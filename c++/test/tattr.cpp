@@ -38,59 +38,58 @@
 
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
-    using H5_std::string;
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
 
-const string	FILENAME("tattr.h5");
+const H5std_string	FILENAME("tattr.h5");
 const size_t	ATTR_MAX_DIMS = 7;
-const string	ATTR_TMP_NAME("temp_name");
+const H5std_string	ATTR_TMP_NAME("temp_name");
 
 /* 3-D dataset with fixed dimensions */
-const string SPACE1_NAME("Space1");
+const H5std_string SPACE1_NAME("Space1");
 const int SPACE1_RANK = 3;
 const int SPACE1_DIM1 = 3;
 const int SPACE1_DIM2 = 15;
 const int SPACE1_DIM3 = 13;
 
 /* Dataset Information */
-const string DSET1_NAME("Dataset1");
-const string DSET2_NAME("Dataset2");
+const H5std_string DSET1_NAME("Dataset1");
+const H5std_string DSET2_NAME("Dataset2");
 
 /* Group Information */
-const string GROUP1_NAME("/Group1");
+const H5std_string GROUP1_NAME("/Group1");
 
 /* Named Datatype Information */
-const string TYPE1_NAME("/Type");
+const H5std_string TYPE1_NAME("/Type");
 
 /* Attribute Rank & Dimensions */
-const string ATTR1_NAME("Attr1");
+const H5std_string ATTR1_NAME("Attr1");
 const int ATTR1_RANK = 1;
 const int ATTR1_DIM1 = 3;
 int attr_data1[ATTR1_DIM1]={512,-234,98123}; /* Test data for 1st attribute */
 
-const string ATTR2_NAME("Attr2");
+const H5std_string ATTR2_NAME("Attr2");
 const int ATTR2_RANK = 2;
 const int ATTR2_DIM1 = 2;
 const int ATTR2_DIM2 = 2;
 int attr_data2[ATTR2_DIM1][ATTR2_DIM2]={{7614,-416},{197814,-3}}; /* Test data for 2nd attribute */
 
-const string ATTR3_NAME("Attr3");
+const H5std_string ATTR3_NAME("Attr3");
 const int ATTR3_RANK = 3;
 const int ATTR3_DIM1 = 2;
 const int ATTR3_DIM2 = 2;
 const int ATTR3_DIM3 = 2;
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0}},{{981724.2,-0.91827},{2.0,23.0}}}; /* Test data for 3rd attribute */
 
-const string ATTR4_NAME("Attr4");
+const H5std_string ATTR4_NAME("Attr4");
 const int ATTR4_RANK = 2;
 const int ATTR4_DIM1 = 2;
 const int ATTR4_DIM2 = 2;
 
-const string ATTR4_FIELDNAME1("i");
-const string ATTR4_FIELDNAME2("d");
-const string ATTR4_FIELDNAME3("c");
+const H5std_string ATTR4_FIELDNAME1("i");
+const H5std_string ATTR4_FIELDNAME2("d");
+const H5std_string ATTR4_FIELDNAME3("c");
 size_t attr4_field1_off=0;
 size_t attr4_field2_off=0;
 size_t attr4_field3_off=0;
@@ -101,12 +100,12 @@ struct attr4_struct {
  } attr_data4[ATTR4_DIM1][ATTR4_DIM2]={{{3,-26.1,'d'},{-100000, 0.123,'3'}},
     {{-23,981724.2,'Q'},{0,2.0,'\n'}}}; // Test data for 4th attribute
 
-const string ATTR5_NAME("Attr5");
+const H5std_string ATTR5_NAME("Attr5");
 const int ATTR5_RANK = 0;
 float attr_data5 = (float)-5.123;    	// Test data for 5th attribute
 
 /* Info for another attribute */
-const string ATTR1A_NAME("Attr1_a");
+const H5std_string ATTR1A_NAME("Attr1_a");
 int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 
 /****************************************************************
@@ -257,7 +256,7 @@ test_attr_rename(void)
 	Attribute attr1(dataset.openAttribute(ATTR_TMP_NAME));
 
 	// Verify new attribute name
-	string attr_name = attr1.getName();
+	H5std_string attr_name = attr1.getName();
 	verify_val(attr_name, ATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
 
 	// Read attribute information immediately, without closing attribute
@@ -275,7 +274,7 @@ test_attr_rename(void)
 	Attribute attr2(dataset.openAttribute(ATTR1A_NAME));
 
 	// Verify second attribute name
-	string attr2_name = attr2.getName();
+	H5std_string attr2_name = attr2.getName();
 	verify_val(attr2_name, ATTR1A_NAME, "Attribute::getName", __LINE__, __FILE__);
 
 	// Read attribute information immediately, without closing attribute
@@ -488,7 +487,7 @@ test_attr_compound_read(void)
 	// was created
 	for(i=0; i<fields; i++)
 	{
-	    string fieldname = datatype.getMemberName(i);
+	    H5std_string fieldname = datatype.getMemberName(i);
 	    if(!((fieldname == ATTR4_FIELDNAME1) ||
 		(fieldname == ATTR4_FIELDNAME2) ||
 		(fieldname == ATTR4_FIELDNAME3)))
@@ -551,7 +550,7 @@ test_attr_compound_read(void)
              } /* end if */
 
 	// Verify name
-	string attr_name = attr.getName();
+	H5std_string attr_name = attr.getName();
 	verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
     } // end try block
 
@@ -800,7 +799,7 @@ test_attr_mult_read(void)
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
 	// Verify Name
-	string attr_name = attr.getName();
+	H5std_string attr_name = attr.getName();
 	verify_val(attr_name, ATTR1_NAME, "DataType::getName", __LINE__, __FILE__);
 
 	attr.close();
@@ -926,7 +925,7 @@ test_attr_mult_read(void)
 static void
 test_attr_delete(void)
 {
-    string  attr_name; // Buffer for attribute names
+    H5std_string  attr_name; // Buffer for attribute names
 
 	// Output message about test being performed
     MESSAGE(5, ("Testing Removing Attribute Function\n"));

@@ -34,7 +34,7 @@ using std::cerr;
 using std::endl;
 #endif
 
-int test_report (int, const string&);
+int test_report (int, const H5std_string&);
 
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");
@@ -70,7 +70,7 @@ template <class Type1, class Type2>
 
 class InvalidActionException : public Exception {
    public:
-	InvalidActionException(const string func_name, const string message = DEFAULT_MSG);
+	InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
 	InvalidActionException();
 	virtual ~InvalidActionException();
 };

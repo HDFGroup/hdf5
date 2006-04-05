@@ -43,18 +43,17 @@
 
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
-    using H5_std::string;
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
 
-const string	FILE1("dataset.h5");
-const string	DSET_DEFAULT_NAME("default");
-const string	DSET_CHUNKED_NAME("chunked");
-const string	DSET_SIMPLE_IO_NAME("simple_io");
-const string	DSET_TCONV_NAME	("tconv");
-const string	DSET_COMPRESS_NAME("compressed");
-const string	DSET_BOGUS_NAME	("bogus");
+const H5std_string	FILE1("dataset.h5");
+const H5std_string	DSET_DEFAULT_NAME("default");
+const H5std_string	DSET_CHUNKED_NAME("chunked");
+const H5std_string	DSET_SIMPLE_IO_NAME("simple_io");
+const H5std_string	DSET_TCONV_NAME	("tconv");
+const H5std_string	DSET_COMPRESS_NAME("compressed");
+const H5std_string	DSET_BOGUS_NAME	("bogus");
 
 const int H5Z_FILTER_BOGUS = 305;
 
@@ -1039,7 +1038,7 @@ main(void)
     }
     catch (Exception E)
     {
-	return(test_report(nerrors, string(" Dataset")));
+	return(test_report(nerrors, H5std_string(" Dataset")));
     }
 
     // Clean up data file
@@ -1047,7 +1046,7 @@ main(void)
 
     // Print out dsets test results
     cerr << endl << endl;
-    return(test_report(nerrors, string(" Dataset")));
+    return(test_report(nerrors, H5std_string(" Dataset")));
 }   // main
 
 /*-------------------------------------------------------------------------

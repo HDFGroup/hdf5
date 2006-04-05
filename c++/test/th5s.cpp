@@ -40,23 +40,22 @@
 
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
-    using H5_std::string;
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
 
-const string    TESTFILE("th5s.h5");
-const string    DATAFILE("th5s1.h5");
+const H5std_string    TESTFILE("th5s.h5");
+const H5std_string    DATAFILE("th5s1.h5");
 
 /* 3-D dataset with fixed dimensions */
-const string SPACE1_NAME("Space1");
+const H5std_string SPACE1_NAME("Space1");
 const int SPACE1_RANK = 3;
 const int SPACE1_DIM1 = 3;
 const int SPACE1_DIM2 = 15;
 const int SPACE1_DIM3 = 13;
 
 /* 4-D dataset with one unlimited dimension */
-const string SPACE2_NAME("Space2");
+const H5std_string SPACE2_NAME("Space2");
 const int SPACE2_RANK = 4;
 const int SPACE2_DIM1 = 0;
 const int SPACE2_DIM2 = 15;
@@ -68,16 +67,16 @@ const hsize_t SPACE2_MAX3 = 13;
 const hsize_t SPACE2_MAX4 = 23;
 
 /* Scalar dataset with simple datatype */
-const string SPACE3_NAME("Scalar1");
+const H5std_string SPACE3_NAME("Scalar1");
 const int SPACE3_RANK = 0;
 unsigned space3_data=65;
 
 /* Scalar dataset with compound datatype */
-const string SPACE4_NAME("Scalar2");
-const string SPACE4_FIELDNAME1("c1");
-const string SPACE4_FIELDNAME2("u");
-const string SPACE4_FIELDNAME3("f");
-const string SPACE4_FIELDNAME4("c2");
+const H5std_string SPACE4_NAME("Scalar2");
+const H5std_string SPACE4_FIELDNAME1("c1");
+const H5std_string SPACE4_FIELDNAME2("u");
+const H5std_string SPACE4_FIELDNAME3("f");
+const H5std_string SPACE4_FIELDNAME4("c2");
 size_t space4_field1_off=0;
 size_t space4_field2_off=0;
 size_t space4_field3_off=0;

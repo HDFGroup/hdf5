@@ -39,7 +39,6 @@
 
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
-    using H5_std::string;
 #endif
 
 #include "h5cpputil.h"
@@ -63,7 +62,7 @@
  *
  *-------------------------------------------------------------------------
  */
-int test_report( int nerrors, const string& testname )
+int test_report( int nerrors, const H5std_string& testname )
 {
    if (nerrors)
    {
@@ -120,7 +119,7 @@ InvalidActionException::InvalidActionException():Exception(){}
 //		func_name - IN: Name of the function where failure should occur
 //		message   - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const string func_name, const string message) : Exception(func_name, message) {}
+InvalidActionException::InvalidActionException(const H5std_string func_name, const H5std_string message) : Exception(func_name, message) {}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException destructor
