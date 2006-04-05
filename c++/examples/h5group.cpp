@@ -39,10 +39,9 @@
 
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
-    using H5_std::string;
 #endif
 
-const string	FILE_NAME( "Group.h5" );
+const H5std_string	FILE_NAME( "Group.h5" );
 const int	RANK = 2;
 
 // Operator function
