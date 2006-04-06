@@ -14,8 +14,8 @@ Contents:
    Section       :  Preconditions and Notes
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
-   Section III   :  How to build an application using the HDF5 library  or DLL
-   Section IV    :  How to build examples (optional)
+   Section III   :  How to build examples (optional)
+   Section IV    :  How to build an application using the HDF5 library  or DLL
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 in VS 7.0(.NET)
    Section VII   :  How to build HDF5 with INTEL Compiler
@@ -1401,7 +1401,7 @@ To use the DLL:
        e) The directories listed in the PATH environment variable.
  
     4. To modify your own application settings, please DO FOLLOW the 
-       "DLL Hints" at Section IV "HELPFUL POINTERS".
+       "DLL Hints" at Section XI "HELPFUL POINTERS".
 
 ========================================================================
          Section V: How to disable Gzip(Zlib)/Szip compression
@@ -2321,19 +2321,6 @@ using the Visual C++ Development Environment.
          General->Predefined Preprocess or Symbols, and add 
          "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
 
-
-3. Use HDF5 to obtain debug information from library
-    
-    3.1 Define Debug Macro
-
-    Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h 
-    and define the following debug macro:
-
-		#define H5S_DEBUG 1
-
-    Save H5pubconf.h.
-
-    3.2 Go back to Section II, continue building and testing HDF5 
 
 ************************************************************************
  Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
