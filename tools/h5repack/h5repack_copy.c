@@ -283,8 +283,12 @@ int do_copy_objects(hid_t fidin,
  hsize_t   dsize_in;     /* input dataset size before filter */
  hsize_t   dsize_out;    /* output dataset size after filter */
  int       next;         /* external files */
+ int       apply_s;      /* flag for apply filter to small dataset sizes */
+ int       apply_f;      /* flag for apply filter to return error on H5Dcreate with filter */
+ float     per;          /* percent utilization of storage */
  int       i, j;
- int       apply;
+
+
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -413,15 +417,15 @@ int do_copy_objects(hid_t fidin,
       * check for datasets too small 
       *-------------------------------------------------------------------------
       */
-     apply=1;
+     apply_s=1;
      if (nelmts*msize < options->threshold )
-      apply=0;
+      apply_s=0;
      
     /*-------------------------------------------------------------------------
      * apply the filter
      *-------------------------------------------------------------------------
      */
-     if (apply){
+     if (apply_s){
       if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options)<0)
        goto error;
      }
@@ -439,13 +443,13 @@ int do_copy_objects(hid_t fidin,
 					 dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_out);
 				} H5E_END_TRY;
 
+    apply_f=1;
 				if (dset_out==FAIL)
 				{
      if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
 						goto error;
 
-					if (options->verbose)
-						printf("warning: could not apply the filter to <%s>\n", travt->objs[i].name);
+     apply_f=0;
 				}
 
 				/*-------------------------------------------------------------------------
@@ -463,16 +467,25 @@ int do_copy_objects(hid_t fidin,
     *-------------------------------------------------------------------------
     */
     if (options->verbose) {
-     float per; /* percent utilization of storage */
-     /* get the storage size of the input dataset */
-     dsize_out=H5Dget_storage_size(dset_out);
-     PER((hssize_t)dsize_in,(hssize_t)dsize_out);
-     print_dataset_info(dcpl_out,travt->objs[i].name,per*(float)100.0);
+     if (apply_s && apply_f)
+     {
+      /* get the storage size of the input dataset */
+      dsize_out=H5Dget_storage_size(dset_out);
+      PER((hssize_t)dsize_in,(hssize_t)dsize_out);
+      print_dataset_info(dcpl_out,travt->objs[i].name,per*(float)100.0);
+     }
+     else
+      print_dataset_info(dcpl_id,travt->objs[i].name,0);
     }
    
-    if (apply==0 && options->verbose)
-     printf("warning: filter not applied to <%s>. dataset smaller than <%d> bytes\n",
-       travt->objs[i].name,(int)options->threshold);
+    if (apply_s==0 && options->verbose)
+     printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
+       travt->objs[i].name,
+       (int)options->threshold);
+
+    if (apply_f==0 && options->verbose)
+						printf(" <warning: could not apply the filter to %s>\n", 
+      travt->objs[i].name);
 
     /*-------------------------------------------------------------------------
      * copy attrs
