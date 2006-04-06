@@ -24,7 +24,10 @@
                     per = (float)fabs(1-( (float)B / (float)A )); \
                  }
 
-#define FORMAT_OBJ " %-21s %s\n"  /* obj type, name */
+#define FORMAT_OBJ      " %-21s %s\n"  /* obj type, name */
+#define FORMAT_OBJ_ATTR "  %-21s %s\n"  /* obj type, name */
+
+
 
 /*-------------------------------------------------------------------------
  * Function: print_dataset_info
@@ -645,13 +648,13 @@ int copy_attr(hid_t loc_in,
               pack_opt_t *options
               )
 {
- hid_t      attr_id=-1;      /* attr ID */
- hid_t      attr_out=-1;     /* attr ID */
- hid_t      space_id=-1;     /* space ID */
- hid_t      ftype_id=-1;     /* file data type ID */
- hid_t      mtype_id=-1;     /* memory data type ID */
+ hid_t      attr_id;      /* attr ID */
+ hid_t      attr_out;     /* attr ID */
+ hid_t      space_id;     /* space ID */
+ hid_t      ftype_id;     /* file data type ID */
+ hid_t      mtype_id;     /* memory data type ID */
  size_t     msize;        /* memory size of type */
- void       *buf=NULL;         /* data buffer */
+ void       *buf=NULL;    /* data buffer */
  hsize_t    nelmts;       /* number of elements in dataset */
  int        rank;         /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
@@ -750,7 +753,7 @@ int copy_attr(hid_t loc_in,
 
 
   if (options->verbose)
-   printf("   %-13s %s\n", "attr", name);
+   printf(FORMAT_OBJ_ATTR, "attr", name);
 
 /*-------------------------------------------------------------------------
  * close
