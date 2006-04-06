@@ -191,13 +191,20 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
                   hid_t type_id,       /* dataset datatype */
-                  pack_opt_t *options) /* repack options */
+                  pack_opt_t *options, /* repack options */
+                  int *apply_f)
 {
 	int          nfilters;       /* number of filters in DCPL */
  hsize_t      chsize[64];     /* chunk size in elements */
  H5D_layout_t layout;
  int          i;
 	pack_info_t  obj;
+
+ if (rank==0)
+ {
+  *apply_f=0;
+  return 0;
+ }
 
 /*-------------------------------------------------------------------------
 	* initialize the assigment object
@@ -400,7 +407,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
 	}
 
  return 0;
-
 }
 
 
@@ -466,6 +472,8 @@ int print_filters(hid_t dcpl_id)
  }
 
  return 0;
+
+
 }
 
 

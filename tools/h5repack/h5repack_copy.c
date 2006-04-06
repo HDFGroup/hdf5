@@ -375,7 +375,7 @@ int do_copy_objects(hid_t fidin,
     goto error;
 
    if (next) 
-    fprintf(stderr,"warning: <%s> has external files, ignoring read...\n",
+    fprintf(stderr," <warning: %s has external files, ignoring read...>\n",
     travt->objs[i].name );
 
 /*-------------------------------------------------------------------------
@@ -387,6 +387,8 @@ int do_copy_objects(hid_t fidin,
  */
    if (next==0 && h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
    {
+    apply_s=1;
+    apply_f=1;
 
 /*-------------------------------------------------------------------------
  * references are a special case
@@ -417,7 +419,7 @@ int do_copy_objects(hid_t fidin,
       * check for datasets too small 
       *-------------------------------------------------------------------------
       */
-     apply_s=1;
+     
      if (nelmts*msize < options->threshold )
       apply_s=0;
      
@@ -426,7 +428,7 @@ int do_copy_objects(hid_t fidin,
      *-------------------------------------------------------------------------
      */
      if (apply_s){
-      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options)<0)
+      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options,&apply_f)<0)
        goto error;
      }
 
@@ -443,7 +445,7 @@ int do_copy_objects(hid_t fidin,
 					 dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_out);
 				} H5E_END_TRY;
 
-    apply_f=1;
+    
 				if (dset_out==FAIL)
 				{
      if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
