@@ -31,7 +31,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
@@ -56,7 +55,7 @@ const int F1_SYM_INTERN_K = 16;
 const unsigned F1_SYM_LEAF_K  = 4;
 const unsigned F1_SYM_INTERN_K = 16;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
-const string    FILE1("tfile1.h5");
+const H5std_string    FILE1("tfile1.h5");
 
 const hsize_t F2_USERBLOCK_SIZE = (hsize_t)512;
 const size_t F2_OFFSET_SIZE = 8;
@@ -68,7 +67,7 @@ const int F2_SYM_INTERN_K = 32;
 const unsigned F2_SYM_LEAF_K  = 4;
 const unsigned F2_SYM_INTERN_K = 32;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
-const string    FILE2("tfile2.h5");
+const H5std_string    FILE2("tfile2.h5");
 
 const hsize_t F3_USERBLOCK_SIZE = (hsize_t)0;
 const size_t F3_OFFSET_SIZE = F2_OFFSET_SIZE;
@@ -80,10 +79,10 @@ const int F3_SYM_INTERN_K = F2_SYM_INTERN_K;
 const unsigned F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
 const unsigned F3_SYM_INTERN_K = F2_SYM_INTERN_K;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
-const string    FILE3("tfile3.h5");
+const H5std_string    FILE3("tfile3.h5");
 
 const int KB =  1024;
-const string    FILE4("tfile4.h5");
+const H5std_string    FILE4("tfile4.h5");
 
 
 /*-------------------------------------------------------------------------
@@ -433,10 +432,10 @@ test_file_size(void)
 const int	RANK = 2;
 const int	NX = 4;
 const int	NY = 5;
-const string	GROUPNAME ("group");
-const string	DSETNAME ("dataset");
-const string	ATTRNAME ("attribute");
-const string	DTYPENAME ("compound");
+const H5std_string	GROUPNAME ("group");
+const H5std_string	DSETNAME ("dataset");
+const H5std_string	ATTRNAME ("attribute");
+const H5std_string	DTYPENAME ("compound");
 
 // Compound datatype
 typedef struct s1_t {
@@ -450,7 +449,7 @@ test_file_name()
     // Output message about test being performed
     MESSAGE(5, ("Testing File Name\n"));
 
-    string file_name;
+    H5std_string file_name;
     try {
         // Create a file using default properties.
 	H5File file4(FILE4, H5F_ACC_TRUNC);

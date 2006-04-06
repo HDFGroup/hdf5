@@ -98,7 +98,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	H5Z_EDC_t getEDCCheck();
 
 	// Returns this class name
-	virtual string fromClass () const { return("DSetMemXferPropList"); }
+	virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
 
 	// Default constructor: creates a dataset memory and transfer prop list.
 	DSetMemXferPropList();

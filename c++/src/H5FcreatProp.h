@@ -66,7 +66,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	void setIstorek( unsigned ik ) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return("FileCreatPropList"); }
+	virtual H5std_string fromClass () const { return("FileCreatPropList"); }
 
 	// Creates a file create property list.
 	FileCreatPropList();

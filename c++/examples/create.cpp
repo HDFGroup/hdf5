@@ -24,20 +24,14 @@
 #include <iostream>
 #endif
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif
 
-const string	FILE_NAME( "SDS.h5" );
-const string	DATASET_NAME( "IntArray" );
+const H5std_string	FILE_NAME( "SDS.h5" );
+const H5std_string	DATASET_NAME( "IntArray" );
 const int 	NX = 5;                    // dataset dimensions
 const int 	NY = 6;
 const int 	RANK = 2;

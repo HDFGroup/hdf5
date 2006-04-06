@@ -27,7 +27,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cout;
     using std::endl;
 #endif  // H5_NO_STD
@@ -39,8 +38,8 @@
 using namespace H5;
 #endif
 
-const string FILE_NAME( "SDS.h5" );
-const string DATASET_NAME( "IntArray" );
+const H5std_string FILE_NAME( "SDS.h5" );
+const H5std_string DATASET_NAME( "IntArray" );
 const int    NX_SUB = 3;	// hyperslab dimensions
 const int    NY_SUB = 4;
 const int    NX = 7;		// output buffer dimensions
@@ -101,7 +100,7 @@ int main (void)
          /*
           * Get order of datatype and print message if it's a little endian.
           */
-	 string order_string;
+	 H5std_string order_string;
          H5T_order_t order = intype.getOrder( order_string );
 	 cout << order_string << endl;
 

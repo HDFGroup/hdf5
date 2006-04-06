@@ -13,11 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
-#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -93,7 +88,7 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group CommonFG::createGroup( const string& name, size_t size_hint ) const
+Group CommonFG::createGroup( const H5std_string& name, size_t size_hint ) const
 {
    return( createGroup( name.c_str(), size_hint ));
 }
@@ -131,7 +126,7 @@ Group CommonFG::openGroup( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group CommonFG::openGroup( const string& name ) const
+Group CommonFG::openGroup( const H5std_string& name ) const
 {
    return( openGroup( name.c_str() ));
 }
@@ -175,7 +170,7 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet CommonFG::createDataSet( const string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist ) const
+DataSet CommonFG::createDataSet( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist ) const
 {
    return( createDataSet( name.c_str(), data_type, data_space, create_plist ));
 }
@@ -212,7 +207,7 @@ DataSet CommonFG::openDataSet( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet CommonFG::openDataSet( const string& name ) const
+DataSet CommonFG::openDataSet( const H5std_string& name ) const
 {
    return( openDataSet( name.c_str() ));
 }
@@ -249,7 +244,7 @@ void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* ne
 ///		\c std::string for \a curr_name and \a new_name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::link( H5G_link_t link_type, const string& curr_name, const string& new_name ) const
+void CommonFG::link( H5G_link_t link_type, const H5std_string& curr_name, const H5std_string& new_name ) const
 {
    link( link_type, curr_name.c_str(), new_name.c_str() );
 }
@@ -277,7 +272,7 @@ void CommonFG::unlink( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::unlink( const string& name ) const
+void CommonFG::unlink( const H5std_string& name ) const
 {
    unlink( name.c_str() );
 }
@@ -311,7 +306,7 @@ void CommonFG::move( const char* src, const char* dst ) const
 ///		\c std::string for \a src and \a dst.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::move( const string& src, const string& dst ) const
+void CommonFG::move( const H5std_string& src, const H5std_string& dst ) const
 {
    move( src.c_str(), dst.c_str() );
 }
@@ -345,7 +340,7 @@ void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& st
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::getObjinfo( const string& name, hbool_t follow_link, H5G_stat_t& statbuf ) const
+void CommonFG::getObjinfo( const H5std_string& name, hbool_t follow_link, H5G_stat_t& statbuf ) const
 {
    getObjinfo( name.c_str(), follow_link, statbuf );
 }
@@ -373,7 +368,7 @@ void CommonFG::getObjinfo( const char* name, H5G_stat_t& statbuf ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - Nov, 2005
 //--------------------------------------------------------------------------
-void CommonFG::getObjinfo( const string& name, H5G_stat_t& statbuf ) const
+void CommonFG::getObjinfo( const H5std_string& name, H5G_stat_t& statbuf ) const
 {
    getObjinfo( name.c_str(), statbuf );
 }
@@ -387,7 +382,7 @@ void CommonFG::getObjinfo( const string& name, H5G_stat_t& statbuf ) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CommonFG::getLinkval( const char* name, size_t size ) const
+H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 {
    char* value_C = new char[size+1];  // temporary C-string for C API
 
@@ -396,7 +391,7 @@ string CommonFG::getLinkval( const char* name, size_t size ) const
    {
       throwException("getLinkval", "H5Gget_linkval failed");
    }
-   string value = string( value_C );
+   H5std_string value = H5std_string( value_C );
    delete []value_C;
    return( value );
 }
@@ -408,7 +403,7 @@ string CommonFG::getLinkval( const char* name, size_t size ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CommonFG::getLinkval( const string& name, size_t size ) const
+H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 {
    return( getLinkval( name.c_str(), size ));
 }
@@ -444,7 +439,7 @@ void CommonFG::setComment( const char* name, const char* comment ) const
 ///		\c std::string for \a name and \a comment.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::setComment( const string& name, const string& comment ) const
+void CommonFG::setComment( const H5std_string& name, const H5std_string& comment ) const
 {
    setComment( name.c_str(), comment.c_str() );
 }
@@ -472,7 +467,7 @@ void CommonFG::removeComment(const char* name) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
-void CommonFG::removeComment(const string& name) const
+void CommonFG::removeComment(const H5std_string& name) const
 {
    removeComment (name.c_str());
 }
@@ -485,7 +480,7 @@ void CommonFG::removeComment(const string& name) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
-string CommonFG::getComment (const string& name) const
+H5std_string CommonFG::getComment (const H5std_string& name) const
 {
    size_t bufsize = 256;        // anticipating the comment's length
    hid_t loc_id = getLocId();   // temporary variable
@@ -510,7 +505,7 @@ string CommonFG::getComment (const string& name) const
    {
       throwException("getComment", "H5Gget_comment failed");
    }
-   string comment = string( comment_C );
+   H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
    return (comment);
 }
@@ -525,7 +520,7 @@ string CommonFG::getComment (const string& name) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CommonFG::getComment( const char* name, size_t bufsize ) const
+H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 {
    // temporary C-string for the object's comment
    char* comment_C = new char[bufsize+1];
@@ -537,7 +532,7 @@ string CommonFG::getComment( const char* name, size_t bufsize ) const
    {
       throwException("getComment", "H5Gget_comment failed");
    }
-   string comment = string( comment_C );
+   H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
    return( comment );
 }
@@ -549,7 +544,7 @@ string CommonFG::getComment( const char* name, size_t bufsize ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CommonFG::getComment( const string& name, size_t bufsize ) const
+H5std_string CommonFG::getComment( const H5std_string& name, size_t bufsize ) const
 {
    return( getComment( name.c_str(), bufsize ));
 }
@@ -586,7 +581,7 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::mount( const string& name, H5File& child, PropList& plist ) const
+void CommonFG::mount( const H5std_string& name, H5File& child, PropList& plist ) const
 {
    mount( name.c_str(), child, plist );
 }
@@ -617,7 +612,7 @@ void CommonFG::unmount( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::unmount( const string& name ) const
+void CommonFG::unmount( const H5std_string& name ) const
 {
    unmount( name.c_str() );
 }
@@ -653,7 +648,7 @@ DataType CommonFG::openDataType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType CommonFG::openDataType( const string& name ) const
+DataType CommonFG::openDataType( const H5std_string& name ) const
 {
    return( openDataType( name.c_str()) );
 }
@@ -689,7 +684,7 @@ ArrayType CommonFG::openArrayType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-ArrayType CommonFG::openArrayType( const string& name ) const
+ArrayType CommonFG::openArrayType( const H5std_string& name ) const
 {
    return( openArrayType( name.c_str()) );
 }
@@ -725,7 +720,7 @@ CompType CommonFG::openCompType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType CommonFG::openCompType( const string& name ) const
+CompType CommonFG::openCompType( const H5std_string& name ) const
 {
    return( openCompType( name.c_str()) );
 }
@@ -761,7 +756,7 @@ EnumType CommonFG::openEnumType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType CommonFG::openEnumType( const string& name ) const
+EnumType CommonFG::openEnumType( const H5std_string& name ) const
 {
    return( openEnumType( name.c_str()) );
 }
@@ -797,7 +792,7 @@ IntType CommonFG::openIntType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType CommonFG::openIntType( const string& name ) const
+IntType CommonFG::openIntType( const H5std_string& name ) const
 {
    return( openIntType( name.c_str()) );
 }
@@ -833,7 +828,7 @@ FloatType CommonFG::openFloatType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType CommonFG::openFloatType( const string& name ) const
+FloatType CommonFG::openFloatType( const H5std_string& name ) const
 {
    return( openFloatType( name.c_str()) );
 }
@@ -869,7 +864,7 @@ StrType CommonFG::openStrType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType CommonFG::openStrType( const string& name ) const
+StrType CommonFG::openStrType( const H5std_string& name ) const
 {
    return( openStrType( name.c_str()) );
 }
@@ -905,7 +900,7 @@ VarLenType CommonFG::openVarLenType( const char* name ) const
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-VarLenType CommonFG::openVarLenType( const string& name ) const
+VarLenType CommonFG::openVarLenType( const H5std_string& name ) const
 {
    return( openVarLenType( name.c_str()) );
 }
@@ -940,7 +935,7 @@ int CommonFG::iterateElems( const char* name, int *idx, H5G_iterate_t op , void*
 ///		\c std::string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int CommonFG::iterateElems( const string& name, int *idx, H5G_iterate_t op , void* op_data )
+int CommonFG::iterateElems( const H5std_string& name, int *idx, H5G_iterate_t op , void* op_data )
 {
    return( iterateElems( name.c_str(), idx, op, op_data ));
 }
@@ -978,7 +973,7 @@ hsize_t CommonFG::getNumObjs() const
 ///		each time the group is opened.
 // Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
-string CommonFG::getObjnameByIdx(hsize_t idx) const
+H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 {
     // call H5Gget_objname_by_idx with name as NULL to get its length
     ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, NULL, 0);
@@ -992,7 +987,7 @@ string CommonFG::getObjnameByIdx(hsize_t idx) const
     name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, name_len);
 
     // clean up and return the string
-    string name = string(name_C);
+    H5std_string name = H5std_string(name_C);
     delete []name_C;
     return (name);
 }
@@ -1014,7 +1009,7 @@ string CommonFG::getObjnameByIdx(hsize_t idx) const
 ///		each time the group is opened.
 // Programmer	Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
-ssize_t CommonFG::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
+ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const
 {
    char* name_C = new char[size];
    ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, size);
@@ -1022,7 +1017,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
    {
       throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
    }
-   name = string( name_C );
+   name = H5std_string(name_C);
    delete [] name_C;
    return (name_len);
 }
@@ -1057,15 +1052,15 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
-H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, string& type_name) const
+H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
 {
    H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
    switch (obj_type)
    {
-	case H5G_LINK: type_name = string("symbolic link"); break;
-	case H5G_GROUP: type_name = string("group"); break;
-	case H5G_DATASET: type_name = string("dataset"); break;
-	case H5G_TYPE: type_name = string("datatype"); break;
+	case H5G_LINK: type_name = H5std_string("symbolic link"); break;
+	case H5G_GROUP: type_name = H5std_string("group"); break;
+	case H5G_DATASET: type_name = H5std_string("dataset"); break;
+	case H5G_TYPE: type_name = H5std_string("datatype"); break;
 	case H5G_UNKNOWN:
 	default:
    	{

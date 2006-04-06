@@ -27,7 +27,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cout;
     using std::endl;
 #endif  // H5_NO_STD
@@ -39,11 +38,11 @@
 using namespace H5;
 #endif
 
-const string FILE_NAME( "SDScompound.h5" );
-const string DATASET_NAME( "ArrayOfStructures" );
-const string MEMBER1( "a_name" );
-const string MEMBER2( "b_name" );
-const string MEMBER3( "c_name" );
+const H5std_string FILE_NAME( "SDScompound.h5" );
+const H5std_string DATASET_NAME( "ArrayOfStructures" );
+const H5std_string MEMBER1( "a_name" );
+const H5std_string MEMBER2( "b_name" );
+const H5std_string MEMBER3( "c_name" );
 const int   LENGTH = 10;
 const int   RANK = 1;
 
@@ -124,7 +123,7 @@ int main(void)
       if( member1_class == H5T_FLOAT )
       {
 	 FloatType member2 = mtype1.getMemberFloatType( 2 );
-	 string norm_string;
+	 H5std_string norm_string;
 	 H5T_norm_t norm = member2.getNorm( norm_string );
 	 cout << "Normalization type is " << norm_string << endl;
       }

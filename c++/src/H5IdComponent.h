@@ -61,10 +61,10 @@ class H5_DLLCPP IdComponent {
 
 	// Makes and returns the string "<class-name>::<func_name>";
 	// <class-name> is returned by fromClass().
-	string inMemFunc(const char* func_name) const;
+	H5std_string inMemFunc(const char* func_name) const;
 
 	// Returns this class name.
-	virtual string fromClass() const {return ("IdComponent");}
+	virtual H5std_string fromClass() const {return ("IdComponent");}
 
 	// Destructor
 	virtual ~IdComponent();
@@ -77,11 +77,7 @@ class H5_DLLCPP IdComponent {
 	IdComponent();
 
 	// Gets the name of the file, in which an HDF5 object belongs.
-#ifndef H5_NO_STD
-	std::string p_get_file_name() const;
-#else
-	string p_get_file_name() const;
-#endif  // H5_NO_STD
+	H5std_string p_get_file_name() const;
 
 	// Gets the id of the H5 file in which the given object is located.
 	hid_t p_get_file_id();

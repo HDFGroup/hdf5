@@ -51,7 +51,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD

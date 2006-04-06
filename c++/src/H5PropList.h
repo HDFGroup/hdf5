@@ -46,18 +46,18 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	// Copies a property from this property list or class to another
 	void copyProp( PropList& dest, const char* name) const;
-	void copyProp( PropList& dest, const string& name) const;
+	void copyProp( PropList& dest, const H5std_string& name) const;
 
 	// Copies a property from one property list or property class to another
 	void copyProp( PropList& dest, PropList& src, const char* name) const;
-	void copyProp( PropList& dest, PropList& src, const string& name) const;
+	void copyProp( PropList& dest, PropList& src, const H5std_string& name) const;
 
 	// Gets the class of this property list, i.e. H5P_FILE_CREATE,
 	// H5P_FILE_ACCESS, ...
 	hid_t getClass() const;
 
 	// Return the name of a generic property list class.
-	string getClassName() const;
+	H5std_string getClassName() const;
 
 	// Returns the parent class of a generic property class.
 	PropList getClassParent() const;
@@ -67,34 +67,34 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	// Query the value of a property in a property list.
 	void getProperty(const char* name, void* value) const;
-	void getProperty(const string& name, void* value) const;
-	string getProperty(const char* name) const;
-	string getProperty(const string& name) const;
+	void getProperty(const H5std_string& name, void* value) const;
+	H5std_string getProperty(const char* name) const;
+	H5std_string getProperty(const H5std_string& name) const;
 
 	// Set a property's value in a property list.
 	void setProperty(const char* name, void* value) const;
 	void setProperty(const char* name, const char* charptr) const;
-	void setProperty(const char* name, string& strg) const;
-	void setProperty(const string& name, void* value) const;
-	void setProperty(const string& name, string& strg) const;
+	void setProperty(const char* name, H5std_string& strg) const;
+	void setProperty(const H5std_string& name, void* value) const;
+	void setProperty(const H5std_string& name, H5std_string& strg) const;
 
 	// Query the size of a property in a property list or class.
 	size_t getPropSize(const char *name) const;
-	size_t getPropSize(const string& name) const;
+	size_t getPropSize(const H5std_string& name) const;
 
 	// Determines whether a property list is a certain class.
 	bool isAClass(const PropList& prop_class) const;
 
 	/// Query the existance of a property in a property object.
 	bool propExist(const char* name) const;
-	bool propExist(const string& name) const;
+	bool propExist(const H5std_string& name) const;
 
 	// Removes a property from a property list.
 	void removeProp(const char *name) const;
-	void removeProp(const string& name) const;
+	void removeProp(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return ("PropList"); }
+	virtual H5std_string fromClass () const { return ("PropList"); }
 
 	// Default constructor: creates a stub PropList object.
 	PropList();

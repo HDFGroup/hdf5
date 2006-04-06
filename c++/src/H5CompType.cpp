@@ -13,11 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
-#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -118,7 +113,7 @@ int CompType::getNmembers() const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CompType::getMemberName( unsigned member_num ) const
+H5std_string CompType::getMemberName( unsigned member_num ) const
 {
     char* member_name_C = H5Tget_member_name( id, member_num );
     if( member_name_C == NULL )  // NULL means failure
@@ -126,7 +121,8 @@ string CompType::getMemberName( unsigned member_num ) const
 	throw DataTypeIException("CompType::getMemberName",
 		"H5Tget_member_name returns NULL for member name");
     }
-    string member_name = string(member_name_C); // convert C string to string
+    // convert C string to string
+    H5std_string member_name = H5std_string(member_name_C); 
     HDfree(member_name_C); // free the C string
     return( member_name ); // return the member name string
 }
@@ -153,7 +149,7 @@ int CompType::getMemberIndex(const char* name) const
    }
    return( member_index );
 }
-int CompType::getMemberIndex(const string& name) const
+int CompType::getMemberIndex(const H5std_string& name) const
 {
    return(getMemberIndex(name.c_str()));
 }
@@ -389,7 +385,7 @@ void CompType::getMemberType( unsigned member_num, StrType& strtype ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CompType::insertMember( const string& name, size_t offset, const DataType& new_member ) const
+void CompType::insertMember( const H5std_string& name, size_t offset, const DataType& new_member ) const
 {
    // Convert string to C-string
    const char* name_C;

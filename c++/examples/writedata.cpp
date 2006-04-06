@@ -30,7 +30,6 @@
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
-    using std::string;
     using std::cout;
     using std::endl;
 #endif  // H5_NO_STD
@@ -42,8 +41,8 @@
 using namespace H5;
 #endif
 
-const string FILE_NAME( "Select.h5" );
-const string DATASET_NAME( "Matrix in file" );
+const H5std_string FILE_NAME( "Select.h5" );
+const H5std_string DATASET_NAME( "Matrix in file" );
 const int   MSPACE1_RANK = 1;	// Rank of the first dataset in memory
 const int   MSPACE1_DIM = 50;   // Dataset size in memory
 const int   MSPACE2_RANK = 1;	// Rank of the second dataset in memory

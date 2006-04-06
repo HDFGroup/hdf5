@@ -13,11 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
-#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -245,7 +240,7 @@ IdComponent::IdComponent() : id(-1) {}
 // 		H5File and H5Object subclasses.
 // Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
-string IdComponent::p_get_file_name() const
+H5std_string IdComponent::p_get_file_name() const
 {
    // Preliminary call to H5Fget_name to get the length of the file name
    ssize_t name_size = H5Fget_name(id, NULL, 0);
@@ -267,7 +262,7 @@ string IdComponent::p_get_file_name() const
    }
 
    // Convert the C file name and return
-   string file_name(name_C);
+   H5std_string file_name(name_C);
    delete []name_C;
    return(file_name);
 }
@@ -371,9 +366,9 @@ bool IdComponent::p_valid_id(hid_t obj_id) const
 ///		an exception is thrown.
 // Programmer	Binh-Minh Ribler - Oct 10, 2005
 //--------------------------------------------------------------------------
-string IdComponent::inMemFunc(const char* func_name) const
+H5std_string IdComponent::inMemFunc(const char* func_name) const
 {
-   string full_name = func_name;
+   H5std_string full_name = func_name;
    full_name.insert(0, "::");
    full_name.insert(0, fromClass());
    return (full_name);

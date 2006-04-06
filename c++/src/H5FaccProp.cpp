@@ -13,11 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::string;
-#endif  // H5_NO_STD
-#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -291,7 +286,7 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const string& meta_ext, const string& raw_ext ) const
+void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const H5std_string& meta_ext, const H5std_string& raw_ext ) const
 {
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
@@ -446,7 +441,7 @@ void FileAccPropList::setLog(const char *logfile, unsigned flags, size_t buf_siz
 ///\param	buf_size - IN: Size of the logging buffer
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void FileAccPropList::setLog(const string& logfile, unsigned flags, size_t buf_size) const
+void FileAccPropList::setLog(const H5std_string& logfile, unsigned flags, size_t buf_size) const
 {
    setLog(logfile.c_str(), flags, buf_size);
 }

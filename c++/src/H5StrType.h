@@ -47,7 +47,7 @@ class H5_DLLCPP StrType : public AtomType {
 	void setStrpad(H5T_str_t strpad) const;
 
 	// Returns this class name
-	virtual string fromClass () const { return("StrType"); }
+	virtual H5std_string fromClass () const { return("StrType"); }
 
 	// default constructor
 	StrType();
