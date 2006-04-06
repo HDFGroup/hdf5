@@ -194,15 +194,10 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   pack_opt_t *options) /* repack options */
 {
 	int          nfilters;       /* number of filters in DCPL */
- hsize_t      nelmts;         /* number of elements in dataset */
- size_t       size;           /* size of datatype in bytes */
  hsize_t      chsize[64];     /* chunk size in elements */
  H5D_layout_t layout;
  int          i;
 	pack_info_t  obj;
-
- if (rank==0)
-  goto out;
 
 /*-------------------------------------------------------------------------
 	* initialize the assigment object
@@ -220,20 +215,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
   return -1;
-
- /* check for datasets too small */
-	if ((size=H5Tget_size(type_id))==0)
-		return 0;
-	nelmts=1;
-	for (i=0; i<rank; i++)
-		nelmts*=dims[i];
-	if (nelmts*size < options->threshold )
-	{
-		if (nfilters && options->verbose)
-			printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
-			name,(int)options->threshold);
-		return 0;
-	}
 	
  /*-------------------------------------------------------------------------
 		* check if we have filters in the pipeline
@@ -420,10 +401,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
 
  return 0;
 
-out:
- if (options->verbose)
-  printf("Warning: Filter could not be applied to <%s>\n",name);
- return 0;
 }
 
 

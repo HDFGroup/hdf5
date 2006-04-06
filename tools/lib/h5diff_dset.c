@@ -566,7 +566,7 @@ int diff_can_type( hid_t       f_type1, /* file data type */
 
  if ( (H5Tequal(f_type1, f_type2)==0) && options->m_verbose && obj1_name)
  {
-  printf("Warning: Different storage datatype\n");
+  printf("warning: different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
   print_type(f_type1);
   printf("\n");
@@ -643,7 +643,7 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  if (maxdim1 && maxdim2 && maxdim_diff==1 && obj1_name )
  {
   if (options->m_verbose) {
-   printf( "Warning: Different maximum dimensions\n");
+   printf( "warning: different maximum dimensions\n");
    printf("<%s> has max dimensions ", obj1_name);
    print_dims(rank1,maxdim1);
    printf("\n");

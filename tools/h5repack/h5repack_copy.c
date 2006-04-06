@@ -19,20 +19,25 @@
 #include "H5private.h"
 #include "h5repack.h"
 
-#if 0
-#define PRINT_DEBUG
-#endif
+#define PER(A,B) { per = 0;                                      \
+                   if (A!=0)                                      \
+                    per = (float)fabs(1-( (float)B / (float)A )); \
+                 }
+
+#define FORMAT_OBJ " %-21s %s\n"  /* obj type, name */
 
 /*-------------------------------------------------------------------------
- * Function: print_obj
+ * Function: print_dataset_info
  *
- * Purpose: print name and filters of an object
+ * Purpose: print name, filters, percentage compression of a dataset
  *
  *-------------------------------------------------------------------------
  */
-static void print_obj(hid_t dcpl_id, char *name)
+static void print_dataset_info(hid_t dcpl_id, 
+                               char *objname,
+                               float per)
 {
- char         str[255];
+ char         strfilter[255];
 #if defined (PRINT_DEBUG )
  char         temp[255];
 #endif
@@ -41,10 +46,10 @@ static void print_obj(hid_t dcpl_id, char *name)
  H5Z_filter_t filtn;          /* filter identification number */
  unsigned     cd_values[20];  /* filter client data values */
  size_t       cd_nelmts;      /* filter client number of values */
- char         f_name[256];    /* filter name */
+ char         f_objname[256];    /* filter objname */
  int          i;
 
- strcpy(str,"\0");
+ strcpy(strfilter,"\0");
 
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
@@ -60,16 +65,16 @@ static void print_obj(hid_t dcpl_id, char *name)
    &filt_flags,
    &cd_nelmts,
    cd_values,
-   sizeof(f_name),
-   f_name);
+   sizeof(f_objname),
+   f_objname);
 #else
   filtn = H5Pget_filter(dcpl_id,
    (unsigned)i,
    &filt_flags,
    &cd_nelmts,
    cd_values,
-   sizeof(f_name),
-   f_name,
+   sizeof(f_objname),
+   f_objname,
    NULL);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
@@ -79,52 +84,64 @@ static void print_obj(hid_t dcpl_id, char *name)
   default:
    break;
   case H5Z_FILTER_DEFLATE:
-   strcat(str,"GZIP ");
+   strcat(strfilter,"GZIP ");
 
 #if defined (PRINT_DEBUG)
    {
     unsigned level=cd_values[0];
     sprintf(temp,"(%d)",level);
-    strcat(str,temp);
+    strcat(strfilter,temp);
    }
 #endif
 
    break;
   case H5Z_FILTER_SZIP:
-   strcat(str,"SZIP ");
+   strcat(strfilter,"SZIP ");
 
 #if defined (PRINT_DEBUG)
    {
     unsigned options_mask=cd_values[0]; /* from dcpl, not filt*/
     unsigned ppb=cd_values[1];
     sprintf(temp,"(%d,",ppb);
-    strcat(str,temp);
+    strcat(strfilter,temp);
     if (options_mask & H5_SZIP_EC_OPTION_MASK)
      strcpy(temp,"EC) ");
     else if (options_mask & H5_SZIP_NN_OPTION_MASK)
      strcpy(temp,"NN) ");
    }
-   strcat(str,temp);
+   strcat(strfilter,temp);
 
 #endif
 
    break;
   case H5Z_FILTER_SHUFFLE:
-   strcat(str,"SHUF ");
+   strcat(strfilter,"SHUF ");
    break;
   case H5Z_FILTER_FLETCHER32:
-   strcat(str,"FLET ");
+   strcat(strfilter,"FLET ");
    break;
   case H5Z_FILTER_NBIT:
-   strcat(str,"NBIT ");
+   strcat(strfilter,"NBIT ");
    break;
   case H5Z_FILTER_SCALEOFFSET:
-   strcat(str,"SCALEOFFSET ");
+   strcat(strfilter,"SCALEOFFSET ");
    break;
   } /* switch */
  }/*i*/
 
- printf(" %-10s %s %s\n", "dataset",str,name );
+ if (strcmp(strfilter,"\0")==0)
+  printf(FORMAT_OBJ,"dset",objname );
+ else
+ {
+  char str[255], temp[20];
+  strcpy(str,"dset  ");
+  strcat(str,strfilter);
+  sprintf(temp,"(%.2f%%)",per);
+  strcat(str,temp);
+  printf(FORMAT_OBJ,str,objname);
+ }
+  
+
 
 }
 
@@ -150,7 +167,7 @@ int copy_objects(const char* fnamein,
                  const char *argv[])
 {
  hid_t         fidin;
- hid_t         fidout=(-1);
+ hid_t         fidout;
  trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
@@ -244,30 +261,38 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in=(-1);       /* group ID */
- hid_t     grp_out=(-1);      /* group ID */
- hid_t     dset_in=(-1);      /* read dataset ID */
- hid_t     dset_out=(-1);     /* write dataset ID */
- hid_t     type_in=(-1);      /* named type ID */
- hid_t     type_out=(-1);     /* named type ID */
- hid_t     dcpl_id=(-1);      /* dataset creation property list ID */
- hid_t     dcpl_out=(-1);     /* dataset creation property list ID */
- hid_t     space_id=(-1);     /* space ID */
- hid_t     ftype_id=(-1);     /* file data type ID */
- hid_t     mtype_id=(-1);     /* memory data type ID */
+ hid_t     grp_in;       /* group ID */
+ hid_t     grp_out;      /* group ID */
+ hid_t     dset_in;      /* read dataset ID */
+ hid_t     dset_out;     /* write dataset ID */
+ hid_t     type_in;      /* named type ID */
+ hid_t     type_out;     /* named type ID */
+ hid_t     dcpl_id;      /* dataset creation property list ID */
+ hid_t     dcpl_out;     /* dataset creation property list ID */
+ hid_t     space_id;     /* space ID */
+ hid_t     ftype_id;     /* file data type ID */
+ hid_t     mtype_id;     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  void      *buf=NULL;    /* data buffer */
  hsize_t   nelmts;       /* number of elements in dataset */
  int       rank;         /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t   dsize_in;     /* input dataset size before filter */
+ hsize_t   dsize_out;    /* output dataset size after filter */
  int       next;         /* external files */
  int       i, j;
+ int       apply;
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
  *-------------------------------------------------------------------------
  */
+
+ if (options->verbose) {
+  printf("-----------------------------------------\n");
+  printf(" Type  Filter (Ratio)  Name\n");
+  printf("-----------------------------------------\n");
+ }
 
  for ( i = 0; i < travt->nobjs; i++)
  {
@@ -281,7 +306,7 @@ int do_copy_objects(hid_t fidin,
  */
   case H5G_GROUP:
    if (options->verbose)
-    printf(" %-10s %s\n", "group",travt->objs[i].name );
+    printf(FORMAT_OBJ,"group",travt->objs[i].name );
 
    if ((grp_out=H5Gcreate(fidout,travt->objs[i].name, 0))<0)
     goto error;
@@ -329,10 +354,7 @@ int do_copy_objects(hid_t fidin,
    for (j=0; j<rank; j++)
     nelmts*=dims[j];
 
-			if (options->verbose)
-				print_obj(dcpl_id,travt->objs[i].name );
-
-   if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
+		 if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
     goto error;
 
    if ((msize=H5Tget_size(mtype_id))==0)
@@ -345,9 +367,9 @@ int do_copy_objects(hid_t fidin,
    if ((next=H5Pget_external_count (dcpl_id))<0)
     goto error;
 
-   if (next) {
-    fprintf(stderr,"Warning: <%s> has external files, ignoring read...\n",travt->objs[i].name );
-   }
+   if (next) 
+    fprintf(stderr,"warning: <%s> has external files, ignoring read...\n",
+    travt->objs[i].name );
 
 /*-------------------------------------------------------------------------
  * check if the dataset creation property list has filters that
@@ -367,12 +389,11 @@ int do_copy_objects(hid_t fidin,
  */
    if ( (H5T_REFERENCE!=H5Tget_class(mtype_id)))
    {
-
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
 
   /*-------------------------------------------------------------------------
-   * read to memory
+   * read 
    *-------------------------------------------------------------------------
    */
     if (nelmts)
@@ -385,12 +406,22 @@ int do_copy_objects(hid_t fidin,
      if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
 
+     /*-------------------------------------------------------------------------
+      * check for datasets too small 
+      *-------------------------------------------------------------------------
+      */
+     apply=1;
+     if (nelmts*msize < options->threshold )
+      apply=0;
+     
     /*-------------------------------------------------------------------------
      * apply the filter
      *-------------------------------------------------------------------------
      */
-     if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options)<0)
-      goto error;
+     if (apply){
+      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options)<0)
+       goto error;
+     }
 
     }/*nelmts*/
 
@@ -411,7 +442,7 @@ int do_copy_objects(hid_t fidin,
 						goto error;
 
 					if (options->verbose)
-						printf("Warning: Could not apply the filter to <%s>\n", travt->objs[i].name);
+						printf("warning: could not apply the filter to <%s>\n", travt->objs[i].name);
 				}
 
 				/*-------------------------------------------------------------------------
@@ -423,6 +454,23 @@ int do_copy_objects(hid_t fidin,
      if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
     }
+
+   /*-------------------------------------------------------------------------
+    * amount of compression used
+    *-------------------------------------------------------------------------
+    */
+    if (options->verbose) {
+     float per; /* percent utilization of storage */
+     /* get the storage size of the input dataset */
+     dsize_out=H5Dget_storage_size(dset_out);
+     PER((hssize_t)dsize_in,(hssize_t)dsize_out);
+     print_dataset_info(dcpl_out,travt->objs[i].name,per*(float)100.0);
+    }
+   
+    if (apply==0 && options->verbose)
+     printf("warning: filter not applied to <%s>. dataset smaller than <%d> bytes\n",
+       travt->objs[i].name,(int)options->threshold);
+
     /*-------------------------------------------------------------------------
      * copy attrs
      *-------------------------------------------------------------------------
@@ -488,7 +536,7 @@ int do_copy_objects(hid_t fidin,
     goto error;
 
    if (options->verbose)
-    printf(" %-10s %s\n","datatype",travt->objs[i].name );
+    printf(FORMAT_OBJ,"type",travt->objs[i].name );
 
    break;
 
@@ -521,14 +569,12 @@ int do_copy_objects(hid_t fidin,
     free(targbuf);
 
     if (options->verbose)
-     printf(" %-10s %s\n","link",travt->objs[i].name );
+     printf(FORMAT_OBJ,"link",travt->objs[i].name );
 
    }
    break;
 
   default:
-   if (options->verbose)
-    printf(" %-10s %s\n","User defined object",travt->objs[i].name);
    goto error;
   }
  }

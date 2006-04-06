@@ -18,9 +18,6 @@
 #include "testh5repack.h"
 #include "h5diff.h"
 
-#if 0
-#define PACK_DEBUG
-#endif
 
 /*-------------------------------------------------------------------------
  * Function: main

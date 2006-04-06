@@ -133,7 +133,7 @@ int check_objects(const char* fname,
 
     if (csize < ppb )
     {
-     printf("Warning: SZIP settins, chunk size is smaller than pixels per block...Exiting\n");
+     printf("warning: SZIP settins, chunk size is smaller than pixels per block...Exiting\n");
      goto out;
     }
 
