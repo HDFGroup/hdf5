@@ -901,58 +901,75 @@ int h5_szip_can_encode(void )
  *              4/4/05
  *
  * Modifications:
+ *		Use original getenv if MPI is not initialized. This happens
+ *		one uses the PHDF5 library to build a serial nature code.
+ *		Albert 2006/04/07
  *
  *-------------------------------------------------------------------------
  */
 
 char* getenv_all(MPI_Comm comm, int root, const char* name)
 {
-    int nID;
-    int len = -1;
+    int mpi_size, mpi_rank, mpi_initialized;
+    int len;
     static char* env = NULL;
     MPI_Status Status;
 
     assert(name);
 
-    MPI_Comm_rank(comm, &nID);
-
-    /* The root task does the getenv call
-     * and sends the result to the other tasks */
-    if(nID == root)
-    {
-	env = HDgetenv(name);
+    MPI_Initialized(&mpi_initialized);
+    if (!mpi_initialized){
+	/* use original getenv */
 	if(env)
-	{
-	    len = HDstrlen(env);
-	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-	}
-	/* len -1 indicates that the variable was not in the environment */
-	else
-	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-    }
-    else
-    {
-	MPI_Bcast(&len, 1, MPI_INT, root, comm);
-	if(len >= 0)
-	{
-	    if(env == NULL)
-		env = (char*) HDmalloc(len+1);
-	    else if(strlen(env) < len)
-		env = (char*) HDrealloc(env, len+1);
+	    HDfree(env);
+	env = HDgetenv(name); 
+    }else{
+	MPI_Comm_rank(comm, &mpi_rank);
+	MPI_Comm_size(comm, &mpi_size);
+	assert(root < mpi_size);
 
-	    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-	    env[len] = '\0';
-	}
-	else
+	/* The root task does the getenv call
+	 * and sends the result to the other tasks */
+	if(mpi_rank == root)
 	{
+	    env = HDgetenv(name);
 	    if(env)
-		HDfree(env);
-	    env = NULL;
+	    {
+		len = HDstrlen(env);
+		MPI_Bcast(&len, 1, MPI_INT, root, comm);
+		MPI_Bcast(env, len, MPI_CHAR, root, comm);
+	    }
+	    else{
+		/* len -1 indicates that the variable was not in the environment */
+		len = -1;
+		MPI_Bcast(&len, 1, MPI_INT, root, comm);
+	    }
+	}
+	else
+	{
+	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
+	    if(len >= 0)
+	    {
+		if(env == NULL)
+		    env = (char*) HDmalloc(len+1);
+		else if(strlen(env) < len)
+		    env = (char*) HDrealloc(env, len+1);
+
+		MPI_Bcast(env, len, MPI_CHAR, root, comm);
+		env[len] = '\0';
+	    }
+	    else
+	    {
+		if(env)
+		    HDfree(env);
+		env = NULL;
+	    }
 	}
     }
 
+#ifndef NDEBUG
     MPI_Barrier(comm);
+#endif
 
     return env;
 }
