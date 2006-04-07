@@ -758,6 +758,8 @@ if [ -z "$NOCVS" ]; then
     fi
     rm $TMPFILE
     PRINT_BLANK
+    # No copyright checking until what need copyright is decided. 2006/4/7.
+    if false; then
     # ======================
     # Check Copyright notice
     # ======================
@@ -792,6 +794,7 @@ if [ -z "$NOCVS" ]; then
     fi
     rm $TMPFILE
     PRINT_BLANK
+    fi
 else
     # make sure the cvs update, if done by another host, has completed.
     # First wait for the presence of $CVSLOG which signals some host
