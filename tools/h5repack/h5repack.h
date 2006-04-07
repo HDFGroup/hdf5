@@ -185,8 +185,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
                   hid_t type_id,       /* datatype */
-                  pack_opt_t *options, /* repack options */
-                  int *apply_f);
+                  pack_opt_t *options); /* repack options */
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
