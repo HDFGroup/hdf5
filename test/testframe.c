@@ -47,6 +47,7 @@ static int num_errs = 0;        /* Total number of errors during testing */
 static int Verbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static int Summary = 0;		/* Show test summary. Default is no. */
 static int CleanUp = 1;		/* Do cleanup or not. Default is yes. */
+static int TestExpress = -1;	/* Do TestExpress or not. -1 means not set yet. */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
 static const void *Test_parameters = NULL;
@@ -372,6 +373,52 @@ int SetTestVerbosity(int newval)
 
     oldval = Verbosity;
     Verbosity = newval;
+    return(oldval);
+}
+
+/*
+ * Retrieve the TestExpress mode for the testing framework
+ * Values: non-zero means TestExpress mode is on, 0 means off.
+ *
+ * Design:
+ If the environment variable $HDF5TestExpress is defined,
+ then an intensive test should run the test in an express
+ mode such that it completes sooner.
+
+ Terms:
+ Intensive means tests that take more than minutes, say 5 minutes,
+ to complete.
+ "sooner" means tests will finish under 5 minutes.
+ Express mode--probably use smaller test sizes, or skip some tests.
+ Test program should print a caution that it is running the express
+ mode.
+
+ Implementation:
+ I think this can be easily implemented in the test library (libh5test.a)
+ so that all tests can just call it to check the status of $HDF5TestExpress.
+ For now, it is just defined or not, the actual value does not matter.
+ It is possible to define levels of express but I could not think of a
+ good use case for it.
+ */
+int GetTestExpress(void)
+{
+    /* set it here for now.  Should be done in something like h5test_init(). */
+    if (TestExpress==-1)
+	SetTestExpress(getenv("HDF5TestExpress")? 1 : 0);
+    return(TestExpress);
+}
+
+/*
+ * Set the TestExpress mode for the testing framework.
+ * Return previous TestExpress mode.
+ * Values: non-zero means TestExpress mode is on, 0 means off.
+ */
+int SetTestExpress(int newval)
+{
+    int oldval;
+
+    oldval = TestExpress;
+    TestExpress = newval;
     return(oldval);
 }
 
