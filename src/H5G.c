@@ -228,6 +228,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
 
+#ifdef H5_GROUP_REVISION
     /* Check if we need to create a non-standard GCPL */
     if(size_hint > 0) {
         H5P_genplist_t  *gc_plist;  /* Property list created */
@@ -255,6 +256,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
     } /* end if */
     else
+#endif /* H5_GROUP_REVISION */
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
     /* Create the group */
@@ -276,6 +278,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate() */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gcreate_expand
@@ -357,6 +360,7 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_expand() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -987,6 +991,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_comment() */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gget_create_plist
@@ -1055,6 +1060,7 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_create_plist() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -1079,7 +1085,7 @@ done:
  *                      Keep external links as they are (default) 
  *                      Expand them into new objects
  *                  H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG
-  *                     Update only the values of object references (default)
+ *                      Update only the values of object references (default)
  *                      Copy objects that are pointed by references
  *                  H5G_COPY_WITHOUT_ATTR_FLAG
  *                      Copy object along with all its attributes (default)
@@ -1123,6 +1129,7 @@ H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(H5Gcopy, FAIL)
+    H5TRACE5("e","isisi",src_loc_id,src_name,dst_loc_id,dst_name,plist_id);
 
     /* Check arguments */
     if(H5G_loc(src_loc_id, &loc) < 0)
@@ -1425,16 +1432,20 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
      */
     if (loc == NULL) {
         H5P_genplist_t *fc_plist;       /* File creation property list */
+#ifdef H5_GROUP_REVISION
         H5O_ginfo_t     ginfo;          /* Group info parameters */
+#endif /* H5_GROUP_REVISION */
 
         /* Get the file creation property list */
         /* (Which is a sub-class of the group creation property class) */
         if(NULL == (fc_plist = H5I_object(f->shared->fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
+#ifdef H5_GROUP_REVISION
         /* Get the group info property */
         if(H5P_get(fc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+#endif /* H5_GROUP_REVISION */
 
         /* Set up group location for root group */
         new_root_loc.oloc = &new_root_oloc;
@@ -1442,7 +1453,11 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
         H5G_loc_reset(&new_root_loc);
         loc = &new_root_loc;
 
-	if(H5G_obj_create(f, dxpl_id, &ginfo, loc->oloc/*out*/) < 0)
+	if(H5G_obj_create(f, dxpl_id,
+#ifdef H5_GROUP_REVISION
+                &ginfo,
+#endif /* H5_GROUP_REVISION */
+                loc->oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(loc->oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "internal error (wrong link count)")
@@ -1509,7 +1524,9 @@ H5G_create(H5G_loc_t *loc, const char *name,
     H5G_t	*grp = NULL;	/*new group			*/
     H5F_t       *file = NULL;   /* File new group will be in    */
     H5P_genplist_t  *gc_plist;  /* Property list created */
+#ifdef H5_GROUP_REVISION
     H5O_ginfo_t ginfo;          /* Group info */
+#endif /* H5_GROUP_REVISION */
     unsigned    oloc_init = 0;  /* Flag to indicate that the group object location was created successfully */
     H5G_loc_t   grp_loc;        /* Group location wrapper structure */
     H5G_t	*ret_value;	/* Return value */
@@ -1538,12 +1555,18 @@ H5G_create(H5G_loc_t *loc, const char *name,
     if(NULL == (gc_plist = H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
+#ifdef H5_GROUP_REVISION
     /* Get the group info property */
     if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get group info")
+#endif /* H5_GROUP_REVISION */
 
     /* Create the group object header */
-    if(H5G_obj_create(file, dxpl_id, &ginfo, &(grp->oloc)/*out*/) < 0)
+    if(H5G_obj_create(file, dxpl_id,
+#ifdef H5_GROUP_REVISION
+            &ginfo,
+#endif /* H5_GROUP_REVISION */
+            &(grp->oloc)/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group object header")
     oloc_init = 1;    /* Indicate that the object location information is valid */
 
@@ -1711,7 +1734,10 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
 
     /* Check if this object has the right message(s) to be treated as a group */
     if(H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0
-            && H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0)
+#ifdef H5_GROUP_REVISION
+            && H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0
+#endif /* H5_GROUP_REVISION */
+            )
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group")
 
 done:
@@ -2750,8 +2776,16 @@ H5G_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
 
 done:
     /* If there's valid information in the link, reset it */
-    if(link_valid)
+    if(link_valid) {
+#ifdef H5_GROUP_REVISION
         H5O_reset(H5O_LINK_ID, &lnk);
+#else /* H5_GROUP_REVISION */
+        /* Free information for link (but don't free link pointer) */
+        if(lnk.type == H5G_LINK_SOFT)
+            lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
+        lnk.name = H5MM_xfree(lnk.name);
+#endif /* H5_GROUP_REVISION */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_move() */

@@ -24,6 +24,7 @@
 
 /* Static function prototypes */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_create_intermediate_group
@@ -108,6 +109,7 @@ H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd_group /*out
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_create_intermediate_group() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -138,6 +140,7 @@ H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Pset_copy_object, FAIL)
+    H5TRACE2("e","iIu",plist_id,cpy_option);
 
     /* Check parameters */
     if(cpy_option & ~H5G_COPY_ALL)
@@ -175,6 +178,7 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_copy_object, FAIL)
+    H5TRACE2("e","ix",plist_id,cpy_option);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

@@ -29,6 +29,7 @@
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
+#ifdef H5_GROUP_REVISION
 
 /*--------------------------------------------------------------------------
  NAME
@@ -184,6 +185,7 @@ H5G_has_stab_test(hid_t gid)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G_has_stab_test() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*--------------------------------------------------------------------------

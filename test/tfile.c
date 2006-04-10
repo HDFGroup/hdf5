@@ -1217,6 +1217,7 @@ test_file_freespace(void)
     ret=H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
+#ifdef H5_GROUP_REVISION
     /* Check that there is the right amount of free space in the file */
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
@@ -1241,6 +1242,7 @@ test_file_freespace(void)
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(free_space, 4592, "H5Fget_freespace");
 #endif /* H5_HAVE_LARGE_HSIZET */
+#endif /* H5_GROUP_REVISION */
 
     /* Close file */
     ret = H5Fclose(file);

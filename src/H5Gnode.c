@@ -1669,12 +1669,18 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         /* Compute index of entry */
         loc_idx = udata->idx - udata->num_objs;
 
-        /* Build temporary object location */
-        tmp_oloc.file = f;
-        HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
-        tmp_oloc.addr = sn->entry[loc_idx].header;
+        /* Check for a soft link */
+        if(sn->entry[loc_idx].type == H5G_CACHED_SLINK)
+            udata->type = H5G_LINK;
+        /* Must be a hard link */
+        else {
+            /* Build temporary object location */
+            tmp_oloc.file = f;
+            HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
+            tmp_oloc.addr = sn->entry[loc_idx].header;
 
-        udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
+            udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
+        } /* end else */
         ret_value = H5B_ITER_STOP;
     } else {
         udata->num_objs += sn->nsyms;
@@ -1687,6 +1693,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_node_type() */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_stab_convert
@@ -1756,6 +1763,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_stab_convert() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------

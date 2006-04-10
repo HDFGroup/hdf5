@@ -459,6 +459,7 @@ test_attr_flush(void)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_flush() */
 
+#ifdef H5_GROUP_REVISION
 /****************************************************************
 **
 **  test_attr_plist(): Test Attribute Creation Property Lists
@@ -570,6 +571,7 @@ test_attr_plist(void)
     ret=H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 }  /* test_attr_plist() */
+#endif /* H5_GROUP_REVISION */
 
 /****************************************************************
 **
@@ -1684,7 +1686,9 @@ test_attr(void)
     test_attr_flush();          /* Test H5A I/O in the presence of H5Fflush calls */
 
     /* This next test uses the same file information */
+#ifdef H5_GROUP_REVISION
     test_attr_plist();          /* Test attribute property lists */
+#endif /* H5_GROUP_REVISION */
 
     /* These next two tests use the same file information */
     test_attr_compound_write();  /* Test complex datatype H5A writing code */

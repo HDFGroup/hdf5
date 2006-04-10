@@ -102,11 +102,19 @@ typedef struct H5O_addr_map_t {
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_NULL,		/*0x0000 Null				*/
     H5O_MSG_SDSPACE,		/*0x0001 Simple Dimensionality		*/
+#ifdef H5_GROUP_REVISION
     H5O_MSG_LINFO,		/*0x0002 Link information		*/
+#else /* H5_GROUP_REVISION */
+    NULL,
+#endif /* H5_GROUP_REVISION */
     H5O_MSG_DTYPE,		/*0x0003 Data Type			*/
     H5O_MSG_FILL,       	/*0x0004 Old data storage -- fill value */
     H5O_MSG_FILL_NEW,		/*0x0005 New Data storage -- fill value */
+#ifdef H5_GROUP_REVISION
     H5O_MSG_LINK,		/*0x0006 Link 				*/
+#else /* H5_GROUP_REVISION */
+    NULL,
+#endif /* H5_GROUP_REVISION */
     H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
     H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
 #ifdef H5O_ENABLE_BOGUS
@@ -114,7 +122,11 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #else /* H5O_ENABLE_BOGUS */
     NULL,			/*0x0009 "Bogus"			*/
 #endif /* H5O_ENABLE_BOGUS */
+#ifdef H5_GROUP_REVISION
     H5O_MSG_GINFO,		/*0x000A Group Information		*/
+#else /* H5_GROUP_REVISION */
+    NULL,
+#endif /* H5_GROUP_REVISION */
     H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
     H5O_MSG_ATTR,		/*0x000C Attribute list			*/
     H5O_MSG_NAME,		/*0x000D Object name			*/
@@ -2894,11 +2906,13 @@ H5O_alloc_new_chunk(H5F_t *f,
                    (found_attr < 0 ||
                     oh->mesg[u].raw_size < oh->mesg[found_attr].raw_size))
                 found_attr = u;
+#ifdef H5_GROUP_REVISION
 	} else if(H5O_LINK_ID == msg_id) {
             if(oh->mesg[u].raw_size >= cont_size &&
                    (found_link < 0 ||
                     oh->mesg[u].raw_size < oh->mesg[found_link].raw_size))
                 found_link = u;
+#endif /* H5_GROUP_REVISION */
 	} else {
             if(oh->mesg[u].raw_size >= cont_size &&
                    (found_other < 0 ||

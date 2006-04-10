@@ -54,8 +54,10 @@ typedef struct {
 /* Private macros */
 
 /* PRIVATE PROTOTYPES */
+#ifdef H5_GROUP_REVISION
 static herr_t
 H5G_obj_link_to_stab_cb(const void *_mesg, unsigned idx, void *_udata);
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -72,14 +74,20 @@ H5G_obj_link_to_stab_cb(const void *_mesg, unsigned idx, void *_udata);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo, H5O_loc_t *oloc/*out*/)
+H5G_obj_create(H5F_t *f, hid_t dxpl_id,
+#ifdef H5_GROUP_REVISION
+    H5O_ginfo_t *ginfo,
+#endif /* H5_GROUP_REVISION */
+    H5O_loc_t *oloc/*out*/)
 {
+#ifdef H5_GROUP_REVISION
     H5O_linfo_t linfo;                  /* Link information */
     H5O_link_t lnk;                     /* Temporary link message info for computing message size */
     char null_char = '\0';              /* Character for creating null string */
     size_t ginfo_size;                  /* Size of the group info message */
     size_t linfo_size;                  /* Size of the link info message */
     size_t link_size;                   /* Size of a link message */
+#endif /* H5_GROUP_REVISION */
     size_t hdr_size;                    /* Size of object header to request */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -89,9 +97,12 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo, H5O_loc_t *oloc/*out
      * Check arguments.
      */
     HDassert(f);
+#ifdef H5_GROUP_REVISION
     HDassert(ginfo);
+#endif /* H5_GROUP_REVISION */
     HDassert(oloc);
 
+#ifdef H5_GROUP_REVISION
     /* Initialize message information */
     linfo.nlinks = 0;
 
@@ -111,6 +122,9 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo, H5O_loc_t *oloc/*out
     hdr_size = linfo_size + 
                 ginfo_size +
                 (ginfo->est_num_entries * (link_size + ginfo->est_name_len));
+#else /* H5_GROUP_REVISION */
+    hdr_size = 4 + 2 * H5F_SIZEOF_ADDR(f);
+#endif /* H5_GROUP_REVISION */
 
     /*
      * Create symbol table object header.  It has a zero link count
@@ -120,6 +134,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo, H5O_loc_t *oloc/*out
     if(H5O_create(f, dxpl_id, hdr_size, oloc/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
+#ifdef H5_GROUP_REVISION
     /* Insert link info message */
     if(H5O_modify(oloc, H5O_LINFO_ID, H5O_NEW_MESG, 0, 0, &linfo, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
@@ -127,6 +142,16 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo, H5O_loc_t *oloc/*out
     /* Insert group info message */
     if(H5O_modify(oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+#else /* H5_GROUP_REVISION */
+    {
+        H5O_stab_t	stab;		/* Symbol table message	*/
+
+        /* The group doesn't currently have a 'stab' message, go create one */
+        if(H5G_stab_create(oloc, &stab, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create symbol table")
+
+    }
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -222,6 +247,7 @@ H5G_obj_ent_encode(H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_obj_ent_encode() */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_obj_link_to_stab_cb
@@ -263,6 +289,7 @@ H5G_obj_link_to_stab_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_link_to_stab_cb() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -285,9 +312,11 @@ herr_t
 H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     hbool_t inc_link, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     H5O_linfo_t linfo;		/* Link info message */
     htri_t      linfo_exists;   /* Whether the link info is present */
     hbool_t     use_stab;       /* Whether to use symbol table for insertions or not */
+#endif /* H5_GROUP_REVISION */
     herr_t     ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_insert, FAIL)
@@ -297,6 +326,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     HDassert(name && *name);
     HDassert(obj_lnk);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((linfo_exists = H5O_exists(grp_oloc, H5O_LINFO_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for link info")
@@ -358,12 +388,16 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     } /* end if */
     else
         use_stab = TRUE;
+#endif /* H5_GROUP_REVISION */
 
     /* Insert into symbol table or create link object */
+#ifdef H5_GROUP_REVISION
     if(use_stab) {
+#endif /* H5_GROUP_REVISION */
         /* Insert into symbol table */
         if(H5G_stab_insert(grp_oloc, name, obj_lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry")
+#ifdef H5_GROUP_REVISION
     } /* end if */
     else {
         /* Insert with link message */
@@ -377,6 +411,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         if(H5O_modify(grp_oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
     } /* end if */
+#endif /* H5_GROUP_REVISION */
 
     /* Increment link count on object, if appropriate */
     if(inc_link) {
@@ -415,7 +450,9 @@ herr_t
 H5G_obj_iterate(hid_t loc_id, const char *name, int skip, int *last_obj,
 	    H5G_iterate_t op, void *op_data, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t              stab_exists;    /* Whether the symbol table info is present */
+#endif /* H5_GROUP_REVISION */
     hid_t               gid = -1;       /* ID of group to iterate over */
     H5G_t		*grp;           /* Pointer to group data structure to iterate over */
     herr_t		ret_value;      /* Return value */
@@ -436,6 +473,7 @@ H5G_obj_iterate(hid_t loc_id, const char *name, int skip, int *last_obj,
     if((grp = H5I_object(gid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "bad group ID")
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((stab_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for symbol table")
@@ -447,10 +485,13 @@ H5G_obj_iterate(hid_t loc_id, const char *name, int skip, int *last_obj,
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over links")
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Iterate over symbol table */
         if((ret_value = H5G_stab_iterate(&(grp->oloc), gid, skip, last_obj, op, op_data, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over symbol table")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
 done:
     if(gid > 0)
@@ -476,7 +517,9 @@ done:
 herr_t
 H5G_obj_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t linfo_exists;                /* Whether the link info is present */
+#endif /* H5_GROUP_REVISION */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_count, FAIL)
@@ -485,6 +528,7 @@ H5G_obj_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
     HDassert(oloc);
     HDassert(num_objs);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((linfo_exists = H5O_exists(oloc, H5O_LINFO_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for link info")
@@ -501,10 +545,13 @@ H5G_obj_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
         *num_objs = linfo.nlinks;
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Get the number of objects in this group by iterating over symbol table */
         if(H5G_stab_count(oloc, num_objs, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't count objects")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -529,7 +576,9 @@ done:
 ssize_t
 H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t              stab_exists;    /* Whether the symbol table info is present */
+#endif /* H5_GROUP_REVISION */
     ssize_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_get_name_by_idx, FAIL)
@@ -537,6 +586,7 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size, h
     /* Sanity check */
     HDassert(oloc);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((stab_exists = H5O_exists(oloc, H5O_STAB_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for symbol table")
@@ -548,10 +598,13 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size, h
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Get the object's name from the symbol table */
         if((ret_value = H5G_stab_get_name_by_idx(oloc, idx, name, size, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -576,7 +629,9 @@ done:
 H5G_obj_t
 H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t              stab_exists;    /* Whether the symbol table info is present */
+#endif /* H5_GROUP_REVISION */
     H5G_obj_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_get_type_by_idx, H5G_UNKNOWN)
@@ -584,6 +639,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     /* Sanity check */
     HDassert(oloc);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((stab_exists = H5O_exists(oloc, H5O_STAB_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "unable to check for symbol table")
@@ -595,10 +651,13 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Get the object's type from the symbol table */
         if((ret_value = H5G_stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -623,10 +682,12 @@ done:
 herr_t
 H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t              linfo_exists;   /* Whether the link info is present */
     H5O_linfo_t		linfo;		/* Link info message            */
     htri_t              stab_exists;    /* Whether the symbol table info is present */
     hbool_t             use_stab;       /* Whether to use symbol table for deletions or not */
+#endif /* H5_GROUP_REVISION */
     H5G_obj_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_remove, FAIL)
@@ -635,6 +696,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
     HDassert(oloc);
     HDassert(obj_type);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((stab_exists = H5O_exists(oloc, H5O_STAB_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for symbol table")
@@ -729,19 +791,25 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
     } /* end if */
     else
         use_stab = TRUE;
+#endif /* H5_GROUP_REVISION */
 
     /* If the symbol table doesn't exist, search link messages */
+#ifdef H5_GROUP_REVISION
     if(!use_stab) {
         /* Remove object from the link messages */
         if((ret_value = H5G_link_remove(oloc, name, obj_type, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Remove object from the symbol table */
         if((ret_value = H5G_stab_remove(oloc, name, obj_type, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
+#ifdef H5_GROUP_REVISION
     /* Decrement the number of objects in this group */
     if(linfo_exists) {
         linfo.nlinks--;
@@ -754,6 +822,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table message")
         } /* end if */
     } /* end if */
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -777,7 +846,9 @@ herr_t
 H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     htri_t     stab_exists;             /* Whether the symbol table info is present */
+#endif /* H5_GROUP_REVISION */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_lookup, FAIL)
@@ -786,6 +857,7 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     HDassert(grp_oloc && grp_oloc->file);
     HDassert(name && *name);
 
+#ifdef H5_GROUP_REVISION
     /* Check if we have information about the number of objects in this group */
     if((stab_exists = H5O_exists(grp_oloc, H5O_STAB_ID, 0, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for symbol table")
@@ -797,10 +869,13 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
     } /* end if */
     else {
+#endif /* H5_GROUP_REVISION */
         /* Get the object's info from the symbol table */
         if(H5G_stab_lookup(grp_oloc, name, lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+#ifdef H5_GROUP_REVISION
     } /* end else */
+#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -835,8 +910,16 @@ H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
         /* Copy link information */
+#ifdef H5_GROUP_REVISION
         if(H5O_copy(H5O_LINK_ID, lnk, udata->lnk) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+#else /* H5_GROUP_REVISION */
+        *udata->lnk = *lnk;
+        HDassert(lnk->name);
+        udata->lnk->name = H5MM_xstrdup(lnk->name);
+        if(lnk->type == H5G_LINK_SOFT)
+            udata->lnk->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
+#endif /* H5_GROUP_REVISION */
     } /* end if */
 
     /* Copy object location for object */

@@ -934,11 +934,13 @@ test_filespace(void)
     /* Close file */
     if(H5Fclose(file)<0) TEST_ERROR;
 
+#ifdef H5_GROUP_REVISION
     /* Get the size of the file */
     if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
+#endif /* H5_GROUP_REVISION */
 
     PASSED();
 
@@ -1044,11 +1046,13 @@ test_filespace(void)
     /* Close file */
     if(H5Fclose(file)<0) TEST_ERROR;
 
+#ifdef H5_GROUP_REVISION
     /* Get the size of the file */
     if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
+#endif /* H5_GROUP_REVISION */
 
     PASSED();
 

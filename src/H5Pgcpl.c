@@ -24,6 +24,7 @@
 
 /* Static function prototypes */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_local_heap_size_hint
@@ -291,4 +292,5 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_est_link_info() */
+#endif /* H5_GROUP_REVISION */
 

@@ -33,6 +33,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
+#ifdef H5_GROUP_REVISION
 /* Private typedefs */
 
 /* Data structure to hold table of links for a group */
@@ -723,4 +724,5 @@ H5G_link_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_lookup() */
+#endif /* H5_GROUP_REVISION */
 

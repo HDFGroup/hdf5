@@ -397,7 +397,14 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
         /* If there's valid information in the link, reset it */
         if(link_valid) {
+#ifdef H5_GROUP_REVISION
             H5O_reset(H5O_LINK_ID, &lnk);
+#else /* H5_GROUP_REVISION */
+            /* Free information for link (but don't free link pointer) */
+            if(lnk.type == H5G_LINK_SOFT)
+                lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
+            lnk.name = H5MM_xfree(lnk.name);
+#endif /* H5_GROUP_REVISION */
             link_valid = FALSE;
         } /* end if */
 
@@ -479,15 +486,21 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         if(lookup_status < 0) {
             /* If an intermediate group doesn't exist & flag is set, create the group */
             if(target & H5G_CRT_INTMD_GROUP) {
+#ifdef H5_GROUP_REVISION
                 H5O_ginfo_t	ginfo;		/* Group info message for parent group */
 
                 /* Get the group info for parent group */
                 if(NULL == H5O_read(grp_loc.oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
                     HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
+#endif /* H5_GROUP_REVISION */
 
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
-                if(H5G_obj_create(grp_oloc.file, dxpl_id, &ginfo, obj_loc.oloc/*out*/) < 0)
+                if(H5G_obj_create(grp_oloc.file, dxpl_id,
+#ifdef H5_GROUP_REVISION
+                        &ginfo,
+#endif /* H5_GROUP_REVISION */
+                        obj_loc.oloc/*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */
@@ -534,8 +547,16 @@ done:
     if(obj_loc_valid)
         H5G_loc_free(&obj_loc);
     /* If there's valid information in the link, reset it */
-    if(link_valid)
+    if(link_valid) {
+#ifdef H5_GROUP_REVISION
         H5O_reset(H5O_LINK_ID, &lnk);
+#else /* H5_GROUP_REVISION */
+        /* Free information for link (but don't free link pointer) */
+        if(lnk.type == H5G_LINK_SOFT)
+            lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
+        lnk.name = H5MM_xfree(lnk.name);
+#endif /* H5_GROUP_REVISION */
+    } /* end if */
     /* If we copied something into the group location, free it */
     if(group_copy)
         H5G_loc_free(&grp_loc);

@@ -257,6 +257,7 @@ test_large(hid_t file)
     return 1;
 }
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    lifecycle
@@ -967,6 +968,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end gcpl_on_root() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -1014,11 +1016,13 @@ main(void)
     nerrors += test_misc(file);
     nerrors += test_long(file);
     nerrors += test_large(file);
+#ifdef H5_GROUP_REVISION
     nerrors += lifecycle(fapl);
     nerrors += long_compact(fapl);
     nerrors += read_old(fapl);
     nerrors += no_compact(fapl);
     nerrors += gcpl_on_root(fapl);
+#endif /* H5_GROUP_REVISION */
     if (nerrors) goto error;
 
     /* Cleanup */

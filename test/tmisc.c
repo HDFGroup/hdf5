@@ -3749,6 +3749,7 @@ test_misc22(void)
 } /* end test_misc22() */
 #endif /* H5_HAVE_FILTER_SZIP */
 
+#ifdef H5_GROUP_REVISION
 /****************************************************************
 **
 **  test_misc23(): Test intermediate group creation.
@@ -4012,6 +4013,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Fclose");
 
 } /* end test_misc23() */
+#endif /* H5_GROUP_REVISION */
 
 /****************************************************************
 **
@@ -4255,7 +4257,9 @@ test_misc(void)
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();      /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
+#ifdef H5_GROUP_REVISION
     test_misc23();      /* Test intermediate group creation */
+#endif /* H5_GROUP_REVISION */
     test_misc24();      /* Test inappropriate API opens of objects */
 
 } /* test_misc() */

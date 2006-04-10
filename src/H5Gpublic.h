@@ -131,9 +131,11 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name,
 			      const char *comment);
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 			   char *buf);
+#ifdef H5_GROUP_REVISION
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
     hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
+#endif /* H5_GROUP_REVISION */
 H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
         const char *dst_name, hid_t plist_id);
 

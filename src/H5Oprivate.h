@@ -68,15 +68,21 @@ typedef struct H5O_loc_t {
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
+#ifdef H5_GROUP_REVISION
 #define H5O_LINFO_ID    0x0002          /* Link Info Message. */
+#endif /* H5_GROUP_REVISION */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
+#ifdef H5_GROUP_REVISION
 #define H5O_LINK_ID     0x0006          /* Link Message. */
+#endif /* H5_GROUP_REVISION */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
+#ifdef H5_GROUP_REVISION
 #define H5O_GINFO_ID	0x000a          /* Group Info Message.  */
+#endif /* H5_GROUP_REVISION */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
@@ -86,6 +92,7 @@ typedef struct H5O_loc_t {
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
 
+#ifdef H5_GROUP_REVISION
 /*
  * Link Info Message.
  * (Data structure in memory)
@@ -93,6 +100,7 @@ typedef struct H5O_loc_t {
 typedef struct H5O_linfo_t {
     hsize_t             nlinks;         /* Number of links in the group      */
 } H5O_linfo_t;
+#endif /* H5_GROUP_REVISION */
 
 /*
  * Fill Value Message. (Old)

@@ -157,8 +157,10 @@ done:
 herr_t
 H5G_stab_create(H5O_loc_t *grp_oloc, H5O_stab_t *stab, hid_t dxpl_id)
 {
+#ifdef H5_GROUP_REVISION
     H5O_ginfo_t	ginfo;	                /* Group info message   */
     size_t      heap_hint;              /* Local heap size hint */
+#endif /* H5_GROUP_REVISION */
     size_t      size_hint;              /* Local heap size hint */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -170,6 +172,7 @@ H5G_stab_create(H5O_loc_t *grp_oloc, H5O_stab_t *stab, hid_t dxpl_id)
     HDassert(grp_oloc);
     HDassert(stab);
 
+#ifdef H5_GROUP_REVISION
     /* Get the group info */
     if(NULL == H5O_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
@@ -180,6 +183,9 @@ H5G_stab_create(H5O_loc_t *grp_oloc, H5O_stab_t *stab, hid_t dxpl_id)
     else
         heap_hint = ginfo.lheap_size_hint;
     size_hint = MAX(heap_hint, H5HL_SIZEOF_FREE(grp_oloc->file) + 2);
+#else /* H5_GROUP_REVISION */
+    size_hint = 4 * (H5HL_SIZEOF_FREE(grp_oloc->file) + 2);
+#endif /* H5_GROUP_REVISION */
 
     if(H5G_stab_create_components(grp_oloc->file, stab, size_hint, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create symbol table components")

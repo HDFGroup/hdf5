@@ -99,6 +99,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit() */
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tcommit_expand
@@ -141,7 +142,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
 
 #ifdef LATER
     /* Get correct property list */
-    if(H5P_DEFAULT == tcpl_id)
+    if(H5P_DEFAULT == tapl_id)
         tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
     else
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
@@ -155,6 +156,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit_expand() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------

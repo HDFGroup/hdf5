@@ -331,8 +331,10 @@ H5_DLL int H5G_node_type(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t a
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
+#ifdef H5_GROUP_REVISION
 H5_DLL int H5G_node_stab_convert(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		  const void *_rt_key, void *_udata);
+#endif /* H5_GROUP_REVISION */
 
 /* Functions that understand link messages */
 /* forward reference for later use */
@@ -353,7 +355,10 @@ H5_DLL herr_t H5G_link_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 
 /* Functions that understand objects */
-H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5O_ginfo_t *ginfo,
+H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id,
+#ifdef H5_GROUP_REVISION
+    H5O_ginfo_t *ginfo,
+#endif /* H5_GROUP_REVISION */
     H5O_loc_t *oloc/*out*/);
 H5_DLL herr_t H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, hbool_t inc_link, hid_t dxpl_id);

@@ -36,6 +36,9 @@
 /* Define if gettimeofday() populates the tz pointer passed in */
 #undef GETTIMEOFDAY_GIVES_TZ
 
+/* Define if the group revision code is to be compiled in */
+#undef GROUP_REVISION
+
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 

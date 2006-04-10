@@ -3,7 +3,7 @@ Expected output for 'h5dump tvms.h5'
 #############################
 HDF5 "tvms.h5" {
 GROUP "/" {
-   DATASET "IntArray" {
+   DATASET "Array" {
       DATATYPE  H5T_VAX_F64
       DATASPACE  SIMPLE { ( 5, 6 ) / ( 5, 6 ) }
       DATA {

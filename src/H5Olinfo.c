@@ -33,6 +33,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 
+#ifdef H5_GROUP_REVISION
 /* PRIVATE PROTOTYPES */
 static void *H5O_linfo_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
@@ -299,4 +300,5 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_debug() */
+#endif /* H5_GROUP_REVISION */
 
