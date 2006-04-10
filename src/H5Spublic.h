@@ -34,8 +34,7 @@ typedef enum H5S_class_t {
     H5S_NO_CLASS         = -1,  /*error                                      */
     H5S_SCALAR           = 0,   /*scalar variable                            */
     H5S_SIMPLE           = 1,   /*simple data space                          */
-    H5S_NULL             = 2,   /*null data space                            */
-    H5S_COMPLEX          = 3    /*complex data space                         */
+    H5S_NULL             = 2    /*null data space                            */
 } H5S_class_t;
 
 /* Different ways of combining selections */

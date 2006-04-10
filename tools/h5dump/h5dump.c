@@ -1163,9 +1163,6 @@ dump_dataspace(hid_t space)
 	    HDfprintf(stdout, "%s %s",
 		      dump_header_format->dataspacedescriptionbegin, S_NULL);
             break;
-        case H5S_COMPLEX:
-	    printf("%s not yet implemented %s\n", BEGIN, END);
-            break;
         case H5S_NO_CLASS:
         default:
 	    printf("%s unknown dataspace %s\n", BEGIN, END);
@@ -2035,7 +2032,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
         /* need to call h5tools_dump_mem for the attribute data */
         space = H5Aget_space(obj_id);
         space_type = H5Sget_simple_extent_type(space);
-        if(space_type == H5S_NULL || space_type == H5S_NO_CLASS || space_type == H5S_COMPLEX) {
+        if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
             status = SUCCEED;
         } else {
 	    char        string_prefix[64];
@@ -4497,10 +4494,6 @@ xml_dump_dataspace(hid_t space)
 
             break;
 #endif /* TMP */
-        case H5S_COMPLEX:
-	    printf("<!-- not yet implemented -->\n");
-
-            break;
         case H5S_NO_CLASS:
         default:
 	    printf("<!-- unknown dataspace -->\n");

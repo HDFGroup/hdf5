@@ -2476,9 +2476,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         case H5S_NULL:
                             fprintf(out, "H5S_NULL");
                             break;
-                        case H5S_COMPLEX:
-                            fprintf(out, "H5S_COMPLEX");
-                            break;
                         default:
                             fprintf(out, "%ld", (long)cls);
                             break;

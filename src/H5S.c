@@ -636,10 +636,6 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
                 dst->max=NULL;
             break;
 
-        case H5S_COMPLEX:
-            /*void */
-            break;
-
         default:
             assert("unknown data space type" && 0);
             break;
@@ -832,9 +828,6 @@ H5S_get_npoints_max(const H5S_t *ds)
             }
             break;
 
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "complex data spaces are not supported yet");
-
         default:
             assert("unknown data space class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown data space class)");
@@ -918,9 +911,6 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
         case H5S_SIMPLE:
             ret_value = ds->extent.rank;
             break;
-
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
@@ -1023,9 +1013,6 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
             }
             break;
 
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-
         default:
             assert("unknown data space class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
@@ -1066,9 +1053,6 @@ H5S_modify(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
             if(H5O_modify(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple dataspace message")
             break;
-
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex dataspaces are not implemented yet")
 
         default:
             HDassert("unknown dataspace class" && 0);
@@ -1120,9 +1104,6 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
             if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent), oh_flags_ptr)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
-
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not implemented yet");
 
         default:
             assert("unknown data space class" && 0);
