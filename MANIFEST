@@ -403,14 +403,14 @@
 ./src/H5Bcache.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h
+./src/H5Bpublic.h			_DO_NOT_DISTRIBUTE_
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h
+./src/H5B2public.h			_DO_NOT_DISTRIBUTE_
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -502,19 +502,19 @@
 ./src/H5HFint.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h
+./src/H5HFpublic.h			_DO_NOT_DISTRIBUTE_
 ./src/H5HFstat.c
 ./src/H5HFtest.c
 ./src/H5HG.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
-./src/H5HGpublic.h
+./src/H5HGpublic.h			_DO_NOT_DISTRIBUTE_
 ./src/H5HL.c
 ./src/H5HLdbg.c
 ./src/H5HLpkg.h
 ./src/H5HLprivate.h
-./src/H5HLpublic.h
+./src/H5HLpublic.h			_DO_NOT_DISTRIBUTE_
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
