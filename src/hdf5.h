@@ -23,15 +23,12 @@
 #include "H5public.h"
 #include "H5Apublic.h"		/* Attributes				*/
 #include "H5ACpublic.h"		/* Metadata cache			*/
-#include "H5Bpublic.h"		/* B-trees				*/
 #include "H5Dpublic.h"		/* Datasets				*/
 #include "H5Epublic.h"		/* Errors				*/
 #include "H5Fpublic.h"		/* Files				*/
 #include "H5FDpublic.h"		/* File drivers				*/
 #include "H5FPpublic.h"		/* Flexible Parallel HDF5               */
 #include "H5Gpublic.h"		/* Groups				*/
-#include "H5HGpublic.h"		/* Global heaps				*/
-#include "H5HLpublic.h"		/* Local heaps				*/
 #include "H5Ipublic.h"		/* ID management			*/
 #include "H5MMpublic.h"		/* Memory management			*/
 #include "H5Opublic.h"		/* Object headers			*/
