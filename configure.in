@@ -1839,6 +1839,28 @@ case "X-$FUNCSTACK" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like the group revision code compiled in
+dnl
+AC_MSG_CHECKING([whether group revision code is enabled])
+AC_ARG_ENABLE([group-revision],
+              [AC_HELP_STRING([--enable-group-revision],
+                              [Enable the group revision code (for internal developers only).])],
+              [GROUPREVISION=$enableval])
+
+case "X-$GROUPREVISION" in
+  X-yes)
+      GROUPREVISION=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([GROUP_REVISION], [1],
+                [Define if the group revision code is to be compiled in])
+    ;;
+  *)
+      GROUPREVISION=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Enable tracing of the API
 dnl This must come after the enable-debug since it depends on debug.
 dnl
@@ -3403,8 +3425,12 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT "Configure Summary"
+PRINT ""
+PRINT "                       Configure Summary"
+PRINT "                       ================="
+PRINT ""
 PRINT "Compiling Options:"
+PRINT "------------------"
 
 PRINT_N "               Compilation Mode"
 case "X-$enable_production" in
@@ -3451,7 +3477,9 @@ IF_YES_NO "$TRACE_API"
 PRINT_N "   Optimization Instrumentation"
 IF_YES_NO "$INSTRUMENT"
 
+PRINT ""
 PRINT "Languages:"
+PRINT "----------"
 
 PRINT_N "                            C++"
 IF_YES_NO "$HDF_CXX"
@@ -3473,7 +3501,9 @@ if test X$HDF_FORTRAN = Xyes; then
     PRINT "$FCFLAGS"
 fi
 
+PRINT ""
 PRINT "Features:"
+PRINT "---------"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
@@ -3483,6 +3513,9 @@ IF_YES_NO "$FPHDF5"
 
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"
+
+PRINT_N "                 Group Revision"
+IF_ENABLED_DISABLED "$GROUPREVISION"
 
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
