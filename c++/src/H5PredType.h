@@ -152,29 +152,45 @@ class H5_DLLCPP PredType : public AtomType {
 
 	static const PredType NATIVE_INT8;
 	static const PredType NATIVE_UINT8;
+#if H5_SIZEOF_INT_LEAST8_T != 0
 	static const PredType NATIVE_INT_LEAST8;
+#endif /* H5_SIZEOF_INT_LEAST8_T */
+#if H5_SIZEOF_UINT_LEAST8_T != 0
 	static const PredType NATIVE_UINT_LEAST8;
+#endif /* H5_SIZEOF_UINT_LEAST8_T */
 	//static const PredType NATIVE_INT_FAST8;
 	//static const PredType NATIVE_UINT_FAST8;
 
 	static const PredType NATIVE_INT16;
 	static const PredType NATIVE_UINT16;
+#if H5_SIZEOF_INT_LEAST16_T != 0
 	static const PredType NATIVE_INT_LEAST16;
+#endif /* H5_SIZEOF_INT_LEAST16_T */
+#if H5_SIZEOF_UINT_LEAST16_T != 0
 	static const PredType NATIVE_UINT_LEAST16;
+#endif /* H5_SIZEOF_UINT_LEAST16_T */
 	//static const PredType NATIVE_INT_FAST16;
 	//static const PredType NATIVE_UINT_FAST16;
 
 	static const PredType NATIVE_INT32;
 	static const PredType NATIVE_UINT32;
+#if H5_SIZEOF_INT_LEAST32_T != 0
 	static const PredType NATIVE_INT_LEAST32;
+#endif /* H5_SIZEOF_INT_LEAST32_T */
+#if H5_SIZEOF_UINT_LEAST32_T != 0
 	static const PredType NATIVE_UINT_LEAST32;
+#endif /* H5_SIZEOF_UINT_LEAST32_T */
 	//static const PredType NATIVE_INT_FAST32;
 	//static const PredType NATIVE_UINT_FAST32;
 
 	static const PredType NATIVE_INT64;
 	static const PredType NATIVE_UINT64;
+#if H5_SIZEOF_INT_LEAST64_T != 0
 	static const PredType NATIVE_INT_LEAST64;
+#endif /* H5_SIZEOF_INT_LEAST64_T */
+#if H5_SIZEOF_UINT_LEAST64_T != 0
 	static const PredType NATIVE_UINT_LEAST64;
+#endif /* H5_SIZEOF_UINT_LEAST64_T */
 	//static const PredType NATIVE_INT_FAST64;
 	//static const PredType NATIVE_UINT_FAST64;
 
