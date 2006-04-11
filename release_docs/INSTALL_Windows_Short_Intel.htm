@@ -337,7 +337,6 @@ INSTALL_Windows.txt before starting below procedures. </p>
 									<li>flush2_fortran </li>
          							<li>hdf5_fortran </li>
          							<li>testhdf5_fortran </li>
-         							<li>hdf5_hl_fortran </li>
          							<li>hl_test_image_fortran </li>
 	            					<li>hl_test_lite_fortran </li>
 	            					<li>hl_test_table_fortran</li>
@@ -346,14 +345,19 @@ INSTALL_Windows.txt before starting below procedures. </p>
 	            			<li><p>b. Select project "libtest_fortran" in the Solution 
 								Explorer window. In the Project menu, select 
 								"Extract Compaq Visual Fortran Project".  Choose 
-								"The Intel Fortran project" as the the main project .</p>
+								"The Intel Fortran project" as the the main project . 
+                            Do the same thing for &quot;hdf5_hl_fortran&quot;</p>
 							</li>
 						</ul>
 					</li>
-					<li><h4>2.2.3 Change project dependencies of "libtest_fortran"</h4>
+					<li><h4>2.2.3 Change project dependencies of "libtest_fortran" 
+                    and &quot;hdf5_hl_fortran&quot;</h4>
 						<p>Highlight project "libtest_fortran", choose "Project"->
 							"Project Dependencies", uncheck "libtest".
 						</p>
+						<p>Highlight project "hdf5_hl_fortran", choose "Project"->
+							"Project Dependencies", uncheck "hdf5_fortran&quot; and 
+                        &quot;hdf5_hl&quot;.</p>
 					</li>
 					<li><h4>2.2.4 Convert all.sln to Use Intel C++ Project System</h4>
 						<p>Right click on the solution name "all.sln" in the 

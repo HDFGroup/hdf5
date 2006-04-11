@@ -2454,7 +2454,6 @@ lines. </p>
         <li>flush2_fortran </li>
         <li>hdf5_fortran </li>
         <li>testhdf5_fortran </li>
-        <li>hdf5_hl_fortran </li>
         <li>hl_test_image_fortran </li>
         <li>hl_test_lite_fortran </li>
         <li>hl_test_table_fortran</li>
@@ -2468,16 +2467,23 @@ lines. </p>
      	 C and Fortran code, you will be asked to specify which project, either Fortran 
      	 or C/C++, will serve as the main project for this mixed language projects. 
       	Choose <span class="filename">&quot;The Intel Fortran project&quot;</span> as the the 
-     	 main project and click <span class="filename">&quot;OK&quot;</span>. </li>
+     	 main project and click <span class="filename">&quot;OK&quot;</span>.&nbsp; 
+        Do the same thing for &quot;hdf5_hl_fortran&quot;.</li>
     	</ul>
     </li>
     
     
-    <li><h4>2.2.4 Change project dependencies of &quot;libtest_fortran&quot;</h4>
+    <li><h4>2.2.4 Change project dependencies of &quot;libtest_fortran&quot; and 
+    &quot;hdf5_hl_fortran&quot;</h4>
     	<ul class="intable">
       	<li>Highlight project <span class="filename">&quot;libtest_fortran&quot;</span>, choose
       	<span class="filename">&quot;Project&quot;</span>-&gt; <span class="filename">&quot;Project 
       	Dependencies&quot;, </span>uncheck<span class="filename"> &quot;libtest&quot;.</span> 
+      	</li>
+      	<li>Highlight project <span class="filename">&quot;hdf5_hl_fortran&quot;</span>, choose
+      	<span class="filename">&quot;Project&quot;</span>-&gt; <span class="filename">&quot;Project 
+      	Dependencies&quot;, </span>uncheck<span class="filename"> &quot;hdf5_hl&quot; 
+        and &quot;hdf5_fortran&quot;.</span> 
       	</li>
     	</ul>
     </li>
