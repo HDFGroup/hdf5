@@ -1827,7 +1827,6 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
        	flush2_fortran
        	hdf5_fortran
        	testhdf5_fortran
-       	hdf5_hl_fortran
        	hl_test_image_fortran
         hl_test_lite_fortran
         hl_test_table_fortran
@@ -1841,11 +1840,18 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
        this mixed language projects. Choose 
        "The Intel Fortran project" as the the main project and 
        click "OK". 
+
+       Do the same thing for hdf5_hl_fortran.
       
-      2.2.3 Change project dependencies of "libtest_fortran"
+      2.2.3 Change project dependencies of "libtest_fortran" and
+      "hdf5_hl_fortran"
                
       Highlight project "libtest_fortran", choose tab "Project"->
       "Project Dependencies", uncheck "libtest".
+
+      Highlight project "hdf5_hl_fortran", choose tab "Project"->
+      "Project Dependencies", uncheck "hdf5_fortran" and "hdf5_hl".
+
                
       2.2.4 Convert to Use Intel C++ Project System
 
