@@ -67,7 +67,7 @@
 ::Test h5ls with different options
 
 echo.****************************************************
-echo.       h5dump%2 %1   T E S T S            
+echo.       h5ls%2 %1   T E S T S            
 echo.****************************************************
 
 :: The paramter following %tooltest% is the expected output file
