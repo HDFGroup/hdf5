@@ -29,4 +29,4 @@ $ copy [.tools.h5dump]*.com [-.tools.h5dump]
 $ copy [.tools.h5ls]*.com [-.tools.h5ls]
 $ copy [.tools.h5diff]*.com [-.tools.h5diff]
 $ copy [.tools.lib]make.com [-.tools.lib]
-
+$ exit
