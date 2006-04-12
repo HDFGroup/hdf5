@@ -1294,7 +1294,6 @@
 ./hl/src/H5TB.c
 ./hl/src/H5DS.c
 ./hl/src/H5PT.c
-./hl/src/H5HL_private.c
 ./hl/src/H5LTanalyze.l
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTparse.y
