@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include "H5LT.h"
+#include "hdf5.h"
 
 #define RANK 2
 

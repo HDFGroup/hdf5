@@ -12,21 +12,30 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5DS_H
-#define _H5DS_H
+#ifndef _H5DSprivate_H
+#define _H5DSprivate_H
 
-#include <hdf5.h>
+/* public hdf5 prototypes			*/
+#include "H5Ipublic.h"		
+#include "H5Tpublic.h"		
+#include "H5Spublic.h"	
+#include "H5Dpublic.h"
+#include "H5Ppublic.h"		
+#include "H5Gpublic.h"		
+#include "H5Apublic.h"		
+#include "H5Epublic.h"	
+#include "H5Rpublic.h"		
+	
+/* public LT prototypes			*/
+#include "H5LTpublic.h"		
+#include "H5DSpublic.h"
 
-#ifndef TRUE
-#define TRUE 1
-#endif
 
 #define DIMENSION_SCALE_CLASS "DIMENSION_SCALE"
 #define DIMENSION_LIST        "DIMENSION_LIST"
 #define REFERENCE_LIST        "REFERENCE_LIST"
 #define DIMENSION_LABELS      "DIMENSION_LABELS"
 
-typedef herr_t  (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 
 
 /* attribute type of a DS dataset */
@@ -34,51 +43,6 @@ typedef struct ds_list_t {
  hobj_ref_t ref;     /* object reference  */
  int        dim_idx; /* dimension index of the dataset */
 } ds_list_t;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-H5_HLDLL herr_t  H5DSattach_scale( hid_t did,
-                        hid_t dsid,
-                        unsigned int idx);
-
-H5_HLDLL herr_t  H5DSdetach_scale( hid_t did,
-                        hid_t dsid,
-                        unsigned int idx);
-
-H5_HLDLL herr_t  H5DSset_scale( hid_t dsid,
-                     char *dimname);
-
-H5_HLDLL int H5DSget_num_scales( hid_t did,
-                       unsigned int dim);
-
-H5_HLDLL herr_t  H5DSset_label( hid_t did,
-                     unsigned int idx,
-                     char *label);
-
-H5_HLDLL ssize_t H5DSget_label( hid_t did,
-                      unsigned int idx,
-                      char *label,
-                      size_t size);
-
-H5_HLDLL ssize_t H5DSget_scale_name( hid_t did,
-                           char *name,
-                           size_t size);
-
-H5_HLDLL htri_t H5DSis_scale( hid_t did);
-
-H5_HLDLL herr_t  H5DSiterate_scales( hid_t did,
-                          unsigned int dim,
-                          int *idx,
-                          H5DS_iterate_t visitor,
-                          void *visitor_data);
-
-H5_HLDLL htri_t H5DSis_attached( hid_t did,
-                       hid_t dsid,
-                       unsigned int idx);
-
 
 
 /*-------------------------------------------------------------------------
@@ -90,9 +54,5 @@ H5_HLDLL htri_t H5DSis_attached( hid_t did,
 H5_HLDLL herr_t  H5DS_is_reserved( hid_t did);
 
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

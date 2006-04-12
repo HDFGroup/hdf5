@@ -12,20 +12,13 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5IM_H
-#define _H5IM_H
+#ifndef _H5IMpublic_H
+#define _H5IMpublic_H
 
-#include "H5LT.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define IMAGE_CLASS   "IMAGE"
-#define PALETTE_CLASS "PALETTE"
-#define IMAGE_VERSION "1.2"
-#define IMAGE8_RANK    3
-#define IMAGE24_RANK   3
 
 
 H5_HLDLL herr_t  H5IMmake_image_8bit( hid_t loc_id,
@@ -53,8 +46,6 @@ H5_HLDLL herr_t  H5IMread_image( hid_t loc_id,
                        const char *dset_name,
                        unsigned char *buffer );
 
-
-
 H5_HLDLL herr_t  H5IMmake_palette( hid_t loc_id,
                          const char *pal_name,
                          const hsize_t *pal_dims,
@@ -76,7 +67,6 @@ H5_HLDLL herr_t  H5IMget_palette_info( hid_t loc_id,
                         const char *image_name,
                         int pal_number,
                         hsize_t *pal_dims );
-
 
 H5_HLDLL herr_t  H5IMget_palette( hid_t loc_id,
                         const char *image_name,

@@ -320,6 +320,10 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_builddir)/fortran/src
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -368,7 +372,6 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 
 # Include files
 AM_FCFLAGS = -I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
-INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/fortran/src
 
 # The Fortran test library
 noinst_LTLIBRARIES = libh5test_fortran.la

@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
+INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 if BUILD_PARALLEL_CONDITIONAL
   TEST_PROG_PARA=h5perf perf

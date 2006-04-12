@@ -12,26 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5TB_H
-#define _H5TB_H
-
-#if 0
-#define H5_TB_DEBUG
-#endif
-
-#include "H5LT.h"
-
-
-#define TABLE_CLASS "TABLE"
-
-
-#define HLTB_MAX_FIELD_LEN 255
-
-#if !defined(MAX)
-#define MAX(X,Y) ((X)>(Y)?(X):(Y))
-#endif
-
-
+#ifndef _H5TBpublic_H
+#define _H5TBpublic_H
 
 
 #ifdef __cplusplus

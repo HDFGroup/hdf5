@@ -23,7 +23,7 @@
 #ifndef H5PTWRAP_H
 #define H5PTWRAP_H
 
-#include "H5PT.h"
+#include "H5PTpublic.h"
 
 class H5_HLCPPDLL  PacketTable
 {

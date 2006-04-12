@@ -299,6 +299,12 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+
+# Include src and tools/lib directories
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_srcdir)/tools/lib
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -346,9 +352,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # be copied to the testfiles/ directory if update is required
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 expect_sorted \
 	actual_sorted
-
-# Include src and tools/lib directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Always build and test h5diff but build and test ph5diff only if parallel
 # is enabled.

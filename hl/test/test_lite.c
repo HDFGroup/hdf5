@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "H5LT.h"
+#include "H5LTprivate.h"
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"

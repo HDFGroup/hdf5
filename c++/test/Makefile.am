@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
+INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL

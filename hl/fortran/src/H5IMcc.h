@@ -15,8 +15,8 @@
 #ifndef _H5IMCC_H
 #define _H5IMCC_H
 
-#include "H5LT.h"
-#include "H5IM.h"
+#include "H5LTprivate.h"
+#include "H5IMprivate.h"
 #include "../../fortran/src/H5f90i_gen.h"
 
 #ifdef __cplusplus

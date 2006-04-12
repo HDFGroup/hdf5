@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5IM.h"
+#include "hdf5.h"
 
 #define WIDTH         (hsize_t)400
 #define HEIGHT        (hsize_t)200

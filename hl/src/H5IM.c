@@ -12,11 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5IM.h"
-
-
+#include "H5IMprivate.h"
+#include "H5LTprivate.h"
 #include <string.h>
 #include <stdlib.h>
+
 /*-------------------------------------------------------------------------
  * Function: H5IMmake_image_8bit
  *

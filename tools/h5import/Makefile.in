@@ -292,6 +292,12 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+
+# Include src and tools/lib directories
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_srcdir)/tools/lib
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -335,9 +341,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
-
-# Include src and tools/lib directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG = h5importtest

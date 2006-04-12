@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src
+INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src
 
 # This is our main target
 lib_LTLIBRARIES=libhdf5_hl_cpp.la

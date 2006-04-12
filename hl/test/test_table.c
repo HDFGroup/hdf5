@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5TB.h"
+#include "H5TBprivate.h"
 
 #include <stdlib.h>
 #include <string.h>

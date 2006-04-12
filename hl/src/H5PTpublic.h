@@ -12,14 +12,20 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5PT_H
-#define _H5PT_H
+#ifndef _H5PTpublic_H
+#define _H5PTpublic_H
 
-#include <hdf5.h>
 
-#if 0
-#define H5_PT_DEBUG
-#endif
+/* public hdf5 prototypes			*/
+#include "H5Ipublic.h"		
+#include "H5Tpublic.h"		
+#include "H5Spublic.h"	
+#include "H5Dpublic.h"
+#include "H5Ppublic.h"		
+#include "H5Gpublic.h"		
+#include "H5Apublic.h"		
+#include "H5Epublic.h"	
+#include "H5Rpublic.h"		
 
 #ifdef __cplusplus
 extern "C" {

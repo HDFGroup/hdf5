@@ -310,6 +310,11 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+
+# Include src directory
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -358,9 +363,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # and scd_family*.h5 were created by setting the HDF5_NOCLEANUP variable.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 \
 	../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
-
-# Include src directory
-INCLUDES = -I$(top_srcdir)/src
 
 #test script and program
 TEST_PROG = h5repart_gentest

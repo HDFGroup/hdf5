@@ -51145,6 +51145,11 @@ fi;
 if test "X$HDF5_HL" = "Xyes"; then
  echo "yes"
  HL="hl"
+
+cat >>confdefs.h <<\_ACEOF
+#define INCLUDE_HL 1
+_ACEOF
+
 else
  echo "no"
 fi

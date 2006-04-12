@@ -284,6 +284,13 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+
+# Include directories
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src \
+	-I$(top_srcdir)/test
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -327,9 +334,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
-
-# Include directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
 
 # Shared C++ libraries aren't universally supported.
 @CXX_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static

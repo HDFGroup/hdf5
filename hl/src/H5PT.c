@@ -12,8 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5PT.h"
-#include "H5HL_private.h"
+#include "H5PTprivate.h"
+#include "H5TBprivate.h"
 #include <stdlib.h>
 
 /*  Packet Table private data */

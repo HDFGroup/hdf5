@@ -549,6 +549,10 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_builddir)/src
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -614,7 +618,6 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 	err_compat.h5 dtransform.h5 test_filters.h5 get_file_name.h5 \
 	tstint[1-2].h5 unlink_chunked.h5 btree2.h5 objcopy_src.h5 \
 	objcopy_dst.h5 objcopy_ext.dat
-INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = $(top_srcdir)/test/testerror.sh

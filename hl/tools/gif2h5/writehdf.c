@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "gif.h"
-#include "H5IM.h"
+#include "H5IMpublic.h"
 
 /*-------------------------------------------------------------------------
  * Function: WriteHDF

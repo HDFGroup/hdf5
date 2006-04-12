@@ -3207,6 +3207,8 @@ AC_ARG_ENABLE([hl],
 if test "X$HDF5_HL" = "Xyes"; then
  echo "yes"
  HL="hl"
+ AC_DEFINE([INCLUDE_HL], [1],
+           [Define if HDF5's high-level library headers should be included in hdf5.h])
 else
  echo "no"
 fi

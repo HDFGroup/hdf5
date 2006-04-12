@@ -12,12 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"
-#include "H5DS.h"
-#include "H5LT.h"
 #include <stdlib.h>
-#include "H5IM.h"
-#include "H5TB.h"
+#include "H5DSprivate.h"
+#include "H5LTprivate.h"
+#include "H5IMprivate.h"
+#include "H5TBprivate.h"
 
 
 
@@ -30,7 +29,7 @@
  *   If DIMNAME is specified, then an attribute called NAME is created, 
 	*   with the value DIMNAME. 
  *
- * Return: Success: SUCCESS, Failure: FAIL
+ * Return: Success: SUCCEED, Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -86,7 +85,7 @@ herr_t H5DSset_scale(hid_t dsid,
    return FAIL;
  }
 
- return SUCCESS;
+ return SUCCEED;
 }
 
 
@@ -99,7 +98,7 @@ herr_t H5DSset_scale(hid_t dsid,
 	*  REFERENCE_LIST attributes. 
  *
  * Return:
- *   Success: SUCCESS
+ *   Success: SUCCEED
  *   Failure: FAIL
 	*
 	* Fails if: Bad arguments 
@@ -540,7 +539,7 @@ herr_t H5DSattach_scale(hid_t did,
    return FAIL;
  }
 
- return SUCCESS;
+ return SUCCEED;
 
 /* error zone, gracefully close */
 out:
@@ -560,7 +559,7 @@ out:
 	*     DIMENSION_LIST and REFERENCE_LIST attributes. 
  *
  * Return:
- *   Success: SUCCESS
+ *   Success: SUCCEED
  *   Failure: FAIL
 	*
 	* Fails if: Bad arguments 
@@ -901,7 +900,7 @@ herr_t H5DSdetach_scale(hid_t did,
  }
 
 
- return SUCCESS;
+ return SUCCEED;
 
 /* error zone, gracefully close */
 out:
@@ -1287,7 +1286,7 @@ herr_t H5DSiterate_scales(hid_t did,
   return FAIL;
 
  if (has_dimlist == 0)
-  return SUCCESS;
+  return SUCCEED;
 
  else if (has_dimlist == 1 )
  {
@@ -1385,7 +1384,7 @@ out:
  *
  * Purpose: Set label for the dimension IDX of dataset DID to the value LABEL
  *
- * Return: Success: SUCCESS, Failure: FAIL
+ * Return: Success: SUCCEED, Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -1533,7 +1532,7 @@ herr_t H5DSset_label(hid_t did,
    free(buf);
  }
 
- return SUCCESS;
+ return SUCCEED;
 
  /* error zone, gracefully close */
 out:

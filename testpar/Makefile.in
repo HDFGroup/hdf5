@@ -305,6 +305,10 @@ RM = rm -f
 CP = cp
 TIME = time
 
+# Path for hl needed in hdf5.h
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_srcdir)/test
+
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -352,7 +356,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #

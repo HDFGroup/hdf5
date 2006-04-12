@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5PT.h"
+#include "hdf5.h"
 #include <stdlib.h>
 
 /*-------------------------------------------------------------------------

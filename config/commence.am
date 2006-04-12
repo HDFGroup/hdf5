@@ -21,6 +21,9 @@ RM=rm -f
 CP=cp
 TIME=time
 
+# Path for hl needed in hdf5.h
+INCLUDES=-I$(top_srcdir)/hl/src
+
 # Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
 # on at least one machine configure fails to detect its existence (janus).
 # Also, when HDF5 is configured on one machine but run on another,

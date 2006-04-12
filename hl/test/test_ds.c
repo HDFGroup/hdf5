@@ -12,11 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5DS.h"
-#include "H5LT.h"
 #include <stdlib.h>
 #include <string.h>
-#include "H5IM.h"
+#include "H5DSprivate.h"
+#include "H5LTprivate.h"
+#include "H5IMprivate.h"
 
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
@@ -776,7 +776,7 @@ static int test_simple(void)
   goto out;
 
  /* detach again, it should fail */
- if (H5DSdetach_scale(did,dsid,DIM1)==SUCCESS)
+ if (H5DSdetach_scale(did,dsid,DIM1)==SUCCEED)
   goto out;
 
  /* verify attach, it must return 0 for no attach */
@@ -1751,7 +1751,7 @@ static int test_errors(void)
 
  TESTING2("attach a dataset to itself");
 
- if (H5DSattach_scale(did,did,0)==SUCCESS)
+ if (H5DSattach_scale(did,did,0)==SUCCEED)
   goto out;
 
  PASSED();
@@ -1762,7 +1762,7 @@ static int test_errors(void)
  */
  TESTING2("attach a group with a dataset");
 
- if (H5DSattach_scale(gid,dsid,0)==SUCCESS)
+ if (H5DSattach_scale(gid,dsid,0)==SUCCEED)
   goto out;
 
  PASSED();
@@ -1773,7 +1773,7 @@ static int test_errors(void)
  */
  TESTING2("attach a dataset with a group");
 
- if (H5DSattach_scale(did,gid,0)==SUCCESS)
+ if (H5DSattach_scale(did,gid,0)==SUCCEED)
   goto out;
 
  PASSED();
@@ -1784,7 +1784,7 @@ static int test_errors(void)
  */
  TESTING2("set scale for a group");
 
- if (H5DSset_scale(gid,"scale 1")==SUCCESS)
+ if (H5DSset_scale(gid,"scale 1")==SUCCEED)
   goto out;
 
  PASSED();
@@ -1847,7 +1847,7 @@ static int test_errors(void)
   goto out;
 
  /* try to attach "ds_a" to "dset_a", not valid */
- if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+ if(H5DSattach_scale(did,dsid,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -1892,7 +1892,7 @@ static int test_errors(void)
   goto out;
 
  /* try to attach "ds_a" to "ds_b", not valid */
- if(H5DSattach_scale(dsid,did,0)==SUCCESS)
+ if(H5DSattach_scale(dsid,did,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -1927,7 +1927,7 @@ static int test_errors(void)
   goto out;
 
  /* try to attach "ds_a" to the image, not valid */
- if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+ if(H5DSattach_scale(did,dsid,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -1988,7 +1988,7 @@ static int test_errors(void)
   goto out;
 
  /* try to detach "ds_a" from "dset_a" */
- if(H5DSdetach_scale(did,dsid,0)==SUCCESS)
+ if(H5DSdetach_scale(did,dsid,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -2016,7 +2016,7 @@ static int test_errors(void)
   goto out;
 
  /* try to detach "ds_a" from "grp" */
- if(H5DSdetach_scale(gid,dsid,0)==SUCCESS)
+ if(H5DSdetach_scale(gid,dsid,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -2044,7 +2044,7 @@ static int test_errors(void)
   goto out;
 
  /* try to detach "grp" from "dset_a" */
- if(H5DSdetach_scale(did,gid,0)==SUCCESS)
+ if(H5DSdetach_scale(did,gid,0)==SUCCEED)
   goto out;
 
  /* close */
@@ -2153,7 +2153,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate trough the 3rd dimension of "dset_a", return error */
- if (H5DSiterate_scales(did,3,NULL,verifiy_scale,NULL)==SUCCESS)
+ if (H5DSiterate_scales(did,3,NULL,verifiy_scale,NULL)==SUCCEED)
   goto out;
 
  /* close */
@@ -2212,7 +2212,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate, return error */
- if (H5DSiterate_scales(gid,0,NULL,verifiy_scale,NULL)==SUCCESS)
+ if (H5DSiterate_scales(gid,0,NULL,verifiy_scale,NULL)==SUCCEED)
   goto out;
 
  /* close */
@@ -2237,7 +2237,7 @@ static int test_iterators(void)
   goto out;
 
  /* iterate  */
- if (H5DSiterate_scales(did,0,NULL,op_bogus,NULL)==SUCCESS)
+ if (H5DSiterate_scales(did,0,NULL,op_bogus,NULL)==SUCCEED)
   goto out;
 
  /* close */

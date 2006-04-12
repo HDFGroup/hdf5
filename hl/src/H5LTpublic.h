@@ -12,27 +12,12 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5LT_H
-#define _H5LT_H
-
-#include <hdf5.h>
+#ifndef _H5LTpublic_H
+#define _H5LTpublic_H
 
 
-#ifndef FAIL
-#define FAIL -1
-#endif
-
-#ifndef SUCCESS
-#define SUCCESS 0
-#endif
-
-#define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
-#define TESTING2(WHAT)  {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
-#define TESTING3(WHAT)  {printf("%-70s", "" WHAT); fflush(stdout);}
-#define PASSED()	{puts(" PASSED");fflush(stdout);}
-#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
-#define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
-#define EXAMPLE(WHAT)	{printf("%-70s", "Example " WHAT); fflush(stdout);}
+/* Public headers needed by this file */
+#include "H5public.h"
 
 typedef enum H5LT_lang_t {
     H5LT_LANG_ERR = -1, /*this is the first*/
@@ -41,6 +26,8 @@ typedef enum H5LT_lang_t {
     H5LT_FORTRAN  = 2,  /*for Fortran*/
     H5LT_NO_LANG  = 3   /*this is the last*/
 } H5LT_lang_t;
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -367,36 +354,6 @@ H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
 
 
 
-/*-------------------------------------------------------------------------
- *
- * Private functions
- *
- *-------------------------------------------------------------------------
- */
-H5_HLDLL herr_t  H5LT_get_attribute_mem( hid_t obj_id,
-                           const char *attr_name,
-                           hid_t mem_type_id,
-                           void *data );
-
-H5_HLDLL herr_t  H5LT_get_attribute_disk( hid_t obj_id,
-                           const char *attr_name,
-                           void *data );
-
-H5_HLDLL herr_t  H5LT_find_attribute( hid_t loc_id, const char *name );
-
-H5_HLDLL herr_t  H5LT_set_attribute_numerical( hid_t loc_id,
-                                     const char *obj_name,
-                                     const char *attr_name,
-                                     size_t size,
-                                     hid_t type_id,
-                                     const void *data );
-
-H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
-                                 char *name,
-                                 char *buf );
-
-H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, 
-                                    size_t *slen, hbool_t no_user_buf);
 
 #ifdef __cplusplus
 }

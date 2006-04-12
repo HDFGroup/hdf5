@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 bin_PROGRAMS=h5jam h5unjam
 check_PROGRAMS=tellub h5jamgentest getub

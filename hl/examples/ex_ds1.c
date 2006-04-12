@@ -12,8 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5DS.h"
-#include "H5LT.h"
+#include "hdf5.h"
+
 
 #define RANK          2
 #define DIM_DATA      12

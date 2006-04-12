@@ -12,41 +12,32 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "hdf5.h"
+#ifndef _H5IMprivate_H
+#define _H5IMprivate_H
 
-int main( void )
-{
- hid_t       file_id; 
- int         data[6];
- hsize_t     dims[2];
- herr_t      status;
- hsize_t     i, j, nrow, n_values;
- 
- /* open file from ex_lite1.c */
- file_id = H5Fopen ("ex_lite1.h5", H5F_ACC_RDONLY, H5P_DEFAULT); 
+/* public hdf5 prototypes			*/
+#include "H5Rpublic.h"	
+#include "H5Apublic.h"	
+#include "H5Spublic.h"	
+#include "H5Dpublic.h"		
 
- /* read dataset */
- status = H5LTread_dataset_int(file_id,"/dset",data);
-
- /* get the dimensions of the dataset */
- status = H5LTget_dataset_info(file_id,"/dset",dims,NULL,NULL);
- 
- /* print it by rows */
- n_values = dims[0] * dims[1];
- nrow = dims[1];
- for (i=0; i<n_values/nrow; i++ )
- {
-  for (j=0; j<nrow; j++)
-   printf ("  %d", data[i*nrow + j]);
-  printf ("\n");
- }
-   
- /* close file */
- status = H5Fclose (file_id);
-
- return 0;
+/* public LT prototypes			*/
+#include "H5LTpublic.h"		
+#include "H5IMpublic.h"
 
 
-}
+#define IMAGE_CLASS   "IMAGE"
+#define PALETTE_CLASS "PALETTE"
+#define IMAGE_VERSION "1.2"
+#define IMAGE8_RANK    3
+#define IMAGE24_RANK   3
 
 
+/*-------------------------------------------------------------------------
+ * Private functions
+ *-------------------------------------------------------------------------
+ */
+H5_HLDLL herr_t  H5IM_find_palette(hid_t loc_id );
+
+
+#endif

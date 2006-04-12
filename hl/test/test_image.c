@@ -12,7 +12,8 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5IM.h"
+#include "H5LTprivate.h"
+#include "H5IMprivate.h"
 #include "pal_rgb.h"
 #include <stdlib.h>
 #include <string.h>

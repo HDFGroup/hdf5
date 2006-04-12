@@ -12,60 +12,47 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "hdf5.h"
-#include <stdlib.h>
+#ifndef _H5TBprivate_H
+#define _H5TBprivate_H
 
-#define ATTR_SIZE 5
 
-int main( void )
-{
- hid_t   file_id; 
- hid_t   dset_id;
- hid_t   space_id;  
- hsize_t dims[1] = { ATTR_SIZE };
- int     data[ATTR_SIZE] = {1,2,3,4,5};
- herr_t  status; 
- int     i;
-  
- /* create a file */
- file_id = H5Fcreate ("ex_lite3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
+#include "H5LTprivate.h"
+#include "H5TBpublic.h"
 
- /* create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
 
- /* create a dataset named "dset" */
- dset_id = H5Dcreate(file_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-
- /* close */
- status = H5Dclose(dset_id);
- status = H5Sclose(space_id);
+#define TABLE_CLASS         "TABLE"
+#define HLTB_MAX_FIELD_LEN  255
 
 /*-------------------------------------------------------------------------
- * example of H5LTset_attribute_int
- *-------------------------------------------------------------------------
- */
-  
- /* create and write the attribute "attr1" on the dataset "dset" */
- status = H5LTset_attribute_int(file_id,"dset","attr1",data,ATTR_SIZE);
-
-/*-------------------------------------------------------------------------
- * example of H5LTget_attribute_int
+ *
+ * Private write function used by H5TB and H5PT
+ *
  *-------------------------------------------------------------------------
  */
 
- /* get the attribute "attr1" from the dataset "dset" */
- status = H5LTget_attribute_int(file_id,"dset","attr1",data);
+herr_t H5TBcommon_append_records( hid_t dataset_id,
+                                  hid_t mem_type_id,
+                                  hsize_t nrecords,
+                                  hsize_t orig_table_size,
+                                  const void * data);
 
- for (i=0; i< ATTR_SIZE; i++ )
- {
-  printf ("  %d", data[i]);
- }
- printf ("\n");
+/*-------------------------------------------------------------------------
+ *
+ * Private read function used by H5TB and H5PT
+ *
+ *-------------------------------------------------------------------------
+ */
 
- /* close file */
- status = H5Fclose(file_id);
 
- return 0;
+herr_t H5TBcommon_read_records( hid_t dataset_id,
+                                hid_t mem_type_id,
+                                hsize_t start,
+                                hsize_t nrecords,
+                                hsize_t table_size,
+                                void *data);
 
-}
+
+
+
+#endif
 

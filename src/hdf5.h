@@ -48,4 +48,12 @@
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 
+/* High Level */
+#if defined (H5_INCLUDE_HL)
+#include "H5DSpublic.h" /* dimension scales */
+#include "H5LTpublic.h" /* lite */
+#include "H5IMpublic.h" /* image */
+#include "H5TBpublic.h" /* table */
+#endif /*H5_INCLUDE_HL*/
+
 #endif

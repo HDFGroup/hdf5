@@ -12,14 +12,14 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5LT.h"
+#include "H5LTprivate.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+
 
 /* For Lex and Yacc */
-#define         SUCCEED         0
-#define         FAIL            -1
 #define         COL             3
 #define         LIMIT           512
 #define         INCREMENT       1024
@@ -3590,7 +3590,7 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  if (H5Tclose(tid)<0)
   goto out;
 
- return SUCCESS;
+ return SUCCEED;
 
  /* error zone, gracefully close */
 out:
