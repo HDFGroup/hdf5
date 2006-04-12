@@ -1349,49 +1349,6 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Should the Stream Virtual File Driver be compiled in ?
-dnl
-AC_MSG_CHECKING([for Stream Virtual File Driver support])
-AC_ARG_ENABLE([stream-vfd],
-              [AC_HELP_STRING([--enable-stream-vfd],
-                              [Build the Stream Virtual File Driver
-                               [default=yes]])],
-              [STREAM_VFD=$enableval],
-              [STREAM_VFD=yes])
-
-if test "$STREAM_VFD" = "yes"; then
-  AC_MSG_RESULT([yes])
-  AC_CHECK_HEADERS([netinet/in.h])
-  AC_CHECK_HEADERS([netinet/tcp.h], , , [#include <netinet/in.h>])
-  AC_CHECK_HEADERS([sys/filio.h])
-  AC_DEFINE([HAVE_STREAM], [1],
-            [Define if the stream virtual file driver should be compiled])
-
-  dnl Check if 'socklen_t' available
-  AC_MSG_CHECKING([if socklen_t is defined])
-  AC_TRY_COMPILE([
-#include <stdio.h>
-#include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-  ],
-    [socklen_t foo; return 0;],
-    AC_DEFINE([HAVE_SOCKLEN_T], 1, [Define if `socklen_t' is defined])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no])
-  )
-else
-  AC_MSG_RESULT([not configured])
-fi
-
-dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
 dnl Posix way to do this?
 dnl
@@ -2108,6 +2065,68 @@ else
   AC_MSG_RESULT([no])
 fi
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Should the Stream Virtual File Driver be compiled in ?
+dnl
+AC_MSG_CHECKING([for Stream Virtual File Driver support])
+AC_ARG_ENABLE([stream-vfd],
+              [AC_HELP_STRING([--enable-stream-vfd],
+                              [Build the Stream Virtual File Driver
+                               [default=yes]])],
+              [STREAM_VFD=$enableval],
+              [STREAM_VFD=yes])
+
+dnl If the user explicitly disabled Stream VFD, say so.
+if test "$STREAM_VFD" != "yes"; then
+  AC_MSG_RESULT([not configured])
+fi
+
+dnl If the stream VFD is being used with parallel, disable it.
+dnl Using both stream VFD and parallel is a weird case and seems to cause errors on some
+dnl platforms.
+if test "$STREAM_VFD" = "yes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_RESULT([not supported in parallel])
+    echo "    warning! Stream-VFD is not supported in parallel"
+    STREAM_VFD=no
+fi
+if test "$STREAM_VFD" = "yes" -a "X${PARALLEL}" != "X"; then
+    AC_MSG_RESULT([not supported in parallel])
+    echo "    warning! Stream-VFD is not supported when a parallel compiler is being used"
+    STREAM_VFD=no
+fi  
+    
+dnl Otherwise, use Stream VFD.
+if test "$STREAM_VFD" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_CHECK_HEADERS([netinet/in.h])
+  AC_CHECK_HEADERS([netinet/tcp.h], , , [#include <netinet/in.h>])
+  AC_CHECK_HEADERS([sys/filio.h])
+  AC_DEFINE([HAVE_STREAM], [1],
+            [Define if the stream virtual file driver should be compiled])
+
+  dnl Check if 'socklen_t' available
+  AC_MSG_CHECKING([if socklen_t is defined])
+  AC_TRY_COMPILE([
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+  ],
+    [socklen_t foo; return 0;],
+    AC_DEFINE([HAVE_SOCKLEN_T], 1, [Define if `socklen_t' is defined])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+  )
+fi
+
 
 dnl ----------------------------------------------------------------------
 dnl Turn on internal I/O filters by setting macros in header files
