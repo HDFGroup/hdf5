@@ -123,7 +123,12 @@ struct datum
  *
  *****************************************************************************/
 
+#ifndef H5_HAVE_MPE
 #define NUM_DATA_ENTRIES	100000
+#else
+    /* Use a smaller test size to avoid creating huge MPE logfiles. */
+#define NUM_DATA_ENTRIES	1000
+#endif
 
 struct datum data[NUM_DATA_ENTRIES];
 
@@ -3339,11 +3344,6 @@ main(int argc, char **argv)
     int max_nerrors;
 
     MPI_Init(&argc, &argv);
-#ifdef H5_HAVE_MPE
-    /* turn off MPE logging since this test generates big cpilog files that */
-    /* fill up /tmp. */
-    MPE_Stop_log();
-#endif H5_HAVE_MPE
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
