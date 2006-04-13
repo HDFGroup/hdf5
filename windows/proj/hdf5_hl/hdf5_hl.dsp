@@ -94,10 +94,6 @@ SOURCE=..\..\..\hl\src\H5DS.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\hl\src\H5HL_private.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\hl\src\H5IM.c
 # End Source File
 # Begin Source File
