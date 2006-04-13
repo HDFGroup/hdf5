@@ -36,6 +36,7 @@ int main(void)
     /* Buffers to hold data */
  hvl_t writeBuffer[5];
  hvl_t readBuffer[5];
+ hsize_t chunk_size=1;
 
     /* This example has two different sizes of "record": longs and shorts */
  long longBuffer[5];
@@ -66,12 +67,12 @@ int main(void)
  fid=H5Fcreate("packet_table_VLexample.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
 
     /* Create a variable-length packet table within the file */
- ptable = H5PTcreate_vl(fid, "Packet Test Dataset", 1);
+ ptable = H5PTcreate_vl(fid, "Packet Test Dataset", chunk_size);
  if(ptable == H5I_INVALID_HID)
      goto out;
 
     /* Write the entire buffer to the packet table */
- err = H5PTappend(ptable, 5, writeBuffer );
+ err = H5PTappend(ptable, (hsize_t)5, writeBuffer );
  if(err < 0)
      goto out;
 
@@ -83,7 +84,7 @@ int main(void)
  printf("Number of packets in packet table after five appends: %d\n", count);
 
     /* Read all five packets back */
- err = H5PTread_packets(ptable, 0, 5, readBuffer );
+ err = H5PTread_packets(ptable, (hsize_t)0, (hsize_t)5, readBuffer );
  if(err < 0)
     goto out;
 
@@ -98,7 +99,7 @@ int main(void)
 
     /* Before we close the packet table, we must free the memory that */
     /* the pointers in readBuffer point to. */
- err = H5PTfree_vlen_readbuff(ptable, 5, readBuffer);
+ err = H5PTfree_vlen_readbuff(ptable, (hsize_t)5, readBuffer);
  if(err < 0)
      goto out;
 
