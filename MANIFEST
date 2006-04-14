@@ -1382,17 +1382,23 @@
 ./hl/c++/test/Makefile.in
 
 #vms files
+./vms/c++/examples/check.com
 ./vms/c++/examples/make.com
 ./vms/c++/src/make.com
+./vms/c++/test/check.com
 ./vms/c++/test/make.com
 
+./vms/fortran/examples/check.com
 ./vms/fortran/examples/make.com
 ./vms/fortran/src/make.com
+./vms/fortran/test/check.com
 ./vms/fortran/test/make.com
 
+./vms/examples/check.com
 ./vms/examples/make.com
 ./vms/src/make.com
 ./vms/src/h5pubconf.h
+./vms/test/check.com
 ./vms/test/make.com
 
 ./vms/make.com
