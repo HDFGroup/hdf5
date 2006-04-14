@@ -58,7 +58,7 @@ const H5std_string	DSET_BOGUS_NAME	("bogus");
 const int H5Z_FILTER_BOGUS = 305;
 
 // Local prototypes
-static size_t bogus(unsigned int flags, size_t cd_nelmts,
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 void cleanup_dsets(void);
 
@@ -394,7 +394,7 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    bogus,			/* The actual filter function	*/
+    (H5Z_func_t)filter_bogus,   /* The actual filter function	*/
 }};
 
 /*-------------------------------------------------------------------------
@@ -418,7 +418,7 @@ static size_t
       const unsigned int UNUSED cd_values[], size_t nbytes,
       size_t UNUSED *buf_size, void UNUSED **buf)
 BMR: removed UNUSED for now until asking Q. or R. to pass compilation*/
-bogus(unsigned int flags, size_t cd_nelmts,
+filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
 {
