@@ -15,8 +15,8 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 Fortran examples
 $!
-$ fcopt = "/float=ieee_float"
-$ fff := fortran 'fcopt /debug/define=H5_VMS/nooptimize/module=[-.src]
+$! fcopt = "/float=ieee_float/define=H5_VMS"
+$ fff := fortran 'fcopt /module=[-.src]
 $
 $ type sys$input
 	Compiling HDF5 Fortran examples
@@ -26,8 +26,6 @@ $ ffiles="dsetexample.f90, fileexample.f90, rwdsetexample.f90, "+-
          "grpdsetexample.f90, hyperslab.f90, selectele.f90, grpit.f90,"+-
          "refobjexample.f90, refregexample.f90, mountexample.f90,"+-
          "compound.f90"
-      
-
 $!
 $ fff 'ffiles
 $ type sys$input
@@ -114,79 +112,4 @@ $ type sys$input
 $ link       compound,-
              [-.src]hdf5_fortran.olb/lib,-
              [-.-.src]hdf5.olb/lib
-
-$ type sys$input
-
-
-	Running Fortran examples
-
-$ type sys$input
-
-	Running dsetexample 
-$ run dsetexample
-$
-$ type sys$input 
-
-	Running fileexample
-$ run fileexample
-$
-$ type sys$input
-
-	Running rwdsetexample
-$ run rwdsetexample
-$
-$ type sys$input
-
-	Running attrexample
-$ run attrexample
-$
-$ type sys$input
-
-	Running groupexample
-$ run groupexample
-$
-$ type sys$input
-
-	Running grpsexample
-$ run grpsexample
-$
-$ type sys$input
-
-	Running grpdsetexample
-$ run grpdsetexample
-$
-$ type sys$input
-
-	Running hyperslab
-$ run hyperslab
-$
-$ type sys$input
-
-	Running selectele
-$ run selectele
-$
-$ type sys$input
-
-	Running grpit
-$ run grpit
-$
-$ type sys$input
-
-	Running refobjexample
-$ run refobjexample
-$
-$ type sys$input
-
-	Running refregexample
-$ run refregexample
-$
-$ type sys$input
-
-	Running mountexample
-$ run mountexample
-$
-$ type sys$input
-
-	Running compound
-$ run compound
-$
+$ exit
