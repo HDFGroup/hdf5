@@ -14,15 +14,15 @@ $!#
 $!
 $! Make HDF5 C++ examples
 $!
-$ ccopt = "/float=ieee_float/standard=strict_ansi"
+$! cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
 $
-$ ccc := cxx 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.src])
-$ 
+$ ccc := cxx 'cxxopt /include=([-.-.src], [-.src])
+$!
 $!
 $ cxxobj= "create.cxx, readdata.cxx, writedata.cxx, compound.cxx,"+-
           "extend_ds.cxx, chunks.cxx, h5group.cxx"
-$ 
-$                               
+$! 
+$!                              
 $ ccc 'cxxobj
 $ type sys$input
 
@@ -36,73 +36,40 @@ $ type sys$input
 $ cxxlink  readdata, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
+$!
 $ type sys$input
 
        Creating writedata  
 $ cxxlink  writedata, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$                               
+$ !                              
 $ type sys$input
 
        Creating compound 
 $ cxxlink  compound, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
+$!
 $ type sys$input
 
        Creating extend_ds  
 $ cxxlink  extend_ds, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
+$!
 $ type sys$input
 
        Creating chunks 
 $ cxxlink  chunks, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
+$!
 $ type sys$input
 
        Creating h5group 
 $ cxxlink  h5group, -
            [-.src]hdf5_cplus.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
-$ type sys$input
-
-       Running create
-$ run create 
-$
-$ type sys$input
-
-       Running readdata
-$ run readdata 
-$
-$ type sys$input
-
-       Running writedata
-$ run writedata 
-$
-$ type sys$input
-
-       Running compound
-$ run compound 
-$
-$ type sys$input
-
-       Running extend_ds
-$ run extend_ds 
-$
-$ type sys$input
-
-       Running chunks
-$ run chunks 
-$
-$ type sys$input
-
-       Running h5group
-$ run h5group 
+$!
+$ exit
