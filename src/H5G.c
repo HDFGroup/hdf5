@@ -2284,22 +2284,8 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
 
         /* Common code to retrieve the file's fileno */
         /* (Use the object location's file info, if it's available) */
-        if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno) < 0)
+        if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
-
-        /* Get common info from link */
-        if(lnk != NULL) {
-            statbuf->cset = lnk->cset;
-            statbuf->ctime = lnk->ctime;
-        } /* end if */
-        else {
-            /* lookup must be on '.' */
-            HDassert(HDstrcmp(name, ".") == 0);
-
-            /* Set "fake" hard link info */
-            statbuf->cset = H5T_CSET_ASCII;
-            statbuf->ctime = 0;
-        } /* end else */
 
         /* Get info for soft link */
         /* (If we don't follow the link, we can retrieve info about the soft link itself) */
@@ -2308,7 +2294,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
 	    statbuf->type = H5G_LINK;
 
             /* Get length of link value */
-	    statbuf->u.slink.linklen = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
+	    statbuf->linklen = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
         } /* end if */
         /* Get info for hard link */
         else {
@@ -2318,20 +2304,25 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
                 H5E_clear_stack(NULL);  /* clear any errors resulting from checking type */
 
 	    /* Get basic info for object */
-	    statbuf->u.obj.objno = obj_loc->oloc->addr;
-	    statbuf->u.obj.nlink = H5O_link(obj_loc->oloc, 0, udata->dxpl_id);
+	    statbuf->objno[0] = (unsigned long)(obj_loc->oloc->addr);
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+	    statbuf->objno[1] = (unsigned long)(obj_loc->oloc->addr >> 8 * sizeof(long));
+#else
+	    statbuf->objno[1] = 0;
+#endif
+	    statbuf->nlink = H5O_link(obj_loc->oloc, 0, udata->dxpl_id);
 
             /* Get creation time for object */
-            if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_ID, 0, &(statbuf->u.obj.mtime), udata->dxpl_id)) {
+            if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_ID, 0, &(statbuf->mtime), udata->dxpl_id)) {
                 H5E_clear_stack(NULL);
-                if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_NEW_ID, 0, &(statbuf->u.obj.mtime), udata->dxpl_id)) {
+                if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), udata->dxpl_id)) {
                     H5E_clear_stack(NULL);
-                    statbuf->u.obj.mtime = 0;
+                    statbuf->mtime = 0;
                 } /* end if */
             } /* end if */
 
             /* Get object header information */
-            if(H5O_get_info(obj_loc->oloc, &(statbuf->u.obj.ohdr), udata->dxpl_id) < 0)
+            if(H5O_get_info(obj_loc->oloc, &(statbuf->ohdr), udata->dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
         } /* end else */
     } /* end if */

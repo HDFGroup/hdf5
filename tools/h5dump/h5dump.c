@@ -673,7 +673,6 @@ print_datatype(hid_t type,unsigned in_group)
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
     H5T_cset_t  cset;
-    H5G_stat_t  statbuf;
     H5T_order_t order;
     hid_t       super;
     hid_t       tmp_type;
@@ -683,10 +682,13 @@ print_datatype(hid_t type,unsigned in_group)
     const char  *sign_s=NULL;   /* sign scheme string */
 
     if (!in_group && H5Tcommitted(type) > 0) {
+        H5G_stat_t  statbuf;
+        haddr_t objno;  /* Compact form of object's location */
         obj_t  *obj;    /* Found object */
 
         H5Gget_objinfo(type, ".", TRUE, &statbuf);
-        obj = search_obj(type_table, statbuf.u.obj.objno);
+        objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+        obj = search_obj(type_table, objno);
 
         if (obj) {
             if (!obj->recorded)
@@ -1420,7 +1422,7 @@ dump_all(hid_t group, const char *name, void * op_data)
             char       *targbuf;
 
             indentation(indent);
-            targbuf = HDmalloc(statbuf.u.slink.linklen);
+            targbuf = HDmalloc(statbuf.linklen);
             HDassert(targbuf);
 
             if (!doxml) {
@@ -1429,7 +1431,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                 indentation(indent + COL);
             }
 
-            if (H5Gget_linkval(group, name, statbuf.u.slink.linklen, targbuf) < 0) {
+            if (H5Gget_linkval(group, name, statbuf.linklen, targbuf) < 0) {
                 error_msg(progname, "unable to get link value\n");
                 d_status = EXIT_FAILURE;
                 ret = FAIL;
@@ -1450,7 +1452,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                     char *t_link_path;
                     int res;
 
-                    t_link_path = HDmalloc(HDstrlen(prefix) + statbuf.u.slink.linklen + 1);
+                    t_link_path = HDmalloc(HDstrlen(prefix) + statbuf.linklen + 1);
                     if(targbuf[0] == '/')
                         HDstrcpy(t_link_path, targbuf);
                     else {
@@ -1543,13 +1545,16 @@ dump_all(hid_t group, const char *name, void * op_data)
 
         case H5G_DATASET:
             if ((obj = H5Dopen(group, name)) >= 0) {
+                haddr_t objno;              /* Compact form of object's location */
+
                 /* hard link */
                 H5Gget_objinfo(obj, ".", TRUE, &statbuf);
+                objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
-                if (statbuf.u.obj.nlink > 1) {
+                if (statbuf.nlink > 1) {
                     obj_t  *found_obj;    /* Found object */
 
-                    found_obj = search_obj(dset_table, statbuf.u.obj.objno);
+                    found_obj = search_obj(dset_table, objno);
 
                     if (found_obj == NULL) {
                         indentation(indent);
@@ -1709,6 +1714,7 @@ static void
 dump_group(hid_t gid, const char *name)
 {
     H5G_stat_t  statbuf;
+    haddr_t     objno;              /* Compact form of object's location */
     hid_t       dset, type;
     char        type_name[1024], *tmp;
     int         xtype = H5G_UNKNOWN; /* dump all */
@@ -1741,11 +1747,12 @@ dump_group(hid_t gid, const char *name)
     } /* end if */
 
     H5Gget_objinfo(gid, ".", TRUE, &statbuf);
+    objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
-    if (statbuf.u.obj.nlink > 1) {
+    if (statbuf.nlink > 1) {
         obj_t  *found_obj;    /* Found object */
 
-        found_obj = search_obj(group_table, statbuf.u.obj.objno);
+        found_obj = search_obj(group_table, objno);
 
 	if (found_obj == NULL) {
 	    indentation(indent);
@@ -2838,6 +2845,7 @@ static void
 handle_datasets(hid_t fid, char *dset, void *data)
 {
     H5G_stat_t       statbuf;
+    haddr_t          objno;              /* Compact form of object's location */
     hid_t            dsetid;
     struct subset_t *sset = (struct subset_t *)data;
 
@@ -2904,11 +2912,12 @@ handle_datasets(hid_t fid, char *dset, void *data)
     }
 
     H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
+    objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
-    if (statbuf.u.obj.nlink > 1) {
+    if (statbuf.nlink > 1) {
         obj_t  *found_obj;    /* Found object */
 
-        found_obj = search_obj(dset_table, statbuf.u.obj.objno);
+        found_obj = search_obj(dset_table, objno);
 
         if (found_obj) {
             if (found_obj->displayed) {
@@ -2951,7 +2960,6 @@ handle_datasets(hid_t fid, char *dset, void *data)
 static void
 handle_groups(hid_t fid, char *group, void UNUSED * data)
 {
-    H5G_stat_t  statbuf;
     hid_t       gid;
 
     if ((gid = H5Gopen(fid, group)) < 0) {
@@ -2970,7 +2978,6 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
             prefix = HDrealloc(prefix, prefix_len);
         }
 
-        H5Gget_objinfo(gid, ".", TRUE, &statbuf);
         HDstrcpy(prefix, group);
         dump_group(gid, group);
 
@@ -3002,13 +3009,13 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
         error_msg(progname, "unable to get obj info from \"%s\"\n", links);
         d_status = EXIT_FAILURE;
     } else if (statbuf.type == H5G_LINK) {
-        char *buf = HDmalloc(statbuf.u.slink.linklen);
+        char *buf = HDmalloc(statbuf.linklen);
 
         begin_obj(dump_header_format->softlinkbegin, links,
                   dump_header_format->softlinkblockbegin);
         indentation(COL);
 
-        if (H5Gget_linkval(fid, links, statbuf.u.slink.linklen, buf) >= 0) {
+        if (H5Gget_linkval(fid, links, statbuf.linklen, buf) >= 0) {
             printf("LINKTARGET \"%s\"\n", buf);
         } else {
             error_msg(progname, "h5dump error: unable to get link value for \"%s\"\n",
@@ -4001,7 +4008,6 @@ xml_print_datatype(hid_t type, unsigned in_group)
     hsize_t                 dims[H5DUMP_MAX_RANK];
     H5T_str_t               str_pad;
     H5T_cset_t              cset;
-    H5G_stat_t              statbuf;
     hid_t                   super;
     H5T_order_t             ord;
     H5T_sign_t              sgn;
@@ -4015,11 +4021,14 @@ xml_print_datatype(hid_t type, unsigned in_group)
     htri_t                  is_vlstr=FALSE;
 
     if (!in_group && H5Tcommitted(type) > 0) {
+        H5G_stat_t statbuf;
+        haddr_t objno;              /* Compact form of object's location */
         obj_t  *found_obj;    /* Found object */
 
         /* detect a shared datatype, output only once */
         H5Gget_objinfo(type, ".", TRUE, &statbuf);
-        found_obj = search_obj(type_table, statbuf.u.obj.objno);
+        objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+        found_obj = search_obj(type_table, objno);
 
         if (found_obj) {
             /* This should be defined somewhere else */
@@ -4378,17 +4387,19 @@ xml_print_datatype(hid_t type, unsigned in_group)
 static void
 xml_dump_datatype(hid_t type)
 {
-    H5G_stat_t              statbuf;
 
     indent += COL;
     indentation(indent);
 
     if (H5Tcommitted(type) > 0) {
+        H5G_stat_t statbuf;
+        haddr_t objno;              /* Compact form of object's location */
         obj_t  *found_obj;    /* Found object */
 
 	/* Data type is a shared or named data type */
 	H5Gget_objinfo(type, ".", TRUE, &statbuf);
-	found_obj = search_obj(type_table, statbuf.u.obj.objno);
+        objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+	found_obj = search_obj(type_table, objno);
 
 	if (found_obj) {
 	    /* Shared data type, must be entered as an object  */
@@ -4833,6 +4844,7 @@ static void
 xml_dump_group(hid_t gid, const char *name)
 {
     H5G_stat_t              statbuf;
+    haddr_t                 objno;              /* Compact form of object's location */
     char                   *cp;
     hid_t                   dset, type;
     char                    type_name[1024], *tmp = NULL;
@@ -4865,12 +4877,13 @@ xml_dump_group(hid_t gid, const char *name)
 
     indent += COL;
     H5Gget_objinfo(gid, ".", TRUE, &statbuf);
+    objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
-    if (statbuf.u.obj.nlink > 1) {
+    if (statbuf.nlink > 1) {
         obj_t  *found_obj;    /* Found object */
 
 	/* Group with more than one link to it... */
-	found_obj = search_obj(group_table, statbuf.u.obj.objno);
+	found_obj = search_obj(group_table, objno);
 
 	if (found_obj == NULL) {
 	    indentation(indent);

@@ -145,11 +145,12 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
 static void
 sym_insert(H5G_stat_t *sb, const char *name)
 {
+    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
     /* Don't add it if the link count is 1 because such an object can only
      * have one name. */
-    if (sb->u.obj.nlink<2) return;
+    if (sb->nlink<2) return;
 
     /* Extend the table */
     if (idtab_g.nobjs>=idtab_g.nalloc) {
@@ -160,7 +161,8 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n].id = sb->u.obj.objno;
+    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
+    idtab_g.obj[n].id = objno;
     idtab_g.obj[n].name = HDstrdup(name);
 }
 
@@ -184,11 +186,13 @@ sym_insert(H5G_stat_t *sb, const char *name)
 static char *
 sym_lookup(H5G_stat_t *sb)
 {
+    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
-    if (sb->u.obj.nlink<2) return NULL; /*only one name possible*/
+    if (sb->nlink<2) return NULL; /*only one name possible*/
+    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
     for (n=0; n<idtab_g.nobjs; n++) {
-        if (idtab_g.obj[n].id==sb->u.obj.objno)
+        if(idtab_g.obj[n].id == objno)
             return idtab_g.obj[n].name;
     }
     return NULL;
@@ -1164,44 +1168,45 @@ static void
 display_type(hid_t type, int ind)
 {
     H5T_class_t  data_class = H5Tget_class(type);
-    H5G_stat_t  sb;
 
     /* Bad data type */
     if (type<0) {
- printf("<ERROR>");
- return;
+        printf("<ERROR>");
+        return;
     }
 
     /* Shared? If so then print the type's OID */
     if (H5Tcommitted(type)) {
- if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
-     printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
-     sb.fileno, sb.u.obj.objno);
- } else {
-     printf("shared ");
- }
+        H5G_stat_t  sb;
+
+        if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
+            haddr_t objno;              /* Compact form of object's location */
+
+            objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+            printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
+                    sb.fileno[0], objno);
+        } else
+            printf("shared ");
     }
 
     /* Print the type */
     if ((!simple_output_g && display_native_type(type, ind)) ||
- display_ieee_type(type, ind) ||
- display_int_type(type, ind) ||
- display_float_type(type, ind) ||
- display_cmpd_type(type, ind) ||
- display_enum_type(type, ind) ||
- display_string_type(type, ind) ||
- display_reference_type(type, ind) ||
- display_vlen_type(type, ind) ||
- display_array_type(type, ind) ||
- display_opaque_type(type, ind) ||
-	display_bitfield_type(type, ind)) {
- return;
-    }
+            display_ieee_type(type, ind) ||
+            display_int_type(type, ind) ||
+            display_float_type(type, ind) ||
+            display_cmpd_type(type, ind) ||
+            display_enum_type(type, ind) ||
+            display_string_type(type, ind) ||
+            display_reference_type(type, ind) ||
+            display_vlen_type(type, ind) ||
+            display_array_type(type, ind) ||
+            display_opaque_type(type, ind) ||
+            display_bitfield_type(type, ind))
+        return;
 
     /* Unknown type */
     printf("%lu-byte class-%u unknown",
-    (unsigned long)H5Tget_size(type),
-    (unsigned)data_class);
+            (unsigned long)H5Tget_size(type), (unsigned)data_class);
 }
 
 
@@ -1763,6 +1768,7 @@ list (hid_t group, const char *name, void *_iter)
     hid_t obj=-1;
     char buf[512], comment[50], *fullname=NULL, *s=NULL;
     H5G_stat_t sb;
+    haddr_t objno;              /* Compact form of object's location */
     struct tm *tm;
     herr_t status;
     iter_t *iter = (iter_t*)_iter;
@@ -1792,6 +1798,7 @@ list (hid_t group, const char *name, void *_iter)
     if (sb.type>=0 && dispatch_g[sb.type].name) {
         fputs(dispatch_g[sb.type].name, stdout);
     }
+    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
     /* If the object has already been printed then just show the object ID
      * and return. */
@@ -1824,11 +1831,11 @@ list (hid_t group, const char *name, void *_iter)
     if (verbose_g>0 && H5G_LINK!=sb.type) {
         if (sb.type>=0)
             H5Aiterate(obj, NULL, list_attr, NULL);
-        printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno, sb.u.obj.objno);
-        printf("    %-10s %u\n", "Links:", sb.u.obj.nlink);
-        if (sb.u.obj.mtime>0) {
-            if (simple_output_g) tm=gmtime(&(sb.u.obj.mtime));
-            else tm=localtime(&(sb.u.obj.mtime));
+        printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno[0], objno);
+        printf("    %-10s %u\n", "Links:", sb.nlink);
+        if (sb.mtime>0) {
+            if (simple_output_g) tm=gmtime(&(sb.mtime));
+            else tm=localtime(&(sb.mtime));
             if (tm) {
                 strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                 printf("    %-10s %s\n", "Modified:", buf);

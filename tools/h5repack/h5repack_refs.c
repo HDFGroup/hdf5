@@ -787,7 +787,7 @@ static const char* MapIdToName(hid_t refobj_id,
     return NULL;
    if (H5Dclose(id)<0)
     return NULL;
-   if (refstat.fileno==objstat.fileno && refstat.u.obj.objno==objstat.u.obj.objno)
+   if (!HDmemcmp(&refstat.fileno, &objstat.fileno, sizeof(refstat.fileno)) && !HDmemcmp(&refstat.objno, &objstat.objno, sizeof(refstat.objno)))
    {
     H5Fclose(fid);
     return travt->objs[i].name;

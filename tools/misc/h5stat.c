@@ -123,11 +123,12 @@ ceil_log10(unsigned long x)
 static void
 sym_insert(H5G_stat_t *sb, const char *name)
 {
+    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
     /* Don't add it if the link count is 1 because such an object can only
      * have one name. */
-    if (sb->u.obj.nlink<2) return;
+    if (sb->nlink<2) return;
 
     /* Extend the table */
     if (idtab_g.nobjs>=idtab_g.nalloc) {
@@ -138,7 +139,8 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n].id = sb->u.obj.objno;
+    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
+    idtab_g.obj[n].id = objno;
     idtab_g.obj[n].name = strdup(name);
 }
 
@@ -162,12 +164,14 @@ sym_insert(H5G_stat_t *sb, const char *name)
 static char *
 sym_lookup(H5G_stat_t *sb)
 {
+    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
-    if (sb->u.obj.nlink<2)
+    if (sb->nlink<2)
         return NULL; /*only one name possible*/
+    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
     for (n=0; n<idtab_g.nobjs; n++) {
-        if (idtab_g.obj[n].id==sb->u.obj.objno)
+        if(idtab_g.obj[n].id == objno)
             return idtab_g.obj[n].name;
     }
     return NULL;
@@ -267,8 +271,8 @@ printf("walk: fullname = %s\n", fullname);
         sym_insert(&sb, fullname);
 
         /* Gather some statistics about the object */
-        if(sb.u.obj.nlink > iter->max_links)
-            iter->max_links = sb.u.obj.nlink;
+        if(sb.nlink > iter->max_links)
+            iter->max_links = sb.nlink;
 
         switch(sb.type) {
             case H5G_GROUP:
@@ -284,8 +288,8 @@ printf("walk: fullname = %s\n", fullname);
                     iter->max_depth = iter->curr_depth;
 
                 /* Get object header information */
-                iter->group_ohdr_info.total_size += sb.u.obj.ohdr.size;
-                iter->group_ohdr_info.free_size += sb.u.obj.ohdr.free;
+                iter->group_ohdr_info.total_size += sb.ohdr.size;
+                iter->group_ohdr_info.free_size += sb.ohdr.free;
 
                 gid = H5Gopen(group, name);
                 assert(gid > 0);
@@ -346,8 +350,8 @@ printf("walk: fullname = %s\n", fullname);
                 iter->uniq_dsets++;
 
                 /* Get object header information */
-                iter->dset_ohdr_info.total_size += sb.u.obj.ohdr.size;
-                iter->dset_ohdr_info.free_size += sb.u.obj.ohdr.free;
+                iter->dset_ohdr_info.total_size += sb.ohdr.size;
+                iter->dset_ohdr_info.free_size += sb.ohdr.free;
 
                 did = H5Dopen(group, name);
                 assert(did > 0);

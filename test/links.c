@@ -244,7 +244,7 @@ cklinks(hid_t fapl)
 	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
-    if (sb1.u.obj.objno!=sb2.u.obj.objno) {
+    if (HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
 	H5_FAILED();
 	puts("    Hard link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
@@ -258,7 +258,7 @@ cklinks(hid_t fapl)
 	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
-    if (sb1.u.obj.objno!=sb2.u.obj.objno) {
+    if (HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
 	H5_FAILED();
 	puts("    Soft link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
@@ -376,7 +376,7 @@ ck_new_links(hid_t fapl)
 	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	goto error;
     }
-    if( sb_dset.u.obj.objno!=sb_hard1.u.obj.objno || sb_dset.u.obj.objno!=sb_hard2.u.obj.objno ) {
+    if(HDmemcmp(&sb_dset.objno, &sb_hard1.objno, sizeof(sb_dset.objno)) || HDmemcmp(&sb_dset.objno, &sb_hard2.objno, sizeof(sb_dset.objno))) {
 	H5_FAILED();
 	puts("    Hard link test failed.  Link seems not to point to the ");
 	puts("    expected file location.");
@@ -394,7 +394,7 @@ ck_new_links(hid_t fapl)
         TEST_ERROR;
     }
 
-    if( sb_dset.u.obj.objno!=sb_soft1.u.obj.objno || sb_dset.u.obj.objno!=sb_soft2.u.obj.objno ) {
+    if(HDmemcmp(&sb_dset.objno, &sb_soft1.objno, sizeof(sb_dset.objno)) || HDmemcmp(&sb_dset.objno, &sb_soft2.objno, sizeof(sb_dset.objno))) {
         H5_FAILED();
         puts("    Soft link test failed.  Link seems not to point to the ");
         puts("    expected file location.");

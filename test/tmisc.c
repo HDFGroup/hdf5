@@ -623,12 +623,12 @@ test_misc4(void)
     CHECK(ret, FAIL, "H5Gget_objinfo");
 
     /* Verify that the fileno values are the same for groups from file1 */
-    VERIFY(stat1.fileno,stat2.fileno,"H5Gget_objinfo");
+    VERIFY(stat1.fileno[0],stat2.fileno[0],"H5Gget_objinfo");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
-    if(stat1.fileno==stat3.fileno)
+    if(stat1.fileno[0]==stat3.fileno[0])
         TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    if(stat2.fileno==stat3.fileno)
+    if(stat2.fileno[0]==stat3.fileno[0])
         TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
 
     /* Close the objects */
@@ -2827,13 +2827,13 @@ test_misc18(void)
     /* Get object information */
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 6, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 1, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 272, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.u.obj.ohdr.free, 152, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.u.obj.ohdr.free, 160, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Create second dataset */
@@ -2843,13 +2843,13 @@ test_misc18(void)
     /* Get object information */
     ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 6, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 1, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 272, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.u.obj.ohdr.free, 152, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.u.obj.ohdr.free, 160, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Loop creating attributes on each dataset, flushing them to the file each time */
@@ -2880,30 +2880,30 @@ test_misc18(void)
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 28, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 944, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 72, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 944, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 72, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 26, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 24, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Get object information for dataset #2 now */
     ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 28, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 944, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 72, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 944, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 72, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.u.obj.ohdr.nmesgs, 26, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.u.obj.ohdr.free, 24, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Close second dataset */
@@ -3843,7 +3843,7 @@ test_misc23(void)
 
     status = H5Gget_objinfo(tmp_id, ".", FALSE, &sb);
     CHECK(status, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.u.obj.nlink,1,"H5Gget_objinfo");
+    VERIFY(sb.nlink,1,"H5Gget_objinfo");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");

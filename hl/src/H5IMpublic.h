@@ -79,10 +79,6 @@ H5_HLDLL herr_t  H5IMis_image( hid_t loc_id,
 H5_HLDLL herr_t  H5IMis_palette( hid_t loc_id,
                      const char *dset_name );
 
-H5_HLDLL herr_t  H5IM_find_palette(hid_t loc_id );
-
-
-
 #ifdef __cplusplus
 }
 #endif

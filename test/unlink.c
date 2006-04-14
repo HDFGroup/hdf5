@@ -462,7 +462,7 @@ check_new_move(void)
         puts("    Unexpected object type, should have been a group");
         goto error;
     }
-    if( sb_hard1.u.obj.objno!=sb_hard2.u.obj.objno) {
+    if (HDmemcmp(&sb_hard1.objno, &sb_hard2.objno, sizeof(sb_hard1.objno))) {
         H5_FAILED();
         puts("    Hard link test failed.  Link seems not to point to the ");
         puts("    expected file location.");

@@ -108,7 +108,7 @@ addr_insert(H5G_stat_t *sb)
 
     /* Don't add it if the link count is 1 because such an object can only
      * be encountered once. */
-    if(sb->u.obj.nlink < 2)
+    if(sb->nlink < 2)
         return;
 
     /* Extend the table */
@@ -119,7 +119,7 @@ addr_insert(H5G_stat_t *sb)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n] = sb->u.obj.objno;
+    idtab_g.obj[n] = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
 } /* end addr_insert() */
 
 
@@ -140,12 +140,14 @@ addr_insert(H5G_stat_t *sb)
 static hbool_t
 addr_lookup(H5G_stat_t *sb)
 {
+    haddr_t obj_addr;           /* Object's address in the file */
     size_t  n;
 
-    if (sb->u.obj.nlink<2) return FALSE; /*only one link possible*/
+    if (sb->nlink<2) return FALSE; /*only one link possible*/
 
+    obj_addr = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
     for(n = 0; n < idtab_g.nobjs; n++)
-        if(idtab_g.obj[n] == sb->u.obj.objno)
+        if(idtab_g.obj[n] == obj_addr)
             return TRUE;
     return FALSE;
 } /* end addr_lookup() */
@@ -804,9 +806,9 @@ compare_groups(hid_t gid, hid_t gid2)
             if(H5Gget_objinfo(gid2, objname2, FALSE, &objstat2) < 0) TEST_ERROR;
             if(objstat.type != objstat2.type) TEST_ERROR;
             if(objstat.type != H5G_LINK) {
-                if(objstat.u.obj.nlink != objstat2.u.obj.nlink) TEST_ERROR;
-                if(objstat.u.obj.ohdr.nmesgs != objstat2.u.obj.ohdr.nmesgs) TEST_ERROR;
-                if(objstat.u.obj.ohdr.nchunks != objstat2.u.obj.ohdr.nchunks) TEST_ERROR;
+                if(objstat.nlink != objstat2.nlink) TEST_ERROR;
+                if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs) TEST_ERROR;
+                if(objstat.ohdr.nchunks != objstat2.ohdr.nchunks) TEST_ERROR;
             } /* end if */
 
             /* Check for object already having been compared */

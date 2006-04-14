@@ -65,7 +65,8 @@ static hbool_t ref_path_table_find(haddr_t objno);
 int
 init_ref_path_table(hid_t fid)
 {
-    H5G_stat_t              sb;
+    H5G_stat_t sb;
+    haddr_t objno;              /* Compact form of object's location */
     char *root_path;
 
     /* Set file ID for later queries (XXX: this should be fixed) */
@@ -83,9 +84,10 @@ init_ref_path_table(hid_t fid)
 	HDfree(root_path);
 	return (-1);
     }
+    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
     /* Insert into table (takes ownership of path) */
-    ref_path_table_put(root_path, sb.u.obj.objno);
+    ref_path_table_put(root_path, objno);
 
     return(0);
 }
@@ -156,6 +158,7 @@ haddr_t
 ref_path_table_lookup(const char *thepath)
 {
     H5G_stat_t  sb;
+    haddr_t objno;              /* Compact form of object's location */
 
     /* Check for external link first, so we don't return the OID of an object in another file */
     if(H5Gget_objinfo(thefile, thepath, FALSE, &sb)<0)
@@ -169,13 +172,14 @@ ref_path_table_lookup(const char *thepath)
             /*  fatal error ? */
             return HADDR_UNDEF;
     } /* end if */
+    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
 
     /* All existing objects in the file had better be in the table */
-    HDassert(ref_path_table_find(sb.u.obj.objno));
+    HDassert(ref_path_table_find(objno));
 
     /* Return OID */
-    return(sb.u.obj.objno);
+    return(objno);
 }
 
 /*-------------------------------------------------------------------------
@@ -332,11 +336,13 @@ fill_ref_path_table(hid_t group, const char *obj_name, void *op_data)
 {
     const char *obj_prefix = (const char *)op_data;
     H5G_stat_t              statbuf;
+    haddr_t objno;              /* Compact form of object's location */
 
     H5Gget_objinfo(group, obj_name, FALSE, &statbuf);
+    objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
     /* Check if the object is in the path table */
-    if (!ref_path_table_find(statbuf.u.obj.objno)) {
+    if (!ref_path_table_find(objno)) {
         size_t                  tmp_len;
         char                   *thepath;
 
@@ -353,7 +359,7 @@ fill_ref_path_table(hid_t group, const char *obj_name, void *op_data)
         HDstrcat(thepath, obj_name);
 
         /* Insert the object into the path table */
-        ref_path_table_put(thepath, statbuf.u.obj.objno);
+        ref_path_table_put(thepath, objno);
 
         if(statbuf.type == H5G_GROUP) {
             /* Iterate over objects in this group, using this group's

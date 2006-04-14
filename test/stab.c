@@ -380,13 +380,13 @@ lifecycle(hid_t fapl)
     /* Check that the object header is only one chunk and the space has been allocated correctly */
     if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR;
 #ifdef H5_HAVE_LARGE_HSIZET
-    if(obj_stat.u.obj.ohdr.size != 232) TEST_ERROR;
+    if(obj_stat.ohdr.size != 232) TEST_ERROR;
 #else /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.u.obj.ohdr.size != 224) TEST_ERROR;
+    if(obj_stat.ohdr.size != 224) TEST_ERROR;
 #endif /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.u.obj.ohdr.free != 0) TEST_ERROR;
-    if(obj_stat.u.obj.ohdr.nmesgs != 6) TEST_ERROR;
-    if(obj_stat.u.obj.ohdr.nchunks != 1) TEST_ERROR;
+    if(obj_stat.ohdr.free != 0) TEST_ERROR;
+    if(obj_stat.ohdr.nmesgs != 6) TEST_ERROR;
+    if(obj_stat.ohdr.nchunks != 1) TEST_ERROR;
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
@@ -408,13 +408,13 @@ lifecycle(hid_t fapl)
     /* Check that the object header is still one chunk and the space has been allocated correctly */
     if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR;
 #ifdef H5_HAVE_LARGE_HSIZET
-    if(obj_stat.u.obj.ohdr.size != 232) TEST_ERROR;
+    if(obj_stat.ohdr.size != 232) TEST_ERROR;
 #else /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.u.obj.ohdr.size != 224) TEST_ERROR;
+    if(obj_stat.ohdr.size != 224) TEST_ERROR;
 #endif /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.u.obj.ohdr.free != 136) TEST_ERROR;
-    if(obj_stat.u.obj.ohdr.nmesgs != 4) TEST_ERROR;
-    if(obj_stat.u.obj.ohdr.nchunks != 1) TEST_ERROR;
+    if(obj_stat.ohdr.free != 136) TEST_ERROR;
+    if(obj_stat.ohdr.nmesgs != 4) TEST_ERROR;
+    if(obj_stat.ohdr.nchunks != 1) TEST_ERROR;
 
     /* Unlink objects from top group */
     while(u >= LIFECYCLE_MIN_DENSE) {

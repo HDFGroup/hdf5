@@ -1051,7 +1051,7 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
 
 	// Create dataspace for dataset */
 	DataSpace dspace;
@@ -1061,14 +1061,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
 
 	// Create attribute on dataset */
 	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 
 	// Close attribute */
 	attr.close();
@@ -1078,14 +1078,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
 
 	// Create attribute on dataset */
 	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
 
 	// Write data into the attribute */
 	attr.write(PredType::NATIVE_INT,&data);
@@ -1116,14 +1116,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 
 	// Unlink the dataset */
 	fid1.unlink(DSET1_NAME);
 
 	// Check reference count on named datatype */
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.u.obj.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+	verify_val(statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
 
 	// Unlink the named datatype */
 	fid1.unlink(TYPE1_NAME);

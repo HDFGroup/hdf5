@@ -137,7 +137,10 @@ H5R_term_interface(void)
 static herr_t
 H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id)
 {
-    H5G_stat_t sb;                      /* Stat buffer for retrieving OID */
+    H5G_loc_t	obj_loc;		/* Group hier. location of object */
+    H5G_name_t  path;            	/* Object group hier. path */
+    H5O_loc_t   oloc;            	/* Object object location */
+    hbool_t     obj_found = FALSE;      /* Object location found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_create)
@@ -147,15 +150,22 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
     HDassert(name);
     HDassert(ref_type > H5R_BADTYPE || ref_type < H5R_MAXTYPE);
 
-    if(H5G_get_objinfo(loc, name, 0, &sb, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "unable to stat object")
+    /* Set up object location to fill in */
+    obj_loc.oloc = &oloc;
+    obj_loc.path = &path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object */
+    if(H5G_loc_find(loc, name, &obj_loc, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "object not found")
+    obj_found = TRUE;
 
     switch(ref_type) {
         case H5R_OBJECT:
         {
             hobj_ref_t *ref = (hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
 
-            *ref=sb.u.obj.objno;
+            *ref = obj_loc.oloc->addr;
             break;
         }
 
@@ -202,7 +212,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
 
             /* Serialize information for dataset OID */
             p = (uint8_t *)buf;
-            H5F_addr_encode(loc->oloc->file, &p, sb.u.obj.objno);
+            H5F_addr_encode(loc->oloc->file, &p, obj_loc.oloc->addr);
 
             /* Serialize the selection */
             if(H5S_SELECT_SERIALIZE(space, p) < 0)
@@ -234,6 +244,9 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
     } /* end switch */
 
 done:
+    if(obj_found)
+        H5G_loc_free(&obj_loc);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R_create() */
 
