@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 library
 $!
-$ ccopt = "/float=ieee_float"
-$ ccc := cc 'ccopt /debug/define=H5_VMS/nooptimize
-$ cc/float=ieee_float h5detect.c
+$! ccopt = "/float=ieee_float/define=H5_VMS"
+$ ccc := cc 'ccopt 
+$ ccc h5detect.c
 $ link h5detect
 $ type sys$input
         Running h5detect to create h5tinit.c
@@ -25,7 +25,7 @@ $ define/user_mode sys$output h5tinit.c
 $ run h5detect
 $
 $ type sys$input
-	Creating  HDF5 library
+         Creating  HDF5 library
 $!
 $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C,"+-  
@@ -54,12 +54,11 @@ $ cobj1= "H5R, H5RC,"+-
         "H5Tpad, H5Tprecis, H5Tstrpad, H5Tvlen, H5TS, H5V, H5Z,"+-
         "H5Zdeflate, H5Zfletcher32, H5Znbit, H5Zshuffle, H5Zszip,"+-
         "H5Zscaleoffset, H5Ztrans"
-
 $!
 $ ccc 'cobj
 $ ccc 'cobj1 
 $ library/create []hdf5
 $ library/insert []hdf5 'cobj, 'cobj1
 $ type sys$input
-	HDF5 library was created
+	Done
 $!
