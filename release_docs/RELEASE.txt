@@ -816,76 +816,108 @@ Supported Configuration Features Summary
           x   = not working in this release
           dna = does not apply
           ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform 
 
-Platform              C   C         F90      F90       C++  Shared        zlib
-                          parallel           parallel       libraries (4)
-Solaris2.7 64-bit     y   y (1)     y        y (1)     y    y             y
-Solaris2.7 32-bit     y   y (1)     y        y (1)     y    y             y
-Solaris2.8 64-bit     y   y (1)     y        y (1)     y    y             y
-Solaris2.8 32-bit     y   y         y        y (1)     y    y             y
-IRIX6.5               y   y (1)     n        n         n    y             y 
-IRIX64_6.5 64-bit     y   y (2)     y        y         y    y             y
-IRIX64_6.5 32-bit     y   y (2)     n        n         n    y             y
-HPUX11.00             y   y (1)     y        y         y    y             y
-OSF1 v5.1             y   y         y        y         y    y             y
-T3E                   y   y (5)     y        y (5)     n    n             y
-SV1                   y   y (5)     y        y (5)     n    n             y
-T90 IEEE              y   y (5)     y        y (5)     n    n             y
-TFLOPS                n   y (1)     n        n         n    n             y
-AIX-5.1 32-bit        y   y         y        y         y    n             y
-AIX-5.1 64-bit        y   y         y        y         y    n             y
-WinXP           (6)   y   n         n        n         y    y             y
-WinXP Intel           y   n         n        n         y    y             y
-WinNT CW              y   n         n        n         n    n             y
-Mac OS X 10.2         y   n         n        n         y    y             y
-FreeBSD               y   y (1)     n        n         y    y             y
-Linux 2.4 gcc   (3)   y   y (1)     y (PGI)  n         y    y             y
-Linux 2.4 Intel (3)   y   n         y        n         y    n             y
-Linux 2.4 PGI   (3)   y   n         y        n         y    n             y
-Linux 2.4 IA32 Intel  y   n         y        n         y    n             y
-Linux 2.4 IA64 Intel  y   n         y        n         y    n             y
+Platform                 C        F90    F90      C++   zlib  SZIP
+                         parallel        parallel
+Solaris2.8 64-bit        y        y      y(1)     y     y     y
+Solaris2.8 32-bit        y        y      y(1)     y     y     y
+Solaris2.9 64-bit        y(1)     y      y(1)     y     y     y
+Solaris2.9 32-bit        y(1)     y      y(1)     y     y     y
+Solaris2.10 64-bit       y(1)     y      n        y     y     y
+Solaris2.10 32-bit       y(1)     y      n        y     y     y
+IRIX64_6.5 64-bit        y(2)     y      y        y     y     y
+IRIX64_6.5 32-bit        y(2)     n      n        n     y     y
+HPUX11.00                y(1)     y      y        y     y     y
+HPUX11.23-32bit          n        y      n        y     y     y
+HPUX11.23-62bit          n        n      n        y     y     y
+OSF1 v5.1                y        y      y        y     y     y
+Cray X1                  y        y      y        y     y     n
+Cray XT3           (16)  n        y      n        y     y     n
+IBM BG/L           (15)  n        n      n        n     y     y
+AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
+AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
+WinXP Visual Studio 6.0  n        y(9)   n        y     y     y
+WinXP .Net 2003          n        y(16)  n        y(8)  y     y               
+WinXP 64bit 
+    Visual Studio 2005   n        n      n        y     n     n
+Cygwin                   n        y      n        y     y     y
+Mac OS X 10.3            n        y(4)   n        y     y     y
+Mac OS X 10.4 PowerPC    n               n
+FreeBSD 4.11             n        n      n        y     y     y
+RedHat EL3  W       (3)  y(1)     y(10)  n        y     y     y
+RedHat EL3  W Intel (3)  n        y      n        y     y     y
+RedHat EL3  W PGI   (3)  n        y      n        y     y     y
+SuSe x86_64 gcc  (3,12)  n        y(11)  n        y     y     y
+SuSe x86_64 icc  (3,12)  n        y(13)  n        y     y     y
+Linux 2.4 Xeon C 
+    Lustre Intel  (3,6)  n        y      n        y     y     y
+Linux 2.4 SuSE ia64 C 
+    Intel         (3,7)  y        y      y        y     y     y
+Linux 2.4 SGI Altix 
+    ia64 Intel      (3)  y        y      y        y     y     y
+Alpha OpenVMS 7.3.2      n        y      n        y     n     n
 
 
-ASCII Table 2 -- for RELEASE.txt
 
-Platform              static- Thread- SZIP GASS STREAM-  High-level  H4/H5 
-                      exec    safe              VFD      APIs        tools (7)
-Solaris2.7 64-bit     x       y       y    n    y        y           n
-Solaris2.7 32-bit     x       y       y    n    y        y           y
-Solaris2.8 64-bit     x       y       y    n    y        y           n
-Solaris2.8 32-bit     x       y       y    n    y        y           y
-IRIX6.5               x       n       y    n    y        y           y
-IRIX64_6.5 64-bit     x       y       y    y    y        y           y
-IRIX64_6.5 32-bit     x       y       y    y    y        y           y
-HPUX11.00             x       n       y    n    y        y           y
-OSF1 v5.1             y       n       y    n    y        y           y
-T3E                   y       n       n    n    y        y           y
-SV1                   y       n       n    n    y        y           y
-T90 IEEE              y       n       n    n    y        y           n
-TFLOPS                y       n       n    n    n        n           n
-AIX-5.1 32-bit        y       n       y    n    y        y           y
-AIX-5.1 64-bit        y       n       y    n    y        y           y
-WinXP           (6)   y       n       y    n    n        y           y
-WinXP Intel           y       n       y    n    n        y           y
-WinNT CW              y       n       y    n    n        y           y
-Mac OS X 10.2         y       n       y    n    y        y           n
-FreeBSD               y       y       y    n    y        y           y
-Linux 2.4 gcc   (3)   y       y       y    n    y        y           y
-Linux 2.4 Intel (3)   y       n       y    n    y        n           n
-Linux 2.4 PGI   (3)   y       n       y    n    y        n           n
-Linux 2.4 IA32 Intel  y       n       y    n    y        y           y
-Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
+Platform                 Shared  Shared    Shared    static-  Thread-  STREAM-
+                         C libs  F90 libs  C++ libs  exec     safe     VFD
+Solaris2.8 64-bit        y       y         n         x        y        y
+Solaris2.8 32-bit        y       y         y         x        y        y
+Solaris2.9 64-bit        y       y         n         x        y        y
+Solaris2.9 32-bit        y       y         y         x        y        y
+Solaris2.10 64-bit       y                           x        y        y
+Solaris2.10 32-bit       y                           x        y        y
+IRIX64_6.5 64-bit        y       y         n         y        y        y
+IRIX64_6.5 32-bit        y       dna       y         y        y        y
+HPUX11.00                y       n         y         x        n        y
+HPUX11.23-32bit          y       n         n         y        n        y
+HPUX11.23-62bit          y       dna       n         y        n        y
+OSF1 v5.1                y                           y        n        y
+Cray X1                  n                           y        n        y
+Cray XT3           (16)  n                           y        n        y
+IBM BG/L           (15)  n                           y        n        n
+AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
+AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
+WinXP Visual Studio 6.0  y       y         y         dna      y        n
+WinXP .Net 2003          y       dna       y         dna      y        n
+WinXP 64bit 
+    Visual Studio 2005   y       dna       y         dna      n        n
+Cygwin                   n       dna       n                  n        n
+Mac OS X 10.3            y                           y        n        y
+Mac OS X 10.4 PowerPC
+FreeBSD 4.11             y       n         y         y        y        y
+RedHat EL3  W       (3)  y       n(10)     y         y        y        y
+RedHat EL3  W Intel (3)  n       n         n         y        n        y
+RedHat EL3  W PGI   (3)  n       n         n         y        n        y
+SuSe x86_64 gcc  (3,12)  y       y         y         y        n        y
+SuSe x86_64 icc  (3,12)  y       y         y         y(14)    n        y
+Linux 2.4 Xeon C 
+    Lustre Intel  (3,6)  y       y         y         y        n        y
+Linux 2.4 SuSE 
+    ia64 C Intel  (3,7)  y       y         y         y        n        n
+Linux 2.4 SGI Altix 
+    ia64 Intel      (3)  y                           y        n        y
+Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
-    Notes: (1) Using mpich 1.2.4.
-           (2) Using mpt and mpich 1.2.4.
-           (3) Linux 2.4 with GNU, Intel, and PGI compilers, respectively.
-           (4) Shared libraries are provided only for the C library, except 
-               on Windows where they are provided for C and C++.
-           (5) Using mpt.
-           (6) Binaries only; source code for this platform is not being 
-               released at this time.
-           (7) Includes the H4toH5 Library and the h4toh5 and h5toh4 
-               utilities.
+    Notes: (1)  Using mpich 1.2.6.
+           (2)  Using mpt and mpich 1.2.6.
+           (3)  Linux 2.4 with GNU, Intel, and PGI compilers, as indicated.  
+                  W or C indicates workstation or cluster, respectively.
+           (4)  IBM XLF and Absoft
+           (5)  Using mpt.
+           (6)  Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp_perfctr_lustre 
+                  and Intel compilers
+           (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
+           (8)  Intel 8.1
+           (9)  With Compaq Visual Fortran 6.6c compiler.
+           (10) With PGI and Absoft compilers.
+           (11) PGI and Intel compilers for both C and Fortran
+           (12) AMD Opteron x86_64
+           (13) ifort
+           (14) Yes with C and Fortran, but not with C++
+           (15) Only serial is ported.  PFS does not work for PHDF5 yet.
+           (16) With Intel Fortran 8.1 compiler.  Static only; DLL build fails.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
