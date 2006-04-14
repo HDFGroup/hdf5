@@ -93,6 +93,10 @@
      write(*, fmt = '(58x,a)', advance = 'no') ' ' 
      write(*, fmt = e_format) error_string
      total_error = total_error + reopen_total_error 
+
+!DEC$ if defined(H5_VMS)
+     goto 100
+!DEC$ else
      error_string = failure
      CALL file_close(cleanup, fclose_total_error)
      IF (fclose_total_error == 0) error_string = success
@@ -100,7 +104,8 @@
      write(*, fmt = '(49x,a)', advance = 'no') ' ' 
      write(*, fmt = e_format) error_string
      total_error = total_error + fclose_total_error 
-
+!DEC$ endif
+100  continue
      error_string = failure
      CALL file_space(cleanup, fspace_total_error)
      IF (fspace_total_error == 0) error_string = success
@@ -231,7 +236,10 @@
      write(*, fmt = '(48x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + external_total_error 
-    
+
+!DEC$ if defined(H5_VMS)
+      goto 200
+!DEC$ else    
      error_string = failure
      cleanup = .FALSE.
      CALL multi_file_test(cleanup, multi_file_total_error)
@@ -240,6 +248,8 @@
      write(*, fmt = '(47x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + multi_file_total_error 
+!DEC$ endif
+200  continue
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing ATTRIBUTE interface              ' 
