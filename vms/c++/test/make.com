@@ -15,14 +15,13 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 C++ library tests
 $!
-$ ccopt = "/float=ieee_float/standard=strict_ansi"
+$! cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
 $
-$ ccc := cxx 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.-.test], [-.src])
-$ 
+$ ccc := cxx 'cxxopt /include=([-.-.src], [-.-.test], [-.src])
+$! 
 $!
 $ cxxobj1= "testhdf5, tattr, tfile, th5s, h5cpputil"
 $ cxxobj2= "dsets, h5cpputil"
-
 $!                               
 $ ccc testhdf5 
 $ ccc tattr
@@ -34,16 +33,14 @@ $ type sys$input
 $ cxxlink  testhdf5,tattr,tfile, th5s, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib
-$
-$                               
+$!
+$ !                              
 $ ccc dsets
 $ type sys$input
-$       Creating dsets
+        Creating dsets
 $ cxxlink  dsets, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib
 $ type sys$input
- 	Created dsets
-$!
-$ run testhdf5
-$ run dsets
+ 	Done
+$ exit
