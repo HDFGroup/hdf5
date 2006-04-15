@@ -14,12 +14,8 @@
 #ifdef H5_VMS
 #include <iostream>
 #endif /*H5_VMS*/
+
 #include <string>
-#ifndef H5_VMS
-#ifndef H5_NO_NAMESPACE
-    using std::count;
-#endif
-#endif /*H5_VMS*/
 
 #include "H5Include.h"
 #include "H5Exception.h"
