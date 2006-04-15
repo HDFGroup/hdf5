@@ -254,6 +254,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't compute value"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTCOMPUTE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTEXTEND_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't extend heap's space"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTEXTEND_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Function entry/exit interface errors */
 assert(H5E_CANTINIT_g==(-1));

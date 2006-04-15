@@ -93,7 +93,7 @@
     )
 
 /* Size of overhead for a direct block */
-#define H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(h, o) (                             \
+#define H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(h, s) (                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
@@ -103,7 +103,7 @@
     + 2                         /* Entry within parent block */               \
     + 2                         /* # of rows for parent block */              \
     + (h)->heap_off_size        /* Offset of the block in the heap */         \
-    + H5HF_SIZEOF_OFFSET_LEN(o) /* Offset of first descriptor in free list */ \
+    + H5HF_SIZEOF_OFFSET_LEN(s) /* Offset of first descriptor in free list */ \
     )
 #define H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(h, d) (                           \
     /* General metadata fields */                                             \
@@ -165,13 +165,50 @@ typedef struct H5HF_dtable_t {
     hsize_t     num_id_first_row;   /* Number of IDs in first row of table */
     hsize_t     *row_block_size;    /* Block size per row of indirect block */
     hsize_t     *row_block_off;     /* Cumulative offset per row of indirect block */
+    hsize_t     *row_dblock_free;   /* Free space in dblocks for this row */
+                                    /* (For indirect block rows, it's the total
+                                     * free space in all direct blocks referenced
+                                     * from the indirect block
+                                     */
 } H5HF_dtable_t;
 
 /* Fractal heap free list info (forward decl - defined in H5HFflist.c) */
 typedef struct H5HF_freelist_t H5HF_freelist_t;
 
-/* Fractal heap free list section info (forward decl - defined in H5HFint.c) */
-typedef struct H5HF_section_free_node_t H5HF_section_free_node_t;
+/* Fractal heap free list section info */
+typedef struct H5HF_free_section_t {
+    haddr_t     sect_addr;                      /* Address of free list section in the file */
+                                                /* (Not actually used as address, used as unique ID for free list node) */
+    size_t      sect_size;                      /* Size of free space section */
+                                                /* (section size is "object size", without the metadata overhead, since metadata overhead varies from block to block) */
+                                                /* (for range sections, this is the largest single section within the range) */
+    enum {H5HF_SECT_SINGLE, H5HF_SECT_RANGE, H5HF_SECT_INDIRECT} type;    /* Type of free space section */
+    union {
+        struct {
+            haddr_t     dblock_addr;            /* Address of direct block for free section */
+            size_t      dblock_size;            /* Size of direct block */
+                                                /* (Needed to retrieve direct block) */
+        } single;
+        struct {
+            haddr_t     iblock_addr;            /* Address of indirect block for free section */
+            unsigned    iblock_nrows;           /* Number of rows in indirect block */
+                                                /* (Needed to retrieve indirect block) */
+            unsigned    row;                    /* Row for range of blocks */
+            unsigned    col;                    /* Column for range of blocks */
+            unsigned    num_entries;            /* Number of entries covered */
+        } range;
+        struct {
+            haddr_t     iblock_addr;            /* Address of indirect block for free section */
+            unsigned    iblock_nrows;           /* Number of rows in indirect block */
+                                                /* (Needed to retrieve indirect block) */
+            unsigned    row;                    /* Row for range of blocks */
+            unsigned    col;                    /* Column for range of blocks */
+            unsigned    num_entries;            /* Number of entries covered */
+            unsigned    indir_row;              /* Row for indirect range of blocks */
+            unsigned    indir_nrows;            /* Number of rows in indirect blocks */
+        } indirect;
+    } u;
+} H5HF_free_section_t;
 
 /* The fractal heap header information */
 /* (Each fractal heap header has certain information that is shared across all
@@ -337,35 +374,60 @@ H5FL_EXTERN(H5HF_indirect_t);
 /* Declare a free list to manage the H5HF_indirect_ent_t sequence information */
 H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 
+/* Declare a free list to manage the H5HF_free_section_t struct */
+H5FL_EXTERN(H5HF_free_section_t);
+
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
 /* Routines for managing shared fractal heap header */
-H5_DLL H5HF_t * H5HF_alloc(H5F_t *f);
-H5_DLL herr_t H5HF_init(H5HF_t *fh, haddr_t heap_addr, H5HF_create_t *cparam);
-H5_DLL herr_t H5HF_finish_init(H5HF_t *fh);
+H5_DLL H5HF_t * H5HF_hdr_alloc(H5F_t *f);
+H5_DLL herr_t H5HF_hdr_init(H5HF_t *hdr, haddr_t heap_addr, H5HF_create_t *cparam);
+H5_DLL herr_t H5HF_hdr_finish_init(H5HF_t *hdr);
 
 /* Doubling table routines */
+H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);
 H5_DLL herr_t H5HF_dtable_dest(H5HF_dtable_t *dtable);
+H5_DLL herr_t H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off,
+    unsigned *row, unsigned *col);
 
 /* Heap header routines */
 H5_DLL herr_t H5HF_cache_hdr_dest_real(H5HF_t *hdr);
 H5_DLL herr_t H5HF_hdr_incr(H5HF_t *hdr);
 H5_DLL herr_t H5HF_hdr_decr(H5HF_t *hdr);
+H5_DLL herr_t H5HF_hdr_dirty(hid_t dxpl_id, H5HF_t *hdr);
+H5_DLL herr_t H5HF_hdr_extend_heap(H5HF_t *hdr, hsize_t new_size, hsize_t extra_free);
 
 /* Indirect block routines */
 H5_DLL herr_t H5HF_cache_iblock_dest_real(H5HF_indirect_t *iblock);
 H5_DLL herr_t H5HF_iblock_incr(H5HF_indirect_t *iblock);
 H5_DLL herr_t H5HF_iblock_decr(H5HF_indirect_t *iblock);
+H5_DLL herr_t H5HF_iblock_dirty(hid_t dxpl_id, H5HF_indirect_t *iblock);
+H5_DLL H5HF_indirect_t * H5HF_man_iblock_place_dblock(H5HF_t *fh, hid_t dxpl_id,
+    size_t min_dblock_size, haddr_t *addr_p, size_t *entry_p,
+    size_t *dblock_size);
+H5_DLL herr_t H5HF_man_iblock_alloc_range(H5HF_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t **sec_node, size_t obj_size);
+H5_DLL herr_t H5HF_man_iblock_alloc_indirect(H5HF_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t **sec_node, size_t obj_size);
 
-/* Routines for allocating space */
+/* Direct block routines */
+H5_DLL herr_t H5HF_man_dblock_new(H5HF_t *fh, hid_t dxpl_id, size_t request);
+H5_DLL herr_t H5HF_man_dblock_create(hid_t dxpl_id, H5HF_t *hdr,
+    H5HF_indirect_t *par_iblock, unsigned par_entry, size_t block_size,
+    hsize_t block_off, haddr_t *addr_p, H5HF_free_section_t **ret_sec_node);
+H5_DLL herr_t H5HF_man_dblock_adj_free(hid_t dxpl_id, H5HF_direct_t *dblock, ssize_t amt);
 H5_DLL herr_t H5HF_man_dblock_build_freelist(H5HF_direct_t *dblock, haddr_t dblock_addr);
+
+/* Routines for internal operations */
+H5_DLL herr_t H5HF_free_section_free_cb(void *item, void UNUSED *key,
+    void UNUSED *op_data);
 H5_DLL herr_t H5HF_man_find(H5HF_t *fh, hid_t dxpl_id, size_t request,
-    H5HF_section_free_node_t **sec_node/*out*/);
+    H5HF_free_section_t **sec_node/*out*/);
 H5_DLL herr_t H5HF_man_insert(H5HF_t *fh, hid_t dxpl_id,
-    H5HF_section_free_node_t *sec_node, size_t obj_size, const void *obj,
+    H5HF_free_section_t *sec_node, size_t obj_size, const void *obj,
     void *id);
 H5_DLL herr_t H5HF_man_read(H5HF_t *fh, hid_t dxpl_id, hsize_t obj_off,
     size_t obj_len, void *obj);
@@ -400,6 +462,8 @@ H5_DLL herr_t H5HF_flist_free(H5HF_freelist_t *flist);
 #ifdef H5HF_TESTING
 H5_DLL herr_t H5HF_get_cparam_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     H5HF_create_t *cparam);
+H5_DLL hsize_t H5HF_get_dblock_free_test(H5F_t *f, hid_t dxpl_id,
+    haddr_t fh_addr, unsigned row);
 #endif /* H5HF_TESTING */
 
 #endif /* _H5HFpkg_H */

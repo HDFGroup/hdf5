@@ -498,7 +498,11 @@
 ./src/H5HF.c
 ./src/H5HFcache.c
 ./src/H5HFdbg.c
+./src/H5HFdblock.c
+./src/H5HFdtable.c
 ./src/H5HFflist.c
+./src/H5HFhdr.c
+./src/H5HFiblock.c
 ./src/H5HFint.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h

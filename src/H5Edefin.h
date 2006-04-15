@@ -72,6 +72,7 @@ hid_t H5E_CANTGETSIZE_g    = FAIL;      /* Unable to compute size */
 /* Heap errors */
 hid_t H5E_CANTRESTORE_g    = FAIL;      /* Can't restore condition */
 hid_t H5E_CANTCOMPUTE_g    = FAIL;      /* Can't compute value */
+hid_t H5E_CANTEXTEND_g     = FAIL;      /* Can't extend heap's space */
 
 /* Function entry/exit interface errors */
 hid_t H5E_CANTINIT_g       = FAIL;      /* Unable to initialize object */

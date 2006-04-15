@@ -113,3 +113,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_cparam_test() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_dblock_free_test
+ *
+ * Purpose:	Retrieve the size of direct block free space for a given
+ *              direct or indirect block size
+ *
+ * Return:	Success:	Size of direct block free space
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, April 10, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5HF_get_dblock_free_test(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, unsigned row)
+{
+    H5HF_t	*hdr = NULL;            /* Pointer to the fractal heap header */
+    hsize_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_get_dblock_free_test)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(H5F_addr_defined(fh_addr));
+
+    /* Look up the fractal heap header */
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, 0, "unable to load fractal heap header")
+
+    /* Return direct block free space */
+    ret_value = hdr->man_dtable.row_dblock_free[row];
+
+done:
+    /* Release fractal heap header node */
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, 0, "unable to release fractal heap header info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_get_dblock_free_test() */
+

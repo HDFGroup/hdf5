@@ -119,8 +119,10 @@ H5_DLLVAR hid_t H5E_CANTGETSIZE_g;   /* Unable to compute size */
 /* Heap errors */
 #define H5E_CANTRESTORE      (H5OPEN H5E_CANTRESTORE_g)
 #define H5E_CANTCOMPUTE      (H5OPEN H5E_CANTCOMPUTE_g)
+#define H5E_CANTEXTEND       (H5OPEN H5E_CANTEXTEND_g)
 H5_DLLVAR hid_t H5E_CANTRESTORE_g;   /* Can't restore condition */
 H5_DLLVAR hid_t H5E_CANTCOMPUTE_g;   /* Can't compute value */
+H5_DLLVAR hid_t H5E_CANTEXTEND_g;    /* Can't extend heap's space */
 
 /* Function entry/exit interface errors */
 #define H5E_CANTINIT         (H5OPEN H5E_CANTINIT_g)

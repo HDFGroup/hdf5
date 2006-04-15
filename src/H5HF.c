@@ -99,7 +99,7 @@ herr_t
 H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p,
     size_t *id_len_p)
 {
-    H5HF_t *fh = NULL;                  /* The new fractal heap header information */
+    H5HF_t *hdr = NULL;                  /* The new fractal heap header information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_create, FAIL)
@@ -113,31 +113,31 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam, haddr_t *addr_p,
     HDassert(id_len_p);
 
     /* Allocate & basic initialization for the shared header */
-    if(NULL == (fh = H5HF_alloc(f)))
+    if(NULL == (hdr = H5HF_hdr_alloc(f)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for shared heap info")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(fh))))
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(hdr))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap header")
 
     /* Initialize shared fractal heap header */
-    if(H5HF_init(fh, *addr_p, cparam) < 0)
+    if(H5HF_hdr_init(hdr, *addr_p, cparam) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't initialize shared fractal heap header")
 
     /* Set the length of heap IDs */
-    *id_len_p = fh->id_len;
+    *id_len_p = hdr->id_len;
 #ifdef QAK
-HDfprintf(stderr, "%s: fh->id_len = %Zu\n", FUNC, fh->id_len);
+HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 #endif /* QAK */
 
     /* Cache the new fractal heap header */
-    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, *addr_p, fh, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, *addr_p, hdr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap header to cache")
 
 done:
     if(ret_value < 0) {
-	if(fh)
-            (void)H5HF_cache_hdr_dest(f, fh);
+	if(hdr)
+            (void)H5HF_cache_hdr_dest(f, hdr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -162,7 +162,7 @@ herr_t
 H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
     const void *obj, void *id/*out*/)
 {
-    H5HF_t *fh = NULL;                  /* The fractal heap header information */
+    H5HF_t *hdr = NULL;                  /* The fractal heap header information */
     unsigned hdr_flags = H5AC__NO_FLAGS_SET;    /* Metadata cache flags for header */
     herr_t ret_value = SUCCEED;
 
@@ -183,37 +183,37 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     /*
      * Load the fractal heap header.
      */
-    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /* Check if object is large enough to be standalone */
-    if(size >= fh->standalone_size) {
+    if(size >= hdr->standalone_size) {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
     } /* end if */
     else {
         /* Check if we are in "append only" mode, or if there's enough room for the object */
-        if(fh->write_once) {
+        if(hdr->write_once) {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
         } /* end if */
         else {
-            H5HF_section_free_node_t *sec_node;         /* Pointer to free space section */
+            H5HF_free_section_t *sec_node;         /* Pointer to free space section */
 
             /* Find free space in heap */
-            if(H5HF_man_find(fh, dxpl_id, size, &sec_node) < 0)
+            if(H5HF_man_find(hdr, dxpl_id, size, &sec_node) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space in fractal heap")
 
             /* Use free space for allocating object */
-            if(H5HF_man_insert(fh, dxpl_id, sec_node, size, obj, id) < 0)
+            if(H5HF_man_insert(hdr, dxpl_id, sec_node, size, obj, id) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for object in fractal heap")
         } /* end else */
     } /* end else */
 
     /* Check for making header dirty */
-    if(fh->dirty)
+    if(hdr->dirty)
         hdr_flags |= H5AC__DIRTIED_FLAG;
 
 done:
-    if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, hdr_flags) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, hdr, hdr_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -237,7 +237,7 @@ herr_t
 H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_id,
     void *obj/*out*/)
 {
-    H5HF_t *fh = NULL;                  /* The fractal heap header information */
+    H5HF_t *hdr = NULL;                  /* The fractal heap header information */
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
     hsize_t obj_off;                    /* Object's offset in heap */
     size_t obj_len;                     /* Object's length in heap */
@@ -256,12 +256,12 @@ H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_id,
     /*
      * Load the fractal heap header.
      */
-    if(NULL == (fh = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /* Decode the object offset within the heap & it's length */
-    UINT64DECODE_VAR(id, obj_off, fh->heap_off_size);
-    UINT64DECODE_VAR(id, obj_len, fh->id_len);
+    UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
+    UINT64DECODE_VAR(id, obj_len, hdr->id_len);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
 #endif /* QAK */
@@ -272,12 +272,12 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
     } /* end if */
     else {
         /* Read object from managed heap blocks */
-        if(H5HF_man_read(fh, dxpl_id, obj_off, obj_len, obj) < 0)
+        if(H5HF_man_read(hdr, dxpl_id, obj_off, obj_len, obj) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't read object from fractal heap")
     } /* end else */
 
 done:
-    if(fh && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, fh, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
