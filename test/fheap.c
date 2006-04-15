@@ -36,7 +36,7 @@
 
 /* "Small" heap creation parameters */
 #define SMALL_ADDRMAP     H5HF_ABSOLUTE           /* Heap address mapping */
-#define SMALL_STAND_SIZE  (32 * 1024)             /* Standalone obj. min. size */
+#define SMALL_STAND_SIZE  (48 * 1024)             /* Standalone obj. min. size */
 #define SMALL_MAN_WIDTH   4                       /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512            /* Managed obj. starting block size */
 #define SMALL_MAN_MAX_DIRECT_SIZE (64 * 1024)     /* Managed obj. max. direct block size */
@@ -4528,6 +4528,140 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_abs_fill_direct_skip_indirect_two_rows_add_skipped
+ *
+ * Purpose:	Test filling all direct blocks in root indirect block, then
+ *              add object too large for initial block in first two rows of
+ *              indirect blocks, to force extension of non-root
+ *              indirect block (and range of skipped blocks).
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, April 15, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    unsigned    first_row_bits;         /* Number of bits used bit addresses in first row */
+    unsigned    first_indirect_block_size;      /* Range of addresses covered by each of the first indirect blocks */
+    unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    size_t      obj_size;               /* Size of object */
+    hsize_t     free_space;             /* Size of free space in heap */
+    hsize_t     heap_size;              /* Total size of heap */
+    unsigned    u, v;                   /* Local index variables */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    if(H5HF_create(f, dxpl, cparam, &fh_addr/*out*/, &id_len/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        FAIL_STACK_ERROR
+
+    /* Compute # of bits used in first row */
+    first_row_bits = H5V_log2_of2(cparam->managed.start_block_size) +
+                        H5V_log2_of2(cparam->managed.width);
+    first_indirect_block_size = 2 * cparam->managed.max_direct_size;
+    num_first_indirect_rows = (H5V_log2_of2(first_indirect_block_size) - first_row_bits) + 1;
+
+    /*
+     * Test absolute heap
+     */
+    TESTING("filling direct blocks and skipping two rows of root indirect block, then backfill and extend");
+
+    /* Fill direct blocks in root indirect block */
+    heap_size = 0;
+    free_space = 0;
+    if(fill_root_direct(f, dxpl, fh_addr, cparam, &heap_size, &free_space, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Insert large object, to force creation of indirect block and
+     * range of skipped blocks that are too small to hold the large object
+     */
+    obj_size = (cparam->managed.max_direct_size / 2) + 1;
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 20, obj_size, FALSE))
+        FAIL_STACK_ERROR
+
+    /* Insert an object to fill up the (biggest) heap block created */
+    obj_size = DBLOCK_FREE(f, dxpl, fh_addr, num_first_indirect_rows + 1) - (obj_size + OBJ_PREFIX_LEN);
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 20, obj_size, TRUE))
+        FAIL_STACK_ERROR
+
+    /* Fill rows skipped over in indirect block's direct blocks
+     */
+    for(u = 0; u < num_first_indirect_rows; u++) {
+        /* Direct block rows in first row of skipped 2nd level indirect blocks */
+        for(v = 0; v < cparam->managed.width; v++)
+            if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, u, &nobjs))
+                FAIL_STACK_ERROR
+
+        /* Direct block rows in second row of skipped 2nd level indirect blocks */
+        for(v = 0; v < cparam->managed.width; v++)
+            if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, u, &nobjs))
+                FAIL_STACK_ERROR
+
+        /* Direct block row in used 2nd level indirect block */
+        if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, u, &nobjs))
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Fill rows in second row of skipped 2nd level indirect blocks (and used 2nd level block) */
+
+    /* Direct block rows in skipped 2nd level indirect blocks */
+    for(v = 0; v < cparam->managed.width; v++)
+        if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, num_first_indirect_rows, &nobjs))
+            FAIL_STACK_ERROR
+
+    /* Direct block row in used 2nd level indirect block */
+    if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, num_first_indirect_rows, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Add one more object, to create another "large" block */
+    obj_size = SMALL_OBJ_SIZE1;
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 10, obj_size, FALSE))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_fill_direct_skip_indirect_two_rows_add_skipped() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_abs_fill_2nd_direct_skip_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
@@ -4757,7 +4891,6 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -4903,7 +5036,157 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
+#endif /* QAK */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped
+ *
+ * Purpose:	Test filling all direct blocks in root indirect block and all
+ *              direct blocks in 2nd level indirect blocks, fill all direct
+ *              blocks and indirect blocks in 3rd level indirect block, then
+ *              fill all direct blocks in 4th level indirect block, then
+ *              insert object that is too large to hold in first row of 2nd
+ *              level indirect blocks of 4th level indirect block, then
+ *              backfill all skipped direct blocks & extend.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, April 15, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    haddr_t     fh_addr;                /* Address of fractal heap created */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    unsigned    first_row_bits;         /* Number of bits used bit addresses in first row */
+    unsigned    first_indirect_block_size;      /* Range of addresses covered by each of the first indirect blocks */
+    unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    size_t      obj_block_size;         /* Size of block to hold large object added */
+    unsigned    nobjs = 0;              /* Number of objects inserted */
+    size_t      obj_size;               /* Size of object */
+    hsize_t     free_space;             /* Size of free space in heap */
+    hsize_t     heap_size;              /* Total size of heap */
+    unsigned    u, v;                   /* Local index variables */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    if(H5HF_create(f, dxpl, cparam, &fh_addr/*out*/, &id_len/*out*/) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        FAIL_STACK_ERROR
+#ifdef QAK
+HDfprintf(stderr, "Fractal heap header address = %a\n", fh_addr);
+#endif /* QAK */
+
+    /* Compute # of bits used in first row */
+    first_row_bits = H5V_log2_of2(cparam->managed.start_block_size) +
+                        H5V_log2_of2(cparam->managed.width);
+    first_indirect_block_size = 2 * cparam->managed.max_direct_size;
+    num_first_indirect_rows = (H5V_log2_of2(first_indirect_block_size) - first_row_bits) + 1;
+    obj_block_size = 1 << ((num_first_indirect_rows + H5V_log2_of2(cparam->managed.start_block_size)) - 1);
+#ifdef QAK
+HDfprintf(stderr, "first_row_bits = %u\n", first_row_bits);
+HDfprintf(stderr, "first_indirect_block_size = %u\n", first_indirect_block_size);
+HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
+HDfprintf(stderr, "obj_block_size = %Zu\n", obj_block_size);
+#endif /* QAK */
+
+    /*
+     * Test absolute heap
+     */
+    TESTING("filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend");
+
+    /* Fill direct blocks in root indirect block */
+    heap_size = 0;
+    free_space = 0;
+    if(fill_root_direct(f, dxpl, fh_addr, cparam, &heap_size, &free_space, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Fill all rows of 2nd level indirect blocks */
+    if(fill_all_2nd_indirect_rows(f, dxpl, fh_addr, cparam, &heap_size, &free_space, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Fill all rows of 3rd level indirect blocks */
+    if(fill_all_3rd_indirect_rows(f, dxpl, fh_addr, cparam, &heap_size, &free_space, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Fill all direct block rows in fourth level indirect block */
+    if(fill_all_direct(f, dxpl, fh_addr, cparam, &heap_size, &free_space, &nobjs))
+        FAIL_STACK_ERROR
+
+    /* Insert large object, to force creation of indirect block and
+     * range of skipped (indirect) blocks that are too small to hold the large
+     * object
+     */
+    obj_size = (1 << ((num_first_indirect_rows + H5V_log2_of2(cparam->managed.start_block_size)) - 2)) + 1;
+#ifdef QAK
+HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+#endif /* QAK */
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 20, obj_size, FALSE))
+        FAIL_STACK_ERROR
+
+    /* Insert object to fill space in (large) block created */
+    obj_size = DBLOCK_FREE(f, dxpl, fh_addr, num_first_indirect_rows) - (obj_size + OBJ_PREFIX_LEN);
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 20, obj_size, TRUE))
+        FAIL_STACK_ERROR
+
+    /* Fill rows skipped over in (first 4th level indirect block's) 2nd level
+     *  indirect block's direct blocks
+     *  (and second row of 2nd level indirect block's direct blocks)
+     */
+    for(u = 0; u < num_first_indirect_rows; u++) {
+        /* Direct block rows in 2nd level indirect blocks */
+        for(v = 0; v < cparam->managed.width; v++)
+            if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, u, &nobjs))
+                FAIL_STACK_ERROR
+
+        /* Direct block row in 2nd level indirect block */
+        if(fill_row(f, dxpl, fh_addr, cparam, &heap_size, &free_space, u, &nobjs))
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Add one more object, to create another "large" block */
+    obj_size = SMALL_OBJ_SIZE1;
+    if(add_obj(f, dxpl, fh_addr, heap_size, &free_space, &nobjs, 10, obj_size, FALSE))
+        FAIL_STACK_ERROR
+
+    PASSED()
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped() */
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -4986,12 +5269,14 @@ HDfprintf(stderr, "Uncomment tests!\n");
     nerrors += test_abs_fill_direct_skip_indirect_start_block_add_skipped(fapl, &cparam);
     nerrors += test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam);
     nerrors += test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam);
+    nerrors += test_abs_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam);
     nerrors += test_abs_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam);
     nerrors += test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam);
+    nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
-    nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam);
+    nerrors += test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &cparam);
 
     if(nerrors)
         goto error;

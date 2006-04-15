@@ -244,6 +244,7 @@ H5HF_flist_add(H5HF_freelist_t *flist, void *node, size_t *size_key, haddr_t *ad
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_add)
+
 #ifdef QAK
 HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *addr_key);
 #endif /* QAK */
@@ -400,6 +401,7 @@ H5HF_flist_find(H5HF_freelist_t *flist, size_t request, void **node)
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_flist_find)
+
 #ifdef QAK
 HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
 #endif /* QAK */
