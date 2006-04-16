@@ -366,6 +366,7 @@
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_TFLOPS
 ./release_docs/INSTALL_VFL
+./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.html
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.html

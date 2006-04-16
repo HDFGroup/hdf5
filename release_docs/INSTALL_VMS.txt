@@ -1,0 +1,82 @@
+		Building and installation instructions for Alpha Open VMS
+			This file is under construction
+			VMS port is not finished yet.
+				EIP April 16, 2006
+
+   
+
+
+		CONTENTS
+		--------
+
+		1. Obtaining HDF5
+		2. Building C, Fortran and C++ libraries
+		3. Testing HDF5 libraries and tools
+		4. Installing HDF5 libraries
+		5. Known problems
+
+
+	1.Obtaining HDF5
+	  Please see INSTALL file in this directory for downloading instructions.
+
+	2. Building C, Fortran and C++ libraries
+	   Use tar command to untar HDF5 source ball
+
+		tar -xvf hdf5-1.8.0-<pre>.tar
+	   Change default directory to [.hdf5-1.8.0-<pre>.vms]
+           and run 
+		@make
+           command. This command file will build 
+			C library, tests, and utilities	
+			Fortran library and tests
+			C++ library and tests
+			C, Fortran and C++ examples
+
+	   IMPORTANT: Compilations flags are defined in the [.vms]make.com file of the
+	   source tree. It is set up to use /float=float_ieee qualifier for C, Fortran 
+	   and C++ compilersi, and debug mode. If desired, those flags can be removed.
+	   Do NOT REMOVE /define=H5_VMS and /standard=strict_ansi qualifiers.
+	   If you have to use make.com file in a particular directory, make sure that
+	   you modify the compilation flags in this file appropriately.
+
+	   If  make.com succeeds, the following libraries and utilties will be built:
+
+	   [.src]hdf5.olb
+	   [.fortran.src]hdf5_fortran.olb
+	   [.c__.src]hdf5_cplus.olb
+	   [.tools.h5diff]h5diff.exe
+	   [.tools.h5dump]h5dump.exe
+	   [.tools.h5import]h5import.exe
+	   [.tools.h5jam]h5jam.exe
+	   [.tools.h5jam]h5unjam.exe
+	   [.tools.h5ls]h5ls.exe
+	   [.tools.h5repack]h5repack.exe
+
+	3. Testing HDF5 libraries and tools
+	   You may try to run check.com files in the following directories
+
+	   [.test]
+	   [.fortran.test]
+	   [.c__.test]
+	   [.examples]
+	   [.fortran.examples]
+	   [.c__.examples]
+
+	4. Installing HDF5 libraries
+	   Currently one has manually copy *.olb, public *.h files and Fortran modules 
+	   files from 
+           [.src], [.fortran.src] and [.c__.src] directories
+
+	5. Known problems
+
+	   1. There is no support for filters including deflated compression filter and
+	      szip compression filters
+	   2. There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
+              multifile driver tests, probably more; all major tests succeed)
+	   3. Mulitifile driver has not been tested yet
+	   4. Test scripts for some tools are missing; existing tools test scripts
+	      do not compare output with the expected output.
+	   5. Probably more :-)
+
+
+	For help contact hdfhelp@hdf.ncsa.uiuc.edu or help@hdfgroup.org
