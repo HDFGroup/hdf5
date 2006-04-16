@@ -39,6 +39,7 @@ $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
         "H5HF, H5HFcache, H5HFdbg, H5HFint, H5HFtest, H5HFflist, H5HFstat,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
+        "H5HFdblock, H5HFdtable, H5HFhdr, H5HFiblock,"+-
         "H5MP, H5MPtest, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omtime,"+-
