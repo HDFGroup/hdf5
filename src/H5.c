@@ -566,6 +566,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#define VERSION_MISMATCH_WARNING \
+    "Warning! ***HDF5 library version mismatched error***\n" \
+    "The HDF5 header files used to compile this application do not match\n" \
+    "the version used by the HDF5 library to which this application is linked.\n" \
+    "Data corruption or segmentation faults may occur if the application continues.\n" \
+    "You should recompile the application or check your shared library related\n" \
+    "settings such as 'LD_LIBRARY_PATH'.\n"
+
 herr_t
 H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 {
@@ -595,14 +603,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             H5_VERS_RELEASE!=relnum) {
         switch (disable_version_check) {
 	case 0:
-            HDfputs ("Warning! The HDF5 header files included by this application "
-                     "do not match the\nversion used by the HDF5 library to which "
-                     "this application is linked. Data\ncorruption or "
-                     "segmentation faults may occur if the application "
-                     "is\nallowed to continue.  You can, at your own risk, "
-                     "disable this check by setting\nthe environment variable "
-                     "'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-		     "Setting it to 2 will suppress the warning totally.\n",
+            HDfputs (VERSION_MISMATCH_WARNING
+		     "You can, at your own risk, disable this warning by setting the environment\n"
+		     "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+		     "Setting it to 2 will suppress the warning messages totally.\n",
 		     stderr);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
@@ -617,13 +621,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    break;
 	default:
 	    /* continue with a warning */
-            HDfputs ("Warning! The HDF5 header files included by this application "
-                     "do not match the\nversion used by the HDF5 library to which "
-                     "this application is linked. Data\ncorruption or "
-                     "segmentation faults may occur if the application "
-                     "continues.\n'HDF5_DISABLE_VERSION_CHECK' "
-                     "environment variable set, application will\n"
-                     "continue.\n", stderr);
+            HDfprintf (stderr, VERSION_MISMATCH_WARNING
+                     "'HDF5_DISABLE_VERSION_CHECK' "
+                     "environment variable is set to %d, application will\n"
+                     "continue at your own risk.\n", disable_version_check);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum,
