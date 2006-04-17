@@ -44,12 +44,6 @@ and configure.  The "--enable-parallel" is optional in this case.
     $ make install
 
 
-------
-TFLOPS
-------
-
-Follow the instructions in INSTALL_TFLOPS.
-
 -------
 IBM SP
 -------
@@ -174,6 +168,31 @@ HP V2500 and N4000
 ------------------
 
 Follow the instructions in section 3.
+
+
+------------------
+Red Storm (Cray XT3)
+------------------
+
+The following steps are for building the Parallel HDF5 for the Red Storm
+compute nodes.  They would probably work for other Cray XT3 systems but have
+not been verified.
+
+# Assume you alrady have a copy of HDF5 source code in directory `hdf5' and
+# want to install the binary in directory `/project/hdf5/phdf5'.  You also
+# have done the proper setup to have mpicc and mpif90 as the compiler commands.
+
+$ cd hdf5
+$ bin/yodconfigure configure
+$ env RUNSERIAL="yod -sz 1" RUNPARALLEL="yod -sz 3" \
+    CC="mpicc -DRED_STORM" F9X=mpif90 \
+    ./configure --disable-hl --without-zlib --disable-stream-vfd \
+    --enable-parallel --prefix=/project/hdf5/phdf5
+$ make
+$ make check
+
+# if all is well, install the binary.
+# make install
 
 
 3. Detail explanation
