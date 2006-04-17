@@ -13,9 +13,8 @@
 	2.4. Windows/NT
 
 	3. Quick installation
-	3.1. TFLOPS
-	3.2. Windows
-	3.3. Certain Virtual File Layer(VFL)
+	3.1. Windows
+	3.2. RedStorm (Cray XT3)
 
 	4. HDF5 dependencies
 	4.1. Zlib
@@ -121,17 +120,16 @@
 	    $ make check
 	    $ make install
 
-3.1. TFLOPS
-	Users of the Intel TFLOPS machine, after reading this file,
-	should see the INSTALL_TFLOPS for more instructions.
-
-3.2. Windows
+3.1. Windows
 	Users of Microsoft Windows should see the INSTALL_Windows for
 	detailed instructions.
 
-3.3. Certain Virtual File Layer(VFL)
-	If users want to install with special Virtual File Layer(VFL),
-	please go to read INSTALL_VFL file.  
+3.2. RedStorm (Cray Xt3)
+	Users of the Red Storm machine, after reading this file, should read
+	the Red Storm section in the INSTALL_parallel file for specific
+	instructions for the Red Storm machine.  The same instructions would
+	probably work for other Cray XT3 systems but they have not been
+	verified.
 
 
 4. HDF5 dependencies
