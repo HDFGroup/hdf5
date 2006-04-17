@@ -924,6 +924,9 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* On Cray X1, a lone colon on the command line of h5dump --xml (as in
+  the testh5dumpxml.sh script) is misinterpereted by the operating system
+  and causes an error.
 * On mpich 1.2.5 and 1.2.6, we found that if more than two processes
   contribute no IO and the application asks to do IO with collective, we found
   that when using 4 processors, a simple collective write will be hung
