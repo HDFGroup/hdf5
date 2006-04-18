@@ -40,7 +40,7 @@ $ link fflush1,h5test_fortran.olb/lib,-
              [-.-.test]libh5test.olb/lib, -
              [-.src]hdf5_fortran.olb/lib,-
              [-.-.src]hdf5.olb/lib
-$ link fflush2,h5test_fortran.olb/lib,
+$ link fflush2,h5test_fortran.olb/lib,-
              [-.-.test]libh5test.olb/lib, - 
              [-.src]hdf5_fortran.olb/lib,-
              [-.-.src]hdf5.olb/lib

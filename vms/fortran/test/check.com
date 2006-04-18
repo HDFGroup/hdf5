@@ -19,6 +19,6 @@ $!
 $ type sys$input
         Running Fortran tests
 $ run fortranlib_test
-$ run flush1
-$ run flush2
+$ run fflush1
+$ run fflush2
 $ exit

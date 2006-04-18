@@ -76,6 +76,6 @@ $ ccc H5File.cxx
 $ lib/insert/object hdf5_cplus H5File
 $!
 $ type sys$input
-$	Done
+	Done
 $ exit
  
