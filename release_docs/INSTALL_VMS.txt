@@ -63,17 +63,20 @@
 	   [.c__.examples]
 
 	4. Installing HDF5 libraries
-	   Currently one has manually copy *.olb, public *.h files and Fortran modules 
-	   files from 
+	   Currently one has to manually copy *.olb, public *.h (all header
+           files that do not have "private" in file name) iheader files and 
+           Fortran modules files from 
            [.src], [.fortran.src] and [.c__.src] directories
 
 	5. Known problems
 
+           0. Only IEEE floating point (/float=ieee_float qualifier)
+              is supported for HDF5-1.8.0-alpha0.
 	   1. There is no support for filters including deflated compression filter and
-	      szip compression filters
+	      szip compression filters.
 	   2. There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
-              multifile driver tests, probably more; all major tests succeed)
-	   3. Mulitifile driver has not been tested yet
+              multifile driver tests, probably more; all major tests succeed).
+	   3. Mulitifile driver has not been tested yet.
 	   4. Test scripts for some tools are missing; existing tools test scripts
 	      do not compare output with the expected output.
 	   5. Probably more :-)
