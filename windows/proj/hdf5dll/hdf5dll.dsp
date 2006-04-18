@@ -1138,7 +1138,67 @@ SOURCE=..\..\..\src\H5HFdbg.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5HFdblock.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFdtable.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5HFflist.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFhdr.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFiblock.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
 
