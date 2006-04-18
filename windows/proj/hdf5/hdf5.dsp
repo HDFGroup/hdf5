@@ -1052,7 +1052,67 @@ SOURCE=..\..\..\src\H5HFdbg.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5HFdblock.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFdtable.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5HFflist.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFhdr.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFiblock.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
@@ -1329,6 +1389,21 @@ SOURCE=..\..\..\src\H5Obogus.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Ocache.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Ocont.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1397,6 +1472,21 @@ SOURCE=..\..\..\src\H5Ofill.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Oginfo.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Olayout.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1404,6 +1494,36 @@ SOURCE=..\..\..\src\H5Olayout.c
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 # PROP Intermediate_Dir "..\..\..\proj\hdf5\Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Olinfo.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Olink.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
 
@@ -2527,6 +2647,10 @@ SOURCE=..\..\..\src\H5MMpublic.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5MPpkg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Oprivate.h
 # End Source File
 # Begin Source File
@@ -2560,6 +2684,18 @@ SOURCE=..\..\..\src\H5Rprivate.h
 # Begin Source File
 
 SOURCE=..\..\..\src\H5Rpublic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHpkg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHprivate.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHpublic.h
 # End Source File
 # Begin Source File
 
@@ -2602,81 +2738,5 @@ SOURCE=..\..\..\src\H5Zpublic.h
 SOURCE=..\..\..\src\hdf5.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\..\..\src\H5MPpkg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Ocache.c
-
-!IF  "$(CFG)" == "hdf5 - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Oginfo.c
-
-!IF  "$(CFG)" == "hdf5 - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Olinfo.c
-
-!IF  "$(CFG)" == "hdf5 - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5Olink.c
-
-!IF  "$(CFG)" == "hdf5 - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5SHpkg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5SHprivate.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\H5SHpublic.h
-# End Source File
 # End Target
 # End Project
