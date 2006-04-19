@@ -28,13 +28,14 @@ int main(void)
     herr_t err;     /* Return value from function calls */
     hid_t fileID;   /* HDF5 identifier for file */
     hsize_t count;  /* Number of records in table */
+    int x;          /* Temporary counter variable */
 
     /* Buffers to hold data */
     int readBuffer[5];
     int writeBuffer[5];
 
     /* Initialize buffers */
-    for(int x=0; x<5; x++)
+    for(x=0; x<5; x++)
     {
         writeBuffer[x]=x;
         readBuffer[x] = -1;
@@ -51,7 +52,7 @@ int main(void)
         fprintf(stderr, "Unable to create packet table.");
 
     /* Append five packets to the packet table, one at a time */
-    for(int x=0; x<5; x++)
+    for(x=0; x<5; x++)
     {
         err = ptable.AppendPacket( &(writeBuffer[x]) );
         if(err<0)
@@ -69,7 +70,7 @@ int main(void)
     ptable.ResetIndex();
 
     /* Iterate through packets, read each one back */
-    for(int x=0; x<5; x++)
+    for(x=0; x<5; x++)
     {
         err = ptable.GetNextPacket( &(readBuffer[x]) );
         if(err < 0)

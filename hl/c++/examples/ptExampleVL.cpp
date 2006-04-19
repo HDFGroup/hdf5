@@ -84,7 +84,7 @@ int main(void)
     ptable.ResetIndex();
 
     /* Iterate through packets, read each one back */
-    for(int x=0; x<5; x++)
+    for(x=0; x<5; x++)
     {
         err = ptable.GetNextPacket( &(readBuffer[x]) );
         if(err < 0)
