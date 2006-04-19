@@ -1301,7 +1301,7 @@
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTparse.y
 ./hl/src/H5LTparse.c
-./hl/src/H5LTparse.h                            _DO_NOT_DISTRIBUTE_
+./hl/src/H5LTparse.h
 ./hl/src/H5DSprivate.h
 ./hl/src/H5DSpublic.h
 ./hl/src/H5IMprivate.h
