@@ -63,7 +63,10 @@ TEST() {
       $RUNSERIAL $TEST_ERR_BIN 
    ) >$actual 2>$actual_err
    # Extract file name, line number, version and thread IDs because they may be different
-   sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' -e 's/line [0-9]*/line (number)/' -e 's/[1-9]*\.[0-9]*\.[0-9]*/version (number)/' $actual_err > $actual_ext
+   sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+	-e 's/line [0-9]*/line (number)/' \
+	-e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+	$actual_err > $actual_ext
    cat $actual_ext >> $actual
     
    if $CMP $expect1 $actual; then
