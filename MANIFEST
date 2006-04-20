@@ -1312,6 +1312,7 @@
 ./hl/src/H5PTpublic.h
 ./hl/src/H5TBprivate.h
 ./hl/src/H5TBpublic.h
+./hl/src/hdf5_hl.h
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
