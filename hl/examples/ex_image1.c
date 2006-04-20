@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
+#include "hdf5_hl.h"
 
 #define WIDTH         (hsize_t)400
 #define HEIGHT        (hsize_t)200
