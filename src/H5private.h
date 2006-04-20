@@ -668,9 +668,15 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
      typedef __int64                    h5_stat_size_t;
      #endif
 #else
-#define HDfstat(F,B)            fstat(F,B)
-typedef struct stat		h5_stat_t;
-typedef off_t                   h5_stat_size_t;
+     #if H5_SIZEOF___INT64==8
+     #define HDfstat(F,B)               fstat64(F,B)
+     typedef struct stat64              h5_stat_t;
+     typedef off64_t                    h5_stat_size_t;
+     #else
+     #define HDfstat(F,B)               fstat(F,B)
+     typedef struct stat                h5_stat_t;
+     typedef off_t                      h5_stat_size_t;
+     #endif
 #endif
 
 #define HDftell(F)		ftell(F)
@@ -850,7 +856,11 @@ H5_DLL void HDsrand(unsigned int seed);
      #define HDstat(S,B)		_stati64(S,B)
      #endif
 #else
+     #if H5_SIZEOF___INT64==8
+     #define HDstat(S,B)  stat64(S,B)
+     #else
 #define HDstat(S,B)  stat(S,B)
+#endif
 #endif
 
 #define HDstrcat(X,Y)		strcat(X,Y)

@@ -128,7 +128,7 @@ H5TEST_DLL hid_t h5_fileaccess(void);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
-H5TEST_DLL off_t h5_get_file_size(const char *filename);
+H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename);
 H5TEST_DLL int print_func(const char *format, ...);
 
 /* Routines for operating on the list of tests (for the "all in one" tests) */

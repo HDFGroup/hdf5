@@ -1022,7 +1022,7 @@ test_attr_dtype_shared(void)
     int data=8;                 /* Data to write */
     int rdata=0;                /* Read read in */
     H5G_stat_t statbuf;         /* Object's information */
-    off_t filesize;             /* Size of file after modifications */
+    h5_stat_size_t filesize;             /* Size of file after modifications */
 
     // Output message about test being performed */
     MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
@@ -1035,7 +1035,7 @@ test_attr_dtype_shared(void)
 	fid1.close();
 
 	// Get size of file */
-	off_t empty_filesize;       // Size of empty file */
+	h5_stat_size_t empty_filesize;       // Size of empty file */
 	empty_filesize = h5_get_file_size(FILENAME.c_str());
 	if (empty_filesize == 0)
     	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);

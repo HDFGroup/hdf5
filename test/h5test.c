@@ -802,14 +802,14 @@ h5_dump_info_object(MPI_Info info)
  *
  *-------------------------------------------------------------------------
  */
-off_t
+h5_stat_size_t
 h5_get_file_size(const char *filename)
 {
     h5_stat_t	sb;
 
     /* Get the file's statistics */
     if (HDstat(filename, &sb)>=0)
-        return((off_t)sb.st_size);
+        return((h5_stat_size_t)sb.st_size);
 
     return(0);
 } /* end get_file_size() */
