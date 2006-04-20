@@ -294,7 +294,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
      * could be of value -1 if it is not defined.
      */
     isppdriver = H5P_DEFAULT != fapl && 
-	(H5FD_MPIO==driver || H5FD_MPIPOSIX==driver || H5FD_FPHDF5==driver);
+	(H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not

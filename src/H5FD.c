@@ -44,9 +44,6 @@
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FLprivate.h"	/* Free lists                           */
-#ifdef H5_HAVE_FPHDF5
-#include "H5FPprivate.h"        /* Flexible Parallel HDF5               */
-#endif  /* H5_HAVE_FPHDF5 */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -169,9 +166,6 @@ H5FD_term_interface(void)
 #ifdef H5_HAVE_PARALLEL
                 H5FD_mpio_term();
                 H5FD_mpiposix_term();
-#ifdef H5_HAVE_FPHDF5
-                H5FD_fphdf5_term();
-#endif /* H5_HAVE_FPHDF5 */
 #endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_STREAM
                 H5FD_stream_term();
@@ -1484,14 +1478,6 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_alloc
  * Purpose:     Private version of H5FDalloc().
- *
- *              For FPHDF5, the dxpl_id is meaningless. The only place it
- *              is likely to be used is in the H5FD_free() function where
- *              it can make a call to H5FD_write() (which needs this
- *              property list). FPHDF5 doesn't have metadata accumulation
- *              turned on, so it won't ever call the H5FD_write()
- *              function.
- *
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
  * Programmer:  Robb Matzke
@@ -1525,25 +1511,6 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     assert(file->cls);
     assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
-
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * When we're using the FPHDF5 driver, allocate from the SAP. If this
-     * is the SAP executing this code, then skip the send to the SAP and
-     * try to do the actual allocations.
-     */
-    if ( H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file) ) {
-        haddr_t addr;
-
-        if ( (addr = H5FP_client_alloc(file, type, dxpl_id, size))
-             == HADDR_UNDEF) {
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
-                        "allocation failed.")
-        } else {
-            HGOTO_DONE(addr)
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
 
 #ifdef H5F_DEBUG
     if (H5DEBUG(F))
@@ -2250,26 +2217,6 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
     assert(file);
     assert(file->cls);
     assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * When we're using the FPHDF5 driver, free with the SAP. If this
-     * is the SAP executing this code, then skip the send to the SAP and
-     * try to do the actual free.
-     */
-    if (H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file)) {
-        unsigned        req_id;
-        H5FP_status_t   status;
-
-        /* Send the request to the SAP */
-        if (H5FP_request_free(file, type, addr, size, &req_id, &status) != SUCCEED)
-            /* FIXME: Should we check the "status" variable here? */
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL, "server couldn't free from file")
-
-        /* We've succeeded -- return the value */
-        HGOTO_DONE(ret_value)
-    }
-#endif  /* H5_HAVE_FPHDF5 */
 
     if (!H5F_addr_defined(addr) || addr>file->maxaddr ||
             H5F_addr_overflow(addr, size) || addr+size>file->maxaddr)

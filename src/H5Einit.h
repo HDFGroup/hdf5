@@ -43,11 +43,6 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "File accessability"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FILE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_FPHDF5_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "Flexible Parallel HDF5"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_FPHDF5_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_SYM_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Symbol table"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -207,6 +202,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "No space available for allocation"))==
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_NOSPACE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTALLOC_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't allocate space"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTALLOC_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_CANTCOPY_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to copy object"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -329,28 +329,6 @@ assert(H5E_CANTPACK_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't pack messages"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTPACK_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-
-/* FPHDF5 errors */
-assert(H5E_CANTRECV_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't receive messages from processes"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTRECV_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_CANTSENDMDATA_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't send metadata message"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTSENDMDATA_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_CANTCHANGE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't register change with server"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTCHANGE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_CANTALLOC_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't allocate from file"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTALLOC_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* System level errors */

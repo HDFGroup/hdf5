@@ -24,7 +24,6 @@ hid_t H5E_DATASET_g        = FAIL;      /* Dataset */
 hid_t H5E_FUNC_g           = FAIL;      /* Function entry/exit */
 hid_t H5E_STORAGE_g        = FAIL;      /* Data storage */
 hid_t H5E_FILE_g           = FAIL;      /* File accessability */
-hid_t H5E_FPHDF5_g         = FAIL;      /* Flexible Parallel HDF5 */
 hid_t H5E_SYM_g            = FAIL;      /* Symbol table */
 hid_t H5E_VFL_g            = FAIL;      /* Virtual File Layer */
 hid_t H5E_INTERNAL_g       = FAIL;      /* Internal error (too specific to document in detail) */
@@ -61,6 +60,7 @@ hid_t H5E_FCNTL_g          = FAIL;      /* File control (fcntl) failed */
 
 /* Resource errors */
 hid_t H5E_NOSPACE_g        = FAIL;      /* No space available for allocation */
+hid_t H5E_CANTALLOC_g      = FAIL;      /* Can't allocate space */
 hid_t H5E_CANTCOPY_g       = FAIL;      /* Unable to copy object */
 hid_t H5E_CANTFREE_g       = FAIL;      /* Unable to free object */
 hid_t H5E_ALREADYEXISTS_g  = FAIL;      /* Object already exists */
@@ -92,12 +92,6 @@ hid_t H5E_BADMESG_g        = FAIL;      /* Unrecognized message */
 hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
 hid_t H5E_BADITER_g        = FAIL;      /* Iteration failed */
 hid_t H5E_CANTPACK_g       = FAIL;      /* Can't pack messages */
-
-/* FPHDF5 errors */
-hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive messages from processes */
-hid_t H5E_CANTSENDMDATA_g  = FAIL;      /* Can't send metadata message */
-hid_t H5E_CANTCHANGE_g     = FAIL;      /* Can't register change with server */
-hid_t H5E_CANTALLOC_g      = FAIL;      /* Can't allocate from file */
 
 /* System level errors */
 hid_t H5E_SYSERRSTR_g      = FAIL;      /* System error message */

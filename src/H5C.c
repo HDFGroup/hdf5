@@ -7026,7 +7026,7 @@ H5C_flush_single_entry(H5F_t *		   f,
             }
 
             /* Sanity check transfer mode */
-            HDassert( xfer_mode == H5FD_MPIO_COLLECTIVE || IS_H5FD_FPHDF5(f) );
+            HDassert( xfer_mode == H5FD_MPIO_COLLECTIVE );
         }
 
 #endif /* NDEBUG */

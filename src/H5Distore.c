@@ -1352,11 +1352,7 @@ H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags)
 
     for (ent=rdcc->head; ent; ent=next) {
 	next = ent->next;
-	if ((flags&H5F_FLUSH_CLEAR_ONLY)) {
-            /* Just mark cache entry as clean */
-            ent->dirty = FALSE;
-        } /* end if */
-	else if ((flags&H5F_FLUSH_INVALIDATE)) {
+	if ((flags&H5F_FLUSH_INVALIDATE)) {
 	    if (H5D_istore_preempt(&io_info, ent, TRUE )<0)
 		nerrors++;
 	} else {

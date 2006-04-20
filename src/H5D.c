@@ -4068,7 +4068,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
 
                 case H5D_CHUNKED:
                     /* Flush the raw data cache */
-                    if (H5D_istore_flush(dataset, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+                    if (H5D_istore_flush(dataset, dxpl_id, flags & H5F_FLUSH_INVALIDATE) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
                     break;
 

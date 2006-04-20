@@ -80,8 +80,7 @@ const H5AC_class_t H5AC_BT[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    H5B_serialize
  *
- * Purpose:     Serialize the data structure for writing to disk or
- *              storing on the SAP (for FPHDF5).
+ * Purpose:     Serialize the data structure for writing to disk.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL

@@ -66,7 +66,6 @@ MAJOR, H5E_PLINE, Data filters
 MAJOR, H5E_EFL, External file list
 MAJOR, H5E_REFERENCE, References
 MAJOR, H5E_VFL, Virtual File Layer
-MAJOR, H5E_FPHDF5, Flexible Parallel HDF5
 MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
@@ -89,7 +88,6 @@ SECTION, DSPACE, Dataspace errors
 SECTION, PLIST, Property list errors
 SECTION, MPI, Parallel MPI errors
 SECTION, HEAP, Heap errors
-SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, NONE, No error
@@ -105,6 +103,7 @@ MINOR, ARGS, H5E_BADVALUE, Bad value
 
 # Resource errors
 MINOR, RESOURCE, H5E_NOSPACE, No space available for allocation
+MINOR, RESOURCE, H5E_CANTALLOC, Can't allocate space
 MINOR, RESOURCE, H5E_CANTCOPY, Unable to copy object
 MINOR, RESOURCE, H5E_CANTFREE, Unable to free object
 MINOR, RESOURCE, H5E_ALREADYEXISTS, Object already exists
@@ -212,12 +211,6 @@ MINOR, MPI, H5E_MPIERRSTR, MPI Error String
 MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
 MINOR, HEAP, H5E_CANTCOMPUTE, Can't compute value
 MINOR, HEAP, H5E_CANTEXTEND, Can't extend heap's space
-
-# FPHDF5 errors
-MINOR, FPH5, H5E_CANTRECV, Can't receive messages from processes
-MINOR, FPH5, H5E_CANTSENDMDATA, Can't send metadata message
-MINOR, FPH5, H5E_CANTCHANGE, Can't register change with server
-MINOR, FPH5, H5E_CANTALLOC, Can't allocate from file
 
 # I/O pipeline errors
 MINOR, PIPELINE, H5E_NOFILTER, Requested filter is not available

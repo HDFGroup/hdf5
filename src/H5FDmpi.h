@@ -61,7 +61,6 @@ typedef struct H5FD_class_mpi_t {
 #endif /* H5_HAVE_PARALLEL */
 
 /* Include all the MPI VFL headers */
-#include "H5FDfphdf5.h"		/* Flexible PHDF5 file driver		*/
 #include "H5FDmpio.h"           /* MPI I/O file driver			*/
 #include "H5FDmpiposix.h"       /* MPI/posix I/O file driver            */
 
@@ -69,7 +68,7 @@ typedef struct H5FD_class_mpi_t {
 
 /* Single macro to check for all file drivers that use MPI */
 #define IS_H5FD_MPI(file)  \
-        (IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file) || IS_H5FD_FPHDF5(file))
+        (IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file))
 
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */

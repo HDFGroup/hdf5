@@ -351,11 +351,8 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     if (HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size")
 
-#ifdef H5_HAVE_FPHDF5
-    if (!H5FD_is_fphdf5_driver(lf) || H5FD_fphdf5_is_captain(lf))
-#endif  /* !H5_HAVE_FPHDF5 */
-        if (eof < stored_eoa)
-            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file")
+    if (eof < stored_eoa)
+        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file")
 
     /*
      * Tell the file driver how much address space has already been

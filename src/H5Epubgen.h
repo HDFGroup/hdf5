@@ -27,7 +27,6 @@
 #define H5E_FUNC             (H5OPEN H5E_FUNC_g)
 #define H5E_STORAGE          (H5OPEN H5E_STORAGE_g)
 #define H5E_FILE             (H5OPEN H5E_FILE_g)
-#define H5E_FPHDF5           (H5OPEN H5E_FPHDF5_g)
 #define H5E_SYM              (H5OPEN H5E_SYM_g)
 #define H5E_VFL              (H5OPEN H5E_VFL_g)
 #define H5E_INTERNAL         (H5OPEN H5E_INTERNAL_g)
@@ -55,7 +54,6 @@ H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
 H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
 H5_DLLVAR hid_t H5E_FILE_g;          /* File accessability */
-H5_DLLVAR hid_t H5E_FPHDF5_g;        /* Flexible Parallel HDF5 */
 H5_DLLVAR hid_t H5E_SYM_g;           /* Symbol table */
 H5_DLLVAR hid_t H5E_VFL_g;           /* Virtual File Layer */
 H5_DLLVAR hid_t H5E_INTERNAL_g;      /* Internal error (too specific to document in detail) */
@@ -100,6 +98,7 @@ H5_DLLVAR hid_t H5E_FCNTL_g;         /* File control (fcntl) failed */
 
 /* Resource errors */
 #define H5E_NOSPACE          (H5OPEN H5E_NOSPACE_g)
+#define H5E_CANTALLOC        (H5OPEN H5E_CANTALLOC_g)
 #define H5E_CANTCOPY         (H5OPEN H5E_CANTCOPY_g)
 #define H5E_CANTFREE         (H5OPEN H5E_CANTFREE_g)
 #define H5E_ALREADYEXISTS    (H5OPEN H5E_ALREADYEXISTS_g)
@@ -108,6 +107,7 @@ H5_DLLVAR hid_t H5E_FCNTL_g;         /* File control (fcntl) failed */
 #define H5E_CANTGC           (H5OPEN H5E_CANTGC_g)
 #define H5E_CANTGETSIZE      (H5OPEN H5E_CANTGETSIZE_g)
 H5_DLLVAR hid_t H5E_NOSPACE_g;       /* No space available for allocation */
+H5_DLLVAR hid_t H5E_CANTALLOC_g;     /* Can't allocate space */
 H5_DLLVAR hid_t H5E_CANTCOPY_g;      /* Unable to copy object */
 H5_DLLVAR hid_t H5E_CANTFREE_g;      /* Unable to free object */
 H5_DLLVAR hid_t H5E_ALREADYEXISTS_g; /* Object already exists */
@@ -155,16 +155,6 @@ H5_DLLVAR hid_t H5E_BADMESG_g;       /* Unrecognized message */
 H5_DLLVAR hid_t H5E_CANTDELETE_g;    /* Can't delete message */
 H5_DLLVAR hid_t H5E_BADITER_g;       /* Iteration failed */
 H5_DLLVAR hid_t H5E_CANTPACK_g;      /* Can't pack messages */
-
-/* FPHDF5 errors */
-#define H5E_CANTRECV         (H5OPEN H5E_CANTRECV_g)
-#define H5E_CANTSENDMDATA    (H5OPEN H5E_CANTSENDMDATA_g)
-#define H5E_CANTCHANGE       (H5OPEN H5E_CANTCHANGE_g)
-#define H5E_CANTALLOC        (H5OPEN H5E_CANTALLOC_g)
-H5_DLLVAR hid_t H5E_CANTRECV_g;      /* Can't receive messages from processes */
-H5_DLLVAR hid_t H5E_CANTSENDMDATA_g; /* Can't send metadata message */
-H5_DLLVAR hid_t H5E_CANTCHANGE_g;    /* Can't register change with server */
-H5_DLLVAR hid_t H5E_CANTALLOC_g;     /* Can't allocate from file */
 
 /* System level errors */
 #define H5E_SYSERRSTR        (H5OPEN H5E_SYSERRSTR_g)

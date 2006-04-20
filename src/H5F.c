@@ -27,7 +27,6 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5FPprivate.h"        /* Flexible parallel			*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -1889,126 +1888,34 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * empty or not.
      */
     if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
-#ifdef H5_HAVE_FPHDF5
-        hsize_t buf_size=0;     /* Size of buffer needed to hold superblock info */
-#endif  /* H5_HAVE_FPHDF5 */
         void *buf=NULL;         /* Buffer to hold superblock info */
 
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
-#ifdef H5_HAVE_FPHDF5
-        if (!H5FD_is_fphdf5_driver(lf) || H5FD_fphdf5_is_captain(lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
-            /* Initialize information about the superblock and allocate space for it */
-            if ((
-#ifdef H5_HAVE_FPHDF5
-                buf_size=
-#endif  /* H5_HAVE_FPHDF5 */
-                H5F_init_superblock(file, dxpl_id)) == 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
+        /* Initialize information about the superblock and allocate space for it */
+        if (H5F_init_superblock(file, dxpl_id) == 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
-            /* Create and open the root group */
-            /* (This must be after the space for the superblock is allocated in
-             *      the file)
-             */
-            if (H5G_mkroot(file, dxpl_id, NULL)<0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-
-#ifdef H5_HAVE_FPHDF5
-            if (H5FD_is_fphdf5_driver(lf)) {
-                /* Allocate room for the superblock buffer */
-                H5_CHECK_OVERFLOW(buf_size, hsize_t, size_t);
-                if((buf=H5MM_malloc((size_t)buf_size))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for superblock buffer")
-            } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
-
-            /* Write the superblock to the file */
-            /* (This must be after the root group is created, since the root
-             *      group's symbol table entry is part of the superblock)
-             */
-            if (H5F_write_superblock(file, dxpl_id, buf) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
-
-#ifdef H5_HAVE_FPHDF5
-        } /* end if */
-
-        /* If this file is using the FPHDF5 driver, broadcast the superblock
-         * from the captain to the other clients
+        /* Create and open the root group */
+        /* (This must be after the space for the superblock is allocated in
+         *      the file)
          */
-        if (H5FD_is_fphdf5_driver(lf)) {
-            int mrc;                    /*MPI return code */
-            H5FP_super_t super_info;    /* Superblock information */
+        if (H5G_mkroot(file, dxpl_id, NULL)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
-            /* Captain sets up the information */
-            if (H5FD_fphdf5_is_captain(lf)) {
-                super_info.addr=shared->super_addr;
-                super_info.size=buf_size;
-            } /* end if */
+        /* Write the superblock to the file */
+        /* (This must be after the root group is created, since the root
+         *      group's symbol table entry is part of the superblock)
+         */
+        if (H5F_write_superblock(file, dxpl_id, buf) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
 
-            /* Broadcast the superblock information */
-            if ((mrc = MPI_Bcast(&super_info, 1, H5FP_super, (int)H5FP_capt_barrier_rank,
-                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc)
-
-            /* Non-captain clients allocate the buffer now */
-            if (!H5FD_fphdf5_is_captain(lf)) {
-                /* Allocate room for the superblock buffer */
-                H5_CHECK_OVERFLOW(super_info.size, hsize_t, size_t);
-                if((buf = H5MM_malloc((size_t)super_info.size))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for superblock buffer")
-            } /* end if */
-
-            /* Broadcast the actual superblock */
-            H5_CHECK_OVERFLOW(super_info.size, hsize_t, int);
-            if ((mrc = MPI_Bcast(buf, (int)super_info.size, MPI_BYTE, (int)H5FP_capt_barrier_rank,
-                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc)
-
-            if (!H5FD_fphdf5_is_captain(lf)) {
-                if (H5F_read_superblock(file, dxpl_id, &root_loc, super_info.addr,
-                                        buf, (size_t)super_info.size) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
-	    }
-
-            /* The following barrier ensures that all set eoa operations
-             * associated with creating the superblock are complete before
-             * we attempt any allocations.
-             *                                    JRM - 4/13/04
-             */
-            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS )
-                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
-
-            if (!H5FD_fphdf5_is_captain(lf)) {
-                if (H5G_mkroot(file, dxpl_id, &root_loc) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-            }
-
-            /* All clients free the buffer used for broadcasting the superblock */
-            buf = H5MM_xfree (buf);
-        } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
     } else if (1 == shared->nrefs) {
-#ifdef H5_HAVE_FPHDF5
-        int mrc;                    /*MPI return code */
-#endif  /* H5_HAVE_FPHDF5 */
-
 	/* Read the superblock if it hasn't been read before. */
         if(H5F_read_superblock(file, dxpl_id, &root_loc, HADDR_UNDEF, NULL, (size_t)0) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
-
-#ifdef H5_HAVE_FPHDF5
-        if (H5FD_is_fphdf5_driver(lf)) {
-            /* reading the superblock generates lots of set_eoa calls.  To avoid
-             * race conditions with allocations, make sure that everyone is done
-             * reading the superblock before we proceed.
-             */
-            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS )
-                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
-        } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
 
 	/* Make sure we can open the root group */
 	if (H5G_mkroot(file, dxpl_id, &root_loc)<0)
@@ -2430,21 +2337,9 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /* flush (and invalidate) the entire meta data cache */
-    /*
-     * FIXME: This should be CLEAR_ONLY for non-captain processes.
-     * Need to fix the H5G_mkroot() call so that only the captain
-     * allocates object headers (calls the H5O_init function...via a
-     * lot of other functions first)....
-     */
-
     H5AC_flags = 0;
-
     if ( (flags & H5F_FLUSH_INVALIDATE) != 0 )
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-
-    if ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0 )
-        H5AC_flags |= H5AC__FLUSH_CLEAR_ONLY_FLAG;
-
     if (H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
@@ -2454,53 +2349,29 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      * "small data" blocks back to the free lists in the file.
      */
     if (flags & H5F_FLUSH_INVALIDATE) {
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * If this is not the SAP, then we want to send a "free"
-         * command to the SAP to free up the EOMA and EOSDA
-         * information. This might also update the EOA information on
-         * the clients...
-         */
-        if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
-            unsigned        req_id = 0;
-            H5FP_status_t   status = H5FP_STATUS_OK;
+        if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+            /* Return the unused portion of the metadata block to a free list */
+            if (f->shared->lf->eoma != 0)
+                if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
+                        f->shared->lf->eoma, f->shared->lf->cur_meta_block_size) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block")
 
-            /* Send the request to the SAP */
-            if (H5FP_request_update_eoma_eosda(f->shared->lf,
-                                               &req_id, &status) != SUCCEED)
-                /* FIXME: Should we check the "status" variable here? */
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
-                            "server couldn't free from file")
-        } else {
-#endif  /* H5_HAVE_FPHDF5 */
+            /* Reset metadata block information, just in case */
+            f->shared->lf->eoma=0;
+            f->shared->lf->cur_meta_block_size=0;
+        } /* end if */
 
-            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
-                /* Return the unused portion of the metadata block to a free list */
-                if (f->shared->lf->eoma != 0)
-                    if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
-                            f->shared->lf->eoma, f->shared->lf->cur_meta_block_size) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block")
+        if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+            /* Return the unused portion of the "small data" block to a free list */
+            if (f->shared->lf->eosda != 0)
+                if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
+                        f->shared->lf->eosda, f->shared->lf->cur_sdata_block_size) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block")
 
-                /* Reset metadata block information, just in case */
-                f->shared->lf->eoma=0;
-                f->shared->lf->cur_meta_block_size=0;
-            } /* end if */
-
-            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
-                /* Return the unused portion of the "small data" block to a free list */
-                if (f->shared->lf->eosda != 0)
-                    if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
-                            f->shared->lf->eosda, f->shared->lf->cur_sdata_block_size) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block")
-
-                /* Reset "small data" block information, just in case */
-                f->shared->lf->eosda=0;
-                f->shared->lf->cur_sdata_block_size=0;
-            } /* end if */
-
-#ifdef H5_HAVE_FPHDF5
-        }
-#endif  /* H5_HAVE_FPHDF5 */
+            /* Reset "small data" block information, just in case */
+            f->shared->lf->eosda=0;
+            f->shared->lf->cur_sdata_block_size=0;
+        } /* end if */
     } /* end if */
 
     /* Write the superblock to disk */
@@ -2737,31 +2608,10 @@ H5F_try_close(H5F_t *f)
     /* Flush at this point since the file will be closed */
     /* (Only try to flush the file if it was opened with write access) */
     if(f->intent&H5F_ACC_RDWR) {
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * We only want the captain to perform the flush of the metadata
-         * to the file.
-         */
-        if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
-                H5FD_fphdf5_is_captain(f->shared->lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
-
-            /* Flush and destroy all caches */
-            if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                          H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-
-#ifdef H5_HAVE_FPHDF5
-        } else {
-            /*
-             * If this isn't the captain process, flush but only clear
-             * the flags.
-             */
-            if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                          H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-        } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
+        /* Flush and destroy all caches */
+        if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
     /*

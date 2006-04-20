@@ -35,10 +35,13 @@ New Features
 
     Configuration:
     --------------
+        - Remove the flexible parallel code and the --enable-fphdf5
+          configure option, it was never up to production standards
+          anyway.  -QAK 2006/4/20
         - Added a --enable-group-revision option to configure, to enable
           segregating the ongoing work on changing the file format.  DO
           NOT ENABLE THIS OPTION!  It is strictly for internal library
-          development!
+          development! -QAK 2006/4/14
 
                            .-"""""-.
                           /         \

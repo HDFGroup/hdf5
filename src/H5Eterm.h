@@ -25,7 +25,6 @@ H5E_DATASET_g=
 H5E_FUNC_g=    
 H5E_STORAGE_g=    
 H5E_FILE_g=    
-H5E_FPHDF5_g=    
 H5E_SYM_g=    
 H5E_VFL_g=    
 H5E_INTERNAL_g=    
@@ -63,6 +62,7 @@ H5E_FCNTL_g=
 
 /* Resource errors */    
 H5E_NOSPACE_g=    
+H5E_CANTALLOC_g=    
 H5E_CANTCOPY_g=    
 H5E_CANTFREE_g=    
 H5E_ALREADYEXISTS_g=    
@@ -94,12 +94,6 @@ H5E_BADMESG_g=
 H5E_CANTDELETE_g=    
 H5E_BADITER_g=    
 H5E_CANTPACK_g=
-
-/* FPHDF5 errors */    
-H5E_CANTRECV_g=    
-H5E_CANTSENDMDATA_g=    
-H5E_CANTCHANGE_g=    
-H5E_CANTALLOC_g=
 
 /* System level errors */    
 H5E_SYSERRSTR_g=

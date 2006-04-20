@@ -90,9 +90,6 @@
 /* Define to 1 if you have the `fork' function. */
 /*#undefine H5_HAVE_FORK */
 
-/* Define if we want flexible parallel HDF5 support */
-#undef H5_HAVE_FPHDF5 
-
 /* Define to 1 if you have the `frexpf' function. */
 #define H5_HAVE_FREXPF 1
 

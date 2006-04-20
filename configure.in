@@ -2316,32 +2316,6 @@ if test -n "$PARALLEL"; then
   fi
 
   dnl ----------------------------------------------------------------------
-  dnl Check if they would like the "Flexible parallel" interface enabled
-  dnl 
-  AC_MSG_CHECKING([if Flexible Parallel HDF5 interface enabled])
-  AC_ARG_ENABLE([fphdf5],
-                [AC_HELP_STRING([--enable-fphdf5],
-                                [Enable the Flexible Parallel HDF5
-                                 interface [default=no]])],
-                [FPHDF5=$enableval],
-                [FPHDF5="no"])
-
-  if test "X$FPHDF5" = "Xyes"; then
-
-    dnl The --enable-fphdf5 flag is not compatible with --enable-fortran.
-    dnl If the user tried to specify both flags, throw an error.
-    if test "X$${FPHDF5}" != "X" && test "X${HDF_FORTRAN}" != "X"; then
-     AC_MSG_ERROR([--enable-fphdf5 and --enable-fortran flags are incompatible])
-    fi
-
-    AC_DEFINE(HAVE_FPHDF5, 1,
-              [Define if we want flexible parallel HDF5 support])
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-  fi
-
-  dnl ----------------------------------------------------------------------
   dnl Set the flag to indicate that the MPI_File_set_size() function
   dnl works with files over 2GB, unless it's already set in the cache.
   dnl (This flag should be set for all machines, except for ASCI Red, where
@@ -3527,9 +3501,6 @@ PRINT "---------"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
-
-PRINT_N "          Flexible Parallel HDF"
-IF_YES_NO "$FPHDF5"
 
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"

@@ -64,11 +64,6 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
-#ifdef H5_HAVE_FPHDF5
-#include "H5FDfphdf5.h"         /* FPHDF5 File Driver                   */
-#include "H5FPprivate.h"        /* Flexible PHDF5                       */
-#endif  /* H5_HAVE_FPHDF5 */
-
 #define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
 
 /*-------------------------------------------------------------------------
@@ -1316,79 +1311,6 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
     info->is_protected = FALSE;
 
 #ifdef H5_HAVE_PARALLEL
-#ifdef H5_HAVE_FPHDF5
-    /* In the flexible parallel case, the cache is always empty.  Thus
-     * we simply flush and destroy entry we have just received.
-     */
-    {
-        H5FD_t *	lf;
-        unsigned        req_id;
-        H5FP_status_t   status;
-
-        HDassert(f->shared->lf);
-
-        lf = f->shared->lf;
-
-        if ( H5FD_is_fphdf5_driver(lf) ) {
-
-            /* Newly inserted entry are presumed to be dirty */
-    	    info->is_dirty = TRUE;
-
-            /*
-             * This is the FPHDF5 driver. Grab a lock for this piece of
-             * metadata from the SAP. Bail-out quickly if we're unable to do
-             * that. In the case of the FPHDF5 driver, the local cache is
-             * turned off. We lock the address then write the data to the SAP.
-             * We do this because the cache is off and thus cannot retain the
-             * data which has just been added to it.  We will get it from the
-             * SAP as needed in the future.
-             */
-            result = H5FP_request_lock(H5FD_fphdf5_file_id(lf), addr,
-                                       H5FP_LOCK_WRITE, TRUE, &req_id, &status);
-
-            if ( result < 0 ) {
-#if 0
-                HDfprintf(stdout, "H5AC_set: Lock failed.\n");
-                /*
-                 * FIXME: Check the status variable. If the lock is got
-                 * by some other process, we can loop and wait or bail
-                 * out of this function
-                 */
-                HDfprintf(stderr,
-                          "Couldn't get lock for metadata at address %a\n",
-                          addr);
-#endif /* 0 */
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, FAIL, \
-                            "can't lock data on SAP!")
-            }
-
-            /* write the metadata to the SAP. */
-
-            result = (info->type->flush)(f, dxpl_id, TRUE,
-                                             info->addr, info);
-
-            if ( result < 0 ) {
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to flush entry")
-            }
-
-            /* and then release the lock */
-
-            result = H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
-                                               TRUE, &req_id, &status);
-            if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, FAIL, \
-                            "can't unlock data on SAP!")
-            }
-
-            HGOTO_DONE(SUCCEED);
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
-#endif  /* H5_HAVE_PARALLEL */
-
-#ifdef H5_HAVE_PARALLEL
     if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
 
         result = H5AC_log_inserted_entry(f,
@@ -1501,46 +1423,6 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_ad
     HDassert(H5F_addr_defined(old_addr));
     HDassert(H5F_addr_defined(new_addr));
     HDassert(H5F_addr_ne(old_addr, new_addr));
-
-#ifdef H5_HAVE_PARALLEL
-#ifdef H5_HAVE_FPHDF5
-    /* In the flexible parallel case, the cache is always empty.
-     * Thus H5AC_rename() has nothing to do by definition.
-     */
-    {
-        H5FD_t *	lf;
-
-        HDassert(f->shared->lf);
-
-        lf = f->shared->lf;
-
-        if ( H5FD_is_fphdf5_driver(lf) ) {
-
-            /* We really should mark the target entry as dirty here, but
-             * the parameter list doesn't give us the information we need
-             * to do the job easily.
-             *
-             * Fortunately, this function is called exactly once in the
-             * the library, so it may be possible to finesse the issue.
-             * If not, I'll have to fix this properly.
-             *
-             * In any case, don't check this code in without revisiting this
-             * issue.
-             *                                       JRM -- 6/6/05
-             *
-             * On reflection, the code was already broken, as there was no
-             * way to advise the SAP that a renamed entry had changed its
-             * address, or was dirty.  I will not worry about it for now, 
-             * but the matter must be addressed if we ever get serious 
-             * about FPHDF5.
-             *					     JRM -- 7/5/05
-             */
-
-            HGOTO_DONE(SUCCEED);
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
-#endif  /* H5_HAVE_PARALLEL */
 
 #ifdef H5_HAVE_PARALLEL
     if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
@@ -1657,11 +1539,7 @@ H5AC_protect(H5F_t *f,
              haddr_t addr,
 	     const void *udata1,
              void *udata2,
-             H5AC_protect_t
-#ifndef H5_HAVE_FPHDF5
-             UNUSED
-#endif /* H5_HAVE_FPHDF5 */
-             rw)
+             H5AC_protect_t UNUSED rw)
 {
     void *		thing = NULL;
     void *		ret_value;      /* Return value */
@@ -1675,100 +1553,6 @@ H5AC_protect(H5F_t *f,
     HDassert(type->flush);
     HDassert(type->load);
     HDassert(H5F_addr_defined(addr));
-
-#ifdef H5_HAVE_PARALLEL
-#ifdef H5_HAVE_FPHDF5
-    /* The following code to support flexible parallel is a direct copy
-     * from the old version of the cache with slight edits.  It should
-     * be viewed with as much suspicion as the rest of the FP code.
-     *                                             JRM - 5/26/04
-     */
-    {
-        H5FD_t *	lf;
-        unsigned	req_id;
-        H5FP_status_t	status;
-        H5AC_info_t *	info;
-
-        HDassert(f->shared->lf);
-
-        lf = f->shared->lf;
-
-        if ( H5FD_is_fphdf5_driver(lf) ) {
-
-            /*
-             * This is the FPHDF5 driver. Grab a lock for this piece of
-             * metadata from the SAP. Bail-out quickly if we're unable to do
-             * that. In the case of the FPHDF5 driver, the local cache is
-             * effectively turned off. We lock the address then load the data
-             * from the SAP (or file) directly. We do this because at any one
-             * time the data on the SAP will be different than what's on the
-             * local process.
-             */
-            if ( H5FP_request_lock(H5FD_fphdf5_file_id(lf), addr,
-                            rw == H5AC_WRITE ? H5FP_LOCK_WRITE : H5FP_LOCK_READ,
-                            TRUE, &req_id, &status) < 0) {
-#if 0
-                HDfprintf(stdout, "H5AC_protect: Lock failed.\n");
-                /*
-                 * FIXME: Check the status variable. If the lock is got
-                 * by some other process, we can loop and wait or bail
-                 * out of this function
-                 */
-                HDfprintf(stderr,
-                          "Couldn't get lock for metadata at address %a\n",
-                          addr);
-#endif /* 0 */
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, \
-                            "can't lock data on SAP!")
-            }
-
-            /* Load a thing from the SAP. */
-            if ( NULL == (thing = type->load(f, dxpl_id, addr,
-                                             udata1, udata2)) ) {
-
-#if 0
-                HDfprintf(stdout,
-                          "%s: Load failed. addr = %a, type->id = %d.\n",
-                          "H5AC_protect",
-                          addr,
-                          (int)(type->id));
-#endif /* 0 */
-                HCOMMON_ERROR(H5E_CACHE, H5E_CANTLOAD, "unable to load object")
-
-                if (H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
-                                              TRUE, &req_id, &status) < 0)
-                    HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, NULL, \
-                                "can't unlock data on SAP!")
-
-                HGOTO_DONE(NULL)
-            }
-
-            info = (H5AC_info_t *)thing;
-
-            HDassert(info->is_dirty == FALSE);
-
-            info->addr = addr;
-            info->type = type;
-            info->is_protected = TRUE;
-
-            if ( (type->size)(f, thing, &(info->size)) < 0 ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, \
-                            "Can't get size of thing")
-            }
-
-            HDassert(info->size < H5C_MAX_ENTRY_SIZE);
-
-            info->next = NULL;
-            info->prev = NULL;
-            info->aux_next = NULL;
-            info->aux_prev = NULL;
-
-            HGOTO_DONE(thing)
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
-#endif  /* H5_HAVE_PARALLEL */
 
     thing = H5C_protect(f,
                         dxpl_id,
@@ -1920,79 +1704,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
             flags = flags | H5AC__SIZE_CHANGED_FLAG;
         }
     }
-
-#ifdef H5_HAVE_PARALLEL
-#ifdef H5_HAVE_FPHDF5
-    /* The following code to support flexible parallel is a direct copy
-     * from the old version of the cache with slight edits.  It should
-     * be viewed with as much suspicion as the rest of the FP code.
-     *                                             JRM - 5/26/04
-     */
-    {
-        H5FD_t *	lf;
-        unsigned	req_id;
-        H5FP_status_t	status;
-
-        HDassert(f->shared->lf);
-
-        lf = f->shared->lf;
-
-        if ( H5FD_is_fphdf5_driver(lf) ) {
-
-            HDassert( ((H5AC_info_t *)thing)->is_protected );
-
-            ((H5AC_info_t *)thing)->is_protected = FALSE;
-
-            /* mark the entry as dirty if appropriate. JRM - 6/6/05 */
-	    ((H5AC_info_t *)thing)->is_dirty |=
-		(flags & H5AC__DIRTIED_FLAG) ? TRUE : FALSE;
-
-            /*
-             * FIXME: If the metadata is *really* deleted at this point
-             * (deleted == TRUE), we need to send a request to the SAP
-             * telling it to remove that bit of metadata from its cache.
-             */
-            /* the deleted parameter has been replaced with the flags
-             * parameter.  The actual value of deleted is still passed
-             * in as a bit in flags.  If it is needed, it can be extracted
-             * as follows:
-             *
-             *      deleted = ( (flags & H5C__DELETED_FLAG) != 0 );
-             *
-             *                                       JRM -- 1/6/05
-             */
-            if ( H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
-                                           TRUE, &req_id, &status) < 0 )
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, FAIL, \
-                            "can't unlock data on SAP!")
-
-            /* Flush a thing to the SAP */
-            if ( thing ) {
-
-                if ( ((H5AC_info_t *)thing)->is_dirty ) {
-
-                    if ( type->flush(f, dxpl_id, FALSE, addr, thing) < 0 ) {
-
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                    "unable to flush object")
-                    }
-                }
-
-                /* Always clear/delete the object from the local cache */
-                if ( type->clear(f, thing, TRUE) < 0 ) {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, \
-                                "unable to free object")
-
-                }
-            }
-
-            /* Exit now. The FPHDF5 stuff is finished. */
-            HGOTO_DONE(SUCCEED)
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
-#endif  /* H5_HAVE_PARALLEL */
 
 #ifdef H5_HAVE_PARALLEL
     if ( ( dirtied ) && ( ((H5AC_info_t *)thing)->is_dirty == FALSE ) &&

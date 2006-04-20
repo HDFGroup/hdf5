@@ -449,8 +449,6 @@
 ./src/H5FDcore.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
-./src/H5FDfphdf5.c
-./src/H5FDfphdf5.h
 ./src/H5FDlog.c
 ./src/H5FDlog.h
 ./src/H5FDmpi.c
@@ -473,11 +471,6 @@
 ./src/H5FLprivate.h
 ./src/H5FO.c
 ./src/H5FOprivate.h
-./src/H5FP.c
-./src/H5FPclient.c
-./src/H5FPprivate.h
-./src/H5FPpublic.h
-./src/H5FPserver.c
 ./src/H5FS.c
 ./src/H5FSprivate.h
 ./src/H5G.c
@@ -753,7 +746,6 @@
 ./testpar/t_cache.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
-./testpar/t_fphdf5.c
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
