@@ -149,6 +149,7 @@ hid_t H5E_CANTDIRTY_g      = FAIL;      /* Unable to mark metadata as dirty */
 /* Parallel MPI errors */
 hid_t H5E_MPI_g            = FAIL;      /* Some MPI function failed */
 hid_t H5E_MPIERRSTR_g      = FAIL;      /* MPI Error String */
+hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive data */
 
 /* Dataspace errors */
 hid_t H5E_CANTCLIP_g       = FAIL;      /* Can't clip hyperslab region */

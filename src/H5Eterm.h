@@ -150,7 +150,8 @@ H5E_CANTDIRTY_g=
 
 /* Parallel MPI errors */    
 H5E_MPI_g=    
-H5E_MPIERRSTR_g=
+H5E_MPIERRSTR_g=    
+H5E_CANTRECV_g=
 
 /* Dataspace errors */    
 H5E_CANTCLIP_g=    

@@ -251,8 +251,10 @@ H5_DLLVAR hid_t H5E_CANTDIRTY_g;     /* Unable to mark metadata as dirty */
 /* Parallel MPI errors */
 #define H5E_MPI              (H5OPEN H5E_MPI_g)
 #define H5E_MPIERRSTR        (H5OPEN H5E_MPIERRSTR_g)
+#define H5E_CANTRECV         (H5OPEN H5E_CANTRECV_g)
 H5_DLLVAR hid_t H5E_MPI_g;           /* Some MPI function failed */
 H5_DLLVAR hid_t H5E_MPIERRSTR_g;     /* MPI Error String */
+H5_DLLVAR hid_t H5E_CANTRECV_g;      /* Can't receive data */
 
 /* Dataspace errors */
 #define H5E_CANTCLIP         (H5OPEN H5E_CANTCLIP_g)
