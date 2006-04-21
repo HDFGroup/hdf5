@@ -70,6 +70,7 @@
 ./config/BlankForm
 ./config/commence.am
 ./config/conclude.am
+./config/craynv
 ./config/dec-flags
 ./config/dec-osf4.x
 ./config/dec-osf5.x
@@ -95,7 +96,6 @@
 ./config/lt_vers.am
 ./config/mpich
 ./config/nec-superux14.1
-./config/nv1-cray
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags

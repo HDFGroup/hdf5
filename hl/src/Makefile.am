@@ -30,8 +30,4 @@ libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5LTparse.c H5LTanalyze
 # Public header files (to be installed)
 include_HEADERS=hdf5_hl.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h
 
-# Automake naturally assumes that we want it to remove H5LTparse.c on distclean.
-# Convince it otherwise.
-distclean-compile:
-
 include $(top_srcdir)/config/conclude.am

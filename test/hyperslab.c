@@ -62,7 +62,9 @@ init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
 	for (j=0; j<ny; j++) {
 	    for (k=0; k<nz; k++) {
 		total += acc;
-		*array++ = acc++;
+		*array = acc;
+		acc++;
+		array++;
 	    }
 	}
     }

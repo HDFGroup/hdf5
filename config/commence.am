@@ -76,7 +76,7 @@ endif
 # but which shouldn't be exported to h5cc for building other programs.
 CFLAGS=@CFLAGS@ @H5_CFLAGS@
 CPPFLAGS=@CPPFLAGS@ @H5_CPPFLAGS@
-FFLAGS=@FFLAGS@ @H5_FFLAGS@
+FCFLAGS=@FCFLAGS@ @H5_FCFLAGS@
 CXXFLAGS=@CXXFLAGS@ @H5_CXXFLAGS@
 
 # The trace script; this is used on source files from the C library to

@@ -150,10 +150,10 @@ if test "X-" = "X-$f9x_flags_set"; then
     # number #. Warning 405 and 412 were stopping the executable from being built.
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FFLAGS="$FFLAGS"
-    DEBUG_FFLAGS="-g"
-    PROD_FFLAGS=""
-    PROFILE_FFLAGS=""
+    FCFLAGS="$FCFLAGS -em"
+    DEBUG_FCFLAGS="-g"
+    PROD_FCFLAGS=""
+    PROFILE_FCFLAGS=""
     f9x_flags_set=yes
 fi
 
