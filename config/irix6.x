@@ -113,10 +113,10 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FCFLAGS="$FCFLAGS -64 -mips4 -O -s"
-  DEBUG_FCFLAGS="-64 -mips4 -O -s"
-  PROD_FCFLAGS="-64 -mips4 -O -s"
-  PROFILE_FCFLAGS="-64 -mips4 -O -s"
+  FCFLAGS="$FCFLAGS -mips4 -O -s"
+  DEBUG_FCFLAGS="-mips4 -O -s"
+  PROD_FCFLAGS="-mips4 -O -s"
+  PROFILE_FCFLAGS="-mips4 -O -s"
   f9x_flags_set=yes
 fi
 
