@@ -5,6 +5,7 @@ Expected output for 'h5diff file7.h5 file8.h5 -v'
 file1     file2
 ---------------------------------------
     x      x    /dset          
+    x      x    /dsetref       
     x      x    /g1            
     x      x    /g1/array      
     x      x    /g1/array2D    
@@ -36,6 +37,7 @@ file1     file2
     x      x    /g1/vlen       
     x      x    /g1/vlen2D     
     x      x    /g1/vlen3D     
+    x      x    /refreg        
 
 Dataset:     </dset> and </dset>
 position        dset            dset            difference          
@@ -43,6 +45,8 @@ position        dset            dset            difference
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
+Dataset:     </dsetref> and </dsetref>
+0 differences found
 Group:       </g1> and </g1>
 0 differences found
 Dataset:     </g1/array> and </g1/array>
@@ -710,6 +714,16 @@ position        vlen3D          vlen3D          difference
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
+Dataset:     </refreg> and </refreg>
+Referenced dataset      5888            5888
+------------------------------------------------------------
+Region blocks
+block #0           (2,2)-(7,7)           (0,0)-(2,2)
+Region points
+point #0              (6,9)              (5,8)
+point #1              (2,2)              (3,3)
+point #2              (8,4)              (7,5)
+4 differences found
 Group:       </> and </>
 0 differences found
 --------------------------------

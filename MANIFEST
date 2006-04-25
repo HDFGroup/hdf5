@@ -812,12 +812,7 @@
 ./tools/h5diff/h5diff_common.h
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
-./tools/h5diff/testh5diff_attr.c
-./tools/h5diff/testh5diff_basic.c
-./tools/h5diff/testh5diff_dset.c
-./tools/h5diff/testh5diff_main.c
-./tools/h5diff/testh5diff_util.c
-./tools/h5diff/testh5diff.h
+./tools/h5diff/h5diffgentest.c
 ./tools/h5diff/testh5diff.sh
 ./tools/h5diff/testph5diff.sh
 
@@ -1186,6 +1181,7 @@
 ./tools/testfiles/h5diff_55.txt
 ./tools/testfiles/h5diff_56.txt
 ./tools/testfiles/h5diff_57.txt
+./tools/testfiles/h5diff_58.txt
 ./tools/testfiles/h5diff_600.txt
 ./tools/testfiles/h5diff_601.txt
 ./tools/testfiles/h5diff_602.txt

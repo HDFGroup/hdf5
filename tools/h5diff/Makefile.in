@@ -30,7 +30,7 @@
 # HDF5 Library Makefile(.in)
 #
 
-SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES) $(ph5diff_SOURCES)
+SOURCES = $(h5diff_SOURCES) $(h5diffgentest_SOURCES) $(ph5diff_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -70,7 +70,7 @@ CONFIG_CLEAN_FILES =
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = ph5diff$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-am__EXEEXT_2 = h5difftst$(EXEEXT)
+am__EXEEXT_2 = h5diffgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am_h5diff_OBJECTS = h5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 h5diff_OBJECTS = $(am_h5diff_OBJECTS)
@@ -78,12 +78,11 @@ h5diff_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
 am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 h5diff_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
-am_h5difftst_OBJECTS = testh5diff_main.$(OBJEXT) \
-	testh5diff_attr.$(OBJEXT) testh5diff_basic.$(OBJEXT) \
-	testh5diff_dset.$(OBJEXT) testh5diff_util.$(OBJEXT)
-h5difftst_OBJECTS = $(am_h5difftst_OBJECTS)
-h5difftst_LDADD = $(LDADD)
-h5difftst_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am_h5diffgentest_OBJECTS = h5diffgentest.$(OBJEXT)
+h5diffgentest_OBJECTS = $(am_h5diffgentest_OBJECTS)
+h5diffgentest_LDADD = $(LDADD)
+h5diffgentest_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2)
 am_ph5diff_OBJECTS = ph5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 ph5diff_OBJECTS = $(am_ph5diff_OBJECTS)
 ph5diff_LDADD = $(LDADD)
@@ -99,8 +98,9 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES) $(ph5diff_SOURCES)
-DIST_SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES) \
+SOURCES = $(h5diff_SOURCES) $(h5diffgentest_SOURCES) \
+	$(ph5diff_SOURCES)
+DIST_SOURCES = $(h5diff_SOURCES) $(h5diffgentest_SOURCES) \
 	$(ph5diff_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -359,7 +359,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 expect_sorted \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SCRIPT_PARA = $(srcdir)/testph5diff.sh
 
 # Test programs and scripts
-TEST_PROG = h5difftst
+TEST_PROG = h5diffgentest
 TEST_SCRIPT = $(srcdir)/testh5diff.sh
 check_SCRIPTS = $(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 # The parallel test script testph5diff.sh actually depends on testh5diff.sh.
@@ -368,9 +368,7 @@ SCRIPT_DEPEND = h5diff$(EXEEXT) $(H5PDIFF) $(srcdir)/testh5diff.sh
 # Source files for the program
 h5diff_SOURCES = h5diff_main.c h5diff_common.c
 ph5diff_SOURCES = ph5diff_main.c h5diff_common.c
-h5difftst_SOURCES = testh5diff_main.c testh5diff_attr.c    \
-    testh5diff_basic.c testh5diff_dset.c testh5diff_util.c
-
+h5diffgentest_SOURCES = h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5) 
@@ -462,9 +460,9 @@ clean-checkPROGRAMS:
 h5diff$(EXEEXT): $(h5diff_OBJECTS) $(h5diff_DEPENDENCIES) 
 	@rm -f h5diff$(EXEEXT)
 	$(LINK) $(h5diff_LDFLAGS) $(h5diff_OBJECTS) $(h5diff_LDADD) $(LIBS)
-h5difftst$(EXEEXT): $(h5difftst_OBJECTS) $(h5difftst_DEPENDENCIES) 
-	@rm -f h5difftst$(EXEEXT)
-	$(LINK) $(h5difftst_LDFLAGS) $(h5difftst_OBJECTS) $(h5difftst_LDADD) $(LIBS)
+h5diffgentest$(EXEEXT): $(h5diffgentest_OBJECTS) $(h5diffgentest_DEPENDENCIES) 
+	@rm -f h5diffgentest$(EXEEXT)
+	$(LINK) $(h5diffgentest_LDFLAGS) $(h5diffgentest_OBJECTS) $(h5diffgentest_LDADD) $(LIBS)
 ph5diff$(EXEEXT): $(ph5diff_OBJECTS) $(ph5diff_DEPENDENCIES) 
 	@rm -f ph5diff$(EXEEXT)
 	$(LINK) $(ph5diff_LDFLAGS) $(ph5diff_OBJECTS) $(ph5diff_LDADD) $(LIBS)
@@ -477,12 +475,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diffgentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ph5diff_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_attr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_basic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_dset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_util.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

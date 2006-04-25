@@ -240,7 +240,7 @@ SKIP() {
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                            ###
+###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
@@ -348,8 +348,8 @@ TOOLTEST h5diff_56.txt file4.h5 file4.h5 -v dset6a dset6b
 # 5.7
 TOOLTEST h5diff_57.txt file4.h5 file4.h5 -v dset7a dset7b
 
-# 5.8 long_long test; different format of long_long print  in Linux and IRIX
-#TOOLTEST h5diff_58.txt file4.h5 file4.h5 dset8a dset8b
+# 5.8 (region reference)
+TOOLTEST h5diff_58.txt file7.h5 file8.h5 -v refreg
 
 # ##############################################################################
 # # Error messages
@@ -482,17 +482,9 @@ TOOLTEST h5diff_80.txt file7.h5 file8.h5 -v
 
 TOOLTEST h5diff_90.txt file1.h5 file1.h5
 
-
-
-
-
-
-
 # ##############################################################################
 # # END
 # ##############################################################################
-
-
 
 if test $nerrors -eq 0 ; then
    echo "All $H5DIFF tests passed."

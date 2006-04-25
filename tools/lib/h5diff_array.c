@@ -52,7 +52,8 @@
 
 /* local functions */
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
-static int     diff_region(hid_t region1_id, hid_t region2_id);
+static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, 
+                           hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t is_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
 
@@ -344,8 +345,6 @@ hsize_t diff_datum(void       *_mem1,
  H5G_obj_t     obj2_type;
  hid_t         obj1_id;
  hid_t         obj2_id;
- H5G_stat_t    sb1;
- H5G_stat_t    sb2;
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
  float         f1, f2, per;
@@ -606,10 +605,10 @@ hsize_t diff_datum(void       *_mem1,
   
   iszero1=is_zero(_mem1, H5Tget_size(m_type));
   iszero2=is_zero(_mem2, H5Tget_size(m_type));
-  if (iszero1==1 && iszero2==1)
+  if (iszero1==1 || iszero2==1)
+  {
    return 0;
-  else if (iszero1!=iszero2)
-   return 1;
+  }
   else
   {
    
@@ -628,10 +627,6 @@ hsize_t diff_datum(void       *_mem1,
      ret= -1;
     if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
      ret= -1;
-    if (H5Gget_objinfo(obj1_id, ".", FALSE, &sb1)<0)
-     ret= -1;
-    if (H5Gget_objinfo(obj2_id, ".", FALSE, &sb2)<0)
-     ret= -1;
     if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
      ret= -1;
     if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2))<0)
@@ -642,10 +637,7 @@ hsize_t diff_datum(void       *_mem1,
      return 0;
     }
     
-    if (diff_region(region1_id,region2_id))
-    {
-     parallel_print("Different region referenced\n");
-    }
+    nfound = diff_region(obj1_id,obj2_id,region1_id,region2_id,options);
     
     close_obj(H5G_DATASET,obj1_id);
     close_obj(H5G_DATASET,obj2_id);
@@ -676,7 +668,8 @@ hsize_t diff_datum(void       *_mem1,
     if (obj1_type!=obj2_type)
     {
      parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
-     return 1;
+     options->not_cmp=1;
+     return 0;
     }
     
     if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1))<0)
@@ -688,7 +681,7 @@ hsize_t diff_datum(void       *_mem1,
      return 0;
     }
     
-    /*deep compare */
+    /* compare */
     switch (obj1_type) {
     case H5G_DATASET:
      nfound=diff_datasetid(obj1_id,
@@ -1716,29 +1709,97 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
   break;
  }
 }
+
+/*-------------------------------------------------------------------------
+ * Function: print_region_block
+ *
+ * Purpose: print start coordinates and opposite corner of a region block 
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void print_region_block(int i, hsize_t *ptdata, int ndims)
+{
+ int j;
+
+ parallel_print("        ");
+ for (j = 0; j < ndims; j++)
+  parallel_print("%s%lu", j ? "," : "   (",
+  (unsigned long)ptdata[i * 2 * ndims + j]);
+ for (j = 0; j < ndims; j++)
+  parallel_print("%s%lu", j ? "," : ")-(",
+  (unsigned long)ptdata[i * 2 * ndims + j + ndims]);
+ parallel_print(")");
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_points
+ *
+ * Purpose: print points of a region reference 
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void print_points(int i, hsize_t *ptdata, int ndims)
+{
+ int j;
+
+ parallel_print("              ");
+ for (j = 0; j < ndims; j++)
+  parallel_print("%s%lu", j ? "," : "(",
+  (unsigned long)(ptdata[i * ndims + j]));
+ parallel_print(")");
+ 
+}
              
 /*-------------------------------------------------------------------------
  * Function: diff_region
  *
  * Purpose: diff a dataspace region
  *
- * Return: 0, diff not found, 1 found
+ * Return: number of differences
  *
  *-------------------------------------------------------------------------
  */
        
-static int diff_region(hid_t region1_id, 
-                       hid_t region2_id)
+static 
+hsize_t diff_region(hid_t obj1_id, 
+                    hid_t obj2_id, 
+                    hid_t region1_id, 
+                    hid_t region2_id,
+                    diff_opt_t *options)
        
 {
- hssize_t  nblocks1, npoints1;
- hssize_t  nblocks2, npoints2;
- hsize_t   alloc_size;
- hsize_t   *ptdata1;
- hsize_t   *ptdata2;
- int       ndims1 = H5Sget_simple_extent_ndims(region1_id);
- int       ndims2 = H5Sget_simple_extent_ndims(region2_id);
- int       ret=0;
+ hssize_t   nblocks1, npoints1;
+ hssize_t   nblocks2, npoints2;
+ H5G_stat_t sb1;
+ H5G_stat_t sb2;
+ hsize_t    alloc_size;
+ hsize_t    *ptdata1;
+ hsize_t    *ptdata2;
+ int        ndims1;
+ int        ndims2;
+ int        i, j, ret;
+ haddr_t    objno1, objno2; /* compact form of object's location */
+ hsize_t    nfound_b=0;     /* block differences found */
+ hsize_t    nfound_p=0;     /* point differences found */
+
+ ndims1 = H5Sget_simple_extent_ndims(region1_id);
+ ndims2 = H5Sget_simple_extent_ndims(region2_id);
+
+ H5Gget_objinfo(obj1_id, ".", FALSE, &sb1);
+ H5Gget_objinfo(obj2_id, ".", FALSE, &sb2);
+
+ objno1 = (haddr_t)sb1.objno[0] | ((haddr_t)sb1.objno[1] << (8 * sizeof(long)));
+ objno2 = (haddr_t)sb2.objno[0] | ((haddr_t)sb2.objno[1] << (8 * sizeof(long)));
 
 /*
  * These two functions fail if the region does not have blocks or points,
@@ -1752,11 +1813,17 @@ static int diff_region(hid_t region1_id,
   npoints1 = H5Sget_select_elem_npoints(region1_id);
   npoints2 = H5Sget_select_elem_npoints(region2_id);
  } H5E_END_TRY;
- 
+
  if (nblocks1!=nblocks2 || npoints1!=npoints2 || ndims1!=ndims2)
-  return 1;
- 
- /* compare block information */
+ {
+  options->not_cmp=1;
+  return 0;
+ }
+
+/*-------------------------------------------------------------------------
+ * compare block information
+ *-------------------------------------------------------------------------
+ */
  if (nblocks1 > 0)
  {
   
@@ -1771,32 +1838,50 @@ static int diff_region(hid_t region1_id,
   H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
   H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
   
-  ret=HDmemcmp(ptdata1,ptdata2,(size_t)alloc_size);
-  
-#if defined (H5DIFF_DEBUG)
   for (i = 0; i < nblocks1; i++)
   {
-   int j;
-   
    /* start coordinates and opposite corner */
    for (j = 0; j < ndims1; j++)
-    parallel_print("%s%lu", j ? "," : "(",
-    (unsigned long)ptdata1[i * 2 * ndims1 + j]);
-   
-   for (j = 0; j < ndims1; j++)
-    parallel_print("%s%lu", j ? "," : ")-(",
-    (unsigned long)ptdata1[i * 2 * ndims1 + j + ndims1]);
-   
-   parallel_print(")\n");
+   {
+    hsize_t start1, start2, end1, end2;
+    start1 = ptdata1[i * 2 * ndims1 + j];
+    start2 = ptdata2[i * 2 * ndims1 + j];
+    end1   = ptdata1[i * 2 * ndims1 + j + ndims1];
+    end2   = ptdata2[i * 2 * ndims1 + j + ndims1];
+    if (start1 != start2 || end1 != end2)
+    {
+     nfound_b++;
+    }
+   }
   }
-#endif
-  
+
+  /* print differences if found */  
+  if (nfound_b)
+  {
+   parallel_print("Referenced dataset      %lu            %lu\n",
+    (unsigned long)objno1,(unsigned long)objno2);
+   parallel_print("------------------------------------------------------------\n");
+
+   parallel_print("Region blocks\n");
+   for (i = 0; i < nblocks1; i++)
+   {
+    parallel_print("block #%d", i);
+    print_region_block(i, ptdata1, ndims1);
+    print_region_block(i, ptdata2, ndims1);
+    parallel_print("\n");
+
+   }
+  }  
   
   HDfree(ptdata1);
   HDfree(ptdata2);
  }
- 
- /* Print point information */
+
+/*-------------------------------------------------------------------------
+ * compare point information
+ *-------------------------------------------------------------------------
+ */
+
  if (npoints1 > 0)
  {
   alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
@@ -1809,9 +1894,45 @@ static int diff_region(hid_t region1_id,
   ptdata2 = malloc((size_t)alloc_size);
   H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
   H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
-  
-  ret=HDmemcmp(ptdata1,ptdata2,(size_t)alloc_size);
-  
+ 
+  for (i = 0; i < npoints1; i++)
+  {
+   hsize_t pt1, pt2;
+   
+   for (j = 0; j < ndims1; j++)
+   {
+    pt1 = ptdata1[i * ndims1 + j];
+    pt2 = ptdata2[i * ndims1 + j];
+    if (pt1 != pt2)
+     nfound_p++;
+   }
+  }
+
+  if (nfound_p)
+  {
+   parallel_print("Region points\n");
+   for (i = 0; i < npoints1; i++)
+   {
+    hsize_t pt1, pt2;
+    int     diff=0;
+    for (j = 0; j < ndims1; j++)
+    {
+     pt1 = ptdata1[i * ndims1 + j];
+     pt2 = ptdata2[i * ndims1 + j];
+     if (pt1 != pt2)
+      diff=1;
+    }
+    if (diff)
+    {
+     parallel_print("point #%d", i);
+     print_points(i, ptdata1, ndims1);
+     print_points(i, ptdata2, ndims1);
+     parallel_print("\n");
+    }
+   }
+  }  
+
+
 #if defined (H5DIFF_DEBUG)
   for (i = 0; i < npoints1; i++)
   {
@@ -1833,7 +1954,7 @@ static int diff_region(hid_t region1_id,
   HDfree(ptdata2);
  }
  
- return ret;
+ return (nfound_p + nfound_b)/2;
 }
 
        

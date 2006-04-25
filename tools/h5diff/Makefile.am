@@ -33,7 +33,7 @@ endif
 bin_PROGRAMS=h5diff $(H5PDIFF)
 
 # Test programs and scripts
-TEST_PROG=h5difftst
+TEST_PROG=h5diffgentest
 TEST_SCRIPT=$(srcdir)/testh5diff.sh
 
 check_PROGRAMS=$(TEST_PROG)
@@ -44,8 +44,7 @@ SCRIPT_DEPEND=h5diff$(EXEEXT) $(H5PDIFF) $(srcdir)/testh5diff.sh
 # Source files for the program
 h5diff_SOURCES=h5diff_main.c h5diff_common.c
 ph5diff_SOURCES=ph5diff_main.c h5diff_common.c
-h5difftst_SOURCES=testh5diff_main.c testh5diff_attr.c    \
-    testh5diff_basic.c testh5diff_dset.c testh5diff_util.c
+h5diffgentest_SOURCES=h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5) 
