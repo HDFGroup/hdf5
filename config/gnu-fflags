@@ -25,10 +25,10 @@
 #   f9x_version:   Version number: 5.0-2, 5.2-2
 #
 if test X = "X$f9x_flags_set"; then
-    f9x_version="`$FC $FCFLAGS -v 2>&1 |grep 'gcc version' |\
+    f9x_version="`$FC $FCFLAGS $H5_FCFLAGS -v 2>&1 |grep 'gcc version' |\
 	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     if test X != "X$f9x_version"; then
-#        is_mpi="`$FC $FCFLAGS -help 2>&1 |grep 'link MPI'`"
+#        is_mpi="`$FC $FCFLAGS $H5_FCFLAGS -help 2>&1 |grep 'link MPI'`"
         f9x_vendor=`echo $f9x_version |sed 's/\([a-z]*\).*/\1/'`
         f9x_version=`echo $f9x_version |sed 's/[-a-z]//g'`
         if test X = "X$f9x_vendor" -a X != "X$f9x_version"; then
@@ -75,7 +75,7 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     FC_BASENAME=gfortran40
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FCFLAGS="$FCFLAGS -pedantic -Wall -Wconversion -Wunderflow -Wimplicit-interface -W"
+    H5_FCFLAGS="$H5_FCFLAGS -pedantic -Wall -Wconversion -Wunderflow -Wimplicit-interface -W"
 
     # Production
     PROD_FCFLAGS="-O2 -s"

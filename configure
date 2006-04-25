@@ -22027,30 +22027,30 @@ echo "${ECHO_T}production" >&6
     fi
 
     CONFIG_MODE=production
-    CFLAGS="$CFLAGS $PROD_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $PROD_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $PROD_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $PROD_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
   X-no)
     enable_production="no"
     echo "$as_me:$LINENO: result: development" >&5
 echo "${ECHO_T}development" >&6
     CONFIG_MODE=development
-    CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $DEBUG_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $DEBUG_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_FCFLAGS"
     ;;
   X-pg|X-profile)
     enable_production="profile"
     echo "$as_me:$LINENO: result: profile" >&5
 echo "${ECHO_T}profile" >&6
     CONFIG_MODE=profile
-    CFLAGS="$CFLAGS $PROFILE_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $PROFILE_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $PROFILE_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $PROFILE_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILE_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILE_FCFLAGS"
     ;;
   *)
     enable_production="user-defined"
@@ -47310,13 +47310,13 @@ all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-    CPPFLAGS="$CPPFLAGS -UNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     echo "$as_me:$LINENO: result: default ($DEBUG_PKG)" >&5
 echo "${ECHO_T}default ($DEBUG_PKG)" >&6
     ;;
   X-all)
     DEBUG_PKG=$all_packages
-    CPPFLAGS="$CPPFLAGS -UNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     echo "$as_me:$LINENO: result: all ($DEBUG_PKG)" >&5
 echo "${ECHO_T}all ($DEBUG_PKG)" >&6
     ;;
@@ -47324,7 +47324,7 @@ echo "${ECHO_T}all ($DEBUG_PKG)" >&6
     echo "$as_me:$LINENO: result: none" >&5
 echo "${ECHO_T}none" >&6
     DEBUG_PKG=
-    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
     ;;
   *)
     echo "$as_me:$LINENO: result: $DEBUG_PKG" >&5
@@ -47334,7 +47334,7 @@ esac
 
 if test -n "$DEBUG_PKG"; then
   for pkg in `echo $DEBUG_PKG | ${TR} 'a-z,' 'A-Z '`; do
-    CPPFLAGS="$CPPFLAGS -DH5${pkg}_DEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
 
@@ -47412,13 +47412,13 @@ case "X-$TRACE" in
     echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
     TRACE_API=yes
-    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DH5_DEBUG_API"
     ;;
   X-no|*)
     echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
     TRACE_API=no
-    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UH5_DEBUG_API"
     ;;
 esac
 
@@ -52995,11 +52995,13 @@ esac
 PRINT_N "                     C Compiler"
 PRINT "$CC"
 
-PRINT_N "                         CFLAGS"
+PRINT_N "                         CFLAGS / H5_CFLAGS"
 PRINT "$CFLAGS"
+PRINT "$H5_CFLAGS"
 
-PRINT_N "                       CPPFLAGS"
+PRINT_N "                       CPPFLAGS / H5_CPPFLAGS"
 PRINT "$CPPFLAGS"
+PRINT "$H5_CPPFLAGS"
 
 PRINT_N "                        LDFLAGS"
 PRINT "$LDFLAGS"
@@ -53039,8 +53041,9 @@ if test X$HDF_CXX = Xyes; then
     PRINT_N "                   C++ Compiler"
     PRINT "$CXX"
 
-    PRINT_N "                       CXXFLAGS"
+    PRINT_N "                       CXXFLAGS / H5_CXXFLAGS"
     PRINT "$CXXFLAGS"
+    PRINT "$H5_CXXFLAGS"
 fi
 
 PRINT_N "                        Fortran"
@@ -53049,8 +53052,9 @@ if test X$HDF_FORTRAN = Xyes; then
     PRINT_N "               Fortran Compiler"
     PRINT "$FC"
 
-    PRINT_N "                         FCFLAGS"
+    PRINT_N "                         FCFLAGS / H5_FCFLAGS"
     PRINT "$FCFLAGS"
+    PRINT "$H5_FCFLAGS"
 fi
 
 PRINT ""

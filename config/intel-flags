@@ -25,7 +25,7 @@
 #   cc_version:   Version number: 8.0
 #
 if test X = "X$cc_flags_set"; then
-    cc_version="`$CC $CFLAGS -V 2>&1 |grep 'Version'`"
+    cc_version="`$CC $CFLAGS $H5_CFLAGS -V 2>&1 |grep 'Version'`"
     if test X != "X$cc_version"; then
         cc_vendor=icc
         cc_version=`echo $cc_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`
@@ -67,7 +67,7 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    CFLAGS="${CFLAGS:--std=c99 $arch}"
+    H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch}"
 
     # Production
     # -Wl,-s to remove all symbols for smaller file

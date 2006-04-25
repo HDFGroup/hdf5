@@ -25,7 +25,7 @@
 #   f9x_version:   Version number: 8.0
 #
 if test X = "X$f9x_flags_set"; then
-    f9x_version="`$FC $FCFLAGS -V 2>&1 |grep '^Intel'`"
+    f9x_version="`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 |grep '^Intel'`"
     if test X != "X$f9x_version"; then
         f9x_vendor=ifort
         f9x_version="`echo $f9x_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`"

@@ -29,7 +29,7 @@ fi
 #       from /usr/include/sys/cdefs.h
 # (Unless we are using g++ as a C compiler)
 if test "X-g++" != "X-$CC"; then
-    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=600" 
+    H5_CPPFLAGS="$H5_CPPFLAGS -D_XOPEN_SOURCE=600" 
 fi
 
 # Figure out C compiler flags

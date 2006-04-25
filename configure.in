@@ -791,28 +791,28 @@ case "X-$enable_production" in
     fi
 
     CONFIG_MODE=production
-    CFLAGS="$CFLAGS $PROD_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $PROD_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $PROD_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $PROD_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
   X-no)
     enable_production="no"
     AC_MSG_RESULT([development])
     CONFIG_MODE=development
-    CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $DEBUG_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $DEBUG_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_FCFLAGS"
     ;;
   X-pg|X-profile)
     enable_production="profile"
     AC_MSG_RESULT([profile])
     CONFIG_MODE=profile
-    CFLAGS="$CFLAGS $PROFILE_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
-    FCFLAGS="$FCFLAGS $PROFILE_FCFLAGS"
+    H5_CFLAGS="$H5_CFLAGS $PROFILE_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $PROFILE_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROFILE_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROFILE_FCFLAGS"
     ;;
   *)
     enable_production="user-defined"
@@ -1749,18 +1749,18 @@ all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-    CPPFLAGS="$CPPFLAGS -UNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT([default ($DEBUG_PKG)])
     ;;
   X-all)
     DEBUG_PKG=$all_packages
-    CPPFLAGS="$CPPFLAGS -UNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT([all ($DEBUG_PKG)])
     ;;
   X-|X-no|X-none)
     AC_MSG_RESULT([none])
     DEBUG_PKG=
-    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
     ;;
   *)
     AC_MSG_RESULT([$DEBUG_PKG])
@@ -1769,7 +1769,7 @@ esac
 
 if test -n "$DEBUG_PKG"; then
   for pkg in `echo $DEBUG_PKG | ${TR} 'a-z,' 'A-Z '`; do
-    CPPFLAGS="$CPPFLAGS -DH5${pkg}_DEBUG"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
 
@@ -1842,12 +1842,12 @@ case "X-$TRACE" in
   X-yes)
     AC_MSG_RESULT([yes])
     TRACE_API=yes
-    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
+    H5_CPPFLAGS="$H5_CPPFLAGS -DH5_DEBUG_API"
     ;;
   X-no|*)
     AC_MSG_RESULT([no])
     TRACE_API=no
-    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+    H5_CPPFLAGS="$H5_CPPFLAGS -UH5_DEBUG_API"
     ;;
 esac
 
@@ -3437,11 +3437,13 @@ esac
 PRINT_N "                     C Compiler"
 PRINT "$CC"
 
-PRINT_N "                         CFLAGS"
+PRINT_N "                         CFLAGS / H5_CFLAGS"
 PRINT "$CFLAGS"
+PRINT "$H5_CFLAGS"
 
-PRINT_N "                       CPPFLAGS"
+PRINT_N "                       CPPFLAGS / H5_CPPFLAGS"
 PRINT "$CPPFLAGS"
+PRINT "$H5_CPPFLAGS"
 
 PRINT_N "                        LDFLAGS"
 PRINT "$LDFLAGS"
@@ -3481,8 +3483,9 @@ if test X$HDF_CXX = Xyes; then
     PRINT_N "                   C++ Compiler"
     PRINT "$CXX"
 
-    PRINT_N "                       CXXFLAGS"
+    PRINT_N "                       CXXFLAGS / H5_CXXFLAGS"
     PRINT "$CXXFLAGS"
+    PRINT "$H5_CXXFLAGS"
 fi
 
 PRINT_N "                        Fortran"
@@ -3491,8 +3494,9 @@ if test X$HDF_FORTRAN = Xyes; then
     PRINT_N "               Fortran Compiler"
     PRINT "$FC"
 
-    PRINT_N "                         FCFLAGS"
+    PRINT_N "                         FCFLAGS / H5_FCFLAGS"
     PRINT "$FCFLAGS"
+    PRINT "$H5_FCFLAGS"
 fi
 
 PRINT ""
