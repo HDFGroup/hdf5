@@ -157,6 +157,8 @@ list-style-type:none;
       <p>3. For users who would like to build and test HDF5 package from the
       command line, please refer to
       INSATLL_Windows_From_Command_Line.txt.</p>
+      <p>4. For .Net and Intel users, If&nbsp; you are not in building HDF5 with 
+      Thread-Safe Feature, ttsafedll.dsp should be turned off always.</p>
       <p class="note">Warnings: Please read CAREFULLY about <a href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#preconditions" target="_blank">
 HDF5 build and install preconditions and notes</a> before starting below procedures.</p>
 
@@ -212,7 +214,8 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
       						<li>testhdf5_cppdll 
       						<li>hdf5_hl_cpp 
       						<li>hdf5_hl_cppdll<li>hl_test_table_cpp</li> 
-      						<li>hl_test_table_cppdll</li>
+      						<li>hl_test_table_cppdll</li> 
+      						<li>ttsafedll</li>
       			</ul>      		
       			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5 
@@ -241,7 +244,8 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
       						<li>libtest_fortran 
       						<li>libtest_fortrandll 
       						<li>testhdf5_fortran 
-      						<li>testhdf5_fortrandll</li>					
+      						<li>testhdf5_fortrandll</li> 
+      						<li>ttsafedll</li>					
       				</ul>      		
       			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5   
@@ -254,7 +258,8 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
     					    
 					<li>hl_test_tabledll<li>hl_test_ds 
     					<li>hl_test_dsdll<li>hl_test_packet</li> 
-    					<li>hl_test_packetdll</li>
+    					<li>hl_test_packetdll</li> 
+    					<li>ttsafedll</li>
 				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5   
 				Libraries. 			</p>		<li><h4>2.4 If you don't want to build HDF5 C++ High-Level&nbsp;Libraries</h4>			<p>Go to "Build" and select "Configuration Manager".        
@@ -262,13 +267,14 @@ HDF5 build and install preconditions and notes</a> before starting below procedu
 				                                                                        
 			<p>Disable the following projects:</p>				<ul class="normal">						<li>hdf5_hl_cpp 
     						<li>hdf5_hl_cppdll<li>hl_test_table_cpp</li> 
-    						<li>hl_test_table_cppdll</li>				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
+    						<li>hl_test_table_cppdll</li> 
+    						<li>ttsafedll</li>				</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or  
 				"Rebuild ALL" to build both release and debug version of HDF5   
 				Libraries.			</p>		<li><h4>2.5 If you don't want to build HDF5 Fortran High-Level Libraries</h4>			<p>Go to "Build" and select "Configuration Manager". Choose "Release" or "Debug" under "Active Solution Configuration".</p>			<p>Disable the following projects:</p>				<ul class="normal">					<li>hdf5_hl_fortran 
     					<li>hdf5_hl_fortrandll<li>hdf5_hl_f90cstubdll<li>hl_test_image_fortran 
       						<li>hl_test_image_fortrandll<li>hl_test_lite_fortran 
       						<li>hl_test_lite_fortrandll<li>hl_test_table_fortran 
-      						<li>hl_test_table_fortrandll</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or 
+      						<li>hl_test_table_fortrandll<li>ttsafedll</ul>			<p>Click on "OK", From the main menu, choose "Build"-&gt; "Build" or 
 				"Rebuild ALL" to build both release and debug version of HDF5
 				Libraries.			</p>		</li>	</ul><hr class="second" >
 

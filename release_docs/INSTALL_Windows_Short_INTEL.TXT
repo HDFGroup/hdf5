@@ -66,6 +66,9 @@ WARNINGS:
 	 want to know detailed information about testing HDF5 Libraries
          and tools, please refer to document INSTALL_Windows.txt, 
          Section II, STEP 2 Testing HDF5 libraries and tools.
+
+      7. For .Net and Intel users, If  you are not building HDF5 with
+         Thread-Safe Feature, ttsafedll.dsp should be turned off always.
   
 ========================================================================
                Part I. INTEL compiler 7.1 with MSVS 6.0
@@ -134,7 +137,8 @@ WARNINGS:
 	       			
       Select "all -- Win32 Debug" or "all -- Win32 Release"
     	        
-      Disable all Fortran project files listed below:
+      Disable all Fortran project files listed below and ttsafedll 
+      project file:
                
              flush1_fortran
              flush1_fortrandll
@@ -158,6 +162,7 @@ WARNINGS:
              hl_test_lite_fortrandll
              hl_test_table_fortran 	 
              hl_test_table_fortrandll 	 
+             ttsafedll
    	        
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
       build debug version of project "all".   			
@@ -200,7 +205,6 @@ WARNINGS:
      		flush2_fortran
        		hdf5_fortran
        		testhdf5_fortran
-       		hdf5_hl_fortran
        		hl_test_image_fortran
                 hl_test_lite_fortran
                 hl_test_table_fortran
@@ -209,11 +213,16 @@ WARNINGS:
         Explorer window. In the Project menu, select 
         "Extract Compaq Visual Fortran Project".  Choose 
         "The Intel Fortran project" as the the main project .
-      
+
+       Do the same thing for hdf5_hl_fortran.
+    
       2.2.3 Change project dependencies of "libtest_fortran"
                      
       Highlight project "libtest_fortran", choose "Project"->
       "Project Dependencies", uncheck "libtest".
+    
+      Highlight project "hdf5_hl_fortran", choose tab "Project"->
+      "Project Dependencies", uncheck "hdf5_fortran" and "hdf5_hl".
                
       2.2.4 Convert all.sln to Use Intel C++ Project System
       
@@ -224,12 +233,11 @@ WARNINGS:
 	      
       2.2.5 Building C and C++ Static and DLL Libraries and  Static 
             Fortran Libraries and Tools
-	  
-      Select "Build", then Select "Set Active Configuration".
-	             
+
       Select "all -- Win32 Debug" or "all -- Win32 Release"
     	        
-      Disable all Fortran DLL project files listed below:
+      Disable all Fortran DLL project files listed below and ttsafedll
+      project file:
 			            
            flush1_fortrandll
            flush2_fortrandll
@@ -241,6 +249,7 @@ WARNINGS:
            hl_test_table_fortrandll
            libtest_fortrandll
            testhdf5_fortrandll
+           ttsafedll
 	                	        
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
       build Debug or Release version of HDF5 C, C++ Static and DLL 

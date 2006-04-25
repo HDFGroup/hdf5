@@ -15,6 +15,9 @@ Notes: This short instruction is written for users who want to quickly
        For users who would like to build and test HDF5 package from the
        command line, please refer to
        INSATLL_Windows_From_Command_Line.txt.
+
+       For .Net and Intel users, If  you are not building HDF5 with 
+       Thread-Safe Feature, ttsafedll.dsp should be turned off always.
         
 WARNINGS:
 
