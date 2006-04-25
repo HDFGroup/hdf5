@@ -369,7 +369,7 @@ test_tconv( H5File& file)
 	// clean up and return with success
 	delete [] out;
 	delete [] in;
-	cerr << " PASSED" << endl;
+	PASSED();
 	return 0;
     }  // end try
 

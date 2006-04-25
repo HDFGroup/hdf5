@@ -1024,116 +1024,116 @@ test_attr_dtype_shared(void)
     H5G_stat_t statbuf;         /* Object's information */
     h5_stat_size_t filesize;             /* Size of file after modifications */
 
-    // Output message about test being performed */
+    // Output message about test being performed
     MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
 
     try {
-	// Create a file */
+	// Create a file
 	H5File fid1(FILENAME, H5F_ACC_TRUNC);
 
-	// Close file */
+	// Close file
 	fid1.close();
 
-	// Get size of file */
-	h5_stat_size_t empty_filesize;       // Size of empty file */
+	// Get size of file
+	h5_stat_size_t empty_filesize;       // Size of empty file
 	empty_filesize = h5_get_file_size(FILENAME.c_str());
 	if (empty_filesize == 0)
     	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
 
-	// Open the file again */
+	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
-	// Create a datatype to commit and use */
+	// Create a datatype to commit and use
 	IntType dtype(PredType::NATIVE_INT);
 
-	// Commit datatype to file */
+	// Commit datatype to file
 	dtype.commit(fid1, TYPE1_NAME);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
 
-	// Create dataspace for dataset */
+	// Create dataspace for dataset
 	DataSpace dspace;
 
-	// Create dataset */
+	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
 
-	// Create attribute on dataset */
+	// Create attribute on dataset
 	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 
-	// Close attribute */
+	// Close attribute
 	attr.close();
 
-	// Delete attribute */
+	// Delete attribute
 	dset.removeAttr(ATTR1_NAME);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
 
-	// Create attribute on dataset */
+	// Create attribute on dataset
 	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
 
-	// Write data into the attribute */
+	// Write data into the attribute
 	attr.write(PredType::NATIVE_INT,&data);
 
-	// Close attribute, dataset, dataspace, datatype, and file */
+	// Close attribute, dataset, dataspace, datatype, and file
 	attr.close();
 	dset.close();
 	dspace.close();
 	dtype.close();
 	fid1.close();
 
-	// Open the file again */
+	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
-	// Open dataset */
+	// Open dataset
 	dset = fid1.openDataSet(DSET1_NAME);
 
-	// Open attribute */
+	// Open attribute
 	attr = dset.openAttribute(ATTR1_NAME);
 
-	// Read data from the attribute */
+	// Read data from the attribute
 	attr.read(PredType::NATIVE_INT, &rdata);
 	verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
 
-	// Close attribute and dataset */
+	// Close attribute and dataset
 	attr.close();
 	dset.close();
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 
-	// Unlink the dataset */
+	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
 
-	// Check reference count on named datatype */
+	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val(statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
 
-	// Unlink the named datatype */
+	// Unlink the named datatype
 	fid1.unlink(TYPE1_NAME);
 
 	// Close file
 	fid1.close();
 
-	// Check size of file */
+	// Check size of file
 	filesize=h5_get_file_size(FILENAME.c_str());
-	verify_val(filesize, empty_filesize, "~H5File", __LINE__, __FILE__);
+	verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
     }   // end try block
 
     catch (Exception E) {
