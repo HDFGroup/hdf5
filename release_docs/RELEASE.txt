@@ -927,6 +927,9 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* On VAX, Scaleoffset filter isn't supported. The filter cannot be applied to
+  HDF5 data generated on VAX. Scaleoffset filter only supports IEEE standard
+  for floating-point data.
 * On Cray X1, a lone colon on the command line of h5dump --xml (as in
   the testh5dumpxml.sh script) is misinterpereted by the operating system
   and causes an error.
@@ -952,8 +955,7 @@ Known Problems
   processor, there's a bug in the compiler for optimization(-O2).  The library
   failed in several tests but all related to multi driver.  The problem has 
   been reported to the vendor.  
-* On windows XP, Fortran DLLs are not working with DEC Fortran 6.6c and Intel
-  8.1.
+* On windows XP, Fortran DLLs are not working with and Intel fortran 8.1.
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command poe.
   Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
