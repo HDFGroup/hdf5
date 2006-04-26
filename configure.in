@@ -81,6 +81,12 @@ AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
 
+dnl Make sure flags are set to something (otherwise macros may set them later).
+CFLAGS="${CFLAGS}"
+CPPFLAGS="${CPPFLAGS}"
+CXXFLAGS="${CXXFLAGS}"
+FCFLAGS="${FCFLAGS}"
+
 dnl Different compilers may need default libraries. They are specified in
 dnl the config/* files, so we put this statement here so that it'll be
 dnl set by the code which follows...
@@ -2353,6 +2359,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
+
 dnl ----------------------------------------------------------------------
 dnl Check to see whether MPI-IO can do collective IO successfully when one or more processes don't do 
 dnl any IOs.
@@ -3439,11 +3446,11 @@ PRINT "$CC"
 
 PRINT_N "                         CFLAGS / H5_CFLAGS"
 PRINT "$CFLAGS"
-PRINT "$H5_CFLAGS"
+PRINT "                         $H5_CFLAGS"
 
 PRINT_N "                       CPPFLAGS / H5_CPPFLAGS"
 PRINT "$CPPFLAGS"
-PRINT "$H5_CPPFLAGS"
+PRINT "                         $H5_CPPFLAGS"
 
 PRINT_N "                        LDFLAGS"
 PRINT "$LDFLAGS"
@@ -3485,7 +3492,7 @@ if test X$HDF_CXX = Xyes; then
 
     PRINT_N "                       CXXFLAGS / H5_CXXFLAGS"
     PRINT "$CXXFLAGS"
-    PRINT "$H5_CXXFLAGS"
+    PRINT "                       $H5_CXXFLAGS"
 fi
 
 PRINT_N "                        Fortran"
@@ -3496,7 +3503,7 @@ if test X$HDF_FORTRAN = Xyes; then
 
     PRINT_N "                         FCFLAGS / H5_FCFLAGS"
     PRINT "$FCFLAGS"
-    PRINT "$H5_FCFLAGS"
+    PRINT "                         $H5_FCFLAGS"
 fi
 
 PRINT ""
