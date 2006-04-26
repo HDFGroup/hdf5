@@ -1787,7 +1787,7 @@ hsize_t diff_region(hid_t obj1_id,
  hsize_t    *ptdata2;
  int        ndims1;
  int        ndims2;
- int        i, j, ret;
+ int        i, j;
  haddr_t    objno1, objno2; /* compact form of object's location */
  hsize_t    nfound_b=0;     /* block differences found */
  hsize_t    nfound_p=0;     /* point differences found */
