@@ -1854,9 +1854,10 @@ hsize_t diff_region(hid_t obj1_id,
     }
    }
   }
+  
 
   /* print differences if found */  
-  if (nfound_b)
+  if (nfound_b && options->m_verbose)
   {
    parallel_print("Referenced dataset      %lu            %lu\n",
     (unsigned long)objno1,(unsigned long)objno2);
@@ -1908,7 +1909,7 @@ hsize_t diff_region(hid_t obj1_id,
    }
   }
 
-  if (nfound_p)
+  if (nfound_p && options->m_verbose)
   {
    parallel_print("Region points\n");
    for (i = 0; i < npoints1; i++)
@@ -1954,7 +1955,9 @@ hsize_t diff_region(hid_t obj1_id,
   HDfree(ptdata2);
  }
  
- return (nfound_p + nfound_b)/2;
+ nfound_b = nfound_b/ndims1;
+ nfound_p = nfound_p/ndims1;
+ return (nfound_p + nfound_b);
 }
 
        
