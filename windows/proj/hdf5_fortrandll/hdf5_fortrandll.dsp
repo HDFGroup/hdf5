@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /define:"HDF5F90_WINDOWS BUILD_HDF5_DLL" /include:"Release/" /dll /nologo /threads /warn:nofileopt
+# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /define:"BUILD_HDF5_DLL" /include:"Release/" /dll /nologo /threads /warn:nofileopt
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "HDF5FORT_CSTUB_USEDLL" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -98,43 +98,43 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5_ff.f90
-NODEP_F90_H5_FF=\
-	".\5GLOBAL.mod"\
+DEP_F90_H5_FF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Aff.f90
-NODEP_F90_H5AFF=\
-	".\5GLOBAL.mod"\
+DEP_F90_H5AFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Dff.f90
-NODEP_F90_H5DFF=\
-	".\5GLOBAL.mod"\
+DEP_F90_H5DFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Eff.f90
-NODEP_F90_H5EFF=\
-	".\5GLOBAL.mod"\
+DEP_F90_H5EFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5f90global.f90
-NODEP_F90_H5F90=\
-	".\5FORTRAN_TYPES.mod"\
+DEP_F90_H5F90=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5fortran_types.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Fff.f90
-NODEP_F90_H5FFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5FFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
@@ -148,69 +148,69 @@ SOURCE=..\..\..\fortran\src\H5fortran_types.f90
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Gff.f90
-NODEP_F90_H5GFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5GFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Iff.f90
-NODEP_F90_H5IFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5IFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Pff.f90
-NODEP_F90_H5PFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5PFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Rff.f90
-NODEP_F90_H5RFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5RFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Sff.f90
-NODEP_F90_H5SFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5SFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Tff.f90
-NODEP_F90_H5TFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5TFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\H5Zff.f90
-NODEP_F90_H5ZFF=\
-	".\Release\H5GLOBAL.MOD"\
+DEP_F90_H5ZFF=\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\fortran\src\HDF5.f90
-NODEP_F90_HDF5_=\
-	".\Release\H5A.MOD"\
-	".\Release\H5D.MOD"\
-	".\Release\H5E.MOD"\
-	".\Release\H5F.MOD"\
-	".\Release\H5G.MOD"\
-	".\Release\H5GLOBAL.MOD"\
-	".\Release\H5I.MOD"\
-	".\Release\H5LIB.MOD"\
-	".\Release\H5P.MOD"\
-	".\Release\H5R.MOD"\
-	".\Release\H5S.MOD"\
-	".\Release\H5T.MOD"\
-	".\Release\H5Z.MOD"\
+DEP_F90_HDF5_=\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5A.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5D.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5E.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5F.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5G.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\h5global.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5I.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5LIB.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5P.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5R.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5S.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5T.mod"\
+	"..\..\..\proj\hdf5_fortrandll\Release\H5Z.mod"\
 	
 # End Source File
 # End Group
