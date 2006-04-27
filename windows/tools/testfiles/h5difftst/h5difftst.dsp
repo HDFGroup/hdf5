@@ -92,23 +92,7 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
 # Begin Source File
 
-SOURCE=..\..\..\..\tools\h5diff\testh5diff_attr.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\..\tools\h5diff\testh5diff_basic.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\..\tools\h5diff\testh5diff_dset.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\..\tools\h5diff\testh5diff_main.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\..\tools\h5diff\testh5diff_util.c
+SOURCE=..\..\..\..\tools\h5diff\h5diffgentest.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
