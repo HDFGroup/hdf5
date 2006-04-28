@@ -233,6 +233,55 @@
  *              This field is NULL if the list is empty.
  *
  *
+ * For very frequently used entries, the protect/unprotect overhead can
+ * become burdensome.  To avoid this overhead, I have modified the cache
+ * to allow entries to be "pinned".  A pinned entry is similar to a 
+ * protected entry, in the sense that it cannot be evicted, and that
+ * the entry can be modified at any time.
+ *
+ * Pinning an entry has the following implications:
+ *
+ *	1) A pinned entry cannot be evicted.  Thus unprotected
+ *         pinned entries reside in the pinned entry list, instead 
+ *         of the LRU list(s) (or other lists maintained by the current
+ *         replacement policy code).
+ *                 
+ *      2) A pinned entry can be accessed or modified at any time.
+ *         Therefore, the cache must check with the entry owner
+ *         before flushing it.  If permission is denied, the
+ *         cache just skips the entry in the flush.
+ * 
+ *      3) A pinned entry can be marked as dirty (and possibly
+ *         change size) while it is unprotected.
+ *
+ *      4) The flush-destroy code must allow pinned entries to
+ *         be unpinned (and possibly unprotected) during the
+ *         flush.
+ *
+ * Since pinned entries cannot be evicted, they must be kept on a pinned
+ * entry list, instead of being entrusted to the replacement policy code.
+ *
+ * Maintaining the pinned entry list requires the following fields:
+ *
+ * pel_len:	Number of entries currently residing on the pinned 
+ * 		entry list.
+ *
+ * pel_size:	Number of bytes of cache entries currently residing on
+ * 		the pinned entry list.
+ *
+ * pel_head_ptr: Pointer to the head of the doubly linked list of pinned
+ * 		but not protected entries.  Note that cache entries on 
+ * 		this list are linked by their next and prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ * pel_tail_ptr: Pointer to the tail of the doubly linked list of pinned
+ * 		but not protected entries.  Note that cache entries on 
+ * 		this list are linked by their next and prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ *
  * The cache must have a replacement policy, and the fields supporting this
  * policy must be accessible from this structure.
  *
@@ -504,6 +553,32 @@
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
+ * pins:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been pinned in the current
+ *		epoch.
+ *
+ * unpins:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been unpinned in the current
+ *		epoch.
+ *
+ * dirty_pins:	Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *		are used to record the number of times an entry with type
+ *		id equal to the array index has been marked dirty while pinned
+ *		in the current epoch.
+ *
+ * pinned_flushes:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
+ * 		cells are used to record the number of times an  entry 
+ * 		with type id equal to the array index has been flushed while 
+ * 		pinned in the current epoch.
+ *
+ * pinned_cleared:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
+ * 		cells are used to record the number of times an  entry 
+ * 		with type id equal to the array index has been cleared while 
+ * 		pinned in the current epoch.
+ *
+ *
  * size_increases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
  *		The cells are used to record the number of times an entry 
  *		with type id equal to the array index has increased in
@@ -552,6 +627,12 @@
  * max_pl_size: Largest value attained by the pl_size field in the
  *              current epoch.
  *
+ * max_pel_len: Largest value attained by the pel_len field in the
+ *              current epoch.
+ *
+ * max_pel_size: Largest value attained by the pel_size field in the
+ *              current epoch.
+ *
  * The remaining stats are collected only when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.
  *
@@ -579,6 +660,11 @@
  *              are used to record the maximum size of any single entry
  *		with type id equal to the array index that has resided in
  *		the cache in the current epoch.
+ *
+ * max_pins:	Array of size_t of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *              are used to record the maximum number of times that any single 
+ *              entry with type id equal to the array index that has been 
+ *              marked as pinned in the cache in the current epoch.
  *
  *
  * Fields supporting testing:
@@ -644,6 +730,11 @@ struct H5C_t
     H5C_cache_entry_t *	        pl_head_ptr;
     H5C_cache_entry_t *  	pl_tail_ptr;
 
+    int32_t                     pel_len;
+    size_t                      pel_size;
+    H5C_cache_entry_t *	        pel_head_ptr;
+    H5C_cache_entry_t *  	pel_tail_ptr;
+
     int32_t                     LRU_list_len;
     size_t                      LRU_list_size;
     H5C_cache_entry_t *		LRU_head_ptr;
@@ -687,6 +778,11 @@ struct H5C_t
     int64_t                     flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     renames[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     pins[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     unpins[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     dirty_pins[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     pinned_flushes[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     pinned_clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_increases[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_decreases[H5C__MAX_NUM_TYPE_IDS + 1];
 
@@ -703,9 +799,11 @@ struct H5C_t
     int32_t                     max_slist_len;
     size_t                      max_slist_size;
 
-
     int32_t                     max_pl_len;
     size_t                      max_pl_size;
+
+    int32_t                     max_pel_len;
+    size_t                      max_pel_size;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -714,6 +812,7 @@ struct H5C_t
     int32_t                     max_clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int32_t                     max_flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     size_t                      max_size[H5C__MAX_NUM_TYPE_IDS + 1];
+    int32_t                     max_pins[H5C__MAX_NUM_TYPE_IDS + 1];
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 

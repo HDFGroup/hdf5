@@ -144,6 +144,9 @@ hid_t H5E_CANTINS_g        = FAIL;      /* Unable to insert metadata into cache 
 hid_t H5E_CANTRENAME_g     = FAIL;      /* Unable to rename metadata */
 hid_t H5E_CANTPROTECT_g    = FAIL;      /* Unable to protect metadata */
 hid_t H5E_CANTUNPROTECT_g  = FAIL;      /* Unable to unprotect metadata */
+hid_t H5E_CANTPIN_g        = FAIL;      /* Unable to pin cache entry */
+hid_t H5E_CANTUNPIN_g      = FAIL;      /* Unable to un-pin cache entry */
+hid_t H5E_CANTMARKDIRTY_g  = FAIL;      /* Unable to mark a pinned entry as dirty */
 hid_t H5E_CANTDIRTY_g      = FAIL;      /* Unable to mark metadata as dirty */
 
 /* Parallel MPI errors */

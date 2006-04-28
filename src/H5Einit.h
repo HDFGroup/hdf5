@@ -534,6 +534,21 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to unprotect metadata"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTUNPROTECT_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTPIN_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to pin cache entry"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTPIN_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTUNPIN_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to un-pin cache entry"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTUNPIN_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTMARKDIRTY_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to mark a pinned entry as dirty"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTMARKDIRTY_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_CANTDIRTY_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to mark metadata as dirty"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")

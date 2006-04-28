@@ -43,6 +43,7 @@
  */
 
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
+#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
@@ -53,7 +54,7 @@
 #endif /* H5_HAVE_PARALLEL */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5ACpkg.h"		/* Metadata cache			*/
 #include "H5Cpkg.h"             /* Cache                                */
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -64,267 +65,8 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
-#define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
-
-/*-------------------------------------------------------------------------
- *  It is a bit difficult to set ranges of allowable values on the 
- *  dirty_bytes_threshold field of H5AC_aux_t.  The following are 
- *  probably broader than they should be.  
- *-------------------------------------------------------------------------
- */
-
-#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(int32_t) \
-						(H5C__MIN_MAX_CACHE_SIZE / 2)
-#define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
-#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
-						(H5C__MAX_MAX_CACHE_SIZE / 4)
-
-/****************************************************************************
- *
- * structure H5AC_aux_t
- *
- * While H5AC has become a wrapper for the cache implemented in H5C.c, there
- * are some features of the metadata cache that are specific to it, and which
- * therefore do not belong in the more generic H5C cache code.
- *
- * In particular, there is the matter of synchronizing writes from the 
- * metadata cache to disk in the PHDF5 case.
- *
- * Prior to this update, the presumption was that all metadata caches would 
- * write the same data at the same time since all operations modifying 
- * metadata must be performed collectively.  Given this assumption, it was 
- * safe to allow only the writes from process 0 to actually make it to disk, 
- * while metadata writes from all other processes were discarded.
- *
- * Unfortunately, this presumption is in error as operations that read 
- * metadata need not be collective, but can change the location of dirty 
- * entries in the metadata cache LRU lists.  This can result in the same 
- * metadata write operation triggering writes from the metadata caches on 
- * some processes, but not all (causing a hang), or in different sets of 
- * entries being written from different caches (potentially resulting in 
- * metadata corruption in the file).
- *
- * To deal with this issue, I decided to apply a paradigm shift to the way
- * metadata is written to disk.
- *
- * With this set of changes, only the metadata cache on process 0 is able 
- * to write metadata to disk, although metadata caches on all other 
- * processes can read metadata from disk as before.
- *
- * To keep all the other caches from getting plugged up with dirty metadata,
- * process 0 periodically broadcasts a list of entries that it has flushed
- * since that last notice, and which are currently clean.  The other caches
- * mark these entries as clean as well, which allows them to evict the 
- * entries as needed.
- *
- * One obvious problem in this approach is synchronizing the broadcasts
- * and receptions, as different caches may see different amounts of 
- * activity.  
- *
- * The current solution is for the caches to track the number of bytes 
- * of newly generated dirty metadata, and to broadcast and receive 
- * whenever this value exceeds some user specified threshold.
- *
- * Maintaining this count is easy for all processes not on process 0 --
- * all that is necessary is to add the size of the entry to the total 
- * whenever there is an insertion, a rename of a previously clean entry,
- * or whever a previously clean entry is marked dirty in an unprotect.
- *
- * On process 0, we have to be careful not to count dirty bytes twice.
- * If an entry is marked dirty, flushed, and marked dirty again, all 
- * within a single reporting period, it only th first marking should 
- * be added to the dirty bytes generated tally, as that is all that 
- * the other processes will see.
- *
- * At present, this structure exists to maintain the fields needed to
- * implement the above scheme, and thus is only used in the parallel
- * case.  However, other uses may arise in the future.
- *
- * Instance of this structure are associated with metadata caches via 
- * the aux_ptr field of H5C_t (see H5Cpkg.h).  The H5AC code is 
- * responsible for allocating, maintaining, and discarding instances
- * of H5AC_aux_t. 
- *
- * The remainder of this header comments documents the individual fields
- * of the structure.
- *
- *                                              JRM - 6/27/05
- *
- * magic:       Unsigned 32 bit integer always set to 
- *		H5AC__H5AC_AUX_T_MAGIC.  This field is used to validate 
- *		pointers to instances of H5AC_aux_t.
- *
- * mpi_comm:	MPI communicator associated with the file for which the
- *		cache has been created.
- *
- * mpi_rank:	MPI rank of this process within mpi_comm.
- *
- * mpi_size:	Number of processes in mpi_comm.
- *
- * write_permitted:  Boolean flag used to control whether the cache
- *		is permitted to write to file.  
- *
- * dirty_bytes_threshold: Integer field containing the dirty bytes 
- *		generation threashold.  Whenever dirty byte creation 
- *		exceeds this value, the metadata cache on process 0 
- *		broadcasts a list of the entries it has flushed since
- *		the last broadcast (or since the beginning of execution)
- *		and which are currently clean (if they are still in the 
- *		cache)
- *
- *		Similarly, metadata caches on processes other than process
- *		0 will attempt to receive a list of clean entries whenever
- *		the threshold is exceeded.
- *
- * dirty_bytes:  Integer field containing the number of bytes of dirty
- *		metadata generated since the beginning of the computation, 
- *		or (more typically) since the last clean entries list 
- *		broadcast.  This field is reset to zero after each such
- *		broadcast.
- *
- * dirty_bytes_propagations: This field only exists when the 
- *		H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of times the cleaned list
- *		has been propagated from process 0 to the other 
- *		processes.
- *
- * unprotect_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of dirty bytes created
- *		via unprotect operations since the last time the cleaned
- *		list was propagated.
- *
- * unprotect_dirty_bytes_updates: This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of times dirty bytes have
- *		been created via unprotect operations since the last time 
- *		the cleaned list was propagated.
- *
- * insert_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of dirty bytes created
- *		via insert operations since the last time the cleaned
- *		list was propagated.
- *
- * insert_dirty_bytes_updates:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of times dirty bytes have
- *		been created via insert operations since the last time 
- *		the cleaned list was propagated.
- *
- * rename_dirty_bytes:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of dirty bytes created
- *		via rename operations since the last time the cleaned
- *		list was propagated.
- *
- * rename_dirty_bytes_updates:  This field only exists when the
- *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
- *
- *		It is used to track the number of times dirty bytes have
- *		been created via rename operations since the last time 
- *		the cleaned list was propagated.
- *
- * d_slist_ptr:  Pointer to an instance of H5SL_t used to maintain a list
- *		of entries that have been dirtied since the last time they
- *		were listed in a clean entries broadcast.  This list is
- *		only maintained by the metadata cache on process 0 -- it
- *		it used to maintain a view of the dirty entries as seen
- *		by the other caches, so as to keep the dirty bytes count
- *		in synchronization with them.
- *
- *		Thus on process 0, the dirty_bytes count is incremented
- *		only if either
- *
- *		1) an entry is inserted in the metadata cache, or
- *
- *		2) a previously clean entry is renamed, and it does not
- *		   already appear in the dirty entry list, or
- *
- *		3) a previously clean entry is unprotected with the 
- *		   dirtied flag set and the entry does not already appear 
- *		   in the dirty entry list.
- *
- *		Entries are added to the dirty entry list whever they cause
- *		the dirty bytes count to be increased.  They are removed 
- *		when they appear in a clean entries broadcast.  Note that
- *		renames must be reflected in the dirty entry list.
- *
- *		To reitterate, this field is only used on process 0 -- it 
- *		should be NULL on all other processes.
- *
- * d_slist_len: Integer field containing the number of entries in the 
- *		dirty entry list.  This field should always contain the 
- *		value 0 on all processes other than process 0.  It exists
- *		primarily for sanity checking.
- *
- * c_slist_ptr: Pointer to an instance of H5SL_t used to maintain a list 
- *		of entries that were dirty, have been flushed
- *		to disk since the last clean entries broadcast, and are
- *		still clean.  Since only process 0 can write to disk, this
- *		list only exists on process 0.
- *
- *		In essence, this slist is used to assemble the contents of
- *		the next clean entries broadcast.  The list emptied after 
- *		each broadcast.
- *		
- * c_slist_len: Integer field containing the number of entries in the clean
- *		entries list (*c_slist_ptr).  This field should always 
- *		contain the value 0 on all processes other than process 0.  
- *		It exists primarily for sanity checking.
- *
- ****************************************************************************/
 
 #ifdef H5_HAVE_PARALLEL
-
-#define H5AC__H5AC_AUX_T_MAGIC        (unsigned)0x00D0A01
-
-typedef struct H5AC_aux_t
-{
-    uint32_t	magic;
-
-    MPI_Comm	mpi_comm;
-
-    int		mpi_rank;
-
-    int		mpi_size;
-
-    hbool_t	write_permitted;
-
-    int32_t	dirty_bytes_threshold;
-
-    int32_t	dirty_bytes;
-
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION 
-
-    int32_t	dirty_bytes_propagations;
-
-    int32_t     unprotect_dirty_bytes;
-    int32_t     unprotect_dirty_bytes_updates;
-
-    int32_t     insert_dirty_bytes;
-    int32_t     insert_dirty_bytes_updates;
-
-    int32_t     rename_dirty_bytes;
-    int32_t     rename_dirty_bytes_updates;
-
-#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-
-    H5SL_t *	d_slist_ptr;
-
-    int32_t	d_slist_len;
-
-    H5SL_t *	c_slist_ptr;
-
-    int32_t	c_slist_len;
-
-} H5AC_aux_t; /* struct H5AC_aux_t */
 
 /* Declare a free list to manage the H5AC_aux_t struct */
 H5FL_DEFINE_STATIC(H5AC_aux_t);
@@ -1221,6 +963,88 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_get_entry_status
+ *
+ * Purpose:     Given a file address, determine whether the metadata
+ * 		cache contains an entry at that location.  If it does,
+ * 		also determine whether the entry is dirty, protected,
+ * 		pinned, etc. and return that information to the caller
+ * 		in *status_ptr.
+ *
+ * 		If the specified entry doesn't exist, set *status_ptr
+ * 		to zero.
+ *
+ * 		On error, the value of *status_ptr is undefined.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/27/06
+ *
+ * Modifications:
+ * 		
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC_get_entry_status(H5C_t *    cache_ptr,
+                      haddr_t    addr,
+		      unsigned * status_ptr)
+{
+    herr_t      ret_value = SUCCEED;      /* Return value */
+    herr_t	result;
+    hbool_t	in_cache;
+    hbool_t	is_dirty;
+    hbool_t	is_protected;
+    hbool_t	is_pinned;
+    size_t	entry_size;
+    unsigned	status = 0;
+
+    FUNC_ENTER_NOAPI(H5AC_get_entry_status, FAIL)
+
+    if ( ( cache_ptr == NULL ) || 
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
+	 ( ! H5F_addr_defined(addr) ) ||
+	 ( status_ptr == NULL ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
+    }
+
+    result = H5C_get_entry_status(cache_ptr, addr, &entry_size, &in_cache,
+		                  &is_dirty, &is_protected, &is_pinned);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_get_entry_status() failed.")
+    }
+
+    if ( in_cache ) {
+
+	status |= H5AC_ES__IN_CACHE;
+
+	if ( is_dirty ) 
+	    status |= H5AC_ES__IS_DIRTY;
+
+	if ( is_protected ) 
+	    status |= H5AC_ES__IS_PROTECTED;
+
+	if ( is_pinned ) 
+	    status |= H5AC_ES__IS_PINNED;
+    }
+    
+    *status_ptr = status;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_get_entry_status() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_set
  *
  * Purpose:     Adds the specified thing to the cache.  The thing need not
@@ -1365,6 +1189,99 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_mark_pinned_entry_dirty
+ *
+ * Purpose:	Mark a pinned entry as dirty.  The target entry MUST be
+ * 		be pinned, and MUST be unprotected.
+ *
+ * 		If the entry has changed size, the function updates 
+ * 		data structures for the size change.
+ *
+ * 		If the entry is not already dirty, the function places
+ * 		the entry on the skip list.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/11/06
+ *
+ * Modifications:
+ *
+ * 		None
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_mark_pinned_entry_dirty(H5C_t * cache_ptr,
+                             void *  thing,
+			     hbool_t size_changed,
+                             size_t  new_size)
+{
+    herr_t		result;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_mark_pinned_entry_dirty, FAIL)
+
+#ifdef H5_HAVE_PARALLEL
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( thing );
+
+    if ( ( ((H5AC_info_t *)thing)->is_dirty == FALSE ) &&
+         ( NULL != cache_ptr->aux_ptr) ) {
+
+        H5AC_info_t *	entry_ptr;
+
+        HDassert( ( size_changed == TRUE ) || ( size_changed == FALSE ) );
+
+        entry_ptr = (H5AC_info_t *)thing;
+
+        if ( ! ( entry_ptr->is_pinned ) ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                            "Entry isn't pinned??")
+        }
+
+        if ( entry_ptr->is_protected ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                        "Entry is protected??")
+        }
+
+        result = H5AC_log_dirtied_entry(cache_ptr,
+                                        entry_ptr,
+                                        entry_ptr->addr,
+                                        size_changed,
+                                        new_size);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                    "H5AC_log_dirtied_entry() failed.")
+        }
+    }
+#endif /* H5_HAVE_PARALLEL */
+
+    result = H5C_mark_pinned_entry_dirty(cache_ptr, 
+		                         thing, 
+					 size_changed,
+			                 new_size);
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                    "H5C_mark_pinned_entry_dirty() failed.")
+
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_mark_pinned_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_rename
  *
  * Purpose:     Use this function to notify the cache that an object's
@@ -1474,6 +1391,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_pin_protected_entry()
+ *
+ * Purpose:	Pin a protected cache entry.  The entry must be protected
+ *              at the time of call, and must be unpinned.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/27/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_pin_protected_entry(H5C_t * cache_ptr,
+                         void *	 thing)
+{
+    herr_t		result;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_pin_protected_entry, FAIL)
+
+    result = H5C_pin_protected_entry(cache_ptr, thing);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
+                    "H5C_pin_protected_entry() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_pin_protected_entry() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If 
@@ -1576,6 +1534,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_protect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_unpin_entry()
+ *
+ * Purpose:	Unpin a cache entry.  The entry must be unprotected at 
+ * 		the time of call, and must be pinned.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/11/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_unpin_entry(H5C_t * cache_ptr,
+                 void *	 thing)
+{
+    herr_t		result;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_unpin_entry, FAIL)
+
+    result = H5C_unpin_entry(cache_ptr, thing);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "H5C_unpin_entry() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_unpin_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -3212,7 +3210,7 @@ H5AC_log_renamed_entry(H5AC_t * cache_ptr,
 
     /* get entry status, size, etc here */
     if ( H5C_get_entry_status(cache_ptr, old_addr, &entry_size, &entry_in_cache,
-                              &entry_dirty, NULL) < 0 ) {
+                              &entry_dirty, NULL, NULL) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
 

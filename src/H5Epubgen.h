@@ -235,6 +235,9 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTRENAME       (H5OPEN H5E_CANTRENAME_g)
 #define H5E_CANTPROTECT      (H5OPEN H5E_CANTPROTECT_g)
 #define H5E_CANTUNPROTECT    (H5OPEN H5E_CANTUNPROTECT_g)
+#define H5E_CANTPIN          (H5OPEN H5E_CANTPIN_g)
+#define H5E_CANTUNPIN        (H5OPEN H5E_CANTUNPIN_g)
+#define H5E_CANTMARKDIRTY    (H5OPEN H5E_CANTMARKDIRTY_g)
 #define H5E_CANTDIRTY        (H5OPEN H5E_CANTDIRTY_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g; /* Unable to serialize data from cache */
@@ -246,6 +249,9 @@ H5_DLLVAR hid_t H5E_CANTINS_g;       /* Unable to insert metadata into cache */
 H5_DLLVAR hid_t H5E_CANTRENAME_g;    /* Unable to rename metadata */
 H5_DLLVAR hid_t H5E_CANTPROTECT_g;   /* Unable to protect metadata */
 H5_DLLVAR hid_t H5E_CANTUNPROTECT_g; /* Unable to unprotect metadata */
+H5_DLLVAR hid_t H5E_CANTPIN_g;       /* Unable to pin cache entry */
+H5_DLLVAR hid_t H5E_CANTUNPIN_g;     /* Unable to un-pin cache entry */
+H5_DLLVAR hid_t H5E_CANTMARKDIRTY_g; /* Unable to mark a pinned entry as dirty */
 H5_DLLVAR hid_t H5E_CANTDIRTY_g;     /* Unable to mark metadata as dirty */
 
 /* Parallel MPI errors */

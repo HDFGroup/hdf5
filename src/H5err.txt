@@ -155,6 +155,9 @@ MINOR, CACHE, H5E_CANTINS, Unable to insert metadata into cache
 MINOR, CACHE, H5E_CANTRENAME, Unable to rename metadata
 MINOR, CACHE, H5E_CANTPROTECT, Unable to protect metadata
 MINOR, CACHE, H5E_CANTUNPROTECT, Unable to unprotect metadata
+MINOR, CACHE, H5E_CANTPIN, Unable to pin cache entry
+MINOR, CACHE, H5E_CANTUNPIN, Unable to un-pin cache entry
+MINOR, CACHE, H5E_CANTMARKDIRTY, Unable to mark a pinned entry as dirty
 MINOR, CACHE, H5E_CANTDIRTY, Unable to mark metadata as dirty
 
 # B-tree related errors

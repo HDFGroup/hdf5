@@ -221,23 +221,45 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__DELETED_FLAG		H5C__DELETED_FLAG
 #define H5AC__DIRTIED_FLAG		H5C__DIRTIED_FLAG
 #define H5AC__SIZE_CHANGED_FLAG		H5C__SIZE_CHANGED_FLAG
+#define H5AC__PIN_ENTRY_FLAG		H5C__PIN_ENTRY_FLAG
+#define H5AC__UNPIN_ENTRY_FLAG		H5C__UNPIN_ENTRY_FLAG
 #define H5AC__FLUSH_INVALIDATE_FLAG	H5C__FLUSH_INVALIDATE_FLAG
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG	H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG	H5C__FLUSH_MARKED_ENTRIES_FLAG
 
 
+/* #defines of flags used to report entry status in the 
+ * H5AC_get_entry_status() call.
+ */
+
+#define H5AC_ES__IN_CACHE	0x0001
+#define H5AC_ES__IS_DIRTY	0x0002
+#define H5AC_ES__IS_PROTECTED	0x0004
+#define H5AC_ES__IS_PINNED	0x0008
+
+
+/* external function declarations: */
 
 H5_DLL herr_t H5AC_init(void);
 H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5AC_get_entry_status(H5C_t * cache_ptr, haddr_t addr,
+				    unsigned * status_ptr);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                        haddr_t addr, void *thing, unsigned int flags);
-H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-                          haddr_t addr, const void *udata1, void *udata2,
-                          H5AC_protect_t rw);
+H5_DLL herr_t H5AC_pin_protected_entry(H5C_t * cache_ptr, void *  thing);
+H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
+                           haddr_t addr, const void *udata1, void *udata2,
+                           H5AC_protect_t rw);
+H5_DLL herr_t H5AC_unpin_entry(H5C_t * cache_ptr,
+		               void *  thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5C_t * cache_ptr,
+		                           void *  thing,
+					   hbool_t size_changed,
+                                           size_t  new_size);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 

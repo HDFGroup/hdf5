@@ -26,6 +26,10 @@
 
 #include "H5Cpkg.h"
 
+#define H5AC_PACKAGE            /*suppress error about including H5Cpkg   */
+
+#include "H5ACpkg.h"
+
 #define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
 #include "H5Fpkg.h"
@@ -55,6 +59,21 @@ MPI_Comm	world_mpi_comm = MPI_COMM_NULL;
 int		file_mpi_size = -1;
 int		file_mpi_rank = -1;
 MPI_Comm	file_mpi_comm = MPI_COMM_NULL;
+
+
+/* the following globals are used to maintain rudementary statistics
+ * to check the validity of the statistics maintained by H5C.c
+ */
+
+long datum_clears          = 0;
+long datum_pinned_clears   = 0;
+long datum_destroys        = 0;
+long datum_flushes         = 0;
+long datum_pinned_flushes  = 0;
+long datum_loads           = 0;
+long global_pins	   = 0;
+long global_dirty_pins	   = 0;
+long local_pins		   = 0;
 
 
 /*****************************************************************************
@@ -91,6 +110,17 @@ MPI_Comm	file_mpi_comm = MPI_COMM_NULL;
  *	locked:	Boolean flag that is set to true iff the entry is in 
  *		the cache and locked.
  *
+ *	global_pinned:	Boolean flag that is set to true iff the entry has 
+ *		been pinned collectively in all caches.  Since writes must
+ *		be collective across all processes, only entries pinned
+ *		in this fashion may be marked dirty.
+ *
+ *	local_pinned:	Boolean flag that is set to true iff the entry
+ *		has been pinned in the local cache, but probably not all
+ *		caches.  Such pins will typically not be consistant across 
+ *		processes, and thus cannot be marked as dirty unless they 
+ *		happen to overlap some collective operation.
+ *
  *	index:	Index of this instance of datum in the data_index[] array
  *		discussed below.
  *
@@ -105,6 +135,8 @@ struct datum
     hbool_t		dirty;
     hbool_t		valid;
     hbool_t		locked;
+    hbool_t		global_pinned;
+    hbool_t		local_pinned;
     int			index;
 };
 
@@ -124,13 +156,42 @@ struct datum
  *****************************************************************************/
 
 #ifndef H5_HAVE_MPE
+
+#if 1 /* JRM */
 #define NUM_DATA_ENTRIES	100000
-#else
-    /* Use a smaller test size to avoid creating huge MPE logfiles. */
+#else /* JRM */
+#define NUM_DATA_ENTRIES	10000
+#endif /* JRM */
+
+#else /* H5_HAVE_MPE */
+
+/* Use a smaller test size to avoid creating huge MPE logfiles. */
 #define NUM_DATA_ENTRIES	1000
-#endif
+
+#endif /* H5_HAVE_MPE */
 
 struct datum data[NUM_DATA_ENTRIES];
+
+
+/* Many tests use the size of data array as the size of test loops.
+ * On some machines, this results in unacceptably long test runs.
+ *
+ * To deal with this issue, I have introduced the virt_num_data_entries 
+ * global, which can be set to a lower value to throtle the length of 
+ * tests.
+ *
+ * Note that this value must always be divisible by 40, and must be an
+ * even divisor of NUM_DATA_ENTRIES.  So far, all tests have been with
+ * powers of 10 that meet these criteria.
+ *
+ * Further, this value must be consistant across all processes.
+ */ 
+
+#define STD_VIRT_NUM_DATA_ENTRIES	NUM_DATA_ENTRIES
+#define EXPRESS_VIRT_NUM_DATA_ENTRIES	(NUM_DATA_ENTRIES / 10)
+#define MPE_VIRT_NUM_DATA_ENTIES	(NUM_DATA_ENTRIES / 100)
+
+int virt_num_data_entries = NUM_DATA_ENTRIES;
 
 
 /*****************************************************************************
@@ -202,6 +263,11 @@ MPI_Datatype mpi_mssg_t;	/* for MPI derived type created from mssg */
 /************************** function declarations ****************************/
 /*****************************************************************************/
 
+/* stats functions */
+
+void print_stats(void);
+void reset_stats(void);
+
 /* MPI setup functions */
 
 hbool_t set_up_file_communicator(void);
@@ -213,9 +279,14 @@ int addr_to_datum_index(haddr_t base_addr);
 void init_data(void);
 
 
+/* test coodination related functions */
+
+int do_express_test(void);
+int get_max_nerrors(void);
+
+
 /* mssg xfer related functions */
 
-int get_max_nerrors(void);
 hbool_t recv_mssg(struct mssg_t *mssg_ptr);
 hbool_t send_mssg(struct mssg_t *mssg_ptr);
 hbool_t setup_derived_types(void);
@@ -260,12 +331,25 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 
 void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr, 
                   int32_t idx, unsigned int flags);
+void local_pin_and_unpin_random_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
+                                        int min_idx, int max_idx, 
+				        int min_count, int max_count);
+void local_pin_random_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
+                            int min_idx, int max_idx);
+void local_unpin_all_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
+			     hbool_t via_unprotect);
+int local_unpin_next_pinned_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
+                                  int start_idx, hbool_t via_unprotect);
 void lock_and_unlock_random_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
                                     int min_idx, int max_idx,
                                     int min_count, int max_count);
 void lock_and_unlock_random_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                                   int min_idx, int max_idx);
 void lock_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx);
+void mark_pinned_entry_dirty(H5C_t * cache_ptr, int32_t idx,
+	                hbool_t size_changed, size_t new_size);
+void pin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
+	       hbool_t global, hbool_t dirty);
 void rename_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t old_idx, int32_t new_idx);
 hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
@@ -274,6 +358,8 @@ void setup_rand(void);
 hbool_t take_down_cache(hid_t fid);
 void unlock_entry(H5C_t * cache_ptr, H5F_t * file_ptr, 
                   int32_t type, unsigned int flags);
+void unpin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
+	         hbool_t global, hbool_t dirty, hbool_t via_unprotect);
 
 
 /* test functions */
@@ -283,6 +369,83 @@ hbool_t smoke_check_1(void);
 hbool_t smoke_check_2(void);
 hbool_t smoke_check_3(void);
 hbool_t smoke_check_4(void);
+
+
+/*****************************************************************************/
+/****************************** stats functions ******************************/
+/*****************************************************************************/
+
+/*****************************************************************************
+ *
+ * Function:	print_stats()
+ *
+ * Purpose:	Print the rudementary stats maintained by t_cache.
+ *
+ * 		This is a debugging function, which will not normally
+ * 		be run as part of t_cache.
+ *
+ * Return:	void
+ *
+ * Programmer:	JRM -- 4/17/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *	
+ *****************************************************************************/
+
+void 
+print_stats(void)
+{
+    HDfprintf(stdout, 
+	      "%d: datum clears / pinned clears / destroys = %ld / %ld / %ld\n",
+              world_mpi_rank, datum_clears, datum_pinned_clears, 
+	      datum_destroys );
+    HDfprintf(stdout, 
+	      "%d: datum flushes / pinned flushes / loads  = %ld / %ld / %ld\n",
+              world_mpi_rank, datum_flushes, datum_pinned_flushes, 
+	      datum_loads );
+    HDfprintf(stdout,
+	      "%d: pins: global / global dirty / local = %ld / %ld / %ld\n",
+	      world_mpi_rank, global_pins, global_dirty_pins, local_pins);
+    HDfflush(stdout);
+
+    return;
+
+} /* print_stats() */
+
+/*****************************************************************************
+ *
+ * Function:	reset_stats()
+ *
+ * Purpose:	Reset the rudementary stats maintained by t_cache.
+ *
+ * Return:	void
+ *
+ * Programmer:	JRM -- 4/17/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *	
+ *****************************************************************************/
+
+void
+reset_stats(void)
+{
+    datum_clears          = 0;
+    datum_pinned_clears   = 0;
+    datum_destroys        = 0;
+    datum_flushes         = 0;
+    datum_pinned_flushes  = 0;
+    datum_loads           = 0;
+    global_pins		  = 0;
+    global_dirty_pins	  = 0;
+    local_pins		  = 0;
+
+    return;
+
+} /* reset_stats() */
 
 
 /*****************************************************************************/
@@ -433,14 +596,6 @@ set_up_file_communicator(void)
         }
     }
 
-#if 0 /* Useful debuggging code -- lets keep it around for a while */
-    if ( success ) {
-
-        fprintf(stdout, "%d:%s: file mpi size = %d, file mpi rank = %d.\n",
-                world_mpi_rank, fcn_name, file_mpi_size, file_mpi_rank);
-    }
-#endif /* JRM */
-
     return(success);
 
 } /* set_up_file_communicator() */
@@ -544,18 +699,21 @@ init_data(void)
 
     /* this must hold so renames don't change entry size. */
     HDassert( (NUM_DATA_ENTRIES / 2) % 20 == 0 );
+    HDassert( (virt_num_data_entries / 2) % 20 == 0 );
 
     for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
     {
-        data[i].base_addr = addr;
-        data[i].len       = (size_t)(addr_offsets[j]);
-        data[i].ver       = 0;
-        data[i].dirty     = FALSE;
-        data[i].valid     = FALSE;
-        data[i].locked    = FALSE;
-	data[i].index     = i;
+        data[i].base_addr     = addr;
+        data[i].len           = (size_t)(addr_offsets[j]);
+        data[i].ver           = 0;
+        data[i].dirty         = FALSE;
+        data[i].valid         = FALSE;
+        data[i].locked        = FALSE;
+	data[i].global_pinned = FALSE;
+	data[i].local_pinned  = FALSE;
+	data[i].index         = i;
 
-        data_index[i]     = i;
+        data_index[i]         = i;
 
         addr += addr_offsets[j];
         HDassert( addr > data[i].base_addr );
@@ -569,8 +727,65 @@ init_data(void)
 
 
 /*****************************************************************************/
-/************************ mssg xfer related functions ************************/
+/******************** test coodination related functions *********************/
 /*****************************************************************************/
+
+/*****************************************************************************
+ *
+ * Function:	do_express_test()
+ *
+ * Purpose:	Do an MPI_Allreduce to obtain the maximum value returned
+ * 		by GetTestExpress() across all processes.  Return this
+ * 		value.
+ *
+ * 		Envirmoment variables can be different across different
+ * 		processes.  This function ensures that all processes agree
+ * 		on whether to do an express test.
+ *
+ * Return:	Success:	Maximum of the values returned by 
+ * 				GetTestExpress() across	all processes.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	JRM -- 4/25/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *	
+ *****************************************************************************/
+
+int
+do_express_test(void)
+{
+    const char * fcn_name = "do_express_test()";
+    int express_test;
+    int max_express_test;
+    int result;
+
+    express_test = GetTestExpress();
+
+    result = MPI_Allreduce((void *)&express_test,
+                           (void *)&max_express_test,
+                           1,
+                           MPI_INT,
+                           MPI_MAX,
+                           world_mpi_comm);
+
+    if ( result != MPI_SUCCESS ) {
+
+        nerrors++;
+        max_express_test = -1;
+        if ( verbose ) {
+            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", 
+                      world_mpi_rank, fcn_name );
+        }
+    } 
+
+    return(max_express_test);
+
+} /* do_express_test() */
+
 
 /*****************************************************************************
  *
@@ -621,6 +836,10 @@ get_max_nerrors(void)
 } /* get_max_nerrors() */
 
 
+/*****************************************************************************/
+/************************ mssg xfer related functions ************************/
+/*****************************************************************************/
+
 /*****************************************************************************
  *
  * Function:	recv_mssg()
@@ -648,7 +867,6 @@ recv_mssg(struct mssg_t *mssg_ptr)
     const char * fcn_name = "recv_mssg()";
     hbool_t success = TRUE;
     int result;
-    static long mssg_num = 0;
     MPI_Status status;
 
     if ( mssg_ptr == NULL ) {
@@ -794,9 +1012,9 @@ setup_derived_types(void)
     hbool_t success = TRUE;
     int i;
     int result;
-    MPI_Datatype types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_LONG,
-                             HADDR_AS_MPI_TYPE, MPI_INT, MPI_INT, 
-                             MPI_UNSIGNED};
+    MPI_Datatype mpi_types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_LONG,
+                                 HADDR_AS_MPI_TYPE, MPI_INT, MPI_INT, 
+                                 MPI_UNSIGNED};
     int block_len[8] = {1, 1, 1, 1, 1, 1, 1, 1};
     MPI_Aint displs[8];
     struct mssg_t sample; /* used to compute displacements */
@@ -829,7 +1047,7 @@ setup_derived_types(void)
 
     if ( success ) {
 
-        result = MPI_Type_struct(8, block_len, displs, types, &mpi_mssg_t);
+        result = MPI_Type_struct(8, block_len, displs, mpi_types, &mpi_mssg_t);
 
         if ( result != MPI_SUCCESS ) {
 
@@ -886,7 +1104,6 @@ takedown_derived_types(void)
 {
     const char * fcn_name = "takedown_derived_types()";
     hbool_t success = TRUE;
-    int i;
     int result;
 
     result = MPI_Type_free(&mpi_mssg_t);
@@ -1225,18 +1442,19 @@ clear_datum(H5F_t * f,
             void *  thing,
              hbool_t dest)
 {
-    int index;
+    int idx;
     struct datum * entry_ptr;
 
     HDassert( thing );
 
     entry_ptr = (struct datum *)thing;
 
-    index = addr_to_datum_index(entry_ptr->base_addr);
+    idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert( index >= 0 );
-    HDassert( index < NUM_DATA_ENTRIES );
-    HDassert( &(data[index]) == entry_ptr );
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
     HDassert( entry_ptr->header.size == entry_ptr->len );
@@ -1248,6 +1466,14 @@ clear_datum(H5F_t * f,
 
         destroy_datum(f, thing);
 
+    }
+
+    datum_clears++;
+
+    if ( entry_ptr->header.is_pinned ) {
+
+        datum_pinned_clears++;
+	HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
     }
 
     return(SUCCEED);
@@ -1275,24 +1501,30 @@ herr_t
 destroy_datum(H5F_t UNUSED * f,
               void *         thing)
 {
-    int index;
+    int idx;
     struct datum * entry_ptr;
 
     HDassert( thing );
 
     entry_ptr = (struct datum *)thing;
 
-    index = addr_to_datum_index(entry_ptr->base_addr);
+    idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert( index >= 0 );
-    HDassert( index < NUM_DATA_ENTRIES );
-    HDassert( &(data[index]) == entry_ptr );
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
     HDassert( entry_ptr->header.size == entry_ptr->len );
 
     HDassert( !(entry_ptr->dirty) );
     HDassert( !(entry_ptr->header.is_dirty) );
+    HDassert( !(entry_ptr->global_pinned) );
+    HDassert( !(entry_ptr->local_pinned) );
+    HDassert( !(entry_ptr->header.is_pinned) );
+
+    datum_destroys++;
 
     return(SUCCEED);
 
@@ -1318,12 +1550,12 @@ herr_t
 flush_datum(H5F_t *f,
             hid_t UNUSED dxpl_id,
             hbool_t dest,
-            haddr_t addr,
+            haddr_t UNUSED addr,
             void *thing)
 {
     const char * fcn_name = "flush_datum()";
     herr_t ret_value = SUCCEED;
-    int index;
+    int idx;
     struct datum * entry_ptr;
     struct mssg_t mssg;
 
@@ -1331,11 +1563,12 @@ flush_datum(H5F_t *f,
 
     entry_ptr = (struct datum *)thing;
 
-    index = addr_to_datum_index(entry_ptr->base_addr);
+    idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert( index >= 0 );
-    HDassert( index < NUM_DATA_ENTRIES );
-    HDassert( &(data[index]) == entry_ptr );
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
     HDassert( entry_ptr->header.size == entry_ptr->len );
@@ -1389,6 +1622,14 @@ flush_datum(H5F_t *f,
         }
     }
 
+    datum_flushes++;
+
+    if ( entry_ptr->header.is_pinned ) {
+    
+        datum_pinned_flushes++;
+	HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
+    }
+
     return(ret_value);
 
 } /* flush_datum() */
@@ -1418,18 +1659,21 @@ load_datum(H5F_t UNUSED *f,
 {
     const char * fcn_name = "load_datum()";
     hbool_t success = TRUE;
-    int index;
+    int idx;
     struct datum * entry_ptr = NULL;
     struct mssg_t mssg;
 
-    index = addr_to_datum_index(addr);
+    idx = addr_to_datum_index(addr);
 
-    HDassert( index >= 0 );
-    HDassert( index < NUM_DATA_ENTRIES );
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
 
-    entry_ptr = &(data[index]);
+    entry_ptr = &(data[idx]);
 
     HDassert( addr == entry_ptr->base_addr );
+    HDassert( ! entry_ptr->global_pinned );
+    HDassert( ! entry_ptr->local_pinned );
 
     /* compose the read message */
     mssg.req       = READ_REQ_CODE;
@@ -1494,6 +1738,8 @@ load_datum(H5F_t UNUSED *f,
 
     }
 
+    datum_loads++;
+
     return(entry_ptr);
 
 } /* load_datum() */
@@ -1519,7 +1765,7 @@ size_datum(H5F_t UNUSED *  f,
            void *   thing,
            size_t * size_ptr)
 {
-    int index;
+    int idx;
     struct datum * entry_ptr;
 
     HDassert( thing );
@@ -1527,11 +1773,12 @@ size_datum(H5F_t UNUSED *  f,
 
     entry_ptr = (struct datum *)thing;
 
-    index = addr_to_datum_index(entry_ptr->base_addr);
+    idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert( index >= 0 );
-    HDassert( index < NUM_DATA_ENTRIES );
-    HDassert( &(data[index]) == entry_ptr );
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
 
@@ -1578,6 +1825,7 @@ insert_entry(H5C_t * cache_ptr,
     HDassert( cache_ptr );
     HDassert( file_ptr );
     HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+    HDassert( idx < virt_num_data_entries );
 
     entry_ptr = &(data[idx]);
 
@@ -1605,11 +1853,26 @@ insert_entry(H5C_t * cache_ptr,
 
         if ( ! (entry_ptr->header.is_dirty) ) {
 
-            nerrors++;
-            if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n",
-	                  world_mpi_rank, fcn_name, idx, 
-                          (int)(data[idx].header.is_dirty));
+	    /* it is possible that we just exceeded the dirty bytes
+	     * threshold, triggering a write of the newly inserted 
+	     * entry.  Test for this, and only flag an error if this
+	     * is not the case.
+	     */
+
+	    struct H5AC_aux_t * aux_ptr;
+
+	    aux_ptr = ((H5AC_aux_t *)(cache_ptr->aux_ptr));
+
+	    if ( ! ( ( aux_ptr != NULL ) &&
+		     ( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC ) &&
+		     ( aux_ptr->dirty_bytes == 0 ) ) ) {
+						    
+                nerrors++;
+                if ( verbose ) {
+	            HDfprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n",
+	                      world_mpi_rank, fcn_name, idx, 
+                              (int)(data[idx].header.is_dirty));
+		}
             }
         }
 
@@ -1620,6 +1883,242 @@ insert_entry(H5C_t * cache_ptr,
     return;
 
 } /* insert_entry() */
+
+
+/*****************************************************************************
+ * Function:    local_pin_and_unpin_random_entries()
+ *
+ * Purpose:     Pin a random number of randomly selected entries in cache, and 
+ *              then unpin a random number of entries.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/12/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+local_pin_and_unpin_random_entries(H5C_t * cache_ptr,
+                                   H5F_t * file_ptr,
+                                   int min_idx,
+                                   int max_idx, 
+				   int min_count, 
+				   int max_count)
+{
+    const char * fcn_name = "local_pin_and_unpin_random_entries()";
+
+    if ( nerrors == 0 ) {
+
+        hbool_t via_unprotect;
+        int count;
+        int i;
+        int idx;
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+        HDassert( 0 <= min_idx );
+        HDassert( min_idx < max_idx );
+        HDassert( max_idx < NUM_DATA_ENTRIES );
+        HDassert( max_idx < virt_num_data_entries );
+	HDassert( 0 <= min_count );
+	HDassert( min_count < max_count );
+
+	count = (HDrand() % (max_count - min_count)) + min_count;
+
+	HDassert( min_count <= count );
+	HDassert( count <= max_count );
+
+	for ( i = 0; i < count; i++ )
+	{
+            local_pin_random_entry(cache_ptr, file_ptr, min_idx, max_idx);
+	}
+
+	count = (HDrand() % (max_count - min_count)) + min_count;
+
+	HDassert( min_count <= count );
+	HDassert( count <= max_count );
+
+        i = 0;
+	idx = 0;
+
+	while ( ( i < count ) && ( idx >= 0 ) )
+	{
+	    via_unprotect = ( (((unsigned)i) & 0x0001) == 0 );
+	    idx = local_unpin_next_pinned_entry(cache_ptr, file_ptr,
+			                        idx, via_unprotect);
+	    i++;
+	}
+    }
+
+    return;
+
+} /* local_pin_and_unpin_random_entries() */
+
+
+/*****************************************************************************
+ * Function:    local_pin_random_entry()
+ *
+ * Purpose:     Pin a randomly selected entry in cache, and mark the entry
+ *              as being locally pinned.  Since this entry will not in 
+ *              general be pinned in any other cache, we can't mark it 
+ *              dirty.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/12/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+local_pin_random_entry(H5C_t * cache_ptr,
+                       H5F_t * file_ptr,
+                       int min_idx,
+                       int max_idx)
+{
+    const char * fcn_name = "local_pin_random_entry()";
+    int idx;
+
+    if ( nerrors == 0 ) {
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+        HDassert( 0 <= min_idx );
+        HDassert( min_idx < max_idx );
+        HDassert( max_idx < NUM_DATA_ENTRIES );
+        HDassert( max_idx < virt_num_data_entries );
+
+	do
+	{
+       	    idx = (HDrand() % (max_idx - min_idx)) + min_idx;
+            HDassert( min_idx <= idx );
+            HDassert( idx <= max_idx );
+	}
+	while ( data[idx].global_pinned || data[idx].local_pinned );
+
+        pin_entry(cache_ptr, file_ptr, idx, FALSE, FALSE);
+    }
+
+    return;
+
+} /* local_pin_random_entry() */
+
+
+/*****************************************************************************
+ * Function:    local_unpin_all_entries()
+ *
+ * Purpose:     Unpin all local pinned entries.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/12/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+local_unpin_all_entries(H5C_t * cache_ptr,
+                        H5F_t * file_ptr,
+			hbool_t via_unprotect)
+{
+    const char * fcn_name = "local_unpin_all_entries()";
+
+    if ( nerrors == 0 ) {
+
+        int idx;
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+
+	idx = 0;
+
+	while ( idx >= 0 ) 
+	{
+	    idx = local_unpin_next_pinned_entry(cache_ptr, file_ptr,
+			                        idx, via_unprotect);
+	}
+    }
+
+    return;
+
+} /* local_unpin_all_entries() */
+
+
+/*****************************************************************************
+ * Function:    local_unpin_next_pinned_entry()
+ *
+ * Purpose:     Find the next locally pinned entry after the specified
+ * 		starting point, and unpin it.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      Index of the unpinned entry if there is one, or -1 if 
+ *              nerrors is non-zero on entry, or if there is no locally 
+ *              pinned entry.
+ *
+ * Programmer:  John Mainzer
+ *              4/12/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+int
+local_unpin_next_pinned_entry(H5C_t * cache_ptr,
+                              H5F_t * file_ptr,
+                              int start_idx,
+			      hbool_t via_unprotect)
+{
+    const char * fcn_name = "local_unpin_next_pinned_entry()";
+    int i = 0;
+    int idx = -1;
+
+    if ( nerrors == 0 ) {
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+        HDassert( 0 <= start_idx );
+        HDassert( start_idx < NUM_DATA_ENTRIES );
+        HDassert( start_idx < virt_num_data_entries );
+
+	idx = start_idx;
+
+	while ( ( i < virt_num_data_entries ) && 
+		( ! ( data[idx].local_pinned ) ) )
+	{
+	    i++;
+	    idx++;
+	    if ( idx >= virt_num_data_entries ) {
+		idx = 0;
+	    }
+	}
+
+	if ( data[idx].local_pinned ) {
+
+	    unpin_entry(cache_ptr, file_ptr, idx, FALSE, FALSE, via_unprotect);
+
+	} else {
+
+	    idx = -1;
+	}
+    }
+
+    return(idx);
+
+} /* local_unpin_next_pinned_entry() */
 
 
 /*****************************************************************************
@@ -1699,7 +2198,7 @@ lock_and_unlock_random_entry(H5C_t * cache_ptr,
                              int max_idx)
 {
     const char * fcn_name = "lock_and_unlock_random_entry()";
-    int index;
+    int idx;
 
     if ( nerrors == 0 ) {
 
@@ -1708,14 +2207,15 @@ lock_and_unlock_random_entry(H5C_t * cache_ptr,
         HDassert( 0 <= min_idx );
         HDassert( min_idx < max_idx );
         HDassert( max_idx < NUM_DATA_ENTRIES );
+        HDassert( max_idx < virt_num_data_entries );
 
-        index = (HDrand() % (max_idx - min_idx)) + min_idx;
+        idx = (HDrand() % (max_idx - min_idx)) + min_idx;
 
-        HDassert( min_idx <= index );
-        HDassert( index <= max_idx );
+        HDassert( min_idx <= idx );
+        HDassert( idx <= max_idx );
 
-	lock_entry(cache_ptr, file_ptr, index);
-	unlock_entry(cache_ptr, file_ptr, index, H5AC__NO_FLAGS_SET);
+	lock_entry(cache_ptr, file_ptr, idx);
+	unlock_entry(cache_ptr, file_ptr, idx, H5AC__NO_FLAGS_SET);
     }
 
     return;
@@ -1752,6 +2252,7 @@ lock_entry(H5C_t * cache_ptr,
 
         HDassert( cache_ptr );
         HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+        HDassert( idx < virt_num_data_entries );
 
         entry_ptr = &(data[idx]);
 
@@ -1777,6 +2278,142 @@ lock_entry(H5C_t * cache_ptr,
     return;
 
 } /* lock_entry() */
+
+
+/*****************************************************************************
+ * Function:    mark_pinned_entry_dirty()
+ *
+ * Purpose:     Mark dirty the entry indicated by the index,
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/14/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+mark_pinned_entry_dirty(H5C_t * cache_ptr,
+                        int32_t idx,
+	                hbool_t size_changed,
+	                size_t new_size)
+{
+    const char * fcn_name = "mark_pinned_entry_dirty()";
+    herr_t result;
+    struct datum * entry_ptr;
+
+    if ( nerrors == 0 ) {
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+        HDassert( idx < virt_num_data_entries );
+
+        entry_ptr = &(data[idx]);
+
+	HDassert ( entry_ptr->global_pinned );
+	HDassert ( ! (entry_ptr->local_pinned) );
+
+        (entry_ptr->ver)++;
+        entry_ptr->dirty = TRUE;
+
+	result = H5AC_mark_pinned_entry_dirty(cache_ptr,
+	                                      (void *)entry_ptr,
+                                              size_changed,
+                                              new_size);
+
+        if ( result < 0 ) {
+
+            nerrors++;
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: error in H5AC_unpin_entry().\n",
+                          world_mpi_rank, fcn_name);
+            }
+        } 
+	else 
+	{
+	    global_dirty_pins++;
+	}
+    }
+
+    return;
+
+} /* mark_pinned_entry_dirty() */
+
+
+/*****************************************************************************
+ * Function:    pin_entry()
+ *
+ * Purpose:     Pin the entry indicated by the index.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/11/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+pin_entry(H5C_t * cache_ptr,
+          H5F_t * file_ptr,
+          int32_t idx,
+	  hbool_t global,
+	  hbool_t dirty)
+{
+    const char * fcn_name = "pin_entry()";
+    unsigned int flags = H5AC__PIN_ENTRY_FLAG;
+    struct datum * entry_ptr;
+
+    if ( nerrors == 0 ) {
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+        HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+        HDassert( idx < virt_num_data_entries );
+
+        entry_ptr = &(data[idx]);
+
+	HDassert ( ! (entry_ptr->global_pinned) );
+	HDassert ( ! (entry_ptr->local_pinned) );
+	HDassert ( ! ( dirty && ( ! global ) ) );
+
+	lock_entry(cache_ptr, file_ptr, idx);
+
+	if ( dirty ) {
+
+	    flags |= H5AC__DIRTIED_FLAG;
+	}
+
+	unlock_entry(cache_ptr, file_ptr, idx, flags);
+
+        HDassert( (entry_ptr->header).is_pinned );
+	HDassert( ( ! dirty ) || ( (entry_ptr->header).is_dirty ) );
+
+	if ( global ) {
+
+	    entry_ptr->global_pinned = TRUE;
+
+	    global_pins++;
+
+	} else {
+
+	    entry_ptr->local_pinned = TRUE;
+
+	    local_pins++;
+
+	}
+    }
+
+    return;
+
+} /* pin_entry() */
 
 
 /*****************************************************************************
@@ -1809,7 +2446,6 @@ rename_entry(H5C_t * cache_ptr,
     const char   * fcn_name = "rename_entry()";
     herr_t         result;
     int		   tmp;
-    hbool_t        done = TRUE; /* will set to FALSE if we have work to do */
     haddr_t        old_addr = HADDR_UNDEF;
     haddr_t        new_addr = HADDR_UNDEF;
     struct datum * old_entry_ptr;
@@ -1820,7 +2456,9 @@ rename_entry(H5C_t * cache_ptr,
         HDassert( cache_ptr );
         HDassert( file_ptr );
         HDassert( ( 0 <= old_idx ) && ( old_idx < NUM_DATA_ENTRIES ) );
+        HDassert( old_idx < virt_num_data_entries );
         HDassert( ( 0 <= new_idx ) && ( new_idx < NUM_DATA_ENTRIES ) );
+        HDassert( new_idx < virt_num_data_entries );
 
         old_entry_ptr = &(data[old_idx]);
         new_entry_ptr = &(data[new_idx]);
@@ -2159,6 +2797,7 @@ setup_rand(void)
 	seed = (unsigned)tv.tv_usec;
 	HDfprintf(stdout, "%d:%s: seed = %d.\n", 
                   world_mpi_rank, fcn_name, seed);
+	fflush(stdout);
         HDsrand(seed);
     }
 
@@ -2258,6 +2897,7 @@ unlock_entry(H5C_t * cache_ptr,
         HDassert( cache_ptr );
         HDassert( file_ptr );
         HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+        HDassert( idx < virt_num_data_entries );
 
         entry_ptr = &(data[idx]);
 
@@ -2269,7 +2909,8 @@ unlock_entry(H5C_t * cache_ptr,
             entry_ptr->dirty = TRUE;
         }
 
-        result = H5AC_unprotect(file_ptr, -1, &(types[0]), entry_ptr->base_addr,
+        result = H5AC_unprotect(file_ptr, -1, &(types[0]), 
+			        entry_ptr->base_addr,
                                 (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -2297,6 +2938,98 @@ unlock_entry(H5C_t * cache_ptr,
     return;
 
 } /* unlock_entry() */
+
+
+/*****************************************************************************
+ * Function:    unpin_entry()
+ *
+ * Purpose:     Unpin the entry indicated by the index.
+ *
+ *              Do nothing if nerrors is non-zero on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/12/06
+ *
+ * Modifications:
+ *
+ *****************************************************************************/
+
+void
+unpin_entry(H5C_t * cache_ptr,
+            H5F_t * file_ptr,
+            int32_t idx,
+            hbool_t global,
+            hbool_t dirty,
+            hbool_t via_unprotect)
+{
+    const char * fcn_name = "unpin_entry()";
+    herr_t result;
+    unsigned int flags = H5AC__UNPIN_ENTRY_FLAG;
+    struct datum * entry_ptr;
+
+    if ( nerrors == 0 ) {
+
+        HDassert( cache_ptr );
+        HDassert( file_ptr );
+        HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
+        HDassert( idx < virt_num_data_entries );
+
+        entry_ptr = &(data[idx]);
+
+	HDassert ( ! ( entry_ptr->global_pinned && entry_ptr->local_pinned) );
+	HDassert ( ( global && entry_ptr->global_pinned ) ||
+		   ( ! global && entry_ptr->local_pinned ) );
+	HDassert ( ! ( dirty && ( ! global ) ) );
+
+	if ( via_unprotect ) {
+
+	    lock_entry(cache_ptr, file_ptr, idx);
+
+	    if ( dirty ) {
+
+	        flags |= H5AC__DIRTIED_FLAG;
+	    }
+
+	    unlock_entry(cache_ptr, file_ptr, idx, flags);
+
+	} else {
+
+	    if ( dirty ) {
+
+		mark_pinned_entry_dirty(cache_ptr, idx, FALSE, (size_t)0);
+
+	    }
+
+	    result = H5AC_unpin_entry(cache_ptr, (void *)entry_ptr);
+
+	    if ( result < 0 ) {
+
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: error in H5AC_unpin_entry().\n",
+	                      world_mpi_rank, fcn_name);
+                }
+	    }
+	}
+
+        HDassert( ! ((entry_ptr->header).is_pinned) );
+
+	if ( global ) {
+
+	    entry_ptr->global_pinned = FALSE;
+
+	} else {
+
+	    entry_ptr->local_pinned = FALSE;
+
+	}
+    }
+
+    return;
+
+} /* unpin_entry() */
 
 
 /*****************************************************************************/
@@ -2336,6 +3069,7 @@ server_smoke_check(void)
 
     nerrors = 0;
     init_data();
+    reset_stats();
 
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
@@ -2512,6 +3246,7 @@ smoke_check_1(void)
 
     nerrors = 0;
     init_data();
+    reset_stats();
 
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
@@ -2538,31 +3273,33 @@ smoke_check_1(void)
             }
         }
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
         }
 
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-- )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
         }
 
         /* rename the first half of the entries... */
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
         }
 
         /* ...and then rename them back. */
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-- )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
         }
 
         if ( fid >= 0 ) {
@@ -2598,7 +3335,6 @@ smoke_check_1(void)
         mssg.magic     = MSSG_MAGIC;
 
         if ( success ) {
-
 
             success = send_mssg(&mssg);
 
@@ -2652,7 +3388,11 @@ smoke_check_1(void)
  *
  * Modifications:
  *
- *		None.
+ *		JRM -- 4/13/06
+ *		Added pinned entry tests.
+ *
+ *		JRM -- 4/28/06
+ *		Modified test to rename pinned entries.
  *	
  *****************************************************************************/
 
@@ -2675,6 +3415,7 @@ smoke_check_2(void)
 
     nerrors = 0;
     init_data();
+    reset_stats();
 
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
@@ -2701,7 +3442,7 @@ smoke_check_2(void)
             }
         }
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
 
@@ -2712,42 +3453,71 @@ smoke_check_2(void)
             }
         }
 
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-=2 )
+	for ( i = 0; i < (virt_num_data_entries / 2); i+=61 )
+	{
+	    /* Make sure we don't step on any locally pinned entries */
+	    if ( data[i].local_pinned ) {
+		unpin_entry(cache_ptr, file_ptr, i, FALSE, FALSE, FALSE);
+	    }
+
+	    pin_entry(cache_ptr, file_ptr, i, TRUE, FALSE);
+	}
+
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-=2 )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 20), 0, 100);
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 20), 
+					   0, 100);
+	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
+			                       (virt_num_data_entries / 4), 
+					       0, 3);
         }
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
+        for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 10), 0, 100);
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 10), 
+					   0, 100);
         }
 
+	/* we can't rename pinned entries, so release any local pins now. */
+	local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
+
         /* rename the first half of the entries... */
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, ((NUM_DATA_ENTRIES / 50) - 1), 
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   ((virt_num_data_entries / 50) - 1), 
                                            0, 100);
         }
 
         /* ...and then rename them back. */
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-- )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 100), 0, 100);
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 100), 
+					   0, 100);
         }
+
+	for ( i = 0; i < (virt_num_data_entries / 2); i+=61 )
+	{
+	    hbool_t via_unprotect = ( (((unsigned)i) & 0x01) == 0 );
+	    hbool_t dirty = ( (((unsigned)i) & 0x02) == 0 );
+
+	    unpin_entry(cache_ptr, file_ptr, i, TRUE, dirty, via_unprotect);
+	}
 
         if ( fid >= 0 ) {
 
@@ -2782,7 +3552,6 @@ smoke_check_2(void)
         mssg.magic     = MSSG_MAGIC;
 
         if ( success ) {
-
 
             success = send_mssg(&mssg);
 
@@ -2842,6 +3611,8 @@ smoke_check_2(void)
  *		Added code intended to ensure correct operation with large
  *		numbers of processors.
  *							JRM - 1/31/06
+ *
+ *		Added pinned entry tests.		JRM - 4/14/06
  *	
  *****************************************************************************/
 
@@ -2868,6 +3639,7 @@ smoke_check_3(void)
 
     nerrors = 0;
     init_data();
+    reset_stats();
 
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
@@ -2894,11 +3666,10 @@ smoke_check_3(void)
             }
         }
 
-        
         min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
         max_count = min_count + 50;
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 4); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 4); i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
 
@@ -2910,12 +3681,32 @@ smoke_check_3(void)
             }
         }
 
+
         min_count = 100 / ((file_mpi_rank + 2) * (file_mpi_rank + 2));
         max_count = min_count + 50;
 
-        for ( i = (NUM_DATA_ENTRIES / 4); i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = (virt_num_data_entries / 4); 
+	      i < (virt_num_data_entries / 2); 
+	      i++ )
         {
+
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+
+	    if ( i % 59 == 0 ) {
+
+		hbool_t dirty = ( (i % 2) == 0);
+
+		if ( data[i].local_pinned ) {
+		    unpin_entry(cache_ptr, file_ptr, i, FALSE, FALSE, FALSE);
+		}
+
+		pin_entry(cache_ptr, file_ptr, i, TRUE, dirty);
+
+	        HDassert( !dirty || data[i].header.is_dirty );
+	        HDassert( data[i].header.is_pinned );
+	        HDassert( data[i].global_pinned );
+	        HDassert( ! data[i].local_pinned );
+	    }
 
             if ( i > 100 ) {
 
@@ -2923,33 +3714,68 @@ smoke_check_3(void)
                                                (i - 100), i,
                                                min_count, max_count);
             }
+
+	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr,
+                                               0, virt_num_data_entries / 4, 
+					       0, (file_mpi_rank + 2));
+
+	}
+
+
+	/* flush the file to be sure that we have no problems flushing
+	 * pinned entries
+	 */
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+            nerrors++;
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+                          world_mpi_rank, fcn_name);
+            }
         }
 
+
         min_idx = 0;
-        max_idx = ((NUM_DATA_ENTRIES / 10) / 
+        max_idx = ((virt_num_data_entries / 10) / 
                    ((file_mpi_rank + 1) * (file_mpi_rank + 1))) - 1;
         if ( max_idx <= min_idx ) {
 
             max_idx = min_idx + 10;
         }
 
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-=2 )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
-	    lock_entry(cache_ptr, file_ptr, i);
-	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           min_idx, max_idx, 0, 100);
+	    if ( ( i >= (virt_num_data_entries / 4) ) && ( i % 59 == 0 ) ) {
+
+                hbool_t via_unprotect = ( (((unsigned)i) & 0x02) == 0 );
+	        hbool_t dirty = ( (((unsigned)i) & 0x04) == 0 );
+
+		HDassert( data[i].global_pinned );
+		HDassert( ! data[i].local_pinned );
+
+		unpin_entry(cache_ptr, file_ptr, i, TRUE, dirty, 
+			    via_unprotect);
+	    }
+	    if ( i % 2 == 0 ) {
+
+	        lock_entry(cache_ptr, file_ptr, i);
+	        unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+	        local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
+				                   virt_num_data_entries / 2, 
+						   0, 2);
+	        lock_and_unlock_random_entries(cache_ptr, file_ptr,
+                                               min_idx, max_idx, 0, 100);
+	    }
         }
 
         min_idx = 0;
-        max_idx = ((NUM_DATA_ENTRIES / 10) / 
+        max_idx = ((virt_num_data_entries / 10) / 
                    ((file_mpi_rank + 3) * (file_mpi_rank + 3))) - 1;
         if ( max_idx <= min_idx ) {
 
             max_idx = min_idx + 10;
         }
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
+        for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
@@ -2957,28 +3783,33 @@ smoke_check_3(void)
                                            min_idx, max_idx, 0, 100);
         }
 
+        /* we can't rename pinned entries, so release any local pins now. */
+        local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
+
         min_count = 10 / (file_mpi_rank + 1);
         max_count = min_count + 100;
 
         /* rename the first half of the entries... */
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 20), 
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 20), 
                                            min_count, max_count);
         }
 
         /* ...and then rename them back. */
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-- )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 40),
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 40),
                                            min_count, max_count);
         }
 
@@ -2988,8 +3819,12 @@ smoke_check_3(void)
         min_count = 200 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
         max_count = min_count + 100;
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
+        for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
+	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
+			                       (virt_num_data_entries / 2), 
+					       0, 5);
+
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
 
@@ -3000,6 +3835,9 @@ smoke_check_3(void)
                                                min_count, max_count);
             }
         }
+
+        /* release any local pins before we take down the cache. */
+        local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
         if ( fid >= 0 ) {
 
@@ -3120,6 +3958,7 @@ smoke_check_4(void)
 
     nerrors = 0;
     init_data();
+    reset_stats();
 
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
@@ -3150,7 +3989,7 @@ smoke_check_4(void)
         min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 50;
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 4); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 4); i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
 
@@ -3165,9 +4004,27 @@ smoke_check_4(void)
         min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
-        for ( i = (NUM_DATA_ENTRIES / 4); i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = (virt_num_data_entries / 4); 
+	      i < (virt_num_data_entries / 2); 
+	      i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+
+            if ( i % 59 == 0 ) {
+
+                hbool_t dirty = ( (i % 2) == 0);
+
+                if ( data[i].local_pinned ) {
+                    unpin_entry(cache_ptr, file_ptr, i, FALSE, FALSE, FALSE);
+                }
+
+                pin_entry(cache_ptr, file_ptr, i, TRUE, dirty);
+
+                HDassert( !dirty || data[i].header.is_dirty );
+                HDassert( data[i].header.is_pinned );
+                HDassert( data[i].global_pinned );
+                HDassert( ! data[i].local_pinned );
+            }
 
             if ( i > 100 ) {
 
@@ -3175,54 +4032,90 @@ smoke_check_4(void)
                                                (i - 100), i,
                                                min_count, max_count);
             }
+
+            local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
+			                       (virt_num_data_entries / 4),
+                                               0, (file_mpi_rank + 2));
         }
 
+
+        /* flush the file to be sure that we have no problems flushing
+	 * pinned entries
+	 */
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+            nerrors++;
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
+                          world_mpi_rank, fcn_name);
+            }
+        }
+
+
         min_idx = 0;
-        max_idx = (((NUM_DATA_ENTRIES / 10) / 4) * 
+        max_idx = (((virt_num_data_entries / 10) / 4) * 
                    ((file_mpi_rank % 4) + 1)) - 1;
 
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-=2 )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
-	    lock_entry(cache_ptr, file_ptr, i);
-	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           min_idx, max_idx, 0, 100);
+            if ( ( i >= (virt_num_data_entries / 4) ) && ( i % 59 == 0 ) ) {
+
+                hbool_t via_unprotect = ( (((unsigned)i) & 0x02) == 0 );
+                hbool_t dirty = ( (((unsigned)i) & 0x04) == 0 );
+
+                HDassert( data[i].global_pinned );
+                HDassert( ! data[i].local_pinned );
+
+                unpin_entry(cache_ptr, file_ptr, i, TRUE, dirty, via_unprotect);
+            }
+
+	    if ( i % 2 == 0 ) {
+
+	        lock_entry(cache_ptr, file_ptr, i);
+	        unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+	        lock_and_unlock_random_entries(cache_ptr, file_ptr,
+                                               min_idx, max_idx, 0, 100);
+	    }
         }
 
         min_idx = 0;
-        max_idx = (((NUM_DATA_ENTRIES / 10) / 8) * 
+        max_idx = (((virt_num_data_entries / 10) / 8) * 
                    ((file_mpi_rank % 4) + 1)) - 1;
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
+        for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
                                            min_idx, max_idx, 0, 100);
         }
+
+	/* we can't rename pinned entries, so release any local pins now. */
+	local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
         min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
         /* rename the first half of the entries... */
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i++ )
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 20), 
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 20), 
                                            min_count, max_count);
         }
 
         /* ...and then rename them back. */
-        for ( i = (NUM_DATA_ENTRIES / 2) - 1; i >= 0; i-- )
+        for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, (i + (NUM_DATA_ENTRIES / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                           0, (NUM_DATA_ENTRIES / 40),
+	    rename_entry(cache_ptr, file_ptr, i, 
+			 (i + (virt_num_data_entries / 2)));
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+			                   (virt_num_data_entries / 40),
                                            min_count, max_count);
         }
 
@@ -3232,7 +4125,7 @@ smoke_check_4(void)
         min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
-        for ( i = 0; i < (NUM_DATA_ENTRIES / 2); i+=2 )
+        for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
@@ -3337,10 +4230,10 @@ int
 main(int argc, char **argv)
 {
     const char * fcn_name = "main()";
+    int express_test;
     int i;
     int mpi_size;
     int mpi_rank;
-    int ret_code;
     int max_nerrors;
 
     MPI_Init(&argc, &argv);
@@ -3354,10 +4247,29 @@ main(int argc, char **argv)
 
     H5open();
 
+    if ( express_test = do_express_test() ) {
+
+#if 0 /* I'll want this from time to time */
+	HDfprintf(stdout, "%d:%s: Express test.\n", world_mpi_rank, fcn_name);
+#endif 
+	virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
+
+    } else {
+
+	virt_num_data_entries = STD_VIRT_NUM_DATA_ENTRIES;
+    }
+
+#ifdef H5_HAVE_MPE
+    if ( MAINPROCESS ) { printf("	Tests compiled for MPE.\n"); }
+    virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
+#endif /* H5_HAVE_MPE */
+
+
     if (MAINPROCESS){
 	printf("===================================\n");
 	printf("Parallel metadata cache tests\n");
-	printf("	mpi_size = %d\n", mpi_size);
+	printf("	mpi_size     = %d\n", mpi_size);
+	printf("	express_test = %d\n", express_test);
 	printf("===================================\n");
     }
 
@@ -3463,6 +4375,8 @@ main(int argc, char **argv)
     /* run the tests */
 #if 1
     server_smoke_check();
+#endif
+#if 1
     smoke_check_1();
 #endif
 #if 1

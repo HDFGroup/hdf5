@@ -396,6 +396,7 @@
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
 ./src/H5AC.c
+./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
 ./src/H5B.c

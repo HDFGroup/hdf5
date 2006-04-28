@@ -243,10 +243,41 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
  *
+ * is_pinned:	Boolean flag indicating whether the entry has been pinned
+ * 		in the cache.
+ *
+ * 		For very hot entries, the protect / unprotect overhead 
+ * 		can become excessive.  Thus the cache has been extended
+ * 		to allow an entry to be "pinned" in the cache.
+ *
+ * 		Pinning an entry in the cache has several implications:
+ *
+ * 		1) A pinned entry cannot be evicted.  Thus unprotected
+ * 		   pinned entries must be stored in the pinned entry
+ * 		   list, instead of being managed by the replacement
+ * 		   policy code (LRU at present).
+ *
+ * 		2) A pinned entry can be accessed or modified at any time.
+ * 		   Therefore, the cache must check with the entry owner
+ * 		   before flushing it.  If permission is denied, the 
+ * 		   cache does not flush the entry.
+ *
+ * 		3) A pinned entry can be marked as dirty (and possibly 
+ *		   change size) while it is unprotected.
+ *
+ *		4) The flush-destroy code must allow pinned entries to 
+ *		   be unpinned (and possibly unprotected) during the 
+ *		   flush.
+ *
+ *		   					JRM -- 3/16/06
+ *
  * in_slist:	Boolean flag indicating whether the entry is in the skip list
  *		As a general rule, entries are placed in the list when they
  *              are marked dirty.  However they may remain in the list after
  *              being flushed.
+ *
+ *              Update: Dirty entries are now removed from the skip list
+ *			when they are flushed.
  *
  * flush_marker:  Boolean flag indicating that the entry is to be flushed
  *		the next time H5C_flush_cache() is called with the
@@ -359,6 +390,9 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * flushes:	int32_t containing the number of times this cache entry has
  *              been flushed to file in its life time.
  *
+ * pins:	int32_t containing the number of times this cache entry has
+ * 		been pinned in cache in its life time.  
+ *
  ****************************************************************************/
 
 typedef struct H5C_cache_entry_t
@@ -368,6 +402,7 @@ typedef struct H5C_cache_entry_t
     const H5C_class_t *	type;
     hbool_t		is_dirty;
     hbool_t		is_protected;
+    hbool_t		is_pinned;
     hbool_t		in_slist;
     hbool_t		flush_marker;
 #ifdef H5_HAVE_PARALLEL
@@ -393,6 +428,7 @@ typedef struct H5C_cache_entry_t
     int32_t			accesses;
     int32_t			clears;
     int32_t			flushes;
+    int32_t			pins;
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
@@ -708,16 +744,18 @@ typedef struct H5C_auto_size_ctl_t
 /* These flags applies only to H5C_unprotect() */
 #define H5C__DIRTIED_FLAG			0x0004
 #define H5C__SIZE_CHANGED_FLAG			0x0008
+#define H5C__PIN_ENTRY_FLAG			0x0010
+#define H5C__UNPIN_ENTRY_FLAG			0x0020
 
 /* These flags apply to H5C_flush_cache() & H5C_flush_single_entry() */
-#define H5C__FLUSH_INVALIDATE_FLAG		0x0010
-#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0020
-#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0040
+#define H5C__FLUSH_INVALIDATE_FLAG		0x0040
+#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0080
+#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0100
 
 /* This flag applies to H5C_flush_cache() only.  It is an error to use
  * it in combination with the H5C__FLUSH_INVALIDATE_FLAG
  */
-#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0080
+#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
 
 
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
@@ -773,7 +811,8 @@ H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
                                    size_t *  size_ptr,
                                    hbool_t * in_cache_ptr,
                                    hbool_t * is_dirty_ptr,
-                                   hbool_t * is_protected_ptr);
+                                   hbool_t * is_protected_ptr,
+				   hbool_t * is_pinned_ptr);
 
 H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               primary_dxpl_id,
@@ -791,10 +830,18 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t   * f,
                                         int32_t   ce_array_len,
                                         haddr_t * ce_array_ptr);
 
+H5_DLL herr_t H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
+	                                  void *  thing,
+					  hbool_t size_changed,
+					  size_t  new_size);
+
 H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);
+
+H5_DLL herr_t H5C_pin_protected_entry(H5C_t * cache_ptr,
+                                      void *  thing);
 
 H5_DLL void * H5C_protect(H5F_t *             f,
                           hid_t               primary_dxpl_id,
@@ -821,6 +868,8 @@ H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
                         hbool_t display_detailed_stats);
 
 H5_DLL void H5C_stats__reset(H5C_t * cache_ptr);
+
+H5_DLL herr_t H5C_unpin_entry(H5C_t * cache_ptr, void * thing);
 
 H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             hid_t               primary_dxpl_id,

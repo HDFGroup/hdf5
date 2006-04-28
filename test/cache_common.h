@@ -105,6 +105,9 @@
 #define MONSTER_ALT_BASE_ADDR	(haddr_t)(HUGE_ALT_BASE_ADDR + \
                                       (HUGE_ENTRY_SIZE * NUM_HUGE_ENTRIES))
 
+#define MAX_PINS	8	/* Maximum number of entries that can be 
+				 * directly pinned by a single entry.
+				 */
 typedef struct test_entry_t
 {
     H5C_cache_entry_t	  header;	/* entry data used by the cache
@@ -113,6 +116,10 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
+    H5C_t               * cache_ptr;	/* pointer to the cache in which 
+					 * the entry resides, or NULL if the
+					 * entry is not in cache.
+					 */
     haddr_t		  addr;         /* where the cache thinks this entry
                                          * is located
                                          */
@@ -146,6 +153,25 @@ typedef struct test_entry_t
     hbool_t		  is_protected;	/* entry should currently be on
 					 * the cache's protected list.
                                          */
+    hbool_t		  is_pinned;	/* entry is currently pinned in
+					 * the cache.
+                                         */
+    int			  pinning_ref_count; /* Number of entries that 
+					 * pin this entry in the cache.
+					 * When this count drops to zero,
+					 * this entry should be unpinned.
+					 */
+    int			  num_pins;     /* Number of entries that this
+					 * entry pins in the cache.  This
+					 * value must be in the range
+					 * [0, MAX_PINS].
+					 */
+    int			  pin_type[MAX_PINS]; /* array of the types of entries
+					 * pinned by this entry.
+					 */
+    int			  pin_idx[MAX_PINS]; /* array of the indicies of 
+					 * entries pinned by this entry.
+					 */
     hbool_t		  loaded;       /* entry has been loaded since the
                                          * last time it was reset.
                                          */
@@ -246,6 +272,33 @@ struct flush_cache_test_spec
     hbool_t		expected_flushed;
     hbool_t		expected_destroyed;
 };
+
+struct pe_flush_cache_test_spec
+{
+    int			entry_num;
+    int			entry_type;
+    int			entry_index;
+    hbool_t		insert_flag;
+    hbool_t		dirty_flag;
+    unsigned int	flags;
+    int			num_pins;
+    int			pin_type[MAX_PINS];
+    int			pin_idx[MAX_PINS];
+    hbool_t		expected_loaded;
+    hbool_t		expected_cleared;
+    hbool_t		expected_flushed;
+    hbool_t		expected_destroyed;
+};
+
+struct rename_entry_test_spec
+{
+    int			entry_type;
+    int			entry_index;
+    hbool_t		is_dirty;
+    hbool_t		is_pinned;
+};
+
+
 
 
 /* global variable externs: */
@@ -376,6 +429,12 @@ void insert_entry(H5C_t * cache_ptr,
                   hbool_t dirty,
                   unsigned int flags);
 
+void mark_pinned_entry_dirty(H5C_t * cache_ptr,
+	                     int32_t type,
+		             int32_t idx,
+		             hbool_t size_changed,
+		             size_t  new_size);
+
 void rename_entry(H5C_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
@@ -388,6 +447,12 @@ void protect_entry(H5C_t * cache_ptr,
 hbool_t entry_in_cache(H5C_t * cache_ptr,
                        int32_t type,
                        int32_t idx);
+
+void create_pinned_entry_dependency(H5C_t * cache_ptr,
+		                    int pinning_type,
+		                    int pinning_idx,
+		                    int pinned_type,
+		                    int pinned_idx);
 
 void reset_entries(void);
 
@@ -487,6 +552,10 @@ void flush_cache(H5C_t * cache_ptr,
                  hbool_t destroy_entries,
                  hbool_t dump_stats,
                  hbool_t dump_detailed_stats);
+
+void unpin_entry(H5C_t * cache_ptr,
+                 int32_t type,
+                 int32_t idx);
 
 void unprotect_entry(H5C_t * cache_ptr,
                      int32_t type,
