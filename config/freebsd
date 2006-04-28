@@ -65,8 +65,8 @@ fi
 # Special setup to use pthread support if enable-threadsafe is on.
 # Works with static executable only.
 if test "X-" != "X-$enable_threadsafe"; then
-  CFLAGS="$CFLAGS -D_THREAD_SAFE" 
-  CXXFLAGS="$CXXFLAGS -D_THREAD_SAFE" 
+  H5_CFLAGS="$H5_CFLAGS -D_THREAD_SAFE" 
+  H5_CXXFLAGS="$H5_CXXFLAGS -D_THREAD_SAFE" 
   LDFLAGS="$LDFLAGS -pthread"
 fi
 
