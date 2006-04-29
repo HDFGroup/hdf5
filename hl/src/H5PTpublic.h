@@ -16,17 +16,6 @@
 #define _H5PTpublic_H
 
 
-/* public hdf5 prototypes			*/
-#include "H5Ipublic.h"		
-#include "H5Tpublic.h"		
-#include "H5Spublic.h"	
-#include "H5Dpublic.h"
-#include "H5Ppublic.h"		
-#include "H5Gpublic.h"		
-#include "H5Apublic.h"		
-#include "H5Epublic.h"	
-#include "H5Rpublic.h"		
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,7 +37,7 @@ H5_HLDLL hid_t H5PTcreate_vl ( hid_t loc_id,
                       hsize_t chunk_size );
 
 H5_HLDLL hid_t H5PTopen( hid_t loc_id,
-                char *dset_name );
+                const char *dset_name );
 
 H5_HLDLL herr_t  H5PTclose( hid_t table_id );
 
@@ -124,3 +113,4 @@ H5_HLDLL herr_t  H5PTfree_vlen_readbuff( hid_t table_id,
 #endif
 
 #endif
+

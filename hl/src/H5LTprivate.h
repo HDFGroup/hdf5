@@ -15,26 +15,11 @@
 #ifndef _H5LTprivate_H
 #define _H5LTprivate_H
 
-#include "H5private.h"
-/* public hdf5 prototypes			*/
-#include "H5Ipublic.h"		
-#include "H5Tpublic.h"		
-#include "H5Spublic.h"	
-#include "H5Dpublic.h"
-#include "H5Ppublic.h"		
-#include "H5Gpublic.h"		
-#include "H5Apublic.h"		
-#include "H5Epublic.h"		
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+
 /* public LT prototypes			*/
 #include "H5LTpublic.h"		
-
-#define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
-#define TESTING2(WHAT)  {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
-#define TESTING3(WHAT)  {printf("%-70s", "" WHAT); fflush(stdout);}
-#define PASSED()	{puts(" PASSED");fflush(stdout);}
-#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
-#define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
-#define EXAMPLE(WHAT)	{printf("%-70s", "Example " WHAT); fflush(stdout);}
 
 /*-------------------------------------------------------------------------
  * Private functions
@@ -60,8 +45,8 @@ H5_HLDLL herr_t  H5LT_set_attribute_numerical( hid_t loc_id,
                                      const void *data );
 
 H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
-                                 char *name,
-                                 char *buf );
+                                 const char *name,
+                                 const char *buf );
 
 H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, 
                                     size_t *slen, hbool_t no_user_buf);

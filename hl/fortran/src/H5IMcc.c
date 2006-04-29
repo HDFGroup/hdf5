@@ -12,10 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5IMprivate.h"
 #include "H5IMcc.h"
-#include "H5f90i_gen.h"
-
 
 #include <string.h>
 #include <stdlib.h>

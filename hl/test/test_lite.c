@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#include "H5LTprivate.h"
+#include "h5hltest.h"
+#include "H5LTpublic.h"
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"
@@ -70,8 +70,8 @@ static int test_dsets( void )
  float   data_float_out[DIM];
  double  data_double_in[DIM]  = {1,2,3,4,5,6};
  double  data_double_out[DIM];
-	char    *data_string_in = "This is a string";
-	char    data_string_out[20];
+ const char    *data_string_in = "This is a string";
+ char    data_string_out[20];
  int     i;
 
 
@@ -426,7 +426,7 @@ static int test_attr( void )
  */
 
  /* Create a group. */
- if ((group_id = H5Gcreate( file_id, "grp", 0 ))<0)
+ if ((group_id = H5Gcreate( file_id, "grp", (size_t)0 ))<0)
   goto out;
 
  /* Close */
@@ -554,7 +554,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_char");
 
  /* Set the attribute */
- if ( H5LTset_attribute_char( loc_id, obj_name, ATTR2_NAME, attr_char_in, 5 ) < 0 )
+ if ( H5LTset_attribute_char( loc_id, obj_name, ATTR2_NAME, attr_char_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -598,7 +598,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_short");
 
  /* Set the attribute */
- if ( H5LTset_attribute_short( loc_id, obj_name, ATTR3_NAME, attr_short_in, 5 ) < 0 )
+ if ( H5LTset_attribute_short( loc_id, obj_name, ATTR3_NAME, attr_short_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -644,7 +644,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_int");
 
  /* Set the attribute */
- if ( H5LTset_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_in, 5 ) < 0 )
+ if ( H5LTset_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -688,7 +688,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_long");
 
  /* Set the attribute */
- if ( H5LTset_attribute_long( loc_id, obj_name, ATTR5_NAME, attr_long_in, 5 ) < 0 )
+ if ( H5LTset_attribute_long( loc_id, obj_name, ATTR5_NAME, attr_long_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -732,7 +732,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_uchar");
 
  /* Set the attribute */
- if ( H5LTset_attribute_uchar( loc_id, obj_name, ATTR6_NAME, attr_uchar_in, 5 ) < 0 )
+ if ( H5LTset_attribute_uchar( loc_id, obj_name, ATTR6_NAME, attr_uchar_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -776,7 +776,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_ushort");
 
  /* Set the attribute */
- if ( H5LTset_attribute_ushort( loc_id, obj_name, ATTR7_NAME, attr_ushort_in, 5 ) < 0 )
+ if ( H5LTset_attribute_ushort( loc_id, obj_name, ATTR7_NAME, attr_ushort_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -822,7 +822,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_uint");
 
  /* Set the attribute */
- if ( H5LTset_attribute_uint( loc_id, obj_name, ATTR8_NAME, attr_uint_in, 5 ) < 0 )
+ if ( H5LTset_attribute_uint( loc_id, obj_name, ATTR8_NAME, attr_uint_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -866,7 +866,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_ulong");
 
  /* Set the attribute */
- if ( H5LTset_attribute_ulong( loc_id, obj_name, ATTR9_NAME, attr_ulong_in, 5 ) < 0 )
+ if ( H5LTset_attribute_ulong( loc_id, obj_name, ATTR9_NAME, attr_ulong_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -911,7 +911,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_float");
 
  /* Set the attribute */
- if ( H5LTset_attribute_float( loc_id, obj_name, ATTR10_NAME, attr_float_in, 5 ) < 0 )
+ if ( H5LTset_attribute_float( loc_id, obj_name, ATTR10_NAME, attr_float_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -956,7 +956,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
  TESTING("H5LTset_attribute_double");
 
  /* Set the attribute */
- if ( H5LTset_attribute_double( loc_id, obj_name, ATTR11_NAME, attr_double_in, 5 ) < 0 )
+ if ( H5LTset_attribute_double( loc_id, obj_name, ATTR11_NAME, attr_double_in, (size_t)5 ) < 0 )
   return -1;
 
 	PASSED();
@@ -1289,7 +1289,7 @@ static int test_enums(void)
     size_t  size = 16;
     char    name1[16];
     int     value1 = 7;
-    char    *name2 = "WHITE";
+    const char    *name2 = "WHITE";
     int     value2;
     H5T_class_t type_class;
     char*   dt_str;

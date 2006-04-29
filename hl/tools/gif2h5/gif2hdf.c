@@ -52,8 +52,8 @@ main(int argv , char *argc[])
         return(-1);
     }
 
-    strncpy(GIFFileName , argc[1] , VSNAMELENMAX - 1);
-    strncpy(HDFFileName , argc[2] , VSNAMELENMAX - 1);
+    strncpy(GIFFileName , argc[1] , (size_t)(VSNAMELENMAX - 1));
+    strncpy(HDFFileName , argc[2] , (size_t)(VSNAMELENMAX - 1));
     GIFFileName[VSNAMELENMAX - 1] = '\0';
     HDFFileName[VSNAMELENMAX - 1] = '\0';
 
@@ -77,7 +77,7 @@ main(int argv , char *argc[])
         exit (-1);
     }
 
-    if (fread(MemGif,(size_t)filesize,1,fpGif) != 1) {
+    if (fread(MemGif,(size_t)filesize,(size_t)1,fpGif) != 1) {
         printf("Corrupted Input File");
         exit(-1);
     }
@@ -101,7 +101,7 @@ main(int argv , char *argc[])
      * Call WriteHDF from here. Go ahead and change WriteHDF to write whatever
      * format you want
      */
-    if (WriteHDF(GifMemoryStruct , argc[2] , argc[1]))
+    if (WriteHDF(GifMemoryStruct , argc[2]))
         printf("HDF Write Error\n\n");
 
     /* Free all buffers */

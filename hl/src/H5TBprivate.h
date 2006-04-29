@@ -15,8 +15,10 @@
 #ifndef _H5TBprivate_H
 #define _H5TBprivate_H
 
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
 
-#include "H5LTprivate.h"
+/* public TB prototypes			*/
 #include "H5TBpublic.h"
 
 
@@ -30,7 +32,7 @@
  *-------------------------------------------------------------------------
  */
 
-herr_t H5TBcommon_append_records( hid_t dataset_id,
+herr_t H5TB_common_append_records( hid_t dataset_id,
                                   hid_t mem_type_id,
                                   hsize_t nrecords,
                                   hsize_t orig_table_size,
@@ -44,7 +46,7 @@ herr_t H5TBcommon_append_records( hid_t dataset_id,
  */
 
 
-herr_t H5TBcommon_read_records( hid_t dataset_id,
+herr_t H5TB_common_read_records( hid_t dataset_id,
                                 hid_t mem_type_id,
                                 hsize_t start,
                                 hsize_t nrecords,

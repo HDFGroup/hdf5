@@ -12,11 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5LTprivate.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include "H5LTprivate.h"
 
 
 /* For Lex and Yacc */
@@ -2120,15 +2120,15 @@ print_enum(hid_t type, char* str, int indt)
     value = (unsigned char*)calloc((size_t)nmembs, MAX(dst_size, super_size));
 
     for (i = 0; i < nmembs; i++) {
- if((name[i] = H5Tget_member_name(type, i))==NULL)
+ if((name[i] = H5Tget_member_name(type, (unsigned)i))==NULL)
             goto out;
- if(H5Tget_member_value(type, i, value + i * super_size)<0)
+ if(H5Tget_member_value(type, (unsigned)i, value + i * super_size)<0)
             goto out;
     }
 
     /* Convert values to native data type */
     if (native > 0) {
-        if(H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT)<0)
+        if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT)<0)
             goto out;
     }
     
@@ -2202,7 +2202,7 @@ herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *
 {
     size_t      str_len = INCREMENT;
     char        *text_str;
-    herr_t      ret;
+    herr_t      ret = -1;
    
     if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
         goto out;
@@ -2502,7 +2502,7 @@ next:
             indent += COL;
             
             indentation(indent + COL, *dt_str);
-            sprintf(tmp_str, "OPQ_SIZE %d;\n", H5Tget_size(dtype));
+            sprintf(tmp_str, "OPQ_SIZE %lu;\n", (unsigned long)H5Tget_size(dtype));
             strcat(*dt_str, tmp_str);
 
             indentation(indent + COL, *dt_str);
@@ -2640,11 +2640,11 @@ next:
             indent += COL;
 
             for (i = 0; i < nmembs; i++) {
-                if((mname = H5Tget_member_name(dtype, i))==NULL)
+                if((mname = H5Tget_member_name(dtype, (unsigned)i))==NULL)
                     goto out;
-                if((mtype = H5Tget_member_type(dtype, i))<0)
+                if((mtype = H5Tget_member_type(dtype, (unsigned)i))<0)
                     goto out;
-                moffset = H5Tget_member_offset(dtype, i);
+                moffset = H5Tget_member_offset(dtype, (unsigned)i);
                 indentation(indent + COL, *dt_str);
 
                 if((mclass = H5Tget_class(mtype))<0)
@@ -2667,7 +2667,7 @@ next:
                 strcat(*dt_str, tmp_str);
                 free(mname);
 
-                sprintf(tmp_str, " : %d;\n", moffset);
+                sprintf(tmp_str, " : %lu;\n", (unsigned long)moffset);
                 strcat(*dt_str, tmp_str);
             }
 
@@ -3509,10 +3509,7 @@ out:
  return -1;
 }
 
-
-
-
-
+
 /*-------------------------------------------------------------------------
  * Function: H5LT_set_attribute_string
  *
@@ -3530,15 +3527,13 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-
-
 herr_t H5LT_set_attribute_string(hid_t dset_id,
-                                 char *name,
-                                 char *buf )
+                                 const char *name,
+                                 const char *buf )
 {
  hid_t   tid;
- hid_t   sid;
- hid_t   aid;
+ hid_t   sid = -1;
+ hid_t   aid = -1;
  int     has_attr;
  size_t  size;
 

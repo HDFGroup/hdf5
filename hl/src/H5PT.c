@@ -81,7 +81,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
 
   /* Register the packet table ID type if this is the first table created */
   if( H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type(H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) <0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) <0)
       goto out;
 
   /* Get memory for the table identifier */
@@ -209,7 +209,7 @@ out:
  *-------------------------------------------------------------------------
  */
 hid_t H5PTopen( hid_t loc_id,
-                             char *dset_name )
+                             const char *dset_name )
 {
   hid_t type_id=H5I_BADID;
   hid_t space_id=H5I_BADID;
@@ -219,13 +219,14 @@ hid_t H5PTopen( hid_t loc_id,
 
   /* Register the packet table ID type if this is the first table created */
   if( H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type(H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free))<0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free))<0)
       goto out;
 
   table = (htbl_t *) malloc(sizeof(htbl_t));
 
   /* Open the dataset */
-  if(( table->dset_id = H5Dopen(loc_id, dset_name)) <0);
+  if(( table->dset_id = H5Dopen(loc_id, dset_name)) <0)
+      goto out;
   if (table->dset_id < 0)
     goto out;
 
@@ -408,7 +409,7 @@ herr_t H5PTappend( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if((H5TBcommon_append_records(table->dset_id, table->type_id,
+  if((H5TB_common_append_records(table->dset_id, table->type_id,
   			nrecords, table->size, data)) <0)
     goto out;
 
@@ -462,7 +463,7 @@ herr_t H5PTget_next( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if((H5TBcommon_read_records(table->dset_id, table->type_id,
+  if((H5TB_common_read_records(table->dset_id, table->type_id,
                               table->current_index, nrecords, table->size, data)) < 0)
     goto out;
 
@@ -509,7 +510,7 @@ herr_t H5PTread_packets( hid_t table_id,
   if (nrecords == 0)
     return 0;
 
-  if( H5TBcommon_read_records(table->dset_id, table->type_id,
+  if( H5TB_common_read_records(table->dset_id, table->type_id,
                               start, nrecords, table->size, data) < 0)
     goto out;
 

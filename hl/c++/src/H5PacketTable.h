@@ -23,7 +23,11 @@
 #ifndef H5PTWRAP_H
 #define H5PTWRAP_H
 
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+
 #include "H5PTpublic.h"
+#include "H5api_adpt.h"
 
 class H5_HLCPPDLL  PacketTable
 {

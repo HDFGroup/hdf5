@@ -12,9 +12,10 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5TBprivate.h"
 #include <stdlib.h>
 #include <string.h>
+#include "H5LTprivate.h"
+#include "H5TBprivate.h"
 
 
 /*-------------------------------------------------------------------------
@@ -323,7 +324,7 @@ herr_t H5TBappend_records( hid_t loc_id,
   goto out;
 
  /* Append the records */
- if ((H5TBcommon_append_records(did, mem_type_id, nrecords, nrecords_orig, data))<0)
+ if ((H5TB_common_append_records(did, mem_type_id, nrecords, nrecords_orig, data))<0)
   goto out;
 
  /* Release the datatype. */
@@ -568,7 +569,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
    /* Only one field */
    else
    {
-    if ( H5Tinsert( write_type_id, member_name, 0, nmtype_id ) < 0 )
+    if ( H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
      goto out;
    }
 
@@ -735,7 +736,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
    /* Only one field */
    else
    {
-    if ( H5Tinsert( write_type_id, member_name, 0, nmtype_id ) < 0 )
+    if ( H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
      goto out;
    }
   /* Close */
@@ -938,7 +939,7 @@ herr_t H5TBread_records( hid_t loc_id,
   goto out;
 
  /* Read the records */
- if ((H5TBcommon_read_records(did, mem_type_id, start, nrecords, nrecords_orig, data)) < 0)
+ if ((H5TB_common_read_records(did, mem_type_id, start, nrecords, nrecords_orig, data)) < 0)
   goto out;
 
  /* get the dataspace handle */
@@ -1089,7 +1090,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
    }
     else
    {
-    if ( H5Tinsert( mem_type_id, member_name, 0, nmtype_id ) < 0 )
+    if ( H5Tinsert( mem_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
      goto out;
    }
 
@@ -1245,7 +1246,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
   }
   else
   {
-   if ( H5Tinsert( read_type_id, member_name, 0, nmtype_id ) < 0 )
+   if ( H5Tinsert( read_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
     goto out;
   }
 
@@ -1471,7 +1472,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
 
  nrows = ntotal_records - nrecords;
  /* Set the attribute */
- if (H5LT_set_attribute_numerical(loc_id,dset_name,"NROWS",1,
+ if (H5LT_set_attribute_numerical(loc_id,dset_name,"NROWS",(size_t)1,
       H5T_NATIVE_LLONG,&nrows)<0)
   return -1;
 
@@ -2426,7 +2427,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   goto out;
 
  /* The field in the file is found by its name */
- if ( H5Tinsert( write_type_id, field_name, 0, field_type ) < 0 )
+ if ( H5Tinsert( write_type_id, field_name, (size_t)0, field_type ) < 0 )
   goto out;
 
  /* Create xfer properties to preserve initialized data */
@@ -2896,7 +2897,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
    goto out;
 
   /* Insert it into the new type */
-  if ( H5Tinsert( read_type_id, member_name, 0, member_type_id ) < 0 )
+  if ( H5Tinsert( read_type_id, member_name, (size_t)0, member_type_id ) < 0 )
     goto out;
 
   tmp_buf = (unsigned char *)calloc((size_t) nrecords, member_size );
@@ -2910,7 +2911,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
    goto out;
 
   /* The field in the file is found by its name */
-  if ( H5Tinsert( write_type_id, member_name, 0, member_type_id ) < 0 )
+  if ( H5Tinsert( write_type_id, member_name, (size_t)0, member_type_id ) < 0 )
    goto out;
 
   /* Create xfer properties to preserve initialized data */
@@ -3656,7 +3657,7 @@ out:
  */
 
 /*-------------------------------------------------------------------------
- * Function: H5TBcommon_append_records
+ * Function: H5TB_common_append_records
  *
  * Purpose: Common code for reading records shared between H5PT and H5TB
  *
@@ -3673,7 +3674,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5TBcommon_append_records( hid_t dataset_id,
+herr_t H5TB_common_append_records( hid_t dataset_id,
                                   hid_t mem_type_id,
                                   hsize_t nrecords,
                                   hsize_t orig_table_size,
@@ -3729,7 +3730,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5TBcommon_read_records
+ * Function: H5TB_common_read_records
  *
  * Purpose: Common code for reading records shared between H5PT and H5TB
  *
@@ -3747,7 +3748,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5TBcommon_read_records( hid_t dataset_id,
+herr_t H5TB_common_read_records( hid_t dataset_id,
                                 hid_t mem_type_id,
                                 hsize_t start,
                                 hsize_t nrecords,

@@ -34,17 +34,12 @@
  */
 
 int
-WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
+WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
 {
     GIFHEAD          gifHead;           /* GIF Header structure            */
     GIFIMAGEDESC    *gifImageDesc;      /* Logical Image Descriptor struct */
 
     long ImageCount;                    /* number of images */
-#ifdef UNUSED
-    long CommentCount,                  /* number of comments */
-         ApplicationCount,              /* number of application extensions */
-         PlainTextCount;                /* number of plain text extensions */
-#endif /* UNUSED */
 
     char ImageName[256];                /* Image name for the Image */
 
@@ -59,11 +54,6 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
 
     /* get some data from gifHead */
     ImageCount = gifHead.ImageCount;
-#ifdef UNUSED
-    CommentCount = (WORD)gifHead.CommentCount;
-    ApplicationCount = (WORD)gifHead.ApplicationCount;
-    PlainTextCount = (WORD)gifHead.PlainTextCount;
-#endif /* UNUSED */
 
     if ((file_id = H5Fcreate(HDFName , H5F_ACC_TRUNC , H5P_DEFAULT , H5P_DEFAULT)) < 0) {
         /* error occured opening the HDF File for write */

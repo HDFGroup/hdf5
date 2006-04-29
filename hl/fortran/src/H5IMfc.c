@@ -14,10 +14,8 @@
 
 /* This files contains C stubs for H5D Fortran APIs */
 
-#include "H5IMprivate.h"
 #include "H5IMcc.h"
 #include "H5LTf90proto.h"
-#include "../../../fortran/src/H5f90i_gen.h"
 
 
 /*-------------------------------------------------------------------------
@@ -64,7 +62,7 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
  * Call H5IMmake_image_8bitf function.
  */
  c_loc_id = (hid_t)*loc_id;
- ret = H5IMmake_image_8bitf(c_loc_id,c_name,*width,*height,buf);
+ ret = H5IMmake_image_8bitf(c_loc_id,c_name,(hsize_t)*width,(hsize_t)*height,buf);
 
  if (ret < 0) return ret_value;
  ret_value = 0;
@@ -175,7 +173,7 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
  */
  c_loc_id = (hid_t)*loc_id;
 
- ret = H5IMmake_image_24bitf(c_loc_id,c_name,*width,*height,c_il,buf);
+ ret = H5IMmake_image_24bitf(c_loc_id,c_name,(hsize_t)*width,(hsize_t)*height,c_il,buf);
 
  if (ret < 0) return ret_value;
  ret_value = 0;

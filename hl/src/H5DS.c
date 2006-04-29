@@ -12,7 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "H5DSprivate.h"
 #include "H5LTprivate.h"
 #include "H5IMprivate.h"
@@ -43,7 +45,7 @@
  */
 
 herr_t H5DSset_scale(hid_t dsid,
-                     char *dimname)
+                     const char *dimname)
 {
  int has_dimlist;
  H5I_type_t it;
@@ -125,8 +127,8 @@ herr_t H5DSattach_scale(hid_t did,
  int        is_ds;
  hssize_t   nelmts;
  hid_t      sid;          /* space ID */
- hid_t      tid;          /* attribute type ID */
- hid_t      aid;          /* attribute ID */
+ hid_t      tid = -1;     /* attribute type ID */
+ hid_t      aid = -1;     /* attribute ID */
  int        rank;         /* rank of dataset */
  hsize_t    *dims;        /* dimension of the "REFERENCE_LIST" array */
  ds_list_t  dsl;          /* attribute data in the DS pointing to the dataset */
@@ -157,7 +159,7 @@ herr_t H5DSattach_scale(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
   return FAIL;
 
  /* get ID type */
@@ -334,7 +336,7 @@ herr_t H5DSattach_scale(hid_t did,
     goto out;
 
    /* same object, so this DS scale is already in this DIM IDX */
-   if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
    {
     found_ds = 1;
    }
@@ -590,8 +592,8 @@ herr_t H5DSdetach_scale(hid_t did,
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
 	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
  hid_t      sid;          /* space ID */
- hid_t      tid;          /* attribute type ID */
- hid_t      aid;          /* attribute ID */
+ hid_t      tid = -1;     /* attribute type ID */
+ hid_t      aid = -1;     /* attribute ID */
  int        rank;         /* rank of dataset */
  ds_list_t  *dsbuf=NULL;  /* array of attribute data in the DS pointing to the dataset */
  ds_list_t  *dsbufn=NULL; /* array of attribute data in the DS pointing to the dataset */
@@ -620,7 +622,7 @@ herr_t H5DSdetach_scale(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
   return FAIL;
 
  /* get ID type */
@@ -714,7 +716,7 @@ herr_t H5DSdetach_scale(hid_t did,
     goto out;
 
    /* same object, reset */
-   if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
    {
     for(jj=j; jj<buf[idx].len-1; jj++)
     {
@@ -799,7 +801,7 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
 
   /* same object, reset. we want to detach only for this DIM */
-  if (!HDmemcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !HDmemcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
+  if (!memcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !memcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
           && (int)idx==dsbuf[i].dim_idx)
   {
    for(jj=i; jj<nelmts-1; jj++)
@@ -955,8 +957,8 @@ htri_t H5DSis_attached(hid_t did,
  int        has_reflist;
  hssize_t   nelmts;
  hid_t      sid;          /* space ID */
- hid_t      tid;          /* attribute type ID */
- hid_t      aid;          /* attribute ID */
+ hid_t      tid = -1;     /* attribute type ID */
+ hid_t      aid = -1;     /* attribute ID */
  int        rank;         /* rank of dataset */
  ds_list_t  *dsbuf;       /* array of attribute data in the DS pointing to the dataset */
  hobj_ref_t ref;          /* reference to the DS */
@@ -985,7 +987,7 @@ htri_t H5DSis_attached(hid_t did,
   return FAIL;
 
  /* same object, not valid */
- if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
   return FAIL;
 
  /* get ID type */
@@ -1067,7 +1069,7 @@ htri_t H5DSis_attached(hid_t did,
     goto out;
 
    /* same object */
-   if (!HDmemcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
    {
     found_ds = 1;
    }
@@ -1155,7 +1157,7 @@ htri_t H5DSis_attached(hid_t did,
      goto out;
 
     /* same object */
-    if (!HDmemcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !HDmemcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
+    if (!memcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !memcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
           && (int)idx==dsbuf[i].dim_idx) {
      found_dset=1;
     } /* if */
@@ -1246,8 +1248,8 @@ herr_t H5DSiterate_scales(hid_t did,
  int          rank;
  hobj_ref_t   ref;          /* reference to the DS */
  hid_t        sid;          /* space ID */
- hid_t        tid;          /* attribute type ID */
- hid_t        aid;          /* attribute ID */
+ hid_t        tid = -1;     /* attribute type ID */
+ hid_t        aid = -1;     /* attribute ID */
  hvl_t        *buf=NULL;    /* VL buffer to store in the attribute */
  H5I_type_t   it;           /* ID type */
  herr_t       ret_value=0;
@@ -1401,15 +1403,15 @@ out:
 
 herr_t H5DSset_label(hid_t did,
                      unsigned int idx,
-                     char *label)
+                     const char *label)
 {
  int           has_labels;
  hid_t         sid;                /* space ID */
- hid_t         tid;                /* attribute type ID */
- hid_t         aid;                /* attribute ID */
+ hid_t         tid = -1;           /* attribute type ID */
+ hid_t         aid = -1;           /* attribute ID */
  int           rank;               /* rank of dataset */
  hsize_t       dims[1];            /* dimensions of dataset */
- char          **buf=NULL;         /* buffer to store in the attribute */
+ const char    **buf=NULL;         /* buffer to store in the attribute */
  H5I_type_t    it;                 /* ID type */
  unsigned int  i;
 
@@ -1469,7 +1471,7 @@ herr_t H5DSset_label(hid_t did,
    goto out;
 
   /* allocate and initialize */
-  buf = (char **)malloc((size_t)rank * sizeof(char *));
+  buf = (const char **)malloc((size_t)rank * sizeof(char *));
 
   if (buf == NULL)
    goto out;
@@ -1509,7 +1511,7 @@ herr_t H5DSset_label(hid_t did,
    goto out;
 
   /* allocate and initialize */
-  buf = (char **)malloc((size_t)rank * sizeof(char *));
+  buf = (const char **)malloc((size_t)rank * sizeof(char *));
 
   if (buf == NULL)
    goto out;
@@ -1574,8 +1576,8 @@ ssize_t H5DSget_label(hid_t did,
 {
  int             has_labels;
  hid_t           sid;                /* space ID */
- hid_t           tid;                /* attribute type ID */
- hid_t           aid;                /* attribute ID */
+ hid_t           tid = -1;           /* attribute type ID */
+ hid_t           aid = -1;           /* attribute ID */
  int             rank;               /* rank of dataset */
  char            **buf=NULL;         /* buffer to store in the attribute */
  H5I_type_t      it;                 /* ID type */
@@ -1627,8 +1629,7 @@ ssize_t H5DSget_label(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- if (has_labels == 1)
- {
+ assert (has_labels == 1);
   if ((aid = H5Aopen_name(did,DIMENSION_LABELS))<0)
    goto out;
 
@@ -1646,18 +1647,17 @@ ssize_t H5DSget_label(hid_t did,
    goto out;
 
   /* get the real string length */
-  nbytes = HDstrlen(buf[idx]);
+  nbytes = strlen(buf[idx]);
 
   /* compute the string length which will fit into the user's buffer */
   copy_len = MIN(size-1, nbytes);
 
   /* copy all/some of the name */
   if( label ) {
-   HDmemcpy(label, buf[idx], copy_len);
+   memcpy(label, buf[idx], copy_len);
 
    /* terminate the string */
    label[copy_len]='\0';
-  }
 
   /* close */
   if (H5Tclose(tid)<0)
@@ -1707,7 +1707,7 @@ ssize_t H5DSget_scale_name(hid_t did,
                            size_t size)
 {
  hid_t      aid;      /* attribute ID  */
- hid_t      tid;      /* attribute type ID */
+ hid_t      tid = -1; /* attribute type ID */
  hid_t      sid;      /* space ID  */
  H5I_type_t it;       /* ID type */
  size_t     nbytes;
@@ -1775,7 +1775,7 @@ ssize_t H5DSget_scale_name(hid_t did,
 
  /* copy all/some of the name */
  if (name) {
-  HDmemcpy(name, buf, copy_len);
+  memcpy(name, buf, copy_len);
 
   /* terminate the string */
   name[copy_len]='\0';
@@ -1828,7 +1828,7 @@ out:
 
 htri_t H5DSis_scale(hid_t did)
 {
- hid_t      tid;        /* attribute type ID */
+ hid_t      tid = -1;   /* attribute type ID */
  hid_t      aid;        /* attribute ID */
  herr_t     has_class;  /* has the "CLASS" attribute */
  htri_t     is_ds;      /* boolean return value */
@@ -1853,7 +1853,7 @@ htri_t H5DSis_scale(hid_t did)
  if (has_class == 0)
   is_ds = 0;
 
- else if (has_class == 1 )
+ else
  {
   if ((aid = H5Aopen_name(did,"CLASS"))<0)
    goto out;
@@ -1913,8 +1913,8 @@ int H5DSget_num_scales(hid_t did,
 {
  int        has_dimlist;
  hid_t      sid;          /* space ID */
- hid_t      tid;          /* attribute type ID */
- hid_t      aid;          /* attribute ID */
+ hid_t      tid = -1;     /* attribute type ID */
+ hid_t      aid = -1;     /* attribute ID */
  int        rank;         /* rank of dataset */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  H5I_type_t it;           /* ID type */
@@ -1964,7 +1964,7 @@ int H5DSget_num_scales(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- else if ( has_dimlist == 1 )
+ else 
  {
   if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
    goto out;
@@ -2032,8 +2032,8 @@ out:
 herr_t H5DS_is_reserved(hid_t did)
 {
  int    has_class;
- hid_t  tid;
- hid_t  aid;
+ hid_t  tid = -1;
+ hid_t  aid = -1;
  char   buf[40];
  herr_t ret;
 
@@ -2044,8 +2044,7 @@ herr_t H5DS_is_reserved(hid_t did)
  if ( has_class ==  0 )
   return 0;
 
- else if ( has_class ==  1 )
- {
+ assert( has_class ==  1 );
   if ((aid = H5Aopen_name(did,"CLASS"))<0)
    goto out;
 
@@ -2068,7 +2067,6 @@ herr_t H5DS_is_reserved(hid_t did)
   if (H5Aclose(aid)<0)
    goto out;
 
- }
 
  return ret;
 

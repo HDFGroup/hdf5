@@ -28,11 +28,14 @@ struct cmpd_info {
     hbool_t     is_field;       /*flag to lexer for compound member*/
     hbool_t     first_memb;     /*flag for first compound member*/
 };
+
 /*stack for nested compound type*/
-struct cmpd_info cmpd_stack[STACK_SIZE] = { 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
-                                    0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
-                                    0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
-                                    0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 };
+struct cmpd_info cmpd_stack[STACK_SIZE] = {
+    {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
+    {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
+    {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
+    {0, 0, 1}, {0, 0, 1}, {0, 0, 1}, {0, 0, 1} };
+
 int csindex = -1;                /*pointer to the top of compound stack*/
 
 /*structure for array type information*/
@@ -161,7 +164,7 @@ memb_list       :
 memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ } 
                         '"' field_name '"' field_offset ';'
                         {   
-                            int origin_size, new_size;
+                            size_t origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
 
                             /*Adjust size and insert member, consider both member size and offset.*/

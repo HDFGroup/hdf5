@@ -31,14 +31,14 @@ H5_HLDLL herr_t  H5DSdetach_scale( hid_t did,
                         unsigned int idx);
 
 H5_HLDLL herr_t  H5DSset_scale( hid_t dsid,
-                     char *dimname);
+                     const char *dimname);
 
 H5_HLDLL int H5DSget_num_scales( hid_t did,
                        unsigned int dim);
 
 H5_HLDLL herr_t  H5DSset_label( hid_t did,
                      unsigned int idx,
-                     char *label);
+                     const char *label);
 
 H5_HLDLL ssize_t H5DSget_label( hid_t did,
                       unsigned int idx,

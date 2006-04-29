@@ -15,14 +15,10 @@
 #ifndef _H5IMprivate_H
 #define _H5IMprivate_H
 
-/* public hdf5 prototypes			*/
-#include "H5Rpublic.h"	
-#include "H5Apublic.h"	
-#include "H5Spublic.h"	
-#include "H5Dpublic.h"		
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
 
-/* public LT prototypes			*/
-#include "H5LTpublic.h"		
+/* public IM prototypes			*/
 #include "H5IMpublic.h"
 
 
@@ -41,3 +37,4 @@ H5_HLDLL herr_t  H5IM_find_palette(hid_t loc_id );
 
 
 #endif
+

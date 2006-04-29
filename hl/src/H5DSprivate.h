@@ -15,19 +15,10 @@
 #ifndef _H5DSprivate_H
 #define _H5DSprivate_H
 
-/* public hdf5 prototypes			*/
-#include "H5Ipublic.h"		
-#include "H5Tpublic.h"		
-#include "H5Spublic.h"	
-#include "H5Dpublic.h"
-#include "H5Ppublic.h"		
-#include "H5Gpublic.h"		
-#include "H5Apublic.h"		
-#include "H5Epublic.h"	
-#include "H5Rpublic.h"		
-	
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+
 /* public LT prototypes			*/
-#include "H5LTpublic.h"		
 #include "H5DSpublic.h"
 
 
@@ -50,9 +41,7 @@ typedef struct ds_list_t {
  *-------------------------------------------------------------------------
  */
 
-
 H5_HLDLL herr_t  H5DS_is_reserved( hid_t did);
 
-
-
 #endif
+

@@ -113,8 +113,8 @@ int main(int argc , char **argv)
         return 0;
     }
 
-    memset(image_name_arr , 0 , MAX_NUMBER_IMAGES);
-    memset(pal_name_arr , 0 , MAX_NUMBER_IMAGES);
+    memset(image_name_arr , 0 , (size_t)MAX_NUMBER_IMAGES);
+    memset(pal_name_arr , 0 , (size_t)MAX_NUMBER_IMAGES);
 
     HDFName = (CHAR *)malloc (strlen(argv[1]) + 1);
     GIFName = (CHAR *)malloc (strlen(argv[2]) + 1);
@@ -310,9 +310,9 @@ int main(int argc , char **argv)
         if (idx == 0) {
             /* Write out the GIF header and logical screen descriptor */
             if (n_images > 1) {
-                fwrite("GIF89a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
+                fwrite("GIF89a", sizeof( char ), (size_t)6, fpGif);  /* the GIF magic number */
             } else {
-                fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
+                fwrite("GIF87a", sizeof( char ), (size_t)6, fpGif);  /* the GIF magic number */
             }
 
             putword(RWidth, fpGif);             /* screen descriptor */
@@ -334,7 +334,7 @@ int main(int argc , char **argv)
                 fputc(0x21 , fpGif);
                 fputc(0xFF , fpGif);
                 fputc(11 , fpGif);
-                fwrite("NETSCAPE2.0" , 1 , 11 , fpGif);
+                fwrite("NETSCAPE2.0" , (size_t)1 , (size_t)11 , fpGif);
                 fputc(3 , fpGif);
                 fputc(1 , fpGif);
                 fputc(0 , fpGif);

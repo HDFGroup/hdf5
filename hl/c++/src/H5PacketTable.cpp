@@ -120,7 +120,7 @@
         if( H5PTis_varlen(table_id) != 0 )    // If this is not a fixed-length table
         {
             H5PTclose(table_id);
-            table_id = NULL;
+            table_id = -1;
         }
     }
 
@@ -216,7 +216,7 @@
         if( H5PTis_varlen(table_id) != 1 )    // If this is not a variable-length table
         {
             H5PTclose(table_id);
-            table_id = NULL;
+            table_id = -1;
         }
     }
 

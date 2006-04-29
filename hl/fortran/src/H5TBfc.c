@@ -58,7 +58,7 @@ nh5tbmake_table_c(int_f *namelen1,
  char    *c_name1;
  int     c_namelen1;
  hsize_t num_elem;
- int     i;
+ hsize_t i;
  int     max_len=1;
  hid_t   c_loc_id     = *loc_id;
  hsize_t c_nfields    = *nfields;
@@ -340,7 +340,7 @@ nh5tbwrite_field_index_c(hid_t_f *loc_id,
  * Call H5TBwrite_fields_name function.
  */
 
- ret = H5TBwrite_fields_index(c_loc_id,c_name,1,c_field_index,c_start,c_nrecords,c_type_size,
+ ret = H5TBwrite_fields_index(c_loc_id,c_name,(hsize_t)1,c_field_index,c_start,c_nrecords,c_type_size,
    0,c_type_sizes,buf);
 
  if (ret < 0) return ret_value;
@@ -404,7 +404,7 @@ nh5tbread_field_index_c(hid_t_f *loc_id,
  * Call H5TBread_fields_index function.
  */
 
- ret = H5TBread_fields_index(c_loc_id,c_name,1,c_field_index,c_start,c_nrecords,c_type_size,
+ ret = H5TBread_fields_index(c_loc_id,c_name,(hsize_t)1,c_field_index,c_start,c_nrecords,c_type_size,
    0,c_type_sizes,buf);
 
  if (ret < 0) return ret_value;
@@ -625,7 +625,7 @@ nh5tbget_field_info_c(hid_t_f *loc_id,
  char    *c_name;
  int     c_namelen;
  hsize_t num_elem;
- int     i;
+ hsize_t i;
  int     max_len=1;
  hid_t   c_loc_id   = *loc_id;
 	hsize_t c_nfields  = *nfields;

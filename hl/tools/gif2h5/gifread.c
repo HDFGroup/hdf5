@@ -65,7 +65,7 @@ ReadGifHeader(GIFHEAD *GifHead, /* Pointer to GIF header structure  */
         GifHead->HeaderDump[i] = *(*MemGif2)++;
     }
 
-    if (strncmp((const char *)GifHead->HeaderDump , "GIF" , 3)) {
+    if (strncmp((const char *)GifHead->HeaderDump , "GIF" , (size_t)3)) {
         printf("The file does not appear to be a valid GIF file.\n");
         exit(-1);
     }

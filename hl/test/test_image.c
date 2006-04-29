@@ -12,11 +12,12 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5LTprivate.h"
-#include "H5IMprivate.h"
-#include "pal_rgb.h"
 #include <stdlib.h>
 #include <string.h>
+#include "h5hltest.h"
+#include "H5LTpublic.h"
+#include "H5IMpublic.h"
+#include "pal_rgb.h"
 
 #define FILE1       "test_image1.h5"
 #define FILE2       "test_image2.h5"
@@ -52,7 +53,7 @@ static int test_simple(void);
 static int test_data(void);
 static int test_generate(void);
 static int read_data(const char* file_name, hsize_t *width, hsize_t *height );
-static int read_palette(const char* file_name, rgb_t *palette, int palette_size);
+static int read_palette(const char* file_name, rgb_t *palette, size_t palette_size);
 
 /* globals */
 unsigned char *image_data = NULL;
@@ -103,7 +104,7 @@ static int test_simple(void)
  unsigned char image_out2[ WIDTH*HEIGHT*3 ];
  unsigned char pal_data_out[PAL_ENTRIES*3];
  unsigned char n;
- int space;
+ hsize_t space;
  /* create a PAL_ENTRIES entry palette */
  unsigned char pal_data_in[PAL_ENTRIES*3] = {
  0,0,168,      /* dark blue */
@@ -137,7 +138,6 @@ static int test_simple(void)
    n++;
    j=0;
   }
-  if (n>255) n=0;
  }
 
  /* create a file using default properties */
@@ -829,7 +829,7 @@ static int read_data( const char* fname, /*IN*/
 
 static int read_palette(const char* fname,
                         rgb_t *palette,
-                        int palette_size)
+                        size_t palette_size)
 {
  FILE          *file;
  char          buffer[80];
@@ -837,7 +837,7 @@ static int read_palette(const char* fname,
  unsigned int  red;
  unsigned int  green;
  unsigned int  blue;
- int           nentries;
+ unsigned      nentries;
  char          *srcdir = getenv("srcdir"); /* the source directory */
  char          data_file[512];             /* buffer to hold name of existing data file */
 
@@ -912,7 +912,7 @@ static int read_palette(const char* fname,
   return -1;
  }
 
- if (sscanf(buffer, "%d", &nentries) != 1)
+ if (sscanf(buffer, "%u", &nentries) != 1)
  {
   fclose(file);
   return -1;

@@ -15,10 +15,6 @@
 #ifndef _H5LTpublic_H
 #define _H5LTpublic_H
 
-
-/* Public headers needed by this file */
-#include "H5public.h"
-
 typedef enum H5LT_lang_t {
     H5LT_LANG_ERR = -1, /*this is the first*/
     H5LT_DDL      = 0,  /*for DDL*/
@@ -26,8 +22,6 @@ typedef enum H5LT_lang_t {
     H5LT_FORTRAN  = 2,  /*for Fortran*/
     H5LT_NO_LANG  = 3   /*this is the last*/
 } H5LT_lang_t;
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -352,11 +346,9 @@ H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    unsigned char *src_buf,
                    unsigned char *dst_buf );
 
-
-
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

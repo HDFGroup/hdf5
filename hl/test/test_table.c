@@ -12,11 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5TBprivate.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "h5hltest.h"
+#include "H5TBpublic.h"
 
 #define TEST_FILE_BE "test_table_be.hdf5"
 #define TEST_FILE_LE "test_table_le.hdf5"
@@ -126,7 +126,7 @@ static int compare_deleted(hsize_t rrecords, hsize_t dstart, hsize_t drecords,
  *-------------------------------------------------------------------------
  */
 
-int test_table(hid_t fid, int write)
+static int test_table(hid_t fid, int write)
 {
  /* identifiers */
  hid_t       fid1;
@@ -325,7 +325,7 @@ int test_table(hid_t fid, int write)
   { "Name","Longitude","Pressure","Temperature","Latitude" };
  hid_t field_type[NFIELDS];
  hid_t string_type = H5Tcopy( H5T_C_S1 );
- H5Tset_size( string_type, 16 );
+ H5Tset_size( string_type, (size_t)16 );
  field_type[0] = string_type;
  field_type[1] = H5T_NATIVE_LONG;
  field_type[2] = H5T_NATIVE_FLOAT;

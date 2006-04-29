@@ -161,7 +161,7 @@ int hdfWriteGIF(FILE *fp, BYTE *pic, int ptype, int w, int h, BYTE *rmap,
                 int colorstyle, int BitsPerPixel);
 
 /* WRITEHDF.C */
-int WriteHDF(GIFTOMEM , CHAR * , CHAR *);
+int WriteHDF(GIFTOMEM , CHAR *);
 
 /* Function:    ReadHDF
 ** Return:      0 on completion without error, -1 on error

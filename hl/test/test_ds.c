@@ -14,9 +14,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "H5DSprivate.h"
-#include "H5LTprivate.h"
-#include "H5IMprivate.h"
+#include "h5hltest.h"
+#include "H5DSpublic.h"
+#include "H5LTpublic.h"
+#include "H5IMpublic.h"
 
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
@@ -115,7 +116,7 @@ error:
 static int test_simple(void)
 {
  hid_t   fid;                                              /* file ID */
- hid_t   did;                                              /* dataset ID */
+ hid_t   did = -1;                                         /* dataset ID */
  hid_t   dsid;                                             /* DS dataset ID */
  hid_t   sid;                                              /* space ID */
  hid_t   gid;                                              /* group ID */
@@ -852,7 +853,7 @@ static int test_simple(void)
  */
 
   /* create a group */
- if ((gid=H5Gcreate(fid,"grp",0))<0)
+ if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
   goto out;
 
  /* create the data space for the dataset */
@@ -989,12 +990,12 @@ static int test_simple(void)
  {
   if ( i==1 )
   {
-   if(H5DSdetach_scale(did,dsid,i)<0)
+   if(H5DSdetach_scale(did,dsid,(unsigned)i)<0)
     goto out;
   }
   else
   {
-   if(H5DSdetach_scale(did,dsid,i)!=FAIL)
+   if(H5DSdetach_scale(did,dsid,(unsigned)i)!=FAIL)
     goto out;
   }
  }
@@ -1047,9 +1048,9 @@ static int test_simple(void)
  *-------------------------------------------------------------------------
  */
 
- if ((dim0_label_size=H5DSget_label(did,DIM0,NULL,0))<0)
+ if ((dim0_label_size=H5DSget_label(did,DIM0,NULL,(size_t)0))<0)
   goto out;
- if ((dim1_label_size=H5DSget_label(did,DIM1,NULL,0))<0)
+ if ((dim1_label_size=H5DSget_label(did,DIM1,NULL,(size_t)0))<0)
   goto out;
 
  /* allocate */
@@ -1058,14 +1059,14 @@ static int test_simple(void)
  if ( dim0_labeld==NULL || dim1_labeld==NULL)
   goto out;
 
- if (H5DSget_label(did,DIM0,dim0_labeld,dim0_label_size)<0)
+ if (H5DSget_label(did,DIM0,dim0_labeld,(size_t)dim0_label_size)<0)
   goto out;
- if (H5DSget_label(did,DIM1,dim1_labeld,dim1_label_size)<0)
+ if (H5DSget_label(did,DIM1,dim1_labeld,(size_t)dim1_label_size)<0)
   goto out;
 
- if (strncmp(DIM0_LABEL,dim0_labeld,dim0_label_size-1)!=0)
+ if (strncmp(DIM0_LABEL,dim0_labeld,(size_t)(dim0_label_size-1))!=0)
   goto out;
- if (strncmp(DIM1_LABEL,dim1_labeld,dim1_label_size-1)!=0)
+ if (strncmp(DIM1_LABEL,dim1_labeld,(size_t)(dim1_label_size-1))!=0)
   goto out;
 
  if (dim0_labeld)
@@ -1124,7 +1125,7 @@ static int test_simple(void)
  */
 
  /* get the lenght of the scale name (pass NULL in name) */
- if ((name_len=H5DSget_scale_name(dsid,NULL,0))<0)
+ if ((name_len=H5DSget_scale_name(dsid,NULL,(size_t)0))<0)
   goto out;
 
  /* allocate a  buffer */
@@ -1133,7 +1134,7 @@ static int test_simple(void)
   goto out;
 
  /* get the scale name using this buffer */
- if (H5DSget_scale_name(dsid,name_out,name_len)<0)
+ if (H5DSget_scale_name(dsid,name_out,(size_t)name_len)<0)
   goto out;
 
  if (strcmp(SCALE_1_NAME,name_out)!=0)
@@ -1512,8 +1513,8 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor
 {
  int      ret = 0;   /* define a default zero value for return. This will cause the iterator to continue */
  hid_t    sid;       /* space ID */
- hid_t    tid;       /* file type ID */
- hid_t    mtid;      /* memory type ID */
+ hid_t    tid = -1;  /* file type ID */
+ hid_t    mtid = -1; /* memory type ID */
  hssize_t nelmts;    /* number of data elements */
  char     *buf=NULL; /* data buffer */
  size_t   size;
@@ -1542,7 +1543,7 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor
 
  if (nelmts)
  {
-  buf=(char *) malloc((unsigned)(nelmts*size));
+  buf=(char *) malloc((size_t)(nelmts*size));
   if ( buf==NULL)
    goto out;
   if (H5Dread(scale_id,mtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -1609,6 +1610,9 @@ static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor
  hssize_t  nelmts;               /* size of a dimension scale array */
  hsize_t   dims[H5S_MAX_RANK];   /* dimensions of dataset */
  hsize_t   storage_size;
+
+    /* Stop compiler from whining about "unused parameters" */
+    visitor_data = visitor_data;
 
 /*-------------------------------------------------------------------------
  * get DID (dataset) space info
@@ -1682,15 +1686,14 @@ out:
 
 static herr_t op_bogus(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
+    /* Stop compiler from whining about "unused parameters" */
+    dset = dset;
+    dim = dim;
+    scale_id = scale_id;
+    visitor_data = visitor_data;
+
  /* define a default zero value for return. This will cause the iterator to continue */
- int ret = 0;
-
- /* unused */
- dset=dset;
- dim=dim;
- visitor_data=visitor_data;
-
- return ret;
+ return 0;
 }
 
 
@@ -1711,11 +1714,11 @@ static int test_errors(void)
  int     rankds   = 1;                                     /* rank of DS dataset */
  hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
  hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
- hid_t   did;                                              /* dataset ID */
- hid_t   dsid;                                             /* scale ID */
- hid_t   gid;                                              /* group ID */
- hid_t   sid;                                              /* space ID */
- hid_t   sidds;                                            /* space ID */
+ hid_t   did = -1;                                         /* dataset ID */
+ hid_t   dsid = -1;                                        /* scale ID */
+ hid_t   gid = -1;                                         /* group ID */
+ hid_t   sid = -1;                                         /* space ID */
+ hid_t   sidds = -1;                                       /* space ID */
  hsize_t pal_dims[] = {9,3};
 
  printf("Testing error conditions\n");
@@ -1729,7 +1732,7 @@ static int test_errors(void)
  if ((fid=H5Fcreate(FILE2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
- if ((gid=H5Gcreate(fid,"grp",0))<0)
+ if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
   goto out;
  /* create the data space for the dataset */
  if ((sid=H5Screate_simple(rank,dims,NULL))<0)
@@ -1911,7 +1914,7 @@ static int test_errors(void)
  TESTING2("attach to a dataset that is a reserved class dataset");
 
  /* make an image */
- if (H5IMmake_image_8bit(fid,"image",100,50,NULL)<0)
+ if (H5IMmake_image_8bit(fid,"image",(hsize_t)100,(hsize_t)50,NULL)<0)
   goto out;
 
  /* make a palette */
@@ -2090,7 +2093,7 @@ static int test_iterators(void)
  int     rankds   = 1;                                     /* rank of DS dataset */
  hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
  hsize_t s1_dim[1]   = {DIM1_SIZE};                        /* size of DS 1 dataset */
- hid_t   gid;                                              /* group ID */
+ hid_t   gid = -1;                                         /* group ID */
  hid_t   did;                                              /* dataset ID */
  hid_t   dsid;                                             /* scale ID */
  char    dname[30];                                        /* dataset name */
@@ -2107,7 +2110,7 @@ static int test_iterators(void)
  if ((fid=H5Fcreate(FILE3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
- if ((gid=H5Gcreate(fid,"grp",0))<0)
+ if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
   goto out;
   /* close */
  if (H5Gclose(gid)<0)
@@ -2272,8 +2275,8 @@ out:
 static int test_rank(void)
 {
  hid_t   fid;                                              /* file ID */
- hid_t   did;                                              /* dataset ID */
- hid_t   dsid;                                             /* scale ID */
+ hid_t   did = -1;                                         /* dataset ID */
+ hid_t   dsid = -1;                                        /* scale ID */
  hid_t   sid;                                              /* space ID */
  hid_t   sidds;                                            /* space ID */
  hsize_t dims1[1]  = {DIM1_SIZE};                          /* size of data dataset */
@@ -2329,9 +2332,9 @@ static int test_rank(void)
   sprintf(name,"ds_a_%d",i);
   if((dsid = H5Dopen(fid,name))<0)
    goto out;
-  if(H5DSattach_scale(did,dsid,i)<0)
+  if(H5DSattach_scale(did,dsid,(unsigned)i)<0)
    goto out;
-  if (H5DSis_attached(did,dsid,i)<=0)
+  if (H5DSis_attached(did,dsid,(unsigned)i)<=0)
    goto out;
   if (H5Dclose(dsid)<0)
    goto out;
@@ -2358,9 +2361,9 @@ static int test_rank(void)
   sprintf(name,"ds_a_%d",i);
   if((dsid = H5Dopen(fid,name))<0)
    goto out;
-  if(H5DSdetach_scale(did,dsid,i)<0)
+  if(H5DSdetach_scale(did,dsid,(unsigned)i)<0)
    goto out;
-  if (H5DSis_attached(did,dsid,i)!=0)
+  if (H5DSis_attached(did,dsid,(unsigned)i)!=0)
    goto out;
   if (H5Dclose(dsid)<0)
    goto out;
@@ -2387,17 +2390,17 @@ static int test_rank(void)
    goto out;
   if (H5DSset_scale(dsid,name)<0)
    goto out;
-  if(H5DSattach_scale(did,dsid,i)<0)
+  if(H5DSattach_scale(did,dsid,(unsigned)i)<0)
    goto out;
-  if (H5DSis_attached(did,dsid,i)<=0)
+  if (H5DSis_attached(did,dsid,(unsigned)i)<=0)
    goto out;
   if (H5DSget_scale_name(dsid,names,sizeof(names))<0)
    goto out;
   if (H5Dclose(dsid)<0)
    goto out;
-  if (H5DSset_label(did,i,name)<0)
+  if (H5DSset_label(did,(unsigned)i,name)<0)
    goto out;
-  if (H5DSget_label(did,i,namel,sizeof(namel))<0)
+  if (H5DSget_label(did,(unsigned)i,namel,sizeof(namel))<0)
    goto out;
   if (strcmp(name,names)!=0)
    goto out;
@@ -2480,8 +2483,8 @@ out:
 static int test_types(void)
 {
  hid_t          fid;                                              /* file ID */
- hid_t          did;                                              /* dataset ID */
- hid_t          dsid;                                             /* DS dataset ID */
+ hid_t          did = -1;                                         /* dataset ID */
+ hid_t          dsid = -1;                                        /* DS dataset ID */
  int            rank     = RANK;                                  /* rank of data dataset */
  int            rankds   = 1;                                     /* rank of DS dataset */
  hsize_t        dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
@@ -2490,8 +2493,8 @@ static int test_types(void)
  hsize_t        s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
  float          s1_float[DIM1_SIZE] = {10,20,30};                 /* data of DS 1 dataset */
  unsigned short s2_ushort[DIM2_SIZE] = {10,20,30,40};             /* data of DS 2 dataset */
- char           *s1_str = "ABC";
- char           *s2_str = "ABCD";
+ const char     *s1_str = "ABC";
+ const char     *s2_str = "ABCD";
 
  printf("Testing scales with several datatypes\n");
 
@@ -2656,8 +2659,8 @@ out:
 static int test_data(void)
 {
  hid_t   fid;                         /* file ID */
- hid_t   did;                         /* dataset ID */
- hid_t   dsid;                        /* DS dataset ID */
+ hid_t   did = -1;                    /* dataset ID */
+ hid_t   dsid = -1;                   /* DS dataset ID */
  hid_t   dcpl;                        /* dataset creation property list */
  hid_t   sid;                         /* dataspace ID */
  float   *vals=NULL;                  /* array to hold data values */
@@ -2845,7 +2848,7 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 
  for (i=0, nelms=1; i < ndims; i++)
  {
-  fscanf( f, "%s %d", str, &j);
+  fscanf( f, "%s %u", str, &j);
   fscanf( f, "%d",&n );
   dims[i] = n;
   nelms *= n;
