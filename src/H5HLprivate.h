@@ -76,3 +76,4 @@ H5_DLL herr_t H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
 H5_DLL herr_t H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			  int fwidth);
 #endif
+

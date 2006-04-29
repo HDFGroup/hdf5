@@ -2065,7 +2065,7 @@ static herr_t
 H5G_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/)
 {
-    char *old_link_name;                /* Pointer to hold the old link name */
+    char *old_link_name = NULL;         /* Pointer to hold the old link name */
     hbool_t old_link_name_set = FALSE;  /* Indicate that we've replaced the old link name */
     H5G_trav_ud3_t *udata = (H5G_trav_ud3_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -2999,7 +2999,7 @@ H5G_unmount(H5G_t *grp)
 static herr_t
 H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t plist_id)
 {
-    H5P_genplist_t  *gcrt_plist;                /* Group create property list created */
+    H5P_genplist_t  *gcrt_plist = NULL;         /* Group create property list created */
     H5P_genplist_t  *gcpy_plist;                /* Group copy property list created */
     hid_t           dxpl_id = H5AC_dxpl_id;
     H5G_name_t      new_path;                   /* Copied object group hier. path */
