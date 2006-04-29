@@ -37,7 +37,6 @@ int main(void)
     /* Buffers to hold data */
  hvl_t writeBuffer[5];
  hvl_t readBuffer[5];
- hsize_t chunk_size=1;
 
     /* This example has two different sizes of "record": longs and shorts */
  long longBuffer[5];
@@ -68,7 +67,7 @@ int main(void)
  fid=H5Fcreate("packet_table_VLexample.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
 
     /* Create a variable-length packet table within the file */
- ptable = H5PTcreate_vl(fid, "Packet Test Dataset", chunk_size);
+ ptable = H5PTcreate_vl(fid, "Packet Test Dataset", (hsize_t)1);
  if(ptable == H5I_INVALID_HID)
      goto out;
 

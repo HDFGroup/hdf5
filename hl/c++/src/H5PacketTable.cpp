@@ -20,6 +20,9 @@
  * February 2004
  */
 
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+
 #include "H5PacketTable.h"
 
     /********************************/

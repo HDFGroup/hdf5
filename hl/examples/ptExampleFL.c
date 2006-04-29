@@ -38,8 +38,6 @@ int main(void)
     /* Buffers to hold data */
  int writeBuffer[5];
  int readBuffer[5];
- hsize_t nrecords;
- hsize_t chunk_size=1;
 
    /* Initialize buffers */
  for(x=0; x<5; x++)
@@ -53,21 +51,17 @@ int main(void)
 
     /* Create a fixed-length packet table within the file */
     /* This table's "packets" will be simple integers. */
- ptable = H5PTcreate_fl(fid, "Packet Test Dataset", H5T_NATIVE_INT, chunk_size);
+ ptable = H5PTcreate_fl(fid, "Packet Test Dataset", H5T_NATIVE_INT, (hsize_t)1);
  if(ptable == H5I_INVALID_HID)
      goto out;
 
- nrecords=1;
-
     /* Write one packet to the packet table */
- err = H5PTappend(ptable, nrecords, &(writeBuffer[0]) );
+ err = H5PTappend(ptable, (hsize_t)1, &(writeBuffer[0]) );
  if(err < 0)
      goto out;
 
- nrecords=4;
-
     /* Write several packets to the packet table */
- err = H5PTappend(ptable, nrecords, &(writeBuffer[1]) );
+ err = H5PTappend(ptable, (hsize_t)4, &(writeBuffer[1]) );
  if(err < 0)
      goto out;
 
@@ -83,11 +77,10 @@ int main(void)
  if(err < 0)
      goto out;
 
- nrecords=1;
     /* Iterate through packets, read each one back */
  for(x=0; x<5; x++)
  {
-    err = H5PTget_next(ptable, nrecords, &(readBuffer[x]) );
+    err = H5PTget_next(ptable, (hsize_t)1, &(readBuffer[x]) );
     if(err < 0)
 	goto out;
 
