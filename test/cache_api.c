@@ -1325,9 +1325,9 @@ mdc_api_call_smoke_check(void)
     double min_hit_rate = 0.90;
     hbool_t dump_cache_size = FALSE;
     hid_t file_id = -1;
-    hid_t dataspace_id;
+    hid_t dataspace_id = -1;
     hid_t filespace_ids[NUM_DSETS];
-    hid_t memspace_id;
+    hid_t memspace_id = -1;
     hid_t dataset_ids[NUM_DSETS];
     hid_t properties;
     char dset_name[64];
@@ -2734,7 +2734,7 @@ check_fapl_mdc_api_errs(void)
     static char msg[128];
     int i;
     herr_t result;
-    hid_t fapl_id;
+    hid_t fapl_id = -1;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t scratch;
 
@@ -2904,7 +2904,7 @@ check_file_mdc_api_errs(void)
     static char msg[128];
     int i;
     herr_t result;
-    hid_t file_id;
+    hid_t file_id = -1;
     size_t max_size;
     size_t min_clean_size;
     size_t cur_size;

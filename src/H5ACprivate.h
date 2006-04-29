@@ -242,21 +242,21 @@ extern hid_t H5AC_ind_dxpl_id;
 
 H5_DLL herr_t H5AC_init(void);
 H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
-H5_DLL herr_t H5AC_get_entry_status(H5C_t * cache_ptr, haddr_t addr,
+H5_DLL herr_t H5AC_get_entry_status(H5F_t * f, haddr_t addr,
 				    unsigned * status_ptr);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                        haddr_t addr, void *thing, unsigned int flags);
-H5_DLL herr_t H5AC_pin_protected_entry(H5C_t * cache_ptr, void *  thing);
+H5_DLL herr_t H5AC_pin_protected_entry(H5F_t * f, void *  thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, const void *udata1, void *udata2,
                            H5AC_protect_t rw);
-H5_DLL herr_t H5AC_unpin_entry(H5C_t * cache_ptr,
+H5_DLL herr_t H5AC_unpin_entry(H5F_t * f,
 		               void *  thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5C_t * cache_ptr,
+H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                           void *  thing,
 					   hbool_t size_changed,
                                            size_t  new_size);

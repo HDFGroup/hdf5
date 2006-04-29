@@ -340,7 +340,7 @@ type_and_index_to_addr(int32_t type,
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_check_if_write_permitted
+ * Function:    check_if_write_permitted
  *
  * Purpose:     Determine if a write is permitted under the current
  *              circumstances, and set *write_permitted_ptr accordingly.
@@ -2021,7 +2021,7 @@ unprotect_entry(H5C_t * cache_ptr,
 
         if ( ( dirty == TRUE ) || ( dirty == FALSE ) ) {
 
-            flags |= (dirty ? H5AC__DIRTIED_FLAG : H5AC__NO_FLAGS_SET);
+            flags |= (dirty ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET);
             entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty);
         }
 
@@ -2058,7 +2058,7 @@ unprotect_entry(H5C_t * cache_ptr,
 
         HDassert( ((entry_ptr->header).type)->id == type );
 
-        if ( ( flags & H5AC__DIRTIED_FLAG ) != 0
+        if ( ( flags & H5C__DIRTIED_FLAG ) != 0
                 && ( (flags & H5C__DELETED_FLAG) == 0 ) ) {
 
             HDassert( entry_ptr->header.is_dirty );

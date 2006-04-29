@@ -346,8 +346,8 @@ void lock_and_unlock_random_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
 void lock_and_unlock_random_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                                   int min_idx, int max_idx);
 void lock_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx);
-void mark_pinned_entry_dirty(H5C_t * cache_ptr, int32_t idx,
-	                hbool_t size_changed, size_t new_size);
+void mark_pinned_entry_dirty(H5C_t * cache_ptr, H5F_t * file_ptr,
+                int32_t idx, hbool_t size_changed, size_t new_size);
 void pin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
 	       hbool_t global, hbool_t dirty);
 void rename_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
@@ -1700,7 +1700,7 @@ load_datum(H5F_t UNUSED *f,
         if ( ! recv_mssg(&mssg) ) {
 
             nerrors++;
-            success = FAIL;
+            success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
                           world_mpi_rank, fcn_name);
@@ -2298,6 +2298,7 @@ lock_entry(H5C_t * cache_ptr,
 
 void
 mark_pinned_entry_dirty(H5C_t * cache_ptr,
+                        H5F_t * file_ptr,
                         int32_t idx,
 	                hbool_t size_changed,
 	                size_t new_size)
@@ -2308,6 +2309,7 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
     if ( nerrors == 0 ) {
 
+        HDassert( file_ptr );
         HDassert( cache_ptr );
         HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
         HDassert( idx < virt_num_data_entries );
@@ -2320,7 +2322,7 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-	result = H5AC_mark_pinned_entry_dirty(cache_ptr,
+	result = H5AC_mark_pinned_entry_dirty(file_ptr,
 	                                      (void *)entry_ptr,
                                               size_changed,
                                               new_size);
@@ -2329,7 +2331,7 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: error in H5AC_unpin_entry().\n",
+	        HDfprintf(stdout, "%d:%s: error in H5AC_mark_pinned_entry_dirty().\n",
                           world_mpi_rank, fcn_name);
             }
         } 
@@ -2998,11 +3000,11 @@ unpin_entry(H5C_t * cache_ptr,
 
 	    if ( dirty ) {
 
-		mark_pinned_entry_dirty(cache_ptr, idx, FALSE, (size_t)0);
+		mark_pinned_entry_dirty(cache_ptr, file_ptr, idx, FALSE, (size_t)0);
 
 	    }
 
-	    result = H5AC_unpin_entry(cache_ptr, (void *)entry_ptr);
+	    result = H5AC_unpin_entry(file_ptr, (void *)entry_ptr);
 
 	    if ( result < 0 ) {
 
@@ -4231,7 +4233,7 @@ main(int argc, char **argv)
 {
     const char * fcn_name = "main()";
     int express_test;
-    int i;
+    unsigned u;
     int mpi_size;
     int mpi_rank;
     int max_nerrors;
@@ -4247,7 +4249,7 @@ main(int argc, char **argv)
 
     H5open();
 
-    if ( express_test = do_express_test() ) {
+    if ( (express_test = do_express_test()) ) {
 
 #if 0 /* I'll want this from time to time */
 	HDfprintf(stdout, "%d:%s: Express test.\n", world_mpi_rank, fcn_name);
@@ -4312,10 +4314,10 @@ main(int argc, char **argv)
     }
 
     /* fix the file names */
-    for ( i = 0; i < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++i ) 
+    for ( u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u ) 
     {
-        if ( h5_fixname(FILENAME[i], fapl, filenames[i], 
-                        sizeof(filenames[i])) == NULL ) {
+        if ( h5_fixname(FILENAME[u], fapl, filenames[u], 
+                        sizeof(filenames[u])) == NULL ) {
 
             nerrors++;
             if ( verbose ) {

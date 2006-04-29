@@ -989,10 +989,11 @@ done:
  */
 
 herr_t
-H5AC_get_entry_status(H5C_t *    cache_ptr,
+H5AC_get_entry_status(H5F_t *    f,
                       haddr_t    addr,
 		      unsigned * status_ptr)
 {
+    H5C_t      *cache_ptr = f->shared->cache;
     herr_t      ret_value = SUCCEED;      /* Return value */
     herr_t	result;
     hbool_t	in_cache;
@@ -1212,11 +1213,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_mark_pinned_entry_dirty(H5C_t * cache_ptr,
+H5AC_mark_pinned_entry_dirty(H5F_t * f,
                              void *  thing,
 			     hbool_t size_changed,
                              size_t  new_size)
 {
+    H5C_t              *cache_ptr = f->shared->cache;
     herr_t		result;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -1408,11 +1410,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_pin_protected_entry(H5C_t * cache_ptr,
+H5AC_pin_protected_entry(H5F_t * f,
                          void *	 thing)
 {
-    herr_t		result;
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5C_t      *cache_ptr = f->shared->cache;
+    herr_t	result;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_pin_protected_entry, FAIL)
 
@@ -1554,11 +1557,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unpin_entry(H5C_t * cache_ptr,
+H5AC_unpin_entry(H5F_t * f,
                  void *	 thing)
 {
-    herr_t		result;
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5C_t      *cache_ptr = f->shared->cache;
+    herr_t	result;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_unpin_entry, FAIL)
 
@@ -2480,7 +2484,7 @@ done:
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_check_if_write_permitted(const H5F_t *f,
-                              hid_t dxpl_id,
+                              hid_t UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr)
 #else /* H5_HAVE_PARALLEL */
 static herr_t
