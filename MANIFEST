@@ -497,6 +497,7 @@
 ./src/H5HFhdr.c
 ./src/H5HFiblock.c
 ./src/H5HFint.c
+./src/H5HFiter.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
 ./src/H5HFpublic.h	

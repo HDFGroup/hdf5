@@ -211,3 +211,37 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_dest() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_dtable_size_to_row
+ *
+ * Purpose:	Compute row that can hold block of a certain size
+ *
+ * Return:	Non-negative on success (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Apr 25 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5HF_dtable_size_to_row(H5HF_dtable_t *dtable, size_t block_size)
+{
+    unsigned row;               /* Row where block will fit */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_size_to_row)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(dtable);
+
+    if(block_size == dtable->cparam.start_block_size)
+        row = 0;
+    else
+        row = (H5V_log2_of2((uint32_t)block_size) - H5V_log2_of2(dtable->cparam.start_block_size)) + 1;
+
+    FUNC_LEAVE_NOAPI(row)
+} /* end H5HF_dtable_size_to_row() */
+

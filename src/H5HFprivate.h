@@ -67,6 +67,9 @@ typedef struct H5HF_create_t {
                                 /* (i.e. max. size of object to manage) */
 } H5HF_create_t;
 
+/* Fractal heap info (forward decl - defined in H5HFpkg.h) */
+typedef struct H5HF_t H5HF_t;
+
 
 /*****************************/
 /* Library-private Variables */
@@ -75,13 +78,15 @@ typedef struct H5HF_create_t {
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-H5_DLL herr_t H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam,
-    haddr_t *addr_p, size_t *id_len_p);
-H5_DLL herr_t H5HF_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
+H5_DLL H5HF_t *H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam);
+H5_DLL H5HF_t *H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
+H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p);
+H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr);
+H5_DLL herr_t H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size,
     const void *obj, void *id/*out*/);
-H5_DLL herr_t H5HF_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *id,
+H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
+H5_DLL herr_t H5HF_close(H5HF_t *fh);
 
 #endif /* _H5HFprivate_H */
-
 

@@ -78,6 +78,7 @@ struct H5HF_freelist_t {
 /* Local Prototypes */
 /********************/
 static herr_t H5HF_flist_node_free_cb(void *item, void *key, void *op_data);
+static herr_t H5HF_flist_init(H5HF_freelist_t *flist);
 
 
 /*********************/
@@ -107,6 +108,41 @@ H5FL_SEQ_DEFINE_STATIC(H5SL_ptr_t);
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_flist_init
+ *
+ * Purpose:	Initialize free list for heap
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, April 18, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_flist_init(H5HF_freelist_t *flist)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_flist_init)
+
+    /* Check arguments. */
+    HDassert(flist);
+
+    /* Set free list parameters */
+    flist->tot_space = 0;
+    flist->sec_count = 0;
+    flist->single.node = NULL;
+    flist->single.size_key = NULL;
+    flist->single.addr_key = NULL;
+    flist->bins = NULL;
+    flist->using_bins = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HF_flist_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_flist_create
  *
  * Purpose:	Allocate & initialize free list for heap
@@ -121,7 +157,7 @@ H5FL_SEQ_DEFINE_STATIC(H5SL_ptr_t);
  *-------------------------------------------------------------------------
  */
 H5HF_freelist_t *
-H5HF_flist_create(size_t max_block_size, H5SL_operator_t node_free_op)
+H5HF_flist_create(unsigned max_index_bits, H5SL_operator_t node_free_op)
 {
     H5HF_freelist_t *flist;             /* New free list structure */
     H5HF_freelist_t *ret_value;         /* Return value */
@@ -136,16 +172,12 @@ H5HF_flist_create(size_t max_block_size, H5SL_operator_t node_free_op)
     if(NULL == (flist = H5FL_MALLOC(H5HF_freelist_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap free list")
 
-    /* Set free list parameters */
-    flist->tot_space = 0;
-    flist->sec_count = 0;
-    flist->single.node = NULL;
-    flist->single.size_key = NULL;
-    flist->single.addr_key = NULL;
-    flist->nbins = H5V_log2_of2(max_block_size);
+    /* Set immutable free list parameters */
+    flist->nbins = max_index_bits;
     flist->node_free_op = node_free_op;
-    flist->bins = NULL;
-    flist->using_bins = FALSE;
+
+    /* Set modifiable free list parameters */
+    H5HF_flist_init(flist);
 
     /* Set return value */
     ret_value = flist;
@@ -190,6 +222,7 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
 
     /* Determine correct bin which holds items of the section's size */
     bin = H5V_log2_gen((hsize_t)*size_key);
+    HDassert(bin < flist->nbins);
     if(flist->bins[bin] == NULL) {
         if(NULL == (flist->bins[bin] = H5SL_create(H5SL_TYPE_SIZE, 0.5, H5HF_FLIST_DEFAULT_SKIPLIST_HEIGHT)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create skip list for free list nodes")
@@ -256,6 +289,9 @@ HDfprintf(stderr, "%s: *size_key = %Zu, *addr_key = %a\n", FUNC, *size_key, *add
     HDassert(addr_key);
 
     /* Check for special cases of # of sections on free list */
+#ifdef QAK
+HDfprintf(stderr, "%s: flist->sec_count = %Zu\n", FUNC, flist->sec_count);
+#endif /* QAK */
     if(flist->sec_count == 0) {
         HDassert(flist->single.node == NULL);
 
@@ -330,6 +366,7 @@ H5HF_flist_find_bin_node(H5HF_freelist_t *flist, size_t request, void **node)
 
     /* Determine correct bin which holds items of at least the section's size */
     bin = H5V_log2_gen((hsize_t)request);
+    HDassert(bin < flist->nbins);
     while(bin < flist->nbins && flist->bins[bin] == NULL)
         bin++;
 
@@ -412,6 +449,9 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
     HDassert(node);
 
     /* Check for any sections on free list */
+#ifdef QAK
+HDfprintf(stderr, "%s: flist->sec_count = %Zu\n", FUNC, flist->sec_count);
+#endif /* QAK */
     if(flist->sec_count > 0) {
         /* Check for single section */
 /* XXX: Take out the "&& !flist->using_bins" when bins converted back into single section */
@@ -435,8 +475,9 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't remove section from bins")
         } /* end else */
 
-        /* Decrement # of sections on free list */
-        flist->sec_count--;
+        /* Decrement # of sections on free list, if we found an object */
+        if(ret_value > 0) {
+            flist->sec_count--;
 /* XXX: Should check for only one section in bins & convert to single section
  *      This is somewhat hard because we "lose" the the size & address keys
  *      (The address key is actually available, but the size key is gone, unless
@@ -444,8 +485,9 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
  *
  *      Drop back to using a "single" node when the bins are empty.
  */
-        if(flist->sec_count == 0)
-            flist->using_bins = FALSE;
+            if(flist->sec_count == 0)
+                flist->using_bins = FALSE;
+        } /* end if */
     } /* end if */
 
 done:
@@ -487,25 +529,26 @@ H5HF_flist_node_free_cb(void *item, void UNUSED *key, void *op_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_flist_free
+ * Function:	H5HF_flist_reset
  *
- * Purpose:	Destroy & deallocate free list structure
+ * Purpose:	Reset free list structure by freeing all existing sections
+ *              and restoring free list info to initial conditions.
  *
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *              Tuesday, March  7, 2006
+ *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_flist_free(H5HF_freelist_t *flist)
+H5HF_flist_reset(H5HF_freelist_t *flist)
 {
     unsigned u;                 /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_flist_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_flist_reset)
 
     /* Check arguments. */
     HDassert(flist);
@@ -530,6 +573,38 @@ H5HF_flist_free(H5HF_freelist_t *flist)
 
         H5FL_SEQ_FREE(H5SL_ptr_t, flist->bins);
     } /* end if */
+
+    /* Reset free list info back to initial state */
+    H5HF_flist_init(flist);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HF_flist_reset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_flist_free
+ *
+ * Purpose:	Destroy & deallocate free list structure
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_flist_free(H5HF_freelist_t *flist)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_flist_free)
+
+    /* Check arguments. */
+    HDassert(flist);
+
+    /* Reset free list information */
+    H5HF_flist_reset(flist);
 
     /* Free fractal heap free list info */
     H5FL_FREE(H5HF_freelist_t, flist);

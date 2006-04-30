@@ -92,11 +92,11 @@
  *
  *-------------------------------------------------------------------------
  */
-H5HF_t *
+H5HF_hdr_t *
 H5HF_hdr_alloc(H5F_t *f)
 {
-    H5HF_t *fh = NULL;          /* Shared fractal heap header */
-    H5HF_t *ret_value = NULL;   /* Return value */
+    H5HF_hdr_t *hdr = NULL;          /* Shared fractal heap header */
+    H5HF_hdr_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_alloc)
 
@@ -106,21 +106,21 @@ H5HF_hdr_alloc(H5F_t *f)
     HDassert(f);
 
     /* Allocate space for the shared information */
-    if(NULL == (fh = H5FL_CALLOC(H5HF_t)))
+    if(NULL == (hdr = H5FL_CALLOC(H5HF_hdr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap shared header")
 
     /* Set the internal parameters for the heap */
-    fh->f = f;
-    fh->sizeof_size = H5F_SIZEOF_SIZE(f);
-    fh->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    hdr->f = f;
+    hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
+    hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
     /* Set the return value */
-    ret_value = fh;
+    ret_value = hdr;
 
 done:
     if(!ret_value)
-        if(fh)
-            (void)H5HF_cache_hdr_dest(f, fh);
+        if(hdr)
+            (void)H5HF_cache_hdr_dest(f, hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -141,7 +141,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5HF_hdr_compute_free_space(H5HF_t *hdr, hsize_t iblock_size)
+H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, hsize_t iblock_size)
 {
     hsize_t acc_heap_size;      /* Accumumated heap space */
     hsize_t acc_dblock_free;    /* Accumumated direct block free space */
@@ -189,7 +189,7 @@ H5HF_hdr_compute_free_space(H5HF_t *hdr, hsize_t iblock_size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_finish_init(H5HF_t *hdr)
+H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 {
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -207,8 +207,15 @@ H5HF_hdr_finish_init(H5HF_t *hdr)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
     /* Create the free-list structure for the heap */
-    if(NULL == (hdr->flist = H5HF_flist_create(hdr->man_dtable.cparam.max_direct_size, H5HF_free_section_free_cb)))
+    if(NULL == (hdr->flist = H5HF_flist_create(hdr->man_dtable.cparam.max_index, H5HF_free_section_free_cb)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free list info")
+
+    /* Start the free list "generation" count */
+    /* (Must be "out of sync" with starting value for indirect & direct block
+     * cache loading routines, in order to trigger re-building the free list
+     * information for each block when a heap is opened->closed->reopened -QAK)
+     */
+    hdr->fl_gen = 1;
 
     /* Set the size of heap IDs */
     hdr->id_len = hdr->heap_off_size + MIN(hdr->man_dtable.max_dir_blk_off_size,
@@ -229,6 +236,10 @@ HDfprintf(stderr, "%s: row_dblock_free[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.r
 #endif /* QAK */
     } /* end for */
 
+    /* Initialize the block iterator for searching for free space */
+    if(H5HF_man_iter_init(&hdr->next_block) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize space search block iterator")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_finish_init() */
@@ -248,7 +259,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_init(H5HF_t *fh, haddr_t fh_addr, H5HF_create_t *cparam)
+H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
 {
     herr_t ret_value = SUCCEED;           /* Return value */
 
@@ -257,7 +268,7 @@ H5HF_hdr_init(H5HF_t *fh, haddr_t fh_addr, H5HF_create_t *cparam)
     /*
      * Check arguments.
      */
-    HDassert(fh);
+    HDassert(hdr);
     HDassert(cparam);
 
 #ifndef NDEBUG
@@ -271,30 +282,33 @@ H5HF_hdr_init(H5HF_t *fh, haddr_t fh_addr, H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
     if(cparam->managed.max_direct_size < cparam->standalone_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
-    if(cparam->managed.max_index > (8 * fh->sizeof_size) || cparam->managed.max_index == 0)
+    if(cparam->managed.max_index > (8 * hdr->sizeof_size) || cparam->managed.max_index == 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
 #endif /* NDEBUG */
 
     /* Set the creation parameters for the heap */
-    fh->heap_addr = fh_addr;
-    fh->addrmap = cparam->addrmap;
-    fh->standalone_size = cparam->standalone_size;
-    HDmemcpy(&(fh->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
+    hdr->heap_addr = fh_addr;
+    hdr->addrmap = cparam->addrmap;
+    hdr->standalone_size = cparam->standalone_size;
+    HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
     /* Set root table address */
-    fh->man_dtable.table_addr = HADDR_UNDEF;
+    hdr->man_dtable.table_addr = HADDR_UNDEF;
+
+    /* Newly created heap's free list is always in sync in memory */
+    hdr->freelist_sync = TRUE;
 
     /* Note that the shared info is dirty (it's not written to the file yet) */
-    fh->dirty = TRUE;
+    hdr->dirty = TRUE;
 
     /* Make shared heap info reference counted */
-    if(H5HF_hdr_finish_init(fh) < 0)
+    if(H5HF_hdr_finish_init(hdr) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared fractal heap header")
 
 done:
     if(ret_value < 0)
-        if(fh)
-            (void)H5HF_cache_hdr_dest(NULL, fh);
+        if(hdr)
+            (void)H5HF_cache_hdr_dest(NULL, hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_init() */
@@ -314,9 +328,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_incr(H5HF_t *hdr)
+H5HF_hdr_incr(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_incr)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_incr)
 
     /* Sanity check */
     HDassert(hdr);
@@ -324,11 +340,16 @@ H5HF_hdr_incr(H5HF_t *hdr)
 /* XXX: When "un-evictable" feature is finished, mark the header as
  *      unevictable on the first block to share it.  - QAK
  */
+    /* Mark header as un-evictable when a block is depending on it */
+    if(hdr->rc == 0)
+        if(H5AC_pin_protected_entry(hdr->f, hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin fractal heap header")
 
     /* Increment reference count on shared header */
     hdr->rc++;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_incr() */
 
 
@@ -346,9 +367,11 @@ H5HF_hdr_incr(H5HF_t *hdr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_decr(H5HF_t *hdr)
+H5HF_hdr_decr(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_decr)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_decr)
 
     /* Sanity check */
     HDassert(hdr);
@@ -356,13 +379,13 @@ H5HF_hdr_decr(H5HF_t *hdr)
     /* Decrement reference count on shared header */
     hdr->rc--;
 
-/* XXX: When "un-evictable" feature is finished, mark the header as
- *      evictable when the ref. count drops to zero.  - QAK
- */
-/* XXX: Take this call out after "un-evictable" flag is working */
-    H5HF_cache_hdr_dest_real(hdr);
+    /* Mark header as evictable again when no child blocks depend on it */
+    if(hdr->rc == 0)
+        if(H5AC_unpin_entry(hdr->f, hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_decr() */
 
 
@@ -380,10 +403,8 @@ H5HF_hdr_decr(H5HF_t *hdr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_dirty(hid_t dxpl_id, H5HF_t *hdr)
+H5HF_hdr_dirty(H5HF_hdr_t *hdr)
 {
-    H5HF_t *tmp_hdr;                    /* Temporary pointer to heap header */
-    hbool_t is_protected;               /* Whether the indirect block is protected */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_dirty)
@@ -394,28 +415,12 @@ HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
     /* Sanity check */
     HDassert(hdr);
 
-/* XXX: When "un-evictable" feature is finished, just mark the header as dirty
- *      in the cache, instead of this protect -> unprotect kludge - QAK
- */
-    /* Protect the header */
-    is_protected = hdr->cache_info.is_protected;
-    if(!is_protected) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->heap_addr = %a\n", FUNC, hdr->heap_addr);
-#endif /* QAK */
-        if(NULL == (tmp_hdr = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, NULL, NULL, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
-        HDassert(hdr == tmp_hdr);
-    } /* end if */
+    /* Mark header as dirty in cache */
+    if(H5AC_mark_pinned_entry_dirty(hdr->f, hdr, FALSE, 0) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
 
     /* Set the dirty flags for the heap header */
     hdr->dirty = TRUE;
-
-    /* Release the heap header (marked as dirty) */
-    if(!is_protected) {
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, tmp_hdr, H5AC__DIRTIED_FLAG) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -436,7 +441,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_extend_heap(H5HF_t *hdr, hsize_t new_size, hsize_t extra_free)
+H5HF_hdr_extend_heap(H5HF_hdr_t *hdr, hsize_t new_size, hsize_t extra_free)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_extend_heap)
 
@@ -455,4 +460,46 @@ H5HF_hdr_extend_heap(H5HF_t *hdr, hsize_t new_size, hsize_t extra_free)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_hdr_extend_heap() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_inc_alloc
+ *
+ * Purpose:	Increase allocated size of heap
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Apr 24 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_inc_alloc(H5HF_hdr_t *hdr, hsize_t new_alloc_size, unsigned nentries)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_inc_alloc)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(new_alloc_size >= hdr->man_alloc_size);
+
+    /* Advance the iterator for the current location with in the indirect block */
+    if(hdr->next_block.curr)
+        if(H5HF_man_iter_next(hdr, &hdr->next_block, nentries) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL, "unable to advance current block iterator location")
+
+    /* Update the "allocated" size within the heap */
+    hdr->man_alloc_size = new_alloc_size;
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->man_alloc_size = %Hu\n", FUNC, hdr->man_alloc_size);
+#endif /* QAK */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_inc_alloc() */
 
