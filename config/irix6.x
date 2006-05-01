@@ -73,7 +73,7 @@ case "X-$CC_BASENAME" in
       #    1685:  turn off warnings about turning off invalid warnings
       #    3201:  remark - parameter not referenced
       #CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
-      CFLAGS="$CFLAGS -woff 1209,3201"
+      H5_CFLAGS="$H5_CFLAGS -woff 1209,3201"
 
       # Always turn off these compiler warnings for the old compiler:
       #    799:   the `long long' type is not standard
@@ -87,7 +87,7 @@ case "X-$CC_BASENAME" in
       #      84:  a library is not used
       #      85:  duplicate definition preemption (from -lnsl)
       #     134:  duplicate weak definition preemption (from -lnsl)
-      CFLAGS="$CFLAGS -Wl,-woff,47,-woff,84,-woff,85,-woff,134"
+      H5_CFLAGS="$H5_CFLAGS -Wl,-woff,47,-woff,84,-woff,85,-woff,134"
     fi
 
     # Extra debugging flags
@@ -113,7 +113,7 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FCFLAGS="$FCFLAGS -mips4 -O -s"
+  H5_FCFLAGS="$H5_FCFLAGS -mips4 -O -s"
   DEBUG_FCFLAGS="-mips4 -O -s"
   PROD_FCFLAGS="-mips4 -O -s"
   PROFILE_FCFLAGS="-mips4 -O -s"
@@ -132,7 +132,8 @@ fi
 if test -z "$cxx_flags_set"; then
   # -LANG:std required for std use; -ptused causes templates used to be
   # instantiated
-  CPPFLAGS="$CPPFLAGS -LANG:std -ptused"
+  CPPFLAGS="$CPPFLAGS -LANG:std"
+  H5_CPPFLAGS="$H5_CPPFLAGS -ptused"
 
   # libCio is a default library, since libtool before 1.5 doesn't fully 
   # support C++ yet, default libraries must be explicitly specified.

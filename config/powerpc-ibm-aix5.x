@@ -45,7 +45,7 @@ case $CC_BASENAME in
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
-    CFLAGS="-qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
+    H5_CFLAGS="$H5_CFLAGS -qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
@@ -60,7 +60,7 @@ case $CC_BASENAME in
     ;;
 
   *)
-    CFLAGS="$CFLAGS -ansi"
+    H5_CFLAGS="$H5_CFLAGS -ansi"
     DEBUG_CFLAGS="-g"
     DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O"
@@ -133,7 +133,8 @@ fi
 
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+  FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG} -k"
+  H5_FCFLAGS="$H5_FCFLAGS -static -qmoddir=./"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
   PROD_FCFLAGS="-O"
@@ -153,6 +154,6 @@ CXX=${CXX=xlC}
 
 # Added -qweaksymbol to suppress linker messages warning of duplicate
 # symbols; these warnings are harmless. - BMR
-CXXFLAGS="$CXXFLAGS -qweaksymbol"
+H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol"
 
 

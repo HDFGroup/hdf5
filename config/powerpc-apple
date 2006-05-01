@@ -50,7 +50,8 @@ fi
 case $FC_BASENAME in
     xlf) 
         F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-        FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
+        FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG}"
+        H5_FCFLAGS="$H5_FCFLAGS -qmoddir=./ "
         FSEARCH_DIRS="-I./ -I../src"
         DEBUG_FCFLAGS="-g"
         PROD_FCFLAGS="-O"
@@ -63,7 +64,7 @@ case $FC_BASENAME in
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
 # (just in case since this should be a default EIP)
-        FCFLAGS="$FCFLAGS -YEXT_NAMES=UCS"
+        H5_FCFLAGS="$H5_FCFLAGS -YEXT_NAMES=UCS"
         FSEARCH_DIRS=""
         DEBUG_FCFLAGS="-g"
         PROD_FCFLAGS="-O"

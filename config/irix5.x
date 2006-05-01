@@ -38,7 +38,7 @@ RANLIB=:
 
 case "X-$CC_BASENAME" in
   X-gcc)
-    CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+    H5_CFLAGS="$H5_CFLAGS -Wsign-compare" #Only works for some versions
     DEBUG_CFLAGS="-g -fverbose-asm"
     DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O3"
@@ -55,7 +55,7 @@ case "X-$CC_BASENAME" in
     #CFLAGS="$CFLAGS -ansi"
 
     # Always turn off these compiler warnings:
-    CFLAGS="$CFLAGS -woff 799"
+    H5_CFLAGS="$H5_CFLAGS -woff 799"
 
     # Extra debugging flags
     DEBUG_CFLAGS=-g
