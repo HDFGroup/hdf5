@@ -73,6 +73,7 @@ static void check_flush_cache__pinned_single_entry_test(H5C_t * cache_ptr,
                                                    hbool_t expected_flushed,
                                                    hbool_t expected_destroyed);
 static void check_flush_protected_err(void);
+static void check_get_entry_status(void);
 static void check_rename_entry(void);
 static void check_rename_entry__run_test(H5C_t * cache_ptr, int test_num,
                                       struct rename_entry_test_spec * spec_ptr);
@@ -92,7 +93,6 @@ static void check_auto_cache_resize_disable(void);
 static void check_auto_cache_resize_epoch_markers(void);
 static void check_auto_cache_resize_input_errs(void);
 static void check_auto_cache_resize_aux_fcns(void);
-static void check_get_entry_status(void);
 
 
 /**************************************************************************/
@@ -7301,6 +7301,205 @@ check_flush_cache__pinned_single_entry_test(H5C_t * cache_ptr,
     return;
 
 } /* check_flush_cache__single_entry_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_get_entry_status()
+ *
+ * Purpose:	Verify that H5C_get_entry_status() behaves as expected.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/28/06
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_get_entry_status(void)
+{
+    const char *  fcn_name = "check_get_entry_status";
+    static char   msg[128];
+    herr_t        result;
+    hbool_t	  in_cache;
+    hbool_t	  is_dirty;
+    hbool_t	  is_protected;
+    hbool_t	  is_pinned;
+    size_t	  entry_size;
+    H5C_t *       cache_ptr = NULL;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    TESTING("H5C_get_entry_status() functionality");
+
+    pass = TRUE;
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024 * 1024),
+                                (size_t)(1 * 1024 * 1024));
+
+        base_addr = entries[0];
+        entry_ptr = &(base_addr[0]);
+    }
+
+    if ( pass ) {
+
+        /* entry not in cache -- only in_cache should be touched by
+         * the call.  Thus, only check that boolean.
+         */
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 1.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            failure_mssg = msg;
+        }
+    }
+
+    protect_entry(cache_ptr, 0, 0);
+
+    unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+    if ( pass ) {
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 2.");
+            failure_mssg = msg;
+
+	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            failure_mssg = msg;
+        }
+    }
+
+    protect_entry(cache_ptr, 0, 0);
+
+    if ( pass ) {
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 3.");
+            failure_mssg = msg;
+
+	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            failure_mssg = msg;
+        }
+    }
+
+    unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+
+    if ( pass ) {
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 4.");
+            failure_mssg = msg;
+
+	} else if ( !in_cache || is_dirty || is_protected || !is_pinned ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            failure_mssg = msg;
+        }
+    }
+
+    mark_pinned_entry_dirty(cache_ptr, 0, 0, FALSE, 0);
+
+    if ( pass ) {
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 5.");
+            failure_mssg = msg;
+
+	} else if ( !in_cache || !is_dirty || is_protected || !is_pinned ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            failure_mssg = msg;
+        }
+    }
+
+    unpin_entry(cache_ptr, 0, 0);
+
+    if ( pass ) {
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+                &in_cache, &is_dirty, &is_protected, &is_pinned);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 6.");
+            failure_mssg = msg;
+
+	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
+            failure_mssg = msg;
+        }
+    }
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_get_entry_status() */
 
 
 /*-------------------------------------------------------------------------
@@ -17585,201 +17784,6 @@ check_auto_cache_resize_aux_fcns(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_get_entry_status()
- *
- * Purpose:	Verify that H5C_get_entry_status() behaves as expected.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              4/28/06
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-check_get_entry_status(void)
-{
-    const char *  fcn_name = "check_get_entry_status";
-    static char   msg[128];
-    herr_t        result;
-    hbool_t	  in_cache;
-    hbool_t	  is_dirty;
-    hbool_t	  is_protected;
-    hbool_t	  is_pinned;
-    size_t	  entry_size;
-    H5C_t *       cache_ptr = NULL;
-    test_entry_t * base_addr;
-    test_entry_t * entry_ptr;
-
-    TESTING("H5C_get_entry_status() functionality");
-
-    pass = TRUE;
-
-    if ( pass ) {
-
-        reset_entries();
-
-        cache_ptr = setup_cache((size_t)(2 * 1024 * 1024),
-                                (size_t)(1 * 1024 * 1024));
-
-        base_addr = entries[0];
-        entry_ptr = &(base_addr[0]);
-    }
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 1.");
-            failure_mssg = msg;
-
-	} else if ( in_cache || is_dirty || is_protected || is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
-            failure_mssg = msg;
-        }
-    }
-
-    protect_entry(cache_ptr, 0, 0);
-
-    unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
-            failure_mssg = msg;
-
-	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
-            failure_mssg = msg;
-        }
-    }
-
-    protect_entry(cache_ptr, 0, 0);
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
-            failure_mssg = msg;
-
-	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
-            failure_mssg = msg;
-        }
-    }
-
-    unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
-            failure_mssg = msg;
-
-	} else if ( !in_cache || is_dirty || is_protected || !is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
-            failure_mssg = msg;
-        }
-    }
-
-    mark_pinned_entry_dirty(cache_ptr, 0, 0, FALSE, 0);
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 5.");
-            failure_mssg = msg;
-
-	} else if ( !in_cache || !is_dirty || is_protected || !is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
-            failure_mssg = msg;
-        }
-    }
-
-    unpin_entry(cache_ptr, 0, 0);
-
-    if ( pass ) {
-
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
-
-	if ( result < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 6.");
-            failure_mssg = msg;
-
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
-            failure_mssg = msg;
-        }
-    }
-
-    if ( pass ) {
-
-        takedown_cache(cache_ptr, FALSE, FALSE);
-    }
-
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
-
-    if ( ! pass ) {
-
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
-    }
-
-    return;
-
-} /* check_get_entry_status() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Run tests on the cache code contained in H5C.c
@@ -17822,6 +17826,7 @@ main(void)
 #if 1
     write_permitted_check();
     check_flush_cache();
+    check_get_entry_status();
     check_rename_entry();
     check_pin_protected_entry();
     check_flush_protected_err();
@@ -17840,7 +17845,6 @@ main(void)
     check_auto_cache_resize_epoch_markers();
     check_auto_cache_resize_input_errs();
     check_auto_cache_resize_aux_fcns();
-    check_get_entry_status();
 #endif
 
     return(0);

@@ -155,20 +155,7 @@ struct datum
  *
  *****************************************************************************/
 
-#ifndef H5_HAVE_MPE
-
-#if 1 /* JRM */
 #define NUM_DATA_ENTRIES	100000
-#else /* JRM */
-#define NUM_DATA_ENTRIES	10000
-#endif /* JRM */
-
-#else /* H5_HAVE_MPE */
-
-/* Use a smaller test size to avoid creating huge MPE logfiles. */
-#define NUM_DATA_ENTRIES	1000
-
-#endif /* H5_HAVE_MPE */
 
 struct datum data[NUM_DATA_ENTRIES];
 
@@ -189,6 +176,7 @@ struct datum data[NUM_DATA_ENTRIES];
 
 #define STD_VIRT_NUM_DATA_ENTRIES	NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES	(NUM_DATA_ENTRIES / 10)
+/* Use a smaller test size to avoid creating huge MPE logfiles. */
 #define MPE_VIRT_NUM_DATA_ENTIES	(NUM_DATA_ENTRIES / 100)
 
 int virt_num_data_entries = NUM_DATA_ENTRIES;
@@ -4251,9 +4239,6 @@ main(int argc, char **argv)
 
     if ( (express_test = do_express_test()) ) {
 
-#if 0 /* I'll want this from time to time */
-	HDfprintf(stdout, "%d:%s: Express test.\n", world_mpi_rank, fcn_name);
-#endif 
 	virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
 
     } else {
