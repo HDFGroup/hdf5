@@ -426,6 +426,118 @@ test_value_dsnt_exist(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_funcs
+ *
+ * Purpose:	Create an enumeration data type and test some functions 
+ *              that are or aren't supposed to work with it.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              Tuesday, April 4, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_funcs(void)
+{
+    hid_t	type=-1, cwg=-1;
+    c_e1	val;
+    signed char	val8;
+    int         size;
+    H5T_pad_t   inpad;
+    H5T_cset_t  cset;
+    herr_t      ret;
+
+    TESTING("some functions with enumeration types");
+
+    /* A native integer */
+    if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1)))<0) goto error;
+    if (H5Tenum_insert(type, "RED",   CPTR(val, E1_RED  ))<0) goto error;
+    if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN))<0) goto error;
+    if (H5Tenum_insert(type, "BLUE",  CPTR(val, E1_BLUE ))<0) goto error;
+    if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE))<0) goto error;
+    if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK))<0) goto error;
+
+    if ((size=H5Tget_precision(type))==0) goto error;
+    if ((size=H5Tget_size(type))==0) goto error;
+    if ((size=H5Tget_offset(type))<0) goto error;
+    if (H5Tget_sign(type)<0) goto error;
+    if (H5Tget_super(type)<0) goto error;
+    
+    H5E_BEGIN_TRY {
+        ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
+    } H5E_END_TRY;
+    if (ret>=0) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    H5E_BEGIN_TRY {
+        size=H5Tget_ebias(type);
+    } H5E_END_TRY;
+    if (size>0) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    H5E_BEGIN_TRY {
+        inpad=H5Tget_inpad(type);
+    } H5E_END_TRY;
+    if (inpad>-1) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    H5E_BEGIN_TRY {
+        cset=H5Tget_cset(type);
+    } H5E_END_TRY;
+    if (cset>-1) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    size = 16;
+    H5E_BEGIN_TRY {
+        ret=H5Tset_offset(type, (size_t)size);
+    } H5E_END_TRY;
+    if (ret>=0) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    H5E_BEGIN_TRY {
+        ret=H5Tset_order(type, H5T_ORDER_BE);
+    } H5E_END_TRY;
+    if (ret>=0) {
+        H5_FAILED();
+        printf("Operation not allowed for this type.\n");
+        goto error;
+    } /* end if */
+
+    if (H5Tclose(type)<0) goto error;
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+	H5Tclose(type);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:
@@ -461,8 +573,9 @@ main(void)
     nerrors += test_tr1(file);
     nerrors += test_tr2(file);
     nerrors += test_value_dsnt_exist();
+    nerrors += test_funcs();
 
-  	H5Fclose(file);
+    H5Fclose(file);
 
     if (nerrors) goto error;
     puts("All enum tests passed.");

@@ -177,6 +177,65 @@ test_array_atomic_1d(void)
 
 /****************************************************************
 **
+**  test_array_funcs(): Test some type functions that are and
+**      aren't supposed to work with array type.
+**
+****************************************************************/
+static void
+test_array_funcs(void)
+{
+    hid_t		type;       /* Datatype ID */
+    hsize_t		tdims1[] = {ARRAY1_DIM1};
+    int                 size;
+    H5T_pad_t           inpad;
+    H5T_norm_t          norm;
+    H5T_sign_t          sign;
+    H5T_cset_t          cset;
+    H5T_str_t           strpad;
+    herr_t		ret;	    /* Generic return value */
+
+    /* Create a datatype to refer to */
+    type = H5Tarray_create (H5T_IEEE_F32BE,ARRAY1_RANK,tdims1,NULL);
+    CHECK(type, FAIL, "H5Tarray_create");
+
+    size=H5Tget_precision(type);
+    CHECK(size, FAIL, "H5Tget_precision");
+
+    size=H5Tget_size(type);
+    CHECK(size, FAIL, "H5Tget_size");
+
+    size=H5Tget_ebias(type);
+    CHECK(size, FAIL, "H5Tget_ebias");
+
+    ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
+    CHECK(ret, FAIL, "H5Tset_pad");
+
+    inpad=H5Tget_inpad(type);
+    CHECK(inpad, FAIL, "H5Tget_inpad");
+
+    norm=H5Tget_norm(type);
+    CHECK(norm, FAIL, "H5Tget_norm");
+
+    ret=H5Tset_offset(type, 16);
+    CHECK(ret, FAIL, "H5Tset_offset");
+
+    H5E_BEGIN_TRY {
+        cset=H5Tget_cset(type);
+    } H5E_END_TRY;
+    VERIFY(cset, FAIL, "H5Tget_cset");
+
+    H5E_BEGIN_TRY {
+        strpad=H5Tget_strpad(type);
+    } H5E_END_TRY;
+    VERIFY(strpad, FAIL, "H5Tget_strpad");
+
+    /* Close datatype */
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+} /* end test_array_funcs */
+
+/****************************************************************
+**
 **  test_array_atomic_3d(): Test basic array datatype code.
 **      Tests 3-D array of atomic datatypes
 **
@@ -2068,6 +2127,7 @@ test_array(void)
     test_array_compound_array();    /* Test 1-D array of compound datatypes (with array fields) */
     test_array_vlen_atomic();   /* Test 1-D array of atomic VL datatypes */
     test_array_vlen_array();    /* Test 1-D array of 1-D array VL datatypes */
+    test_array_funcs();         /* Test type functions with array types */
 
     test_array_bkg();           /* Read compound datatype with array fields and background fields read */
 
