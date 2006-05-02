@@ -1069,7 +1069,7 @@ Optional Features:
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
                           is most packages.
-  --enable-funcstack      Enable the function stack tracing (for developer
+  --enable-codestack      Enable the function stack tracing (for developer
                           debugging).
   --enable-group-revision Enable the group revision code (for internal
                           developers only).
@@ -47345,25 +47345,25 @@ fi
 
 echo "$as_me:$LINENO: checking whether function stack tracking is enabled" >&5
 echo $ECHO_N "checking whether function stack tracking is enabled... $ECHO_C" >&6
-# Check whether --enable-funcstack or --disable-funcstack was given.
-if test "${enable_funcstack+set}" = set; then
-  enableval="$enable_funcstack"
-  FUNCSTACK=$enableval
+# Check whether --enable-codestack or --disable-codestack was given.
+if test "${enable_codestack+set}" = set; then
+  enableval="$enable_codestack"
+  CODESTACK=$enableval
 fi;
 
-case "X-$FUNCSTACK" in
+case "X-$CODESTACK" in
   X-yes)
-      FUNCSTACK=yes
+      CODESTACK=yes
       echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_FUNCSTACK 1
+#define HAVE_CODESTACK 1
 _ACEOF
 
     ;;
   *)
-      FUNCSTACK=no
+      CODESTACK=no
       echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
     ;;
@@ -53071,7 +53071,7 @@ PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
 
 PRINT_N "         Function Stack Tracing"
-IF_ENABLED_DISABLED "$FUNCSTACK"
+IF_ENABLED_DISABLED "$CODESTACK"
 
 PRINT_N "                 Group Revision"
 IF_ENABLED_DISABLED "$GROUPREVISION"

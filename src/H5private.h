@@ -1161,17 +1161,17 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
-#ifdef H5_HAVE_FUNCSTACK
+#ifdef H5_HAVE_CODESTACK
 
 /* Include required function stack header */
-#include "H5FSprivate.h"
+#include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC(func_name) H5FS_push(#func_name)
-#define H5_POP_FUNC             H5FS_pop()
-#else /* H5_HAVE_FUNCSTACK */
+#define H5_PUSH_FUNC(func_name) H5CS_push(#func_name)
+#define H5_POP_FUNC             H5CS_pop()
+#else /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC(func_name) /* void */
 #define H5_POP_FUNC             /* void */
-#endif /* H5_HAVE_FUNCSTACK */
+#endif /* H5_HAVE_CODESTACK */
 
 #ifdef H5_HAVE_MPE
 extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
@@ -1340,7 +1340,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /*
  * Use this macro for non-API functions which fall into these categories:
  *      - functions which shouldn't push their name on the function stack
- *              (so far, just the H5FS routines themselves)
+ *              (so far, just the H5CS routines themselves)
  *
  * This macro is used for functions which fit the above categories _and_
  * also don't use the 'FUNC' variable (i.e. don't push errors on the error stack)
@@ -1422,7 +1422,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /*
  * Use this macro for non-API functions which fall into these categories:
  *      - functions which didn't push their name on the function stack
- *              (so far, just the H5FS routines themselves)
+ *              (so far, just the H5CS routines themselves)
  */
 #define FUNC_LEAVE_NOAPI_NOFS(ret_value)                                      \
         return (ret_value);						      \

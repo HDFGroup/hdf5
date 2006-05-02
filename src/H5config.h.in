@@ -48,6 +48,9 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
+/* Define if the function stack tracing code is to be compiled in */
+#undef HAVE_CODESTACK
+
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
@@ -89,9 +92,6 @@
 
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
-
-/* Define if the function stack tracing code is to be compiled in */
-#undef HAVE_FUNCSTACK
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION

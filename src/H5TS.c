@@ -64,7 +64,7 @@ static void H5TS_mutex_init(H5TS_mutex_t *mutex);
 static void
 H5TS_key_destructor(void *key_val)
 {
-    /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5FS routines */
+    /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5CS routines */
     if(key_val!=NULL)
         HDfree(key_val);
 }

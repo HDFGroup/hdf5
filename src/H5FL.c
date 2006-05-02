@@ -265,7 +265,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
         H5FL_track_t *trk = obj = ((unsigned char *)obj) - sizeof(H5FL_track_t);
 
         /* Free tracking information about the allocation location */
-        H5FS_close_stack(trk->stack);
+        H5CS_close_stack(trk->stack);
         trk->stack = H5MM_xfree(trk->stack);
         trk->file = H5MM_xfree(trk->file);
         trk->func = H5MM_xfree(trk->func);
@@ -376,8 +376,8 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 
 #ifdef H5FL_TRACK
     /* Copy allocation location information */
-    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5FS_t));
-    H5FS_copy_stack(((H5FL_track_t *)ret_value)->stack);
+    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5CS_t));
+    H5CS_copy_stack(((H5FL_track_t *)ret_value)->stack);
     ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
     ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
     ((H5FL_track_t *)ret_value)->line = call_line;
@@ -874,8 +874,8 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
 #ifdef H5FL_TRACK
     /* Copy allocation location information */
-    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5FS_t));
-    H5FS_copy_stack(((H5FL_track_t *)ret_value)->stack);
+    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5CS_t));
+    H5CS_copy_stack(((H5FL_track_t *)ret_value)->stack);
     ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
     ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
     ((H5FL_track_t *)ret_value)->line = call_line;
@@ -975,7 +975,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         H5FL_track_t *trk = block = ((unsigned char *)block) - sizeof(H5FL_track_t);
 
         /* Free tracking information about the allocation location */
-        H5FS_close_stack(trk->stack);
+        H5CS_close_stack(trk->stack);
         trk->stack = H5MM_xfree(trk->stack);
         trk->file = H5MM_xfree(trk->file);
         trk->func = H5MM_xfree(trk->func);
@@ -1091,12 +1091,12 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 H5FL_track_t *trk = (H5FL_track_t *)(((unsigned char *)block) - sizeof(H5FL_track_t));
 
                 /* Release previous tracking information */
-                H5FS_close_stack(trk->stack);
+                H5CS_close_stack(trk->stack);
                 trk->file = H5MM_xfree(trk->file);
                 trk->func = H5MM_xfree(trk->func);
 
                 /* Store new tracking information */
-                H5FS_copy_stack(trk->stack);
+                H5CS_copy_stack(trk->stack);
                 trk->file = H5MM_strdup(call_file);
                 trk->func = H5MM_strdup(call_func);
                 trk->line = call_line;
@@ -2271,7 +2271,7 @@ H5FL_term_interface(void)
             /* Print information about the outstanding block */
             HDfprintf(stderr,"%s: Outstanding allocation:\n", "H5FL_term_interface");
             HDfprintf(stderr,"\tFile: %s, Function: %s, Line: %d\n", trk->file, trk->func, trk->line);
-            H5FS_print_stack(trk->stack, stderr);
+            H5CS_print_stack(trk->stack, stderr);
 
             /* Advance to next node */
             trk = trk->next;

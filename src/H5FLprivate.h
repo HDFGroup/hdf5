@@ -64,7 +64,7 @@
 
 /* Tracking information for each block */
 typedef struct H5FL_track_t {
-    H5FS_t *stack;      /* Function stack */
+    H5CS_t *stack;      /* Function stack */
     char *file;         /* Name of file containing calling function */
     char *func;         /* Name of calling function */
     int line;           /* Line # within calling function */

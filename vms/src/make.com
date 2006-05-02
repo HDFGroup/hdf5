@@ -28,13 +28,13 @@ $ type sys$input
          Creating  HDF5 library
 $!
 $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
-        "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C,"+-  
+        "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C, H5CS,"+-  
         "H5D, H5Dcontig, H5Dcompact,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
         "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5FD, H5FDcore,"+-
         "H5FDfamily, H5FDlog, H5FDmpi, H5FDmpio,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDstdio,"+-
-        "H5FDstream, H5FL, H5FO, H5FS,"+-
+        "H5FDstream, H5FL, H5FO,"+-
         "H5G, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
         "H5HF, H5HFcache, H5HFdbg, H5HFint, H5HFtest, H5HFflist, H5HFstat,"+-

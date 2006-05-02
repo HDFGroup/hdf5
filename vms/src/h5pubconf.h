@@ -100,7 +100,7 @@
 /* #undef H5_HAVE_FSEEK64 */
 
 /* Define if the function stack tracing code is to be compiled in */
-/*#define H5_HAVE_FUNCSTACK 1*/
+/*#define H5_HAVE_CODESTACK 1*/
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 /* EIP #define H5_HAVE_FUNCTION 1*/

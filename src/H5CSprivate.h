@@ -15,29 +15,29 @@
 /*
  *  Header file for function stacks, etc.
  */
-#ifndef _H5FSprivate_H
-#define _H5FSprivate_H
+#ifndef _H5CSprivate_H
+#define _H5CSprivate_H
 
 #ifdef NOT_YET
-#include "H5FSpublic.h"
+#include "H5CSpublic.h"
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5FS_NSLOTS	32	/*number of slots in an function stack	     */
+#define H5CS_NSLOTS	32	/*number of slots in an function stack	     */
 
 /* A function stack */
-typedef struct H5FS_t {
+typedef struct H5CS_t {
     unsigned	nused;			        /*num slots currently used in stack  */
-    const char *slot[H5FS_NSLOTS];	/*array of function records	     */
-} H5FS_t;
+    const char *slot[H5CS_NSLOTS];	/*array of function records	     */
+} H5CS_t;
 
-H5_DLL herr_t H5FS_push (const char *func_name);
-H5_DLL herr_t H5FS_pop (void);
-H5_DLL herr_t H5FS_print (FILE *stream);
-H5_DLL herr_t H5FS_print_stack (const H5FS_t *stack, FILE *stream);
-H5_DLL herr_t H5FS_copy_stack (H5FS_t *stack);
-H5_DLL herr_t H5FS_close_stack (H5FS_t *stack);
+H5_DLL herr_t H5CS_push (const char *func_name);
+H5_DLL herr_t H5CS_pop (void);
+H5_DLL herr_t H5CS_print (FILE *stream);
+H5_DLL herr_t H5CS_print_stack (const H5CS_t *stack, FILE *stream);
+H5_DLL herr_t H5CS_copy_stack (H5CS_t *stack);
+H5_DLL herr_t H5CS_close_stack (H5CS_t *stack);
 
-#endif /* _H5FSprivate_H */
+#endif /* _H5CSprivate_H */

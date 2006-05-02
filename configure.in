@@ -1783,20 +1783,20 @@ dnl ----------------------------------------------------------------------
 dnl Check if they would like the function stack support compiled in
 dnl
 AC_MSG_CHECKING([whether function stack tracking is enabled])
-AC_ARG_ENABLE([funcstack],
-              [AC_HELP_STRING([--enable-funcstack],
+AC_ARG_ENABLE([codestack],
+              [AC_HELP_STRING([--enable-codestack],
                               [Enable the function stack tracing (for developer debugging).])],
-              [FUNCSTACK=$enableval])
+              [CODESTACK=$enableval])
 
-case "X-$FUNCSTACK" in
+case "X-$CODESTACK" in
   X-yes)
-      FUNCSTACK=yes
+      CODESTACK=yes
       AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_FUNCSTACK], [1],
+      AC_DEFINE([HAVE_CODESTACK], [1],
                 [Define if the function stack tracing code is to be compiled in])
     ;;
   *)
-      FUNCSTACK=no
+      CODESTACK=no
       AC_MSG_RESULT([no])
     ;;
 esac
@@ -3514,7 +3514,7 @@ PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
 
 PRINT_N "         Function Stack Tracing"
-IF_ENABLED_DISABLED "$FUNCSTACK"
+IF_ENABLED_DISABLED "$CODESTACK"
 
 PRINT_N "                 Group Revision"
 IF_ENABLED_DISABLED "$GROUPREVISION"

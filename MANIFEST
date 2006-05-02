@@ -417,6 +417,8 @@
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
+./src/H5CS.c
+./src/H5CSprivate.h
 ./src/H5D.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c
@@ -472,8 +474,6 @@
 ./src/H5FLprivate.h
 ./src/H5FO.c
 ./src/H5FOprivate.h
-./src/H5FS.c
-./src/H5FSprivate.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Glink.c
