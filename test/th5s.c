@@ -944,6 +944,10 @@ test_h5s_compound_scalar_read(void)
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
      } /* end if */
 
+    /* Close datatype */
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
