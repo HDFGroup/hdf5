@@ -27,6 +27,9 @@
 #CFLAGS="$CFLAGS -ansi"
 #CPPFLAGS="$CPPFLAGS -I."
 
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=
 DEBUG_CPPFLAGS=
@@ -101,8 +104,7 @@ fi
 
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG} -k"
-  H5_FCFLAGS="$H5_FCFLAGS -static -qmoddir=./"
+  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
   PROD_FCFLAGS="-O"
