@@ -15,22 +15,20 @@ $! Makefile for VAX/VMX systems.
 $!
 $! Make h5diff tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.lib])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $ type sys$input
        Creating h5diff  
 $!
-$ cobj= "h5diff_main, h5diff_common, testh5diff_main, testh5diff_attr, " +-
-        "testh5diff_basic, testh5diff_dset, testh5diff_util"
+$ cobj= "h5diff_main, h5diff_common, h5diffgentest"
 
 $!                               
 $ ccc 'cobj 
 $ type sys$input
-       Creating h5ddifftst
-$ link/exe=h5difftst.exe -
-           testh5diff_main, testh5diff_attr, -
-           testh5diff_basic, testh5diff_dset, testh5diff_util, -
+       Creating h5diffgentest
+$ link/exe=h5diffgentest.exe -
+           h5diffgentest, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib 
 $ type sys$input
        Created  h5difftest
@@ -44,3 +42,4 @@ $ link/exe=h5diff.exe -
 $ type sys$input
        Created  h5diff
 $!
+$ exit

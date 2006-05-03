@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make h5ls tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.lib])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $ type sys$input
 	Creating h5ls
 $!
@@ -30,7 +30,7 @@ $ type sys$input
        Creating h5ls
 $ link     h5ls, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  h5ls
 $!
+$ exit

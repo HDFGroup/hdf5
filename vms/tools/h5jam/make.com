@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make h5ls tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=VMS/include=([-.-.src], [-.lib])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $ type sys$input
 	Creating h5jam
 $!
@@ -30,14 +30,12 @@ $ type sys$input
        Creating tellub
 $ link     tellub -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  tellub
 $ type sys$input
        Creating getub
 $ link     getub -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  getub
 $!
@@ -46,7 +44,6 @@ $ type sys$input
        Creating h5jamgentest
 $ link     h5jamgentest, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  h5jamgentest
 $!
@@ -54,7 +51,6 @@ $ type sys$input
        Creating h5jam
 $ link     h5jam, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  h5jam
 $!
@@ -66,3 +62,4 @@ $ link     h5unjam, -
 $ type sys$input
 	Created  h5unjam
 $!
+$ exit

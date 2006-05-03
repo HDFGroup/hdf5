@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make h5dump tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.lib])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $ 
 $
 $ cobj= "h5dump.c, h5dumpgentest.c "
@@ -26,8 +26,8 @@ $
 $ ccc 'cobj 
 $ type sys$input
        Creating h5dumpgentest
-$ link     h5dumpgentest
-$
+$ link     h5dumpgentest, -
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib 
 $ type sys$input
  	Created  h5dumpgentest
 $
@@ -35,7 +35,7 @@ $ type sys$input
        Creating h5dump
 $ link     h5dump, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-               sys$clib/lib
 $ type sys$input
 	Created  h5dump
 $!
+$ exit

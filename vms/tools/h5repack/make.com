@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make h5repack tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.lib], [-.-.test])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib], [-.-.test])
 $ type sys$input
 	Creating h5repack
 $!
@@ -52,3 +52,4 @@ $ link/exe=h5repacktst.exe -
 $ type sys$input
 	Created  h5repacktst
 $!
+$ exit

@@ -15,19 +15,19 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 tools library
 $!
-$ ccopt = "/float=ieee_float"
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src])
-$
+$! ccopt = "/float=ieee_float"
+$ ccc := cc 'ccopt /include=([-.-.src])
+$!
 $ type sys$input
 	Creating  HDF5 Tools library
 $!
 $ cobj="h5tools, h5tools_str, h5tools_utils, h5diff, h5diff_array, "+-
         "h5diff_attr, h5diff_dset, h5diff_util, h5trav,"+- 
         " h5trav_table, h5tools_filters, h5tools_ref, h5tools_type"
-
 $!
 $ ccc 'cobj 
 $ library/create []libh5tools  'cobj
 $ type sys$input
 	Created HDF5 tools library
 $!
+$ exit

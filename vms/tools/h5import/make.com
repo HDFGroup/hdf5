@@ -15,9 +15,9 @@ $! Makefile for VMS systems.
 $!
 $! Make h5import tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! ccopt = "/float=ieee_float"
 $
-$ ccc := cc 'ccopt /debug/define=H5_VMS/include=([-.-.src], [-.lib])
+$ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $ type sys$input
 	Creating  h5import
 $!
@@ -30,7 +30,6 @@ $ type sys$input
        Creating h5import
 $ link     h5import,-
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  h5import
 $!
@@ -38,7 +37,7 @@ $ type sys$input
        Creating h5importtest
 $ link     h5importtest, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
 $ type sys$input
 	Created  h5importtest
 $!
+$ exit
