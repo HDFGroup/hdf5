@@ -135,10 +135,10 @@ test_file_create(void)
 	}
 	catch( FileIException E ) // catching creating existing file
 	{} // do nothing, FAIL expected
-#ifndef H5_HAVE_FILE_VERSIONS
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
+#ifndef H5_HAVE_FILE_VERSIONS
 	// Try to truncate first file again. This should fail because file1
 	// is the same file and is currently open.
     	try {
