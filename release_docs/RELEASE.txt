@@ -224,6 +224,14 @@ New Features
                         hdf5_mpi_complex_derived_datatype_works='no' should be
                         added at the end of the config file ia64-linux-gnu.
                      KY - 2005/09/12
+        We also found not all MPI-IO packages support collective IO with one
+                    or more processes to have no contributions to IO.
+                     For mpich version 1.2.6 or lower and all IRIX machine, 
+                     if the library  checks that there are no IO contributions for some
+                     processes, collective IO request is replaced with
+                     independent inside HDF5.
+                     KY - 2006/05/04
+                    
         - HDF5 N-bit filter 
           HDF5 support N-bit filter from this version,  
           The N-Bit filter is used effectively for compressing data of N-Bit
