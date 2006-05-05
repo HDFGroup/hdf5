@@ -43,7 +43,7 @@ CFG=hdf5 - Win32 AlphaDbg
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
-# ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
+# ADD F90 /compile_only /include:"..\..\..\proj\hdf5\Release/" /include:"Release/" /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
@@ -71,7 +71,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE F90 /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
-# ADD F90 /browser /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
+# ADD F90 /browser /compile_only /debug:full /include:"..\..\..\proj\hdf5\Debug/" /include:"Debug/" /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
@@ -1128,6 +1128,21 @@ SOURCE=..\..\..\src\H5HFiblock.c
 # Begin Source File
 
 SOURCE=..\..\..\src\H5HFint.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFiter.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
