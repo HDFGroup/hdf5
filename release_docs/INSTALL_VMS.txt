@@ -1,7 +1,7 @@
 		Building and installation instructions for Alpha Open VMS
 			This file is under construction
 			VMS port is not finished yet.
-				EIP April 16, 2006
+				EIP May 5, 2006
 
    
 
@@ -70,16 +70,15 @@
 
 	5. Known problems
 
-           0. Only IEEE floating point (/float=ieee_float qualifier)
-              is supported for HDF5-1.8.0-alpha0.
-	   1. There is no support for filters including deflated compression filter and
+	   - There is no support for files bigger than 2GB
+           - There is no support for filters including deflated compression filter and
 	      szip compression filters.
-	   2. There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
+	   - There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
               multifile driver tests, probably more; all major tests succeed).
-	   3. Mulitifile driver has not been tested yet.
-	   4. Test scripts for some tools are missing; existing tools test scripts
+	   - Mulitifile driver has not been tested yet.
+	   - Test scripts for some tools are missing; existing tools test scripts
 	      do not compare output with the expected output.
-	   5. Probably more :-)
+           - Probably more :-)
 
 
 	For help contact hdfhelp@hdf.ncsa.uiuc.edu or help@hdfgroup.org
