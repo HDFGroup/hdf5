@@ -4,14 +4,23 @@ HDF5 version 1.8.0-alpha2 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.7.*, and contains information on the platforms tested and
-known problems in HDF5-1.7.*. For more details check the HISTORY.txt
+HDF5-1.8.0-alpha2, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-alpha2. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
 (ftp.ncsa.uiuc.edu) in the directory:
 
      /HDF/HDF5/docs/
+
+The HDF5 1.8.0-alpha* documentation can be found on the NCSA web 
+server http://hdf.ncsa.uiuc.edu/HDF5/release/alpha/obtain518.html
+
+New features of upcoming 1.8.0 release are described in
+http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+
+New and modified APIs are listed in
+http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
 
 For more information look at the HDF5 home page at:
    
@@ -420,6 +429,10 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added support for VAX floating numbers for Alpha Open VMS 7.3.2
+                                                     EIP - 2006/05/05
+        - Fixed broken make.com files in tools directories
+                                                     EIP - 2006/05/05
         - Added support for Alpha Open VMS 7.3.2 EIP - 2006/04/15
         - Added support for Cray X1.  JML - 2005/10/03
         - PGI Fortran compiler is supported on Linux64 systems (x86_64)
