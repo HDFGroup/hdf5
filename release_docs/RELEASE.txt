@@ -17,6 +17,7 @@ The HDF5 1.8.0-alpha* documentation can be found on the NCSA web
 server http://hdf.ncsa.uiuc.edu/HDF5/release/alpha/obtain518.html
 
 New features of upcoming 1.8.0 release are described in
+the "What is new in 1.8.0-alpha?" document at the following URL:
 http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
 
 New and modified APIs are listed in
@@ -745,7 +746,7 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-
+Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
 
     AIX 5.2 (32/64 bit)           xlc 6.0.0.8
                                   xlC 6.0.0.9
@@ -760,7 +761,7 @@ Platforms Tested
     AIX 5.3 (32/64 bit)           xlc 7.0.0.0
                                   xlC 7.0.
                                   xlf 9.1.0.3
-    Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
+*   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
     FreeBSD 4.11                  gcc 2.95.4
@@ -769,7 +770,7 @@ Platforms Tested
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
                                   HP F90 v2.4
                                   HP ANSI C++ B3910B A.03.13
-    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
+*   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9
                                   HP aC++/ANSI C B3910B A.06.00
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
@@ -798,7 +799,7 @@ Platforms Tested
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
-    OSF1 V5.1 (PSC)               Compaq C V6.5-303 
+*   OSF1 V5.1 (PSC)               Compaq C V6.5-303 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-040  
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
@@ -807,7 +808,7 @@ Platforms Tested
     SunOS 5.9 32,64               Sun C 5.6 2004/07/15
      (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
                                   Sun C++ 5.6 2004/07/15
-    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
+*   SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
                                   Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
                                   Patch 111685-13 
@@ -948,6 +949,8 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* On Altix SGI with Intel 9.0 testmeta.c would not compile with -O3
+  optimization flag.
 * On VAX, Scaleoffset filter isn't supported. The filter cannot be applied to
   HDF5 data generated on VAX. Scaleoffset filter only supports IEEE standard
   for floating-point data.
