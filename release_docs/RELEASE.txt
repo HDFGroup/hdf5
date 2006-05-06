@@ -1,11 +1,11 @@
-HDF5 version 1.8.0-alpha2 released on Sat May  6 09:09:16 CDT 2006
+HDF5 version 1.8.0-alpha3 currently under development
 ================================================================================
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-alpha2, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-alpha2. For more details check the HISTORY.txt
+HDF5-1.8.0-alpha3, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-alpha3. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
