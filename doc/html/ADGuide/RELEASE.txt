@@ -1,4 +1,4 @@
-HDF5 version 1.6.5-post11 released on Sun Apr 16 18:35:12 CDT 2006
+HDF5 version 1.6.5-post12 released on Sun May  7 18:27:47 CDT 2006
 ================================================================================
 
 INTRODUCTION
