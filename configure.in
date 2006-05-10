@@ -1009,6 +1009,7 @@ cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
 AC_CHECK_SIZEOF([off_t], [4])
+AC_CHECK_SIZEOF([off64_t], [8])
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE

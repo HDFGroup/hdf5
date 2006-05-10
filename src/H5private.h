@@ -656,27 +656,29 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 /* fscanf() variable arguments */
 #define HDfseek(F,O,W)		fseek(F,O,W)
 #define HDfsetpos(F,P)		fsetpos(F,P)
-/* definitions related to the file stat utilities */
+/* definitions related to the file stat utilities.
+ * Windows have its own function names.
+ * For Unix, if off_t is not 64bit big, try use the pseudo-standard
+ * xxx64 versions if available.
+ */
 #ifdef WIN32
-     #ifdef __MWERKS__
-     #define HDfstat(F,B)               fstat(F,B)
-     typedef struct stat		h5_stat_t;
-     typedef off_t                      h5_stat_size_t;
-     #else /*MSVC*/
-     #define HDfstat(F,B)		_fstati64(F,B)
-     typedef struct _stati64		h5_stat_t;
-     typedef __int64                    h5_stat_size_t;
-     #endif
+    #ifdef __MWERKS__
+    #define HDfstat(F,B)        fstat(F,B)
+    typedef struct stat		h5_stat_t;
+    typedef off_t               h5_stat_size_t;
+    #else /*MSVC*/
+    #define HDfstat(F,B)	_fstati64(F,B)
+    typedef struct _stati64	h5_stat_t;
+    typedef __int64             h5_stat_size_t;
+    #endif
+#elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8
+    #define HDfstat(F,B)        fstat64(F,B)
+    typedef struct stat64       h5_stat_t;
+    typedef off64_t             h5_stat_size_t;
 #else
-     #if H5_SIZEOF___INT64==8
-     #define HDfstat(F,B)               fstat64(F,B)
-     typedef struct stat64              h5_stat_t;
-     typedef off64_t                    h5_stat_size_t;
-     #else
-     #define HDfstat(F,B)               fstat(F,B)
-     typedef struct stat                h5_stat_t;
-     typedef off_t                      h5_stat_size_t;
-     #endif
+    #define HDfstat(F,B)        fstat(F,B)
+    typedef struct stat         h5_stat_t;
+    typedef off_t               h5_stat_size_t;
 #endif
 
 #define HDftell(F)		ftell(F)
@@ -850,17 +852,15 @@ H5_DLL void HDsrand(unsigned int seed);
 /* sscanf() variable arguments */
 
 #ifdef WIN32
-     #ifdef __MWERKS__
-     #define HDstat(S,B)   stat(S,B)
-     #else /*MSVC*/
-     #define HDstat(S,B)		_stati64(S,B)
-     #endif
+    #ifdef __MWERKS__
+    #define HDstat(S,B)   	stat(S,B)
+    #else /*MSVC*/
+    #define HDstat(S,B)		_stati64(S,B)
+    #endif
+#elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8
+    #define HDstat(S,B)  	stat64(S,B)
 #else
-     #if H5_SIZEOF___INT64==8
-     #define HDstat(S,B)  stat64(S,B)
-     #else
-#define HDstat(S,B)  stat(S,B)
-#endif
+    #define HDstat(S,B)  	stat(S,B)
 #endif
 
 #define HDstrcat(X,Y)		strcat(X,Y)
