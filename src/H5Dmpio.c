@@ -69,7 +69,9 @@
 
 /* Macros to define the default ratio of obtaining all chunk addresses for one linked-chunk IO case */
 #define H5D_ALL_CHUNK_ADDR_THRES_IND  10
+#define H5D_ALL_CHUNK_ADDR_THRES_IND_NUM 4
 #define H5D_ALL_CHUNK_ADDR_THRES_COL  20
+#define H5D_ALL_CHUNK_ADDR_THRES_COL_NUM 10000
 
 /***** Macros for multi-chunk collective IO case. *****/
 /* The default value of the threshold to do collective IO for this chunk.
@@ -646,7 +648,7 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
 {
 
     int               io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
-    int               sum_chunk,mpi_size;
+    int               sum_chunk = 0,mpi_size;
     unsigned          one_link_chunk_io_threshold;
     H5P_genplist_t    *plist; 
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
@@ -790,18 +792,18 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
      
       int              mpi_size,mpi_code;              /* MPI return code */ 
 
-      int               i,num_chunk,total_chunks;
+      int               i,num_chunk=0,total_chunks;
       size_t            ori_num_chunk;
       hsize_t           ori_total_chunks;
       haddr_t           chunk_base_addr;
-      haddr_t*          total_chunk_addr_array;
-      MPI_Datatype     *chunk_mtype;
-      MPI_Datatype     *chunk_ftype;
+      haddr_t*          total_chunk_addr_array=NULL;
+      MPI_Datatype     *chunk_mtype=NULL;
+      MPI_Datatype     *chunk_ftype=NULL;
       MPI_Datatype      chunk_final_mtype;
       MPI_Datatype      chunk_final_ftype;
-      MPI_Aint         *chunk_disp_array;
-      MPI_Aint         *chunk_mem_disp_array;
-      int              *blocklen;
+      MPI_Aint         *chunk_disp_array=NULL;
+      MPI_Aint         *chunk_mem_disp_array=NULL;
+      int              *blocklen=NULL;
       int               blocklen_value;
       int               actual_bsearch_coll_chunk_threshold;
       int               bsearch_coll_chunk_threshold;
@@ -810,7 +812,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
       int               many_chunk_opt = 0;
 
       H5D_common_coll_info_t coll_info;
-      H5D_chunk_addr_info_t*  chunk_addr_info_array;
+      H5D_chunk_addr_info_t*  chunk_addr_info_array=NULL;
 
 #ifdef CC_PERF
       char *bc_percent = NULL;
@@ -858,6 +860,9 @@ printf("before inter_collective_io for total chunk = 1 \n");
 
       ori_num_chunk        = H5SL_count(fm->fsel);
       H5_ASSIGN_OVERFLOW(num_chunk,ori_num_chunk,size_t,int);
+#ifdef KENT
+printf("total_chunks = %d\n",(int)total_chunks);
+#endif
 
          
       if(num_chunk == 0) total_chunk_addr_array = H5MM_malloc(sizeof(haddr_t)*total_chunks);
@@ -899,9 +904,14 @@ printf("before inter_collective_io for total chunk = 1 \n");
 
       /* Calculate the actual threshold to obtain all chunk addresses collectively 
          The bigger this number is, the more possible the use of obtaining chunk address collectively. */
+      /* For non-optimization one-link IO, 
+         actual bsearch threshold is always 0,
+         we would always want to obtain the chunk addresses individually
+         for each process. */
       actual_bsearch_coll_chunk_threshold = sum_chunk*100/(total_chunks*mpi_size);
 
-      if(actual_bsearch_coll_chunk_threshold >= bsearch_coll_chunk_threshold) 
+      if((actual_bsearch_coll_chunk_threshold > bsearch_coll_chunk_threshold)
+         &&(sum_chunk/mpi_size >= H5D_ALL_CHUNK_ADDR_THRES_COL_NUM))
 	many_chunk_opt = H5D_OBTAIN_ALL_CHUNK_ADDR_COL;
 
       else {
@@ -937,8 +947,12 @@ printf("before inter_collective_io for total chunk = 1 \n");
             
         bsearch_chunk_threshold = 1 +(total_chunks*bsearch_chunk_ratio-99)/100;
 	if(num_chunk > bsearch_chunk_threshold) many_chunk_opt = H5D_OBTAIN_ALL_CHUNK_ADDR_IND;
+        if((sum_chunk == 0) && (total_chunks >= H5D_ALL_CHUNK_ADDR_THRES_IND_NUM))
+          many_chunk_opt = H5D_OBTAIN_ALL_CHUNK_ADDR_IND;
       }
-
+#ifdef KENT
+printf("before sorting the chunk address \n");
+#endif
       /* Sort the chunk address 
          when chunk optimization selection is either H5D_OBTAIN_*/
       if(num_chunk == 0){ /* special case: this process doesn't select anything */
@@ -952,6 +966,9 @@ printf("before inter_collective_io for total chunk = 1 \n");
         	 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to sort chunk address");
          chunk_base_addr = chunk_addr_info_array[0].chunk_addr;
       }
+#ifdef KENT
+printf("after sorting the chunk address \n");
+#endif
       
       /* Obtain MPI derived datatype from all individual chunks */ 
       for ( i = 0; i < num_chunk; i++) {
@@ -1012,6 +1029,10 @@ printf("before inter_collective_io for total chunk = 1 \n");
 	coll_info.mpi_buf_count  = 0;
 	coll_info.chunk_addr     = chunk_base_addr;
       }
+#ifdef KENT
+printf("before coming to final collective IO\n");
+#endif
+      
       if(H5D_final_collective_io(io_info,&chunk_final_ftype,&chunk_final_mtype,&coll_info,buf,do_write)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish MPI-IO");
 
@@ -1070,7 +1091,7 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
       uint8_t          *chunk_io_option;
 
       H5SL_node_t      *chunk_node;           /* Current node in chunk skip list */
-      H5D_chunk_info_t *chunk_info;
+      H5D_chunk_info_t *chunk_info=NULL;
       haddr_t          *chunk_addr;
       H5D_storage_t     store;                /* union of EFL and chunk pointer in file space */
       hbool_t           select_chunk;
@@ -1469,7 +1490,7 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
     H5SL_node_t      *chunk_node;         /* Current node in chunk skip list */
     H5D_chunk_info_t *chunk_info;         /* Current chunking info. of this node. */
     haddr_t           chunk_addr;         /* Current chunking address of this node */
-    haddr_t          *total_chunk_addr_array; /* The array of chunk address for the total number of chunk */
+    haddr_t          *total_chunk_addr_array=NULL; /* The array of chunk address for the total number of chunk */
     int               i,mpi_code;
     int               total_chunks;
     size_t            num_chunks;
@@ -1483,6 +1504,10 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
     FUNC_ENTER_NOAPI_NOINIT(H5D_sort_chunk)
 
     num_chunks =  H5SL_count(fm->fsel);
+#ifdef KENT
+printf("many_chunk_opt= %d\n",many_chunk_opt);
+#endif
+
     /* If we need to optimize the way to obtain the chunk address */
     if(many_chunk_opt != H5D_OBTAIN_ONE_CHUNK_ADDR_IND){
 
@@ -1493,6 +1518,10 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
       if(many_chunk_opt == H5D_OBTAIN_ALL_CHUNK_ADDR_COL) {/* We will broadcast the array from the root process */
 
 	int mpi_rank, root;
+
+#ifdef KENT
+printf("Coming inside H5D_OBTAIN_ALL_CHUNK_ADDR_COL\n");
+#endif
 	root = 0;
 	if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file))<0)
 	 HGOTO_ERROR (H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank");
@@ -1559,6 +1588,9 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
             i++;
             chunk_node = H5SL_next(chunk_node);
     }
+#ifdef KENT
+printf("before Qsort\n");
+#endif
 
     if(do_sort)
 	    HDqsort(chunk_addr_info_array,num_chunks,sizeof(chunk_addr_info_array),H5D_cmp_chunk_addr);
@@ -1624,9 +1656,9 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   hsize_t           ori_total_chunks;
   unsigned          percent_nproc_per_chunk,threshold_nproc_per_chunk;
   H5FD_mpio_chunk_opt_t chunk_opt_mode;
-  uint8_t*          io_mode_info;
-  uint8_t*          recv_io_mode_info;
-  uint8_t*          mergebuf;
+  uint8_t*          io_mode_info=NULL;
+  uint8_t*          recv_io_mode_info=NULL;
+  uint8_t*          mergebuf=NULL;
   uint8_t*          tempbuf;
 
   H5SL_node_t*      chunk_node;  
