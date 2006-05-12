@@ -19,6 +19,7 @@
 
 # Use AIX supplied C compiler by default, xlc for serial, mpcc_r for parallel.
 # Use -D_LARGE_FILES by default to support large file size.
+# Make sure this is applied to other API compile options such as C++.
 if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
     CC=mpcc_r
@@ -45,6 +46,7 @@ case $CC_BASENAME in
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
+    # Make sure this is applied to other API compile options such as C++.
     CFLAGS="-qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
@@ -153,6 +155,7 @@ CXX=${CXX=xlC}
 
 # Added -qweaksymbol to suppress linker messages warning of duplicate
 # symbols; these warnings are harmless. - BMR
-CXXFLAGS="$CXXFLAGS -qweaksymbol"
+# Use -D_LARGE_FILES by default to support large file size.
+CXXFLAGS="$CXXFLAGS -qweaksymbol -D_LARGE_FILES"
 
 
