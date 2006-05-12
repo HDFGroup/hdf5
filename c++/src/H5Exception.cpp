@@ -227,7 +227,7 @@ void Exception::clearErrorStack()
 ///\par
 ///     Data structure to describe the error:
 ///\code
-/// typedef struct H5E_error_t {
+/// typedef struct H5E_error_stack_t {
 ///     hid_t       cls_id;         //class ID
 ///     hid_t       maj_num;        //major error ID
 ///     hid_t       min_num;        //minor error number
@@ -235,11 +235,11 @@ void Exception::clearErrorStack()
 ///     const char  *file_name;     //file in which error occurred
 ///     unsigned    line;           //line in file where error occurs
 ///     const char  *desc;          //optional supplied description
-/// } H5E_error_t;
+/// } H5E_error_stack_t;
 ///\endcode
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void* client_data )
+void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_stack_t func, void* client_data )
 {
    // calls the C API routine H5Ewalk to walk the error stack
    herr_t ret_value = H5Ewalk_stack( H5E_DEFAULT, direction, func, client_data );

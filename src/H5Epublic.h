@@ -37,8 +37,18 @@ typedef enum H5E_type_t {
 typedef hid_t   H5E_major_t;
 typedef hid_t   H5E_minor_t;
 
-/* Information about an error; element of error stack */
+/* Information about an error; element of error stack.  For backward compatibility with v1.6. */
 typedef struct H5E_error_t {
+        H5E_major_t maj_num;                /*major error number                 */
+        H5E_minor_t min_num;                /*minor error number                 */
+        const char  *func_name;             /*function in which error occurred   */
+        const char  *file_name;             /*file in which error occurred       */
+        unsigned    line;                   /*line in file where error occurs    */
+        const char  *desc;                  /*optional supplied description      */
+} H5E_error_t;
+
+/* Information about an error; element of error stack */
+typedef struct H5E_error_stack_t {
     hid_t       cls_id;         /*class ID                           */
     hid_t       maj_num;	/*major error ID		     */
     hid_t       min_num;	/*minor error number		     */
@@ -46,7 +56,7 @@ typedef struct H5E_error_t {
     const char	*func_name;   	/*function in which error occurred   */
     const char	*file_name;	/*file in which error occurred       */
     const char	*desc;		/*optional supplied description      */
-} H5E_error_t;
+} H5E_error_stack_t;
 
 /* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
@@ -143,6 +153,7 @@ extern "C" {
 
 /* Error stack traversal callback function pointers */
 typedef herr_t (*H5E_walk_t)(unsigned n, const H5E_error_t *err_desc, void *client_data);
+typedef herr_t (*H5E_walk_stack_t)(unsigned n, const H5E_error_stack_t *err_desc, void *client_data);
 typedef herr_t (*H5E_auto_t)(void *client_data);
 typedef herr_t (*H5E_auto_stack_t)(hid_t estack, void *client_data);
 
@@ -178,7 +189,7 @@ H5_DLL const char * H5Eget_minor(H5E_minor_t min);
 H5_DLL herr_t  H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line,
                         hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t  H5Eprint_stack(hid_t err_stack, FILE *stream);
-H5_DLL herr_t  H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func,
+H5_DLL herr_t  H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_stack_t func,
                             void *client_data);
 H5_DLL herr_t  H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data);

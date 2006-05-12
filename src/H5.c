@@ -1760,7 +1760,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5E_error_t *error = va_arg (ap, H5E_error_t*); /*lint !e64 Type mismatch not really occuring */
+		    H5E_error_stack_t *error = va_arg (ap, H5E_error_stack_t*); /*lint !e64 Type mismatch not really occuring */
 		    fprintf (out, "0x%lx", (unsigned long)error);
 		}
 		break;

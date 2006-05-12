@@ -63,7 +63,7 @@ class H5_DLLCPP Exception {
 	// Walks the error stack for the current thread, calling the
 	// specified function.
 	static void walkErrorStack( H5E_direction_t direction,
-				H5E_walk_t func, void* client_data);
+				H5E_walk_stack_t func, void* client_data);
 
 	// Prints the error stack in a default manner.
 	virtual void printError( FILE* stream = NULL ) const;

@@ -107,10 +107,11 @@ static herr_t  H5E_close_stack(H5E_t *err_stack);
 static ssize_t H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
-static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
-static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func,
-                             void *client_data);
+static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream, hbool_t bk_compatible);
+static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
+                            H5E_walk_stack_t stack_func, hbool_t bk_compatible, void *client_data);
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
+static herr_t  H5E_walk_stack_cb(unsigned n, const H5E_error_stack_t *err_desc, void *client_data);
 static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void **func, void **client_data);
 static herr_t  H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data);
 
@@ -1026,7 +1027,7 @@ H5E_get_current_stack(void)
     /* Make a copy of current error stack */
     estack_copy->nused = current_stack->nused;
     for(u=0; u<current_stack->nused; u++) {
-        H5E_error_t *current_error, *new_error; /* Pointers to errors on each stack */
+        H5E_error_stack_t *current_error, *new_error; /* Pointers to errors on each stack */
 
         /* Get pointers into the current error stack location */
         current_error = &(current_stack->slot[u]);
@@ -1140,7 +1141,7 @@ H5E_set_current_stack(H5E_t *estack)
     /* Copy new stack to current error stack */
     current_stack->nused = estack->nused;
     for(u=0; u<current_stack->nused; u++) {
-        H5E_error_t *current_error, *new_error; /* Pointers to errors on each stack */
+        H5E_error_stack_t *current_error, *new_error; /* Pointers to errors on each stack */
 
         /* Get pointers into the current error stack location */
         current_error = &(current_stack->slot[u]);
@@ -1759,7 +1760,7 @@ done:
 static herr_t
 H5E_clear_entries(H5E_t *estack, size_t nentries)
 {
-    H5E_error_t         *error; /* Pointer to error stack entry to clear */
+    H5E_error_stack_t         *error; /* Pointer to error stack entry to clear */
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1872,7 +1873,7 @@ H5Eprint(FILE *stream)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Print error stack */
-    if(H5E_print_stack(estack, stream)<0)
+    if(H5E_print_stack(estack, stream, TRUE)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
 
 done:
@@ -1930,7 +1931,7 @@ H5Eprint_stack(hid_t err_stack, FILE *stream)
     } /* end else */
 
     /* Print error stack */
-    if(H5E_print_stack(estack, stream)<0)
+    if(H5E_print_stack(estack, stream, FALSE)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
 
 done:
@@ -1966,9 +1967,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_print_stack(const H5E_t *estack, FILE *stream)
+H5E_print_stack(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
 {
-    H5E_print_t eprint;         /* Callback information to pass to H5E_walk_cb() */
+    H5E_print_t eprint;         /* Callback information to pass to H5E_walk_stack_cb() */
     herr_t	ret_value = SUCCEED;
 
     /* Don't clear the error stack! :-) */
@@ -1987,8 +1988,13 @@ H5E_print_stack(const H5E_t *estack, FILE *stream)
     HDmemset(&eprint.cls,0,sizeof(H5E_cls_t));
 
     /* Walk the error stack */
-    if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)&eprint)<0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+    if(bk_compatible) {
+        if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, H5E_walk_cb, NULL, TRUE, (void*)&eprint)<0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+    } else {        
+        if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, NULL, H5E_walk_stack_cb, FALSE, (void*)&eprint)<0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2025,7 +2031,7 @@ H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Walk the error stack */
-    if(H5E_walk_stack(estack, direction, func, client_data)<0)
+    if(H5E_walk_stack(estack, direction, func, NULL, TRUE, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
 
 done:
@@ -2053,7 +2059,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, void *client_data)
+H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_stack_t stack_func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t	ret_value=SUCCEED;      /* Return value */
@@ -2076,7 +2082,7 @@ H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, void 
     } /* end else */
 
     /* Walk the error stack */
-    if(H5E_walk_stack(estack, direction, func, client_data)<0)
+    if(H5E_walk_stack(estack, direction, NULL, stack_func, FALSE, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
 
 done:
@@ -2096,11 +2102,16 @@ done:
  *		means to start at the API and end at the inner-most function
  *		where the error was first detected.
  *
- *		The function pointed to by FUNC will be called for each error
- *		in the error stack. It's arguments will include an index
- *		number (beginning at zero regardless of stack traversal
- *		direction), an error stack entry, and the CLIENT_DATA pointer
- *		passed to H5E_print.
+ *		The function pointed to by STACK_FUNC will be called for 
+ *		each error record in the error stack. It's arguments will 
+ *		include an index number (beginning at zero regardless of 
+ *		stack traversal	direction), an error stack entry, and the 
+ *		CLIENT_DATA pointer passed to H5E_print_stack.
+ *
+ *		The function FUNC is also provided for backward compatibility.
+ *		When BK_COMPATIBLE is set to be TRUE, FUNC is used to be
+ *		compatible with older library.  If BK_COMPATIBLE is FALSE,
+ *		STACK_FUNC is used.   
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2113,10 +2124,16 @@ done:
  *              Wednesday, July 16, 2003
  *              Let it walk through specified error stack.
  *
+ *              Raymond Lu
+ *              Friday, May 12, 2006
+ *              Added backward compatibility support.  FUNC is for older 
+ *              library; STACK_FUNC is for new library.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, void *client_data)
+H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, H5E_walk_stack_t stack_func, 
+        hbool_t bk_compatible, void *client_data)
 {
     int		i;              /* Local index variable */
     herr_t	status;         /* Status from callback function */
@@ -2132,15 +2149,56 @@ H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
 	direction = H5E_WALK_UPWARD;
 
     /* Walk the stack if a callback function was given */
-    if(func) {
+    if(bk_compatible && func) {
+        H5E_error_t old_err;
+
+        status=SUCCEED;
+        if (H5E_WALK_UPWARD==direction) {
+            for (i=0; i<(int)estack->nused && status>=0; i++) {
+                /*Copy each error record on the stack and pass it to callback function.*/
+                old_err.maj_num = estack->slot[i].maj_num;
+                old_err.min_num = estack->slot[i].min_num;
+                old_err.func_name = HDstrdup(estack->slot[i].func_name);
+                old_err.file_name = HDstrdup(estack->slot[i].file_name);
+                old_err.desc = HDstrdup(estack->slot[i].desc);
+                old_err.line = estack->slot[i].line;
+
+                status = (func)((unsigned)i, &old_err, client_data);
+
+                HDfree(old_err.func_name);
+                HDfree(old_err.file_name);
+                HDfree(old_err.desc);
+            }
+        } else {
+            H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
+            for (i=(int)(estack->nused-1); i>=0 && status>=0; i--) {
+                /*Copy each error record on the stack and pass it to callback function.*/
+                old_err.maj_num = estack->slot[i].maj_num;
+                old_err.min_num = estack->slot[i].min_num;
+                old_err.func_name = HDstrdup(estack->slot[i].func_name);
+                old_err.file_name = HDstrdup(estack->slot[i].file_name);
+                old_err.desc = HDstrdup(estack->slot[i].desc);
+                old_err.line = estack->slot[i].line;
+
+                status = (func)((unsigned)(estack->nused-(size_t)(i+1)), &old_err, client_data);
+
+                HDfree(old_err.func_name);
+                HDfree(old_err.file_name);
+                HDfree(old_err.desc);
+            }
+        }
+
+        if(status<0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+    } else if(!bk_compatible && stack_func) {
         status=SUCCEED;
         if (H5E_WALK_UPWARD==direction) {
             for (i=0; i<(int)estack->nused && status>=0; i++)
-                status = (func)((unsigned)i, estack->slot+i, client_data);
+                status = (stack_func)((unsigned)i, estack->slot+i, client_data);
         } else {
             H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
             for (i=(int)(estack->nused-1); i>=0 && status>=0; i--)
-                status = (func)((unsigned)(estack->nused-(size_t)(i+1)), estack->slot+i, client_data);
+                status = (stack_func)((unsigned)(estack->nused-(size_t)(i+1)), estack->slot+i, client_data);
         }
 
         if(status<0)
@@ -2153,10 +2211,125 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_walk_cb
+ * Function:	H5E_walk_stack_cb
  *
  * Purpose:	This is a default error stack traversal callback function
  *		that prints error messages to the specified output stream.
+ *		It is not meant to be called directly but rather as an
+ *		argument to the H5Ewalk_stack() function.  This function is 
+ *		called also by H5Eprint_stack().  Application writers are 
+ *		encouraged to use this function as a model for their own 
+ *		error stack walking functions.
+ *
+ *		N is a counter for how many times this function has been
+ *		called for this particular traversal of the stack.  It always
+ *		begins at zero for the first error on the stack (either the
+ *		top or bottom error, or even both, depending on the traversal
+ *		direction and the size of the stack).
+ *
+ *		ERR_DESC is an error description.  It contains all the
+ *		information about a particular error.
+ *
+ *		CLIENT_DATA is the same pointer that was passed as the
+ *		CLIENT_DATA argument of H5Ewalk().  It is expected to be a
+ *		file pointer (or stderr if null).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, December 12, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E_walk_stack_cb(unsigned n, const H5E_error_stack_t *err_desc, void *client_data)
+{
+    H5E_print_t         *eprint  = (H5E_print_t *)client_data;
+    FILE		*stream;        /* I/O stream to print output to */
+    H5E_cls_t           *cls_ptr;       /* Pointer to error class */
+    H5E_msg_t           *maj_ptr;       /* Pointer to major error info */
+    H5E_msg_t           *min_ptr;       /* Pointer to minor error info */
+    const char		*maj_str = "No major description";      /* Major error description */
+    const char		*min_str = "No minor description";      /* Minor error description */
+    unsigned            have_desc=1;    /* Flag to indicate whether the error has a "real" description */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_stack_cb)
+
+    /* Check arguments */
+    assert (err_desc);
+
+    /* If no client data was passed, output to stderr */
+    if (!client_data) stream = stderr;
+    else stream = eprint->stream;
+
+    /* Get descriptions for the major and minor error numbers */
+    maj_ptr = H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
+    min_ptr = H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
+    assert(maj_ptr && min_ptr);
+    if(maj_ptr->msg)
+        maj_str = maj_ptr->msg;
+    if(min_ptr->msg)
+        min_str = min_ptr->msg;
+
+    /* Get error class info */
+    cls_ptr = maj_ptr->cls;
+
+    /* Print error class header if new class */
+    if(eprint->cls.lib_name==NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+        /* update to the new class information */
+        if(cls_ptr->cls_name) eprint->cls.cls_name = cls_ptr->cls_name;
+        if(cls_ptr->lib_name) eprint->cls.lib_name = cls_ptr->lib_name;
+        if(cls_ptr->lib_vers) eprint->cls.lib_vers = cls_ptr->lib_vers;
+
+        fprintf (stream, "%s-DIAG: Error detected in %s (%s) ", cls_ptr->cls_name, cls_ptr->lib_name, cls_ptr->lib_vers);
+
+        /* try show the process or thread id in multiple processes cases*/
+#ifdef H5_HAVE_PARALLEL
+        {   int mpi_rank, mpi_initialized;
+	    MPI_Initialized(&mpi_initialized);
+	    if (mpi_initialized){
+	        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+	        fprintf (stream, "MPI-process %d", mpi_rank);
+	    }else
+	        fprintf (stream, "thread 0");
+        }
+#elif defined(H5_HAVE_THREADSAFE)
+#ifdef WIN32
+        fprintf (stream, "some thread: no way to know the thread number from pthread on windows");
+#else
+        fprintf (stream, "thread %lu", (unsigned long)pthread_self());
+#endif
+#else
+        fprintf (stream, "thread 0");
+#endif
+        fprintf (stream, ":\n");
+    }
+
+    /* Check for "real" error description - used to format output more nicely */
+    if(err_desc->desc==NULL || HDstrlen(err_desc->desc)==0)
+        have_desc=0;
+
+    /* Print error message */
+    fprintf (stream, "%*s#%03u: %s line %u in %s()%s%s\n",
+	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
+	     err_desc->func_name, (have_desc ? ": " : ""),
+             (have_desc ? err_desc->desc : ""));
+    fprintf (stream, "%*smajor: %s\n", H5E_INDENT*2, "", maj_str);
+    fprintf (stream, "%*sminor: %s\n", H5E_INDENT*2, "", min_str);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_walk_cb
+ *
+ * Purpose:	This function is for backward compatibility.
+ *              This is a default error stack traversal callback function
+ *		that prints error messages to the specified output stream.
+ *		This function is for backward compatibility with v1.6.
  *		It is not meant to be called directly but rather as an
  *		argument to the H5Ewalk() function.  This function is called
  *		also by H5Eprint().  Application writers are encouraged to
@@ -2178,8 +2351,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, December 12, 1997
+ * Programmer:  Raymond Lu	
+ *		Thursday, May 11, 2006
  *
  * Modifications:
  *
