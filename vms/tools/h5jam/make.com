@@ -29,13 +29,13 @@ $
 $ type sys$input
        Creating tellub
 $ link     tellub -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  tellub
 $ type sys$input
        Creating getub
 $ link     getub -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  getub
 $!
@@ -43,22 +43,21 @@ $!
 $ type sys$input
        Creating h5jamgentest
 $ link     h5jamgentest, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5jamgentest
 $!
 $ type sys$input
        Creating h5jam
 $ link     h5jam, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5jam
 $!
 $ type sys$input
        Creating h5junam
 $ link     h5unjam, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
-!               sys$clib/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5unjam
 $!

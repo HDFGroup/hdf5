@@ -29,47 +29,47 @@ $ type sys$input
        Creating create 
 $ cxxlink  create, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
        Creating readdata  
 $ cxxlink  readdata, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating writedata  
 $ cxxlink  writedata, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ !                              
 $ type sys$input
 
        Creating compound 
 $ cxxlink  compound, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating extend_ds  
 $ cxxlink  extend_ds, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating chunks 
 $ cxxlink  chunks, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating h5group 
 $ cxxlink  h5group, -
            [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ exit

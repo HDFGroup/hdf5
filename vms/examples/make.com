@@ -30,45 +30,45 @@ $
 $ type sys$input
        Creating h5_write 
 $ link     h5_write, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_read 
 $ link     h5_read, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_extend_write
 $ link     h5_extend_write, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_chunk_read 
 $ link     h5_chunk_read, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_compound 
 $ link     h5_compound, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_group 
 $ link     h5_group, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_select 
 $ link     h5_select, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_attribute 
 $ link     h5_attribute, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_mount 
 $ link     h5_mount, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_reference 
 $ link     h5_reference, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_drivers
 $ link     h5_drivers, -
-            [-.src]hdf5.olb/lib
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ exit

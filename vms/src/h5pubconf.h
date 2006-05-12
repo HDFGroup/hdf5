@@ -70,7 +70,7 @@
 /*EIP #define H5_HAVE_FEATURES_H */
 
 /* Define if support for deflate (zlib) filter is enabled */
-/*#define H5_HAVE_FILTER_DEFLATE 1*/
+#define H5_HAVE_FILTER_DEFLATE 1
 
 /* Define if support for Fletcher32 checksum is enabled */
 #define H5_HAVE_FILTER_FLETCHER32 1

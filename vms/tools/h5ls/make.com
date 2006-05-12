@@ -29,7 +29,7 @@ $
 $ type sys$input
        Creating h5ls
 $ link     h5ls, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5ls
 $!

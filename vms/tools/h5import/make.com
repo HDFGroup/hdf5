@@ -29,14 +29,14 @@ $
 $ type sys$input
        Creating h5import
 $ link     h5import,-
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5import
 $!
 $ type sys$input
        Creating h5importtest
 $ link     h5importtest, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 	Created  h5importtest
 $!

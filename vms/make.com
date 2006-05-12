@@ -34,12 +34,17 @@ $ copy [.tools.h5import]*.com   [-.tools.h5import]
 $ copy [.tools.h5jam]*.com      [-.tools.h5jam]
 $ copy [.tools.lib]make.com     [-.tools.lib]
 $!
+$! Define location of ZLIB library. If you do not have it on your system, download
+$! source code from http://www.zlib.net/, build and install on your system
+$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$!
 $! Set up compilation flags here
 $! Do not remove define=H5_VMS and standard=strict_ansi qualifiers.
 $!
-$ ccopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize"
-$ fcopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize"
-$ cxxopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/standard=strict_ansi"
+$ ccopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
+$ fcopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
+$ cxxopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/"+-
+            "standard=strict_ansii/include=zlib_dir"
 $!
 $!
 $ hdf5top     = F$DIRECTORY()

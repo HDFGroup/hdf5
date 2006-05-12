@@ -32,7 +32,7 @@ $ type sys$input
        Creating testhdf5
 $ cxxlink  testhdf5,tattr,tfile, th5s, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ !                              
 $ ccc dsets
@@ -40,7 +40,7 @@ $ type sys$input
         Creating dsets
 $ cxxlink  dsets, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
-           [-.-.src]hdf5.olb/lib
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
  	Done
 $ exit
