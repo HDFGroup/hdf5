@@ -25,6 +25,7 @@ char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 #   define nh5_fixname_c              H5_FC_FUNC_(h5_fixname_c, H5_FIXNAME_C)
 #   define nh5_cleanup_c              H5_FC_FUNC_(h5_cleanup_c, H5_CLEANUP_C)
 #   define nh5_exit_c                 H5_FC_FUNC_(h5_exit_c, H5_EXIT_C)
+#   define nh5_group_revision_c       H5_FC_FUNC_(h5_group_revision_c, H5_GROUP_REVISION_C)
 
 H5_FCTESTDLL int_f nh5_fixname_c
 (_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen);
@@ -35,3 +36,4 @@ H5_FCTESTDLL int_f nh5_cleanup_c
 H5_FCTESTDLL void nh5_exit_c
 (int_f *status);
 
+H5_FCTESTDLL int_f nh5_group_revision_c();

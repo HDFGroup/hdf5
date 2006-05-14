@@ -696,6 +696,8 @@
           LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
           INTEGER              :: error
+          INTEGER flag 
+          INTEGER :: free_space_out
      
           !
           CHARACTER(LEN=10), PARAMETER :: filename = "file_space"
@@ -745,9 +747,16 @@
 
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
+          CALL h5_group_revision_f(flag)
                CALL check("h5fget_freespace_f",error,total_error)
+               if(flag .eq. 1) then
+                  free_space_out = 232
+               else
+                  free_space_out = 1024
+               endif
+               if(error .eq.0 .and. free_space .ne. free_space_out) then
 !               if(error .eq.0 .and. free_space .ne. 232) then
-               if(error .eq.0 .and. free_space .ne. 1024) then
+!               if(error .eq.0 .and. free_space .ne. 1024) then
                  total_error = total_error + 1
                  write(*,*) "3: Wrong amount of free space reported, ", free_space
                endif
