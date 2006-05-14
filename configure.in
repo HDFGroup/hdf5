@@ -942,6 +942,12 @@ AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
                [AC_CHECK_FUNCS([lseek64 fseek64])],
                [AC_MSG_RESULT([skipping test for lseek64() and fseek64()])])
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/stat.h>],
+[struct stat64 sb;],
+[AC_CHECK_FUNCS([stat64 fstat64])],
+[AC_MSG_RESULT([skipping test for stat64() and fstat64()])])
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.

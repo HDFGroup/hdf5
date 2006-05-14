@@ -93,6 +93,9 @@
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
 
+/* Define to 1 if you have the `fstat64' function. */
+#undef HAVE_FSTAT64
+
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
@@ -231,6 +234,9 @@
 
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
+
+/* Define to 1 if you have the `stat64' function. */
+#undef HAVE_STAT64
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS

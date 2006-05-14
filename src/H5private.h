@@ -664,19 +664,23 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifdef WIN32
     #ifdef __MWERKS__
     #define HDfstat(F,B)        fstat(F,B)
+    #define HDstat(S,B)   	stat(S,B)
     typedef struct stat		h5_stat_t;
     typedef off_t               h5_stat_size_t;
     #else /*MSVC*/
     #define HDfstat(F,B)	_fstati64(F,B)
+    #define HDstat(S,B)		_stati64(S,B)
     typedef struct _stati64	h5_stat_t;
     typedef __int64             h5_stat_size_t;
     #endif
-#elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8
+#elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
     #define HDfstat(F,B)        fstat64(F,B)
+    #define HDstat(S,B)  	stat64(S,B)
     typedef struct stat64       h5_stat_t;
     typedef off64_t             h5_stat_size_t;
 #else
     #define HDfstat(F,B)        fstat(F,B)
+    #define HDstat(S,B)  	stat(S,B)
     typedef struct stat         h5_stat_t;
     typedef off_t               h5_stat_size_t;
 #endif
@@ -850,18 +854,6 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDsrandom(S)		srand(S)
 #endif
 /* sscanf() variable arguments */
-
-#ifdef WIN32
-    #ifdef __MWERKS__
-    #define HDstat(S,B)   	stat(S,B)
-    #else /*MSVC*/
-    #define HDstat(S,B)		_stati64(S,B)
-    #endif
-#elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8
-    #define HDstat(S,B)  	stat64(S,B)
-#else
-    #define HDstat(S,B)  	stat(S,B)
-#endif
 
 #define HDstrcat(X,Y)		strcat(X,Y)
 #define HDstrchr(S,C)		strchr(S,C)
