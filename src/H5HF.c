@@ -67,9 +67,6 @@
 /* Package Variables */
 /*********************/
 
-/* Declare a free list to manage the H5HF_hdr_t struct */
-H5FL_DEFINE(H5HF_hdr_t);
-
 
 /*****************************/
 /* Library Private Variables */
@@ -141,20 +138,17 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 
     /* Lock the heap header into memory */
-#ifdef QAK
-HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
-#endif /* QAK */
     if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load fractal heap header")
 
-    /* Point fractal heap wrapper at header */
+    /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
     if(H5HF_hdr_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Unlock heap header, now pinned */
     if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     hdr = NULL;
 
     /* Add heap to list of open objects in file */
@@ -170,7 +164,7 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 done:
     if(!ret_value) {
         if(fh)
-            (void)H5HF_close(fh);
+            (void)H5HF_close(fh, dxpl_id);
 	else if(hdr)
             (void)H5HF_cache_hdr_dest(f, hdr);
     } /* end if */
@@ -253,7 +247,7 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
-            (void)H5HF_close(fh);
+            (void)H5HF_close(fh, dxpl_id);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -387,6 +381,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_get_obj_len
+ *
+ * Purpose:	Get the size of an entry in a fractal heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May  9 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5HF_get_obj_len)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(obj_len_p);
+
+    /* Skip over object offset */
+    id += fh->hdr->heap_off_size;
+
+    /* Retrieve the entry length */
+    UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->id_len);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_get_obj_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_read
  *
  * Purpose:	Read an object from a fractal heap into a buffer
@@ -456,7 +487,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_close(H5HF_t *fh)
+H5HF_close(H5HF_t *fh, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;
 
@@ -474,19 +505,15 @@ H5HF_close(H5HF_t *fh)
     if(0 == fh->fo_count) {
         /* Remove the heap from the list of opened objects in the file */
         if(H5FO_delete(fh->hdr->f, H5AC_dxpl_id, fh->hdr->heap_addr) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
 
-        /* Reset the free list information */
-        /* (Bump the "generation" counter in case this heap header is still
-         *      in the cache when the heap is re-opened -QAK)
-         */
-        H5HF_flist_reset(fh->hdr->flist);
-        fh->hdr->fl_gen++;
-        fh->hdr->freelist_sync = FALSE;
+        /* Close the free space information */
+        if(H5HF_space_close(fh->hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
 
         /* Reset the block iterator */
         if(H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
         /* Decrement the reference count on the heap header */
         if(H5HF_hdr_decr(fh->hdr) < 0)

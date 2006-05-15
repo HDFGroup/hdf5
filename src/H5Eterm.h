@@ -47,6 +47,7 @@ H5E_TST_g=
 H5E_ARGS_g=    
 H5E_ERROR_g=    
 H5E_PLINE_g=    
+H5E_FSPACE_g=    
 H5E_CACHE_g= (-1);
 
 /* Reset minor error IDs */

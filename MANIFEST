@@ -474,6 +474,12 @@
 ./src/H5FLprivate.h
 ./src/H5FO.c
 ./src/H5FOprivate.h
+./src/H5FS.c
+./src/H5FScache.c
+./src/H5FSdbg.c
+./src/H5FSpkg.h
+./src/H5FSprivate.h
+./src/H5FSpublic.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Glink.c
@@ -493,7 +499,6 @@
 ./src/H5HFdbg.c
 ./src/H5HFdblock.c
 ./src/H5HFdtable.c
-./src/H5HFflist.c
 ./src/H5HFhdr.c
 ./src/H5HFiblock.c
 ./src/H5HFint.c
@@ -501,6 +506,8 @@
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
 ./src/H5HFpublic.h	
+./src/H5HFsection.c
+./src/H5HFspace.c
 ./src/H5HFstat.c
 ./src/H5HFtest.c
 ./src/H5HG.c

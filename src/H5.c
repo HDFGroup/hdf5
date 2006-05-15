@@ -231,6 +231,7 @@ H5_term_library(void)
          * that depend on them. -QAK
          */
         if(pending==0) {
+            pending += DOWN(FS);
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);

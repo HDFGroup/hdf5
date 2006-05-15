@@ -4034,7 +4034,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
     /* Check args */
     assert(f);
 
-    /* Update layout message for compact dataset */
+    /* Retrieve the # of outstanding dataset IDs */
     num_dsets=H5F_get_obj_count(f, H5F_OBJ_DATASET);
 
     /* Check for something to do */

@@ -321,6 +321,9 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(f, p, hdr->total_man_free);
     H5F_DECODE_LENGTH(f, p, hdr->total_std_free);
 
+    /* Address of free section header */
+    H5F_addr_decode(f, &p, &(hdr->fs_addr));
+
     /* Statistics information */
     H5F_DECODE_LENGTH(f, p, hdr->total_size);
     H5F_DECODE_LENGTH(f, p, hdr->man_size);
@@ -334,17 +337,11 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
 
     HDassert((size_t)(p - buf) == size);
 
-    /* If the heap has any blocks stored, the memory free list is out of sync */
-    if(H5F_addr_defined(hdr->man_dtable.table_addr))
-        hdr->freelist_sync = FALSE;
-    else
-        hdr->freelist_sync = TRUE;
-
     /* Finish initialization of heap header */
     if(H5HF_hdr_finish_init(hdr) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't finish initializing shared fractal heap header")
 #ifdef QAK
-HDfprintf(stderr, "%s: hdr->flist = %p\n", FUNC, hdr->flist);
+HDfprintf(stderr, "%s: hdr->fspace = %p\n", FUNC, hdr->fspace);
 #endif /* QAK */
 
     /* Set return value */
@@ -431,6 +428,9 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         H5F_ENCODE_LENGTH(f, p, hdr->total_man_free);
         H5F_ENCODE_LENGTH(f, p, hdr->total_std_free);
 
+        /* Address of free section header */
+        H5F_addr_encode(f, &p, hdr->fs_addr);
+
         /* Statistics information */
         H5F_ENCODE_LENGTH(f, p, hdr->total_size);
         H5F_ENCODE_LENGTH(f, p, hdr->man_size);
@@ -486,9 +486,6 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
      */
     HDassert(hdr);
     HDassert(hdr->rc == 0);
-
-    /* Free the free list section information */
-    H5HF_flist_free(hdr->flist);
 
     /* Free the block size lookup table for the doubling table */
     H5HF_dtable_dest(&hdr->man_dtable);
@@ -615,8 +612,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     /* Set block's internal information */
     dblock->size = *size;
     dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
-    dblock->free_list = NULL;
-    dblock->fl_gen = 0;
 
     /* Allocate block buffer */
 /* XXX: Change to using free-list factories */
@@ -661,21 +656,10 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
         /* Share parent block */
         if(H5HF_iblock_incr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
-
-        /* Retrieve this block's free space from parent */
-        dblock->blk_free_space = dblock->parent->ents[dblock->par_entry].free_space;
     } /* end if */
-    else {
-        /* Direct block is linked directly from heap header */
-        dblock->blk_free_space = dblock->hdr->total_man_free;
-    } /* end else */
 
     /* Offset of heap within the heap's address space */
     UINT64DECODE_VAR(p, dblock->block_off, dblock->hdr->heap_off_size);
-
-    /* Offset of free list head */
-    /* (Defer deserializing the whole free list until we actually need to modify it) */
-    UINT64DECODE_VAR(p, dblock->free_list_head, dblock->blk_off_size);
 
     /* Set return value */
     ret_value = dblock;
@@ -748,46 +732,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         if(hdr->addrmap != H5HF_ABSOLUTE)
             HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "encoding mapped direct blocks not supported currently")
 
-        /* Offset of free list head */
-        UINT64ENCODE_VAR(p, dblock->free_list_head, dblock->blk_off_size);
-
         /* Sanity check */
-        HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD_DBLOCK(hdr, dblock));
-
-        /* Check for dirty free list */
-        if(dblock->free_list && dblock->free_list->dirty) {
-            H5HF_direct_free_node_t *node;      /* Pointer to free list node for block */
-
-            /* Loop over all free list blocks, updating their data */
-            node = dblock->free_list->first;
-            while(node) {
-                /* Find first node which has enough room to describe free space */
-                while(node && node->size < H5HF_MAN_ABS_DIRECT_FREE_NODE_SIZE(dblock))
-                    node = node->next;
-
-                /* Check for free space node to encode */
-                if(node) {
-                    H5HF_direct_free_node_t *next_node; /* Pointer to next free list node for block */
-
-                    /* Probe ahead for next node that is large enough to encode free space description */
-                    next_node = node->next;
-                    while(next_node && next_node->size < H5HF_MAN_ABS_DIRECT_FREE_NODE_SIZE(dblock))
-                        next_node = next_node->next;
-
-                    /* Encode information for this node on free list */
-                    p = dblock->blk + node->my_offset;
-                    UINT64ENCODE_VAR(p, node->size, dblock->blk_off_size);
-                    UINT64ENCODE_VAR(p, (next_node ? next_node->my_offset : 0), dblock->blk_off_size);
-
-                    /* Advance to next node */
-                    node = node->next;
-                } /* end if */
-
-            } /* end while */
-
-            /* Reset the free list dirty flag */
-            dblock->free_list->dirty = FALSE;
-        } /* end if */
+        HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
 	/* Write the direct block */
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_DBLOCK, addr, (size_t)dblock->size, dxpl_id, dblock->blk) < 0)
@@ -839,11 +785,6 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
         if(H5HF_iblock_decr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
 
-    /* Check for free list & free it, if necessary */
-    if(dblock->free_list)
-        if(H5HF_man_dblock_destroy_freelist(dblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't destroy free list for direct block")
-
     /* Free block's buffer */
     H5FL_BLK_FREE(direct_block, dblock->blk);
 
@@ -879,9 +820,6 @@ H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy)
      * Check arguments.
      */
     HDassert(dblock);
-
-    /* Reset the free list dirty flag */
-    dblock->free_list->dirty = FALSE;
 
     /* Reset the dirty flag.  */
     dblock->cache_info.is_dirty = FALSE;
@@ -951,9 +889,6 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     const uint8_t	*p;             /* Pointer into raw data buffer */
     haddr_t             heap_addr;      /* Address of heap header in the file */
     uint32_t            metadata_chksum;        /* Metadata checksum value */
-#ifndef NDEBUG
-    hsize_t             acc_child_free_space;   /* Accumulated child free space */
-#endif /* NDEBUG */
     size_t              u;              /* Local index variable */
     H5HF_indirect_t	*ret_value;     /* Return value */
 
@@ -982,7 +917,6 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     iblock->nrows = *nrows;
     iblock->addr = addr;
     iblock->dirty = FALSE;
-    iblock->fl_gen = 0;
 
     /* Compute size of indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(iblock->hdr, iblock);
@@ -1031,16 +965,10 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
         if(H5HF_iblock_incr(iblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
 
-        /* Retrieve this block's free space from parent */
-        iblock->child_free_space = iblock->parent->ents[iblock->par_entry].free_space;
-
         /* Set max. # of rows in this block */
         iblock->max_rows = iblock->nrows;
     } /* end if */
     else {
-        /* Direct block is linked directly from heap header */
-        iblock->child_free_space = iblock->hdr->total_man_free;
-
         /* Set max. # of rows in this block */
         iblock->max_rows = iblock->hdr->man_dtable.max_root_rows;
     } /* end else */
@@ -1052,29 +980,19 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     HDassert(iblock->nrows > 0);
     if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (iblock->nrows * iblock->hdr->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct entries")
-#ifndef NDEBUG
-    /* Reset child free space */
-    acc_child_free_space = 0;
-#endif /* NDEBUG */
     for(u = 0; u < (iblock->nrows * iblock->hdr->man_dtable.cparam.width); u++) {
-        /* Decode block address */
+        /* Decode child block address */
         H5F_addr_decode(f, &p, &(iblock->ents[u].addr));
 
-        /* Decode direct & indirect blocks differently */
+#ifdef LATER
+        /* Decode direct & indirect blocks differently (later, when direct blocks can be compressed) */
         if(u < (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width))
             UINT32DECODE_VAR(p, iblock->ents[u].free_space, iblock->hdr->man_dtable.max_dir_blk_off_size)
-        else
-            UINT64DECODE_VAR(p, iblock->ents[u].free_space, iblock->hdr->heap_off_size)
+#endif /* LATER */
 #ifdef QAK
-HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a, %Hu}\n", FUNC, u, iblock->ents[u].addr, iblock->ents[u].free_space);
+HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].addr);
 #endif /* QAK */
-#ifndef NDEBUG
-        acc_child_free_space += iblock->ents[u].free_space;
-#endif /* NDEBUG */
     } /* end for */
-#ifndef NDEBUG
-    HDassert(iblock->parent == NULL || acc_child_free_space == iblock->child_free_space);
-#endif /* NDEBUG */
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == iblock->size);
@@ -1172,16 +1090,16 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
         /* Encode indirect block-specific fields */
         for(u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); u++) {
 #ifdef QAK
-HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a, %Hu}\n", FUNC, u, iblock->ents[u].addr, iblock->ents[u].free_space);
+HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].addr);
 #endif /* QAK */
-            /* Encode block address */
+            /* Encode child block address */
             H5F_addr_encode(f, &p, iblock->ents[u].addr);
 
-            /* Encode direct & indirect blocks differently */
+#ifdef LATER
+            /* Encode direct & indirect blocks differently (when direct blocks can be compressed) */
             if(u < (hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width))
                 UINT32ENCODE_VAR(p, iblock->ents[u].free_space, hdr->man_dtable.max_dir_blk_off_size)
-            else
-                UINT64ENCODE_VAR(p, iblock->ents[u].free_space, hdr->heap_off_size)
+#endif /* LATER */
         } /* end for */
 
         /* Sanity check */

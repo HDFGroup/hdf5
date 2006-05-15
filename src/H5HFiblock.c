@@ -57,18 +57,23 @@
 /* Local Prototypes */
 /********************/
 
-/* Indirect block routines */
-static herr_t H5HF_man_iblock_skip_blocks(H5HF_hdr_t *hdr, 
+/* Free space section routines */
+static herr_t H5HF_man_iblock_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *iblock, haddr_t iblock_addr,
     unsigned start_entry, unsigned nentries);
-static herr_t H5HF_man_iblock_skip_ranges(H5HF_hdr_t *hdr,
+static herr_t H5HF_man_iblock_skip_ranges(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *iblock, haddr_t iblock_addr,
     unsigned start_entry, unsigned nentries);
-static herr_t H5HF_man_iblock_double_root(H5HF_hdr_t *hdr, hid_t dxpl_id,
+
+/* Root indirect block routines */
+static herr_t H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     size_t min_dblock_size);
+static herr_t H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    size_t min_dblock_size);
+
+/* Misc. indirect block routines */
 static herr_t H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     hsize_t block_off, unsigned nrows, unsigned max_rows, haddr_t *addr_p);
-static herr_t H5HF_man_iblock_build_sections(H5HF_indirect_t *iblock);
 
 /*********************/
 /* Package Variables */
@@ -227,7 +232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_man_iblock_skip_blocks(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock,
+H5HF_man_iblock_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
     haddr_t iblock_addr, unsigned start_entry, unsigned nentries)
 {
     H5HF_free_section_t *sec_node; /* Pointer to free list section for range */
@@ -281,9 +286,10 @@ HDfprintf(stderr, "%s: row_entries = %u, hdr->man_dtable.row_dblock_free[%u] = %
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct block free list section")
 
         /* Set section's information */
-        sec_node->sect_addr = sect_off;
-        sec_node->sect_size = hdr->man_dtable.row_dblock_free[curr_row];
-        sec_node->type = H5HF_SECT_RANGE;
+        sec_node->sect_info.addr = sect_off;
+        sec_node->sect_info.size = hdr->man_dtable.row_dblock_free[curr_row];
+        sec_node->sect_info.cls = &hdr->sect_cls[H5FS_SECT_FHEAP_RANGE];
+        sec_node->sect_info.state = H5FS_SECT_LIVE;
         sec_node->u.range.iblock = iblock;
         if(H5HF_iblock_incr(iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
@@ -292,7 +298,7 @@ HDfprintf(stderr, "%s: row_entries = %u, hdr->man_dtable.row_dblock_free[%u] = %
         sec_node->u.range.num_entries = row_entries;
 
         /* Add new free space to the global list of space */
-        if(H5HF_flist_add(hdr->flist, sec_node, &sec_node->sect_size, &sec_node->sect_addr) < 0)
+        if(H5HF_space_add(hdr, dxpl_id, sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add indirect block free space to global list")
 
         /* Advance row & column position */
@@ -330,7 +336,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_man_iblock_skip_ranges(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock,
+H5HF_man_iblock_skip_ranges(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
     haddr_t iblock_addr, unsigned start_entry, unsigned nentries)
 {
     H5HF_free_section_t *sec_node; /* Pointer to free list section for range */
@@ -406,12 +412,13 @@ HDfprintf(stderr, "%s: hdr->man_dtable.row_dblock_free[%u] = %Zu\n", FUNC, w, hd
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct block free list section")
 
             /* Set section's information */
-            sec_node->sect_addr = sect_off + hdr->man_dtable.row_block_off[w];
+            sec_node->sect_info.addr = sect_off + hdr->man_dtable.row_block_off[w];
 #ifdef QAK
-HDfprintf(stderr, "%s: sec_node->sect_addr = %a\n", FUNC, sec_node->sect_addr);
+HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
 #endif /* QAK */
-            sec_node->sect_size = hdr->man_dtable.row_dblock_free[w];
-            sec_node->type = H5HF_SECT_INDIRECT;
+            sec_node->sect_info.size = hdr->man_dtable.row_dblock_free[w];
+            sec_node->sect_info.cls = &hdr->sect_cls[H5FS_SECT_FHEAP_INDIRECT];
+            sec_node->sect_info.state = H5FS_SECT_LIVE;
             sec_node->u.indirect.iblock = iblock;
             if(H5HF_iblock_incr(iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
@@ -422,7 +429,7 @@ HDfprintf(stderr, "%s: sec_node->sect_addr = %a\n", FUNC, sec_node->sect_addr);
             sec_node->u.indirect.indir_nrows = num_rows;
 
             /* Add new free space to the global list of space */
-            if(H5HF_flist_add(hdr->flist, sec_node, &sec_node->sect_size, &sec_node->sect_addr) < 0)
+            if(H5HF_space_add(hdr, dxpl_id, sec_node) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add indirect block free space to global list")
         } /* end for */
 #ifdef QAK
@@ -448,7 +455,144 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_double_root
+ * Function:	H5HF_man_iblock_root_create
+ *
+ * Purpose:	Create root indirect block
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May  2 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
+{
+    H5HF_indirect_t *iblock;        /* Pointer to indirect block */
+    haddr_t iblock_addr;            /* Indirect block's address */
+    hsize_t acc_dblock_free;        /* Accumulated free space in direct blocks */
+    hbool_t have_direct_block;      /* Flag to indicate a direct block already exists */
+    unsigned nrows;                 /* Number of rows for root indirect block */
+    unsigned u;                     /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_create)
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Creating root indirect block\n", FUNC);
+#endif /* QAK */
+
+    /* Check for allocating entire root indirect block initially */
+    if(hdr->man_dtable.cparam.start_root_rows == 0)
+        nrows = hdr->man_dtable.max_root_rows;
+    else {
+        unsigned rows_needed;   /* Number of rows needed to get to direct block size */
+        unsigned block_row_off; /* Row offset from larger block sizes */
+
+        nrows = hdr->man_dtable.cparam.start_root_rows;
+
+        block_row_off = H5V_log2_of2(min_dblock_size) - H5V_log2_of2(hdr->man_dtable.cparam.start_block_size);
+        if(block_row_off > 0)
+            block_row_off++;        /* Account for the pair of initial rows of the initial block size */
+        rows_needed = 1 + block_row_off;
+        if(nrows < rows_needed)
+            nrows = rows_needed;
+    } /* end else */
+#ifdef QAK
+HDfprintf(stderr, "%s: nrows = %u\n", FUNC, nrows);
+#endif /* QAK */
+
+    /* Allocate root indirect block */
+    if(H5HF_man_iblock_create(hdr, dxpl_id, (hsize_t)0, nrows, hdr->man_dtable.max_root_rows, &iblock_addr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
+#ifdef QAK
+HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
+#endif /* QAK */
+
+    /* Move current direct block (used as root) into new indirect block */
+
+    /* Lock new indirect block */
+    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, NULL, 0, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
+
+    /* Check if there's already a direct block as root) */
+    have_direct_block = H5F_addr_defined(hdr->man_dtable.table_addr);
+#ifdef QAK
+HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_block);
+#endif /* QAK */
+    if(have_direct_block) {
+        H5HF_direct_t *dblock;          /* Pointer to direct block to query */
+
+        /* Lock first (root) direct block */
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, iblock, 0, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
+
+        /* Point indirect block at direct block to add */
+        iblock->ents[0].addr = hdr->man_dtable.table_addr;
+
+        /* Make direct block share parent indirect block */
+        dblock->parent = iblock;
+        dblock->par_entry = 0;
+        if(H5HF_iblock_incr(iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
+
+        /* Unlock first (root) direct block */
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+        dblock = NULL;
+    } /* end if */
+
+    /* Set up iterator at correct location */
+    if(H5HF_man_iter_start_entry(hdr, &hdr->next_block, iblock, have_direct_block) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize block iterator")
+
+    /* Check for skipping over direct blocks, in order to get to large enough block */
+    if(min_dblock_size > hdr->man_dtable.cparam.start_block_size) {
+        /* Add skipped blocks to heap's free space */
+        if(H5HF_man_iblock_skip_blocks(hdr, dxpl_id, iblock, iblock_addr,
+                have_direct_block, ((nrows - 1) * hdr->man_dtable.cparam.width) - have_direct_block) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
+    } /* end if */
+
+    /* Mark indirect block as modified */
+    if(H5HF_iblock_dirty(iblock) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
+
+    /* Unprotect root indirect block (it's pinned by the iterator though) */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__DIRTIED_FLAG) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+    iblock = NULL;
+
+    /* Point heap header at new indirect block */
+    hdr->man_dtable.curr_root_rows = nrows;
+    hdr->man_dtable.table_addr = iblock_addr;
+
+    /* Compute free space in direct blocks referenced from entries in root indirect block */
+    acc_dblock_free = 0;
+    for(u = 0; u < nrows; u++)
+        acc_dblock_free += hdr->man_dtable.row_dblock_free[u] * hdr->man_dtable.cparam.width;
+
+    /* Account for potential initial direct block */
+    if(have_direct_block)
+        acc_dblock_free -= hdr->man_dtable.row_dblock_free[0];
+
+    /* Extend heap to cover new root indirect block */
+    if(H5HF_hdr_extend_heap(hdr, hdr->man_dtable.row_block_off[nrows], acc_dblock_free) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
+
+    /* Mark heap header as modified */
+    if(H5HF_hdr_dirty(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark header as dirty")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_iblock_root_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_iblock_root_double
  *
  * Purpose:	Double size of root indirect block
  *
@@ -461,7 +605,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_man_iblock_double_root(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
+H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
 {
     H5HF_indirect_t *iblock;    /* Pointer to root indirect block */
     haddr_t new_addr;           /* New address of indirect block */
@@ -477,7 +621,7 @@ H5HF_man_iblock_double_root(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     size_t u;                   /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_double_root)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_double)
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Extending root indirect block\n", FUNC);
@@ -548,7 +692,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
     /* Check for skipping over rows and add free section for skipped rows */
     if(skip_direct_rows) {
         /* Add skipped blocks to heap's free space */
-        if(H5HF_man_iblock_skip_blocks(hdr, iblock, new_addr,
+        if(H5HF_man_iblock_skip_blocks(hdr, dxpl_id, iblock, new_addr,
                 next_entry, (new_next_entry - next_entry)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
     } /* end if */
@@ -559,9 +703,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
         unsigned row = u / hdr->man_dtable.cparam.width;        /* Row for current entry */
 
         iblock->ents[u].addr = HADDR_UNDEF;
-        iblock->ents[u].free_space = hdr->man_dtable.row_dblock_free[row];
-        iblock->child_free_space += iblock->ents[u].free_space;
-        acc_dblock_free += iblock->ents[u].free_space;
+        acc_dblock_free += hdr->man_dtable.row_dblock_free[row];
     } /* end for */
 
     /* Mark indirect block as dirty */
@@ -601,11 +743,11 @@ HDfprintf(stderr, "%s: acc_dblock_free = %Hu\n", FUNC, acc_dblock_free);
 
     /* Release the indirect block (marked as dirty) */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__DIRTIED_FLAG) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iblock_double_root() */
+} /* end H5HF_man_iblock_root_double() */
 
 
 /*-------------------------------------------------------------------------
@@ -627,8 +769,10 @@ H5HF_indirect_t *
 H5HF_man_iblock_place_dblock(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size,
     size_t *entry_p, size_t *dblock_size)
 {
+#ifdef OLD_WAY
     H5HF_indirect_t *iblock;            /* Pointer to indirect block */
     haddr_t iblock_addr;                /* Indirect block's address */
+#endif /* OLD_WAY */
     H5HF_indirect_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_place_dblock)
@@ -644,118 +788,11 @@ HDfprintf(stderr, "%s: min_dblock_size = %Zu\n", FUNC, min_dblock_size);
 
     /* Check for creating first indirect block */
     if(hdr->man_dtable.curr_root_rows == 0) {
-        H5HF_direct_t *dblock;          /* Pointer to direct block to query */
-        hsize_t acc_dblock_free;        /* Accumulated free space in direct blocks */
-        hbool_t have_direct_block;      /* Flag to indicate a direct block already exists */
-        unsigned nrows;                 /* Number of rows for root indirect block */
-        unsigned u;                     /* Local index variable */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: creating first indirect block\n", FUNC);
-#endif /* QAK */
-        /* Check for allocating entire root indirect block initially */
-        if(hdr->man_dtable.cparam.start_root_rows == 0)
-            nrows = hdr->man_dtable.max_root_rows;
-        else {
-            unsigned rows_needed;   /* Number of rows needed to get to direct block size */
-            unsigned block_row_off; /* Row offset from larger block sizes */
-
-            nrows = hdr->man_dtable.cparam.start_root_rows;
-
-            block_row_off = H5V_log2_of2(min_dblock_size) - H5V_log2_of2(hdr->man_dtable.cparam.start_block_size);
-            if(block_row_off > 0)
-                block_row_off++;        /* Account for the pair of initial rows of the initial block size */
-            rows_needed = 1 + block_row_off;
-            if(nrows < rows_needed)
-                nrows = rows_needed;
-        } /* end else */
-#ifdef QAK
-HDfprintf(stderr, "%s: nrows = %u\n", FUNC, nrows);
-#endif /* QAK */
-
-        /* Allocate root indirect block */
-        if(H5HF_man_iblock_create(hdr, dxpl_id, (hsize_t)0, nrows, hdr->man_dtable.max_root_rows, &iblock_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate fractal heap indirect block")
-#ifdef QAK
-HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
-#endif /* QAK */
-
-        /* Move current direct block (used as root) into new indirect block */
-
-        /* Lock new indirect block */
-        if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, NULL, 0, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
-
-        /* Check if there's already a direct block as root) */
-        have_direct_block = H5F_addr_defined(hdr->man_dtable.table_addr);
-#ifdef QAK
-HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_block);
-#endif /* QAK */
-        if(have_direct_block) {
-            /* Lock first (root) direct block */
-            if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, iblock, 0, H5AC_WRITE)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
-
-            /* Point indirect block at direct block to add */
-            iblock->child_free_space += (hssize_t)(dblock->blk_free_space - iblock->ents[0].free_space);
-            iblock->ents[0].addr = hdr->man_dtable.table_addr;
-            iblock->ents[0].free_space = dblock->blk_free_space;
-
-            /* Make direct block share parent indirect block */
-            dblock->parent = iblock;
-            dblock->par_entry = 0;
-            if(H5HF_iblock_incr(iblock) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
-
-            /* Unlock first (root) direct block */
-            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap direct block")
-            dblock = NULL;
-        } /* end if */
-
-        /* Set up iterator at correct location */
-        if(H5HF_man_iter_start_entry(hdr, &hdr->next_block, iblock, have_direct_block) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize block iterator")
-
-        /* Check for skipping over direct blocks, in order to get to large enough block */
-        if(min_dblock_size > hdr->man_dtable.cparam.start_block_size) {
-            /* Add skipped blocks to heap's free space */
-            if(H5HF_man_iblock_skip_blocks(hdr, iblock, iblock_addr,
-                    have_direct_block, ((nrows - 1) * hdr->man_dtable.cparam.width) - have_direct_block) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, NULL, "can't add skipped blocks to heap's free space")
-        } /* end if */
-
-        /* Mark indirect block as modified */
-        if(H5HF_iblock_dirty(iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, NULL, "can't mark indirect block as dirty")
-
-        /* Unprotect root indirect block (it's pinned by the iterator though) */
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__DIRTIED_FLAG) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap indirect block")
-        iblock = NULL;
-
-        /* Point heap header at new indirect block */
-        hdr->man_dtable.curr_root_rows = nrows;
-        hdr->man_dtable.table_addr = iblock_addr;
-
-        /* Compute free space in direct blocks referenced from entries in root indirect block */
-        acc_dblock_free = 0;
-        for(u = 0; u < nrows; u++)
-            acc_dblock_free += hdr->man_dtable.row_dblock_free[u] * hdr->man_dtable.cparam.width;
-
-        /* Account for potential initial direct block */
-        if(have_direct_block)
-            acc_dblock_free -= hdr->man_dtable.row_dblock_free[0];
-
-        /* Extend heap to cover new root indirect block */
-        if(H5HF_hdr_extend_heap(hdr, hdr->man_dtable.row_block_off[nrows], acc_dblock_free) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, NULL, "can't increase space to cover root direct block")
-
-        /* Mark heap header as modified */
-        if(H5HF_hdr_dirty(hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, NULL, "can't mark header as dirty")
+        if(H5HF_man_iblock_root_create(hdr, dxpl_id, min_dblock_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, NULL, "unable to create root indirect block")
     } /* end if */
     else {
+        H5HF_indirect_t *iblock;        /* Pointer to indirect block */
         hbool_t walked_up, walked_down; /* Condition variables for finding direct block location */
         unsigned next_row;              /* Iterator's next block row */
         unsigned next_entry;            /* Iterator's next block entry */
@@ -808,7 +845,7 @@ HDfprintf(stderr, "%s: min_entry = %u, skip_entries = %u\n", FUNC, min_entry, sk
 #endif /* QAK */
 
             /* Add skipped direct blocks to heap's free space */
-            if(H5HF_man_iblock_skip_blocks(hdr, iblock, iblock->addr, next_entry, skip_entries) < 0)
+            if(H5HF_man_iblock_skip_blocks(hdr, dxpl_id, iblock, iblock->addr, next_entry, skip_entries) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, NULL, "can't add skipped blocks to heap's free space")
 
             /* Get information about new iterator location */
@@ -839,7 +876,7 @@ HDfprintf(stderr, "%s: Off the end of a block\n", FUNC);
 #ifdef QAK
 HDfprintf(stderr, "%s: Doubling root block\n", FUNC);
 #endif /* QAK */
-                    if(H5HF_man_iblock_double_root(hdr, dxpl_id, min_dblock_size) < 0)
+                    if(H5HF_man_iblock_root_double(hdr, dxpl_id, min_dblock_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, NULL, "unable to double root indirect block")
                 } /* end if */
                 else {
@@ -915,7 +952,7 @@ HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
 #endif /* QAK */
 
                     /* Add skipped indirect ranges to heap's free space */
-                    if(H5HF_man_iblock_skip_ranges(hdr, iblock, iblock->addr, next_entry, (child_entry - next_entry)) < 0)
+                    if(H5HF_man_iblock_skip_ranges(hdr, dxpl_id, iblock, iblock->addr, next_entry, (child_entry - next_entry)) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, NULL, "can't add skipped blocks to heap's free space")
                 } /* end if */
                 else {
@@ -974,7 +1011,7 @@ HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %
 #endif /* QAK */
 
                         /* Add skipped blocks to heap's free space */
-                        if(H5HF_man_iblock_skip_blocks(hdr, new_iblock, new_iblock->addr, 0, new_entry) < 0)
+                        if(H5HF_man_iblock_skip_blocks(hdr, dxpl_id, new_iblock, new_iblock->addr, 0, new_entry) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, NULL, "can't add skipped blocks to heap's free space")
                     } /* end if */
 
@@ -988,7 +1025,7 @@ HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %
 
                     /* Unprotect child indirect block */
                     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, new_iblock->addr, new_iblock, H5AC__DIRTIED_FLAG) < 0)
-                        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap indirect block")
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap indirect block")
                 } /* end else */
 
                 /* Get information about new iterator location */
@@ -1004,6 +1041,7 @@ HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %
 
     /* Get information about iterator location */
 {
+    H5HF_indirect_t *iblock;    /* Pointer to indirect block */
     unsigned next_row;          /* Iterator's next block row */
     unsigned next_entry;        /* Iterator's next block entry */
     size_t next_size;           /* Size of next direct block to create */
@@ -1026,12 +1064,6 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "skipping direct block sizes not su
     /* Set size of direct block to create */
     *dblock_size = next_size;
 
-#ifdef OLD_WAY
-    /* Increment location of next block from this indirect block */
-    if(H5HF_man_iter_next(hdr, &hdr->next_block, 1) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't advance fractal heap block location")
-#endif /* OLD_WAY */
-
     /* Set return value */
     ret_value = iblock;
 }
@@ -1039,6 +1071,78 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "skipping direct block sizes not su
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_place_dblock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_iblock_alloc_single
+ *
+ * Purpose:	Update the memory information for a 'single' free section
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May  8 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_iblock_alloc_single(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sec_node)
+{
+    H5HF_indirect_t *sec_iblock;        /* Pointer to section indirect block */
+    unsigned sec_entry;                 /* Entry within section indirect block */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_alloc_single)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(sec_node);
+    HDassert(sec_node->sect_info.state == H5FS_SECT_SERIALIZED);
+
+    /* Check for root direct block */
+    if(hdr->man_dtable.curr_root_rows == 0) {
+        /* Set the information for the section */
+        sec_node->u.single.parent = NULL;
+        sec_node->u.single.par_entry = 0;
+
+        /* Set direct block info */
+        HDassert(H5F_addr_defined(hdr->man_dtable.table_addr));
+        sec_node->u.single.dblock_addr =  hdr->man_dtable.table_addr;
+        sec_node->u.single.dblock_size =  hdr->man_dtable.cparam.start_block_size;
+    } /* end if */
+    else {
+        /* Look up indirect block containing direct blocks for range */
+        if(H5HF_man_locate_block(hdr, dxpl_id, sec_node->sect_info.addr, FALSE, &sec_iblock, &sec_entry, H5AC_READ) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
+
+        /* Increment reference count on indirect block that free section is in */
+        if(H5HF_iblock_incr(sec_iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+        /* Set the information for the section */
+        sec_node->u.single.parent = sec_iblock;
+        sec_node->u.single.par_entry = sec_entry;
+
+        /* Set direct block info */
+        sec_node->u.single.dblock_addr =  sec_iblock->ents[sec_entry].addr;
+        sec_node->u.single.dblock_size =  hdr->man_dtable.row_block_size[sec_entry / hdr->man_dtable.cparam.width];
+
+        /* Unlock indirect block */
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, sec_iblock->addr, sec_iblock, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        sec_iblock = NULL;
+    } /* end else */
+
+    /* Section is "live" now */
+    sec_node->sect_info.state = H5FS_SECT_LIVE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_iblock_alloc_single() */
 
 
 /*-------------------------------------------------------------------------
@@ -1061,7 +1165,7 @@ herr_t
 H5HF_man_iblock_alloc_range(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t **sec_node)
 {
-    H5HF_indirect_t *iblock;            /* Pointer to indirect block */
+    H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
     haddr_t dblock_addr;                /* Direct block's address */
     H5HF_free_section_t *dblock_sec_node = NULL;     /* Pointer to direct block's section node */
     H5HF_free_section_t *old_sec_node = *sec_node;     /* Pointer to old section node */
@@ -1075,6 +1179,31 @@ H5HF_man_iblock_alloc_range(H5HF_hdr_t *hdr, hid_t dxpl_id,
      */
     HDassert(hdr);
     HDassert(sec_node && *sec_node);
+
+    /* Check for serialized section */
+    if(old_sec_node->sect_info.state == H5FS_SECT_SERIALIZED) {
+        H5HF_indirect_t *sec_iblock;  /* Pointer to section indirect block */
+        unsigned sec_entry;           /* Entry within section indirect block */
+
+        /* Look up indirect block containing direct blocks for range */
+        if(H5HF_man_locate_block(hdr, dxpl_id, old_sec_node->sect_info.addr, FALSE, &sec_iblock, &sec_entry, H5AC_READ) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
+
+        /* Increment reference count on indirect block that free section is in */
+        if(H5HF_iblock_incr(sec_iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+        /* Set the pointer to the section's indirect block */
+        old_sec_node->u.range.iblock = sec_iblock;
+
+        /* Unlock indirect block */
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, sec_iblock->addr, sec_iblock, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        sec_iblock = NULL;
+
+        /* Section is "live" now */
+        old_sec_node->sect_info.state = H5FS_SECT_LIVE;
+    } /* end if */
 
     /* Compute info about range */
     cur_entry = (old_sec_node->u.range.row * hdr->man_dtable.cparam.width) + old_sec_node->u.range.col;
@@ -1098,7 +1227,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.row_block_size[old_sec_node->u.range.row]
 HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect_addr);
 #endif /* QAK */
     /* Create direct block of appropriate size */
-    if(H5HF_man_dblock_create(dxpl_id, hdr, iblock, cur_entry, (size_t)hdr->man_dtable.row_block_size[old_sec_node->u.range.row], (hsize_t)old_sec_node->sect_addr, &dblock_addr, &dblock_sec_node) < 0)
+    if(H5HF_man_dblock_create(dxpl_id, hdr, iblock, cur_entry, (size_t)hdr->man_dtable.row_block_size[old_sec_node->u.range.row], (hsize_t)old_sec_node->sect_info.addr, &dblock_addr, &dblock_sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
 
     /* Hook direct block up to indirect block */
@@ -1119,14 +1248,14 @@ HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect
     } /* end if */
     else {
         /* Adjust section information */
-        old_sec_node->sect_addr += hdr->man_dtable.row_block_size[old_sec_node->u.range.row];
+        old_sec_node->sect_info.addr += hdr->man_dtable.row_block_size[old_sec_node->u.range.row];
 
         /* Adjust range information */
         old_sec_node->u.range.col++;
         old_sec_node->u.range.num_entries--;
 
         /* Add section back to free space list */
-        if(H5HF_flist_add(hdr->flist, old_sec_node, &old_sec_node->sect_size, &old_sec_node->sect_addr) < 0)
+        if(H5HF_space_add(hdr, dxpl_id, old_sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add indirect block free space to global list")
     } /* end else */
 
@@ -1177,6 +1306,31 @@ H5HF_man_iblock_alloc_indirect(H5HF_hdr_t *hdr, hid_t dxpl_id,
      */
     HDassert(hdr);
     HDassert(sec_node && *sec_node);
+
+    /* Check for serialized section */
+    if(old_sec_node->sect_info.state == H5FS_SECT_SERIALIZED) {
+        H5HF_indirect_t *sec_iblock;  /* Pointer to section indirect block */
+        unsigned sec_entry;           /* Entry within section indirect block */
+
+        /* Look up indirect block containing indirect blocks for section */
+        if(H5HF_man_locate_block(hdr, dxpl_id, old_sec_node->sect_info.addr, TRUE, &sec_iblock, &sec_entry, H5AC_READ) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
+
+        /* Increment reference count on indirect block that free section is in */
+        if(H5HF_iblock_incr(sec_iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+        /* Set the pointer to the section's indirect block */
+        old_sec_node->u.indirect.iblock = sec_iblock;
+
+        /* Unlock indirect block */
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, sec_iblock->addr, sec_iblock, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        sec_iblock = NULL;
+
+        /* Section is "live" now */
+        old_sec_node->sect_info.state = H5FS_SECT_LIVE;
+    } /* end if */
 
     /* Compute info about range */
     curr_entry = (old_sec_node->u.indirect.row * hdr->man_dtable.cparam.width) + old_sec_node->u.indirect.col;
@@ -1232,7 +1386,6 @@ HDfprintf(stderr, "%s: child_iblock->child_free_space = %Hu\n", FUNC, child_iblo
 
         /* Hook child up to parent indirect block */
         iblock->ents[curr_entry].addr = child_iblock_addr;
-        HDassert(iblock->ents[curr_entry].free_space == child_iblock->child_free_space);
 
         /* Mark parent indirect block as modified */
         if(H5HF_iblock_dirty(iblock) < 0)
@@ -1243,12 +1396,13 @@ HDfprintf(stderr, "%s: child_iblock->child_free_space = %Hu\n", FUNC, child_iblo
     dblock_entry = old_sec_node->u.indirect.indir_row * hdr->man_dtable.cparam.width;
 
     /* Create direct block of correct size */
+    /* (creates a 'single' free space section also) */
 #ifdef QAK
 HDfprintf(stderr, "%s: old_sec_node->u.indirect.indir_row = %u\n", FUNC, old_sec_node->u.indirect.indir_row);
 HDfprintf(stderr, "%s: hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row] = %Hu\n", FUNC, hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row]);
 HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect_addr);
 #endif /* QAK */
-    if(H5HF_man_dblock_create(dxpl_id, hdr, child_iblock, dblock_entry, (size_t)hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row], (hsize_t)old_sec_node->sect_addr, &dblock_addr, &dblock_sec_node) < 0)
+    if(H5HF_man_dblock_create(dxpl_id, hdr, child_iblock, dblock_entry, (size_t)hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row], (hsize_t)old_sec_node->sect_info.addr, &dblock_addr, &dblock_sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
 
     /* Hook direct block up to child indirect block */
@@ -1266,10 +1420,11 @@ HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct block free list section")
 
     /* Set section's information */
-    range_sec_node->sect_addr = child_iblock->block_off + hdr->man_dtable.row_block_off[old_sec_node->u.indirect.indir_row]
+    range_sec_node->sect_info.addr = child_iblock->block_off + hdr->man_dtable.row_block_off[old_sec_node->u.indirect.indir_row]
             + hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row];
-    range_sec_node->sect_size = old_sec_node->sect_size;
-    range_sec_node->type = H5HF_SECT_RANGE;
+    range_sec_node->sect_info.size = old_sec_node->sect_info.size;
+    range_sec_node->sect_info.cls = &hdr->sect_cls[H5FS_SECT_FHEAP_RANGE];
+    range_sec_node->sect_info.state = H5FS_SECT_LIVE;
     range_sec_node->u.range.iblock = child_iblock;
     if(H5HF_iblock_incr(child_iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
@@ -1278,7 +1433,7 @@ HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect
     range_sec_node->u.range.num_entries = hdr->man_dtable.cparam.width - 1;
 
     /* Add new free space to the global list of space */
-    if(H5HF_flist_add(hdr->flist, range_sec_node, &range_sec_node->sect_size, &range_sec_node->sect_addr) < 0)
+    if(H5HF_space_add(hdr, dxpl_id, range_sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add indirect block free space to global list")
 
 
@@ -1295,20 +1450,20 @@ HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect
     } /* end if */
     else {
         /* Adjust section information */
-        old_sec_node->sect_addr += hdr->man_dtable.row_block_size[old_sec_node->u.indirect.row];
+        old_sec_node->sect_info.addr += hdr->man_dtable.row_block_size[old_sec_node->u.indirect.row];
 
         /* Adjust range information */
         old_sec_node->u.indirect.col++;
         old_sec_node->u.indirect.num_entries--;
 
         /* Add section back to free space list */
-        if(H5HF_flist_add(hdr->flist, old_sec_node, &old_sec_node->sect_size, &old_sec_node->sect_addr) < 0)
+        if(H5HF_space_add(hdr, dxpl_id, old_sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add indirect block free space to global list")
     } /* end else */
 
     /* Release the child indirect block (marked as dirty) */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, child_iblock_addr, child_iblock, H5AC__DIRTIED_FLAG) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
     /* Point 'sec_node' at new direct block section node */
     *sec_node = dblock_sec_node;
@@ -1316,117 +1471,6 @@ HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_alloc_indirect() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_alloc_opaque
- *
- * Purpose:	Break up an opaque section into component sections
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Apr 25 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_man_iblock_alloc_opaque(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t **sec_node)
-{
-    H5HF_indirect_t *iblock;            /* Pointer to indirect block */
-    H5HF_free_section_t *old_sec_node = *sec_node;     /* Pointer to old section node */
-    haddr_t child_addr;                 /* Child block's address */
-    unsigned entry;                     /* Entry of child block for section */
-    unsigned row;                       /* Row of child block for section */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_alloc_opaque)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(sec_node && *sec_node);
-
-    /* Get a pointer to the indirect block covering the section */
-    iblock = old_sec_node->u.opaque.iblock;
-    HDassert(iblock);
-
-    /* Compute info about child block */
-    entry = old_sec_node->u.opaque.entry;
-    row = entry / hdr->man_dtable.cparam.width;
-    child_addr = iblock->ents[entry].addr;
-
-    /* Check if this section's child block is direct or indirect */
-    if(row < hdr->man_dtable.max_direct_rows) {
-        H5HF_direct_t *child_dblock;    /* Direct child block */
-        size_t dblock_size;             /* Direct block's size */
-
-        /* Compute direct block info */
-        dblock_size = hdr->man_dtable.row_block_size[row];
-
-        /* Check whether direct block exists yet */
-        if(H5F_addr_defined(child_addr)) {
-            /* Lock child direct block */
-            /* (also parses it's free space sections) */
-            if(NULL == (child_dblock = H5HF_man_dblock_protect(hdr, dxpl_id, child_addr, dblock_size, iblock, entry, H5AC_WRITE)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
-
-            /* Unlock child direct block */
-            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, child_addr, child_dblock, H5AC__NO_FLAGS_SET) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
-        } /* end if */
-        else {
-            haddr_t dblock_addr;        /* Address of direct block created */
-
-            /* Create direct block of appropriate size */
-            if(H5HF_man_dblock_create(dxpl_id, hdr, iblock, entry, dblock_size, (hsize_t)old_sec_node->sect_addr, &dblock_addr, NULL) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
-
-            /* Hook direct block up to indirect block */
-            iblock->ents[entry].addr = dblock_addr;
-
-            /* Mark indirect block as dirty */
-            if(H5HF_iblock_dirty(iblock) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
-        } /* end else */
-    } /* end if */
-    else {
-        H5HF_indirect_t *child_iblock;  /* Indirect child block */
-        size_t iblock_nrows;            /* Indirect block's size */
-
-        /* Compute indirect block info */
-        iblock_nrows = (H5V_log2_gen(hdr->man_dtable.row_block_size[row]) - hdr->man_dtable.first_row_bits) + 1;
-
-        /* Check whether direct block exists yet */
-        if(H5F_addr_defined(child_addr)) {
-            /* Lock child indirect block */
-            /* (also parses it's free space sections) */
-            if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, child_addr, iblock_nrows, iblock, entry, H5AC_WRITE)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
-
-            /* Release the child indirect block */
-            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, child_addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
-        } /* end if */
-        else {
-HDfprintf(stderr, "%s: Creating indirect block from opaque section not supported\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "Creating indirect block from opaque section not supported yet")
-        } /* end else */
-    } /* end else */
-
-    /* Drop reference count on indirect block that free section is in */
-    if(H5HF_iblock_decr(iblock) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
-
-    /* Free section structure */
-    H5FL_FREE(H5HF_free_section_t, old_sec_node);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iblock_alloc_opaque() */
 
 
 /*-------------------------------------------------------------------------
@@ -1447,8 +1491,7 @@ H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     hsize_t block_off, unsigned nrows, unsigned max_rows, haddr_t *addr_p)
 {
     H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
-    size_t curr_row;                    /* Current row within indirect block */
-    size_t u, v;                        /* Local index variable */
+    size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_create)
@@ -1485,7 +1528,6 @@ HDfprintf(stderr, "%s: nrows = %u, max_nrows = %u\n", FUNC, nrows, max_nrows);
     iblock->nrows = nrows;
     iblock->max_rows = max_rows;
     iblock->dirty = TRUE;
-    iblock->fl_gen = hdr->fl_gen;       /* New blocks have their free list generation set up correctly */
 
     /* Compute size of buffer needed for indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
@@ -1495,16 +1537,8 @@ HDfprintf(stderr, "%s: nrows = %u, max_nrows = %u\n", FUNC, nrows, max_nrows);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for block entries")
 
     /* Initialize indirect block entry tables */
-    curr_row = 0;
-    iblock->child_free_space = 0;
-    for(u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); /* u advanced in inner loop */) {
-        for(v = 0; v < hdr->man_dtable.cparam.width; v++, u++) {
-            iblock->ents[u].addr = HADDR_UNDEF;
-            iblock->ents[u].free_space = hdr->man_dtable.row_dblock_free[curr_row];
-            iblock->child_free_space += iblock->ents[u].free_space;
-        } /* end for */
-        curr_row++;
-    } /* end for */
+    for(u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); u++)
+        iblock->ents[u].addr = HADDR_UNDEF;
 
     /* Allocate space for the indirect block on disk */
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
@@ -1524,86 +1558,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_build_sections
- *
- * Purpose:	Build free space sections for child blocks of an indirect block
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Apr 25 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_man_iblock_build_sections(H5HF_indirect_t *iblock)
-{
-    H5HF_free_section_t *sec_node;      /* Pointer to free list section for block */
-    H5HF_hdr_t *hdr;                    /* Heap header info */
-    haddr_t curr_off;                   /* Offset of child block in heap */
-    unsigned row, col;                  /* Current row & column being operated on */
-    unsigned entry;                     /* Currenty entry being worked on */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_build_sections)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(iblock);
-
-    /* Get the heap header pointer (for convenience) */
-    hdr = iblock->hdr;
-
-    /* Set starting offset in heap */
-    curr_off = iblock->block_off;
-
-    /* Create a free space section for each child block of indirect block */
-    entry = 0;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_alloc_size = %Hu\n", FUNC, hdr->man_alloc_size);
-#endif /* QAK */
-    for(row = 0; row < iblock->nrows; row++) {
-        for(col = 0; col < hdr->man_dtable.cparam.width; col++) {
-#ifdef QAK
-HDfprintf(stderr, "%s: curr_off = %a\n", FUNC, curr_off);
-#endif /* QAK */
-            /* Only create free space sections for blocks within the allocated size of the heap */
-            if(curr_off >= hdr->man_alloc_size)
-                break;
-
-            /* Allocate section node */
-            if(NULL == (sec_node = H5FL_MALLOC(H5HF_free_section_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct block free list section")
-
-            /* Set section's information */
-            sec_node->sect_addr = curr_off;
-            sec_node->sect_size = iblock->ents[entry].free_space;
-            sec_node->type = H5HF_SECT_OPAQUE;
-            sec_node->u.opaque.iblock = iblock;
-            sec_node->u.opaque.entry = entry;
-
-            /* Increment reference count on indirect block */
-            if(H5HF_iblock_incr(iblock) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
-
-            /* Add section to free list */
-            if(H5HF_flist_add(hdr->flist, sec_node, &sec_node->sect_size, &sec_node->sect_addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add free space section to global list")
-
-            /* Advance state */
-            curr_off += hdr->man_dtable.row_block_size[row];
-            entry++;
-        } /* end for */
-    } /* end for */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iblock_build_sections() */
 
 
 /*-------------------------------------------------------------------------
@@ -1649,17 +1603,6 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
     /* Protect the indirect block */
     if(NULL == (iblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &iblock_nrows, &par_info, rw)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
-
-    /* Regenerate the free list information for this block, if necessary */
-    /* (Only create free list information if write access is requested) */
-    if(rw == H5AC_WRITE && hdr->fl_gen != iblock->fl_gen) {
-        /* Build the free list sections for the block */
-        if(H5HF_man_iblock_build_sections(iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't build free space sections for block")
-
-        /* Mark the block's free list generation as up to date now */
-        iblock->fl_gen = hdr->fl_gen;
-    } /* end if */
 
     /* Set the return value */
     ret_value = iblock;

@@ -49,6 +49,7 @@
 #define H5E_ARGS             (H5OPEN H5E_ARGS_g)
 #define H5E_ERROR            (H5OPEN H5E_ERROR_g)
 #define H5E_PLINE            (H5OPEN H5E_PLINE_g)
+#define H5E_FSPACE           (H5OPEN H5E_FSPACE_g)
 #define H5E_CACHE            (H5OPEN H5E_CACHE_g)
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
@@ -76,6 +77,7 @@ H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */
 H5_DLLVAR hid_t H5E_ARGS_g;          /* Invalid arguments to routine */
 H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_PLINE_g;         /* Data filters */
+H5_DLLVAR hid_t H5E_FSPACE_g;        /* File Free Space */
 H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 
 /*********************/

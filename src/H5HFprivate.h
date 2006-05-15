@@ -80,13 +80,20 @@ typedef struct H5HF_t H5HF_t;
 /***************************************/
 H5_DLL H5HF_t *H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam);
 H5_DLL H5HF_t *H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
-H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p);
+H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p/*out*/);
 H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr);
 H5_DLL herr_t H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size,
     const void *obj, void *id/*out*/);
+H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, const void *id, size_t *obj_len_p/*out*/);
 H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
-H5_DLL herr_t H5HF_close(H5HF_t *fh);
+H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
+
+/* Debugging routines */
+#ifdef H5HF_DEBUGGING
+H5_DLL herr_t H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth);
+#endif /* H5HF_DEBUGGING */
 
 #endif /* _H5HFprivate_H */
 

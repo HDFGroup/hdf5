@@ -482,6 +482,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "fractal heap headers",
     "fractal heap direct blocks",
     "fractal heap indirect blocks",
+    "free space headers",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

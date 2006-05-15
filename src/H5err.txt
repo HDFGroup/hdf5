@@ -70,6 +70,7 @@ MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
+MAJOR, H5E_FSPACE, File Free Space
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)

@@ -233,7 +233,7 @@ HDfprintf(stderr, "%s: biter->curr->entry = %u\n", FUNC, biter->curr->entry);
 
         /* Release the current indirect block */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
         iblock = NULL;
 
         /* See if the location falls in a direct block row */

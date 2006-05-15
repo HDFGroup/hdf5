@@ -132,3 +132,34 @@ H5HF_get_dblock_free_test(H5HF_t *fh, unsigned row)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dblock_free_test() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_dblock_overhead
+ *
+ * Purpose:	Retrieve the size of direct block overhead
+ *
+ * Return:	Success:	Size of direct block overhead
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, May  9, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5HF_get_dblock_overhead(H5HF_t *fh)
+{
+    size_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_dblock_overhead)
+
+    /* Check arguments. */
+    HDassert(fh);
+
+    /* Return direct block overhead */
+    ret_value = H5HF_MAN_ABS_DIRECT_OVERHEAD(fh->hdr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_get_dblock_overhead() */
+

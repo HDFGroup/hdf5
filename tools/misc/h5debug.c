@@ -24,11 +24,12 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"		/* B-trees				*/
@@ -36,6 +37,7 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
+#include "H5FSpkg.h"		/* File free space			*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5HGprivate.h"	/* Global Heaps				*/
@@ -65,8 +67,6 @@
  *              matzke@llnl.gov
  *              Jul 18 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -82,13 +82,13 @@ main(int argc, char *argv[])
     if(argc == 1) {
 	fprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
 	HDexit(1);
-    }
+    } /* end if */
 
     /* Initialize the library */
     if(H5open() < 0) {
         fprintf(stderr, "cannot initialize the library\n");
         HDexit(1);
-    }
+    } /* end if */
 
     /*
      * Open the file and get the file descriptor.
@@ -96,21 +96,21 @@ main(int argc, char *argv[])
     if((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) {
         fprintf(stderr, "cannot create dataset transfer property list\n");
         HDexit(1);
-    }
+    } /* end if */
     if((fapl = H5Pcreate (H5P_FILE_ACCESS))<0) {
         fprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
-    }
+    } /* end if */
     if(strchr (argv[1], '%'))
 	H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
     if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
-    }
+    } /* end if */
     if(NULL == (f = H5I_object(fid))) {
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
-    }
+    } /* end if */
 
     /*
      * Parse command arguments.
@@ -301,11 +301,33 @@ main(int argc, char *argv[])
         if(extra == 0 || extra2 == 0) {
             fprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump indirect block\n");
             fprintf(stderr, "Fractal heap indirect block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <number of rows>\n");
+            fprintf(stderr, "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
             HDexit(4);
         } /* end if */
 
         status = H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
+
+    } else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, H5FS_SIZEOF_MAGIC)) {
+        /*
+         * Debug a free space header.
+         */
+
+        status = H5FS_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+
+    } else if(!HDmemcmp(sig, H5FS_SECTS_MAGIC, H5FS_SIZEOF_MAGIC)) {
+        /*
+         * Debug free space serialized sections.
+         */
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need free space header address and client address in order to dump serialized sections\n");
+            fprintf(stderr, "Free space serialized sections usage:\n");
+            fprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header address> <client address>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
 
     } else if(sig[0] == H5O_VERSION) {
         /*
@@ -332,18 +354,19 @@ main(int argc, char *argv[])
 
         fprintf(stderr, "unknown signature\n");
         HDexit(4);
-    }
+    } /* end else */
 
+    /* Check for an error when dumping information */
     if(status < 0) {
         fprintf(stderr, "An error occurred!\n");
         H5Eprint(stderr);
         HDexit(5);
-    }
+    } /* end if */
 
     H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);
 
     return 0;
-}
+} /* main() */
 

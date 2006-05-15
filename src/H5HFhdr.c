@@ -46,7 +46,13 @@
  *      need to be larger, the 32-bit limit for H5V_log2_of2(n), and
  *      some offsets/sizes are encoded with a maxiumum of 32-bits  - QAK)
  */
-#define H5HL_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
+#define H5HF_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
+
+/* Limit on the width of the doubling table */
+/* (This is limited to 16-bits currently, because I think it's unlikely to
+ *      need to be larger, and its encoded with a maxiumum of 16-bits  - QAK)
+ */
+#define H5HF_WIDTH_LIMIT (64 * 1024)
 
 /******************/
 /* Local Typedefs */
@@ -66,6 +72,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Declare a free list to manage the H5HF_hdr_t struct */
+H5FL_DEFINE(H5HF_hdr_t);
 
 
 /*****************************/
@@ -191,7 +200,7 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, hsize_t iblock_size)
 herr_t
 H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 {
-    size_t u;                           /* Local index variable */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_finish_init)
@@ -206,17 +215,6 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
     if(H5HF_dtable_init(&hdr->man_dtable) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
-    /* Create the free-list structure for the heap */
-    if(NULL == (hdr->flist = H5HF_flist_create(hdr->man_dtable.cparam.max_index, H5HF_free_section_free_cb)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free list info")
-
-    /* Start the free list "generation" count */
-    /* (Must be "out of sync" with starting value for indirect & direct block
-     * cache loading routines, in order to trigger re-building the free list
-     * information for each block when a heap is opened->closed->reopened -QAK)
-     */
-    hdr->fl_gen = 1;
-
     /* Set the size of heap IDs */
     hdr->id_len = hdr->heap_off_size + MIN(hdr->man_dtable.max_dir_blk_off_size,
         ((H5V_log2_gen((hsize_t)hdr->standalone_size) + 7) / 8));
@@ -225,8 +223,7 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
     for(u = 0; u < hdr->man_dtable.max_root_rows; u++) {
         if(u < hdr->man_dtable.max_direct_rows)
             hdr->man_dtable.row_dblock_free[u] = hdr->man_dtable.row_block_size[u] -
-                (H5HF_MAN_ABS_DIRECT_OVERHEAD_SIZE(hdr, hdr->man_dtable.row_block_size[u])
-                    + H5HF_MAN_ABS_DIRECT_OBJ_PREFIX_LEN(hdr));
+                    H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
         else
             hdr->man_dtable.row_dblock_free[u] = H5HF_hdr_compute_free_space(hdr, hdr->man_dtable.row_block_size[u]);
 #ifdef QAK
@@ -273,17 +270,28 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
 
 #ifndef NDEBUG
     /* Check for valid parameters */
-    if(!POWER_OF_TWO(cparam->managed.width) || cparam->managed.width == 0)
+    if(cparam->managed.width == 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width must be greater than zero")
+    if(cparam->managed.width > H5HF_WIDTH_LIMIT)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width too large")
+    if(!POWER_OF_TWO(cparam->managed.width))
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width not power of two")
-    if(!POWER_OF_TWO(cparam->managed.start_block_size) || cparam->managed.start_block_size == 0)
+    if(cparam->managed.start_block_size == 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size must be greater than zero")
+    if(!POWER_OF_TWO(cparam->managed.start_block_size))
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size not power of two")
-    if(!POWER_OF_TWO(cparam->managed.max_direct_size) ||
-            (cparam->managed.max_direct_size == 0 || cparam->managed.max_direct_size > H5HL_MAX_DIRECT_SIZE_LIMIT))
+    if(cparam->managed.max_direct_size == 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size must be greater than zero")
+    if(cparam->managed.max_direct_size > H5HF_MAX_DIRECT_SIZE_LIMIT)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size too large")
+    if(!POWER_OF_TWO(cparam->managed.max_direct_size))
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
     if(cparam->managed.max_direct_size < cparam->standalone_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
-    if(cparam->managed.max_index > (8 * hdr->sizeof_size) || cparam->managed.max_index == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
+    if(cparam->managed.max_index == 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size must be greater than zero")
+    if(cparam->managed.max_index > (8 * hdr->sizeof_size))
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size too large for file")
 #endif /* NDEBUG */
 
     /* Set the creation parameters for the heap */
@@ -292,11 +300,11 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
     hdr->standalone_size = cparam->standalone_size;
     HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
-    /* Set root table address */
+    /* Set root table address to indicate that the heap is empty currently */
     hdr->man_dtable.table_addr = HADDR_UNDEF;
 
-    /* Newly created heap's free list is always in sync in memory */
-    hdr->freelist_sync = TRUE;
+    /* Set free list header address to indicate that the heap is empty currently */
+    hdr->fs_addr = HADDR_UNDEF;
 
     /* Note that the shared info is dirty (it's not written to the file yet) */
     hdr->dirty = TRUE;
@@ -425,6 +433,50 @@ HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_adj_free
+ *
+ * Purpose:	Adjust the free space for a heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May  9 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_adj_free)
+#ifdef QAK
+HDfprintf(stderr, "%s: amt = %Zd\n", FUNC, amt);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Update heap header */
+    HDassert(amt > 0 || hdr->total_man_free >= (hsize_t)-amt);
+    hdr->total_man_free += amt;
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
+#endif /* QAK */
+
+    /* Mark heap header as modified */
+    if(H5HF_hdr_dirty(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_adj_free() */
 
 
 /*-------------------------------------------------------------------------
