@@ -22,6 +22,7 @@ int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
 #define token(x)        (int)x
+#define YY_BUF_SIZE        262144    /*Define read buffer to be 256K*/
 extern char *myinput;
 extern int  input_len;
 
