@@ -423,6 +423,11 @@ New Features
 
     High-Level APIs:
     ------
+        - There are two new functions in the Lite library, H5LTtext_to_dtype
+            and H5LTdtype_to_text.  H5LTtext_to_dtype creates a HDF5 data type
+            given a text description; H5LTdtype_to_text converts a data type
+            to text description.  Only DDL definition is supported as text 
+            desciption now. SLU - 2006/05/17
         - Added Packet Table API for creating tables with less overhead than
             H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
             JML - 2004/03/28
