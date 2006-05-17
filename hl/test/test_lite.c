@@ -19,6 +19,7 @@
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"
+#define INPUT_FILE "dtype_file.txt"
 
 #define DSET0_NAME "2D int array"
 #define DSET1_NAME "dataset char"
@@ -42,6 +43,9 @@
 #define ATTR9_NAME "attr ulong"
 #define ATTR10_NAME "attr float"
 #define ATTR11_NAME "attr double"
+
+/*Initial input buffer size for testing H5LTtext_to_dtype()*/
+#define BUF_SIZE 1024
 
 static herr_t make_attributes( hid_t loc_id, const char* obj_name );
 
@@ -1513,6 +1517,87 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test_complicated_compound().
+ *-------------------------------------------------------------------------
+ */
+static int test_complicated_compound(void)
+{
+    hid_t   dtype;
+    int     nmembs;
+    H5T_class_t type_class;
+    size_t  str_len;
+    char*   line=NULL;
+    FILE    *fp;
+    int     size = 1024;
+    char    *srcdir = getenv("srcdir"); /* the source directory */
+    char    filename[1024]="";
+    
+    TESTING3("        text for complicated compound types");
+
+    /* compose the name of the file to open, using the srcdir, if appropriate */
+    if(srcdir)
+    {
+      strcpy(filename, srcdir);
+      strcat(filename, "/");
+    }
+    strcat(filename, INPUT_FILE);
+
+    /* Open input file */
+    fp = fopen(filename, "r");
+    if(fp == NULL)
+    {
+       printf( "Could not find file %s. Try set $srcdir \n", filename);
+       goto out;
+    }
+
+    /* This part reads in the input as a string in a slow manner.  GNU C 
+     * Library has convenient function getline() but isn't available on 
+     * all machines.
+     */
+    if((line = (char*)calloc(size, sizeof(char)))==NULL)
+        goto out;
+    if(fgets(line, size, fp)==NULL)
+        goto out;
+    while(strlen(line)==size-1) {
+        size *= 2;
+        if(line)
+            free(line);
+        if((line = (char*)calloc(size, sizeof(char)))==NULL)
+            goto out;
+        if(fseek(fp, 0L, SEEK_SET)!=0)
+            goto out;
+        if(fgets(line, size, fp)==NULL)
+            goto out;
+    }
+
+    fclose(fp);
+
+    if((dtype = H5LTtext_to_dtype(line, H5LT_DDL))<0)
+        goto out;
+   
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    /* There should be 101 compound members */ 
+    if((nmembs = H5Tget_nmembers(dtype))<0)
+        goto out;
+    if(nmembs != 101)
+        goto out;
+
+    if(line)
+        free(line);
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * test H5LTtext_to_dtype function
  *-------------------------------------------------------------------------
  */
@@ -1542,6 +1627,9 @@ static int test_text_dtype(void)
         goto out;
  
     if(test_compounds()<0)
+        goto out;
+    
+    if(test_complicated_compound()<0)
         goto out;
 
     return 0;
