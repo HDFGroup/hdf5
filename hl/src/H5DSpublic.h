@@ -15,6 +15,14 @@
 #ifndef _H5DSpublic_H
 #define _H5DSpublic_H
 
+
+
+#define DIMENSION_SCALE_CLASS "DIMENSION_SCALE"
+#define DIMENSION_LIST        "DIMENSION_LIST"
+#define REFERENCE_LIST        "REFERENCE_LIST"
+#define DIMENSION_LABELS      "DIMENSION_LABELS"
+
+
 typedef herr_t  (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 
 

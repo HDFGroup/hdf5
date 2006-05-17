@@ -346,6 +346,20 @@ H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    unsigned char *src_buf,
                    unsigned char *dst_buf );
 
+
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Utility functions
+ *
+ *-------------------------------------------------------------------------
+ */
+
+H5_HLDLL herr_t  H5LTfind_attribute( hid_t loc_id, const char *name );
+
+
+
 #ifdef __cplusplus
 }
 #endif

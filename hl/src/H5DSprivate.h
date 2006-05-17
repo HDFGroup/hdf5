@@ -22,11 +22,6 @@
 #include "H5DSpublic.h"
 
 
-#define DIMENSION_SCALE_CLASS "DIMENSION_SCALE"
-#define DIMENSION_LIST        "DIMENSION_LIST"
-#define REFERENCE_LIST        "REFERENCE_LIST"
-#define DIMENSION_LABELS      "DIMENSION_LABELS"
-
 
 
 /* attribute type of a DS dataset */

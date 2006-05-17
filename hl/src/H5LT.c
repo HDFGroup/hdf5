@@ -1754,6 +1754,29 @@ static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5LTfind_attribute
+ *
+ * Purpose: Inquires if an attribute named attr_name exists attached to 
+ *          the object loc_id.
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 17, 2006
+ *
+ * Comments:
+ *  Calls the private version of the function
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
+{
+ return H5LT_find_attribute(loc_id,attr_name);
+}
+
+
+
+/*-------------------------------------------------------------------------
  * Function: H5LT_find_attribute
  *
  * Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
