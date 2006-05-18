@@ -642,7 +642,7 @@ HDfprintf(stderr, "%s: fspace->hdr->alloc_sect_size = %Hu\n", FUNC, fspace->hdr-
         /* Compute new size */
         new_size = fspace->hdr->alloc_sect_size;
         while(new_size < fspace->hdr->sect_size)
-            new_size *= (double)fspace->hdr->expand_percent / 100.0;
+            new_size *= (float)fspace->hdr->expand_percent / (float)100.0;
         fspace->hdr->alloc_sect_size = new_size;
 
         /* Allocate space for the new indirect block on disk */
@@ -696,7 +696,7 @@ H5FS_sect_decrease(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
     fspace->hdr->sect_size = H5FS_serialize_size(fspace);
 
     /* Compute the threshold for decreasing the sections' serialized size */
-    decrease_threshold = (fspace->hdr->alloc_sect_size * (double)fspace->hdr->shrink_percent) / 100.0;
+    decrease_threshold = (fspace->hdr->alloc_sect_size * (float)fspace->hdr->shrink_percent) / (float)100.0;
 
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->hdr->sect_size = %Hu\n", FUNC, fspace->hdr->sect_size);
@@ -721,7 +721,7 @@ HDfprintf(stderr, "%s: fspace->hdr->alloc_sect_size = %Hu\n", FUNC, fspace->hdr-
         while(fspace->hdr->sect_size < decrease_threshold) {
             new_size = decrease_threshold;
 
-            decrease_threshold *= (double)fspace->hdr->shrink_percent / 100.0;
+            decrease_threshold *= (float)fspace->hdr->shrink_percent / (float)100.0;
         } /* end while */
         if(new_size < H5FS_SECT_SIZE_DEFAULT)
             new_size = H5FS_SECT_SIZE_DEFAULT;
