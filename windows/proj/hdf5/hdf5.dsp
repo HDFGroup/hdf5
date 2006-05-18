@@ -804,6 +804,51 @@ SOURCE=..\..\..\src\H5FO.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5FS.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5FScache.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5FSdbg.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Fsfile.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1082,21 +1127,6 @@ SOURCE=..\..\..\src\H5HFdtable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5HFflist.c
-
-!IF  "$(CFG)" == "hdf5 - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\H5HFhdr.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1143,6 +1173,36 @@ SOURCE=..\..\..\src\H5HFint.c
 # Begin Source File
 
 SOURCE=..\..\..\src\H5HFiter.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFsection.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5HFspace.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
