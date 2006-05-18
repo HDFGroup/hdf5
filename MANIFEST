@@ -1332,6 +1332,7 @@
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
 ./hl/test/usa.wri
+./hl/test/dtype_file.txt
 ./hl/tools/Makefile.am
 ./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Makefile.am
