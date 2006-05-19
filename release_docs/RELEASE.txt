@@ -45,6 +45,8 @@ New Features
 
     Configuration:
     --------------
+	- Configure can now use any tr command.  No more need for
+	  defining variable TR nor is it supported. -AKC 2006/05/19
         - Remove the flexible parallel code and the --enable-fphdf5
           configure option, it was never up to production standards
           anyway.  -QAK 2006/4/20

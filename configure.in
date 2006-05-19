@@ -112,25 +112,16 @@ set >&AS_MESSAGE_LOG_FD
 AC_MSG_RESULT([done])
 
 dnl ----------------------------------------------------------------------
-dnl Some platforms have broken tr, basename, and/or xargs programs. Check
+dnl Some platforms have broken basename, and/or xargs programs. Check
 dnl that it actually does what it's supposed to do. Catch this early
-dnl since configure relies upon tr heavily and there's no use continuing
+dnl since configure relies upon them heavily and there's no use continuing
 dnl if it's broken.
 dnl
 
-dnl If the TR variable is set, use it as tr.
-AC_SUBST([TR])
-if test "X${TR}" = "X"; then
-  TR=tr
-fi
-
-AC_MSG_CHECKING([if tr works])
-TR_TEST="`echo Test | ${TR} 'a-z,' 'A-Z '`"
-if test "X${TR_TEST}" != "XTEST"; then
-  AC_MSG_ERROR([tr program ${TR} doesn't work])
-else
-  AC_MSG_RESULT([yes])
-fi
+dnl Avoid depending upon Character Ranges.
+dnl These are defined by autoconf.
+dnl as_cr_letters='abcdefghijklmnopqrstuvwxyz'
+dnl as_cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 AC_MSG_CHECKING([if basename works])
 BASENAME_TEST="`basename /foo/bar/baz/qux/basename_works`"
@@ -1781,7 +1772,7 @@ case "X-$DEBUG_PKG" in
 esac
 
 if test -n "$DEBUG_PKG"; then
-  for pkg in `echo $DEBUG_PKG | ${TR} 'a-z,' 'A-Z '`; do
+  for pkg in `echo $DEBUG_PKG | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
     H5_CPPFLAGS="$H5_CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
@@ -1962,7 +1953,7 @@ case "$CC_BASENAME" in
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | ${TR} : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1993,7 +1984,7 @@ case "$CC_BASENAME" in
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | ${TR} : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -2051,7 +2042,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       if (echo $cmd |grep / >/dev/null); then
         path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
       else
-        for path in `echo $PATH |tr : ' '`; do
+        for path in `echo $PATH | tr : ' '`; do
           if test -x $path/$cmd; then
             break;
           fi
@@ -2425,7 +2416,7 @@ case "X-$FILTERS" in
 esac
 
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | ${TR} 'a-z,' 'A-Z '`; do
+  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
     dnl ------------------------------------------------------------------
     dnl Have to use separate 'if' construct for each filter, so that
     dnl autoheader can detect the AC_DEFINE for each one...
