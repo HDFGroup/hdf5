@@ -1316,6 +1316,7 @@
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
+./hl/test/dtype_file.txt
 ./hl/test/earth.pal
 ./hl/test/h5hltest.h
 ./hl/test/image8.txt
