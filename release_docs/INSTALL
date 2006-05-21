@@ -334,8 +334,8 @@
 	    $ MAKE=gmake ./configure
 	    $ gmake
 
-	The `AR', 'TR', and `RANLIB' variables can also be set to the names
-	of the `ar', 'tr', and `ranlib' (or `:') commands to override values
+	The `AR' and `RANLIB' variables can also be set to the names of
+	the `ar' and `ranlib' (or `:') commands to override values
 	detected by configure.
 
 	The HDF5 library, include files, and utilities are installed

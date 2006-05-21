@@ -9798,8 +9798,9 @@ echo "${ECHO_T}$FILTERS" >&6
     ;;
 esac
 
+
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
     if test $filter = "SHUFFLE"; then
 
 cat >>confdefs.h <<\_ACEOF

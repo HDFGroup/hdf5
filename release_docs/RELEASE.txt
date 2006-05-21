@@ -78,6 +78,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Configuration
     -------------
+	- Configure can now use any tr command.  No more need for
+	  defining variable TR nor is it supported. -AKC 2006/05/20
 
     Performance
     -------------

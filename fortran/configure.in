@@ -743,8 +743,13 @@ case "X-$FILTERS" in
     ;;
 esac
 
+dnl Avoid depending upon Character Ranges.
+dnl These are defined by autoconf.
+dnl as_cr_letters='abcdefghijklmnopqrstuvwxyz'
+dnl as_cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
 dnl ----------------------------------------------------------------------
 dnl Have to use separate 'if' construct for each filter, so that autoheader
 dnl can detect the AC_DEFINE for each one...
