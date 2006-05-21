@@ -45,8 +45,6 @@ New Features
 
     Configuration:
     --------------
-	- Configure can now use any tr command.  No more need for
-	  defining variable TR nor is it supported. -AKC 2006/05/19
         - Remove the flexible parallel code and the --enable-fphdf5
           configure option, it was never up to production standards
           anyway.  -QAK 2006/4/20
@@ -712,6 +710,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Configuration
     -------------
+	- Configure can now use any tr command.  No more need for
+	  defining variable TR nor is it supported. -AKC 2006/05/19
         - Parallel I/O with the MPI-I/O driver will no longer work if the
             filesystem is not POSIX compliant.  The "HDF5_MPI_1_METAWRITE"
             environment variable has been removed.  QAK - 2004/01/30
