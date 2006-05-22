@@ -77,7 +77,7 @@ H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */
 H5_DLLVAR hid_t H5E_ARGS_g;          /* Invalid arguments to routine */
 H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_PLINE_g;         /* Data filters */
-H5_DLLVAR hid_t H5E_FSPACE_g;        /* File Free Space */
+H5_DLLVAR hid_t H5E_FSPACE_g;        /* Free Space Manager */
 H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 
 /*********************/
@@ -141,6 +141,14 @@ H5_DLLVAR hid_t H5E_CANTRELEASE_g;   /* Unable to release object */
 H5_DLLVAR hid_t H5E_CANTGET_g;       /* Can't get value */
 H5_DLLVAR hid_t H5E_CANTSET_g;       /* Can't set value */
 H5_DLLVAR hid_t H5E_DUPCLASS_g;      /* Duplicate class name in parent class */
+
+/* Free space errors */
+#define H5E_CANTMERGE        (H5OPEN H5E_CANTMERGE_g)
+#define H5E_CANTREVIVE       (H5OPEN H5E_CANTREVIVE_g)
+#define H5E_CANTSHRINK       (H5OPEN H5E_CANTSHRINK_g)
+H5_DLLVAR hid_t H5E_CANTMERGE_g;     /* Can't merge objects */
+H5_DLLVAR hid_t H5E_CANTREVIVE_g;    /* Can't revive object */
+H5_DLLVAR hid_t H5E_CANTSHRINK_g;    /* Can't shrink container */
 
 /* Object header related errors */
 #define H5E_LINKCOUNT        (H5OPEN H5E_LINKCOUNT_g)
@@ -289,6 +297,7 @@ H5_DLLVAR hid_t H5E_CANTCOMPARE_g;   /* Can't compare objects */
 #define H5E_CANTINSERT       (H5OPEN H5E_CANTINSERT_g)
 #define H5E_CANTLIST         (H5OPEN H5E_CANTLIST_g)
 #define H5E_CANTMODIFY       (H5OPEN H5E_CANTMODIFY_g)
+#define H5E_CANTREMOVE       (H5OPEN H5E_CANTREMOVE_g)
 H5_DLLVAR hid_t H5E_NOTFOUND_g;      /* Object not found */
 H5_DLLVAR hid_t H5E_EXISTS_g;        /* Object already exists */
 H5_DLLVAR hid_t H5E_CANTENCODE_g;    /* Unable to encode value */
@@ -299,6 +308,7 @@ H5_DLLVAR hid_t H5E_CANTSWAP_g;      /* Unable to swap records */
 H5_DLLVAR hid_t H5E_CANTINSERT_g;    /* Unable to insert object */
 H5_DLLVAR hid_t H5E_CANTLIST_g;      /* Unable to list node */
 H5_DLLVAR hid_t H5E_CANTMODIFY_g;    /* Unable to modify record */
+H5_DLLVAR hid_t H5E_CANTREMOVE_g;    /* Unable to remove object */
 
 /* Argument errors */
 #define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)

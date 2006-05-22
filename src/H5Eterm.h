@@ -87,6 +87,11 @@ H5E_CANTGET_g=
 H5E_CANTSET_g=    
 H5E_DUPCLASS_g=
 
+/* Free space errors */    
+H5E_CANTMERGE_g=    
+H5E_CANTREVIVE_g=    
+H5E_CANTSHRINK_g=
+
 /* Object header related errors */    
 H5E_LINKCOUNT_g=    
 H5E_VERSION_g=    
@@ -175,7 +180,8 @@ H5E_CANTREDISTRIBUTE_g=
 H5E_CANTSWAP_g=    
 H5E_CANTINSERT_g=    
 H5E_CANTLIST_g=    
-H5E_CANTMODIFY_g=
+H5E_CANTMODIFY_g=    
+H5E_CANTREMOVE_g=
 
 /* Argument errors */    
 H5E_UNINITIALIZED_g=    

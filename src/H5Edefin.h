@@ -46,7 +46,7 @@ hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */
 hid_t H5E_ARGS_g           = FAIL;      /* Invalid arguments to routine */
 hid_t H5E_ERROR_g          = FAIL;      /* Error API */
 hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
-hid_t H5E_FSPACE_g         = FAIL;      /* File Free Space */
+hid_t H5E_FSPACE_g         = FAIL;      /* Free Space Manager */
 hid_t H5E_CACHE_g          = FAIL;      /* Object cache */
 
 /* Minor error IDs */
@@ -84,6 +84,11 @@ hid_t H5E_CANTRELEASE_g    = FAIL;      /* Unable to release object */
 hid_t H5E_CANTGET_g        = FAIL;      /* Can't get value */
 hid_t H5E_CANTSET_g        = FAIL;      /* Can't set value */
 hid_t H5E_DUPCLASS_g       = FAIL;      /* Duplicate class name in parent class */
+
+/* Free space errors */
+hid_t H5E_CANTMERGE_g      = FAIL;      /* Can't merge objects */
+hid_t H5E_CANTREVIVE_g     = FAIL;      /* Can't revive object */
+hid_t H5E_CANTSHRINK_g     = FAIL;      /* Can't shrink container */
 
 /* Object header related errors */
 hid_t H5E_LINKCOUNT_g      = FAIL;      /* Bad object header link count */
@@ -174,6 +179,7 @@ hid_t H5E_CANTSWAP_g       = FAIL;      /* Unable to swap records */
 hid_t H5E_CANTINSERT_g     = FAIL;      /* Unable to insert object */
 hid_t H5E_CANTLIST_g       = FAIL;      /* Unable to list node */
 hid_t H5E_CANTMODIFY_g     = FAIL;      /* Unable to modify record */
+hid_t H5E_CANTREMOVE_g     = FAIL;      /* Unable to remove object */
 
 /* Argument errors */
 hid_t H5E_UNINITIALIZED_g  = FAIL;      /* Information is uinitialized */

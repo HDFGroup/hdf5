@@ -127,7 +127,7 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
     if(H5F_addr_defined(hdr->fs_addr)) {
         /* Open an existing free space structure for the heap */
         if(NULL == (hdr->fspace = H5FS_open(hdr->f, dxpl_id, hdr->fs_addr,
-                H5HF_free_section_free_cb, hdr->nsect_classes, hdr->sect_cls, hdr)))
+                hdr->nsect_classes, hdr->sect_cls, hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
     } /* end if */
     else {
@@ -142,8 +142,7 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
 
         /* Create the free space structure for the heap */
         if(NULL == (hdr->fspace = H5FS_create(hdr->f, dxpl_id, &hdr->fs_addr,
-                &fs_create, H5HF_free_section_free_cb,
-                hdr->nsect_classes, hdr->sect_cls, hdr)))
+                &fs_create, hdr->nsect_classes, hdr->sect_cls, hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
     } /* end else */
 
@@ -233,12 +232,60 @@ H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
     HDassert(hdr->fspace);
 
     /* Add to the free space for the heap */
-    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node) < 0)
+    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, 0, NULL) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_space_add() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_return
+ *
+ * Purpose:	Return a freedsection to the free space for the heap
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 15 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_return(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
+{
+    H5HF_add_ud1_t udata;               /* User data for free space manager 'add' */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_return)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(node);
+
+    /* Check if the free space for the heap has been initialized */
+    if(!hdr->fspace_open)
+        if(H5HF_space_start(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
+
+    /* Construct user data */
+    udata.hdr = hdr;
+    udata.dxpl_id = dxpl_id;
+    udata.dblock = NULL;
+
+    /* Add to the free space for the heap */
+    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_return() */
 
 
 /*-------------------------------------------------------------------------

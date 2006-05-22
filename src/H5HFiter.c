@@ -436,7 +436,7 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
         biter->curr->row = biter->curr->entry / hdr->man_dtable.cparam.width;
         biter->curr->col = biter->curr->entry % hdr->man_dtable.cparam.width;
     } /* end else */
-    HDassert(biter->curr->row <= biter->curr->context->nrows);
+/*    HDassert(biter->curr->row <= biter->curr->context->nrows); */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_man_iter_next() */

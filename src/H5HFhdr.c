@@ -216,8 +216,9 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
     /* Set the size of heap IDs */
-    hdr->id_len = hdr->heap_off_size + MIN(hdr->man_dtable.max_dir_blk_off_size,
-        ((H5V_log2_gen((hsize_t)hdr->standalone_size) + 7) / 8));
+    hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
+            ((H5V_log2_gen((hsize_t)hdr->standalone_size) + 7) / 8));
+    hdr->id_len = hdr->heap_off_size + hdr->heap_len_size;
 
     /* Set the free space in direct blocks */
     for(u = 0; u < hdr->man_dtable.max_root_rows; u++) {
@@ -554,4 +555,50 @@ HDfprintf(stderr, "%s: hdr->man_alloc_size = %Hu\n", FUNC, hdr->man_alloc_size);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_inc_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_empty
+ *
+ * Purpose:	Reset heap header to 'empty heap' state
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 17 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_empty(H5HF_hdr_t *hdr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_empty)
+#ifdef QAK
+HDfprintf(stderr, "%s: Reseting heap header to empty\n", FUNC);
+#endif /* QAK */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Reset root pointer information */
+    hdr->man_dtable.curr_root_rows = 0;
+    hdr->man_dtable.table_addr = HADDR_UNDEF;
+
+    /* Shrink heap size */
+    hdr->total_size = hdr->std_size;
+    hdr->man_size = 0;
+
+    /* Reset the free space in direct blocks */
+    hdr->total_man_free = 0;
+
+    /* Mark heap header as modified */
+    if(H5HF_hdr_dirty(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark header as dirty")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_empty() */
 

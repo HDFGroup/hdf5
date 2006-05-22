@@ -376,6 +376,9 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not su
     } /* end else */
 
 done:
+#ifdef QAK
+HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
+#endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_insert() */
 
@@ -411,7 +414,7 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     id += fh->hdr->heap_off_size;
 
     /* Retrieve the entry length */
-    UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->id_len);
+    UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->heap_len_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_get_obj_len() */
@@ -452,8 +455,7 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
     hdr = fh->hdr;
 
     /* Decode the object offset within the heap & it's length */
-    UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
-    UINT64DECODE_VAR(id, obj_len, hdr->id_len);
+    H5HF_ID_DECODE(id, hdr, obj_off, obj_len);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
 #endif /* QAK */
@@ -465,12 +467,70 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
     else {
         /* Read object from managed heap blocks */
         if(H5HF_man_read(hdr, dxpl_id, obj_off, obj_len, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't read object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_remove
+ *
+ * Purpose:	Remove an object from a fractal heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 15 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    hsize_t obj_off;                    /* Object's offset in heap */
+    size_t obj_len;                     /* Object's length in heap */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5HF_remove, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(fh->hdr);
+    HDassert(id);
+
+    /* Decode the object offset within the heap & it's length */
+#ifdef QAK
+HDfprintf(stderr, "%s: fh->hdr->heap_off_size = %u, fh->hdr->heap_len_size = %u\n", FUNC, (unsigned)fh->hdr->heap_off_size, (unsigned)fh->hdr->heap_len_size);
+#endif /* QAK */
+    H5HF_ID_DECODE(id, fh->hdr, obj_off, obj_len);
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
+#endif /* QAK */
+
+    /* Sanity check parameters */
+    HDassert(obj_off);
+    HDassert(obj_len);
+
+    /* Check for standalone object */
+    if(obj_off & 0) {
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
+    } /* end if */
+    else {
+        /* Remove object from managed heap blocks */
+        if(H5HF_man_remove(fh->hdr, dxpl_id, obj_off, obj_len) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from fractal heap")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_remove() */
 
 
 /*-------------------------------------------------------------------------

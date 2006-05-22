@@ -70,7 +70,7 @@ MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
-MAJOR, H5E_FSPACE, File Free Space
+MAJOR, H5E_FSPACE, Free Space Manager
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
@@ -89,6 +89,7 @@ SECTION, DSPACE, Dataspace errors
 SECTION, PLIST, Property list errors
 SECTION, MPI, Parallel MPI errors
 SECTION, HEAP, Heap errors
+SECTION, FSPACE, Free space errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, NONE, No error
@@ -172,6 +173,7 @@ MINOR, BTREE, H5E_CANTSWAP, Unable to swap records
 MINOR, BTREE, H5E_CANTINSERT, Unable to insert object
 MINOR, BTREE, H5E_CANTLIST, Unable to list node
 MINOR, BTREE, H5E_CANTMODIFY, Unable to modify record
+MINOR, BTREE, H5E_CANTREMOVE, Unable to remove object
 
 # Object header related errors
 MINOR, OHDR, H5E_LINKCOUNT, Bad object header link count
@@ -216,6 +218,11 @@ MINOR, MPI, H5E_CANTRECV, Can't receive data
 MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
 MINOR, HEAP, H5E_CANTCOMPUTE, Can't compute value
 MINOR, HEAP, H5E_CANTEXTEND, Can't extend heap's space
+
+# Free space manager errors
+MINOR, FSPACE, H5E_CANTMERGE, Can't merge objects
+MINOR, FSPACE, H5E_CANTREVIVE, Can't revive object
+MINOR, FSPACE, H5E_CANTSHRINK, Can't shrink container
 
 # I/O pipeline errors
 MINOR, PIPELINE, H5E_NOFILTER, Requested filter is not available

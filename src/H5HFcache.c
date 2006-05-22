@@ -698,12 +698,13 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
     HDassert(dblock);
 
     if(dblock->cache_info.is_dirty) {
-        H5HF_hdr_t *hdr;            /* Shared fractal heap information */
+        H5HF_hdr_t *hdr;        /* Shared fractal heap information */
         uint8_t *p;             /* Pointer into raw data buffer */
 
         /* Get the pointer to the shared heap header */
         hdr = dblock->hdr;
 
+        HDassert(dblock->blk);
         p = dblock->blk;
 
         /* Magic number */

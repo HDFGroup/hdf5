@@ -95,7 +95,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
     unsigned par_entry, size_t block_size, hsize_t block_off, haddr_t *addr_p,
     H5HF_free_section_t **ret_sec_node)
 {
-    H5HF_free_section_t *sec_node; /* Pointer to free list section for block */
+    H5HF_free_section_t *sec_node; /* Pointer to free space section for block */
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block */
     size_t free_space;                  /* Free space in new block */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -173,7 +173,7 @@ HDmemset(dblock->blk, 0, dblock->size);
         /* Pass back the pointer to the section instead of adding it to the free list */
         *ret_sec_node = sec_node;
     else {
-        /* Add new free space to the global list of space */
+        /* Add new free space to the heap's list of space */
         if(H5HF_space_add(hdr, dxpl_id, sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
     } /* end else */
@@ -189,6 +189,77 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_dblock_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_dblock_destroy
+ *
+ * Purpose:	Destroy a managed direct block
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 17 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
+    haddr_t dblock_addr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_destroy)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(dblock);
+
+    /* Check for root direct block */
+    if(hdr->man_dtable.curr_root_rows == 0) {
+#ifdef QAK
+HDfprintf(stderr, "%s: root direct block\n", FUNC);
+#endif /* QAK */
+        /* Sanity check */
+        HDassert(hdr->man_dtable.table_addr == dblock_addr);
+        HDassert(hdr->man_dtable.cparam.start_block_size == dblock->size);
+
+        /* Sanity check block iterator */
+        HDassert(!H5HF_man_iter_ready(&hdr->next_block));
+
+        /* Reset header information back to "empty heap" state */
+        if(H5HF_hdr_empty(hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty")
+    } /* end if */
+    else {
+#ifdef QAK
+HDfprintf(stderr, "%s: root indirect block\n", FUNC);
+#endif /* QAK */
+
+/* Remove from parent indirect block */
+
+/* If this is the last block in the heap, move block iterator backwards */
+
+/* Detect the last direct block (of the starting block size) and make it the root direct block */
+
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "destroying non-root direct block not supported yet")
+    } /* end else */
+
+    /* Release direct block's disk space */
+    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, (hsize_t)dblock->size)<0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+
+    /* Remove direct block from metadata cache */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__DELETED_FLAG) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+    dblock = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_dblock_destroy() */
 
 
 /*-------------------------------------------------------------------------

@@ -38,6 +38,17 @@
 /* Library Private Macros */
 /**************************/
 
+/* Flags for H5FS_add() */
+#define H5FS_ADD_DESERIALIZING  0x01    /* Free space is being deserialized
+                                         *      (for package use only)
+                                         */
+#define H5FS_ADD_RETURNED_SPACE 0x02    /* Section was previously allocated
+                                         *      and is being returned to the
+                                         *      free space manager (usually
+                                         *      as a result of freeing an
+                                         *      object)
+                                         */
+
 
 /****************************/
 /* Library Private Typedefs */
@@ -51,12 +62,23 @@ typedef struct H5FS_section_info_t H5FS_section_info_t;
 
 /* Free space section class info */
 typedef struct H5FS_section_class_t {
-    unsigned type;                              /* Type of free space section */
+    /* Class variables */
+    const unsigned type;                        /* Type of free space section */
     size_t serial_size;                         /* Size of serialized form of section */
-    herr_t (*init)(struct H5FS_section_class_t *, const void *);          /* Routine to initialize class-specific settings */
-    herr_t (*serialize)(const H5FS_section_info_t *, uint8_t *);     /* Routine to serialize a "live" section into a buffer */
+
+    /* Class methods */
+    herr_t (*init_cls)(struct H5FS_section_class_t *, const void *);    /* Routine to initialize class-specific settings */
+
+    /* Object methods */
+    herr_t (*serialize)(const H5FS_section_info_t *, uint8_t *);        /* Routine to serialize a "live" section into a buffer */
     herr_t (*deserialize)(struct H5FS_section_class_t *cls, const uint8_t *,
             haddr_t, hsize_t, H5FS_section_info_t **);  /* Routine to deserialize a buffer into a "live" section */
+    htri_t (*can_merge)(const H5FS_section_info_t *, const H5FS_section_info_t *,
+            void *);     /* Routine to determine if two nodes are mergable */
+    herr_t (*merge)(H5FS_section_info_t *, H5FS_section_info_t *, void *);      /* Routine to merge two nodes */
+    htri_t (*can_shrink)(H5FS_section_info_t *, void *);     /* Routine to determine if node can shrink container */
+    herr_t (*shrink)(H5FS_section_info_t **, void *);   /* Routine to shrink container */
+    herr_t (*free)(H5FS_section_info_t *);      /* Routine to free node */
     herr_t (*debug)(const H5FS_section_info_t *, FILE *,
             int , int );                                /* Routine to dump debugging information about a section */
 } H5FS_section_class_t;
@@ -105,13 +127,14 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr,
-    const H5FS_create_t *fs_create, H5SL_operator_t node_free_op,
-    size_t nclasses, H5FS_section_class_t *classes, const void *cls_init_udata);
-H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
-    H5SL_operator_t node_free_op, size_t nclasses,
+    const H5FS_create_t *fs_create, size_t nclasses,
     H5FS_section_class_t *classes, const void *cls_init_udata);
-H5_DLL herr_t H5FS_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t *node);
-H5_DLL htri_t H5FS_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node);
+H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
+    size_t nclasses, H5FS_section_class_t *classes, const void *cls_init_udata);
+H5_DLL herr_t H5FS_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    H5FS_section_info_t *node, unsigned flags, void *op_data);
+H5_DLL htri_t H5FS_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    hsize_t request, H5FS_section_info_t **node);
 H5_DLL herr_t H5FS_iterate(H5FS_t *fspace, H5FS_operator_t op, void *op_data);
 H5_DLL herr_t H5FS_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);

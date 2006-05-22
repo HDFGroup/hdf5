@@ -90,6 +90,7 @@ typedef struct H5F_t H5F_t;
    int64_t _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
+									      \
    for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)			      \
       *_p++ = (uint8_t)(_n & 0xff);					      \
    for (/*void*/; _i < 8; _i++)						      \
@@ -101,6 +102,7 @@ typedef struct H5F_t H5F_t;
    uint64_t _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
+									      \
    for (_i = 0; _i < sizeof(uint64_t); _i++, _n >>= 8)			      \
       *_p++ = (uint8_t)(_n & 0xff);					      \
    for (/*void*/; _i < 8; _i++)						      \
@@ -172,6 +174,7 @@ typedef struct H5F_t H5F_t;
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
    size_t _i;								      \
+									      \
    n = 0;								      \
    (p) += 8;								      \
    for (_i = 0; _i < sizeof(int64_t); _i++)					      \
@@ -182,6 +185,7 @@ typedef struct H5F_t H5F_t;
 #  define UINT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
    size_t _i;								      \
+									      \
    n = 0;								      \
    (p) += 8;								      \
    for (_i = 0; _i < sizeof(uint64_t); _i++)				      \

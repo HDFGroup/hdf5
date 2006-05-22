@@ -87,6 +87,7 @@ H5_DLL herr_t H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size,
 H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, const void *id, size_t *obj_len_p/*out*/);
 H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
+H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
 
 /* Debugging routines */

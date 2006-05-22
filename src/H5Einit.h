@@ -154,7 +154,7 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "Data filters"))==NULL)
 if((H5E_PLINE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_FSPACE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "File Free Space"))==NULL)
+if((msg = H5E_create_msg(cls, H5E_MAJOR, "Free Space Manager"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FSPACE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
@@ -297,6 +297,23 @@ assert(H5E_DUPCLASS_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Duplicate class name in parent class"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_DUPCLASS_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+
+/* Free space errors */
+assert(H5E_CANTMERGE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't merge objects"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTMERGE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTREVIVE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't revive object"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTREVIVE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTSHRINK_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't shrink container"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTSHRINK_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Object header related errors */
@@ -659,6 +676,11 @@ assert(H5E_CANTMODIFY_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to modify record"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTMODIFY_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTREMOVE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to remove object"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTREMOVE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Argument errors */
