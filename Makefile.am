@@ -76,7 +76,7 @@ SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
 # Some files generated during configure that should be cleaned
-DISTCLEANFILES=src/H5config.h src/H5pubconf.h config/stamp1 config/stamp2
+DISTCLEANFILES=config/stamp1 config/stamp2
 
 # Define rules for lib, progs, check, and tests.
 # These simply involve recursing into subdirectories.
