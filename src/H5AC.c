@@ -763,12 +763,12 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    f->shared->cache = NULL;
-
     if ( H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id, cache) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
     }
+
+    f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
     if ( aux_ptr != NULL ) {
