@@ -384,6 +384,7 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
+    HDassert(hdr->rc);
 
     /* Decrement reference count on shared header */
     hdr->rc--;

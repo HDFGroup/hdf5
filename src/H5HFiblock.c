@@ -784,10 +784,6 @@ H5HF_indirect_t *
 H5HF_man_iblock_place_dblock(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size,
     size_t *entry_p, size_t *dblock_size)
 {
-#ifdef OLD_WAY
-    H5HF_indirect_t *iblock;            /* Pointer to indirect block */
-    haddr_t iblock_addr;                /* Indirect block's address */
-#endif /* OLD_WAY */
     H5HF_indirect_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_place_dblock)

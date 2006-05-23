@@ -232,6 +232,9 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Total managed space data block size:",
 	      hdr->man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Total managed space allocated data block size:",
+	      hdr->man_alloc_size);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total standalone space data block size:",
 	      hdr->std_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
@@ -537,7 +540,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	      hdr->man_dtable.max_direct_rows);
 
     /* Print the entry tables */
-    HDfprintf(stream, "%*sDirect Block Entries (address, free space):\n", indent, "");
+    HDfprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
     for(u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
         sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)hdr->man_dtable.row_block_size[u]);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -577,7 +580,6 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     else
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   "<none>");
-
 
 done:
     if(iblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_IBLOCK, addr, iblock, H5AC__NO_FLAGS_SET) < 0)

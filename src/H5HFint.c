@@ -645,12 +645,13 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
     dblock = NULL;
 
+    /* Update statistics about heap */
+    hdr->nobjs--;
+    hdr->total_man_free += obj_len;
+
     /* Return free space to the heap's list of space */
     if(H5HF_space_return(hdr, dxpl_id, sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
-
-    /* Update statistics about heap */
-    hdr->nobjs--;
 
     /* Mark heap header as modified */
     if(H5HF_hdr_dirty(hdr) < 0)
