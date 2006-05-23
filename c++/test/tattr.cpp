@@ -1101,18 +1101,18 @@ test_attr_dtype_shared(void)
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
 	// Open dataset
-	dset = fid1.openDataSet(DSET1_NAME);
+	DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
 
 	// Open attribute
-	attr = dset.openAttribute(ATTR1_NAME);
+	Attribute *attr2 = new Attribute (dset.openAttribute(ATTR1_NAME));
 
 	// Read data from the attribute
-	attr.read(PredType::NATIVE_INT, &rdata);
+	attr2->read(PredType::NATIVE_INT, &rdata);
 	verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
 
 	// Close attribute and dataset
-	attr.close();
-	dset.close();
+	delete attr2;
+	delete dset2;
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
