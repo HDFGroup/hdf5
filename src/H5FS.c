@@ -1777,7 +1777,7 @@ HDfprintf(stderr, "%s: fspace->serial_size = %Zu\n", FUNC, fspace->serial_size);
         /* Check for no space on disk allocated for the serialized sections */
         if(!H5F_addr_defined(fspace->hdr->sect_addr)) {
             /* Compute size to store sections on disk */
-            fspace->hdr->alloc_sect_size = fspace->hdr->sect_size * (double)fspace->hdr->expand_percent / 100.0;
+            fspace->hdr->alloc_sect_size = (size_t)fspace->hdr->sect_size * (double)fspace->hdr->expand_percent / 100.0;
 
             /* Allocate space for the new serialized sections on disk */
             if(HADDR_UNDEF == (fspace->hdr->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SECTS, dxpl_id, (hsize_t)fspace->hdr->alloc_sect_size)))
@@ -1818,7 +1818,7 @@ HDfprintf(stderr, "%s: fspace->hdr->alloc_sect_size = %Hu\n", FUNC, fspace->hdr-
                 hsize_t new_size;                   /* New size of space for serialized sections */
 
                 /* Compute the threshold for decreasing the sections' serialized size */
-                decrease_threshold = (fspace->hdr->alloc_sect_size * (double)fspace->hdr->shrink_percent) / 100.0;
+                decrease_threshold = ((size_t)fspace->hdr->alloc_sect_size * (double)fspace->hdr->shrink_percent) / 100.0;
 
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->hdr->sect_size = %Hu\n", FUNC, fspace->hdr->sect_size);
