@@ -49,7 +49,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : IdComponent() {}
+H5File::H5File() : IdComponent(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -78,7 +78,7 @@ H5File::H5File() : IdComponent() {}
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5F.html#File-Create
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
+H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent(0)
 {
    p_get_file(name, flags, create_plist, access_plist);
 }
@@ -96,7 +96,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 ///		FileCreatPropList::DEFAULT
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
+H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent(0)
 {
    p_get_file(name.c_str(), flags, create_plist, access_plist);
 }
@@ -258,7 +258,7 @@ void H5File::reOpen()
    // If this object has a valid id, appropriately decrement reference
    // counter and close the id.
     try {
-        decRefCount();
+        close();
     }
     catch (Exception close_error) {
         throw FileIException("H5File::reOpen", close_error.getDetailMsg());
@@ -649,13 +649,16 @@ hid_t H5File::getLocId() const
 //--------------------------------------------------------------------------
 void H5File::close()
 {
-   herr_t ret_value = H5Fclose( id );
-   if( ret_value < 0 )
-   {
-      throw FileIException("H5File::close", "H5Fclose failed");
-   }
-   // reset the id because the file that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Fclose( id );
+	if( ret_value < 0 )
+	{
+	    throw FileIException("H5File::close", "H5Fclose failed");
+	}
+	// reset the id because the file that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -689,12 +692,11 @@ void H5File::throwException(const H5std_string func_name, const H5std_string msg
 //--------------------------------------------------------------------------
 H5File::~H5File()
 {
-   // The HDF5 file id will be closed properly
     try {
-        decRefCount();
+	close();
     }
     catch (Exception close_error) {
-        cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
+	cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }
 

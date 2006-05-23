@@ -101,18 +101,17 @@ DataType::DataType(const DataType& original) : H5Object(original) {}
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-    // reset the identifier of this instance, H5Tclose will be called
-    // if needed
+    // If this object is representing an hdf5 object, close it before
+    // copying like_type to it
     try {
-	decRefCount();
+        close();
     }
     catch (Exception close_error) {
-	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
+        throw FileIException("DataType::copy", close_error.getDetailMsg());
     }
 
     // call C routine to copy the datatype
     id = H5Tcopy( like_type.getId() );
-
     if( id < 0 )
 	throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
@@ -130,8 +129,11 @@ void DataType::copy( const DataType& like_type )
 //--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
-   copy(rhs);
-   return(*this);
+    if (this != &rhs)
+    {
+        copy(rhs);
+        return(*this);
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -636,13 +638,16 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void DataType::close()
 {
-    herr_t ret_value = H5Tclose(id);
-    if( ret_value < 0 )
+    if (p_valid_id(id))
     {
-	throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+	herr_t ret_value = H5Tclose(id);
+	if( ret_value < 0 )
+	{
+	 throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+	}
+	// reset the id because the datatype that it represents is now closed
+	id = 0;
     }
-    // reset the id because the datatype that it represents is now closed
-    id = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -655,9 +660,8 @@ void DataType::close()
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
-    // The datatype id will be closed properly
     try {
-	decRefCount();
+	close();
     }
     catch (Exception close_error) {
 	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;

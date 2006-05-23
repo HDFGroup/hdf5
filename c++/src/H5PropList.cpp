@@ -97,20 +97,19 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
-    // If this object has a valid id, appropriately decrement reference
-    // counter and close the id.
+    // If this object is representing an hdf5 object, close it before
+    // copying like_plist to it
     try {
-        decRefCount();
+        close();
     }
     catch (Exception close_error) {
-        throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
+        throw FileIException("PropList::copy", close_error.getDetailMsg());
     }
 
-   // call C routine to copy the property list
-   id = H5Pcopy( like_plist.getId() );
-
-   if( id < 0 )
-      throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
+    // call C routine to copy the property list
+    id = H5Pcopy( like_plist.getId() );
+    if( id < 0 )
+        throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -126,8 +125,11 @@ void PropList::copy( const PropList& like_plist )
 //--------------------------------------------------------------------------
 PropList& PropList::operator=( const PropList& rhs )
 {
-   copy(rhs);
-   return(*this);
+    if (this != &rhs)
+    {
+	copy(rhs);
+	return(*this);
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -208,18 +210,16 @@ void PropList::copyProp( PropList& dest, PropList& src, const H5std_string& name
 //--------------------------------------------------------------------------
 void PropList::close()
 {
-   if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
-   {
-      herr_t ret_value = H5Pclose( id );
-      if( ret_value < 0 )
-      {
-         throw PropListIException(inMemFunc("close"), "H5Pclose failed");
-      }
-      // reset the id because the property list that it represents is now closed
-      id = 0;
-   }
-   else
-      throw PropListIException(inMemFunc("close"), "Cannot close a constant");
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Pclose( id );
+	if( ret_value < 0 )
+	{
+	    throw PropListIException(inMemFunc("close"), "H5Pclose failed");
+	}
+	// reset the id because the property list that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -626,9 +626,8 @@ PropList PropList::getClassParent() const
 //--------------------------------------------------------------------------
 PropList::~PropList()
 {
-   // The property list id will be closed properly
     try {
-        decRefCount();
+	close();
     }
     catch (Exception close_error) {
         cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;

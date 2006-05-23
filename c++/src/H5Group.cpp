@@ -187,13 +187,16 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void Group::close()
 {
-   herr_t ret_value = H5Gclose( id );
-   if( ret_value < 0 )
-   {
-      throw GroupIException("Group::close", "H5Gclose failed");
-   }
-   // reset the id because the group that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Gclose( id );
+	if( ret_value < 0 )
+	{
+	    throw GroupIException("Group::close", "H5Gclose failed");
+	}
+	// reset the id because the group that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -227,14 +230,12 @@ void Group::throwException(const H5std_string func_name, const H5std_string msg)
 //--------------------------------------------------------------------------
 Group::~Group()
 {
-   // The group id will be closed properly
     try {
-        decRefCount();
+	close();
     }
     catch (Exception close_error) {
-        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
+	cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
-
 }
 
 #ifndef H5_NO_NAMESPACE

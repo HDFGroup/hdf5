@@ -46,7 +46,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs() {}
+DataSet::DataSet() : AbstractDs() {} 
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -521,13 +521,16 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void DataSet::close()
 {
-   herr_t ret_value = H5Dclose( id );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::close", "H5Dclose failed");
-   }
-   // reset the id because the dataset that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Dclose( id );
+	if( ret_value < 0 )
+	{
+         throw DataSetIException("DataSet::close", "H5Dclose failed");
+	}
+	// reset the id because the dataset that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -540,12 +543,11 @@ void DataSet::close()
 //--------------------------------------------------------------------------
 DataSet::~DataSet()
 {
-    // The dataset id will be closed properly
     try {
-        decRefCount();
+	close();
     }
     catch (Exception close_error) {
-        cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
+	cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
     }
 }
 

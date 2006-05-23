@@ -270,13 +270,16 @@ H5std_string Attribute::getName() const
 //--------------------------------------------------------------------------
 void Attribute::close()
 {
-   herr_t ret_value = H5Aclose(id);
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::close", "H5Aclose failed");
-   }
-   // reset the id because the attribute that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Aclose(id);
+	if( ret_value < 0 )
+	{
+	    throw AttributeIException("Attribute::close", "H5Aclose failed");
+	}
+	// reset the id because the attribute that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -304,13 +307,12 @@ hsize_t Attribute::getStorageSize() const
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {
-   // The attribute id will be closed properly
-   try {
-      decRefCount();
-   }
-   catch (Exception close_error) {
-      cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
-   }
+    try {
+	close();
+    }
+    catch (Exception close_error) {
+	cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
+    }
 }
 
 #ifndef H5_NO_NAMESPACE

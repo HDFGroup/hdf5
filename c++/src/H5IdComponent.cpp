@@ -43,8 +43,8 @@ IdComponent::IdComponent(const hid_t h5_id) : id(h5_id) {}
 //--------------------------------------------------------------------------
 IdComponent::IdComponent( const IdComponent& original )
 {
-   id = original.id;
-   incRefCount(); // increment number of references to this id
+    id = original.id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -80,6 +80,7 @@ void IdComponent::incRefCount() const
 void IdComponent::decRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
+    {
         if (H5Idec_ref(obj_id) < 0)
 	    if (H5Iget_ref(obj_id) <= 0)
 		throw IdComponentException(inMemFunc("decRefCount"),
@@ -87,6 +88,7 @@ void IdComponent::decRefCount(const hid_t obj_id) const
 	    else
 		throw IdComponentException(inMemFunc("decRefCount"),
 					"decrementing object ref count failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -112,7 +114,7 @@ int IdComponent::getCounter(const hid_t obj_id) const
     {
 	counter = H5Iget_ref(obj_id);
 	if (counter < 0)
-            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
+            throw IdComponentException(inMemFunc("incRefCount"), "getting object ref count failed - negative");
     }
     return (counter);
 }
@@ -168,16 +170,23 @@ H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 //--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
 {
-   // handling references to this id
-   decRefCount();
+    if (this != &rhs)
+    {
+	// handling references to this id
+	try {
+            close();
+	}
+	catch (Exception close_error) {
+            throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
+	}
 
-   // copy the data members from the rhs object
-   id = rhs.id;
+	// copy the data members from the rhs object
+	id = rhs.id;
 
-   // increment the reference counter
-   incRefCount();
-
-   return( *this );
+	// increment the reference counter
+	incRefCount();
+    }
+    return *this;
 }
 
 //--------------------------------------------------------------------------
@@ -194,11 +203,19 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 //--------------------------------------------------------------------------
 void IdComponent::setId(const hid_t new_id)
 {
-   // handling references to this id
-   decRefCount();
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw IdComponentException(inMemFunc("copy"), close_error.getDetailMsg());
+    }
 
    // reset object's id to the given id
    id = new_id;
+
+   // increment the reference counter of the new id
+   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -209,7 +226,7 @@ void IdComponent::setId(const hid_t new_id)
 //--------------------------------------------------------------------------
 hid_t IdComponent::getId () const
 {
-   return( id );
+   return(id);
 }
 
 //--------------------------------------------------------------------------
@@ -217,31 +234,7 @@ hid_t IdComponent::getId () const
 ///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent::~IdComponent() {
-
-/* uncomment this block and complete it when deciding to use dontAtExit
-   unless the atexit/global destructor problem is fixed, then
-   remove it- BMR 11/14/00
-
-   if( id == NOTATEXIT )
-   {
-      // Call H5Library::close to clean up - temporary solution to avoid the
-      // trouble of atexit/global destructors
-      try {
-         if( H5Library::need_cleanup == true )
-         {
-            H5Library::close();
-            H5Library::need_cleanup = false; // reset the boolean just in case
-         }
-      }
-      // catch failure caused by the H5Library operations
-      catch( LibraryIException error )
-      {
-         error.printError();
-      }
-   }
-*/
-}
+IdComponent::~IdComponent() {}
 
 //
 // Implementation of protected functions for HDF5 Reference Interface.
