@@ -156,7 +156,7 @@ PRINT_TRAILER()
 }
 
 # Figure out which remote command to use to reach a host.
-# Try rsh first, then ssh.
+# Try ssh first, then rsh since fewer machines support rsh exec.
 # $1--hostname to reach.
 CHECK_RSH()
 {
@@ -185,10 +185,10 @@ CHECK_RSH()
     # Try remote command with host if it responds to ping.
     # Still try it if we don't know how to do ping.
     if [ no_ping = "$PING" ] || $PING $host $PINGCOUNT >/dev/null 2>&1; then
-	if rsh $host -n hostname >/dev/null 2>&1; then
-	    RSH=rsh
-	elif ssh $host -n hostname >/dev/null 2>&1; then
+	if ssh $host -n hostname >/dev/null 2>&1; then
 	    RSH=ssh
+	elif rsh $host -n hostname >/dev/null 2>&1; then
+	    RSH=rsh
 	else
 	    PRINT cannot remote command with $host
 	    RSH="NoRemoteCommand"
