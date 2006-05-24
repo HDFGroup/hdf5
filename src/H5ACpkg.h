@@ -263,6 +263,18 @@
  *		contain the value 0 on all processes other than process 0.  
  *		It exists primarily for sanity checking.
  *
+ * write_done:  In the parallel test bed, it is necessary to ensure that
+ *              all writes to the server process from cache 0 complete
+ *              before it enters the barrier call with the other caches.
+ *
+ *              The write_done callback allows t_cache to do this without
+ *              requiring an ACK on each write.  Since these ACKs greatly
+ *              increase the run time on some platforms, this is a
+ *              significant optimization.
+ *
+ *              This field must be set to NULL when the callback is not
+ *              needed.
+ *
  ****************************************************************************/
 
 #ifdef H5_HAVE_PARALLEL
@@ -307,6 +319,8 @@ typedef struct H5AC_aux_t
     H5SL_t *	c_slist_ptr;
 
     int32_t	c_slist_len;
+
+    void	(* write_done)(void);
 
 } H5AC_aux_t; /* struct H5AC_aux_t */
 

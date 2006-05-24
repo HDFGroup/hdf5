@@ -465,6 +465,10 @@ H5AC_term_interface(void)
  *		Added code to set the prefix if required.
  *
  *						JRM - 1/20/06
+ *						
+ *		Added code to initialize the new write_done field.
+ *
+ *						JRM - 5/11/06
  *
  *-------------------------------------------------------------------------
  */
@@ -568,6 +572,7 @@ H5AC_create(const H5F_t *f,
                 aux_ptr->d_slist_len = 0;
                 aux_ptr->c_slist_ptr = NULL;
                 aux_ptr->c_slist_len = 0;
+		aux_ptr->write_done = NULL;
 
 		sprintf(prefix, "%d:", mpi_rank);
             }
@@ -863,6 +868,9 @@ done:
  *		bug in PHDF5.  See the header comments on the H5AC_aux_t
  *		structure for details.
  *
+ *		JRM -- 5/11/06
+ *		Added call to the write_done callback.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -936,6 +944,12 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
             }
+
+            if ( aux_ptr->write_done != NULL ) {
+
+                (aux_ptr->write_done)();
+	    }
+
         } /* end if ( aux_ptr->mpi_rank == 0 ) */
 
         status = H5AC_propagate_flushed_and_still_clean_entries_list(f,
@@ -1199,9 +1213,6 @@ done:
  * 		If the entry has changed size, the function updates 
  * 		data structures for the size change.
  *
- * 		If the entry is not already dirty, the function places
- * 		the entry on the skip list.
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
@@ -1260,7 +1271,7 @@ H5AC_mark_pinned_entry_dirty(H5F_t * f,
 
         if ( result < 0 ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
                     "H5AC_log_dirtied_entry() failed.")
         }
     }
@@ -1270,6 +1281,82 @@ H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                         thing, 
 					 size_changed,
 			                 new_size);
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                    "H5C_mark_pinned_entry_dirty() failed.")
+
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_mark_pinned_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_mark_pinned_or_protected_entry_dirty
+ *
+ * Purpose:	Mark a pinned or protected entry as dirty.  The target 
+ * 		entry MUST be either pinned, protected, or both.
+ *
+ * 		Unlike H5AC_mark_pinned_entry_dirty(), this function does
+ * 		not support size changes.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/16/06
+ *
+ * Modifications:
+ *
+ * 		None
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_mark_pinned_or_protected_entry_dirty(H5F_t * f,
+                                          void *  thing)
+{
+    H5C_t *		cache_ptr = f->shared->cache;
+#ifdef H5_HAVE_PARALLEL
+    H5AC_info_t *	info_ptr;
+#endif /* H5_HAVE_PARALLEL */
+    herr_t		result;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_mark_pinned_or_protected_entry_dirty, FAIL)
+
+#ifdef H5_HAVE_PARALLEL
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( thing );
+
+    info_ptr = (H5AC_info_t *)thing;
+
+    if ( ( info_ptr->is_dirty == FALSE ) &&
+	 ( ! ( info_ptr->is_protected ) ) &&
+	 ( info_ptr->is_pinned ) &&
+         ( NULL != cache_ptr->aux_ptr) ) {
+
+        result = H5AC_log_dirtied_entry(cache_ptr,
+                                        info_ptr,
+                                        info_ptr->addr,
+                                        FALSE,
+                                        0);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                    "H5AC_log_dirtied_entry() failed.")
+        }
+    }
+#endif /* H5_HAVE_PARALLEL */
+
+    result = H5C_mark_pinned_or_protected_entry_dirty(cache_ptr, thing);
+
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
@@ -1664,6 +1751,11 @@ done:
  *		as it can effect dirty byte creation counts, thereby 
  *		throwing the caches out of sync in the PHDF5 case.
  *
+ *		JRM - 5/16/06
+ *		Added code to use the new dirtied field in 
+ *		H5C_cache_entry_t in the test to see if the entry has
+ *		been dirtied.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1691,7 +1783,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert( ((H5AC_info_t *)thing)->addr == addr );
     HDassert( ((H5AC_info_t *)thing)->type == type );
 
-    dirtied = ((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG );
+    dirtied = ( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
+		( ((H5AC_info_t *)thing)->dirtied ) );
 
     if ( dirtied ) { 
 
@@ -1780,6 +1873,55 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_unprotect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    HA5C_set_write_done_callback
+ *
+ * Purpose:     Set the value of the write_done callback.  This callback
+ *              is used to improve performance of the parallel test bed
+ *              for the cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/11/06
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef H5_HAVE_PARALLEL
+herr_t
+H5AC_set_write_done_callback(H5C_t * cache_ptr,
+                             void (* write_done)(void))
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5AC_aux_t * aux_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5AC_set_write_done_callback, FAIL)
+
+    /* This would normally be an assert, but we need to use an HGOTO_ERROR
+     * call to shut up the compiler.
+     */
+    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
+    }
+
+    aux_ptr = cache_ptr->aux_ptr;
+
+    HDassert( aux_ptr != NULL );
+    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+
+    aux_ptr->write_done = write_done;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_set_write_done_callback() */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -3410,6 +3552,9 @@ done:
  *
  * Modifications:
  *
+ * 		JRM -- 5/11/06
+ * 		Added code to call the write_done callback.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3475,6 +3620,11 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "H5C_flush_to_min_clean() failed.")
         }
+
+	if ( aux_ptr->write_done != NULL ) {
+
+	    (aux_ptr->write_done)();
+	}
 
         if ( H5AC_broadcast_clean_list(cache_ptr) < 0 ) {
 

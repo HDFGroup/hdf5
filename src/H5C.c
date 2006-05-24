@@ -2607,6 +2607,7 @@ H5C_create(size_t		      max_cache_size,
         ((cache_ptr->epoch_markers)[i]).size		= (size_t)0;
         ((cache_ptr->epoch_markers)[i]).type		= &epoch_marker_class;
         ((cache_ptr->epoch_markers)[i]).is_dirty	= FALSE;
+        ((cache_ptr->epoch_markers)[i]).dirtied		= FALSE;
         ((cache_ptr->epoch_markers)[i]).is_protected	= FALSE;
         ((cache_ptr->epoch_markers)[i]).is_pinned	= FALSE;
         ((cache_ptr->epoch_markers)[i]).in_slist	= FALSE;
@@ -3732,6 +3733,10 @@ done:
  *		Added initialization for the new is_pinned field of the
  *		H5C_cache_entry_t structure.
  *
+ *		JRM -- 5/3/06
+ *		Added initialization for the new dirtied field of the 
+ *		H5C_cache_entry_t structure.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3788,6 +3793,9 @@ H5C_insert_entry(H5F_t * 	     f,
 
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
+
+    /* not protected, so can't be dirtied */
+    entry_ptr->dirtied  = FALSE;
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
@@ -4364,6 +4372,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_mark_pinned_or_protected_entry_dirty
+ *
+ * Purpose:	Mark a pinned or protected entry as dirty.  The target entry 
+ * 		MUST be either pinned or protected, and MAY be both.
+ *
+ * 		At present, this funtion does not support size change.
+ *
+ * 		In the protected case, this call is the functional 
+ * 		equivalent of setting the H5C__DIRTIED_FLAG on an unprotect
+ * 		call.
+ *
+ * 		In the pinned but not protected case, if the entry is not 
+ * 		already dirty, the function places function marks the entry
+ * 		dirty and places it on the skip list.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/15/06
+ *
+ * Modifications:
+ *
+ * 		None
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
+                                         void *  thing)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5C_cache_entry_t *	entry_ptr;
+
+    FUNC_ENTER_NOAPI(H5C_mark_pinned_or_protected_entry_dirty, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( thing );
+
+    entry_ptr = (H5C_cache_entry_t *)thing;
+
+    if ( entry_ptr->is_protected ) {
+
+        /* set the dirtied flag */
+        entry_ptr->dirtied = TRUE;
+
+    } else if ( entry_ptr->is_pinned ) {
+
+        /* mark the entry as dirty if it isn't already */
+        entry_ptr->is_dirty = TRUE;
+
+
+        if ( ! (entry_ptr->in_slist) ) {
+
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        }
+
+        H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+
+    } else {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
+                        "Entry is neither pinned nor protected??")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_mark_pinned_or_protected_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
  *
  * Function:    H5C_rename_entry
  *
@@ -4621,6 +4702,10 @@ done:
  *		JRM -- 10/22/05
  *		Hand optimizations.
  *
+ *		JRM -- 5/3/06
+ *		Added code to set the new dirtied field in 
+ *		H5C_cache_entry_t to FALSE prior to return.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4790,6 +4875,8 @@ H5C_protect(H5F_t *	        f,
     H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL)
 
     entry_ptr->is_protected = TRUE;
+
+    entry_ptr->dirtied = FALSE;
 
     ret_value = thing;
 
@@ -5857,6 +5944,11 @@ done:
  *		Unpdated function to pin and unpin entries as directed via
  *		the new H5C__PIN_ENTRY_FLAG and H5C__UNPIN_ENTRY_FLAG flags.
  *
+ *		JRM -- 5/3/06
+ *		Added code to make use of the new dirtied field in 
+ *		H5C_cache_entry_t.  If this field is TRUE, it is the
+ *		equivalent of setting the H5C__DIRTIED_FLAG.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5909,6 +6001,11 @@ H5C_unprotect(H5F_t *		  f,
 
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->type == type );
+
+    /* also set the dirtied variable if the dirtied field is set in 
+     * the entry.
+     */
+    dirtied |= entry_ptr->dirtied;
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
         if ( H5C_validate_lru_list(cache_ptr) < 0 ) {

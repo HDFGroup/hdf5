@@ -261,10 +261,14 @@ H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                           void *  thing,
 					   hbool_t size_changed,
                                            size_t  new_size);
+H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(H5F_t * f, 
+		                                        void *  thing);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
+                                           void (* write_done)(void));
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,

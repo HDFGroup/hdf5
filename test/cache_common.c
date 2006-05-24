@@ -1686,6 +1686,94 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	mark_pinned_or_protected_entry_dirty()
+ *
+ * Purpose:	Mark the specified entry as dirty.  
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              5/17/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
+                                     int32_t type,
+                                     int32_t idx)
+{
+    const char * fcn_name = "mark_pinned_or_protected_entry_dirty()";
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    if ( pass ) {
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+	HDassert( entry_ptr->cache_ptr == cache_ptr );
+        HDassert( entry_ptr->header.is_protected || 
+		  entry_ptr->header.is_pinned );
+
+	entry_ptr->is_dirty = TRUE;
+
+        result = H5C_mark_pinned_or_protected_entry_dirty(cache_ptr, 
+			                                  (void *)entry_ptr);
+
+        if ( ( result < 0 ) 
+	     ||
+	     ( ( ! (entry_ptr->header.is_protected) ) 
+	       &&
+	       ( ! (entry_ptr->header.is_pinned) ) 
+	     ) 
+	     ||
+             ( ( entry_ptr->header.is_protected ) 
+	       && 
+	       ( ! ( entry_ptr->header.dirtied ) ) 
+	     )
+	     ||
+             ( ( ! ( entry_ptr->header.is_protected ) )
+	       && 
+	       ( ! ( entry_ptr->header.is_dirty ) ) 
+	     )
+	     ||
+             ( entry_ptr->header.type != &(types[type]) ) 
+	     ||
+             ( entry_ptr->size != entry_ptr->header.size ) 
+	     ||
+             ( entry_ptr->addr != entry_ptr->header.addr ) ) {
+
+            pass = FALSE;
+            failure_mssg = 
+                "error in H5C_mark_pinned_or_protected_entry_dirty().";
+
+        }
+
+        HDassert( ((entry_ptr->header).type)->id == type );
+
+    }
+
+    return;
+
+} /* mark_pinned_or_protected_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	rename_entry()
  *
  * Purpose:	Rename the entry indicated by the type and index to its

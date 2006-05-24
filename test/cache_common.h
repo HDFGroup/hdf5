@@ -435,6 +435,10 @@ void mark_pinned_entry_dirty(H5C_t * cache_ptr,
 		             hbool_t size_changed,
 		             size_t  new_size);
 
+void mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
+                                          int32_t type,
+                                          int32_t idx);
+
 void rename_entry(H5C_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
