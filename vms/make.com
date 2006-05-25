@@ -44,7 +44,7 @@ $!
 $ ccopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $ fcopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $ cxxopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/"+-
-            "standard=strict_ansii/include=zlib_dir"
+            "standard=strict_ansi/include=zlib_dir"
 $!
 $!
 $ hdf5top     = F$DIRECTORY()
@@ -67,7 +67,7 @@ $ hdf5fortran_test     = hdf5top_dir + "FORTRAN.TEST]"
 $ hdf5cxx_src          = hdf5top_dir + "C__.SRC]"
 $ hdf5cxx_test         = hdf5top_dir + "C__.TEST]"
 $ hdf5cxx_examples     = hdf5top_dir + "C__.EXAMPLES]"
-
+$!
 $ write sys$output "Building C library"
 $ set def 'hdf5src'
 $ @make.com
