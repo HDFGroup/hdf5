@@ -21,7 +21,7 @@ include $(top_srcdir)/config/commence.am
 
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
-INCLUDES += -I$(top_srcdir)/src
+INCLUDES+=-I$(top_srcdir)/src
 AM_FCFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src
 
 AM_FCLIBS=$(LIBHDF5)
@@ -125,14 +125,15 @@ BUILT_SOURCES = H5f90i_gen.h
 #Specify what Automake needs to create: first the H5fort_type_defines.h
 # header, then H5match_types which includes that header, then
 # it needs to run H5match_types.
-H5fortran_types.f90 H5f90i_gen.h: H5match_types.c H5fort_type_defines.h
-	$(MAKE) $(AM_MAKEFLAGS) H5match_types$(EXEEXT)
+H5fortran_types.f90 H5f90i_gen.h: H5match_types$(EXEEXT)
 	$(RUNSERIAL) ./H5match_types$(EXEEXT)
 
 # H5fort_type_defines.h is created by running H5fortran_detect.
 # Obviously, H5fortran_detect needs to be built first.
 H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
 	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
+
+H5match_types.$(OBJEXT): H5fort_type_defines.h
 
 # Automake knows how to build fortran programs if we tell it the source
 # files.
