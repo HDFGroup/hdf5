@@ -249,6 +249,7 @@ void dataset_readInd(void);
 void dataset_readAll(void);
 void extend_readInd(void);
 void extend_readAll(void);
+void test_chunk_alloc(void);
 void compact_dataset(void);
 void big_dataset(void);
 void dataset_fillvalue(void);
