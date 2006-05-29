@@ -290,6 +290,11 @@ RUNSNAPTEST()
 		CC="cc -n32"
 		export CC
 		;;
+	    -64) # want -64 option
+		SRCDIRNAME=${SRCDIRNAME}-64
+		CC="cc -64"
+		export CC
+		;;
 	    parallel) # want parallel test
 		SNAPCMD_OPT="$SNAPCMD_OPT $ENABLE_PARALLEL"
 		SRCDIRNAME=${SRCDIRNAME}-pp
