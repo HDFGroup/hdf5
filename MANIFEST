@@ -1421,6 +1421,7 @@
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
 ./testpar/t_coll_chunk.c
+./testpar/t_chunk_alloc.c
 ./testpar/t_span_tree.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
