@@ -129,7 +129,7 @@ $!
 $ type sys$input
        Creating dsets tests
 $ ccc  dsets 
-$ link/debug dsets, -
+$ link dsets, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
@@ -148,6 +148,12 @@ $ type sys$input
        Creating external test
 $ ccc  external
 $ link external, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
+       Creating objcopy test
+$ ccc  objcopy
+$ link objcopy, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
@@ -171,7 +177,7 @@ $!
 $ type sys$input
        Creating mtime test
 $ ccc  mtime
-$ link/debug mtime, -
+$ link mtime, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input

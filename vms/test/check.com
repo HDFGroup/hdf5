@@ -95,6 +95,11 @@ $ run  dtypes
 $ type sys$input
  
 $ type sys$input
+-------			Running dsets   	-------
+$ run  dsets
+$ type sys$input
+ 
+$ type sys$input
 -------			Running cmpd_dset    	-------
 $ run  cmpd_dset
 $ type sys$input
@@ -107,6 +112,11 @@ $ type sys$input
 $ type sys$input
 -------			Running external    	-------
 $ run  external
+$ type sys$input
+ 
+$ type sys$input
+-------			Running objcopy    	-------
+$ run  objcopy 
 $ type sys$input
  
 $ type sys$input
