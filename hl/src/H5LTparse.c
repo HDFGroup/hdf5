@@ -1026,7 +1026,7 @@ case 92:
                                 short short_val=(short)yylval.ival;
                                 int int_val=(int)yylval.ival;
                                 long long_val=(long)yylval.ival;
-                                long long llong_val=(long long)yylval.ival;
+                                long_long llong_val=(long_long)yylval.ival;
                                 hid_t super = H5Tget_super(enum_id);
                                 hid_t native = H5Tget_native_type(super, H5T_DIR_ASCEND);
                                 
