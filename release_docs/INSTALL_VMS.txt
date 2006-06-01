@@ -1,14 +1,13 @@
 		Building and installation instructions for Alpha Open VMS
 			This file is under construction
-			VMS port is not finished yet.
-				EIP May 5, 2006
+				EIP June 1, 2006
 
    
 
 
 		CONTENTS
 		--------
-
+                
 		1. Obtaining HDF5
 		2. Building C, Fortran and C++ libraries
 		3. Testing HDF5 libraries and tools
@@ -20,11 +19,18 @@
 	  Please see INSTALL file in this directory for downloading instructions.
 
 	2. Building C, Fortran and C++ libraries
-	   Use tar command to untar HDF5 source ball
+
+           IMPORTANT: This version REQUIRES GNU ZLIB librarary to be installed
+                      on a system. You may download the source code from
+                      http://www.zlib.net/
+
+	 -  Use tar command to untar HDF5 source ball
 
 		tar -xvf hdf5-1.8.0-<pre>.tar
-	   Change default directory to [.hdf5-1.8.0-<pre>.vms]
-           and run 
+
+	 -  Change default directory to [.hdf5-1.8.0-<pre>.vms]
+         -  Modify make.com file to point to the installed ZLIB library.
+         -  Run 
 		@make
            command. This command file will build 
 			C library, tests, and utilities	
@@ -70,9 +76,11 @@
 
 	5. Known problems
 
-	   - There is no support for files bigger than 2GB
-           - There is no support for filters including deflated compression filter and
-	      szip compression filters.
+	   - dsets test fails for test_scleoffset_double and
+	     test_scleoffset_double_2 tests when G_FLOAT double is used
+                                                          06/01/2006 EIP 
+           - There is no support for files bigger than 2GB
+           - There is no support for szip compression filter.
 	   - There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
               multifile driver tests, probably more; all major tests succeed).
 	   - Mulitifile driver has not been tested yet.
