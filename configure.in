@@ -2580,14 +2580,14 @@ dnl (This flag should be _unset_ for all machines, except for Windows, where
 dnl it's set in the custom Windows H5pubconf.h file)
 dnl
 AC_MSG_CHECKING([if converting floating-point values to long long is not working])
-AC_CACHE_VAL([hdf5_cv_convert_float_llong_not_works], [hdf5_cv_convert_float_llong_not_works=yes])
+AC_CACHE_VAL([hdf5_cv_convert_float_llong_not_works], [hdf5_cv_convert_float_llong_not_works=no])
 
 if test ${hdf5_cv_convert_float_llong_not_works} = "yes"; then
   AC_DEFINE([HW_FP_TO_LLONG_NOT_WORKS], [1],
             [Define if your system can't handle converting floating-point values to long long.])
-  AC_MSG_RESULT([yes])
+  AC_MSG_RESULT([true])
 else
-  AC_MSG_RESULT([no])
+  AC_MSG_RESULT([false])
 fi
 
 dnl -----------------------------------------------------------------------
