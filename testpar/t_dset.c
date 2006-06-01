@@ -2122,7 +2122,7 @@ compress_readAll(void)
         hsize_t chunk_dim;           /* Chunk dimensions */
 
         /* Create the file */
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        fid = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((fid > 0), "H5Fcreate succeeded");
 
         /* Create property list for chunking and compression */
