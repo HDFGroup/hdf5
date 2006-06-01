@@ -450,6 +450,37 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	h5_rmprefix
+ *
+ * Purpose:	This "removes" the MPIO driver prefix part of the file name
+ *		by returning a pointer that points at the non-prefix component
+ *              part of the file name.  E.g.,
+ *		    Input			Return
+ *		    pfs:/scratch1/dataX		/scratch1/dataX
+ *		    /scratch2/dataY         	/scratch2/dataY
+ *		Note that there is no change to the original file name.
+ *
+ * Return:	Success:	a pointer at the non-prefix part.
+ *
+ * Programmer:	Albert Cheng; Jun  1, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_rmprefix(const char *filename)
+{
+    char *ret_ptr;
+
+    if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
+	ret_ptr = filename;
+    else
+	ret_ptr++;
+    
+    return(ret_ptr);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	h5_fileaccess
  *
  * Purpose:	Returns a file access template which is the default template

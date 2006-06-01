@@ -122,6 +122,7 @@ H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
 H5TEST_DLL void h5_no_hwconv(void);
+H5TEST_DLL char *h5_rmprefix(const char *filename);
 H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
 H5TEST_DLL off_t h5_get_file_size(const char *filename);
