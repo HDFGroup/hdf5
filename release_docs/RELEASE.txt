@@ -956,6 +956,8 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
+  double to (unsigned) long long and from (unsigned)long long to long double. 
 * On Altix SGI with Intel 9.0 testmeta.c would not compile with -O3
   optimization flag.
 * On VAX, Scaleoffset filter isn't supported. The filter cannot be applied to
