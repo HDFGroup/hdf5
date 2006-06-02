@@ -32,6 +32,7 @@
 
 int main(void)
 {
+#ifdef H5_GROUP_REVISION
     hid_t fid = -1;             /* File ID */
     hid_t fcpl = -1;            /* File creation property list ID */
     hid_t gid = -1;             /* Group creation property list ID */
@@ -77,9 +78,11 @@ int main(void)
 
     /* Close file */
     if(H5Fclose(fid) < 0) goto error;
+#endif /* H5_GROUP_REVISION */
 
     return 0;
 
+#ifdef H5_GROUP_REVISION
 error:
     H5E_BEGIN_TRY {
         H5Pclose(did);
@@ -89,5 +92,6 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
+#endif /* H5_GROUP_REVISION */
 }
 
