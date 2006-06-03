@@ -673,8 +673,8 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool
     printf("chunk_opt_mode = %d\n",chunk_opt_mode);
 #endif
     
-    if(chunk_opt_mode == H5FD_MPIO_OPT_ONE_IO) io_option = H5D_ONE_LINK_CHUNK_IO;/*no opt*/
-    else if(chunk_opt_mode == H5FD_MPIO_OPT_MULTI_IO) io_option = H5D_MULTI_CHUNK_IO;/*no opt */
+    if(chunk_opt_mode == H5FD_MPIO_CHUNK_ONE_IO) io_option = H5D_ONE_LINK_CHUNK_IO;/*no opt*/
+    else if(chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO) io_option = H5D_MULTI_CHUNK_IO;/*no opt */
     else {
        if(H5D_mpio_get_sum_chunk(io_info,fm,&sum_chunk)<0)   
   	       HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes"); 
@@ -1710,7 +1710,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
    
   chunk_opt_mode=(H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
 
-  if((chunk_opt_mode == H5FD_MPIO_OPT_MULTI_IO) || (percent_nproc_per_chunk == 0)){
+  if((chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO) || (percent_nproc_per_chunk == 0)){
     if(H5D_istore_chunkmap(io_info,total_chunks,chunk_addr,fm->down_chunks)<0)
        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");    
     for(ic = 0; ic<total_chunks;ic++)

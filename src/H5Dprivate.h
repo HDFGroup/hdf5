@@ -144,7 +144,7 @@
 /* Definitions for optimization of MPI-IO transfer mode property */
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME      "mpio_chunk_opt_hard"
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE       sizeof(H5FD_mpio_chunk_opt_t)
-#define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_OPT_IGNORE
+#define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_CHUNK_DEFAULT
 
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME       "mpio_chunk_opt_num"
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE        sizeof(unsigned)

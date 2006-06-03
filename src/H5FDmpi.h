@@ -43,9 +43,9 @@ typedef enum H5FD_mpio_xfer_t {
 
 /* Type of I/O for data transfer properties */
 typedef enum H5FD_mpio_chunk_opt_t {
-    H5FD_MPIO_OPT_IGNORE = 0,
-    H5FD_MPIO_OPT_ONE_IO,  		/*zero is the default*/
-    H5FD_MPIO_OPT_MULTI_IO
+    H5FD_MPIO_CHUNK_DEFAULT = 0,
+    H5FD_MPIO_CHUNK_ONE_IO,  		/*zero is the default*/
+    H5FD_MPIO_CHUNK_MULTI_IO
 } H5FD_mpio_chunk_opt_t;
 
 
