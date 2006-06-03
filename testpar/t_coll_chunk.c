@@ -642,11 +642,11 @@ coll_chunktest(const char* filename,
 
   switch(api_option){
 	case API_LINK_HARD:
-	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_OPT_ONE_IO);
+	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_CHUNK_ONE_IO);
            VRFY((status>= 0),"collective chunk optimization succeeded");
 	break;
 	case API_MULTI_HARD:
-	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_OPT_MULTI_IO);
+	   status = H5Pset_dxpl_mpio_chunk_opt(xfer_plist,H5FD_MPIO_CHUNK_MULTI_IO);
 	   VRFY((status>= 0),"collective chunk optimization succeeded ");
 	break;
 	case API_LINK_TRUE:
