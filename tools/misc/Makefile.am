@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-INCLUDES+=-I$(top_srcdir)/src
+INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
 TEST_PROG=h5repart_gentest
@@ -46,7 +46,7 @@ CHECK_CLEANFILES+=*.h5 ../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
 DISTCLEANFILES=h5cc testh5repart.sh
 
 # All programs rely on hdf5 library and h5tools library
-LDADD=$(LIBHDF5) $(LIBH5TOOLS)
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 # h5cc needs custom install and uninstall rules, since it may be
 # named h5pcc if hdf5 is being built in parallel mode.

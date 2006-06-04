@@ -16,11 +16,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include "H5private.h"		/* Generic Functions			*/
+#include "h5tools.h"
+#include "h5tools_utils.h"
+#include "h5tools_ref.h"
+#include "h5trav.h"
 #include "hdf5.h"
 
 /* Parameters to control statistics gathered */
 #define SIZE_SMALL_GROUPS       10
 #define SIZE_SMALL_DSETS        10
+
+#define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
+                                          accommodate for user-define filters + one
+                                          to accomodate datasets whithout any filters */
+
+
 
 /* Datatype statistics for datasets */
 typedef struct dtype_info_t {
@@ -58,13 +68,16 @@ typedef struct iter_t {
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
     unsigned long small_dset_dims[SIZE_SMALL_DSETS];    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
+    unsigned long dset_comptype[H5_NFILTERS_IMPL]; /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
     dtype_info_t *dset_type_info;       /* Pointer to dataset datatype information found */
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
     unsigned long *dset_dim_bins;       /* Pointer to array of bins for dataset dimensions */
     ohdr_info_t dset_ohdr_info;         /* Object header information for datasets */
     hsize_t dset_storage_size;          /* Size of raw data for datasets */
+    unsigned long nexternal;            /* Number of external files for a dataset */
 } iter_t;
+
 
 /* Table containing object id and object name */
 static struct {
@@ -76,6 +89,101 @@ static struct {
     } *obj;
 } idtab_g;
 
+const char *progname = "h5stat";
+int               d_status = EXIT_SUCCESS;
+static int        display_all = TRUE;
+static int        display_file_metadata = FALSE;
+static int        display_file = FALSE;
+static int        display_group_metadata = FALSE;
+static int        display_group = FALSE;
+static int        display_dset_metadata = FALSE;
+static int        display_dset = FALSE;
+static int        display_dtype_metadata = FALSE;
+static int        display_dtype = FALSE;
+ 
+static const char *s_opts ="FfhGgDdT";
+static struct long_options l_opts[] = {
+    {"help", no_arg, 'h'},
+    {"hel", no_arg, 'h'},
+    {"file", no_arg, 'f'},
+    {"fil", no_arg, 'f'},
+    {"fi", no_arg, 'f'},
+    {"filemetadata", no_arg, 'F'},
+    {"filemetadat", no_arg, 'F'},
+    {"filemetada", no_arg, 'F'},
+    {"filemetad", no_arg, 'F'},
+    {"filemeta", no_arg, 'F'},
+    {"filemet", no_arg, 'F'},
+    {"fileme", no_arg, 'F'},
+    {"filem", no_arg, 'F'},
+    {"group", no_arg, 'g'},
+    {"grou", no_arg, 'g'},
+    {"gro", no_arg, 'g'},
+    {"gr", no_arg, 'g'},
+    {"groupmetadata", no_arg, 'G'},
+    {"groupmetadat", no_arg, 'G'},
+    {"groupmetada", no_arg, 'G'},
+    {"groupmetad", no_arg, 'G'},
+    {"groupmeta", no_arg, 'G'},
+    {"groupmet", no_arg, 'G'},
+    {"groupme", no_arg, 'G'},
+    {"groupm", no_arg, 'G'},
+    {"dset", no_arg, 'd'},
+    {"dse", no_arg, 'd'},
+    {"ds", no_arg, 'd'},
+    {"d", no_arg, 'd'},
+    {"dsetmetadata", no_arg, 'D'},
+    {"dsetmetadat", no_arg, 'D'},
+    {"dsetmetada", no_arg, 'D'},
+    {"dsetmetad", no_arg, 'D'},
+    {"dsetmeta", no_arg, 'D'},
+    {"dsetmet", no_arg, 'D'},
+    {"dsetme", no_arg, 'D'},
+    {"dsetm", no_arg, 'D'},
+    {"dtypemetadata", no_arg, 'T'},
+    {"dtypemetadat", no_arg, 'T'},
+    {"dtypemetada", no_arg, 'T'},
+    {"dtypemetad", no_arg, 'T'},
+    {"dtypemeta", no_arg, 'T'},
+    {"dtypemet", no_arg, 'T'},
+    {"dtypeme", no_arg, 'T'},
+    {"dtypem", no_arg, 'T'},
+    {"dtype", no_arg, 'T'},
+    { NULL, 0, '\0' }
+};
+
+static void 
+leave(int ret)
+{
+   h5tools_close();
+   exit(ret); 
+}  
+
+
+static void                                                                                                                    usage(const char *prog)
+{
+     fflush(stdout);
+     fprintf(stdout, "\n");
+     fprintf(stdout, "This tool is under development. For detailed information\n");
+     fprintf(stdout, "please see the specification document at\n");
+     fprintf(stdout, "http://hdf.ncsa.uiuc.edu/RFC/h5stat/h5stat-spec.pdf\n");
+     fprintf(stdout, "\n");
+     fprintf(stdout, "Please send your comments and questions to help@hdfgroup.org\n");
+     fprintf(stdout, "\n");
+     fprintf(stdout, "Usage: %s [OPTIONS] file\n", prog); 
+     fprintf(stdout, "\n");
+     fprintf(stdout, "      OPTIONS\n"); 
+     fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
+     fprintf(stdout, "     -f, --file            Print file information\n");
+     fprintf(stdout, "     -F, --filemetadata    Print file metadata\n");
+     fprintf(stdout, "     -g, --group           Print group information\n");
+     fprintf(stdout, "     -G, --groupmetadata   Print group metadata\n");
+     fprintf(stdout, "     -d, --dset            Print dataset information\n");
+     fprintf(stdout, "     -D, --dsetmetadata    Print dataset metadata\n");
+     fprintf(stdout, "     -T, --dtypemetadata   Print datatype metadata\n");
+     fprintf(stdout, "\n");
+}
+ 
 
 /*-------------------------------------------------------------------------
  * Function: ceil_log10
@@ -171,7 +279,7 @@ sym_lookup(H5G_stat_t *sb)
         return NULL; /*only one name possible*/
     objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
     for (n=0; n<idtab_g.nobjs; n++) {
-        if(idtab_g.obj[n].id == objno)
+            if (idtab_g.obj[n].id==objno)
             return idtab_g.obj[n].name;
     }
     return NULL;
@@ -345,6 +453,9 @@ printf("walk: fullname = %s\n", fullname);
                 int ndims;                      /* Number of dimensions of dataset */
                 hsize_t storage;                /* Size of dataset storage */
                 unsigned u;                     /* Local index variable */
+                int num_ext;                    /* Number of external files for a dataset */
+                int nfltr;                      /* Number of filters for a dataset */
+                H5Z_filter_t fltr;              /* Filter identifier */
 
                 /* Gather statistics about this type of object */
                 iter->uniq_dsets++;
@@ -455,7 +566,27 @@ printf("walk: fullname = %s\n", fullname);
 
                 /* Track the layout type for dataset */
                 (iter->dset_layouts[lout])++;
+                
+                num_ext = H5Pget_external_count(dcpl);
+                assert (num_ext >= 0);
 
+                if(num_ext) iter->nexternal = iter->nexternal + num_ext;
+
+                /* Track different filters */
+
+                if ((nfltr=H5Pget_nfilters(dcpl)) >= 0) { 
+
+                if (nfltr == 0) iter->dset_comptype[0]++;
+                   for (u=0; u < nfltr; u++) {
+                     fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0, NULL);
+                     if (fltr < (H5_NFILTERS_IMPL-1)) 
+                        iter->dset_comptype[fltr]++;
+                     else
+                        iter->dset_comptype[H5_NFILTERS_IMPL-1]++; /*other filters*/
+                   }
+
+                } /*endif nfltr */
+                
                 ret = H5Pclose(dcpl);
                 assert(ret >= 0);
 
@@ -487,29 +618,94 @@ printf("walk: fullname = %s\n", fullname);
     return 0;
 }
 
-static void
-usage(void)
+static int
+parse_command_line(int argc, const char *argv[])
 {
-    printf("usage: h5stat <filename>\n");
-    exit(1);
+    int  opt;
+
+
+    /* parse command line options */
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+parse_start:
+        switch ((char)opt) {
+        case 'F':
+            display_all = FALSE;
+            display_file_metadata = TRUE;
+            break;
+        case 'f':
+            display_all = FALSE;
+            display_file = TRUE;
+            break;
+        case 'G':
+            display_all = FALSE;
+            display_group_metadata = TRUE;
+            break;
+        case 'g':
+            display_all = FALSE;
+            display_group = TRUE;
+            break;
+        case 'T':
+            display_all = FALSE;
+            display_dtype_metadata = TRUE;
+            break;
+        case 'D':
+            display_all = FALSE;
+            display_dset_metadata = TRUE;
+            break;
+        case 'd':
+            display_all = FALSE;
+            display_dset = TRUE;
+            break;
+        case 'h':
+            usage(progname);
+            leave(EXIT_SUCCESS);
+        default:
+            usage(progname);
+            leave(EXIT_FAILURE);
+        }
+    }
+
+parse_end:
+    /* check for file name to be processed */
+    if (argc <= opt_ind) {
+        error_msg(progname, "missing file name\n");
+        usage(progname);
+        leave(EXIT_FAILURE);
+    }
 }
 
 int
-main(int argc, char *argv[])
+main(int argc, const char *argv[])
 {
-    iter_t iter;
-    hid_t fid;
-    unsigned long power;        /* Temporary "power" for bins */
-    size_t dtype_size;          /* Size of encoded datatype */
-    unsigned long total;        /* Total count for various statistics */
-    unsigned u;                 /* Local index variable */
+    iter_t          iter;
+    const char     *fname = NULL;
+    hid_t           fid;
+    unsigned        long power;        /* Temporary "power" for bins */
+    size_t          dtype_size;        /* Size of encoded datatype */
+    unsigned long   total;             /* Total count for various statistics */
+    unsigned        u;                 /* Local index variable */
+    int             status;            /* Return value for parse_command_line function */
+    void            *edata;
+    H5E_auto_stack_t    func;
 
-    if(argc != 2)
-        usage();
+    /* Disable error reporting */
+    H5Eget_auto_stack(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
-    printf("Filename: %s\n", argv[1]);
+    /* Initialize h5tools lib */
+    h5tools_init();
+    status = parse_command_line (argc, argv);
+    fname = argv[opt_ind];
 
-    if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT)) > 0) {
+    printf("Filename: %s\n", fname);
+
+    fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (fid < 0) {
+        error_msg(progname, "unable to open file \"%s\"\n", fname);
+        leave(EXIT_FAILURE);
+    }
+
+    if(fid  > 0) {
         iter.container = "/";
         iter.uniq_groups = 0;
         iter.uniq_dsets = 0;
@@ -534,6 +730,8 @@ main(int argc, char *argv[])
             iter.small_dset_dims[u] = 0;
         for(u = 0; u < H5D_NLAYOUTS; u++)
             iter.dset_layouts[u] = 0;
+        for(u = 0; u < H5_NFILTERS_IMPL; u++)
+            iter.dset_comptype[u] = 0;
         iter.dset_ntypes = 0;
         iter.dset_type_info = NULL;
         iter.dset_dim_nbins = 0;
@@ -541,61 +739,83 @@ main(int argc, char *argv[])
         iter.dset_ohdr_info.total_size = 0;
         iter.dset_ohdr_info.free_size = 0;
         iter.dset_storage_size = 0;
+        iter.nexternal = 0;
         walk(fid, "/", &iter);
         H5Fclose(fid);
     } /* end if */
 
     /* Print information about the file */
-    printf("File Hierarchy:\n");
-    printf("\t# of unique groups: %lu\n", iter.uniq_groups);
-    printf("\t# of unique datasets: %lu\n", iter.uniq_dsets);
-    printf("\t# of unique named dataypes: %lu\n", iter.uniq_types);
-    printf("\t# of unique links: %lu\n", iter.uniq_links);
-    printf("\t# of unique other: %lu\n", iter.uniq_others);
-    printf("\tMax. # of links to object: %lu\n", iter.max_links);
-    printf("\tMax. depth of hierarchy: %lu\n", iter.max_depth);
-    HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter.max_fanout);
+    if(display_all) {
+       display_file = TRUE;
+       display_file_metadata = TRUE;
+       display_group = TRUE;
+       display_group_metadata = TRUE;
+       display_dset = TRUE;
+       display_dtype_metadata = TRUE;
+    }
 
-    printf("Object header size: (total/unused)\n");
-    HDfprintf(stdout, "\tGroups: %Hu/%Hu\n", iter.group_ohdr_info.total_size, iter.group_ohdr_info.free_size);
-    HDfprintf(stdout, "\tDatasets: %Hu/%Hu\n", iter.dset_ohdr_info.total_size, iter.dset_ohdr_info.free_size);
+    if(display_file) {
 
-    printf("Small groups:\n");
-    total = 0;
-    for(u = 0; u < SIZE_SMALL_GROUPS; u++) {
-        if(iter.num_small_groups[u] > 0) {
-            printf("\t# of groups of size %u: %lu\n", u, iter.num_small_groups[u]);
-            total += iter.num_small_groups[u];
-        } /* end if */
-    } /* end for */
-    printf("\tTotal # of small groups: %lu\n", total);
+       printf("File information\n");
+       printf("\t# of unique groups: %lu\n", iter.uniq_groups);
+       printf("\t# of unique datasets: %lu\n", iter.uniq_dsets);
+       printf("\t# of unique named dataypes: %lu\n", iter.uniq_types);
+       printf("\t# of unique links: %lu\n", iter.uniq_links);
+       printf("\t# of unique other: %lu\n", iter.uniq_others);
+       printf("\tMax. # of links to object: %lu\n", iter.max_links);
+       printf("\tMax. depth of hierarchy: %lu\n", iter.max_depth);
+       HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter.max_fanout);
 
-    printf("Group bins:\n");
-    total = 0;
-    if(iter.group_bins[0] > 0) {
-        printf("\t# of groups of size 0: %lu\n", iter.group_bins[0]);
-        total = iter.group_bins[0];
-    } /* end if */
-    power = 1;
-    for(u = 1; u < iter.group_nbins; u++) {
-        if(iter.group_bins[u] > 0) {
-            printf("\t# of groups of size %lu - %lu: %lu\n", power, (power * 10) - 1, iter.group_bins[u]);
-            total += iter.group_bins[u];
-        } /* end if */
-        power *= 10;
-    } /* end for */
-    printf("\tTotal # of groups: %lu\n", total);
+    }
 
 
+    if(display_file_metadata) {
+
+       printf("Object header size: (total/unused)\n");
+       HDfprintf(stdout, "\tGroups: %Hu/%Hu\n", iter.group_ohdr_info.total_size, iter.group_ohdr_info.free_size);
+       HDfprintf(stdout, "\tDatasets: %Hu/%Hu\n", iter.dset_ohdr_info.total_size, iter.dset_ohdr_info.free_size);
+
+    }
+
+    if(display_group) {
+
+       printf("Small groups:\n");
+       total = 0;
+       for(u = 0; u < SIZE_SMALL_GROUPS; u++) {
+           if(iter.num_small_groups[u] > 0) {
+               printf("\t# of groups of size %u: %lu\n", u, iter.num_small_groups[u]);
+               total += iter.num_small_groups[u];
+           } /* end if */
+       } /* end for */
+       printf("\tTotal # of small groups: %lu\n", total);
+
+       printf("Group bins:\n");
+       total = 0;
+       if(iter.group_bins[0] > 0) {
+           printf("\t# of groups of size 0: %lu\n", iter.group_bins[0]);
+           total = iter.group_bins[0];
+       } /* end if */
+       power = 1;
+       for(u = 1; u < iter.group_nbins; u++) {
+           if(iter.group_bins[u] > 0) {
+               printf("\t# of groups of size %lu - %lu: %lu\n", power, (power * 10) - 1, iter.group_bins[u]);
+               total += iter.group_bins[u];
+           } /* end if */
+           power *= 10;
+       } /* end for */
+       printf("\tTotal # of groups: %lu\n", total);
+
+    }
+    if(display_dset) {
     if(iter.uniq_dsets > 0) {
-        printf("Dataset dimension info:\n");
+        printf("Dataset dimension information:\n");
         printf("\tMax. rank of datasets: %lu\n", iter.max_dset_rank);
         printf("\tDataset ranks:\n");
         for(u = 0; u < H5S_MAX_RANK; u++)
             if(iter.dset_rank_count[u] > 0)
                 printf("\t\t# of dataset with rank %u: %lu\n", u, iter.dset_rank_count[u]);
 
-        printf("1-D Dataset info:\n");
+        printf("1-D Dataset information:\n");
         HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter.max_dset_dims);
         printf("\tSmall 1-D datasets:\n");
         total = 0;
@@ -626,28 +846,43 @@ main(int argc, char *argv[])
             printf("\t\tTotal # of datasets: %lu\n", total);
         } /* end if */
 
-        printf("Dataset storage info:\n");
+        printf("Dataset storage information:\n");
         HDfprintf(stdout, "\tTotal raw data size: %Hu\n", iter.dset_storage_size);
 
-        printf("Dataset layout info:\n");
+        printf("Dataset layout information:\n");
         for(u = 0; u < H5D_NLAYOUTS; u++)
             printf("\tDataset layout counts[%s]: %lu\n", (u == 0 ? "COMPACT" :
                 (u == 1 ? "CONTIG" : "CHUNKED")), iter.dset_layouts[u]);
+        printf("\tNumber of external files : %lu\n", iter.nexternal);
+        printf("Dataset filters information:\n");
+        printf("\tNumber of datasets with \n");
+        printf("\t                        NO filter: %lu\n", iter.dset_comptype[H5Z_FILTER_ERROR+1]);
+        printf("\t                        GZIP filter: %lu\n", iter.dset_comptype[H5Z_FILTER_DEFLATE]);
+        printf("\t                        SHUFFLE filter: %lu\n", iter.dset_comptype[H5Z_FILTER_SHUFFLE]);
+        printf("\t                        FLETCHER32 filter: %lu\n", iter.dset_comptype[H5Z_FILTER_FLETCHER32]);
+        printf("\t                        SZIP filter: %lu\n", iter.dset_comptype[H5Z_FILTER_SZIP]);
+        printf("\t                        NBIT filter: %lu\n", iter.dset_comptype[H5Z_FILTER_NBIT]);
+        printf("\t                        SCALEOFFSET filter: %lu\n", iter.dset_comptype[H5Z_FILTER_SCALEOFFSET]);
+        printf("\t                        USER-DEFINED filter: %lu\n", iter.dset_comptype[H5_NFILTERS_IMPL-1]);
+        if(display_dtype_metadata) {
+           printf("Dataset datatype information:\n");
+           printf("\t# of unique datatypes used by datasets: %lu\n", iter.dset_ntypes);
+           total = 0;
+           for(u = 0; u < iter.dset_ntypes; u++) {
+               H5Tencode(iter.dset_type_info[u].tid, NULL, &dtype_size);
+               printf("\tDataset datatype #%u:\n", u);
+               printf("\t\tCount (total/named) = (%lu/%lu)\n", iter.dset_type_info[u].count, iter.dset_type_info[u].named);
+               printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size, (unsigned long)H5Tget_size(iter.dset_type_info[u].tid));
+               H5Tclose(iter.dset_type_info[u].tid);
+               total += iter.dset_type_info[u].count;
+           } /* end for */
+           printf("\tTotal dataset datatype count: %lu\n", total);
+        } 
+       } /* end if */
+    } /* display dset */
+    
+    H5Eset_auto_stack(H5E_DEFAULT, func, edata);
 
-        printf("Dataset datatype info:\n");
-        printf("\t# of unique datatypes used by datasets: %lu\n", iter.dset_ntypes);
-        total = 0;
-        for(u = 0; u < iter.dset_ntypes; u++) {
-            H5Tencode(iter.dset_type_info[u].tid, NULL, &dtype_size);
-            printf("\tDataset datatype #%u:\n", u);
-            printf("\t\tCount (total/named) = (%lu/%lu)\n", iter.dset_type_info[u].count, iter.dset_type_info[u].named);
-            printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size, (unsigned long)H5Tget_size(iter.dset_type_info[u].tid));
-            H5Tclose(iter.dset_type_info[u].tid);
-            total += iter.dset_type_info[u].count;
-        } /* end for */
-        printf("\tTotal dataset datatype count: %lu\n", total);
-    } /* end if */
-
-    return (0);
+    leave(d_status);
 }
 

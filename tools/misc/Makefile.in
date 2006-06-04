@@ -76,8 +76,8 @@ PROGRAMS = $(bin_PROGRAMS)
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
 h5debug_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/src/libhdf5.la
-am__DEPENDENCIES_2 = $(top_builddir)/tools/lib/libh5tools.la
+am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
+am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 h5debug_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 h5repart_SOURCES = h5repart.c
 h5repart_OBJECTS = h5repart.$(OBJEXT)
@@ -312,7 +312,8 @@ TIME = time
 # Path for hl needed in hdf5.h
 
 # Include src directory
-INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src
+INCLUDES = -I$(top_srcdir)/hl/src -I$(top_srcdir)/src \
+	-I$(top_srcdir)/tools/lib
 
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
@@ -377,7 +378,7 @@ CLEANFILES = h5redeploy
 DISTCLEANFILES = h5cc testh5repart.sh
 
 # All programs rely on hdf5 library and h5tools library
-LDADD = $(LIBHDF5) $(LIBH5TOOLS)
+LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 @BUILD_PARALLEL_CONDITIONAL_FALSE@H5CC_NAME = h5cc
 
 # h5cc needs custom install and uninstall rules, since it may be
