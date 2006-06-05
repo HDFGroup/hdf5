@@ -152,47 +152,70 @@ class H5_DLLCPP PredType : public AtomType {
 
 	static const PredType NATIVE_INT8;
 	static const PredType NATIVE_UINT8;
+	static const PredType NATIVE_INT16;
+	static const PredType NATIVE_UINT16;
+	static const PredType NATIVE_INT32;
+	static const PredType NATIVE_UINT32;
+	static const PredType NATIVE_INT64;
+	static const PredType NATIVE_UINT64;
+
+// LEAST types
 #if H5_SIZEOF_INT_LEAST8_T != 0
 	static const PredType NATIVE_INT_LEAST8;
 #endif /* H5_SIZEOF_INT_LEAST8_T */
 #if H5_SIZEOF_UINT_LEAST8_T != 0
 	static const PredType NATIVE_UINT_LEAST8;
 #endif /* H5_SIZEOF_UINT_LEAST8_T */
-	//static const PredType NATIVE_INT_FAST8;
-	//static const PredType NATIVE_UINT_FAST8;
 
-	static const PredType NATIVE_INT16;
-	static const PredType NATIVE_UINT16;
 #if H5_SIZEOF_INT_LEAST16_T != 0
 	static const PredType NATIVE_INT_LEAST16;
 #endif /* H5_SIZEOF_INT_LEAST16_T */
 #if H5_SIZEOF_UINT_LEAST16_T != 0
 	static const PredType NATIVE_UINT_LEAST16;
 #endif /* H5_SIZEOF_UINT_LEAST16_T */
-	//static const PredType NATIVE_INT_FAST16;
-	//static const PredType NATIVE_UINT_FAST16;
 
-	static const PredType NATIVE_INT32;
-	static const PredType NATIVE_UINT32;
 #if H5_SIZEOF_INT_LEAST32_T != 0
 	static const PredType NATIVE_INT_LEAST32;
 #endif /* H5_SIZEOF_INT_LEAST32_T */
 #if H5_SIZEOF_UINT_LEAST32_T != 0
 	static const PredType NATIVE_UINT_LEAST32;
 #endif /* H5_SIZEOF_UINT_LEAST32_T */
-	//static const PredType NATIVE_INT_FAST32;
-	//static const PredType NATIVE_UINT_FAST32;
 
-	static const PredType NATIVE_INT64;
-	static const PredType NATIVE_UINT64;
 #if H5_SIZEOF_INT_LEAST64_T != 0
 	static const PredType NATIVE_INT_LEAST64;
 #endif /* H5_SIZEOF_INT_LEAST64_T */
 #if H5_SIZEOF_UINT_LEAST64_T != 0
 	static const PredType NATIVE_UINT_LEAST64;
 #endif /* H5_SIZEOF_UINT_LEAST64_T */
-	//static const PredType NATIVE_INT_FAST64;
-	//static const PredType NATIVE_UINT_FAST64;
+
+// FAST types
+#if H5_SIZEOF_INT_FAST8_T != 0
+	static const PredType NATIVE_INT_FAST8;
+#endif /* H5_SIZEOF_INT_FAST8_T */
+#if H5_SIZEOF_UINT_FAST8_T != 0
+	static const PredType NATIVE_UINT_FAST8;
+#endif /* H5_SIZEOF_UINT_FAST8_T */
+
+#if H5_SIZEOF_INT_FAST16_T != 0
+	static const PredType NATIVE_INT_FAST16;
+#endif /* H5_SIZEOF_INT_FAST16_T */
+#if H5_SIZEOF_UINT_FAST16_T != 0
+	static const PredType NATIVE_UINT_FAST16;
+#endif /* H5_SIZEOF_UINT_FAST16_T */
+
+#if H5_SIZEOF_INT_FAST32_T != 0
+	static const PredType NATIVE_INT_FAST32;
+#endif /* H5_SIZEOF_INT_FAST32_T */
+#if H5_SIZEOF_UINT_FAST32_T != 0
+	static const PredType NATIVE_UINT_FAST32;
+#endif /* H5_SIZEOF_UINT_FAST32_T */
+
+#if H5_SIZEOF_INT_FAST64_T != 0
+	static const PredType NATIVE_INT_FAST64;
+#endif /* H5_SIZEOF_INT_FAST64_T */
+#if H5_SIZEOF_UINT_FAST64_T != 0
+	static const PredType NATIVE_UINT_FAST64;
+#endif /* H5_SIZEOF_UINT_FAST64_T */
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// These dummy functions do not inherit from DataType - they'll

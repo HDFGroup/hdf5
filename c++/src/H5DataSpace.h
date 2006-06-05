@@ -34,8 +34,8 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Assignment operator
 	DataSpace& operator=( const DataSpace& rhs );
 
-        // Closes this dataspace.
-        virtual void close();
+	// Closes this dataspace.
+	virtual void close();
 
 	// Makes copy of an existing dataspace.
 	void copy(const DataSpace& like_space);

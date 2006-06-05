@@ -96,18 +96,19 @@ DataType::DataType(const DataType& original) : H5Object(original) {}
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-    // If this object is representing an hdf5 object, close it before
-    // copying like_type to it
+    // close the current data type before copying like_type to this object
     try {
-        close();
+	close();
     }
     catch (Exception close_error) {
-        throw FileIException("DataType::copy", close_error.getDetailMsg());
+	throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
     }
 
     // call C routine to copy the datatype
@@ -131,8 +132,8 @@ DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
     {
-        copy(rhs);
-        return(*this);
+	copy(rhs);
+	return(*this);
     }
 }
 
@@ -468,20 +469,20 @@ void DataType::setTag( const H5std_string& tag ) const
 //--------------------------------------------------------------------------
 H5std_string DataType::getTag() const
 {
-   char* tag_Cstr = H5Tget_tag( id );
+    char* tag_Cstr = H5Tget_tag( id );
 
-   // if the tag C-string returned is not NULL, convert it to C++ string
-   // and return it, otherwise, raise an exception
-   if( tag_Cstr != NULL )
-   {
-      H5std_string tag = H5std_string(tag_Cstr); // convert C string to string object
+    // if the tag C-string returned is not NULL, convert it to C++ string
+    // and return it, otherwise, raise an exception
+    if( tag_Cstr != NULL )
+    {
+	H5std_string tag = H5std_string(tag_Cstr); // C string to string object
 	HDfree(tag_Cstr); // free the C string
-      return (tag); // return the tag
-   }
-   else
-   {
-      throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
-   }
+	return (tag); // return the tag
+    }
+    else
+    {
+	throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -643,7 +644,7 @@ void DataType::close()
 	herr_t ret_value = H5Tclose(id);
 	if( ret_value < 0 )
 	{
-	 throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+	    throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
 	}
 	// reset the id because the datatype that it represents is now closed
 	id = 0;
@@ -655,8 +656,10 @@ void DataType::close()
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {

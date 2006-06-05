@@ -191,7 +191,7 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
    if( member_class == H5T_NO_CLASS )
    {
       throw DataTypeIException("CompType::getMemberClass",
-                "H5Tget_member_class returns H5T_NO_CLASS");
+		"H5Tget_member_class returns H5T_NO_CLASS");
    }
    return(member_class);
 }
@@ -255,26 +255,6 @@ ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CompType::getMemberEnumType
-///\brief	Returns the enumeration datatype of the specified member in
-///		this compound datatype.
-///\param	member_num - IN: Zero-based index of the member
-///\return	EnumType instance
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-EnumType CompType::getMemberEnumType( unsigned member_num ) const
-{
-   try {
-      EnumType enumtype(p_get_member_type(member_num));
-      return(enumtype);
-   }
-   catch (DataTypeIException E) {
-      throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	CompType::getMemberCompType
 ///\brief	Returns the compound datatype of the specified member in this
 ///		compound datatype.
@@ -291,6 +271,26 @@ CompType CompType::getMemberCompType( unsigned member_num ) const
    }
    catch (DataTypeIException E) {
       throw DataTypeIException("CompType::getMemberCompType", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberEnumType
+///\brief	Returns the enumeration datatype of the specified member in
+///		this compound datatype.
+///\param	member_num - IN: Zero-based index of the member
+///\return	EnumType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType CompType::getMemberEnumType( unsigned member_num ) const
+{
+   try {
+      EnumType enumtype(p_get_member_type(member_num));
+      return(enumtype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
    }
 }
 

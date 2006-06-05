@@ -22,6 +22,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+
 class H5_DLLCPP ArrayType : public DataType {
    public:
 	// Constructor that creates a new array data type based on the

@@ -128,7 +128,7 @@ void* Group::Reference(const char* name) const
 ///		It differs from the above function in that it takes an
 ///		\c std::string for the object's name.
 ///\param	name - IN: Name of the object to be referenced
-// Programmer   Binh-Minh Ribler - May, 2004
+// Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const H5std_string& name) const
 {
@@ -141,10 +141,10 @@ void* Group::Reference(const H5std_string& name) const
 ///\param		ref      - IN: Reference to query
 ///\param		ref_type - IN: Type of reference to query
 ///\return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.
-//			H5G_GROUP Object is a group.
-//			H5G_DATASET   Object is a dataset.
-//			H5G_TYPE Object is a named datatype
+///			H5G_LINK Object is a symbolic link.
+///			H5G_GROUP Object is a group.
+///			H5G_DATASET   Object is a dataset.
+///			H5G_TYPE Object is a named datatype
 ///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -213,7 +213,7 @@ void Group::close()
 //		implementation of Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Group::throwException(const H5std_string func_name, const H5std_string msg) const
+void Group::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
    H5std_string full_name = func_name;
    full_name.insert(0, "Group::");
@@ -226,7 +226,7 @@ void Group::throwException(const H5std_string func_name, const H5std_string msg)
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		ID reference counting mechanism - BMR, Jun 1, 2004
 //--------------------------------------------------------------------------
 Group::~Group()
 {

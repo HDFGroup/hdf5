@@ -36,8 +36,8 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void openFile(const char* name, unsigned int flags,
 	    const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
 
-        // Close this file.
-        virtual void close();
+	// Close this file.
+	virtual void close();
 
 	// Flushes all buffers associated with this file to disk
 	void flush(H5F_scope_t scope) const;
@@ -51,8 +51,8 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Gets the name of this file.
 	H5std_string getFileName() const;
 
-        // Retrieves the file size of an opened file.
-        hsize_t getFileSize() const;
+	// Retrieves the file size of an opened file.
+	hsize_t getFileSize() const;
 
 	// Returns the amount of free space in the file.
 	hssize_t getFreeSpace() const;
@@ -96,7 +96,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	virtual H5std_string fromClass () const { return("H5File"); }
 
 	// Throw file exception.
-	virtual void throwException(const H5std_string func_name, const H5std_string msg) const;
+	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
 	// Gets the file id
 	virtual hid_t getLocId() const;

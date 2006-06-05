@@ -46,7 +46,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs() {} 
+DataSet::DataSet() : AbstractDs() {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -436,7 +436,7 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 ///\brief	This is an overloaded function, provided for your convenience.
 ///		It differs from the above function in that it only creates
 ///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
+///\param	name - IN: Name of the object to be referenced - \c char pointer
 ///\return	A reference
 ///\exception	H5::DataSetIException
 ///\par Description
@@ -474,10 +474,10 @@ void* DataSet::Reference(const H5std_string& name) const
 ///\param		ref_type - IN: Type of reference to query
 ///\param		ref      - IN: Reference to query
 ///\return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.
-//			H5G_GROUP Object is a group.
-//			H5G_DATASET   Object is a dataset.
-//			H5G_TYPE Object is a named datatype
+///		\li \c H5G_LINK Object is a symbolic link.
+///		\li \c H5G_GROUP Object is a group.
+///		\li \c H5G_DATASET   Object is a dataset.
+///		\li \c H5G_TYPE Object is a named datatype
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -526,7 +526,7 @@ void DataSet::close()
 	herr_t ret_value = H5Dclose( id );
 	if( ret_value < 0 )
 	{
-         throw DataSetIException("DataSet::close", "H5Dclose failed");
+	    throw DataSetIException("DataSet::close", "H5Dclose failed");
 	}
 	// reset the id because the dataset that it represents is now closed
 	id = 0;
@@ -538,8 +538,10 @@ void DataSet::close()
 ///\brief	Properly terminates access to this dataset.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 DataSet::~DataSet()
 {

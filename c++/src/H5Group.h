@@ -22,8 +22,8 @@ namespace H5 {
 
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
-        // Close this group.
-        virtual void close();
+	// Close this group.
+	virtual void close();
 
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
@@ -42,8 +42,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Group"); }
 
-        // Throw group exception.
-        virtual void throwException(const H5std_string func_name, const H5std_string msg) const;
+	// Throw group exception.
+	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
 	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;
@@ -57,8 +57,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Destructor
 	virtual ~Group();
 
-        // Creates a copy of an existing group using its id.
-        Group( const hid_t group_id );
+	// Creates a copy of an existing group using its id.
+	Group( const hid_t group_id );
 
 };
 #ifndef H5_NO_NAMESPACE

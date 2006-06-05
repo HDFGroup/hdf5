@@ -98,8 +98,10 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
@@ -410,7 +412,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::getSelectElemPointlist",
-                "H5Sget_select_elem_pointlist failed");
+		"H5Sget_select_elem_pointlist failed");
    }
 }
 
@@ -433,7 +435,7 @@ void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::getSelectBounds",
-                "H5Sget_select_bounds failed");
+		"H5Sget_select_bounds failed");
    }
 }
 
@@ -460,7 +462,7 @@ void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, co
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::selectElements",
-                "H5Sselect_elements failed");
+		"H5Sselect_elements failed");
    }
 }
 
@@ -493,7 +495,7 @@ void DataSpace::selectNone () const
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::selectNone",
-                "H5Sselect_none failed");
+		"H5Sselect_none failed");
    }
 }
 
@@ -516,7 +518,7 @@ bool DataSpace::selectValid () const
    else
    {
       throw DataSpaceIException("DataSpace::selectValid",
-                "H5Sselect_valid returns negative value");
+		"H5Sselect_valid returns negative value");
    }
 }
 
@@ -573,8 +575,10 @@ void DataSpace::close()
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {

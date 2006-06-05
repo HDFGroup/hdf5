@@ -41,25 +41,25 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// etc..., use the specific functions, that follow, instead.
 	DataType getDataType() const;
 
-        // Gets a copy of the specific datatype of this abstract dataset.
+	// Gets a copy of the specific datatype of this abstract dataset.
 	ArrayType getArrayType() const;
-        CompType getCompType() const;
-        EnumType getEnumType() const;
-        IntType getIntType() const;
-        FloatType getFloatType() const;
-        StrType getStrType() const;
+	CompType getCompType() const;
+	EnumType getEnumType() const;
+	IntType getIntType() const;
+	FloatType getFloatType() const;
+	StrType getStrType() const;
 	VarLenType getVarLenType() const;
 
 	// Gets the dataspace of this abstract dataset - pure virtual.
 	virtual DataSpace getSpace() const = 0;
 
-        // Gets the class of the datatype that is used by this abstract
+	// Gets the class of the datatype that is used by this abstract
 	// dataset.
 	H5T_class_t getTypeClass() const;
 
-        // Returns the amount of storage size required for this abstract
+	// Returns the amount of storage size required for this abstract
 	// dataset - pure virtual.
-        virtual hsize_t getStorageSize() const = 0;
+	virtual hsize_t getStorageSize() const = 0;
 
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
@@ -75,7 +75,7 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	AbstractDs( const hid_t ds_id );
 
    private:
-	// This member function is implemented by DataSet and Attribute
+	// This member function is implemented by DataSet and Attribute.
 	virtual hid_t p_get_type() const = 0;
 };
 #ifndef H5_NO_NAMESPACE

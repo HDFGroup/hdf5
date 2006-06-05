@@ -67,13 +67,13 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	// Query the value of a property in a property list.
 	void getProperty(const char* name, void* value) const;
-	H5std_string getProperty(const char* name) const;
 	void getProperty(const H5std_string& name, void* value) const;
+	H5std_string getProperty(const char* name) const;
 	H5std_string getProperty(const H5std_string& name) const;
 
 	// Set a property's value in a property list.
-	void setProperty(const char* name, void* charptr) const;
-	void setProperty(const char* name, const char* value) const;
+	void setProperty(const char* name, void* value) const;
+	void setProperty(const char* name, const char* charptr) const;
 	void setProperty(const char* name, H5std_string& strg) const;
 	void setProperty(const H5std_string& name, void* value) const;
 	void setProperty(const H5std_string& name, H5std_string& strg) const;

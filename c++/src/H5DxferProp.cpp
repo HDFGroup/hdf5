@@ -41,11 +41,11 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 // Function	DSetMemXferPropList copy constructor
 ///\brief	Copy constructor: makes a copy of the original
 ///		DSetMemXferPropList object
-///\param	orig - IN: The original dataset memory and transfer property
+///\param	original - IN: Original dataset memory and transfer property
 ///				list object to copy
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}
+DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList& original ) : PropList( original ) {}
 
 //--------------------------------------------------------------------------
 // Function	DSetMemXferPropList overloaded constructor
@@ -188,7 +188,7 @@ void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t op, void *user_d
    if( ret_value < 0 )
    {
       throw PropListIException("DSetMemXferPropList::setTypeConvCB",
-                "H5Pset_type_conv_cb failed");
+		"H5Pset_type_conv_cb failed");
    }
 }
 
@@ -206,7 +206,7 @@ void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user
    if( ret_value < 0 )
    {
       throw PropListIException("DSetMemXferPropList::getTypeConvCB",
-                "H5Pget_type_conv_cb failed");
+		"H5Pget_type_conv_cb failed");
    }
 }
 
@@ -325,7 +325,7 @@ void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size)
 // Function:	DSetMemXferPropList::getSmallDataBlockSize
 ///\brief	Returns the current small data block size setting.
 ///\return	Size of the small data block, in bytes
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 hsize_t DSetMemXferPropList::getSmallDataBlockSize()
@@ -362,7 +362,7 @@ void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)
 }
 
 //--------------------------------------------------------------------------
-// Function:	DSetMemXferPropList::getSmallDataBlockSize
+// Function:	DSetMemXferPropList::getHyperVectorSize
 ///\brief	Returns the number of I/O vectors to be read/written in
 ///		hyperslab I/O.
 ///\return	Number of I/O vectors

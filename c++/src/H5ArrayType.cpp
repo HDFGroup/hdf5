@@ -164,7 +164,7 @@ ArrayType::~ArrayType()
 {
    // Free allocated memory
    if (dimensions != NULL)
-      delete [] dimensions;
+      delete []dimensions;
 }
 
 #ifndef H5_NO_NAMESPACE

@@ -56,7 +56,7 @@ namespace H5 {
 ///\param	size_hint - IN: Indicates the number of bytes to reserve for
 ///		the names that will appear in the group
 ///\return	Group instance
-///\exception	H5::GroupIException
+///\exception	H5::FileIException or H5::GroupIException
 ///\par Description
 ///		The optional \a size_hint specifies how much file space to
 ///		reserve for storing the names that will appear in this new
@@ -99,7 +99,7 @@ Group CommonFG::createGroup( const H5std_string& name, size_t size_hint ) const
 ///		or another group.
 ///\param	name  - IN: Name of the group to open
 ///\return	Group instance
-///\exception	H5::GroupIException
+///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group CommonFG::openGroup( const char* name ) const
@@ -139,7 +139,7 @@ Group CommonFG::openGroup( const H5std_string& name ) const
 ///\param	data_space - IN: Dataspace for the dataset
 ///\param	create_plist - IN: Creation properly list for the dataset
 ///\return	DataSet instance
-///\exception	H5::DataSetIException
+///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist ) const
@@ -180,7 +180,7 @@ DataSet CommonFG::createDataSet( const H5std_string& name, const DataType& data_
 ///\brief	Opens an existing dataset at this location.
 ///\param	name  - IN: Name of the dataset to open
 ///\return	DataSet instance
-///\exception	H5::DataSetIException
+///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet CommonFG::openDataSet( const char* name ) const
@@ -318,11 +318,11 @@ void CommonFG::move( const H5std_string& src, const H5std_string& dst ) const
 ///\param	follow_link - IN: Link flag
 ///\param	statbuf - OUT: Buffer to return information about the object
 ///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5G.html#Group-GetObjinfo
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& statbuf ) const
 {
@@ -505,7 +505,7 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
    {
       throwException("getComment", "H5Gget_comment failed");
    }
-   H5std_string comment = H5std_string( comment_C );
+   H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
    return (comment);
 }
@@ -532,7 +532,7 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
    {
       throwException("getComment", "H5Gget_comment failed");
    }
-   H5std_string comment = H5std_string( comment_C );
+   H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
    return( comment );
 }
@@ -1017,8 +1017,8 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    {
       throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
    }
-   name = H5std_string( name_C );
-   delete [] name_C;
+   name = H5std_string(name_C);
+   delete []name_C;
    return (name_len);
 }
 

@@ -39,7 +39,7 @@ class H5_DLLCPP IdComponent {
 	// Returns an HDF object type, given the object id.
 	static H5I_type_t getHDFObjType(const hid_t obj_id);
 
-	// Assignment operator.
+	// Assignment operator
 	IdComponent& operator=( const IdComponent& rhs );
 
 	// Sets the identifier of this object to a new value.
@@ -64,7 +64,7 @@ class H5_DLLCPP IdComponent {
 	H5std_string inMemFunc(const char* func_name) const;
 
 	// Returns this class name.
-        virtual H5std_string fromClass() const { return("IdComponent");}
+	virtual H5std_string fromClass() const { return("IdComponent");}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -81,17 +81,17 @@ class H5_DLLCPP IdComponent {
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
 
-        // Gets the id of the H5 file in which the given object is located.
-        hid_t p_get_file_id();
+	// Gets the id of the H5 file in which the given object is located.
+	hid_t p_get_file_id();
 
-        // Creates a reference to an HDF5 object or a dataset region.
-        void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
+	// Creates a reference to an HDF5 object or a dataset region.
+	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
-        // Retrieves the type of object that an object reference points to.
-        H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
 
-        // Retrieves a dataspace with the region pointed to selected.
-        hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+	// Retrieves a dataspace with the region pointed to selected.
+	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
 
 	// Verifies that the given id is valid.
 	bool p_valid_id(const hid_t obj_id) const;

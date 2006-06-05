@@ -25,6 +25,9 @@ class H5_DLLCPP FileAccPropList : public PropList {
    public:
 	static const FileAccPropList DEFAULT;
 
+	// Creates a file access property list.
+	FileAccPropList();
+
 	// Modifies this property list to use the H5FD_STDIO driver
 	void setStdio() const;
 
@@ -121,9 +124,6 @@ class H5_DLLCPP FileAccPropList : public PropList {
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("FileAccPropList"); }
-
-	// Creates a file access property list.
-	FileAccPropList();
 
 	// Copy constructor: creates a copy of a FileAccPropList object.
 	FileAccPropList( const FileAccPropList& original );

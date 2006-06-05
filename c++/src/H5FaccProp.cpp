@@ -31,23 +31,23 @@ const FileAccPropList FileAccPropList::DEFAULT;
 
 //--------------------------------------------------------------------------
 // Function:	Default Constructor
-///\brief	  Default constructor: creates a file access property list
+///\brief	Creates a file access property list
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList copy constructor
-///\brief	  Copy Constructor: makes a copy of the original
-///             FileAccPropList object.
+///\brief	Copy Constructor: makes a copy of the original
+///		FileAccPropList object.
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList(const FileAccPropList& orig) : PropList(orig) {}
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList overloaded constructor
-///\brief	  Creates a file access property list using the id of an
-///             existing one.
+///\brief	Creates a file access property list using the id of an
+///		existing one.
 // Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList(const hid_t plist_id) : PropList(plist_id) {}
@@ -70,7 +70,7 @@ void FileAccPropList::setStdio() const
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getDriver
-///\brief	  Return the ID of the low-level file driver.
+///\brief	Return the ID of the low-level file driver.
 ///\return	A low-level driver ID which is the same ID used when the
 ///		driver was set for the property list.  The driver ID is
 ///		only valid as long as the file driver remains registered.
@@ -229,9 +229,9 @@ void FileAccPropList::getFamily(hsize_t& memb_size, FileAccPropList& memb_plist)
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getFamily
-///\brief	  This is an overloaded member function, provided for convenience.
-///             It differs from the above function only in what arguments it
-///             accepts and its return value.
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in what arguments it
+///		accepts and its return value.
 ///\param	memb_size  - OUT: Size in bytes of each file member
 ///\return	The file access property list for each file member
 ///\exception	H5::PropListIException
@@ -276,9 +276,9 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setSplit
-///\brief	  This is an overloaded member function, provided for convenience.
-///             It differs from the above function only in what arguments it
-///             accepts.
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in what arguments it
+///		accepts.
 ///\param	meta_plist  - IN: File access plist for the metadata file
 ///\param	raw_plist   - IN: File access plist for the raw data file
 ///\param	meta_ext    - IN: Metadata filename extension as \c string
@@ -666,9 +666,9 @@ unsigned FileAccPropList::getGcReferences() const
 }
 
 //--------------------------------------------------------------------------
-// Function:  FileAccPropList destructor
+// Function:	FileAccPropList destructor
 ///\brief	Noop destructor
-// Programmer Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::~FileAccPropList() {}
 

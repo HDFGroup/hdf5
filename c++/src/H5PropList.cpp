@@ -70,18 +70,18 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 {
     if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
-        // call C routine to create the new property
-        id = H5Pcreate(plist_id);
-        if( id < 0 )
-        {
-            throw PropListIException("PropList constructor", "H5Pcreate failed");
-        }
+	// call C routine to create the new property
+	id = H5Pcreate(plist_id);
+	if( id < 0 )
+	{
+	    throw PropListIException("PropList constructor", "H5Pcreate failed");
+	}
     }
     else {
-        if(plist_id==H5P_NO_CLASS)
-            id=H5P_DEFAULT;
-        else
-            id=plist_id;
+	if(plist_id==H5P_NO_CLASS)
+	    id=H5P_DEFAULT;
+	else
+	    id=plist_id;
     }
 }
 
@@ -92,24 +92,26 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
     // If this object is representing an hdf5 object, close it before
     // copying like_plist to it
     try {
-        close();
+	close();
     }
     catch (Exception close_error) {
-        throw FileIException("PropList::copy", close_error.getDetailMsg());
+	throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
     // call C routine to copy the property list
     id = H5Pcopy( like_plist.getId() );
     if( id < 0 )
-        throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
+	throw PropListIException(inMemFunc("copy"), "H5Pcopy failed");
 }
 
 //--------------------------------------------------------------------------
@@ -170,7 +172,7 @@ void PropList::copyProp( PropList& dest, const H5std_string& name ) const
 ///\param	dest - IN: Destination property list or class
 ///\param	src  - IN: Source property list or class
 ///\param	name - IN: Name of the property to copy - \c char pointer
-///\notes	This member function will be removed in the next release
+///\note	This member function will be removed in the next release
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -621,8 +623,10 @@ PropList PropList::getClassParent() const
 ///\brief	Properly terminates access to this property list.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - June 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 PropList::~PropList()
 {
@@ -630,7 +634,7 @@ PropList::~PropList()
 	close();
     }
     catch (Exception close_error) {
-        cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
+	cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
     }
 }
 

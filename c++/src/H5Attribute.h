@@ -53,6 +53,9 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
 
+	// Default constructor
+	Attribute();
+
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 
@@ -63,14 +66,11 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// sub-types
 	virtual hid_t p_get_type() const;
 
-	// do not inherit iterateAttrs from H5Object
+	// do not inherit H5Object::iterateAttrs
 	int iterateAttrs() { return 0; }
 
-	// do not inherit iterateAttrs from H5Object
-	void rename() {}
-
-	// Default constructor
-	Attribute();
+	// do not inherit H5Object::renameAttr
+	void renameAttr() {}
 };
 #ifndef H5_NO_NAMESPACE
 }

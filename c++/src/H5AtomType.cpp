@@ -97,7 +97,7 @@ H5T_order_t AtomType::getOrder() const
 //--------------------------------------------------------------------------
 // Function:	AtomType::getOrder
 ///\brief	This is an overloaded member function, provided for convenience.
-///             It takes a reference to a \c std::string for the buffer that
+///		It takes a reference to a \c std::string for the buffer that
 ///		provide the text description of the returned byte order.
 ///		The text description can be either of the following:
 ///		"Little endian byte ordering (0)";

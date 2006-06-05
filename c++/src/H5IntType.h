@@ -19,6 +19,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
+
 class H5_DLLCPP IntType : public AtomType {
    public:
 	// Creates a integer type using a predefined type
@@ -34,7 +35,7 @@ class H5_DLLCPP IntType : public AtomType {
 	void setSign( H5T_sign_t sign ) const;
 
 	// Returns this class name
-        virtual H5std_string fromClass () const { return("IntType"); }
+	virtual H5std_string fromClass () const { return("IntType"); }
 
 	// Default constructor
 	IntType();

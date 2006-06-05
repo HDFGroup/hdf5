@@ -159,8 +159,8 @@ H5std_string EnumType::nameOf( void *value, size_t size ) const
       throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
    }
    // otherwise, create the string to hold the datatype name and return it
-   H5std_string name = H5std_string( name_C );
-   delete [] name_C;
+   H5std_string name = H5std_string(name_C);
+   delete []name_C;
    return( name );
 }
 

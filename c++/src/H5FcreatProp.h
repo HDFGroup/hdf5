@@ -26,6 +26,9 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// Default file creation property list.
 	static const FileCreatPropList DEFAULT;
 
+	// Creates a file create property list.
+	FileCreatPropList();
+
 	// Retrieves version information for various parts of a file.
 	void getVersion( unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
@@ -58,9 +61,6 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("FileCreatPropList"); }
-
-	// Creates a file create property list.
-	FileCreatPropList();
 
 	// Copy constructor: creates a copy of a FileCreatPropList object.
 	FileCreatPropList(const FileCreatPropList& orig);

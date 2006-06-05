@@ -56,7 +56,7 @@ void IdComponent::incRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
 	if (H5Iinc_ref(obj_id) < 0)
-            throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
+	    throw IdComponentException(inMemFunc("incRefCount"), "incrementing object ref count failed");
 }
 
 //--------------------------------------------------------------------------
@@ -80,15 +80,13 @@ void IdComponent::incRefCount() const
 void IdComponent::decRefCount(const hid_t obj_id) const
 {
     if (p_valid_id(obj_id))
-    {
-        if (H5Idec_ref(obj_id) < 0)
+	if (H5Idec_ref(obj_id) < 0)
 	    if (H5Iget_ref(obj_id) <= 0)
 		throw IdComponentException(inMemFunc("decRefCount"),
 					"object ref count is 0 or negative");
 	    else
 		throw IdComponentException(inMemFunc("decRefCount"),
 					"decrementing object ref count failed");
-    }
 }
 
 //--------------------------------------------------------------------------
@@ -114,7 +112,7 @@ int IdComponent::getCounter(const hid_t obj_id) const
     {
 	counter = H5Iget_ref(obj_id);
 	if (counter < 0)
-            throw IdComponentException(inMemFunc("incRefCount"), "getting object ref count failed - negative");
+	    throw IdComponentException(inMemFunc("incRefCount"), "getting object ref count failed - negative");
     }
     return (counter);
 }
@@ -131,9 +129,9 @@ int IdComponent::getCounter() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    hdfObjectType
-///\brief       Given an id, returns the type of the object.
-///return       a valid HDF object type, which may be one of the following:
+// Function:	hdfObjectType
+///\brief	Given an id, returns the type of the object.
+///return	a valid HDF object type, which may be one of the following:
 ///		\li \c H5I_FILE
 ///		\li \c H5I_GROUP
 ///		\li \c H5I_DATATYPE
@@ -148,9 +146,9 @@ H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 {
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
-        return H5I_BADID; // invalid
+	return H5I_BADID; // invalid
     else
-        return id_type; // valid type
+	return id_type; // valid type
 }
 
 //--------------------------------------------------------------------------
@@ -161,11 +159,10 @@ H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 ///\exception	H5::IdComponentException when attempt to close the HDF5
 ///		object fails
 // Description
-// 		The underlaying reference counting in the C library ensures
-// 		that the current valid id of this object is properly closed.
-//		Copy the id from rhs to this object, then increment the
+//		First, close the current valid id of this object.  Then
+//		copy the id from rhs to this object, and increment the
 //		reference counter of the id to indicate that another object
-//		is referencing it.
+//		is referencing that id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
@@ -174,10 +171,10 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
     {
 	// handling references to this id
 	try {
-            close();
+	    close();
 	}
 	catch (Exception close_error) {
-            throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
+	    throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
 	}
 
 	// copy the data members from the rhs object
@@ -205,10 +202,10 @@ void IdComponent::setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
-        close();
+	close();
     }
     catch (Exception close_error) {
-        throw IdComponentException(inMemFunc("copy"), close_error.getDetailMsg());
+	throw IdComponentException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
    // reset object's id to the given id
@@ -237,8 +234,10 @@ hid_t IdComponent::getId () const
 IdComponent::~IdComponent() {}
 
 //
-// Implementation of protected functions for HDF5 Reference Interface.
+// Implementation of protected functions for HDF5 Reference Interface
+// and miscelaneous helpers.
 //
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	IdComponent::inMemFunc

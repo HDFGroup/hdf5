@@ -151,7 +151,7 @@ class H5_DLLCPP CommonFG {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.
-	virtual void throwException(const H5std_string func_name, const H5std_string msg) const = 0;
+	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const = 0;
 
 	// Default constructor.
 	CommonFG();
