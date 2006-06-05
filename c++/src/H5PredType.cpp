@@ -163,7 +163,9 @@ const PredType PredType::NATIVE_ULONG( H5T_NATIVE_ULONG );
 const PredType PredType::NATIVE_LLONG( H5T_NATIVE_LLONG );
 const PredType PredType::NATIVE_ULLONG( H5T_NATIVE_ULLONG );
 const PredType PredType::NATIVE_DOUBLE( H5T_NATIVE_DOUBLE );
+#if H5_SIZEOF_LONG_DOUBLE !=0
 const PredType PredType::NATIVE_LDOUBLE( H5T_NATIVE_LDOUBLE );
+#endif
 const PredType PredType::NATIVE_B8( H5T_NATIVE_B8 );
 const PredType PredType::NATIVE_B16( H5T_NATIVE_B16 );
 const PredType PredType::NATIVE_B32( H5T_NATIVE_B32 );
@@ -183,6 +185,7 @@ const PredType PredType::NATIVE_UINT32( H5T_NATIVE_UINT32 );
 const PredType PredType::NATIVE_INT64( H5T_NATIVE_INT64 );
 const PredType PredType::NATIVE_UINT64( H5T_NATIVE_UINT64 );
 
+// LEAST types
 #if H5_SIZEOF_INT_LEAST8_T != 0
 const PredType PredType::NATIVE_INT_LEAST8( H5T_NATIVE_INT_LEAST8 );
 #endif /* H5_SIZEOF_INT_LEAST8_T */
@@ -211,6 +214,7 @@ const PredType PredType::NATIVE_INT_LEAST64( H5T_NATIVE_INT_LEAST64 );
 const PredType PredType::NATIVE_UINT_LEAST64( H5T_NATIVE_UINT_LEAST64 );
 #endif /* H5_SIZEOF_UINT_LEAST64_T */
 
+// FAST types
 #if H5_SIZEOF_INT_FAST8_T != 0
 const PredType PredType::NATIVE_INT_FAST8( H5T_NATIVE_INT_FAST8 );
 #endif /* H5_SIZEOF_INT_FAST8_T */
@@ -253,8 +257,11 @@ const PredType PredType::NATIVE_UINT_FAST64( H5T_NATIVE_UINT_FAST64 );
 //--------------------------------------------------------------------------
 PredType& PredType::operator=( const PredType& rhs )
 {
-   copy(rhs);
-   return(*this);
+    if (this != &rhs)
+    {
+	copy(rhs);
+	return(*this);
+    }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

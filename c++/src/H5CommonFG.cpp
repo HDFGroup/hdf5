@@ -1018,7 +1018,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
       throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
    }
    name = H5std_string(name_C);
-   delete [] name_C;
+   delete []name_C;
    return (name_len);
 }
 

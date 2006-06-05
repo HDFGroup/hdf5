@@ -28,7 +28,7 @@ namespace H5 {
 class H5_DLLCPP PredType : public AtomType {
    public:
 	// Returns this class name
-	virtual H5std_string fromClass () const { return ("PredType"); }
+	virtual H5std_string fromClass () const { return("PredType"); }
 
 	// Makes a copy of the predefined type and stores the new
 	// id in the left hand side object.
@@ -159,6 +159,7 @@ class H5_DLLCPP PredType : public AtomType {
 	static const PredType NATIVE_INT64;
 	static const PredType NATIVE_UINT64;
 
+// LEAST types
 #if H5_SIZEOF_INT_LEAST8_T != 0
 	static const PredType NATIVE_INT_LEAST8;
 #endif /* H5_SIZEOF_INT_LEAST8_T */
@@ -187,6 +188,7 @@ class H5_DLLCPP PredType : public AtomType {
 	static const PredType NATIVE_UINT_LEAST64;
 #endif /* H5_SIZEOF_UINT_LEAST64_T */
 
+// FAST types
 #if H5_SIZEOF_INT_FAST8_T != 0
 	static const PredType NATIVE_INT_FAST8;
 #endif /* H5_SIZEOF_INT_FAST8_T */

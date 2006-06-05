@@ -53,7 +53,7 @@ extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_
 //		set it to a valid HDF5 id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::H5Object() : IdComponent() {}
+H5Object::H5Object() : IdComponent(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5Object overloaded constructor (protected)

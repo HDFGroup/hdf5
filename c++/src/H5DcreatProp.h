@@ -25,6 +25,9 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Default dataset creation property list.
 	static const DSetCreatPropList DEFAULT;
 
+	// Creates a dataset creation property list.
+	DSetCreatPropList();
+
 	// Queries whether all the filters set in this property list are
 	// available currently.
 	bool allFiltersAvail();
@@ -102,9 +105,6 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
-
-	// Default constructor: creates a stub dataset creation property list.
-	DSetCreatPropList();
 
 	// Copy constructor: creates a copy of a DSetCreatPropList object.
 	DSetCreatPropList(const DSetCreatPropList& orig);

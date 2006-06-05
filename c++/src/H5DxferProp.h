@@ -24,6 +24,9 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
 	static const DSetMemXferPropList DEFAULT;
 
+	// Creates a dataset memory and transfer property list.
+	DSetMemXferPropList();
+
 #ifdef H5_WANT_H5_V1_4_COMPAT
         // Sets type conversion and background buffers.
         void setBuffer( hsize_t size, void* tconv, void* bkg ) const;
@@ -45,10 +48,10 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         size_t getBuffer( void** tconv, void** bkg ) const;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
-	// Sets B-tree split ratios for a dataset transfer property list
+	// Sets B-tree split ratios for a dataset transfer property list.
 	void setBtreeRatios( double left, double middle, double right ) const;
 
-	// Gets B-tree split ratios for a dataset transfer property list
+	// Gets B-tree split ratios for a dataset transfer property list.
 	void getBtreeRatios( double& left, double& middle, double& right ) const;
 
 	// Sets the dataset transfer property list status to TRUE or FALSE.
@@ -58,16 +61,16 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	bool getPreserve() const;
 
 	// Sets the memory manager for variable-length datatype
-	// allocation in H5Dread and H5Dvlen_reclaim
+	// allocation in H5Dread and H5Dvlen_reclaim.
 	void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info,
 				H5MM_free_t free, void* free_info ) const;
 
 	// alloc and free are set to NULL, indicating that system
-	// malloc and free are to be used
+	// malloc and free are to be used.
 	void setVlenMemManager() const;
 
 	// Gets the memory manager for variable-length datatype
-	// allocation in H5Dread and H5Tvlen_reclaim
+	// allocation in H5Dread and H5Tvlen_reclaim.
 	void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info,
 				H5MM_free_t& free, void** free_info ) const;
 
@@ -97,18 +100,15 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Determines whether error-detection is enabled for dataset reads.
 	H5Z_EDC_t getEDCCheck();
 
-	// Returns this class name
+	// Returns this class name.
 	virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
-
-	// Default constructor: creates a dataset memory and transfer prop list.
-	DSetMemXferPropList();
 
 	// Copy constructor: makes a copy of a DSetMemXferPropList object.
 	DSetMemXferPropList(const DSetMemXferPropList& orig);
 
 	// Creates a copy of an existing dataset memory and transfer
 	// property list using the property list id.
-	DSetMemXferPropList (const hid_t plist_id);
+	DSetMemXferPropList(const hid_t plist_id);
 
 	// Noop destructor
 	virtual ~DSetMemXferPropList();

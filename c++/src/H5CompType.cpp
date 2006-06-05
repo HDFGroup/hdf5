@@ -121,8 +121,7 @@ H5std_string CompType::getMemberName( unsigned member_num ) const
 	throw DataTypeIException("CompType::getMemberName",
 		"H5Tget_member_name returns NULL for member name");
     }
-    // convert C string to string
-    H5std_string member_name = H5std_string(member_name_C); 
+    H5std_string member_name = H5std_string(member_name_C); // convert C string to string
     HDfree(member_name_C); // free the C string
     return( member_name ); // return the member name string
 }
@@ -176,14 +175,6 @@ size_t CompType::getMemberOffset( unsigned member_num ) const
    return( offset );
 }
 
-// Returns the dimensionality of the member.
-int CompType::getMemberDims( unsigned member_num, size_t* dims, int* perm ) const
-{
-   throw DataTypeIException( "Error: getMemberDims is no longer supported." );
-   return (-1); // unreachable statement; but without it, the compiler
-		// will complain
-}
-
 //--------------------------------------------------------------------------
 // Function:	CompType::getMemberClass
 ///\brief	Gets the type class of the specified member.
@@ -217,9 +208,9 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
       return( member_type_id );
    else
    {
-	// p_get_member_type is private, use caller's function name for api
-      throw DataTypeIException("CompType::p_get_member_type",
-		"H5Tget_member_type failed");
+      // p_get_member_type is private, caller will catch this exception
+      // then throw another with appropriate API name
+      throw DataTypeIException("", "H5Tget_member_type failed");
    }
 }
 
@@ -234,8 +225,13 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 //--------------------------------------------------------------------------
 DataType CompType::getMemberDataType( unsigned member_num ) const
 {
-   DataType datatype(p_get_member_type(member_num));
-   return(datatype);
+   try {
+      DataType datatype(p_get_member_type(member_num));
+      return(datatype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberDataType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -245,12 +241,17 @@ DataType CompType::getMemberDataType( unsigned member_num ) const
 ///\param	member_num - IN: Zero-based index of the member
 ///\return	ArrayType instance
 ///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
 ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 {
-   ArrayType arraytype(p_get_member_type(member_num));
-   return(arraytype);
+   try {
+      ArrayType arraytype(p_get_member_type(member_num));
+      return(arraytype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberArrayType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -264,8 +265,13 @@ ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 //--------------------------------------------------------------------------
 CompType CompType::getMemberCompType( unsigned member_num ) const
 {
-   CompType comptype(p_get_member_type(member_num));
-   return(comptype);
+   try {
+      CompType comptype(p_get_member_type(member_num));
+      return(comptype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberCompType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -279,8 +285,13 @@ CompType CompType::getMemberCompType( unsigned member_num ) const
 //--------------------------------------------------------------------------
 EnumType CompType::getMemberEnumType( unsigned member_num ) const
 {
-   EnumType enumtype(p_get_member_type(member_num));
-   return(enumtype);
+   try {
+      EnumType enumtype(p_get_member_type(member_num));
+      return(enumtype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -294,8 +305,13 @@ EnumType CompType::getMemberEnumType( unsigned member_num ) const
 //--------------------------------------------------------------------------
 IntType CompType::getMemberIntType( unsigned member_num ) const
 {
-   IntType inttype(p_get_member_type(member_num));
-   return(inttype);
+   try {
+      IntType inttype(p_get_member_type(member_num));
+      return(inttype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberIntType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -309,8 +325,13 @@ IntType CompType::getMemberIntType( unsigned member_num ) const
 //--------------------------------------------------------------------------
 FloatType CompType::getMemberFloatType( unsigned member_num ) const
 {
-   FloatType floatype(p_get_member_type(member_num));
-   return(floatype);
+   try {
+      FloatType floatype(p_get_member_type(member_num));
+      return(floatype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberFloatType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -324,8 +345,13 @@ FloatType CompType::getMemberFloatType( unsigned member_num ) const
 //--------------------------------------------------------------------------
 StrType CompType::getMemberStrType( unsigned member_num ) const
 {
-   StrType strtype(p_get_member_type(member_num));
-   return(strtype);
+   try {
+      StrType strtype(p_get_member_type(member_num));
+      return(strtype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberStrType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -335,12 +361,17 @@ StrType CompType::getMemberStrType( unsigned member_num ) const
 ///\param	member_num - IN: Zero-based index of the member
 ///\return	VarLenType instance
 ///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
 VarLenType CompType::getMemberVarLenType( unsigned member_num ) const
 {
-   VarLenType varlentype(p_get_member_type(member_num));
-   return(varlentype);
+   try {
+      VarLenType varlentype(p_get_member_type(member_num));
+      return(varlentype);
+   }
+   catch (DataTypeIException E) {
+      throw DataTypeIException("CompType::getMemberVarLenType", E.getDetailMsg());
+   }
 }
 
 /* old style of getMemberType - using overloads; new style above

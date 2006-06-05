@@ -40,10 +40,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	void* Reference(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual H5std_string fromClass () const { return ("Group"); }
+	virtual H5std_string fromClass () const { return("Group"); }
 
-        // Throw group exception.
-        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
+	// Throw group exception.
+	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
 	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;
@@ -57,8 +57,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Destructor
 	virtual ~Group();
 
-        // Creates a copy of an existing group using its id.
-        Group( const hid_t group_id );
+	// Creates a copy of an existing group using its id.
+	Group( const hid_t group_id );
 
 };
 #ifndef H5_NO_NAMESPACE

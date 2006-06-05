@@ -17,7 +17,6 @@
 #else
 #include <iostream>
 #endif
-
 #include <string>
 
 #include "H5Include.h"
@@ -97,15 +96,16 @@ DataType::DataType(const DataType& original) : H5Object(original) {}
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-    // reset the identifier of this instance, H5Tclose will be called
-    // if needed
+    // close the current data type before copying like_type to this object
     try {
-	decRefCount();
+	close();
     }
     catch (Exception close_error) {
 	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
@@ -113,7 +113,6 @@ void DataType::copy( const DataType& like_type )
 
     // call C routine to copy the datatype
     id = H5Tcopy( like_type.getId() );
-
     if( id < 0 )
 	throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
@@ -131,8 +130,11 @@ void DataType::copy( const DataType& like_type )
 //--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
-   copy(rhs);
-   return(*this);
+    if (this != &rhs)
+    {
+	copy(rhs);
+	return(*this);
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -345,8 +347,7 @@ H5T_class_t DataType::getClass() const
    // Return datatype class identifier if successful
    if( type_class == H5T_NO_CLASS )
    {
-      throw DataTypeIException(inMemFunc("getClass"),
-		"H5Tget_class returns H5T_NO_CLASS");
+      throw DataTypeIException(inMemFunc("getClass"), "H5Tget_class returns H5T_NO_CLASS");
    }
    return( type_class );
 }
@@ -364,8 +365,7 @@ size_t DataType::getSize() const
    size_t type_size = H5Tget_size( id );
    if( type_size <= 0 ) // valid data types are never zero size
    {
-      throw DataTypeIException(inMemFunc("getSize"),
-		"H5Tget_size returns invalid datatype size");
+      throw DataTypeIException(inMemFunc("getSize"), "H5Tget_size returns invalid datatype size");
    }
    return( type_size );
 }
@@ -512,21 +512,20 @@ void DataType::setTag( const H5std_string& tag ) const
 //--------------------------------------------------------------------------
 H5std_string DataType::getTag() const
 {
-   char* tag_Cstr = H5Tget_tag( id );
+    char* tag_Cstr = H5Tget_tag( id );
 
-   // if the tag C-string returned is not NULL, convert it to C++ string
-   // and return it, otherwise, raise an exception
-   if( tag_Cstr != NULL )
-   {
-      // convert C string to string
-      H5std_string tag = H5std_string(tag_Cstr); 
-      HDfree(tag_Cstr); // free the C string
-      return (tag); // return the tag
-   }
-   else
-   {
-      throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
-   }
+    // if the tag C-string returned is not NULL, convert it to C++ string
+    // and return it, otherwise, raise an exception
+    if( tag_Cstr != NULL )
+    {
+	H5std_string tag = H5std_string(tag_Cstr); // C string to string object
+	HDfree(tag_Cstr); // free the C string
+	return (tag); // return the tag
+    }
+    else
+    {
+	throw DataTypeIException(inMemFunc("getTag"), "H5Tget_tag returns NULL for tag");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -570,7 +569,7 @@ bool DataType::isVariableStr() const
    else
    {
       throw DataTypeIException(inMemFunc("isVariableStr"),
-                		"H5Tis_variable_str returns negative value");
+				"H5Tis_variable_str returns negative value");
    }
 }
 
@@ -581,7 +580,7 @@ bool DataType::isVariableStr() const
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -601,7 +600,7 @@ void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected
 //		function for it to pass to the C API H5Rcreate
@@ -641,7 +640,7 @@ void* DataType::Reference(const H5std_string& name) const
 ///			\li \c H5G_GROUP Object is a group.
 ///			\li \c H5G_DATASET   Object is a dataset.
 ///			\li \c H5G_TYPE Object is a named datatype
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
@@ -660,7 +659,7 @@ H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::IdComponentException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
@@ -683,13 +682,16 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void DataType::close()
 {
-    herr_t ret_value = H5Tclose(id);
-    if( ret_value < 0 )
+    if (p_valid_id(id))
     {
-	throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+	herr_t ret_value = H5Tclose(id);
+	if( ret_value < 0 )
+	{
+	    throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
+	}
+	// reset the id because the datatype that it represents is now closed
+	id = 0;
     }
-    // reset the id because the datatype that it represents is now closed
-    id = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -697,14 +699,15 @@ void DataType::close()
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
-    // The datatype id will be closed properly
     try {
-	decRefCount();
+	close();
     }
     catch (Exception close_error) {
 	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;

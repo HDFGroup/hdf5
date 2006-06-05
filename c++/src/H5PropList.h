@@ -94,7 +94,7 @@ class H5_DLLCPP PropList : public IdComponent {
 	void removeProp(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual H5std_string fromClass () const { return ("PropList"); }
+	virtual H5std_string fromClass () const { return("PropList"); }
 
 	// Default constructor: creates a stub PropList object.
 	PropList();

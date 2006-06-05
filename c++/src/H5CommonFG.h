@@ -147,6 +147,7 @@ class H5_DLLCPP CommonFG {
 	/// For subclasses, H5File and Group, to return the correct
 	/// object id, i.e. file or group id.
 	virtual hid_t getLocId() const = 0;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.

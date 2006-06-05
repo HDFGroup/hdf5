@@ -25,12 +25,12 @@ namespace H5 {
 
 class H5_DLLCPP VarLenType : public DataType {
    public:
-	// Returns this class name
-	virtual H5std_string fromClass () const { return ("VarLenType"); }
-
 	// Constructor that creates a variable-length datatype based
 	// on the specified base type.
 	VarLenType(const DataType* base_type);
+
+	// Returns this class name
+	virtual H5std_string fromClass () const { return("VarLenType"); }
 
 	// Copy constructor: makes copy of the original object.
 	VarLenType( const VarLenType& original );
@@ -44,7 +44,6 @@ class H5_DLLCPP VarLenType : public DataType {
    protected:
 	// Default constructor
 	VarLenType();
-
 };
 #ifndef H5_NO_NAMESPACE
 }

@@ -53,7 +53,7 @@ class H5_DLLCPP FloatType : public AtomType {
 	void setNorm( H5T_norm_t norm ) const;
 
 	// Returns this class name
-	virtual H5std_string fromClass () const { return ("FloatType"); }
+	virtual H5std_string fromClass () const { return("FloatType"); }
 
 	// Default constructor
 	FloatType();

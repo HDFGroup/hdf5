@@ -85,7 +85,7 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 ///\param	dataspace - IN: Dataspace with selection
 ///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -105,7 +105,7 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 ///		a reference to an HDF5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 ///\par Description
 //		This function passes H5R_OBJECT and -1 to the protected
 //		function for it to pass to the C API H5Rcreate
@@ -140,17 +140,22 @@ void* Group::Reference(const H5std_string& name) const
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param		ref      - IN: Reference to query
 ///\param		ref_type - IN: Type of reference to query
-// Return	An object type, which can be one of the following:
-//			H5G_LINK Object is a symbolic link.
-//			H5G_GROUP Object is a group.
-//			H5G_DATASET   Object is a dataset.
-//			H5G_TYPE Object is a named datatype
-// Exception	H5::IdComponentException
+///\return	An object type, which can be one of the following:
+///			H5G_LINK Object is a symbolic link.
+///			H5G_GROUP Object is a group.
+///			H5G_DATASET   Object is a dataset.
+///			H5G_TYPE Object is a named datatype
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   return(p_get_obj_type(ref, ref_type));
+   try {
+      return(p_get_obj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::getObjType", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -159,13 +164,18 @@ H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
 ///\param	ref      - IN: Reference to get region of
 ///\param	ref_type - IN: Type of reference to get region of - default
 ///\return	DataSpace instance
-///\exception	H5::IdComponentException
+///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   DataSpace dataspace(p_get_region(ref, ref_type));
-   return(dataspace);
+   try {
+      DataSpace dataspace(p_get_region(ref, ref_type));
+      return(dataspace);
+   }
+   catch (IdComponentException E) {
+      throw GroupIException("Group::getRegion", E.getDetailMsg());
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -177,13 +187,16 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 void Group::close()
 {
-   herr_t ret_value = H5Gclose( id );
-   if( ret_value < 0 )
-   {
-      throw GroupIException("Group::close", "H5Gclose failed");
-   }
-   // reset the id because the group that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Gclose( id );
+	if( ret_value < 0 )
+	{
+	    throw GroupIException("Group::close", "H5Gclose failed");
+	}
+	// reset the id because the group that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -212,17 +225,18 @@ void Group::throwException(const H5std_string& func_name, const H5std_string& ms
 ///\brief	Properly terminates access to this group.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 Group::~Group()
 {
-   // The group id will be closed properly
     try {
-        decRefCount();
+	close();
     }
     catch (Exception close_error) {
-        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
+	cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 }
 

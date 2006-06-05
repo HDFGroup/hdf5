@@ -51,8 +51,8 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Gets the name of this file.
 	H5std_string getFileName() const;
 
-        // Retrieves the file size of an opened file.
-        hsize_t getFileSize() const;
+	// Retrieves the file size of an opened file.
+	hsize_t getFileSize() const;
 
 	// Returns the amount of free space in the file.
 	hssize_t getFreeSpace() const;
@@ -93,7 +93,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void* Reference(const H5std_string& name) const;
 
 	// Returns this class name
-	virtual H5std_string fromClass () const { return ("H5File"); }
+	virtual H5std_string fromClass () const { return("H5File"); }
 
 	// Throw file exception.
 	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;

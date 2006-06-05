@@ -284,13 +284,16 @@ hsize_t Attribute::getStorageSize() const
 //--------------------------------------------------------------------------
 void Attribute::close()
 {
-   herr_t ret_value = H5Aclose(id);
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::close", "H5Aclose failed");
-   }
-   // reset the id because the attribute that it represents is now closed
-   id = 0;
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Aclose(id);
+	if( ret_value < 0 )
+	{
+	    throw AttributeIException("Attribute::close", "H5Aclose failed");
+	}
+	// reset the id because the attribute that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -298,18 +301,19 @@ void Attribute::close()
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {
-   // The attribute id will be closed properly
-   try {
-      decRefCount();
-   }
-   catch (Exception close_error) {
-      cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
-   }
+    try {
+	close();
+    }
+    catch (Exception close_error) {
+	cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
+    }
 }
 
 #ifndef H5_NO_NAMESPACE

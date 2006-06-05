@@ -46,7 +46,7 @@ const DataSpace DataSpace::ALL( H5S_ALL );
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
+DataSpace::DataSpace( H5S_class_t type ) : IdComponent(0)
 {
    id = H5Screate( type );
    if( id < 0 )
@@ -64,7 +64,7 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) : IdComponent()
+DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) : IdComponent(0)
 {
    id = H5Screate_simple( rank, dims, maxdims );
    if( id < 0 )
@@ -98,21 +98,22 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
-   // If this object has a valid id, appropriately decrement reference
-   // counter and close the id.
+   // If this object has an hdf5 valid id, close it
    if( id != H5S_ALL ) {
       try {
-         decRefCount();
+         close();
       }
       catch (Exception close_error) {
          throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
       }
-   }  // if
+   }  // end if
 
    // call C routine to copy the dataspace
    id = H5Scopy( like_space.getId() );
@@ -134,8 +135,11 @@ void DataSpace::copy( const DataSpace& like_space )
 //--------------------------------------------------------------------------
 DataSpace& DataSpace::operator=( const DataSpace& rhs )
 {
-   copy(rhs);
-   return(*this);
+    if (this != &rhs)
+    {
+	copy(rhs);
+	return(*this);
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -408,7 +412,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::getSelectElemPointlist",
-                "H5Sget_select_elem_pointlist failed");
+		"H5Sget_select_elem_pointlist failed");
    }
 }
 
@@ -431,7 +435,7 @@ void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::getSelectBounds",
-                "H5Sget_select_bounds failed");
+		"H5Sget_select_bounds failed");
    }
 }
 
@@ -458,7 +462,7 @@ void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, co
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::selectElements",
-                "H5Sselect_elements failed");
+		"H5Sselect_elements failed");
    }
 }
 
@@ -491,7 +495,7 @@ void DataSpace::selectNone () const
    if( ret_value < 0 )
    {
       throw DataSpaceIException("DataSpace::selectNone",
-                "H5Sselect_none failed");
+		"H5Sselect_none failed");
    }
 }
 
@@ -514,7 +518,7 @@ bool DataSpace::selectValid () const
    else
    {
       throw DataSpaceIException("DataSpace::selectValid",
-                "H5Sselect_valid returns negative value");
+		"H5Sselect_valid returns negative value");
    }
 }
 
@@ -553,18 +557,17 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 //--------------------------------------------------------------------------
 void DataSpace::close()
 {
-   if( id != H5S_ALL ) // not a constant, should call H5Sclose
-   {
-      herr_t ret_value = H5Sclose(id);
-      if( ret_value < 0 )
-      {
-	 throw DataSpaceIException("DataSpace::close", "H5Sclose failed");
-      }
-      // reset the id because the dataspace that it represents is now closed
-      id = 0;
-   }
-   else // cannot close a constant
-      throw DataSpaceIException("DataSpace::close", "Cannot close a constant");
+    // check if id is a valid hdf5 object id before trying to close it
+    if (p_valid_id(id))
+    {
+	herr_t ret_value = H5Sclose(id);
+	if( ret_value < 0 )
+	{
+	    throw DataSpaceIException("DataSpace::close", "H5Sclose failed");
+	}
+	// reset the id because the dataspace that it represents is now closed
+	id = 0;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -572,21 +575,19 @@ void DataSpace::close()
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {
-   // If this object has a valid id, appropriately decrement reference
-   // counter and close the id.
-   if( id != H5S_ALL ) {
-      try {
-         decRefCount();
-      }
-      catch (Exception close_error) {
-	 cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
-      }
-   }  // if
+    try {
+	close();
+    }
+    catch (Exception close_error) {
+	cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
+    }
 }
 
 #ifndef H5_NO_NAMESPACE
