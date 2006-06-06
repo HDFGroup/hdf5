@@ -252,40 +252,22 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
         /* all chunks are written by all the processes in an interleaved way*/
         case write_all:
 
-            for (i=0; i<nchunks/mpi_size; i++){ 
+	    memset(buffer, mpi_rank+1, CHUNKSIZE);
+	    count[0] = 1;
+	    stride[0] = 1;
+	    block[0] = chunk_dims[0];
+            for (i=0; i<(nchunks+mpi_size-1)/mpi_size; i++){ 
+		if (i*mpi_size+mpi_rank < nchunks){
+		    offset[0] = (i*mpi_size+mpi_rank)*chunk_dims[0];
 
-                memset(buffer, mpi_rank+1, CHUNKSIZE);
+		    hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
+		    VRFY((hrc >= 0), "");
 
-                offset[0] = (i*mpi_size+mpi_rank)*chunk_dims[0];
-                count[0] = 1;
-                stride[0] = 1;
-                block[0] = chunk_dims[0];
+		    /* Write the buffer out */
+		    hrc = H5Dwrite(*dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
+		    VRFY((hrc >= 0), "H5Dwrite");
+		}
 
-                hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
-                VRFY((hrc >= 0), "");
-
-                /* Write the buffer out */
-                hrc = H5Dwrite(*dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
-                VRFY((hrc >= 0), "H5Dwrite");
-
-            }
-
-            /* remainder writing */
-            if (mpi_rank < nchunks%mpi_size){
-
-                memset(buffer, mpi_rank+1, CHUNKSIZE);
-
-                offset[0] = ((nchunks/mpi_size)*mpi_size+mpi_rank)*chunk_dims[0];
-                count[0] = 1;
-                stride[0] = 1;
-                block[0] = chunk_dims[0];
-
-                hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
-                VRFY((hrc >= 0), "");
-
-                /* Write the buffer out */
-                hrc = H5Dwrite(*dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
-                VRFY((hrc >= 0), "H5Dwrite");
             }
 
             break;
@@ -337,13 +319,13 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
 
 /*
  * This routine verifies the data written in the dataset. It does one of the
- * three cases according to the value of parameter `write'.
+ * three cases according to the value of parameter `write_pattern'.
  * 1. it returns correct fill values though the dataset has not been written;
  * 2. it still returns correct fill values though only a small part is written;
  * 3. it returns correct values when the whole dataset has been written in an
  *    interleaved pattern.
  */
-void verify_data(const char *filename, int nchunks, write_type write, int close, hid_t *file_id, hid_t *dataset)
+void verify_data(const char *filename, int nchunks, write_type write_pattern, int close, hid_t *file_id, hid_t *dataset)
 {
     /* HDF5 gubbins */
     hid_t    dataspace, memspace;     /* HDF5 file identifier */
@@ -394,21 +376,15 @@ void verify_data(const char *filename, int nchunks, write_type write, int close,
     dataspace = H5Dget_space(*dataset);            
     VRFY((dataspace >= 0), "");
 
-    /* expected value in the dataset */
-    if (write == all)
-        value = mpi_rank + 1;
-    else
-        value =0;
+    /* all processes check all chunks. */
+    count[0] = 1;
+    stride[0] = 1;
+    block[0] = chunk_dims[0];
+    for (i=0; i<nchunks; i++){ 
+	/* reset buffer values */
+	memset(buffer, -1, CHUNKSIZE);
 
-    /* checks main portion of the dataset */
-    for (i=0; i<nchunks/mpi_size; i++){ 
-
-        memset(buffer, -1, CHUNKSIZE);
-
-        offset[0] = (i*mpi_size+mpi_rank)*chunk_dims[0];
-        count[0] = 1;
-        stride[0] = 1;
-        block[0] = chunk_dims[0];
+        offset[0] = i*chunk_dims[0];
 
         hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
         VRFY((hrc >= 0), "");
@@ -417,49 +393,25 @@ void verify_data(const char *filename, int nchunks, write_type write, int close,
         hrc = H5Dread(*dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
         VRFY((hrc >= 0), "H5Dread");
 
-        /* adjust expected value for sec_last chunk */
-        if (i == nchunks/mpi_size-1 && !(nchunks%mpi_size) && write==sec_last){
-            if (mpi_rank == mpi_size-2)
-                value = 100;
-            else
-                value = 0;
-        }
+        /* set expected value according the write pattern */
+	switch (write_pattern) {
+	    case all:
+		value = i%mpi_size + 1;
+		break;
+	    case none:
+		value = 0;
+		break;
+            case sec_last:
+		if (i==(nchunks-2))
+		    value = 100;
+		else
+		    value = 0;
+	}
 
         /* verify content of the chunk */
         for (index = 0; index < CHUNKSIZE; index++)
             VRFY((buffer[index] == value), "data verification");
         
-    }
-
-    /* remainder checking */
-    if (mpi_rank < nchunks%mpi_size){
-
-        memset(buffer, -1, CHUNKSIZE);
-
-        offset[0] = ((nchunks/mpi_size)*mpi_size+mpi_rank)*chunk_dims[0];
-        count[0] = 1;
-        stride[0] = 1;
-        block[0] = chunk_dims[0];
-
-        hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
-        VRFY((hrc >= 0), "");
-
-        /* read the buffer out */
-        hrc = H5Dread(*dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
-        VRFY((hrc >= 0), "H5Dread");
-
-        /* adjust expected value for sec_last chunk */
-        if (write == sec_last){
-            if (mpi_rank == nchunks%mpi_size-2)
-                value = 100;
-            else
-                value = 0;
-        }
-
-        /* verify content of the chunk */
-        for (index = 0; index < CHUNKSIZE; index++)
-            VRFY((buffer[index] == value), "data verification");
-    
     }
 
     hrc = H5Sclose (dataspace);
