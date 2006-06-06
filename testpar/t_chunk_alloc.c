@@ -49,7 +49,7 @@ get_filesize(const char *filename)
     return(filesize);
 }
 
-typedef enum write_ {
+typedef enum write_pattern {
     none,
     sec_last,
     all
@@ -68,7 +68,7 @@ typedef enum access_ {
  * routine will open this in parallel for extension test.
  */
 void
-create_chunked_dataset(const char *filename, int nchunks, write_type write)
+create_chunked_dataset(const char *filename, int nchunks, write_type write_pattern)
 {
     hid_t       file_id, dataset;                          /* handles */
     hid_t       dataspace,memspace;  
@@ -124,7 +124,7 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write)
 	dataset = H5Dcreate (file_id, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, cparms);
 	VRFY((dataset >= 0), "");
 
-	switch (write) {
+	switch (write_pattern) {
 
 	    /* writes only the second to last chunk */
 	    case sec_last:
