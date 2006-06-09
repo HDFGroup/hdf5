@@ -1468,10 +1468,14 @@ END SUBROUTINE h5tget_class_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_cset</code> retrieves the character set type 
         of a string datatype.  Valid character set types are:
-        <dl><ul>
-            <dt>H5T_CSET_ASCII (<code>0</code>)
-               <dd>Character set is US ASCII
-        </ul></dl>
+        <table>
+            <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td><code>H5T_CSET_ASCII</code> &nbsp; 
+            </td><td>(<code>0</code>)
+            </td><td>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>Character set is US ASCII.
+            </td></tr>
+        </table>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -2137,7 +2141,7 @@ END SUBROUTINE h5tget_member_value_f
         <p>
 	<code>H5Tget_native_type</code> is designed primarily for
 	use with intenger and floating point datatypes.
-	Time, bifield, opaque, and reference datatypes are returned
+	String, time, bitfield, opaque, and reference datatypes are returned
 	as a copy of <code>type_id</code>.
         <p>
         The identifier returned by <code>H5Tget_native_type</code> 
@@ -3210,15 +3214,19 @@ SUBROUTINE
 <dt><strong>Purpose:</strong>
     <dd>Sets character set to be used.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tset_cset</code> the character set to be used.
+    <dd><code>H5Tset_cset</code> sets the character set to be used.
         <p>
         HDF5 is able to distinguish between character sets of different
         nationalities and to convert between them to the extent possible.
         Valid character set types are:
-        <ul> <dl>
-            <dt>H5T_CSET_ASCII (<code>0</code>)
-               <dd>Character set is US ASCII.
-        </dl> </ul>
+        <table>
+            <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td><code>H5T_CSET_ASCII</code> &nbsp; 
+            </td><td>(<code>0</code>)
+            </td><td>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>Character set is US ASCII.
+            </td></tr>
+        </table>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -4247,7 +4255,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 February 2006");
+document.writeln("Last modified: 8 June 2006");
 -->
 </SCRIPT>
  
