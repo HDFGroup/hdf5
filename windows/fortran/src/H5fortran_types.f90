@@ -23,7 +23,7 @@
         INTEGER, PARAMETER :: HSIZE_T = 8
         INTEGER, PARAMETER :: HSSIZE_T = 8
         INTEGER, PARAMETER :: SIZE_T = 4
-        INTEGER, PARAMETER :: INT = 4
+        INTEGER, PARAMETER :: Fortran_INTEGER = 4
         INTEGER, PARAMETER :: HID_T = 4
         INTEGER, PARAMETER :: Fortran_REAL = 4
         INTEGER, PARAMETER :: Fortran_DOUBLE = 8
