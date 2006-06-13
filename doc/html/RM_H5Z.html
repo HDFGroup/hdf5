@@ -175,7 +175,7 @@ data compression.
 <dl>
   <dt><strong>Name:</strong> <a name="Compression-FilterAvail">H5Zfilter_avail</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Zfilter_avail</code>(<em>H5Z_filter_t</em> <code>filter</code>)
+    <dd><em>htri_t</em> <code>H5Zfilter_avail</code>(<em>H5Z_filter_t</em> <code>filter</code>)
   <dt><strong>Purpose:</strong>
     <dd>Determines whether a filter is available.
   <dt><strong>Description:</strong>
@@ -184,13 +184,14 @@ data compression.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>H5Z_filter_t</em>&nbsp;<code>filter&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5Z_filter_t</em>&nbsp;<code>filter&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Filter identifier.
               See the introduction to this section of the reference manual 
               for a list of valid filter identifiers.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
+    <dd>Returns a Boolean value (<code>TRUE</code>/<code>FALSE</code>) 
+        if successful; 
         otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong> h5zfilter_avail_f
     <dd>
@@ -707,7 +708,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified:  2 September 2004");
+document.writeln("Last modified:  13 June 2006");
 -->
 </SCRIPT>
  

@@ -1886,14 +1886,14 @@ END SUBROUTINE h5pget_alignment_f
 	This property is set in the dataset creation property list 
 	<code>plist_id</code>.
         <p>
-	The timing setting is returned in <code>fill_time</code> as one of the 
+	The timing setting is returned in <code>alloc_time</code> as one of the 
 	following values:
 	<table border=0 >
            <tr valign="top"><td rowspan="4">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
 	     <code>H5D_ALLOC_TIME_DEFAULT</code>&nbsp;&nbsp; 
              </td><td>
 	     Uses the default allocation time, based on the dataset storage method.<br>
-	     See the <code>fill_time</code> description in 
+	     See the <code>alloc_time</code> description in 
 	     <a href="#Property-SetAllocTime">H5Pset_alloc_time</a> for 
 	     default allocation times for various storage methods.
 	   </td></tr><tr valign="top"><td>
@@ -3480,21 +3480,25 @@ SUBROUTINE
   <dd>Returns the file close degree. 
   <dt><strong>Description:</strong> 
   <dd><code>H5Pget_fclose_degree</code> returns the current setting of the file 
-    close degree property <code>fc_degree</code> in the file access property list 
-    <code>fapl_id</code>.  
-    <p> The value of <code>fc_degree</code> determines how aggressively <code>H5Fclose</code> 
-      deals with objects within a file that remain open when <code>H5Fclose</code> 
-      is called to close that file.  <code>fc_degree</code> can have any one of 
-      four valid values as described above in <a href="#Property-SetFcloseDegree"><code>H5Pset_fclose_degree</code></a>. 
+    close degree property <code>fc_degree</code> in the file access property 
+    list <code>fapl_id</code>. 
+    <p>
+    The value of <code>fc_degree</code> determines how aggressively 
+    <code>H5Fclose</code> deals with objects within a file that remain 
+    open when <code>H5Fclose</code> is called to close that file. 
+    <code>fc_degree</code> can have any one of four valid values as 
+    described in 
+    <a href="#Property-SetFcloseDegree"><code>H5Pset_fclose_degree</code></a>. 
   <dt><strong>Parameters:</strong> 
     <ul><table>
       <tr>
-	      <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+          <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
           <td valign="top">IN: File access property list identifier.</td></tr>
       <tr>
-	      <td valign="top"><em>H5F_close_degree_t&nbsp;*</em><code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
-          <td valign="top">OUT: Pointer to a location to which to return the file close degree 
-            property, the value of <code>fc_degree</code>.</td></tr>
+          <td valign="top"><em>H5F_close_degree_t&nbsp;*</em><code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+          <td valign="top">OUT: Pointer to a location to which to return the 
+              file close degree property, the value of <code>fc_degree</code>.
+      </td></tr>
     </table></ul>
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful. Otherwise returns a negative 
@@ -3516,7 +3520,7 @@ SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
 END SUBROUTINE h5pget_fclose_degree_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
+    	<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -3525,14 +3529,14 @@ END SUBROUTINE h5pget_fclose_degree_f
 <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>C</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.0</td>
+          <td valign="top">1.6.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+            Function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
@@ -5486,11 +5490,7 @@ END SUBROUTINE h5pisa_class_f
     For each property in the object, <code>iter_func</code> and
     the additional information specified below are passed to the
     <code>H5P_iterate_t</code> operator function.  
-	
-	<b><i>(NOTE: <code>iter_func</code> was changed to 
-	<code>H5P_iterate_t</code> in the preceding sentence.
-	Is this correct?)</i></b>
-	
+
     <p>
     The iteration begins with the <code>idx</code>-th property in 
     the object; the next element to be processed by the operator 
@@ -5506,7 +5506,7 @@ END SUBROUTINE h5pisa_class_f
         <ul> <dl>
             <dt><em>typedef herr_t</em> (*<code>H5P_iterate_t</code>)(
                                   <em>hid_t</em> <code>id</code>, 
-                                  <em>const char *</em><code>>name</code>, 
+                                  <em>const char *</em><code>name</code>, 
                                   <em>void *</em><code>iter_data</code>
 	        )
         </dl> </ul>
@@ -6224,7 +6224,7 @@ END SUBROUTINE h5pset_alignment_f
 	This property is set in the dataset creation property list 
 	<code>plist_id</code>.
         <p>
-	Timing is specified in <code>fill_time</code> with one of the 
+	Timing is specified in <code>alloc_time</code> with one of the 
 	following values:
 	<table border=0 >
            <tr valign="top"><td rowspan="4">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
@@ -10822,7 +10822,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 February 2006");
+document.writeln("Last modified: 13 June 2006");
 -->
 </SCRIPT>
  
