@@ -467,7 +467,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS H5_CFLAGS H5_CPPFLAGS H5_FCFLAGS H5_CXXFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F F9XSUFFIXFLAG FSEARCH_DIRS FC FCFLAGS ac_ct_FC F9XMODFLAG F9XMODEXT FCLIBS CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP LT_STATIC_EXEC PERL AR FORTRAN_SHARED_CONDITIONAL_TRUE FORTRAN_SHARED_CONDITIONAL_FALSE CXX_SHARED_CONDITIONAL_TRUE CXX_SHARED_CONDITIONAL_FALSE EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP F77 FFLAGS ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_ALL_CONDITIONAL_TRUE BUILD_ALL_CONDITIONAL_FALSE BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE BUILD_SHARED_ONLY_CONDITIONAL_TRUE BUILD_SHARED_ONLY_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS H5_CFLAGS H5_CPPFLAGS H5_FCFLAGS H5_CXXFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F F9XSUFFIXFLAG FSEARCH_DIRS FC FCFLAGS ac_ct_FC F9XMODFLAG F9XMODEXT FCLIBS CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP LT_STATIC_EXEC PERL AR FORTRAN_SHARED_CONDITIONAL_TRUE FORTRAN_SHARED_CONDITIONAL_FALSE CXX_SHARED_CONDITIONAL_TRUE CXX_SHARED_CONDITIONAL_FALSE EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP F77 FFLAGS ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP PTHREAD H5_LONE_COLON DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_ALL_CONDITIONAL_TRUE BUILD_ALL_CONDITIONAL_FALSE BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE BUILD_SHARED_ONLY_CONDITIONAL_TRUE BUILD_SHARED_ONLY_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -47240,6 +47240,32 @@ fi
 done
 
 
+echo "$as_me:$LINENO: checking if lone colon can be used as an argument" >&5
+echo $ECHO_N "checking if lone colon can be used as an argument... $ECHO_C" >&6
+if test "${hdf5_cv_lone_colon+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+  echo "int main(int argc, char * argv) {return 0;}" > conftest.c
+  $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
+  echo "./a.out :" > conftest.sh
+  chmod 700 conftest.sh
+
+  ./conftest.sh 2> conftest.out
+  TEST_OUTPUT=`cat conftest.out`
+
+  if test "X$TEST_OUTPUT" = "X"; then
+    hdf5_cv_lone_colon=yes
+  else
+    hdf5_cv_lone_colon=no
+  fi
+
+fi
+echo "$as_me:$LINENO: result: $hdf5_cv_lone_colon" >&5
+echo "${ECHO_T}$hdf5_cv_lone_colon" >&6
+
+ H5_LONE_COLON="$hdf5_cv_lone_colon"
+
 echo "$as_me:$LINENO: checking for an ANSI C-conforming const" >&5
 echo $ECHO_N "checking for an ANSI C-conforming const... $ECHO_C" >&6
 if test "${ac_cv_c_const+set}" = set; then
@@ -51885,7 +51911,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh examples/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/tools/Makefile hl/tools/gif2h5/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumpxml.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh examples/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile fortran/Makefile fortran/src/h5fc fortran/src/libhdf5_fortran.settings fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile hl/Makefile hl/src/Makefile hl/test/Makefile hl/tools/Makefile hl/tools/gif2h5/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -52525,6 +52551,7 @@ do
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "tools/h5dump/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
   "tools/h5dump/testh5dump.sh" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dump.sh" ;;
+  "tools/h5dump/testh5dumpxml.sh" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dumpxml.sh" ;;
   "tools/h5import/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5import/Makefile" ;;
   "tools/h5diff/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5diff/Makefile" ;;
   "tools/h5jam/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5jam/Makefile" ;;
@@ -52751,6 +52778,7 @@ s,@AM_MAKEFLAGS@,$AM_MAKEFLAGS,;t t
 s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
 s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
 s,@PTHREAD@,$PTHREAD,;t t
+s,@H5_LONE_COLON@,$H5_LONE_COLON,;t t
 s,@DEBUG_PKG@,$DEBUG_PKG,;t t
 s,@TRACE_API@,$TRACE_API,;t t
 s,@INSTRUMENT_LIBRARY@,$INSTRUMENT_LIBRARY,;t t

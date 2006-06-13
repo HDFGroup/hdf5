@@ -1623,6 +1623,31 @@ int main(void)
     ,)
 
 dnl ----------------------------------------------------------------------
+dnl Check that a lone colon can be used as an argument
+dnl This is not true on Cray X1, which interprets a lone colon as a
+dnl system command.
+dnl
+AC_CACHE_CHECK([if lone colon can be used as an argument],
+               [hdf5_cv_lone_colon],
+               [
+  echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
+  $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
+  echo "./a.out :" > conftest.sh
+  chmod 700 conftest.sh
+
+  ./conftest.sh 2> conftest.out
+  TEST_OUTPUT=`cat conftest.out`
+
+  if test "X$TEST_OUTPUT" = "X"; then
+    hdf5_cv_lone_colon=yes
+  else
+    hdf5_cv_lone_colon=no
+  fi
+               ])
+
+AC_SUBST(H5_LONE_COLON) H5_LONE_COLON="$hdf5_cv_lone_colon"
+
+dnl ----------------------------------------------------------------------
 dnl Check compiler characteristics
 dnl
 AC_C_CONST
@@ -3295,6 +3320,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
+                 tools/h5dump/testh5dumpxml.sh
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
                  tools/h5jam/Makefile

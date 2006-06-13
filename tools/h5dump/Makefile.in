@@ -55,7 +55,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testh5dump.sh.in $(top_srcdir)/config/commence.am \
+	$(srcdir)/testh5dump.sh.in $(srcdir)/testh5dumpxml.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h5dump$(EXEEXT)
@@ -66,7 +67,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testh5dump.sh
+CONFIG_CLEAN_FILES = testh5dump.sh testh5dumpxml.sh
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = h5dumpgentest$(EXEEXT)
@@ -174,6 +175,7 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
+H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HDF5_INTERFACES = @HDF5_INTERFACES@
@@ -346,7 +348,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 
 # Test programs and scripts
 TEST_PROG = h5dumpgentest
-TEST_SCRIPT = testh5dump.sh $(srcdir)/testh5dumpxml.sh
+TEST_SCRIPT = testh5dump.sh testh5dumpxml.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5dump$(EXEEXT)
 
@@ -404,6 +406,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 testh5dump.sh: $(top_builddir)/config.status $(srcdir)/testh5dump.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testh5dumpxml.sh: $(top_builddir)/config.status $(srcdir)/testh5dumpxml.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)

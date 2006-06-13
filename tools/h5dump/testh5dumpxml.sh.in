@@ -14,6 +14,8 @@
 #
 # Tests for the h5dump tool
 
+H5_LONE_COLON="@H5_LONE_COLON@"
+
 DUMPER=h5dump               # The tool name
 DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
 
@@ -83,6 +85,13 @@ TOOLTEST() {
    fi
 }
 
+# Print a "SKIP" message    
+SKIP() {
+         TESTING $DUMPER $@
+          echo  " -SKIP-"
+}
+
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###
@@ -145,7 +154,15 @@ TOOLTEST tnamed_dtype_attr.h5.xml --xml tnamed_dtype_attr.h5
 
 TOOLTEST tempty-dtd.h5.xml --xml --use-dtd tempty.h5
 TOOLTEST tempty-dtd-2.h5.xml --xml -u tempty.h5
-TOOLTEST tempty-nons.h5.xml --xml -X ":" tempty.h5
+
+# The lone colon here confuses some systems (Cray X1).  Skip
+# it if configure detects that this is a problem.
+if test "X$H5_LONE_COLON" != "Xno"; then 
+  TOOLTEST tempty-nons.h5.xml --xml -X ":" tempty.h5
+else
+  SKIP tempty-nons.h5.xml --xml -X ":" tempty.h5
+fi
+
 TOOLTEST tempty-nons-2.h5.xml --xml --xml-ns=":" tempty.h5
 
 ## Some of these combinations are syntactically correct but

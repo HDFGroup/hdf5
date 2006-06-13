@@ -776,7 +776,7 @@
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
-./tools/h5dump/testh5dumpxml.sh
+./tools/h5dump/testh5dumpxml.sh.in
 
 ./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
