@@ -157,6 +157,11 @@ New Features
 	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
         - Prefix default is changed from /usr/local to `pwd`/hdf5.
             AKC - 2003/07/09
+        - Added support to explicity enable stream_vfd or shared libraries
+          when using parallel via the '--enable-stream_vfd' and
+          '--enable-shared' options, respectively. If not explicity defined, 
+          These settings default to enabled when parallel is not used, 
+          and disabled when parallel is used. 
 
     Library:
     --------

@@ -363,13 +363,13 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the C++ interface compiled
 dnl
-AC_MSG_CHECKING([if c++ interface enabled])
-
 dnl We need to check for a C++ compiler unconditionally, since
 dnl AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 dnl miss even if c++ is not enabled.
   AC_PROG_CXX
   AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
+
+AC_MSG_CHECKING([if c++ interface enabled])
 
 AC_ARG_ENABLE([cxx],
               [AC_HELP_STRING([--enable-cxx],
@@ -458,12 +458,12 @@ int main(void) {
     echo no
     CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
   ])
-
-  dnl Change back to the C language
-  AC_LANG_POP(C++)
 else
   echo "no"
 fi
+
+dnl Change back to the C language
+AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
@@ -509,6 +509,208 @@ export AR
 
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+
+
+
+dnl ----------------------------------------------------------------------
+dnl The following variables are used to distinguish between building a
+dnl serial and parallel library.
+dnl
+dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
+dnl			   a parallel library even if configure wasn't
+dnl			   able to find some header file or library that
+dnl			   might be required. This is defined if the
+dnl			   compiler looks like a parallel compiler (e.g.,
+dnl			   mpicc or mpcc) or if the user explicitly states
+dnl			   that a parallel library is being built by supplying
+dnl			   the `--enable-parallel' configure switch.
+dnl
+dnl    PARALLEL		-- This variable is set to a non-null value if
+dnl			   configure thinks we're compiling a parallel
+dnl			   version of the library.
+dnl
+dnl    RUNSERIAL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable using
+dnl			   a single process. For serial versions of the
+dnl			   library this will normally be empty. For parallel
+dnl			   versions it might be something like `mpirun -np 1'.
+dnl			   The value of this variable is substituted in *.in
+dnl			   files.
+dnl
+dnl    RUNPARALLEL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable on
+dnl			   multiple processors. For the serial library the
+dnl			   value will normally be the empty string. For
+dnl			   parallel library it should be something like
+dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
+dnl			   contain the number of processors on which to run
+dnl			   the executable (the double dollarsigns are to
+dnl			   protect the expansion until make executes the
+dnl			   command).  The value of this variable is
+dnl			   substituted in *.in files.
+dnl
+AC_SUBST([PARALLEL])
+AC_SUBST([RUNSERIAL])
+AC_SUBST([RUNPARALLEL])
+AC_SUBST([TESTPARALLEL])
+
+dnl ----------------------------------------------------------------------
+dnl If the compiler is obviously a parallel compiler then we're building
+dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
+dnl the name of the compiler might tell us how to run the resulting
+dnl executable. For `mpicc' the executable should be run with `mpirun' from
+dnl the same directory as mpicc if it exists.
+dnl
+case "$CC_BASENAME" in
+  mpicc)
+    dnl The mpich compiler. Use mpirun from the same directory if it
+    dnl exists.
+    PARALLEL=mpicc
+    AC_MSG_CHECKING([for mpirun])
+
+    dnl Find the path where mpicc is located.
+    cmd="`echo $CC | cut -f1 -d' '`"
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
+    else
+      for path in `echo $PATH | tr : ' '`; do
+        if test -x $path/$cmd; then
+          break
+        fi
+      done
+    fi
+
+    dnl Is there an mpirun at that path?
+    if test -x $path/mpirun; then
+      AC_MSG_RESULT([$path/mpirun])
+      RUNSERIAL="${RUNSERIAL:-none}"
+
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
+      fi
+    else
+      AC_MSG_RESULT([none])
+    fi
+    ;;
+
+  hcc)
+    dnl The LAM compiler. Use mpirun_lam or mpirun from the same directory
+    dnl if it exists.
+    PARALLEL=hcc
+    AC_MSG_CHECKING([for mpirun_lam or mpirun])
+
+    dnl Find the path where hcc is located
+    cmd="`echo $CC | cut -f1 -d' '`"
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
+    else
+      for path in `echo $PATH | tr : ' '`; do
+        if test -x $path/$cmd; then
+          break
+        fi
+      done
+    fi
+
+    dnl Is there an mpirun_lam or mpirun at that path?
+    if test -x $path/mpirun_lam -o -x $path/mpirun; then
+      if test -x $path/mpirun_lam; then
+        cmd=mpirun_lam
+      else
+        cmd=mpirun
+      fi
+      AC_MSG_RESULT([$path/$cmd])
+      RUNSERIAL="${RUNSERIAL:-none}"
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
+      fi
+    else
+      AC_MSG_RESULT([none])
+    fi
+    ;;
+
+  mpcc|mpcc_r)
+    dnl The IBM compiler
+    PARALLEL="$CC_BASENAME"
+    ;;
+
+  *)
+    dnl Probably not a parallel compiler, but if `--enable-parallel'
+    dnl is defined below then we're still building a parallel hdf5.
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl If the Fortran compiler is obviously a parallel compiler then we're
+dnl building a parallel version of hdf5 and should define HAVE_PARALLEL.
+dnl Furthermore, the name of the compiler might tell us how to run the
+dnl resulting executable. For `mpif90' the executable should be run with
+dnl `mpirun' from the same directory as mpif90 if it exists.
+dnl
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  dnl Change to the Fortran 90 language
+  AC_LANG_PUSH(Fortran)
+
+  case "$FC" in
+    *mpif90*)
+      dnl The Fortran mpich compiler. Use mpirun from the same directory
+      dnl if it exists.
+      PARALLEL=mpif90
+      AC_MSG_CHECKING([for mpirun])
+
+      dnl Find the path where mpif90 is located.
+      cmd=`echo $FC |cut -f1 -d' '`
+      if (echo $cmd |grep / >/dev/null); then
+        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+      else
+        for path in `echo $PATH | tr : ' '`; do
+          if test -x $path/$cmd; then
+            break;
+          fi
+        done
+      fi
+
+      dnl Is there an mpirun at that path?
+      if test -x $path/mpirun; then
+        AC_MSG_RESULT([$path/mpirun])
+        RUNSERIAL="${RUNSERIAL:-none}"
+
+        if test -z "$RUNPARALLEL"; then
+          RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+        fi
+      else
+        AC_MSG_RESULT([none])
+      fi
+      ;;
+
+    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
+      dnl The IBM compiler
+      PARALLEL="$FC"
+      ;;
+
+    *)
+      dnl Probably not a parallel compiler, but if `--enable-parallel'
+      dnl is defined below then we're still building a parallel hdf5.
+      ;;
+  esac
+
+  dnl Change to the C language
+  AC_LANG_POP(Fortran)
+fi
+
+dnl -----------------------------------------------------------------------------
+dnl If shared libraries are being used with parallel, disable them, unless the 
+dnl user explicity enables them via the '--enable-shared' option.
+if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries disabled in parallel'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries explicitly enabled by user'
+elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries disabled when a parallel compiler is being used'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries explicitly enabled by user'
+fi
 
 dnl ----------------------------------------------------------------------
 dnl As of Libtool 1.5.14, libtool officially doesn't know how to create
@@ -1917,192 +2119,6 @@ esac
 dnl Checkpoint the cache
 AC_CACHE_SAVE
 
-dnl ----------------------------------------------------------------------
-dnl The following variables are used to distinguish between building a
-dnl serial and parallel library.
-dnl
-dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
-dnl			   a parallel library even if configure wasn't
-dnl			   able to find some header file or library that
-dnl			   might be required. This is defined if the
-dnl			   compiler looks like a parallel compiler (e.g.,
-dnl			   mpicc or mpcc) or if the user explicitly states
-dnl			   that a parallel library is being built by supplying
-dnl			   the `--enable-parallel' configure switch.
-dnl
-dnl    PARALLEL		-- This variable is set to a non-null value if
-dnl			   configure thinks we're compiling a parallel
-dnl			   version of the library.
-dnl
-dnl    RUNSERIAL	-- This is a command which will be prepended to
-dnl			   the executable name to run the executable using
-dnl			   a single process. For serial versions of the
-dnl			   library this will normally be empty. For parallel
-dnl			   versions it might be something like `mpirun -np 1'.
-dnl			   The value of this variable is substituted in *.in
-dnl			   files.
-dnl
-dnl    RUNPARALLEL	-- This is a command which will be prepended to
-dnl			   the executable name to run the executable on
-dnl			   multiple processors. For the serial library the
-dnl			   value will normally be the empty string. For
-dnl			   parallel library it should be something like
-dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
-dnl			   contain the number of processors on which to run
-dnl			   the executable (the double dollarsigns are to
-dnl			   protect the expansion until make executes the
-dnl			   command).  The value of this variable is
-dnl			   substituted in *.in files.
-dnl
-AC_SUBST([PARALLEL])
-AC_SUBST([RUNSERIAL])
-AC_SUBST([RUNPARALLEL])
-AC_SUBST([TESTPARALLEL])
-
-dnl ----------------------------------------------------------------------
-dnl If the compiler is obviously a parallel compiler then we're building
-dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
-dnl the name of the compiler might tell us how to run the resulting
-dnl executable. For `mpicc' the executable should be run with `mpirun' from
-dnl the same directory as mpicc if it exists.
-dnl
-case "$CC_BASENAME" in
-  mpicc)
-    dnl The mpich compiler. Use mpirun from the same directory if it
-    dnl exists.
-    PARALLEL=mpicc
-    AC_MSG_CHECKING([for mpirun])
-
-    dnl Find the path where mpicc is located.
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | tr : ' '`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    dnl Is there an mpirun at that path?
-    if test -x $path/mpirun; then
-      AC_MSG_RESULT([$path/mpirun])
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
-    ;;
-
-  hcc)
-    dnl The LAM compiler. Use mpirun_lam or mpirun from the same directory
-    dnl if it exists.
-    PARALLEL=hcc
-    AC_MSG_CHECKING([for mpirun_lam or mpirun])
-
-    dnl Find the path where hcc is located
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | tr : ' '`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    dnl Is there an mpirun_lam or mpirun at that path?
-    if test -x $path/mpirun_lam -o -x $path/mpirun; then
-      if test -x $path/mpirun_lam; then
-        cmd=mpirun_lam
-      else
-        cmd=mpirun
-      fi
-      AC_MSG_RESULT([$path/$cmd])
-      RUNSERIAL="${RUNSERIAL:-none}"
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
-    ;;
-
-  mpcc|mpcc_r)
-    dnl The IBM compiler
-    PARALLEL="$CC_BASENAME"
-    ;;
-
-  *)
-    dnl Probably not a parallel compiler, but if `--enable-parallel'
-    dnl is defined below then we're still building a parallel hdf5.
-    ;;
-esac
-
-dnl ----------------------------------------------------------------------
-dnl If the Fortran compiler is obviously a parallel compiler then we're
-dnl building a parallel version of hdf5 and should define HAVE_PARALLEL.
-dnl Furthermore, the name of the compiler might tell us how to run the
-dnl resulting executable. For `mpif90' the executable should be run with
-dnl `mpirun' from the same directory as mpif90 if it exists.
-dnl
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  dnl Change to the Fortran 90 language
-  AC_LANG_PUSH(Fortran)
-
-  case "$FC" in
-    *mpif90*)
-      dnl The Fortran mpich compiler. Use mpirun from the same directory
-      dnl if it exists.
-      PARALLEL=mpif90
-      AC_MSG_CHECKING([for mpirun])
-
-      dnl Find the path where mpif90 is located.
-      cmd=`echo $FC |cut -f1 -d' '`
-      if (echo $cmd |grep / >/dev/null); then
-        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-      else
-        for path in `echo $PATH | tr : ' '`; do
-          if test -x $path/$cmd; then
-            break;
-          fi
-        done
-      fi
-
-      dnl Is there an mpirun at that path?
-      if test -x $path/mpirun; then
-        AC_MSG_RESULT([$path/mpirun])
-        RUNSERIAL="${RUNSERIAL:-none}"
-
-        if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
-        fi
-      else
-        AC_MSG_RESULT([none])
-      fi
-      ;;
-
-    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-      dnl The IBM compiler
-      PARALLEL="$FC"
-      ;;
-
-    *)
-      dnl Probably not a parallel compiler, but if `--enable-parallel'
-      dnl is defined below then we're still building a parallel hdf5.
-      ;;
-  esac
-
-  dnl Change to the C language
-  AC_LANG_POP(Fortran)
-fi
-
-dnl ----------------------------------------------------------------------
 dnl What header files and libraries do we have to look for for parallel
 dnl support?  For the most part, search paths are already specified with
 dnl CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
@@ -2478,7 +2494,7 @@ if test 1 = 2; then
             [Define if shared writing must be disabled (CodeWarrior only)])
 fi
 
-dnl ----------------------------------------------------------------------
+dnl -----------------------------------------------------------------------------
 dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
 AC_MSG_CHECKING([for Stream Virtual File Driver support])
@@ -2487,30 +2503,36 @@ AC_ARG_ENABLE([stream-vfd],
                               [Build the Stream Virtual File Driver
                                [default=yes]])],
               [STREAM_VFD=$enableval],
-              [STREAM_VFD=yes])
+              [STREAM_VFD=default])
 
 dnl If the user explicitly disabled Stream VFD, say so.
-if test "$STREAM_VFD" != "yes"; then
+if test "$STREAM_VFD" != "yes" -a "$STREAM_VFD" != "default"; then
   AC_MSG_RESULT([not configured])
 fi
 
-dnl If the stream VFD is being used with parallel, disable it.
-dnl Using both stream VFD and parallel is a weird case and seems to cause errors on some
-dnl platforms.
-if test "$STREAM_VFD" = "yes" -a "X${enable_parallel}" = "Xyes"; then
-    AC_MSG_RESULT([not supported in parallel])
-    echo "    warning! Stream-VFD is not supported in parallel"
+dnl If stream VFD is being used with parallel, disable it, unless the user
+dnl explicity enables it via the '--enable-stream_vfd' option.
+if test "$STREAM_VFD" = "default" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_RESULT([disabled in parallel])
     STREAM_VFD=no
+elif test "$STREAM_VFD" = "yes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_RESULT([enabled by user])
+elif test "$STREAM_VFD" = "default" -a "X${PARALLEL}" != "X"; then
+    AC_MSG_RESULT([disabled when a parallel compiler is being used])
+    STREAM_VFD=no
+elif test "$STREAM_VFD" = "yes" -a "X${PARALLEL}" != "X"; then
+    AC_MSG_RESULT([enabled by user])
+elif test "$STREAM_VFD" = "yes"; then
+    AC_MSG_RESULT([yes])
 fi
-if test "$STREAM_VFD" = "yes" -a "X${PARALLEL}" != "X"; then
-    AC_MSG_RESULT([not supported in parallel])
-    echo "    warning! Stream-VFD is not supported when a parallel compiler is being used"
-    STREAM_VFD=no
+
+if test "$STREAM_VFD" = "default"; then
+    AC_MSG_RESULT([yes])
+    STREAM_VFD=yes
 fi
 
 dnl Otherwise, use Stream VFD.
 if test "$STREAM_VFD" = "yes"; then
-  AC_MSG_RESULT([yes])
   AC_CHECK_HEADERS([netinet/in.h])
   AC_CHECK_HEADERS([netinet/tcp.h], , , [#include <netinet/in.h>])
   AC_CHECK_HEADERS([sys/filio.h])

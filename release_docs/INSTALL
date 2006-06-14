@@ -484,7 +484,9 @@
 	compiles the "stream" Virtual File Driver into the main library.
 	See the documentation on the Virtual File Layer for more details
 	about the use of this driver.  The network stream capability is
-	enabled by default.
+	enabled by default, except for use in parallel or with a parallel
+        compiler, where it is disabled. Explicitly enabling Stream-VFD
+        will allow for its use in parallel.
 
 5.4. Building
 	The library, confidence tests, and programs can be build by
