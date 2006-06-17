@@ -886,6 +886,9 @@
 ./tools/misc/h5stat.c
 ./tools/misc/repart_test.c
 ./tools/misc/testh5repart.sh.in
+./tools/misc/testh5stat.sh.in
+./tools/misc/testfiles/h5stat_help1.ddl
+./tools/misc/testfiles/h5stat_help2.ddl
 
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
