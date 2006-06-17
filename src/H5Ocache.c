@@ -294,6 +294,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 		/* combine adjacent null messages */
 		mesgno = oh->nmesgs - 1;
 		oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR(f) + mesg_size;
+		oh->mesg[mesgno].dirty = TRUE;
                 merged_null_msgs++;
 	    } else {
 		/* new message */
