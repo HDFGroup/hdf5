@@ -272,6 +272,19 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC24_DATATYPE_NAME    "datatype"
 #define MISC24_DATATYPE_LINK    "datatype_link"
 
+/* Definitions for misc. test #25 */
+#define MISC25_FILE             "foo.h5"
+#define MISC25_GROUP0_NAME      "grp0"
+#define MISC25_GROUP1_NAME      "/grp0/grp1"
+#define MISC25_GROUP2_NAME      "/grp0/grp2"
+#define MISC25_GROUP3_NAME      "/grp0/grp3"
+#define MISC25_ATTR1_NAME       "_long attribute_"
+#define MISC25_ATTR1_LEN        11
+#define MISC25_ATTR2_NAME       "_short attr__"
+#define MISC25_ATTR2_LEN        11
+#define MISC25_ATTR3_NAME       "_short attr__"
+#define MISC25_ATTR3_LEN        1
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -4224,6 +4237,311 @@ test_misc24(void)
 
 /****************************************************************
 **
+**  test_misc25(): Exercise null object header message merge bug
+**
+****************************************************************/
+static void
+test_misc25(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t gid, gid2, gid3;      /* Group IDs */
+    hid_t aid;          /* Attribute ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t tid;          /* Datatype ID */
+    herr_t      ret;            /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Exercise null object header message bug\n"));
+
+    /* Create file */
+    fid = H5Fcreate(MISC25_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create top group */
+    gid = H5Gcreate(fid, MISC25_GROUP0_NAME, (size_t)0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Close top group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Create first group */
+    gid = H5Gcreate(fid, MISC25_GROUP1_NAME, (size_t)0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Create second group */
+    gid2 = H5Gcreate(fid, MISC25_GROUP2_NAME, (size_t)0);
+    CHECK(gid2, FAIL, "H5Gcreate");
+
+    /* Close second group */
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Create dataspace for attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataype for attribute */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid, MISC25_ATTR1_LEN);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Add 1st attribute on first group */
+    aid = H5Acreate(gid, MISC25_ATTR1_NAME, tid, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Create dataspace for 2nd attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataype for attribute */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid, MISC25_ATTR2_LEN);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Add 2nd attribute on first group */
+    aid = H5Acreate(gid, MISC25_ATTR2_NAME, tid, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close 2nd attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create third group */
+    gid3 = H5Gcreate(fid, MISC25_GROUP3_NAME, (size_t)0);
+    CHECK(gid3, FAIL, "H5Gcreate");
+
+    /* Close third group */
+    ret = H5Gclose(gid3);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete 2nd attribute */
+    ret = H5Adelete(gid, MISC25_ATTR2_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Create dataspace for 3rd attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataype for attribute */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid, MISC25_ATTR3_LEN);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Add 3rd attribute on first group (smaller than 2nd attribute) */
+    aid = H5Acreate(gid, MISC25_ATTR3_NAME, tid, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close 3rd attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete 3rd attribute */
+    ret = H5Adelete(gid, MISC25_ATTR3_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Create dataspace for 3rd attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataype for attribute */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid, MISC25_ATTR2_LEN);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Re-create 2nd attribute on first group */
+    aid = H5Acreate(gid, MISC25_ATTR2_NAME, tid, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close 2nd attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete 2nd attribute */
+    ret = H5Adelete(gid, MISC25_ATTR2_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(MISC25_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open first group */
+    gid = H5Gopen(fid, MISC25_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Create dataspace for 3rd attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataype for attribute */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid, MISC25_ATTR2_LEN);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Re-create 2nd attribute on first group */
+    aid = H5Acreate(gid, MISC25_ATTR2_NAME, tid, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close 2nd attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc25() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -4261,6 +4579,7 @@ test_misc(void)
     test_misc23();      /* Test intermediate group creation */
 #endif /* H5_GROUP_REVISION */
     test_misc24();      /* Test inappropriate API opens of objects */
+    test_misc25();      /* Exercise null object header message merge bug */
 
 } /* test_misc() */
 
@@ -4311,5 +4630,6 @@ cleanup_misc(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     HDremove(MISC23_FILE);
     HDremove(MISC24_FILE);
+    HDremove(MISC25_FILE);
 }
 
