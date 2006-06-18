@@ -101,7 +101,7 @@ static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
 static int        display_dtype = FALSE;
  
-static const char *s_opts ="FfhGgDdT";
+static const char *s_opts ="FfhGgDdTV";
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
     {"hel", no_arg, 'h'},
@@ -149,6 +149,12 @@ static struct long_options l_opts[] = {
     {"dtypeme", no_arg, 'T'},
     {"dtypem", no_arg, 'T'},
     {"dtype", no_arg, 'T'},
+    { "version", no_arg, 'V' },
+    { "versio", no_arg, 'V' },
+    { "versi", no_arg, 'V' },
+    { "vers", no_arg, 'V' },
+    { "ver", no_arg, 'V' },
+    { "ve", no_arg, 'V' },
     { NULL, 0, '\0' }
 };
 
@@ -174,6 +180,7 @@ static void                                                                     
      fprintf(stdout, "\n");
      fprintf(stdout, "      OPTIONS\n"); 
      fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
+     fprintf(stdout, "     -V, --version         Print version number and exit\n");
      fprintf(stdout, "     -f, --file            Print file information\n");
      fprintf(stdout, "     -F, --filemetadata    Print file metadata\n");
      fprintf(stdout, "     -g, --group           Print group information\n");
@@ -659,6 +666,11 @@ parse_start:
         case 'h':
             usage(progname);
             leave(EXIT_SUCCESS);
+        case 'V':
+            print_version(progname);
+            leave(EXIT_SUCCESS);
+            break;
+	
         default:
             usage(progname);
             leave(EXIT_FAILURE);
