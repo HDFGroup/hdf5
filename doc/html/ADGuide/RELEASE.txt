@@ -1,4 +1,4 @@
-HDF5 version 1.6.5-post12 released on Sun May  7 18:27:47 CDT 2006
+HDF5 version 1.6.5-post13 released on Sun Jun 18 18:57:28 CDT 2006
 ================================================================================
 
 INTRODUCTION
@@ -73,11 +73,49 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed file corruption bug which could write an incorrect number of
+            messages to an object's header under certain circumstances.
+            Generally, the sequence of actions to generate this bug looks
+            like this:
+                - Create an object
+                - Close the file
+                - Re-open the file
+                - Add 2 (or more) attributes to the object
+                - Close the file
+                - Re-open the file
+                - Delete one of the attributes on the object
+                - Add a smaller attribute to the object
+                - Delete the smaller atttribute on the object
+                - Add a larger attribute on the object
+
+            After this, the number of header messages stored for the object
+            will be off by one.  Other sequences of modifying attributes on an
+            object could also trigger this bug.  If you are opening an
+            object and the bottom few messages of the HDF5 error stack
+            resembles this, the object has been affected by this bug:
+
+              #007: ../../hdf5_v1.6/src/H5C.c line 3887 in H5C_load_entry(): unable to load entry
+                major(08): Meta data cache layer
+                minor(40): Unable to load metadata into cache
+              #008: ../../hdf5_v1.6/src/H5Ocache.c line 332 in H5O_load(): corrupt object header - too few messages
+                major(12): Object header layer
+                minor(40): Unable to load metadata into cache
+
+            Specifically, "corrupt object header" is the best string to search
+            for in the HDF5 error stack output.
+
+            If your files have been affected by this bug, or you are concerned
+            that your files might have been, please contact the HDF Helpdesk
+            at hdfhelp@ncsa.uiuc.edu for a tool to detect and repair files
+            affected by this problem.  QAK - 2006/6/16
+
         - Fixed various problems with retrieving names of objects, especially
             with mounted files.  QAK - 2005/12/25
 
     Configuration
     -------------
+	- Configure can now use any tr command.  No more need for
+	  defining variable TR nor is it supported. -AKC 2006/05/20
 
     Performance
     -------------
