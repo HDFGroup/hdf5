@@ -887,6 +887,13 @@
 ./tools/misc/repart_test.c
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/testh5stat.sh.in
+./tools/misc/testfiles/h5stat_filters-d.ddl
+./tools/misc/testfiles/h5stat_filters.ddl
+./tools/misc/testfiles/h5stat_filters-dT.ddl
+./tools/misc/testfiles/h5stat_filters-f.ddl
+./tools/misc/testfiles/h5stat_filters-F.ddl
+./tools/misc/testfiles/h5stat_filters-g.ddl
+./tools/misc/testfiles/h5stat_filters.h5
 ./tools/misc/testfiles/h5stat_help1.ddl
 ./tools/misc/testfiles/h5stat_help2.ddl
 
