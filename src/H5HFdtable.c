@@ -103,11 +103,11 @@ H5HF_dtable_init(H5HF_dtable_t *dtable)
     HDassert(dtable);
 
     /* Compute/cache some values */
-    dtable->first_row_bits = H5V_log2_of2(dtable->cparam.start_block_size) +
-            H5V_log2_of2(dtable->cparam.width);
+    dtable->start_bits = H5V_log2_of2(dtable->cparam.start_block_size);
+    dtable->first_row_bits = dtable->start_bits + H5V_log2_of2(dtable->cparam.width);
     dtable->max_root_rows = (dtable->cparam.max_index - dtable->first_row_bits) + 1;
-    dtable->max_direct_rows = (H5V_log2_of2(dtable->cparam.max_direct_size) -
-            H5V_log2_of2(dtable->cparam.start_block_size)) + 2;
+    dtable->max_direct_bits = H5V_log2_of2(dtable->cparam.max_direct_size);
+    dtable->max_direct_rows = (dtable->max_direct_bits - dtable->start_bits) + 2;
     dtable->num_id_first_row = dtable->cparam.start_block_size * dtable->cparam.width;
     dtable->max_dir_blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dtable->cparam.max_direct_size);
 
@@ -244,4 +244,35 @@ H5HF_dtable_size_to_row(H5HF_dtable_t *dtable, size_t block_size)
 
     FUNC_LEAVE_NOAPI(row)
 } /* end H5HF_dtable_size_to_row() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_dtable_size_to_rows
+ *
+ * Purpose:	Compute # of rows of indirect block of a given size
+ *
+ * Return:	Non-negative on success (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 31 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5HF_dtable_size_to_rows(H5HF_dtable_t *dtable, hsize_t size)
+{
+    unsigned rows;              /* # of rows required for indirect block */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_size_to_rows)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(dtable);
+
+    rows = (H5V_log2_gen(size) - dtable->first_row_bits) + 1;
+
+    FUNC_LEAVE_NOAPI(rows)
+} /* end H5HF_dtable_size_to_rows() */
 

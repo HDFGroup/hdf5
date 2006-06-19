@@ -231,25 +231,17 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
     if((node_found = H5HF_space_find(hdr, dxpl_id, (hsize_t)request, sec_node)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
 
-    /* If we didn't find a node, go make one big enough to hold the requested block */
-    if(!node_found) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Allocate new direct block\n", FUNC);
-#endif /* QAK */
+    /* If we didn't find a node, go create a direct block big enough to hold the requested block */
+    if(!node_found)
         /* Allocate direct block big enough to hold requested size */
-        if(H5HF_man_dblock_new(hdr, dxpl_id, request) < 0)
+        if(H5HF_man_dblock_new(hdr, dxpl_id, request, sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create fractal heap direct block")
 
-        /* Request space from the free space */
-        /* (Ought to be able to be filled, now) */
-        if(H5HF_space_find(hdr, dxpl_id, (hsize_t)request, sec_node) <= 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
-    } /* end if */
     HDassert(*sec_node);
 #ifdef QAK
-HDfprintf(stderr, "%s: (*sec_node)->sect_addr = %a\n", FUNC, (*sec_node)->sect_addr);
-HDfprintf(stderr, "%s: (*sec_node)->sect_size = %Zu\n", FUNC, (*sec_node)->sect_size);
-HDfprintf(stderr, "%s: (*sec_node)->type = %u\n", FUNC, (unsigned)(*sec_node)->type);
+HDfprintf(stderr, "%s: (*sec_node)->sect_info.addr = %a\n", FUNC, (*sec_node)->sect_info.addr);
+HDfprintf(stderr, "%s: (*sec_node)->sect_info.size = %Hu\n", FUNC, (*sec_node)->sect_info.size);
+HDfprintf(stderr, "%s: (*sec_node)->sect_info.type = %u\n", FUNC, (*sec_node)->sect_info.type);
 #endif /* QAK */
 
 done:
@@ -279,6 +271,9 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_insert)
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -289,7 +284,7 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
     HDassert(id);
 
     /* Check for indirect section */
-    if(sec_node->sect_info.cls->type == H5FS_SECT_FHEAP_INDIRECT) {
+    if(sec_node->sect_info.type == H5HF_FSPACE_SECT_INDIRECT) {
 #ifdef QAK
 HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
 HDfprintf(stderr, "%s: sec_node->sect_info.size = %Zu\n", FUNC, sec_node->sect_info.size);
@@ -308,7 +303,7 @@ HDfprintf(stderr, "%s: sec_node->u.indirect.indir_nrows = %u\n", FUNC, sec_node-
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up indirect free section")
     } /* end if */
     /* Check for range section */
-    else if(sec_node->sect_info.cls->type == H5FS_SECT_FHEAP_RANGE) {
+    else if(sec_node->sect_info.type == H5HF_FSPACE_SECT_RANGE) {
 #ifdef QAK
 HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
 HDfprintf(stderr, "%s: sec_node->sect_info.size = %Zu\n", FUNC, sec_node->sect_info.size);
@@ -323,7 +318,7 @@ HDfprintf(stderr, "%s: sec_node->u.range.num_entries = %u\n", FUNC, sec_node->u.
         if(H5HF_man_iblock_alloc_range(hdr, dxpl_id, &sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up range free section")
     } /* end if */
-    HDassert(sec_node->sect_info.cls->type == H5FS_SECT_FHEAP_SINGLE);
+    HDassert(sec_node->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
 
     /* Check for serialized 'single' section */
     if(sec_node->sect_info.state == H5FS_SECT_SERIALIZED) {
@@ -334,8 +329,8 @@ HDfprintf(stderr, "%s: sec_node->u.range.num_entries = %u\n", FUNC, sec_node->u.
 
     /* Lock direct block */
 #ifdef QAK
-HDfprintf(stderr, "%s: sec_node->sect_addr = %a\n", FUNC, sec_node->sect_addr);
-HDfprintf(stderr, "%s: sec_node->sect_size = %Zu\n", FUNC, sec_node->sect_size);
+HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
+HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
 HDfprintf(stderr, "%s: sec_node->u.single.parent = %p\n", FUNC, sec_node->u.single.parent);
 if(sec_node->u.single.parent)
     HDfprintf(stderr, "%s: sec_node->u.single.parent->addr = %a\n", FUNC, sec_node->u.single.parent->addr);
@@ -365,29 +360,11 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
         HDassert(sec_node->sect_info.size >= obj_size);
 
 #ifdef QAK
-HDfprintf(stderr, "%s: sec_node->sect_info.size = %Zu\n", FUNC, sec_node->sect_info.size);
+HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
 #endif /* QAK */
-        if(sec_node->sect_info.size == obj_size) {
-            /* Drop reference count on parent indirect block of direct block that free section is in */
-            HDassert(dblock->parent == NULL ||
-                    sec_node->u.single.parent == NULL ||
-                    dblock->parent == sec_node->u.single.parent);
-            if(sec_node->u.single.parent)
-                if(H5HF_iblock_decr(sec_node->u.single.parent) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
-
-            /* Release the memory for the free space section */
-            H5FL_FREE(H5HF_free_section_t, sec_node);
-        } /* end if */
-        else {
-            /* Adjust information for section node */
-            sec_node->sect_info.addr += obj_size;
-            sec_node->sect_info.size -= obj_size;
-
-            /* Re-insert section node into heap's free space */
-            if(H5HF_space_add(hdr, dxpl_id, sec_node) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space")
-        } /* end else */
+        /* Reduce (& possibly re-add) single section */
+        if(H5HF_sect_single_reduce(hdr, dxpl_id, sec_node, obj_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce single section node")
 
 #ifdef QAK
 HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
@@ -564,9 +541,9 @@ HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
     HDassert(obj_len > 0);
 
     /* Check for bad offset or length */
-    if(obj_off > hdr->man_alloc_size)
+    if(obj_off > hdr->man_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
-    if(obj_len > hdr->man_dtable.cparam.start_block_size)
+    if(obj_len > hdr->man_dtable.cparam.max_direct_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
     if(obj_len > hdr->standalone_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object should be standalone")
@@ -623,22 +600,9 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 #endif /* QAK */
 
     /* Create free space section node */
-    if(NULL == (sec_node = H5FL_MALLOC(H5HF_free_section_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct block free list section")
-
-    /* Set section's information */
-    sec_node->sect_info.addr = obj_off;
-    sec_node->sect_info.size = obj_len;
-    sec_node->sect_info.cls = &hdr->sect_cls[H5FS_SECT_FHEAP_SINGLE];
-    sec_node->sect_info.state = H5FS_SECT_LIVE;
-    sec_node->u.single.parent = dblock->parent;
-    if(dblock->parent) {
-        if(H5HF_iblock_incr(dblock->parent) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
-    } /* end if */
-    sec_node->u.single.par_entry = dblock->par_entry;
-    sec_node->u.single.dblock_addr = dblock_addr;
-    sec_node->u.single.dblock_size = dblock_size;
+    if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len,
+            dblock->parent, dblock->par_entry, dblock_addr, dblock_size)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for direct block's free space")
 
     /* Unlock direct block */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -647,15 +611,14 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 
     /* Update statistics about heap */
     hdr->nobjs--;
-    hdr->total_man_free += obj_len;
+
+    /* Reduce space available in heap */
+    if(H5HF_hdr_adj_free(hdr, (ssize_t)obj_len) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
     /* Return free space to the heap's list of space */
     if(H5HF_space_return(hdr, dxpl_id, sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
-
-    /* Mark heap header as modified */
-    if(H5HF_hdr_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

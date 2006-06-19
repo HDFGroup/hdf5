@@ -54,7 +54,7 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Free space info (forward decl - defined in H5FS.c) */
+/* Free space info (forward decl - defined in H5FSpkg.h) */
 typedef struct H5FS_t H5FS_t;
 
 /* Forward declaration free space section info */
@@ -71,28 +71,27 @@ typedef struct H5FS_section_class_t {
 
     /* Object methods */
     herr_t (*serialize)(const H5FS_section_info_t *, uint8_t *);        /* Routine to serialize a "live" section into a buffer */
-    herr_t (*deserialize)(struct H5FS_section_class_t *cls, const uint8_t *,
-            haddr_t, hsize_t, H5FS_section_info_t **);  /* Routine to deserialize a buffer into a "live" section */
-    htri_t (*can_merge)(const H5FS_section_info_t *, const H5FS_section_info_t *,
-            void *);     /* Routine to determine if two nodes are mergable */
+    H5FS_section_info_t *(*deserialize)(const uint8_t *, haddr_t, hsize_t);     /* Routine to deserialize a buffer into a "live" section */
+    htri_t (*can_merge)(H5FS_section_info_t *, H5FS_section_info_t *, void *);  /* Routine to determine if two nodes are mergable */
     herr_t (*merge)(H5FS_section_info_t *, H5FS_section_info_t *, void *);      /* Routine to merge two nodes */
-    htri_t (*can_shrink)(H5FS_section_info_t *, void *);     /* Routine to determine if node can shrink container */
+    htri_t (*can_shrink)(H5FS_section_info_t *, void *);        /* Routine to determine if node can shrink container */
     herr_t (*shrink)(H5FS_section_info_t **, void *);   /* Routine to shrink container */
-    herr_t (*free)(H5FS_section_info_t *);      /* Routine to free node */
-    herr_t (*debug)(const H5FS_section_info_t *, FILE *,
-            int , int );                                /* Routine to dump debugging information about a section */
+    herr_t (*free)(H5FS_section_info_t *);              /* Routine to free node */
+    herr_t (*debug)(const H5FS_section_info_t *, FILE *, int , int );   /* Routine to dump debugging information about a section */
 } H5FS_section_class_t;
+
+/* State of section ("live" or "serialized") */
+typedef enum H5FS_section_state_t {
+    H5FS_SECT_LIVE,             /* Section has "live" memory references */
+    H5FS_SECT_SERIALIZED        /* Section is in "serialized" form */
+} H5FS_section_state_t;
 
 /* Free space section info */
 struct H5FS_section_info_t {
-    haddr_t     addr;                           /* Address of free space section in the address space */
-                                                /* (Not actually used as address, used as unique ID for free space node) */
-    hsize_t     size;                           /* Size of free space section */
-    H5FS_section_class_t *cls;                  /* Class of free space section */
-    enum {
-            H5FS_SECT_LIVE,                     /* Section has "live" memory references */
-            H5FS_SECT_SERIALIZED}               /* Section is in "serialized" form */
-        state;                                  /* Whether the section is in "serialized" or "live" form */
+    haddr_t     addr;                   /* Address of free space section in the address space */
+    hsize_t     size;                   /* Size of free space section */
+    unsigned    type;                   /* Type of free space section (i.e. class) */
+    H5FS_section_state_t state;         /* Whether the section is in "serialized" or "live" form */
 };
 
 /* Free space client IDs for identifying user of free space */
@@ -128,16 +127,22 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 /***************************************/
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr,
     const H5FS_create_t *fs_create, size_t nclasses,
-    H5FS_section_class_t *classes, const void *cls_init_udata);
+    const H5FS_section_class_t *classes[], const void *cls_init_udata);
 H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
-    size_t nclasses, H5FS_section_class_t *classes, const void *cls_init_udata);
+    size_t nclasses, const H5FS_section_class_t *classes[], const void *cls_init_udata);
 H5_DLL herr_t H5FS_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     H5FS_section_info_t *node, unsigned flags, void *op_data);
 H5_DLL htri_t H5FS_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     hsize_t request, H5FS_section_info_t **node);
 H5_DLL herr_t H5FS_iterate(H5FS_t *fspace, H5FS_operator_t op, void *op_data);
+H5_DLL herr_t H5FS_get_sect_count(const H5FS_t *fspace, hsize_t *nsects);
 H5_DLL herr_t H5FS_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
+
+/* Debugging routines for dumping file structures */
+H5_DLL herr_t H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect,
+    FILE *stream, int indent, int fwidth);
 
 #endif /* _H5FSprivate_H */
 

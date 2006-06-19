@@ -96,10 +96,9 @@ herr_t
 H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
     const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for fractal heap */
-        H5FS_SECT_CLS_FHEAP_SINGLE,
-        H5FS_SECT_CLS_FHEAP_RANGE,
-        H5FS_SECT_CLS_FHEAP_INDIRECT};
-    unsigned u;                         /* Local index variable */
+        H5HF_FSPACE_SECT_CLS_SINGLE,
+        H5HF_FSPACE_SECT_CLS_RANGE,
+        H5HF_FSPACE_SECT_CLS_INDIRECT};
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_space_start)
@@ -109,25 +108,11 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
      */
     HDassert(hdr);
 
-    /* Allocate space for the section classes for the free list management code to use */
-    hdr->nsect_classes = NELMTS(classes);
-    if(NULL == (hdr->sect_cls = H5FL_SEQ_MALLOC(H5FS_section_class_t, hdr->nsect_classes)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for free space section class array ")
-
-    /* Copy the section classes for this heap */
-    /* (Initialization calls will be performed by the free list code) */
-    for(u = 0; u < hdr->nsect_classes; u++) {
-        /* Make certain that section class type can be used as an array index into this array */
-        HDassert(u == classes[u]->type);
-
-        HDmemcpy(&hdr->sect_cls[u], classes[u], sizeof(H5FS_section_class_t));
-    } /* end for */
-
     /* Check for creating free space info for the heap */
     if(H5F_addr_defined(hdr->fs_addr)) {
         /* Open an existing free space structure for the heap */
         if(NULL == (hdr->fspace = H5FS_open(hdr->f, dxpl_id, hdr->fs_addr,
-                hdr->nsect_classes, hdr->sect_cls, hdr)))
+                NELMTS(classes), classes, hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
     } /* end if */
     else {
@@ -142,12 +127,9 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
 
         /* Create the free space structure for the heap */
         if(NULL == (hdr->fspace = H5FS_create(hdr->f, dxpl_id, &hdr->fs_addr,
-                &fs_create, hdr->nsect_classes, hdr->sect_cls, hdr)))
+                &fs_create, NELMTS(classes), classes, hdr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
     } /* end else */
-
-    /* Free space for heap is now open */
-    hdr->fspace_open = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -185,7 +167,7 @@ H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_secti
     HDassert(node);
 
     /* Check if the free space for the heap has been initialized */
-    if(!hdr->fspace_open)
+    if(!hdr->fspace)
         if(H5HF_space_start(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
@@ -228,7 +210,6 @@ H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
      */
     HDassert(hdr);
     HDassert(node);
-    HDassert(hdr->fspace_open);
     HDassert(hdr->fspace);
 
     /* Add to the free space for the heap */
@@ -270,7 +251,7 @@ H5HF_space_return(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
     HDassert(node);
 
     /* Check if the free space for the heap has been initialized */
-    if(!hdr->fspace_open)
+    if(!hdr->fspace)
         if(H5HF_space_start(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
@@ -316,20 +297,27 @@ H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id)
     HDassert(hdr);
 
     /* Check if the free space was ever opened */
-    if(hdr->fspace_open) {
-        /* Sanity check */
-        HDassert(hdr->fspace);
+    if(hdr->fspace) {
+        hsize_t nsects;         /* Number of sections for this heap */
+
+        /* Retrieve the number of sections for this heap */
+        if(H5FS_get_sect_count(hdr->fspace, &nsects) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOUNT, FAIL, "can't query free space section count")
+#ifdef QAK
+HDfprintf(stderr, "%s: nsects = %Hu\n", FUNC, nsects);
+#endif /* QAK */
 
         /* Close the free space for the heap */
         if(H5FS_close(hdr->f, dxpl_id, hdr->fspace) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
         hdr->fspace = NULL;
 
-        /* Release the memory for the free space section classes */
-        H5FL_SEQ_FREE(H5FS_section_class_t, hdr->sect_cls);
-
-        /* Free space is now closed */
-        hdr->fspace_open = FALSE;
+        /* Check if we can delete the free space manager for this heap */
+        if(!nsects) {
+            if(H5FS_delete(hdr->f, dxpl_id, hdr->fs_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete free space info")
+            hdr->fs_addr = HADDR_UNDEF;
+        } /* end if */
     } /* end if */
 
 done:

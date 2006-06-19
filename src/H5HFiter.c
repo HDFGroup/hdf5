@@ -138,6 +138,9 @@ H5HF_man_iter_start_offset(H5HF_hdr_t *hdr, hid_t dxpl_id,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iter_start_offset)
+#ifdef QAK
+HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -270,7 +273,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_start
+ * Function:	H5HF_man_iter_set_entry
+ *
+ * Purpose:	Set the current entry for the iterator
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 31 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_iter_set_entry(const H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned entry)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_man_iter_set_entry)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(biter);
+
+    /* Set location context */
+    biter->curr->entry = entry;
+    biter->curr->row = entry / hdr->man_dtable.cparam.width;
+    biter->curr->col = entry % hdr->man_dtable.cparam.width;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_man_iter_set_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_iter_start_entry
  *
  * Purpose:	Initialize a block iterator to a particular location within
  *              an indirect block
@@ -411,32 +446,18 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
     HDassert(biter);
     HDassert(biter->curr);
     HDassert(biter->curr->context);
-
-    /* Advance to next entry in current block */
     HDassert(biter->curr->row < biter->curr->context->nrows);
-    if(nentries == 1) {
-        /* Increment block entry */
-        biter->curr->entry++;
 
-        /* Increment column */
-        biter->curr->col++;
-
-        /* Check for walking off end of column */
-        if(biter->curr->col == hdr->man_dtable.cparam.width) {
-            /* Reset column */
-            biter->curr->col = 0;
-
-            /* Increment row & block size */
-            biter->curr->row++;
-        } /* end if */
-    } /* end if */
-    /* Advance multiple entries */
-    else {
-        biter->curr->entry += nentries;
-        biter->curr->row = biter->curr->entry / hdr->man_dtable.cparam.width;
-        biter->curr->col = biter->curr->entry % hdr->man_dtable.cparam.width;
-    } /* end else */
+    /* Advance entry in current block */
+    biter->curr->entry += nentries;
+    biter->curr->row = biter->curr->entry / hdr->man_dtable.cparam.width;
+    biter->curr->col = biter->curr->entry % hdr->man_dtable.cparam.width;
 /*    HDassert(biter->curr->row <= biter->curr->context->nrows); */
+#ifdef QAK
+HDfprintf(stderr, "%s: biter->curr->entry = %u\n", "H5HF_man_iter_next", biter->curr->entry);
+HDfprintf(stderr, "%s: biter->curr->row = %u\n", "H5HF_man_iter_next", biter->curr->row);
+HDfprintf(stderr, "%s: biter->curr->col = %u\n", "H5HF_man_iter_next", biter->curr->col);
+#endif /* QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_man_iter_next() */
@@ -540,50 +561,6 @@ H5HF_man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iter_down() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_man_iter_update_iblock
- *
- * Purpose:	Update indirect block for current iterator location
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Apr 24 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_man_iter_update_iblock(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iter_update_iblock)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(biter);
-    HDassert(biter->ready);
-    HDassert(biter->curr);
-    HDassert(biter->curr->context);
-
-    /* Release hold on current location's indirect block */
-    if(H5HF_iblock_decr(biter->curr->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
-
-    /* Update current location's indirect block */
-    biter->curr->context = iblock;
-
-    /* Add hold to current location's indirect block */
-    if(H5HF_iblock_incr(biter->curr->context) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_iter_update_iblock() */
 
 
 /*-------------------------------------------------------------------------

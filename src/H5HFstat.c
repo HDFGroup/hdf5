@@ -83,7 +83,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_stat_info(H5HF_t *fh, H5HF_stat_t *stats)
+H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_stat_info)
 
@@ -94,6 +94,8 @@ H5HF_stat_info(H5HF_t *fh, H5HF_stat_t *stats)
     /* Report statistics for fractal heap */
     stats->total_size = fh->hdr->total_size;
     stats->man_size = fh->hdr->man_size;
+    stats->man_alloc_size = fh->hdr->man_alloc_size;
+    stats->man_iter_off = fh->hdr->man_iter_off;
     stats->std_size = fh->hdr->std_size;
     stats->man_free_space = fh->hdr->total_man_free;
     stats->nobjs = fh->hdr->nobjs;

@@ -63,6 +63,7 @@ typedef struct {
 
 /* User data for free space section iterator callback */
 typedef struct {
+    H5FS_t *fspace;             /* Free space manager */
     FILE *stream;               /* Stream for output */
     int indent;                 /* Indention amount */
     int fwidth;                 /* Field width mount */
@@ -232,8 +233,11 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Total managed space data block size:",
 	      hdr->man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total managed space allocated data block size:",
+	      "Total managed space allocated:",
 	      hdr->man_alloc_size);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Offset of managed space iterator:",
+	      hdr->man_iter_off);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total standalone space data block size:",
 	      hdr->std_size);
@@ -628,17 +632,16 @@ H5HF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
 	      sect->sect_info.size);
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section type:",
-	      (sect->sect_info.cls->type == H5FS_SECT_FHEAP_SINGLE ? "single" :
-                  (sect->sect_info.cls->type == H5FS_SECT_FHEAP_RANGE ? "range" :
-                      (sect->sect_info.cls->type == H5FS_SECT_FHEAP_INDIRECT ? "indirect" : "unknown"))));
+	      (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
+                  (sect->sect_info.type == H5HF_FSPACE_SECT_RANGE ? "range" :
+                      (sect->sect_info.type == H5HF_FSPACE_SECT_INDIRECT ? "indirect" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section state:",
 	      (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
 
-    /* Call the section's debugging routine */
-    if(sect->sect_info.cls->debug)
-        if((sect->sect_info.cls->debug)(_sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't dump section's debugging info")
+    /* Dump section-specific debugging information */
+    if(H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't dump section's debugging info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -688,6 +691,7 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
     /* Prepare user data for section iteration callback */
+    udata.fspace = hdr->fspace;
     udata.stream = stream;
     udata.indent = indent;
     udata.fwidth = fwidth;

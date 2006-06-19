@@ -218,6 +218,8 @@ MINOR, MPI, H5E_CANTRECV, Can't receive data
 MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
 MINOR, HEAP, H5E_CANTCOMPUTE, Can't compute value
 MINOR, HEAP, H5E_CANTEXTEND, Can't extend heap's space
+MINOR, HEAP, H5E_CANTATTACH, Can't attach object
+MINOR, HEAP, H5E_CANTUPDATE, Can't update object
 
 # Free space manager errors
 MINOR, FSPACE, H5E_CANTMERGE, Can't merge objects

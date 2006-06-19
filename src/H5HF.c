@@ -568,10 +568,20 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
 
         /* Close the free space information */
+        /* (Can't put this in header "destroy" routine, because it has
+         *      pointers to indirect blocks in the heap, which would create
+         *      a reference loop and the objects couldn't be removed from
+         *      the metadata cache - QAK)
+         */
         if(H5HF_space_close(fh->hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
 
         /* Reset the block iterator */
+        /* (Can't put this in header "destroy" routine, because it has
+         *      pointers to indirect blocks in the heap, which would create
+         *      a reference loop and the objects couldn't be removed from
+         *      the metadata cache - QAK)
+         */
         if(H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 

@@ -328,6 +328,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(f, p, hdr->total_size);
     H5F_DECODE_LENGTH(f, p, hdr->man_size);
     H5F_DECODE_LENGTH(f, p, hdr->man_alloc_size);
+    H5F_DECODE_LENGTH(f, p, hdr->man_iter_off);
     H5F_DECODE_LENGTH(f, p, hdr->std_size);
     H5F_DECODE_LENGTH(f, p, hdr->nobjs);
 
@@ -435,6 +436,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         H5F_ENCODE_LENGTH(f, p, hdr->total_size);
         H5F_ENCODE_LENGTH(f, p, hdr->man_size);
         H5F_ENCODE_LENGTH(f, p, hdr->man_alloc_size);
+        H5F_ENCODE_LENGTH(f, p, hdr->man_iter_off);
         H5F_ENCODE_LENGTH(f, p, hdr->std_size);
         H5F_ENCODE_LENGTH(f, p, hdr->nobjs);
 
@@ -917,7 +919,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     iblock->rc = 0;
     iblock->nrows = *nrows;
     iblock->addr = addr;
-    iblock->dirty = FALSE;
+    iblock->nchildren = 0;
 
     /* Compute size of indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(iblock->hdr, iblock);
@@ -985,6 +987,12 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
         /* Decode child block address */
         H5F_addr_decode(f, &p, &(iblock->ents[u].addr));
 
+        /* Count child blocks */
+        if(H5F_addr_defined(iblock->ents[u].addr)) {
+            iblock->nchildren++;
+            iblock->max_child = u;
+        } /* end if */
+
 #ifdef LATER
         /* Decode direct & indirect blocks differently (later, when direct blocks can be compressed) */
         if(u < (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width))
@@ -995,8 +1003,9 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
 #endif /* QAK */
     } /* end for */
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert((size_t)(p - buf) == iblock->size);
+    HDassert(iblock->nchildren);        /* indirect blocks w/no children should have been deleted */
 
     /* Set return value */
     ret_value = iblock;
@@ -1042,13 +1051,14 @@ HDfprintf(stderr, "%s: Flushing indirect block, addr = %a, destroy = %u\n", FUNC
     HDassert(iblock);
 
     if(iblock->cache_info.is_dirty) {
-        H5HF_hdr_t *hdr;            /* Shared fractal heap information */
-        uint8_t	*buf = NULL;    /* Temporary buffer */
-        uint8_t *p;             /* Pointer into raw data buffer */
-        size_t u;               /* Local index variable */
-
-        /* Sanity check */
-        HDassert(iblock->dirty);
+        H5HF_hdr_t *hdr;                /* Shared fractal heap information */
+        uint8_t	*buf = NULL;            /* Temporary buffer */
+        uint8_t *p;                     /* Pointer into raw data buffer */
+#ifndef NDEBUG
+        unsigned nchildren = 0;         /* Track # of children */
+        unsigned max_child = 0;         /* Track max. child entry used */
+#endif /* NDEBUG */
+        size_t u;                       /* Local index variable */
 
         /* Get the pointer to the shared heap header */
         hdr = iblock->hdr;
@@ -1096,6 +1106,15 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
             /* Encode child block address */
             H5F_addr_encode(f, &p, iblock->ents[u].addr);
 
+#ifndef NDEBUG
+            /* Count child blocks */
+            if(H5F_addr_defined(iblock->ents[u].addr)) {
+                nchildren++;
+                if(u > max_child)
+                    max_child = u;
+            } /* end if */
+#endif /* NDEBUG */
+
 #ifdef LATER
             /* Encode direct & indirect blocks differently (when direct blocks can be compressed) */
             if(u < (hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width))
@@ -1105,6 +1124,10 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
 
         /* Sanity check */
         HDassert((size_t)(p - buf) == iblock->size);
+#ifndef NDEBUG
+        HDassert(nchildren == iblock->nchildren);
+        HDassert(max_child == iblock->max_child);
+#endif /* NDEBUG */
 
 	/* Write the indirect block */
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_IBLOCK, addr, iblock->size, dxpl_id, buf) < 0)
@@ -1114,7 +1137,6 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
         H5FL_BLK_FREE(indirect_block, buf);
 
         /* Reset dirty flags */
-	iblock->dirty = FALSE;
 	iblock->cache_info.is_dirty = FALSE;
     } /* end if */
 
@@ -1153,9 +1175,8 @@ H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
      */
     HDassert(iblock);
     HDassert(iblock->rc == 0);
-    HDassert(!iblock->dirty);
 #ifdef QAK
-HDfprintf(stderr, "%s: Destroying indirect block\n", "H5HF_cache_iblock_dest");
+HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 #endif /* QAK */
 
     /* Decrement reference count on shared info */

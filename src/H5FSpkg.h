@@ -98,6 +98,34 @@ typedef struct H5FS_hdr_t {
     hsize_t alloc_sect_size;    /* Allocated size of the section info in the file */
 } H5FS_hdr_t;
 
+/* Free space section bin info */
+typedef struct H5FS_bin_t {
+    size_t sect_count;          /* Total # of sections in this bin */
+    H5SL_t *bin_list;           /* Skip list of differently sized sections */
+} H5FS_bin_t;
+
+/* Main free space info */
+struct H5FS_t {
+    /* Stored values (from header) */
+    H5FS_hdr_t *hdr;            /* Pointer to header info                     */
+
+    /* Computed/cached values */
+    haddr_t addr;               /* Address of free space header on disk       */
+    unsigned nbins;             /* Number of bins                             */
+    size_t serial_size;         /* Total serialized size of all section nodes */
+    size_t size_count;          /* Number of differently sized sections       */
+    unsigned sect_prefix_size;  /* Size of the section serialization prefix (in bytes) */
+    unsigned sect_off_size;     /* Size of a section offset (in bytes)        */
+    unsigned sect_len_size;     /* Size of a section length (in bytes)        */
+    hbool_t dirty;              /* Space information is dirty                 */
+
+    /* Memory data structures (not stored directly) */
+    H5FS_section_class_t *sect_cls; /* Array of section classes for this free list */
+    H5FS_section_info_t *single; /* Section information when free list has only one free section */
+    H5SL_t *merge_list;         /* Skip list to hold sections for detecting merges */
+    H5FS_bin_t *bins;           /* Array of lists of lists of free sections   */
+};
+
 
 /*****************************/
 /* Package Private Variables */

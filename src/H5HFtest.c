@@ -102,34 +102,133 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_get_dblock_overhead
+ * Function:	H5HF_get_max_root_rows
  *
- * Purpose:	Retrieve the size of direct block overhead
+ * Purpose:	Retrieve the max. # of rows in the root indirect block
  *
- * Return:	Success:	Size of direct block overhead
+ * Return:	Success:	Max. # of rows in root indirect block
  *
  *		Failure:	0
  *
  * Programmer:	Quincey Koziol
- *              Tuesday, May  9, 2006
+ *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5HF_get_dblock_overhead(const H5HF_t *fh)
+unsigned
+H5HF_get_max_root_rows(const H5HF_t *fh)
 {
-    size_t	ret_value;              /* Return value */
+    unsigned	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_dblock_overhead)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_max_root_rows)
 
     /* Check arguments. */
     HDassert(fh);
 
-    /* Return direct block overhead */
-    ret_value = H5HF_MAN_ABS_DIRECT_OVERHEAD(fh->hdr);
+    /* Return max. # of rows in root indirect block */
+    ret_value = fh->hdr->man_dtable.max_root_rows;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF_get_dblock_overhead() */
+} /* H5HF_get_max_root_rows() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_dtable_width_test
+ *
+ * Purpose:	Retrieve the width of the doubling table for a heap
+ *
+ * Return:	Success:	Width of the doubling table
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, May 22, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5HF_get_dtable_width_test(const H5HF_t *fh)
+{
+    unsigned	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_dtable_width_test)
+
+    /* Check arguments. */
+    HDassert(fh);
+
+    /* Return width of doubling table */
+    ret_value = fh->hdr->man_dtable.cparam.width;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_get_dtable_width_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_dtable_max_drows_test
+ *
+ * Purpose:	Retrieve the max. # of direct block rows in any indirect block
+ *
+ * Return:	Success:	Max. # of direct block rows
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, May 22, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
+{
+    unsigned	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_dtable_max_drows_test)
+
+    /* Check arguments. */
+    HDassert(fh);
+
+    /* Return max. # of direct blocks in any indirect block */
+    ret_value = fh->hdr->man_dtable.max_direct_rows;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_get_dtable_max_drows_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_iblock_max_drows_test
+ *
+ * Purpose:	Retrieve the max. # of direct block rows in an indirect block
+ *
+ * Note:        POS is indexed from 1 and is only really working for the
+ *              2nd-level indirect blocks (i.e. indirect blocks with
+ *              only direct block children)
+ *
+ * Return:	Success:	Max. # of direct block rows
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, May 22, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
+{
+    unsigned	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_iblock_max_drows_test)
+
+    /* Check arguments. */
+    HDassert(fh);
+    HDassert(pos);
+
+    /* Return max. # of direct blocks in this indirect block row */
+    ret_value = pos + (fh->hdr->man_dtable.max_direct_bits -
+            fh->hdr->man_dtable.first_row_bits) + 1;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_get_iblock_max_drows_test() */
 
 
 /*-------------------------------------------------------------------------
