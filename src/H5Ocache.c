@@ -288,7 +288,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 continue;
             } /* end if */
 
-	    if(H5O_NULL_ID == id && oh->nmesgs > 0 &&
+            if((H5F_get_intent(f) & H5F_ACC_RDWR) &&
+	            H5O_NULL_ID == id && oh->nmesgs > 0 &&
                     H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
                     oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
 		/* combine adjacent null messages */
@@ -326,6 +327,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             } /* end if */
         } /* end for */
     } /* end while */
+
+    /* Mark the object header dirty if we've merged a message */
+    if(merged_null_msgs)
+	oh->cache_info.is_dirty = TRUE;
 
     /* Sanity check for the correct # of messages in object header */
     if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
