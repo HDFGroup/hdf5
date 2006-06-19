@@ -1025,6 +1025,15 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 n = fprintf (stream, format_templ, nout);
 		break;
 
+            case 't':
+                {
+                    htri_t tri_var = va_arg (ap, htri_t);
+                    if (tri_var > 0) fprintf (stream, "TRUE");
+                    else if (!tri_var) fprintf (stream, "FALSE");
+                    else fprintf (stream, "FAIL(%d)", (int)tri_var);
+                }
+                break;
+
 	    default:
 		HDfputs (format_templ, stream);
 		n = (int)HDstrlen (format_templ);
