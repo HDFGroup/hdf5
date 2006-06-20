@@ -138,10 +138,10 @@
 #endif
 
 /* Define an internal macro for converting long double to long long.  SGI compilers give some incorrect
- * conversions.  HP-UX 11.00 compiler generates floating exception.  The hard conversion on Windows 
- * .NET 2003 has a bug and gives wrong exception value. */
+ * conversions. Mac OS 10.4 gives incorrect conversions. HP-UX 11.00 compiler generates floating exception.  
+ * The hard conversion on Windows .NET 2003 has a bug and gives wrong exception value. */
 #if (H5_WANT_DATA_ACCURACY && !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE && \
-    H5_LDOUBLE_TO_INTEGER_WORKS) || \
+    H5_LDOUBLE_TO_INTEGER_WORKS && H5_LDOUBLE_TO_LLONG_ACCURATE) || \
     (!H5_WANT_DATA_ACCURACY && !H5_HW_FP_TO_LLONG_NOT_WORKS && H5_LDOUBLE_TO_INTEGER_WORKS)
 #define H5T_CONV_INTERNAL_LDOUBLE_LLONG         1
 #endif
@@ -156,10 +156,11 @@
 #define H5T_CONV_INTERNAL_FP_ULLONG         0
 #endif
 
-/* Define an internal macro for converting long double to all integers.  SGI compilers give some incorrect
- * conversions.  HP-UX 11.00 compiler generates floating exception. */
+/* Define an internal macro for converting long double to unsigned long long.  SGI compilers give some 
+ * incorrect conversions.  Mac OS 10.4 gives incorrect conversions. HP-UX 11.00 compiler generates 
+ * floating exception. */
 #if (H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_ACCURATE && H5_LDOUBLE_TO_INTEGER_WORKS && \
-    H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM) || \
+    H5_FP_TO_ULLONG_ACCURATE && H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_LDOUBLE_TO_LLONG_ACCURATE) || \
     (!H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_INTEGER_WORKS)
 #define H5T_CONV_INTERNAL_LDOUBLE_ULLONG         1
 #else

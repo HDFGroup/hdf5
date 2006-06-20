@@ -383,6 +383,10 @@
 /* Define if your system can convert from long double to integer values. */
 #undef LDOUBLE_TO_INTEGER_WORKS
 
+/* Define if your system can convert long double to (unsigned) long long
+   values correctly. */
+#undef LDOUBLE_TO_LLONG_ACCURATE
+
 /* Define if your system can convert long double to unsigned int values
    correctly. */
 #undef LDOUBLE_TO_UINT_ACCURATE

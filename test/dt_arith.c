@@ -5120,10 +5120,26 @@ run_fp_int_conv(const char *name)
 #endif
 
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG && H5_SIZEOF_LONG_DOUBLE!=0
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
-#ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM
+#else /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+            {
+                char		str[256];		/*string		*/
+
+                sprintf(str, "Testing %s %s -> %s conversions",
+                        name, "long double", "long long");
+                printf("%-70s", str);
+                SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+                HDputs("    Test skipped due to hardware conversion error.");
+#else
+                HDputs("    Test skipped due to disabled long double.");
+#endif
+            }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#if H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_LDOUBLE_TO_LLONG_ACCURATE
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
-#else /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/
+#else /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_LDOUBLE_TO_LLONG_ACCURATE*/
             {
                 char		str[256];		/*string		*/
 
@@ -5137,7 +5153,7 @@ run_fp_int_conv(const char *name)
                 HDputs("    Test skipped due to disabled long double.");
 #endif
             }
-#endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/
+#endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_LDOUBLE_TO_LLONG_ACCURATE*/
 #endif
 #endif
 #else /*H5_LDOUBLE_TO_INTEGER_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE*/
