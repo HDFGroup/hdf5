@@ -1364,6 +1364,7 @@
 ./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
 ./hl/fortran/examples/Makefile.in
+./hl/fortran/examples/exlite.f90
 ./hl/fortran/src/H5IMcc.c
 ./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
