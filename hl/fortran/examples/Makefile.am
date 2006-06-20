@@ -30,7 +30,7 @@ endif
 # be run.
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
-TEST_PROG=
+TEST_PROG=exlite
 
 # List files to be installed here
 INSTALL_FILES=
