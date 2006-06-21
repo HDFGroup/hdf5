@@ -378,33 +378,52 @@ int SetTestVerbosity(int newval)
 
 /*
  * Retrieve the TestExpress mode for the testing framework
- * Values: non-zero means TestExpress mode is on, 0 means off.
- *
- * Design:
+ Values: 
+ 0: Exhaustive run
+    Tests should take as long as necessary
+ 1: Full run.  Default if HDF5TestExpress is not defined
+    Tests should take no more than 30 minutes
+ 2: Quick run
+    Tests should take no more than 10 minutes
+ 3: Smoke test.  Default if HDF5TestExpress is set to a value other than 0-3
+    Tests should take less than 1 minute
+
+ Design:
  If the environment variable $HDF5TestExpress is defined,
- then an intensive test should run the test in an express
- mode such that it completes sooner.
+ then test programs should skip some tests so that they
+ complete sooner.
 
  Terms:
- Intensive means tests that take more than minutes, say 5 minutes,
- to complete.
- "sooner" means tests will finish under 5 minutes.
- Express mode--probably use smaller test sizes, or skip some tests.
- Test program should print a caution that it is running the express
- mode.
-
+ A "test" is a single executable, even if it contains multiple
+ sub-tests.
+ The standard system for test times is a Linux machine running in
+ NFS space (to catch tests that involve a great deal of disk I/O).
+ 
  Implementation:
  I think this can be easily implemented in the test library (libh5test.a)
  so that all tests can just call it to check the status of $HDF5TestExpress.
- For now, it is just defined or not, the actual value does not matter.
- It is possible to define levels of express but I could not think of a
- good use case for it.
  */
 int GetTestExpress(void)
 {
+    char * env_val;
+
     /* set it here for now.  Should be done in something like h5test_init(). */
-    if (TestExpress==-1)
-	SetTestExpress(getenv("HDF5TestExpress")? 1 : 0);
+    if(TestExpress==-1)
+    {
+       env_val = getenv("HDF5TestExpress");
+
+       if(env_val == NULL)
+         SetTestExpress(1);
+       else if(strcmp(env_val, "0") == 0)
+         SetTestExpress(0);
+       else if(strcmp(env_val, "1") == 0)
+         SetTestExpress(1);
+       else if(strcmp(env_val, "2") == 0)
+         SetTestExpress(2);
+       else
+         SetTestExpress(3);
+    }
+
     return(TestExpress);
 }
 
