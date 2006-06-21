@@ -13075,7 +13075,7 @@ main(void)
     h5_reset();
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
-    if (ExpressMode)
+    if (ExpressMode > 1)
 	printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize heap's creation parameters */
@@ -13161,7 +13161,7 @@ curr_test = FHEAP_TEST_REOPEN;
          * level of complexity gradually. -QAK
          */
 #ifndef QAK
-	if (ExpressMode)
+	if (ExpressMode > 1)
 	    printf("***Express test mode on.  Some tests skipped\n");
 	else
             nerrors += test_abs_start_5th_recursive_indirect(fapl, &cparam, &tparam);
@@ -13171,7 +13171,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 
 #ifndef QAK
         /* Skip blocks insertion */
-	if (ExpressMode)
+	if (ExpressMode > 1)
 	    printf("***Express test mode on.  Some tests skipped\n");
 	else {
             nerrors += test_abs_skip_start_block(fapl, &cparam, &tparam);
@@ -13217,7 +13217,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 
         /* Random object insertion */
 #ifndef QAK
-	if (ExpressMode)
+	if (ExpressMode > 1)
 	    printf("***Express test mode on.  Some tests skipped\n");
 	else {
             nerrors += test_abs_random_managed((hsize_t)(100*1000*1000), fapl, &cparam, &tparam);
