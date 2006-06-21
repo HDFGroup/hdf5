@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/test
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #

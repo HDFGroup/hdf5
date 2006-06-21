@@ -3214,6 +3214,7 @@ else
   STATIC_SHARED="none"
 fi
 
+
 dnl Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
@@ -3348,7 +3349,7 @@ AM_CONDITIONAL([BUILD_PABLO_CONDITIONAL], [test "X$HAVE_PABLO" = "Xyes"])
 AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-AM_CONDITIONAL([BUILD_SHARED_ONLY_CONDITIONAL], [test "X$enable_static" = "Xno"])
+
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.

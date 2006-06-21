@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
 TEST_PROG=h5repart_gentest

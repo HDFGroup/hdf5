@@ -161,7 +161,11 @@ New Features
           when using parallel via the '--enable-stream_vfd' and
           '--enable-shared' options, respectively. If not explicity defined, 
           These settings default to enabled when parallel is not used, 
-          and disabled when parallel is used. 
+          and disabled when parallel is used. MAM  2006/06/21
+        - When both shared and static libraries are enabled, h5cc will test
+            compilation of both shared and static libraries, ultimately
+            linking with static libraries, as opposed to only doing a single
+            compile of static libraries.  MAM 2006/06/21
 
     Library:
     --------

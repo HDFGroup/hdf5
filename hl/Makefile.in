@@ -103,8 +103,6 @@ BUILD_PABLO_CONDITIONAL_FALSE = @BUILD_PABLO_CONDITIONAL_FALSE@
 BUILD_PABLO_CONDITIONAL_TRUE = @BUILD_PABLO_CONDITIONAL_TRUE@
 BUILD_PARALLEL_CONDITIONAL_FALSE = @BUILD_PARALLEL_CONDITIONAL_FALSE@
 BUILD_PARALLEL_CONDITIONAL_TRUE = @BUILD_PARALLEL_CONDITIONAL_TRUE@
-BUILD_SHARED_ONLY_CONDITIONAL_FALSE = @BUILD_SHARED_ONLY_CONDITIONAL_FALSE@
-BUILD_SHARED_ONLY_CONDITIONAL_TRUE = @BUILD_SHARED_ONLY_CONDITIONAL_TRUE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -271,9 +269,6 @@ RM = rm -f
 CP = cp
 TIME = time
 
-# Path for hl needed in hdf5.h
-INCLUDES = -I$(top_srcdir)/hl/src
-
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that
@@ -294,20 +289,15 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 docdir = $(exec_prefix)/doc
-@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CC = $(bindir)/h5cc
 
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CC = $(bindir)/h5cc -shlib
-@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CC_PP = $(bindir)/h5pcc
-@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CC_PP = $(bindir)/h5pcc -shlib
-@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5FC = $(bindir)/h5fc
-@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5FC = $(bindir)/h5fc -shlib
-@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5FC_PP = $(bindir)/h5pfc
-@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5FC_PP = $(bindir)/h5pfc -shlib
-@BUILD_SHARED_ONLY_CONDITIONAL_FALSE@H5CPP = $(bindir)/h5c++
-@BUILD_SHARED_ONLY_CONDITIONAL_TRUE@H5CPP = $(bindir)/h5c++ -shlib
+H5CC = $(bindir)/h5cc $(H5CCFLAGS)
+H5CC_PP = $(bindir)/h5pcc $(H5CCFLAGS)
+H5FC = $(bindir)/h5fc $(H5CCFLAGS)
+H5FC_PP = $(bindir)/h5pfc $(H5CCFLAGS)
+H5CPP = $(bindir)/h5c++ $(H5CCFLAGS)
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.

@@ -70,5 +70,15 @@ uninstall-examples:
         fi
 
 installcheck-local:
-	@$(MAKE) $(AM_MAKEFLAGS) check
+	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
+	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
+	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
+	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
+	 elif test "$(STATIC_SHARED)" = "shared"; then                     \
+	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
+	 else                                                              \
+	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
+	 fi
+
+
 

@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-INCLUDES+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Always build and test h5diff but build and test ph5diff only if parallel
 # is enabled.
