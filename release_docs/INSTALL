@@ -521,6 +521,11 @@
 	fails. To prevent deletion of the files define the HDF5_NOCLEANUP
 	environment variable.
 
+        The HDF5 tests can take a long time to run on some systems.  To
+        perform a faster (but less thorough) test, set the HDF5TestExpress
+        environment variable to 2 or 3 (with 3 being the shortest run).
+        To perform a longer test, set HDF5TestExpress to 0.  1 is the default.
+
 5.6. Installing
 	The HDF5 library, include files, and support programs can be
 	installed in a (semi-)public place by saying `make install'. The
