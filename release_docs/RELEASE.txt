@@ -447,6 +447,9 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added suport for HPUX11.23 for both 32 and 64-bit; HDF5 C++
+          shared library is not supported with +DD64 flag.
+                                                     EIP - 2006/06/22
         - Added support for VAX floating numbers for Alpha Open VMS 7.3.2
                                                      EIP - 2006/05/05
         - Fixed broken make.com files in tools directories
@@ -825,7 +828,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
                                   HP F90 v2.4
                                   HP ANSI C++ B3910B A.03.13
 *   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
-                                  HP F90 v2.9
+                                  HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
@@ -908,7 +911,7 @@ IRIX64_6.5 64-bit        y(2)     y      y        y     y     y
 IRIX64_6.5 32-bit        y(2)     n      n        n     y     y
 HPUX11.00                y(1)     y      y        y     y     y
 HPUX11.23-32bit          n        y      n        y     y     y
-HPUX11.23-62bit          n        n      n        y     y     y
+HPUX11.23-64bit          n        y      n        y     y     y
 OSF1 v5.1                y        y      y        y     y     y
 Cray X1                  y        y      y        y     y     n
 Cray XT3           (16)  n        y      n        y     y     n
@@ -950,7 +953,7 @@ IRIX64_6.5 64-bit        y       y         n         y        y        y
 IRIX64_6.5 32-bit        y       dna       y         y        y        y
 HPUX11.00                y       n         y         x        n        y
 HPUX11.23-32bit          y       n         n         y        n        y
-HPUX11.23-62bit          y       dna       n         y        n        y
+HPUX11.23-64bit          y       dna       n         y        n        y
 OSF1 v5.1                y                           y        n        y
 Cray X1                  n                           y        n        y
 Cray XT3           (16)  n                           y        n        y

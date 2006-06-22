@@ -80,6 +80,7 @@
 ./config/gnu-flags
 ./config/hpux10.20
 ./config/hpux11.00
+./config/hpux11.23
 ./config/hpux9.03
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
