@@ -51783,6 +51783,110 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if correctly converting (unsigned) long long to long double values" >&5
+echo $ECHO_N "checking if correctly converting (unsigned) long long to long double values... $ECHO_C" >&6
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_llong_to_ldouble_correct=${hdf5_llong_to_ldouble_correct=no}
+else
+   if test "${hdf5_llong_to_ldouble_correct+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        int main(void)
+        {
+            long double         ld;
+            long long           ll;
+            unsigned long long  ull;
+            unsigned char       s[16];
+            int                 flag=0, ret=0;
+
+            /*Determine if long double has 16 byte in size, 11 bit exponent, and
+             *the bias is 0x3ff */
+            if(sizeof(long double) == 16) {
+                ld = 1.0L;
+                memcpy(s, &ld, 16);
+                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
+                    flag = 1;
+            }
+
+            if(flag==1 && sizeof(long long)==8) {
+                ll = 0x01ffffffffffffffLL;
+                ld = (long double)ll;
+                memcpy(s, &ld, 16);
+                /*Check if the bit sequence is as supposed to be*/
+                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
+                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
+                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
+                    ret = 1;
+            }
+            if(flag==1 && sizeof(unsigned long long)==8) {
+                ull = 0x01ffffffffffffffULL;
+                ld = (long double)ull;
+                memcpy(s, &ld, 16);
+                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
+                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
+                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
+                    ret = 1;
+            }
+    done:
+            exit(ret);
+        }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  hdf5_llong_to_ldouble_correct=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+hdf5_llong_to_ldouble_correct=no
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+
+fi
+
+if test ${hdf5_llong_to_ldouble_correct} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define LLONG_TO_LDOUBLE_CORRECT 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 
 H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
 

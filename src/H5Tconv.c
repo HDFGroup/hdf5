@@ -8343,7 +8343,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
+#if H5T_CONV_INTERNAL_LLONG_LDOUBLE
 herr_t
 H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8359,7 +8359,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
+#endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
 
 /*-------------------------------------------------------------------------

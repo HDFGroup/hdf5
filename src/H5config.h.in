@@ -394,6 +394,10 @@
 /* Define if your system can compile long long to floating-point casts. */
 #undef LLONG_TO_FP_CAST_WORKS
 
+/* Define if your system can convert (unsigned) long long to long double
+   values correctly. */
+#undef LLONG_TO_LDOUBLE_CORRECT
+
 /* Define if your system can handle complicated MPI derived datatype
    correctly. */
 #undef MPI_COMPLEX_DERIVED_DATATYPE_WORKS
