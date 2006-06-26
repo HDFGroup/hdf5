@@ -26,7 +26,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_PROG=h5dumpgentest
 TEST_SCRIPT=testh5dump.sh testh5dumpxml.sh
 
-check_PROGRAMS=$(TEST_PROG)
+check_PROGRAMS=$(TEST_PROG) binread
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5dump$(EXEEXT)
 

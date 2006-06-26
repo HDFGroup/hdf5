@@ -351,7 +351,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -600,6 +600,7 @@ usage(const char *prog)
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
+    fprintf(stdout, "     -b F                 Output raw data into file F in binary form (use with -d)\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -1952,7 +1953,7 @@ dump_subsetting_header(struct subset_t *sset, int dims)
  *-------------------------------------------------------------------------
  */
 static void
-dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
+dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_ai)
 {
     h5tool_format_t   *outputformat = &dataformat;
     int         status = -1;
@@ -1967,7 +1968,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
-    outputformat->pindex=pindex;
+    outputformat->pindex=display_ai;
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
         outputformat->idx_n_fmt = "%lu";
@@ -2001,7 +2002,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
 
     /* Print all the values. */
     if (obj_data == DATASET_DATA) {
-        hid_t       f_type = H5Dget_type(obj_id);
+        hid_t       f_type = H5Dget_type(obj_id); 
         char        string_prefix[64];
         h5tool_format_t    string_dataformat;
 
@@ -2665,21 +2666,40 @@ static void dump_fcontents(hid_t fid)
  * Programmer:  Albert Cheng, 2000/09/30
  *
  * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
  *
  *-------------------------------------------------------------------------
  */
 static int
-set_output_file(const char *fname)
+set_output_file(const char *fname, int is_bin)
 {
-    FILE    *f;	/* temporary holding place for the stream pointer
-                 * so that rawdatastream is changed only when succeeded */
+ FILE    *f;	/* temporary holding place for the stream pointer
+* so that rawdatastream is changed only when succeeded */
 
-    if ((f = fopen(fname, "w")) != NULL) {
-	rawdatastream = f;
-	return 0;
-    }
-
-    return -1;
+ if (rawdatastream && rawdatastream != stdout) {
+  if (fclose(rawdatastream))
+   perror("closing rawdatastream");
+  else
+   rawdatastream = NULL;
+ }
+ 
+ /* binary output */
+ if (is_bin)
+ {
+  if ((f = fopen(fname, "wb")) != NULL) {
+   rawdatastream = f;
+   return 0;
+  }
+ }
+ else
+ {
+  if ((f = fopen(fname, "w")) != NULL) {
+   rawdatastream = f;
+   return 0;
+  }
+ }
+ 
+ return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -3110,6 +3130,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
  *              Tuesday, 20. February 2001
  *
  * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
  *
  *-------------------------------------------------------------------------
  */
@@ -3234,13 +3255,24 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 'o':
-            if (set_output_file(opt_arg) < 0){
+            if (set_output_file(opt_arg, 0) < 0){
                 /* failed to set output file */
                 usage(progname);
                 leave(EXIT_FAILURE);
             }
 
             usingdasho = TRUE;
+            last_was_dset = FALSE;
+            break;
+
+       case 'b':
+            if (set_output_file(opt_arg, 1) < 0){
+                /* failed to set output file */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+
+            bin_output = TRUE;
             last_was_dset = FALSE;
             break;
 

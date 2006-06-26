@@ -30,7 +30,7 @@
 # HDF5 Library Makefile(.in)
 #
 
-SOURCES = h5dump.c h5dumpgentest.c
+SOURCES = binread.c h5dump.c h5dumpgentest.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -58,7 +58,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5dump.sh.in $(srcdir)/testh5dumpxml.sh.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) binread$(EXEEXT)
 bin_PROGRAMS = h5dump$(EXEEXT)
 subdir = tools/h5dump
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -72,11 +72,15 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = h5dumpgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
+binread_SOURCES = binread.c
+binread_OBJECTS = binread.$(OBJEXT)
+binread_LDADD = $(LDADD)
+am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
+am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
+binread_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 h5dump_SOURCES = h5dump.c
 h5dump_OBJECTS = h5dump.$(OBJEXT)
 h5dump_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
-am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 h5dump_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 h5dumpgentest_SOURCES = h5dumpgentest.c
 h5dumpgentest_OBJECTS = h5dumpgentest.$(OBJEXT)
@@ -94,8 +98,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5dump.c h5dumpgentest.c
-DIST_SOURCES = h5dump.c h5dumpgentest.c
+SOURCES = binread.c h5dump.c h5dumpgentest.c
+DIST_SOURCES = binread.c h5dump.c h5dumpgentest.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -434,6 +438,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+binread$(EXEEXT): $(binread_OBJECTS) $(binread_DEPENDENCIES) 
+	@rm -f binread$(EXEEXT)
+	$(LINK) $(binread_LDFLAGS) $(binread_OBJECTS) $(binread_LDADD) $(LIBS)
 h5dump$(EXEEXT): $(h5dump_OBJECTS) $(h5dump_DEPENDENCIES) 
 	@rm -f h5dump$(EXEEXT)
 	$(LINK) $(h5dump_LDFLAGS) $(h5dump_OBJECTS) $(h5dump_LDADD) $(LIBS)
@@ -447,6 +454,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dumpgentest.Po@am__quote@
 

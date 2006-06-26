@@ -352,7 +352,9 @@ struct subset_t {
     hsize_t *block;
 };
 
-extern FILE   *rawdatastream;       /*output stream for raw data            */
+extern FILE   *rawdatastream;       /* output stream for raw data */
+extern int bin_output;              /* binary output */
+
 
 /* Strings for output */
 #define GROUP           "GROUP"
