@@ -130,7 +130,7 @@ H5_DLL H5G_t *H5G_open(H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_insert(H5G_loc_t *loc, const char *name,
     H5G_loc_t *obj_loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
-H5_DLL herr_t H5G_get_objinfo(H5G_loc_t *loc, const char *name,
+H5_DLL herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
 H5_DLL H5F_t *H5G_insertion_file(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);

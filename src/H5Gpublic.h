@@ -115,13 +115,13 @@ typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
 
 /* Flags for object copy (H5Gcopy) */
-#define H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG    (0x0001u)   /* Create missing groups when create a group */
-#define H5G_COPY_SHALLOW_HIERARCHY_FLAG    	(0x0002u)   /* Copy only immediate members */
-#define H5G_COPY_EXPAND_SOFT_LINK_FLAG		(0x0004u)   /* Expand soft links into new objects */
-#define H5G_COPY_EXPAND_EXT_LINK_FLAG   	          (0x0008u)   /* Expand external links into new objects */
-#define H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG 	(0x0010u)   /* Copy objects that are pointed by references */
-#define H5G_COPY_WITHOUT_ATTR_FLAG    		(0x0020u)   /* Copy object without copying attributes */
-#define H5G_COPY_ALL				(0x003Fu)	  /* All object copying flags (for internal range checking) */
+#define H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG (0x0001u)   /* Create missing groups when create a group */
+#define H5G_COPY_SHALLOW_HIERARCHY_FLAG         (0x0002u)   /* Copy only immediate members */
+#define H5G_COPY_EXPAND_SOFT_LINK_FLAG          (0x0004u)   /* Expand soft links into new objects */
+#define H5G_COPY_EXPAND_EXT_LINK_FLAG           (0x0008u)   /* Expand external links into new objects */
+#define H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG      (0x0010u)   /* Copy objects that are pointed by references */
+#define H5G_COPY_WITHOUT_ATTR_FLAG              (0x0020u)   /* Copy object without copying attributes */
+#define H5G_COPY_ALL                            (0x003Fu)   /* All object copying flags (for internal checking) */
 
 H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
 H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);

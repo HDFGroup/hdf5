@@ -55,13 +55,16 @@ const char *FILENAME[] = {
 #define NAME_GROUP_SUB_SUB2 	"g000"
 #define NAME_GROUP_DATASET 	"/g0/dataset_simple"
 #define NAME_GROUP_LINK		"/g_links"
+#define NAME_GROUP_LINK2	"/g_links2"
 #define NAME_GROUP_LOOP		"g_loop"
 #define NAME_GROUP_LOOP2	"g_loop2"
 #define NAME_GROUP_LOOP3	"g_loop3"
 #define NAME_LINK_DATASET	"/g_links/dataset_simple"
 #define NAME_LINK_HARD		"/g_links/hard_link_to_dataset_simple"
 #define NAME_LINK_SOFT		"/g_links/soft_link_to_dataset_simple"
+#define NAME_LINK_SOFT2		"/g_links2/soft_link_to_dataset_simple"
 #define NAME_LINK_SOFT_DANGLE	"/g_links/soft_link_to_nowhere"
+#define NAME_LINK_SOFT_DANGLE2	"/g_links2/soft_link_to_nowhere"
 
 #define NAME_BUF_SIZE   1024
 #define NUM_ATTRIBUTES 4
@@ -476,7 +479,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_std_attributes(hid_t oid, hid_t oid2)
+compare_std_attributes(hid_t oid, hid_t oid2, unsigned cpy_flags)
 {
     hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
     int num_attrs;                              /* Number of attributes */
@@ -491,28 +494,34 @@ compare_std_attributes(hid_t oid, hid_t oid2)
     /* Check the number of attributes on destination dataset */
     if ( (num_attrs2 = H5Aget_num_attrs(oid2)) < 0) TEST_ERROR;
 
-    /* Compare the number of attributes */
-    if ( num_attrs != num_attrs2) TEST_ERROR;
-
-    /* Check the attributes are equal */
-    for(i = 0; i < (unsigned)num_attrs; i++) {
-        sprintf(attr_name, "%d attr", i);
-
-        /* Set up attribute data buffers */
-        wattr_data[0] = 100 * i;
-        wattr_data[1] = 200 * i;
-
-        /* Open the attributes */
-        if ( (aid = H5Aopen_name(oid, attr_name)) < 0) TEST_ERROR
-        if ( (aid2 = H5Aopen_name(oid2, attr_name)) < 0) TEST_ERROR
+    if(cpy_flags & H5G_COPY_WITHOUT_ATTR_FLAG) {
+        /* Check that the destination has no attributes */
+        if ( num_attrs2 != 0) TEST_ERROR;
+    } /* end if */
+    else {
+        /* Compare the number of attributes */
+        if ( num_attrs != num_attrs2) TEST_ERROR;
 
         /* Check the attributes are equal */
-        if ( !compare_attribute(aid, aid2, wattr_data)) TEST_ERROR
+        for(i = 0; i < (unsigned)num_attrs; i++) {
+            sprintf(attr_name, "%d attr", i);
 
-        /* Close the attributes */
-        if ( H5Aclose(aid) < 0) TEST_ERROR
-        if ( H5Aclose(aid2) < 0) TEST_ERROR
-    } /* end for */
+            /* Set up attribute data buffers */
+            wattr_data[0] = 100 * i;
+            wattr_data[1] = 200 * i;
+
+            /* Open the attributes */
+            if ( (aid = H5Aopen_name(oid, attr_name)) < 0) TEST_ERROR
+            if ( (aid2 = H5Aopen_name(oid2, attr_name)) < 0) TEST_ERROR
+
+            /* Check the attributes are equal */
+            if ( !compare_attribute(aid, aid2, wattr_data)) TEST_ERROR
+
+            /* Close the attributes */
+            if ( H5Aclose(aid) < 0) TEST_ERROR
+            if ( H5Aclose(aid2) < 0) TEST_ERROR
+        } /* end for */
+    } /* end if */
 
     /* Objects should be the same. :-) */
     return TRUE;
@@ -598,7 +607,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_datasets(hid_t did, hid_t did2, const void *wbuf)
+compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 {
     hid_t sid = -1, sid2 = -1;                  /* Dataspace IDs */
     hid_t tid = -1, tid2 = -1;                  /* Datatype IDs */
@@ -612,6 +621,14 @@ compare_datasets(hid_t did, hid_t did2, const void *wbuf)
     void *rbuf2 = NULL;                         /* Buffer for reading raw data */
     H5D_space_status_t space_status;            /* Dataset's raw data space status */
     H5D_space_status_t space_status2;           /* Dataset's raw data space status */
+    unsigned cpy_flags;                         /* Object copy flags */
+
+    /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
+    if(pid != H5P_DEFAULT) {
+        if(H5Pget_copy_object(pid, &cpy_flags) < 0) TEST_ERROR;
+    } /* end if */
+    else
+        cpy_flags = 0;
 
     /* Check the datatypes are equal */
 
@@ -732,7 +749,7 @@ compare_datasets(hid_t did, hid_t did2, const void *wbuf)
 
 
     /* Check if the attributes are equal */
-    if ( compare_std_attributes(did, did2) != TRUE) TEST_ERROR;
+    if ( compare_std_attributes(did, did2, cpy_flags) != TRUE) TEST_ERROR;
 
 
     /* Datasets should be the same. :-) */
@@ -768,19 +785,32 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_groups(hid_t gid, hid_t gid2)
+compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
 {
     hsize_t num_objs;           /* Number of objects in group */
     hsize_t num_objs2;          /* Number of objects in group */
     hsize_t idx;                /* Index over the objects in group */
+    unsigned cpy_flags;         /* Object copy flags */
+
+    /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
+    if(pid != H5P_DEFAULT) {
+        if(H5Pget_copy_object(pid, &cpy_flags) < 0) TEST_ERROR;
+    } /* end if */
+    else
+        cpy_flags = 0;
 
     /* Check if both groups have the same # of objects */
     if(H5Gget_num_objs(gid, &num_objs) < 0) TEST_ERROR;
     if(H5Gget_num_objs(gid2, &num_objs2) < 0) TEST_ERROR;
-    if(num_objs != num_objs2) TEST_ERROR;
+    if((cpy_flags & H5G_COPY_SHALLOW_HIERARCHY_FLAG) && depth == 0) {
+        if(num_objs2 != 0) TEST_ERROR;
+    } /* end if */
+    else {
+        if(num_objs != num_objs2) TEST_ERROR;
+    } /* end if */
 
     /* Check contents of groups */
-    if(num_objs > 0) {
+    if(num_objs2 > 0) {
         char objname[NAME_BUF_SIZE];            /* Name of object in group */
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
         H5G_obj_t objtype;                      /* Type of object in group */
@@ -837,7 +867,7 @@ compare_groups(hid_t gid, hid_t gid2)
                     if((oid2 = H5Gopen(gid2, objname2)) < 0) TEST_ERROR;
 
                     /* Compare groups */
-                    if(compare_groups(oid, oid2) != TRUE) TEST_ERROR;
+                    if(compare_groups(oid, oid2, pid, depth - 1) != TRUE) TEST_ERROR;
 
                     /* Close groups */
                     if(H5Gclose(oid) < 0) TEST_ERROR;
@@ -850,7 +880,7 @@ compare_groups(hid_t gid, hid_t gid2)
                     if((oid2 = H5Dopen(gid2, objname2)) < 0) TEST_ERROR;
 
                     /* Compare datasets */
-                    if(compare_datasets(oid, oid2, NULL) != TRUE) TEST_ERROR;
+                    if(compare_datasets(oid, oid2, pid, NULL) != TRUE) TEST_ERROR;
 
                     /* Close datasets */
                     if(H5Dclose(oid) < 0) TEST_ERROR;
@@ -878,7 +908,7 @@ HDassert(0 && "Unknown type of object");
     } /* end if */
 
     /* Check if the attributes are equal */
-    if ( compare_std_attributes(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_std_attributes(gid, gid2, cpy_flags) != TRUE) TEST_ERROR;
 
     /* Groups should be the same. :-) */
     return TRUE;
@@ -1266,7 +1296,7 @@ test_copy_dataset_simple(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -1373,7 +1403,7 @@ test_copy_dataset_simple_empty(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, NULL) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -1503,7 +1533,7 @@ test_copy_dataset_compound(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -1631,7 +1661,7 @@ test_copy_dataset_chunked(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -1748,7 +1778,7 @@ test_copy_dataset_chunked_empty(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, NULL) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -1886,7 +1916,7 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, NULL) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -2019,7 +2049,7 @@ test_copy_dataset_compressed(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, NULL) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -2147,7 +2177,7 @@ test_copy_dataset_compact(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPACT)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -2281,7 +2311,7 @@ test_copy_dataset_external(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -2402,7 +2432,7 @@ test_copy_dataset_named_dtype(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -2539,7 +2569,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -2678,7 +2708,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -2812,7 +2842,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -2953,7 +2983,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -3073,7 +3103,7 @@ test_copy_dataset_contig_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -3211,7 +3241,7 @@ test_copy_dataset_chunked_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -3348,7 +3378,7 @@ test_copy_dataset_compact_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -3611,7 +3641,7 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, NULL) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -3722,7 +3752,7 @@ test_copy_group_empty(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -3853,7 +3883,7 @@ test_copy_group(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -3995,7 +4025,7 @@ test_copy_group_deep(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -4106,7 +4136,7 @@ test_copy_group_loop(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -4235,7 +4265,7 @@ test_copy_group_wide_loop(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -4368,7 +4398,7 @@ test_copy_group_links(hid_t fapl)
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -4402,6 +4432,7 @@ error:
  * Function:    test_copy_soft_link
  *
  * Purpose:     Create a soft link in SRC file and copy it to DST file
+ *              copy a datast pointed by a soft link to DST file
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -4493,7 +4524,7 @@ test_copy_soft_link(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -4737,7 +4768,7 @@ test_copy_path(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SUB_SUB)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -4965,7 +4996,7 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5105,7 +5136,7 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5253,7 +5284,7 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5403,7 +5434,7 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5559,7 +5590,7 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5713,7 +5744,7 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -5867,7 +5898,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -6024,7 +6055,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, buf) != TRUE) TEST_ERROR;
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
 
     /* close the destination dataset */
     if ( H5Dclose(did2) < 0) TEST_ERROR;
@@ -6092,6 +6123,8 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
     hid_t gid_sub=-1, gid_sub_sub=-1;           /* Sub-group ID */
     hid_t pid=-1;				/* Property ID */
+    unsigned cpy_flags;                         /* Object copy flags */
+    int depth = -1;                             /* Copy depth */
     hsize_t dim2d[2];
     int buf[DIM_SIZE_1][DIM_SIZE_2];
     int i, j;
@@ -6147,7 +6180,12 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     /* add a dataset to the sub sub group */
     if ( (did = H5Dcreate(gid_sub_sub, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR;
     if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
+
+    /* close dataset */
     if (H5Dclose(did) < 0) TEST_ERROR;
+
+    /* close dataspace */
+    if ( H5Sclose(sid) < 0) TEST_ERROR;
 
     if( H5Gclose(gid_sub_sub) < 0) TEST_ERROR;
 
@@ -6156,15 +6194,30 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     /* close the group */
     if ( H5Gclose(gid) < 0) TEST_ERROR;
 
-    /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR;
+    if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
+        /* Create group to copy */
+        if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5G_LINK_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5G_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR;
+        if ( H5Gclose(gid) < 0) TEST_ERROR;
+
+        /* Create group to compare with */
+        if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK2, (size_t)0)) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5G_LINK_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5G_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR;
+        if ( H5Gclose(gid) < 0) TEST_ERROR;
+    }
 
     /* close the SRC file */
     if ( H5Fclose(fid_src) < 0) TEST_ERROR;
 
-
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
+    /* (except when expanding soft links */
+    if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
+        if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
+    } /* end if */
+    else
+        if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
@@ -6176,20 +6229,62 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     /* create property to pass copy options */
     if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR;
 
-    /* set property for shallow copy */
+    /* set options for object copy */
     if ( H5Pset_copy_object(pid, flag) < 0) TEST_ERROR;
 
+    /* Verify object copy flags */
+    if ( H5Pget_copy_object(pid, &cpy_flags) < 0) TEST_ERROR;
+    if ( cpy_flags != flag) TEST_ERROR;
+
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
+    if ((flag & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, "/new_g0/new_g00", pid) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+        /* open the group for copy */ 
+        if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+        /* open the destination group */ 
+        if ( (gid2 = H5Gopen(fid_dst, "/new_g0/new_g00")) < 0) TEST_ERROR;
+
+    } else if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
+        if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, pid) < 0) TEST_ERROR;
+
+        /* Unlink dataset to copy from original location */
+        /* (So group comparison works properly) */
+        if ( H5Gunlink(fid_src, NAME_DATASET_SUB_SUB) < 0) TEST_ERROR;
+
+        /* open the group for copy */ 
+        if ( (gid = H5Gopen(fid_src, NAME_GROUP_LINK2)) < 0) TEST_ERROR;
+
+        /* open the destination group */ 
+        if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR;
+
+    } else if(flag & H5G_COPY_WITHOUT_ATTR_FLAG) {
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
+
+        /* open the group for copy */ 
+        if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+
+        /* open the destination group */ 
+        if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+    } else if(flag & H5G_COPY_SHALLOW_HIERARCHY_FLAG) {
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
+
+        /* open the group for copy */ 
+        if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+
+        /* open the destination group */ 
+        if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
+
+        /* Set the copy depth */
+        depth = 1;
+    } else {
+        /* Unknown flag */
+        TEST_ERROR;
+    } /* end else */
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2) != TRUE) TEST_ERROR;
+    if ( compare_groups(gid, gid2, pid, depth) != TRUE) TEST_ERROR;
 
     /* close the destination group */
     if ( H5Gclose(gid2) < 0) TEST_ERROR;
@@ -6204,7 +6299,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     if ( H5Fclose(fid_dst) < 0) TEST_ERROR;
 
     /* close property */
-    if (H5Pclose(pid) < 0) TEST_ERROR;
+    if ( H5Pclose(pid) < 0) TEST_ERROR;
 
     PASSED();
     return 0;
@@ -6289,7 +6384,15 @@ main(void)
     nerrors += test_copy_exist(fapl);  
     nerrors += test_copy_path(fapl);  
     nerrors += test_copy_same_file_named_datatype(fapl);  
-    nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, "H5Gcopy: copy without attributes");
+    nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, "H5Gcopy(): without attributes");
+    nerrors += test_copy_option(fapl, H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG, "H5Gcopy(): with missing groups");
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, "H5Gcopy(): expand soft link");
+    nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, "H5Gcopy(): shallow group copy");
+
+/* TODO: not implemented 
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, "H5Gcopy: expand external link");
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, "H5Gcopy: expand object reference");
+*/
 
 /* TODO: Add more tests for copying objects in same file */
 
@@ -6310,6 +6413,7 @@ main(void)
 
     puts ("All object copying tests passed.");
     h5_cleanup(FILENAME, fapl);
+
     return 0;
 } /* main */
 

@@ -224,11 +224,11 @@ typedef struct H5G_bt_it_ud4_t {
 
 /* Data passed to B-tree iteration for copying copy symblol table content */
 typedef struct H5G_bt_it_ud5_t {
-    haddr_t     src_heap_addr;   /* heap address of the source symbol table  */
-    H5F_t       *dst_file;       /* File of destination group */
-    H5O_stab_t  *dst_stab;       /* symbol table info for destination group */
-    H5SL_t      *map_list;       /* skip list to map copied object addresses */
-    unsigned    cpy_option;      /* cpy options */
+    H5O_loc_t   *src_oloc;      /* source object location */
+    haddr_t     src_heap_addr;  /* heap address of the source symbol table  */
+    H5F_t       *dst_file;      /* File of destination group */
+    H5O_stab_t  *dst_stab;      /* symbol table info for destination group */
+    H5O_copy_t  *cpy_info;      /* Information for copy operation */
 } H5G_bt_it_ud5_t;
 
 /* Typedef for path traversal operations */

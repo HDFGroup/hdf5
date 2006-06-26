@@ -2356,7 +2356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_get_objinfo(H5G_loc_t *loc, const char *name, hbool_t follow_link,
+H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     H5G_stat_t *statbuf/*out*/, hid_t dxpl_id)
 {
     H5G_trav_ud4_t udata;           /* User data for callback */
@@ -2999,17 +2999,17 @@ H5G_unmount(H5G_t *grp)
 static herr_t
 H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t plist_id)
 {
-    H5P_genplist_t  *gcrt_plist = NULL;         /* Group create property list created */
-    H5P_genplist_t  *gcpy_plist;                /* Group copy property list created */
-    hid_t           dxpl_id = H5AC_dxpl_id;
+    H5P_genplist_t  *gcrt_plist=NULL;           /* Group create property list created */
+    H5P_genplist_t  *gcpy_plist=NULL;           /* Group copy property list created */
+    hid_t           dxpl_id=H5AC_dxpl_id;
     H5G_name_t      new_path;                   /* Copied object group hier. path */
     H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
-    hbool_t         entry_inserted = FALSE;     /* Flag to indicate that the new entry was inserted into a group */
+    hbool_t         entry_inserted=FALSE;       /* Flag to indicate that the new entry was inserted into a group */
+    hbool_t         gcrt_plist_created=FALSE;   /* Flag to indicate if H5G_CREATE_INTERMEDIATE_GROUP_FLAG is set */
     unsigned        cpy_option = 0;             /* Copy options */
     H5P_genclass_t  *gcrt_class;	       /* Group creation property class */
-    hid_t	          gcplist_id = H5P_DEFAULT;   /* Group creation property list */
-    hbool_t         gcplist_created = FALSE;    /* Flag o indicate if group creation property list is created */
+    hid_t	    gcplist_id = H5P_DEFAULT;   /* Group creation property list */
     herr_t          ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_copy, FAIL);
@@ -3041,22 +3041,26 @@ H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_t pli
     /* Create group creatiion property to create missing groups */
     if((cpy_option & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
         if(NULL == (gcrt_class = H5I_object_verify(H5P_GROUP_CREATE, H5I_GENPROP_CLS)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
 
         /* Create the new property list */
         if((gcplist_id = H5P_create_id(gcrt_class)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
-        gcplist_created = TRUE;
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list")
+        gcrt_plist_created = TRUE;
     } else
         gcplist_id = H5P_GROUP_CREATE_DEFAULT;
 
+    /* Get a pointer to the group creation property list */
     if(NULL == (gcrt_plist = H5I_object(gcplist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Set the intermediate group creation property, if requested */
-    if(gcplist_created)
-        if(H5P_set(gcrt_plist, H5G_CRT_INTERMEDIATE_GROUP_NAME, &cpy_option) < 0)
+    if(gcrt_plist_created) {
+        unsigned crt_intmd_group = TRUE;
+
+        if(H5P_set(gcrt_plist, H5G_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set intermediate group creation flag")
+    } /* end if */
 
     /* Insert the new object in the destination file's group */
     if(H5G_insert(dst_loc, dst_name, &new_loc, dxpl_id, gcrt_plist) < 0)
@@ -3067,8 +3071,11 @@ done:
     /* Free the ID to name buffers */
     if(entry_inserted)
         H5G_loc_free(&new_loc);
-    if (gcplist_created)
-        H5P_close(gcrt_plist);
+
+    if(gcplist_id>0 && gcrt_plist_created) {
+        if(H5I_dec_ref(gcplist_id)<0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_copy() */

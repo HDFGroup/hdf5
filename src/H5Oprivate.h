@@ -36,6 +36,7 @@
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
@@ -64,6 +65,18 @@ typedef struct H5O_loc_t {
     H5F_t       *file;          /* File that object header is located within */
     haddr_t     addr;           /* File address of object header */
 } H5O_loc_t;
+
+/* Settings/flags for copying an object */
+typedef struct H5O_copy_t {
+    hbool_t copy_shallow;               /* Flag to perform shallow hierarchy copy */
+    hbool_t expand_soft_link;           /* Flag to expand soft links */
+    hbool_t expand_ext_link;            /* Flag to expand external links */
+    hbool_t expand_obj_ref;             /* Flag to expand object references */
+    hbool_t copy_without_attr;          /* Flag to not copy attributes */ 
+    int curr_depth;                     /* Current depth in hierarchy copied */
+    int max_depth;                      /* Maximum depth in hierarchy to copy */
+    H5SL_t *map_list;                   /* Skip list to hold address mappings */
+} H5O_copy_t;
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
@@ -347,7 +360,7 @@ H5_DLL H5G_obj_t H5O_obj_type(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, 
     hid_t dxpl_id, unsigned cpy_option);
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, 
-    hid_t dxpl_id, unsigned cpy_option, struct H5SL_t *map_list);
+    hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth);
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);

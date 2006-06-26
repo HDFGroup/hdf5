@@ -40,7 +40,7 @@ static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
-    hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
+    hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -622,7 +622,7 @@ done:
  */
 static void *
 H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, 
-    UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void *_udata)
+    H5O_copy_t UNUSED *cpy_info, void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;

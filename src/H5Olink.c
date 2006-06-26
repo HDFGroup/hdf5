@@ -43,12 +43,14 @@ static size_t H5O_link_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
 static herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
-static herr_t H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, 
-    void *mesg_dst, hbool_t *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list);
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static herr_t H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, 
+    void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_link_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-			     FILE * stream, int indent, int fwidth);
+    FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_LINK[1] = {{
@@ -65,7 +67,7 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
-    NULL,			/* pre copy native value to file */
+    H5O_link_pre_copy_file,	/* pre copy native value to file */
     H5O_link_copy_file,		/* copy native value to file    */
     H5O_link_post_copy_file,	/* post copy native value to file    */
     H5O_link_debug          	/*debug the message             */
@@ -463,6 +465,44 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_link_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files for link messages. 
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, June 26, 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
+    void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    void UNUSED *udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_pre_copy_file)
+
+    /* check args */
+    HDassert(deleted);
+    HDassert(cpy_info);
+
+    /* If we are performing a 'shallow hierarchy' copy, and this link won't
+     *  be included in the final group, indicate that it should be deleted
+     *  in the destination object header before performing any other actions
+     *  on it.
+     */
+    if(cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
+        *deleted = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_link_pre_copy_file() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_link_copy_file
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
@@ -478,7 +518,7 @@ done:
  */
 static void *
 H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst, 
-hid_t UNUSED dxpl_id, UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void UNUSED *udata)
+    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_link_t           *link_src = (H5O_link_t *) native_src;
     H5O_link_t           *link_dst = NULL;
@@ -489,6 +529,8 @@ hid_t UNUSED dxpl_id, UNUSED unsigned cpy_option, H5SL_t UNUSED *map_list, void 
     /* check args */
     HDassert(link_src);
     HDassert(file_dst);
+    HDassert(cpy_info);
+    HDassert(cpy_info->max_depth < 0 || cpy_info->curr_depth < cpy_info->max_depth);
 
     /* Allocate space for the destination stab */
     if(NULL == (link_dst = H5FL_MALLOC(H5O_link_t)))
@@ -543,10 +585,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, 
-    hbool_t *modified, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list)
+H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, 
+    hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    const H5O_link_t     *link_src = (const H5O_link_t *)mesg_src;
+    H5O_link_t           *link_src = (H5O_link_t *)mesg_src;    /* Casting away const OK... -QAK */
+    H5O_link_t           tmp_link_src;
     H5O_link_t           *link_dst = (H5O_link_t *)mesg_dst;
     herr_t               ret_value = SUCCEED;          /* Return value */
 
@@ -559,7 +602,42 @@ H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_ol
     HDassert(dst_oloc->file);
     HDassert(link_dst);
     HDassert(modified && *modified == FALSE);
-    HDassert(map_list);
+    HDassert(cpy_info);
+    HDassert(cpy_info->max_depth < 0 || cpy_info->curr_depth < cpy_info->max_depth);
+
+    /* Expand soft link */
+    if(H5G_LINK_SOFT == link_src->type && cpy_info->expand_soft_link) {
+        H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
+        H5G_loc_t   grp_loc;        /* Group location for parent of soft link */
+        H5G_name_t  grp_path;       /* Path for parent of soft link */
+
+        /* Make a temporary copy, so that it will not change the info in the cache */
+        HDmemcpy(&tmp_link_src, link_src, sizeof(H5O_link_t));
+        link_src = &tmp_link_src;
+
+        /* Set up group location for soft link to start in */
+        H5G_name_reset(&grp_path);
+        grp_loc.path = &grp_path;
+        grp_loc.oloc = (H5O_loc_t *)parent_src_oloc;    /* Casting away const OK... -QAK */
+
+        /* Check if the object pointed by the soft link exists in the source file */
+        /* (It would be more efficient to make a specialized traversal callback,
+         *      but this is good enough for now... -QAK)
+         */
+        if(H5G_get_objinfo(&grp_loc, link_src->u.soft.name, TRUE, &statbuf, H5AC_ind_dxpl_id) >= 0) {
+            /* Convert temp. copy of source soft link to hard link */
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+            link_src->u.hard.addr = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
+#else
+            link_src->u.hard.addr = statbuf.objno[0];
+#endif
+            link_src->type = H5G_LINK_HARD;
+
+            /* Convert destination link to hard link */
+            link_dst->type = H5G_LINK_HARD;
+            link_dst->u.soft.name = H5MM_xfree(link_dst->u.soft.name);
+        } /* end if */
+    } /* if ((H5G_CACHED_SLINK == src_ent->type)... */
 
     /* Additional "deep copy" for each kind of link */
     switch(link_src->type) {
@@ -571,7 +649,7 @@ H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_ol
 
                 /* Build temporary object location for source */
                 H5O_loc_reset(&src_oloc);
-                src_oloc.file = file_src;
+                src_oloc.file = parent_src_oloc->file;
                 HDassert(H5F_addr_defined(link_src->u.hard.addr));
                 src_oloc.addr = link_src->u.hard.addr;
 
@@ -580,8 +658,7 @@ H5O_link_post_copy_file(H5F_t *file_src, const void *mesg_src, H5O_loc_t *dst_ol
                 new_oloc.file = dst_oloc->file;
 
                 /* Copy the shared object from source to destination */
-                /* (Increments link count on destination) */
-                if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, cpy_option, map_list) < 0)
+                if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, cpy_info, TRUE) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
                 /* Update link information with new destination object's address */

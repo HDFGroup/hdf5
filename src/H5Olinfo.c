@@ -40,6 +40,8 @@ static herr_t H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_linfo_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_linfo_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_linfo_free(void *_mesg);
+static void *H5O_linfo_copy_file(H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_linfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -59,7 +61,7 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     NULL,			/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
+    H5O_linfo_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_linfo_debug          	/*debug the message             */
 }};
@@ -263,6 +265,57 @@ H5O_linfo_free(void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_linfo_copy_file
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              June 26, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst, 
+    hid_t UNUSED dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
+{
+    H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
+    H5O_linfo_t          *linfo_dst = NULL;
+    void                 *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_copy_file)
+
+    /* check args */
+    HDassert(linfo_src);
+    HDassert(cpy_info);
+
+    /* Copy the source message */
+    if(NULL == (linfo_dst = H5O_linfo_copy(linfo_src, NULL, FALSE)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
+
+    /* If we are performing a 'shallow hierarchy' copy, and the links in this
+     *  group won't be included in the destination, reset the link count for
+     *  this group.
+     */
+    if(cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
+        linfo_dst->nlinks = 0;
+
+    /* Set return value */
+    ret_value = linfo_dst;
+
+done:
+    if(!ret_value)
+        if(linfo_dst)
+            H5FL_FREE(H5O_linfo_t, linfo_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_linfo_copy_file() */
 
 
 /*-------------------------------------------------------------------------

@@ -1907,6 +1907,8 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_ud5_t       *udata = (H5G_bt_it_ud5_t *)_udata;
+    H5O_loc_t             *parent_src_oloc = udata->src_oloc;
+    H5O_copy_t            *cpy_info = udata->cpy_info;
     const H5HL_t          *heap = NULL;
     H5G_node_t	          *sn = NULL;
     unsigned int           i;                   /* Local index variable */
@@ -1930,17 +1932,50 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     /* copy object in this node one by one */
     for(i = 0; i < sn->nsyms; i++) {
         H5G_entry_t *src_ent = &(sn->entry[i]); /* Convenience variable to refer to current source group entry */
-        H5O_loc_t   new_oloc;           /* Copied object object location */
         H5O_link_t  lnk;                /* Link to insert */
         const char  *name;              /* Name of source object */
+        H5G_entry_t tmp_src_ent;        /* Temperary copy. Change will not affect the cache */
 
-        /* Set up copied object location to fill in */
-        H5O_loc_reset(&new_oloc);
-        new_oloc.file = udata->dst_file;
+        /* expand soft link */
+        if(H5G_CACHED_SLINK == src_ent->type && cpy_info->expand_soft_link) {
+            H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
+            H5G_loc_t   grp_loc;        /* Group location for parent of soft link */
+            H5G_name_t  grp_path;       /* Path for parent of soft link */
+            char *link_name;            /* Pointer to value of soft link */
+
+            /* Make a temporary copy, so that it will not change the info in the cache */
+            HDmemcpy(&tmp_src_ent, src_ent, sizeof(H5G_entry_t));
+            src_ent = &tmp_src_ent;
+
+            /* Set up group location for soft link to start in */
+            H5G_name_reset(&grp_path);
+            grp_loc.path = &grp_path;
+            grp_loc.oloc = parent_src_oloc;
+
+            /* Get pointer to link value in local heap */
+            link_name = (char *)H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
+
+            /* Check if the object pointed by the soft link exists in the source file */
+            /* (It would be more efficient to make a specialized traversal callback,
+             *      but this is good enough for now... -QAK)
+             */
+            if(H5G_get_objinfo(&grp_loc, link_name, TRUE, &statbuf, H5AC_ind_dxpl_id) >= 0) {
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+                src_ent->header = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
+#else
+                src_ent->header = statbuf.objno[0];
+#endif
+            } /* end if */
+        } /* if ((H5G_CACHED_SLINK == src_ent->type)... */
 
         /* Check if object in source group is a hard link */
         if(H5F_addr_defined(src_ent->header)) {
-            H5O_loc_t src_oloc;             /* Temporary object location for source object */
+            H5O_loc_t new_oloc;         /* Copied object object location */
+            H5O_loc_t src_oloc;         /* Temporary object location for source object */
+
+            /* Set up copied object location to fill in */
+            H5O_loc_reset(&new_oloc);
+            new_oloc.file = udata->dst_file;
 
             /* Build temporary object location for source */
             src_oloc.file = f;
@@ -1948,8 +1983,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             src_oloc.addr = src_ent->header;
 
             /* Copy the shared object from source to destination */
-            /* (Increments link count on destination) */
-            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, udata->cpy_option, udata->map_list) < 0)
+            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, cpy_info, TRUE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
 
             /* Construct link information for eventual insertion */

@@ -43,9 +43,9 @@ static size_t H5O_shared_size (const H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-              void *mesg_src, void *_udata);
+              void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_shared_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_shared_debug (H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
 
 /* This message derives from H5O message class */
@@ -429,7 +429,7 @@ done:
  */
 static void *
 H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst, 
-    hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void UNUSED *udata)
+    hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5O_shared_t        *shared_src = (H5O_shared_t *)native_src;
     H5O_shared_t        *shared_dst = NULL;
@@ -440,7 +440,7 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     /* check args */
     HDassert(shared_src);
     HDassert(file_dst);
-    HDassert(map_list);
+    HDassert(cpy_info);
 
     /* Allocate space for the destination message */
     if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
@@ -451,7 +451,7 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     shared_dst->oloc.file = file_dst;
 
     /* Copy the shared object from source to destination */
-    if(H5O_copy_header_map(&(shared_src->oloc), &(shared_dst->oloc), dxpl_id, cpy_option, map_list) < 0)
+    if(H5O_copy_header_map(&(shared_src->oloc), &(shared_dst->oloc), dxpl_id, cpy_info, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
     /* Set return value */
@@ -482,27 +482,29 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type, void  *native_src, void *udata)
+H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+    void *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    void *udata)
 {
     H5O_shared_t   *shared_src = (H5O_shared_t *)native_src;
     void           *mesg_native = NULL; 
-    hid_t          dxpl_id = H5AC_dxpl_id; 
     herr_t         ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_pre_copy_file)
 
-    if(type->pre_copy_file) {
-        if((mesg_native = H5O_read_real(&(shared_src->oloc), type, 0, NULL, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to load object header")
-
-        /* Perform "pre copy" operation on messge */
-        if((type->pre_copy_file)(file_src, type, mesg_native, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
-    } /* end of if */
-
     /* check args */
     HDassert(file_src);
     HDassert(type);
+
+    if(type->pre_copy_file) {
+        /* Go get the actual shared message */
+        if((mesg_native = H5O_read_real(&(shared_src->oloc), type, 0, NULL, H5AC_dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to load object header")
+
+        /* Perform "pre copy" operation on messge */
+        if((type->pre_copy_file)(file_src, type, mesg_native, deleted, cpy_info, udata) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
+    } /* end of if */
 
 done:
     if(mesg_native)

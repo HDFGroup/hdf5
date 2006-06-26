@@ -24,7 +24,6 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5SLprivate.h"	/* Skip lists				*/
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -73,9 +72,9 @@ struct H5O_msg_class_t {
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
-    herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, void *, void *); /*"pre copy" action when copying native value to file */
-    void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, unsigned, H5SL_t *, void *); /*copy native value to file */
-    herr_t	(*post_copy_file)(H5F_t *, const void *, H5O_loc_t *, void *, hbool_t *, hid_t, unsigned, H5SL_t *); /*"post copy" action when copying native value to file */
+    herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
+    void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
+    herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hbool_t *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 };
 

@@ -37,9 +37,9 @@ static size_t H5O_pline_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset (void *_mesg);
 static herr_t H5O_pline_free (void *_mesg);
 static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-                               void *mesg_src, void *_udata);
+    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
-			       FILE * stream, int indent, int fwidth);
+    FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
@@ -441,7 +441,9 @@ H5O_pline_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type, void *mesg_src, void *_udata)
+H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
+    void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+    void *_udata)
 {
     H5O_pline_t        *pline_src = (H5O_pline_t *)mesg_src;    /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */

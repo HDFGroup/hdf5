@@ -37,8 +37,10 @@ static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_free (void *mesg);
 static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_attr_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void *udata);
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -57,7 +59,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     H5O_attr_link,		/* link method			*/
     NULL,			/* get share method		*/
     NULL,			/* set share method		*/
-    NULL,			/* pre copy native value to file */
+    H5O_attr_pre_copy_file,	/* pre copy native value to file */
     H5O_attr_copy_file,		/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_attr_debug		/* debug the message            */
@@ -635,6 +637,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_attr_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files for attribute messages. 
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, June 26, 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
+    void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    void UNUSED *udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_pre_copy_file)
+
+    /* check args */
+    HDassert(deleted);
+    HDassert(cpy_info);
+
+    /* If we are not copying attributes into the destination file, indicate
+     *  that this message should be deleted.
+     */
+    if(cpy_info->copy_without_attr)
+        *deleted = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_attr_pre_copy_file() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_attr_copy_file
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
@@ -654,7 +692,7 @@ done:
  */
 static void *
 H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst, 
-    hid_t dxpl_id, unsigned cpy_option, H5SL_t *map_list, void UNUSED *udata)
+    hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5A_t        *attr_src = (H5A_t *)native_src;
     H5A_t        *attr_dst = NULL;
@@ -674,7 +712,8 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     /* check args */
     HDassert(attr_src);
     HDassert(file_dst);
-    HDassert(map_list);
+    HDassert(cpy_info);
+    HDassert(!cpy_info->copy_without_attr);
 
     /* Allocate space for the destination message */
     if(NULL == (attr_dst = H5FL_CALLOC(H5A_t)))
@@ -718,7 +757,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
         dst_oloc->file = file_dst;
 
         /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_option, map_list) < 0)
+        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
         /* Reset shared message information */

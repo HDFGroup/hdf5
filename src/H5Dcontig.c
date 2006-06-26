@@ -990,6 +990,9 @@ done:
  * Programmer:  Quincey Koziol
  *	        Monday, November 21, 2005	
  *
+ * Modifier:    Peter Cao
+ *              Saturday, January 07, 2006
+ *              Add case to deal with compressed variable length datasets
  *-------------------------------------------------------------------------
  */
 herr_t
