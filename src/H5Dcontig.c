@@ -988,7 +988,7 @@ done:
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:  Quincey Koziol
- *	        Monday, November 21, 2005	
+ *	        Monday, November 21, 2005
  *
  * Modifier:    Peter Cao
  *              Saturday, January 07, 2006
@@ -996,7 +996,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src, 
+H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     H5F_t *f_dst,  H5O_layout_t *layout_dst, H5T_t *dt_src, hid_t dxpl_id)
 {
     haddr_t     addr_src;               /* File offset in source dataset */

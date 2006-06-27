@@ -378,7 +378,7 @@ int SetTestVerbosity(int newval)
 
 /*
  * Retrieve the TestExpress mode for the testing framework
- Values: 
+ Values:
  0: Exhaustive run
     Tests should take as long as necessary
  1: Full run.  Default if HDF5TestExpress is not defined
@@ -398,7 +398,7 @@ int SetTestVerbosity(int newval)
  sub-tests.
  The standard system for test times is a Linux machine running in
  NFS space (to catch tests that involve a great deal of disk I/O).
- 
+
  Implementation:
  I think this can be easily implemented in the test library (libh5test.a)
  so that all tests can just call it to check the status of $HDF5TestExpress.

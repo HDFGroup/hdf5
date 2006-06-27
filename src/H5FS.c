@@ -1342,7 +1342,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", FU
 #ifdef QAK
 HDfprintf(stderr, "%s: Returning space\n", FUNC);
 #endif /* QAK */
-        
+
         /* Attempt to merge returned section with existing sections */
         if(H5FS_sect_merge(f, dxpl_id, fspace, &sect, op_data) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMERGE, FAIL, "can't merge sections")

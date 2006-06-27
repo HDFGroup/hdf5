@@ -5350,7 +5350,7 @@ done:
  RETURNS
     >=0 on success, <0 on failure
  DESCRIPTION
-    Examine the span tree for a hyperslab selection and rebuild 
+    Examine the span tree for a hyperslab selection and rebuild
     the start/stride/count/block information for the selection, if possible.
 
  GLOBAL VARIABLES
@@ -5374,7 +5374,7 @@ H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab
     unsigned u;
     H5S_hyper_dim_t      canon_down_span_slab_info[H5S_MAX_RANK];
     hbool_t ret_value = TRUE;
-   
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_rebuild_helper)
 
     if(span) {
@@ -5431,7 +5431,7 @@ H5S_hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_slab
             } /* end if */
 
             /* Obtain values for stride and block */
-            next_stride  = span->low  - curr_low; 
+            next_stride  = span->low  - curr_low;
             next_block   = (span->high - span->low) + 1;
 
             /* Compare stride and block in this span, to compare stride,
@@ -5478,7 +5478,7 @@ done:
  RETURNS
     >=0 on success, <0 on failure
  DESCRIPTION
-    Examine the span tree for a hyperslab selection and rebuild 
+    Examine the span tree for a hyperslab selection and rebuild
     the start/stride/count/block information for the selection, if possible.
 
  GLOBAL VARIABLES
@@ -5490,7 +5490,7 @@ done:
  REVISION LOG
 
     This routine is the optimization of the old version. The previous version
-    can only detect a singluar selection. This version is general enough to 
+    can only detect a singluar selection. This version is general enough to
     detect any regular selection.
     KY, 2005/9/22
 --------------------------------------------------------------------------*/
@@ -5520,7 +5520,7 @@ H5S_hyper_rebuild(H5S_t *space)
         diminfo=space->select.sel_info.hslab->opt_diminfo;
         app_diminfo=space->select.sel_info.hslab->app_diminfo;
 
-        for(curr_dim = 0; curr_dim < rank; curr_dim++) { 
+        for(curr_dim = 0; curr_dim < rank; curr_dim++) {
 
             app_diminfo[(rank - curr_dim) - 1].start  = diminfo[(rank - curr_dim) - 1].start = top_span_slab_info[curr_dim].start;
             app_diminfo[(rank - curr_dim) - 1].stride = diminfo[(rank - curr_dim) - 1].stride = top_span_slab_info[curr_dim].stride;

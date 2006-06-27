@@ -31,29 +31,29 @@
 
 int main( void )
 {
- typedef struct Particle 
+ typedef struct Particle
  {
   char   name[16];
   int    lati;
   int    longi;
   float  pressure;
-  double temperature; 
+  double temperature;
  } Particle;
 
  /* Define a subset of Particle, with latitude and longitude fields */
- typedef struct Position 
+ typedef struct Position
  {
   int    lati;
   int    longi;
  } Position;
 
  /* Define a subset of Particle, with name and pressure fields */
- typedef struct NamePressure 
+ typedef struct NamePressure
  {
   char   name[16];
   float  pressure;
  } NamePressure;
- 
+
  /* Calculate the type_size and the offsets of our struct members */
  Particle  dst_buf[NRECORDS];
  size_t dst_size =  sizeof( Particle );
@@ -70,28 +70,28 @@ int main( void )
 
  size_t field_offset_pos[2] = { HOFFSET( Position, lati ),
                                 HOFFSET( Position, longi )};
- 
+
  /* Initially no data */
  Particle  *p_data = NULL;
 
  /* Define field information */
- const char *field_names[NFIELDS]  = 
+ const char *field_names[NFIELDS]  =
  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
  hid_t      field_type[NFIELDS];
  hid_t      string_type;
  hid_t      file_id;
  hsize_t    chunk_size = 10;
-  Particle   fill_data[1] = 
- { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */ 
+  Particle   fill_data[1] =
+ { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */
  int        compress  = 0;
  hsize_t    nfields;
  hsize_t    start;                       /* Record to start reading/writing */
  hsize_t    nrecords;                    /* Number of records to read/write */
- herr_t     status; 
+ herr_t     status;
  int        i;
 
  /* Define new values for the field "Pressure"  */
- float      pressure_in  [NRECORDS] = 
+ float      pressure_in  [NRECORDS] =
  { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f };
 
  int        field_index_pre[1]     = { 3 };
@@ -100,11 +100,11 @@ int main( void )
  /* Define new values for the fields "Latitude,Longitude"  */
  Position   position_in[NRECORDS] = { {0,0},
  {10,10},
- {20,20}, 
- {30,30}, 
+ {20,20},
+ {30,30},
  {40,40},
- {50,50}, 
- {60,60},    
+ {50,50},
+ {60,60},
  {70,70} };
 
  size_t field_sizes_pos[2]=
@@ -112,9 +112,9 @@ int main( void )
   sizeof(position_in[0].longi),
   sizeof(position_in[0].lati)
  };
- 
+
  size_t field_sizes_pre[1]=
- { 
+ {
   sizeof(float)
  };
 
@@ -126,27 +126,27 @@ int main( void )
  field_type[2] = H5T_NATIVE_INT;
  field_type[3] = H5T_NATIVE_FLOAT;
  field_type[4] = H5T_NATIVE_DOUBLE;
- 
+
  /* Create a new file using default properties. */
  file_id = H5Fcreate( "ex_table_05.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make the table */
- status=H5TBmake_table( "Table Title", file_id, TABLE_NAME,NFIELDS,NRECORDS, 
-                         dst_size,field_names, dst_offset, field_type, 
+ status=H5TBmake_table( "Table Title", file_id, TABLE_NAME,NFIELDS,NRECORDS,
+                         dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, p_data  );
 
  /* Write the pressure field starting at record 2 */
  nfields  = 1;
- start    = 2;      
- nrecords = 3; 
- status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pre, start, nrecords, 
+ start    = 2;
+ nrecords = 3;
+ status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pre, start, nrecords,
    sizeof( float ), 0, field_sizes_pre, pressure_in  );
 
  /* Write the new longitude and latitude information starting at record 2  */
  nfields  = 2;
- start    = 2;      
- nrecords = 3; 
- status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pos, start, nrecords, 
+ start    = 2;
+ nrecords = 3;
+ status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pos, start, nrecords,
    sizeof( Position ), field_offset_pos, field_sizes_pos, position_in  );
 
  /* read the table */
@@ -154,7 +154,7 @@ int main( void )
 
  /* print it by rows */
  for (i=0; i<NRECORDS; i++) {
-  printf ("%-5s %-5d %-5d %-5f %-5f", 
+  printf ("%-5s %-5d %-5d %-5f %-5f",
    dst_buf[i].name,
    dst_buf[i].lati,
    dst_buf[i].longi,
@@ -162,7 +162,7 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
- 
+
  /* Close the file. */
  H5Fclose( file_id );
 

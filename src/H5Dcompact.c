@@ -155,7 +155,7 @@ done:
  * Return:      Non-negative on success, negative on failure.
  *
  * Programmer:  Peter Cao
- *              December 11, 2005       
+ *              December 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -181,10 +181,10 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     HDassert(layout_dst && H5D_COMPACT == layout_dst->type);
 
     /* If there's a source datatype, set up type conversion information */
-    if (!dt_src)  
+    if (!dt_src)
         /* Type conversion not necessary */
         HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
-    else {         
+    else {
         H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
         H5T_t *dt_dst;              /* Destination datatype */
         H5T_t *dt_mem;              /* Memory datatype */

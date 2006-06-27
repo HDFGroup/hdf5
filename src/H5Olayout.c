@@ -39,7 +39,7 @@ static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
+static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
@@ -613,15 +613,15 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  Peter Cao 
- *              July 23, 2005 
+ * Programmer:  Peter Cao
+ *              July 23, 2005
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, 
+H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hid_t dxpl_id,
     H5O_copy_t UNUSED *cpy_info, void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
@@ -677,7 +677,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hid_t dxp
                 layout_dst->u.chunk.addr = HADDR_UNDEF;
 
                 /* create chunked layout */
-                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, 
+                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst,
                         udata->src_dtype, udata->src_pline, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
 

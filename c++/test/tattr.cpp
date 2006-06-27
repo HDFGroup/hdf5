@@ -1012,7 +1012,7 @@ test_attr_delete(void)
 
 /****************************************************************
 **
-**  test_attr_dtype_shared(): Test code for using shared datatypes 
+**  test_attr_dtype_shared(): Test code for using shared datatypes
 **				in attributes.
 **
 ****************************************************************/

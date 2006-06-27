@@ -610,7 +610,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 case H5T_ORDER_BE:
                     flags |= 0x01;
                     break;
-                case H5T_ORDER_VAX:     /*turn on 1st and 6th (reserved before adding VAX) bits*/ 
+                case H5T_ORDER_VAX:     /*turn on 1st and 6th (reserved before adding VAX) bits*/
                     flags |= 0x41;
                     has_vax = TRUE;
                     break;
@@ -1211,7 +1211,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              November 21, 2005 
+ *              November 21, 2005
  *
  *-------------------------------------------------------------------------
  */

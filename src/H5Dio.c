@@ -1249,7 +1249,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	  if(H5D_contig_collective_io(io_info,file_space,mem_space,buf,TRUE)<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed in collective mode");
 	}
-	else 
+	else
 #endif
         {
 	  if((io_info->ops.write)(io_info,
@@ -1514,7 +1514,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 	  if(H5D_chunk_collective_io(io_info,&fm,buf,FALSE)<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked read failed in collective mode");
 	}
-	
+
 	else {/* sequential or independent read */
 #endif
 	/* Get first node in chunk skip list */
@@ -1830,7 +1830,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
 #ifdef H5_HAVE_PARALLEL
         /* Check whether the collective mode can be turned off globally*/
-    
+
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
           if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
           HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
@@ -1840,7 +1840,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked write failed in collective mode");
 	}
 	else {/* sequential or independent write */
-	  
+
  #endif /* H5_HAVE_PARALLEL */
 	/* Get first node in chunk skip list */
 	chunk_node=H5SL_first(fm.fsel);
@@ -2188,14 +2188,14 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     /* calculate total chunk in file map*/
     fm->select_chunk = NULL;
     fm->total_chunks = 1;
-    for(u=0; u<fm->f_ndims; u++) 
+    for(u=0; u<fm->f_ndims; u++)
        fm->total_chunks= fm->total_chunks*fm->chunks[u];
-    if(IS_H5FD_MPI(dataset->oloc.file)) { 
+    if(IS_H5FD_MPI(dataset->oloc.file)) {
         H5_CHECK_OVERFLOW(fm->total_chunks, hsize_t, size_t);
         if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc((size_t)fm->total_chunks * sizeof(hbool_t))))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
     }
- 
+
 
 
 
@@ -2219,9 +2219,9 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
     /* If the selection is NONE or POINTS, set the flag to FALSE */
-    if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE) 
+    if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
       sel_hyper_flag = FALSE;
-    else 
+    else
       sel_hyper_flag = TRUE;
     /* Check if file selection is a point selection */
     if(!sel_hyper_flag) {
@@ -2487,7 +2487,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm,const H5D_t *dset)
         end[u]=(coords[u]+fm->chunk_dim[u])-1;
     } /* end for */
 
-    
+
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")

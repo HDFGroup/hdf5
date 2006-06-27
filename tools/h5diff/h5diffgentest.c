@@ -339,7 +339,7 @@ int write_dset( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-static 
+static
 void gen_datareg(hid_t fid,
                  int make_diffs /* flag to modify data buffers */)
 {
@@ -367,14 +367,14 @@ void gen_datareg(hid_t fid,
 
  for (i=0; i<10*10; i++)
  {
-  buf[i]=i; 
+  buf[i]=i;
  }
 
  /* create the data dataset */
  sid1   = H5Screate_simple(2,dims1,NULL);
  did1   = H5Dcreate(fid,"dsetref",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
  status = H5Dwrite(did1,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
- 
+
  /* create the reference dataset */
  sid2   = H5Screate_simple(1,dims2,NULL);
  did2   = H5Dcreate(fid,"refreg",H5T_STD_REF_DSETREG,sid2,H5P_DEFAULT);
@@ -410,13 +410,13 @@ void gen_datareg(hid_t fid,
  }
  H5Sselect_elements(sid1,H5S_SELECT_SET,5,(const hsize_t **)coord);
  H5Sget_select_npoints(sid1);
- 
+
  /* store second dataset region */
  H5Rcreate(&rbuf[1],fid,"dsetref",H5R_DATASET_REGION,sid1);
 
  /* write */
  status = H5Dwrite(did2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
- 
+
  /* close, free memory buffers */
  status = H5Dclose(did1);
  status = H5Sclose(sid1);
@@ -434,7 +434,7 @@ void gen_datareg(hid_t fid,
  *
  *-------------------------------------------------------------------------
  */
-static 
+static
 void write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid,
@@ -1025,7 +1025,7 @@ void write_dset_in(hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-static 
+static
 void write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid,
@@ -2092,7 +2092,7 @@ int test_dsetall(const char *file,
  *-------------------------------------------------------------------------
  */
 static
-int test_basic(const char *file1, 
+int test_basic(const char *file1,
                const char *file2)
 {
 
@@ -2152,13 +2152,13 @@ int test_basic(const char *file1,
 /*-------------------------------------------------------------------------
  * Function: test_basic
  *
- * Purpose: Compare different HDF5 types (H5G_obj_t): 
+ * Purpose: Compare different HDF5 types (H5G_obj_t):
  * H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
  *
  *-------------------------------------------------------------------------
  */
 static
-int test_types(const char *file1, 
+int test_types(const char *file1,
                const char UNUSED *file2)
 {
 
@@ -2241,7 +2241,7 @@ int test_types(const char *file1,
  *-------------------------------------------------------------------------
  */
 static
-int test_native(const char *file1, 
+int test_native(const char *file1,
                 const char UNUSED *file2)
 {
 

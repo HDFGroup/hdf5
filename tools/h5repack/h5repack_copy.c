@@ -36,7 +36,7 @@
  *
  *-------------------------------------------------------------------------
  */
-static void print_dataset_info(hid_t dcpl_id, 
+static void print_dataset_info(hid_t dcpl_id,
                                char *objname,
                                float per)
 {
@@ -143,7 +143,7 @@ static void print_dataset_info(hid_t dcpl_id,
   strcat(str,temp);
   printf(FORMAT_OBJ,str,objname);
  }
-  
+
 
 
 }
@@ -166,7 +166,7 @@ static void print_dataset_info(hid_t dcpl_id,
 int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options,
-                 int argc, 
+                 int argc,
                  const char *argv[])
 {
  hid_t         fidin;
@@ -374,7 +374,7 @@ int do_copy_objects(hid_t fidin,
    if ((next=H5Pget_external_count (dcpl_id))<0)
     goto error;
 
-   if (next) 
+   if (next)
     fprintf(stderr," <warning: %s has external files, ignoring read...>\n",
     travt->objs[i].name );
 
@@ -402,7 +402,7 @@ int do_copy_objects(hid_t fidin,
     dsize_in=H5Dget_storage_size(dset_in);
 
   /*-------------------------------------------------------------------------
-   * read 
+   * read
    *-------------------------------------------------------------------------
    */
     if (nelmts)
@@ -416,13 +416,13 @@ int do_copy_objects(hid_t fidin,
       goto error;
 
      /*-------------------------------------------------------------------------
-      * check for datasets too small 
+      * check for datasets too small
       *-------------------------------------------------------------------------
       */
-     
+
      if (nelmts*msize < options->threshold )
       apply_s=0;
-     
+
     /*-------------------------------------------------------------------------
      * apply the filter
      *-------------------------------------------------------------------------
@@ -445,7 +445,7 @@ int do_copy_objects(hid_t fidin,
 					 dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_out);
 				} H5E_END_TRY;
 
-    
+
 				if (dset_out==FAIL)
 				{
      if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
@@ -479,14 +479,14 @@ int do_copy_objects(hid_t fidin,
      else
       print_dataset_info(dcpl_id,travt->objs[i].name,0);
     }
-   
+
     if (apply_s==0 && options->verbose)
      printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
        travt->objs[i].name,
        (int)options->threshold);
 
     if (apply_f==0 && options->verbose)
-						printf(" <warning: could not apply the filter to %s>\n", 
+						printf(" <warning: could not apply the filter to %s>\n",
       travt->objs[i].name);
 
     /*-------------------------------------------------------------------------

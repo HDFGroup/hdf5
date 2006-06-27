@@ -37,7 +37,7 @@ int main( void )
  252,252,84,   /* yellow */
  252,168,0,    /* orange */
  252,0,0};     /* red */
- 
+
  /* create an image of 9 values divided evenly by the array */
  space = WIDTH*HEIGHT / PAL_ENTRIES;
  for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
@@ -50,22 +50,22 @@ int main( void )
   }
   if (n>PAL_ENTRIES-1) n=0;
  }
- 
+
  /* create a new HDF5 file using default properties. */
  file_id = H5Fcreate( "ex_image1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
- 
+
  /* make the image */
  status = H5IMmake_image_8bit( file_id, "image1", WIDTH, HEIGHT, buf );
- 
+
  /* make a palette */
  status = H5IMmake_palette( file_id, "pallete", pal_dims, pal );
- 
+
  /* attach the palette to the image */
  status = H5IMlink_palette( file_id, "image1", "pallete" );
- 
+
  /* close the file. */
  status = H5Fclose( file_id );
- 
+
  return 0;
- 
+
 }

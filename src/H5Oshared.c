@@ -423,12 +423,12 @@ done:
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              November 1, 2005 
+ *              November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst, 
+H5O_shared_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5O_shared_t        *shared_src = (H5O_shared_t *)native_src;
@@ -470,14 +470,14 @@ done:
  * Function:    H5O_shared_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
- *              files for shared messages. 
+ *              files for shared messages.
  *
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
  *
- * Programmer:  Peter Cao 
- *              Saturday, February 11, 2006 
+ * Programmer:  Peter Cao
+ *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -487,7 +487,7 @@ H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     void *udata)
 {
     H5O_shared_t   *shared_src = (H5O_shared_t *)native_src;
-    void           *mesg_native = NULL; 
+    void           *mesg_native = NULL;
     herr_t         ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_pre_copy_file)

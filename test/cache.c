@@ -3235,7 +3235,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3251,7 +3251,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 2,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
@@ -3268,7 +3268,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 3,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
 					PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1},
@@ -3397,7 +3397,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3413,7 +3413,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 2,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
@@ -3430,7 +3430,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 3,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
 					PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1},
@@ -3543,7 +3543,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3559,7 +3559,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3575,7 +3575,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3681,7 +3681,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3697,7 +3697,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3713,7 +3713,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3828,7 +3828,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3844,7 +3844,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3860,7 +3860,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3876,7 +3876,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3892,7 +3892,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
@@ -3908,7 +3908,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -3924,7 +3924,7 @@ check_flush_cache__multi_entry(H5C_t * cache_ptr)
             /* dirty_flag         = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE, 
+	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
@@ -4259,8 +4259,8 @@ check_flush_cache__pe_multi_entry_test(H5C_t * cache_ptr,
 	for ( j = 0; j < spec[i].num_pins; j++ )
 	{
             create_pinned_entry_dependency(cache_ptr,
-		                           spec[i].entry_type, 
-					   spec[i].entry_index, 
+		                           spec[i].entry_type,
+					   spec[i].entry_index,
 					   spec[i].pin_type[j],
 					   spec[i].pin_idx[j]);
 	}
@@ -5709,41 +5709,41 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
      *
      * This yields a total of 256 tests.
      *
-     * The tests and their expected results are given in the spec table 
+     * The tests and their expected results are given in the spec table
      * below.  The values assigned to the expected_cleared, expected_flushed,
      * and expected_destroyed fields are somewhat arcane, so the following
      * overview may be useful.
      *
-     * In addition to simply checking to see if the test case runs, 
+     * In addition to simply checking to see if the test case runs,
      * we also check to see if the desired operations take place on the
      * cache entry.  Thus expected_cleared is set to TRUE if we expect
      * the entry to be flushed, expected_flushed is set to TRUE if we
      * we expect the entry to be flushed, and expected_destroyed is set
      * to TRUE if we expect the entry to be destroyed.
      *
-     * In this test, we are working with pinned entries which can't be 
+     * In this test, we are working with pinned entries which can't be
      * evicted, so expected_destroyed is always FALSE.  We could pull it
      * from the table, but it is a hold over from the code this test
      * was adapted from, and it doesn't do any particular harm.
      *
-     * In general, we expect an entry to be flushed if it is dirty, and 
+     * In general, we expect an entry to be flushed if it is dirty, and
      * flush in invoked WITHOUT the H5C__FLUSH_CLEAR_ONLY_FLAG.  However,
-     * there are exceptions:  If flush is invoked with the 
+     * there are exceptions:  If flush is invoked with the
      * H5C__FLUSH_MARKED_ENTRIES_FLAG, only marked entries will be flushed.
      *
      * Further, unprotecting an entry with the H5C__SET_FLUSH_MARKER_FLAG
      * will NOT mark the entry unless the entry has either been marked
      * dirty either before or durting the unprotect call.  This results in
-     * some counterintuitive entries in the table.  It make be useful to 
+     * some counterintuitive entries in the table.  It make be useful to
      * look in the test code to see the exact order of operations.
-     * 
-     * Similarly, we expect an entry to be cleared if it is dirty, and 
+     *
+     * Similarly, we expect an entry to be cleared if it is dirty, and
      * flush is invoked WITH the H5C__FLUSH_CLEAR_ONLY_FLAG.  Again, there
-     * are exceptions -- If flush is also invoked with the 
+     * are exceptions -- If flush is also invoked with the
      * H5C__FLUSH_MARKED_ENTRIES_FLAG, only the marked entries will be
      * cleared.
-     * 
-     * The above comments about applying unprotect with the 
+     *
+     * The above comments about applying unprotect with the
      * H5C__SET_FLUSH_MARKER_FLAG apply here as well.
      */
 
@@ -5766,7 +5766,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             hbool_t		expected_flushed;
             hbool_t		expected_destroyed;
 	} spec[256] =
-	/*                                           pop    pop     
+	/*                                           pop    pop
 	 *                         ent               mark   mark
 	 *  test  entry            -ry dirty  mark   dirty  dirty  unprot                             flush                                                        expect  expect expect
          *  num   type             idx  flag  dirty  prot   pinned unpin  flags                       flags                                                        clear   flush  destroy
@@ -6053,7 +6053,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
     }
 
     return;
-    
+
 } /* check_flush_cache__single_entry() */
 
 
@@ -6247,8 +6247,8 @@ check_flush_cache__single_entry_test(H5C_t * cache_ptr,
  * Modifications:
  *
  * 		JRM -- 5/17/06
- * 		Added the pop_mark_dirty_prot and pop_mark_dirty_pinned 
- * 		flags and supporting code to allow us to test the 
+ * 		Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
+ * 		flags and supporting code to allow us to test the
  * 		H5C_mark_pinned_or_protected_entry_dirty() call.  Use the
  * 		call to mark the entry dirty while the entry is protected
  * 		if pop_mark_dirty_prot is TRUE, and to mark the entry
@@ -6316,8 +6316,8 @@ check_flush_cache__pinned_single_entry_test(H5C_t * cache_ptr,
 
 	if ( pop_mark_dirty_prot ) {
 
-	    mark_pinned_or_protected_entry_dirty(cache_ptr, 
-			                         entry_type, 
+	    mark_pinned_or_protected_entry_dirty(cache_ptr,
+			                         entry_type,
 			                         entry_idx);
 	}
 
@@ -6332,8 +6332,8 @@ check_flush_cache__pinned_single_entry_test(H5C_t * cache_ptr,
 
 	if ( pop_mark_dirty_pinned ) {
 
-	    mark_pinned_or_protected_entry_dirty(cache_ptr, 
-			                         entry_type, 
+	    mark_pinned_or_protected_entry_dirty(cache_ptr,
+			                         entry_type,
 			                         entry_idx);
 	}
     }
@@ -6653,7 +6653,7 @@ check_get_entry_status(void)
 /*-------------------------------------------------------------------------
  * Function:	check_rename_entry()
  *
- * Purpose:	Verify that H5C_rename_entry behaves as expected.  In 
+ * Purpose:	Verify that H5C_rename_entry behaves as expected.  In
  * 		particular, verify that it works correctly with pinned
  * 		entries.
  *
@@ -6706,7 +6706,7 @@ check_rename_entry(void)
     pass = TRUE;
 
     /* allocate a cache, load entries into it, and then rename
-     * them.  To the extent possible, verify that the desired 
+     * them.  To the extent possible, verify that the desired
      * actions took place.
      *
      * At present, we should do the following tests:
@@ -6766,7 +6766,7 @@ check_rename_entry(void)
 /*-------------------------------------------------------------------------
  * Function:    check_rename_entry__run_test()
  *
- * Purpose:     Run a rename entry test.  
+ * Purpose:     Run a rename entry test.
  *
  *		Do nothing if pass is FALSE on entry.
  *
@@ -6828,7 +6828,7 @@ check_rename_entry__run_test(H5C_t * cache_ptr,
                        "bad entry_ptr in rename test #%d.",
                        test_num);
             failure_mssg = msg;
-        
+
         } else if ( spec_ptr->is_pinned ) {
 
             flags |= H5C__PIN_ENTRY_FLAG;
@@ -6868,7 +6868,7 @@ check_rename_entry__run_test(H5C_t * cache_ptr,
                         ( test_ptr != (H5C_cache_entry_t *)entry_ptr ) )
                 {
                     test_ptr = test_ptr->next;
-                }             
+                }
 
                 if ( test_ptr == NULL ) {
 
@@ -7427,7 +7427,7 @@ check_double_pin_err(void)
 
     /* allocate a cache, protect an entry, unprotect it with the pin flag,
      * protect it again, and then try to unprotect it again with the pin
-     * flag.  This should fail.  Unpin the entry and destroy the cache 
+     * flag.  This should fail.  Unpin the entry and destroy the cache
      * -- should succeed.
      */
 
@@ -7450,7 +7450,7 @@ check_double_pin_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
-                               entry_ptr->addr, (void *)entry_ptr, 
+                               entry_ptr->addr, (void *)entry_ptr,
                                H5C__PIN_ENTRY_FLAG, 0);
 
         if ( result > 0 ) {
@@ -7486,7 +7486,7 @@ check_double_pin_err(void)
 /*-------------------------------------------------------------------------
  * Function:	check_double_unpin_err()
  *
- * Purpose:	Verify that an attempt to unpin an unpinned entry will 
+ * Purpose:	Verify that an attempt to unpin an unpinned entry will
  * 		generate an error.
  *
  * Return:	void
@@ -7514,7 +7514,7 @@ check_double_unpin_err(void)
     pass = TRUE;
 
     /* allocate a cache, protect an entry, unprotect it with the unpin flag.
-     * -- This should fail.  
+     * -- This should fail.
      *
      * Try again with H5C_unpin_entry -- this should also fail.
      *
@@ -7536,7 +7536,7 @@ check_double_unpin_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
-                               entry_ptr->addr, (void *)entry_ptr, 
+                               entry_ptr->addr, (void *)entry_ptr,
                                H5C__UNPIN_ENTRY_FLAG, 0);
 
         if ( result > 0 ) {
@@ -7613,10 +7613,10 @@ check_pin_entry_errs(void)
     pass = TRUE;
 
     /* Allocate a cache, protect an entry, unprotect it with no flags,
-     * and then call H5C_pin_protected_entry() to pin it -- This should fail.  
+     * and then call H5C_pin_protected_entry() to pin it -- This should fail.
      *
      * Protect the entry again, unprotect it with a pin flag, protect it
-     * again, and then call H5C_pin_protected_entry() to pin it -- This 
+     * again, and then call H5C_pin_protected_entry() to pin it -- This
      * should fail also.
      *
      * Unprotect the entry with the unpin flag.
@@ -7791,7 +7791,7 @@ check_double_protect_err(void)
  *		H5C_unprotect().
  *
  *		JRM -- 9/8/05
- *		Updated function for the new size change parameter in 
+ *		Updated function for the new size change parameter in
  *		H5C_unprotect().  We don't use them for now.
  *
  *-------------------------------------------------------------------------
@@ -7831,7 +7831,7 @@ check_double_unprotect_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
-                               entry_ptr->addr, (void *)entry_ptr, 
+                               entry_ptr->addr, (void *)entry_ptr,
                                H5C__NO_FLAGS_SET, 0);
 
         if ( result > 0 ) {
@@ -7872,7 +7872,7 @@ check_double_unprotect_err(void)
  * 		   entry as the target will generate an error.
  *
  *		3) a call to H5C_mark_pinned_or_protected_entry_dirty with
- *		   and unpinned and unprotected entry will generate an 
+ *		   and unpinned and unprotected entry will generate an
  *		   error.
  *
  * Return:	void
@@ -7900,9 +7900,9 @@ check_mark_entry_dirty_errs(void)
     pass = TRUE;
 
     /* allocate a cache, protect an entry, and then attempt to mark it dirty
-     * with the H5C_mark_pinned_entry_dirty() call -- This should fail.  
+     * with the H5C_mark_pinned_entry_dirty() call -- This should fail.
      *
-     * Then unprotect the entry without pinning it, and try to mark it dirty 
+     * Then unprotect the entry without pinning it, and try to mark it dirty
      * again -- this should fail too.
      *
      * Try it again using H5C_mark_pinned_or_protected_entry_dirty -- this
@@ -7960,7 +7960,7 @@ check_mark_entry_dirty_errs(void)
 
     if ( pass ) {
 
-	result = H5C_mark_pinned_or_protected_entry_dirty(cache_ptr, 
+	result = H5C_mark_pinned_or_protected_entry_dirty(cache_ptr,
 			                                  (void *)entry_ptr);
 
 

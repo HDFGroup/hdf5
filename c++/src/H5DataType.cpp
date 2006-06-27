@@ -198,7 +198,7 @@ void DataType::commit(CommonFG& loc, const H5std_string& name) const
 // Function:	DataType::committed
 ///\brief	Determines whether a datatype is a named type or a
 ///		transient type.
-///\return	\c true if the datatype is a named type, and \c false, 
+///\return	\c true if the datatype is a named type, and \c false,
 ///		otherwise.
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000

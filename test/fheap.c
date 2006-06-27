@@ -218,11 +218,11 @@ error:
  *                      man_size
  *                      man_alloc_size
  *                      man_free_space
- *                      
+ *
  *              The following fields in the 'state' structure are set to
  *              the current state, before any block has been created:
  *                      nobjs
- *                      
+ *
  * Return:	Success:	0
  *
  *		Failure:	1
@@ -531,11 +531,11 @@ error:
  *                      man_size
  *                      man_alloc_size
  *                      man_free_space
- *                      
+ *
  *              The following fields in the 'state' structure are set to
  *              the current state, before the block has been created:
  *                      nobjs
- *                      
+ *
  * Return:	Success:	0
  *
  *		Failure:	1
@@ -754,7 +754,7 @@ fill_root_row(H5HF_t *fh, hid_t dxpl, unsigned row, size_t obj_size,
         expand_rows = 1;
     else if(POWER_OF_TWO(row))
         expand_rows = row;
-    else 
+    else
         expand_rows = 0;
 
     /* Compute first block & all blocks heap size & free space */
@@ -1061,7 +1061,7 @@ error:
  * Function:	fill_3rd_indirect
  *
  * Purpose:	Insert (small) objects to fill up the free space in all direct
- *              heap blocks in a third-level indirect block (which 
+ *              heap blocks in a third-level indirect block (which
  *              has one more level of indirect blocks)
  *
  * Return:	Success:	0
@@ -1100,7 +1100,7 @@ error:
  * Function:	fill_3rd_indirect_row
  *
  * Purpose:	Insert (small) objects to fill up the free space in all direct
- *              heap blocks in a row of third-level indirect block (which 
+ *              heap blocks in a row of third-level indirect block (which
  *              have one more level of indirect blocks)
  *
  * Return:	Success:	0
@@ -1140,7 +1140,7 @@ error:
  * Function:	fill_all_3rd_indirect_rows
  *
  * Purpose:	Insert (small) objects to fill up the free space in all direct
- *              heap blocks in all rows of third-level indirect blocks (which 
+ *              heap blocks in all rows of third-level indirect blocks (which
  *              have one more level of indirect blocks)
  *
  * Return:	Success:	0
@@ -1180,7 +1180,7 @@ error:
  * Function:	fill_4th_indirect_row
  *
  * Purpose:	Insert (small) objects to fill up the free space in all direct
- *              heap blocks in a row of fourth-level indirect blocks (which 
+ *              heap blocks in a row of fourth-level indirect blocks (which
  *              have two more levels of indirect blocks)
  *
  * Return:	Success:	0
@@ -1230,7 +1230,7 @@ error:
  * Function:	fill_all_4th_indirect_rows
  *
  * Purpose:	Insert (small) objects to fill up the free space in all direct
- *              heap blocks in all rows of fourth-level indirect blocks (which 
+ *              heap blocks in all rows of fourth-level indirect blocks (which
  *              have two more levels of indirect blocks)
  *
  * Return:	Success:	0
@@ -3088,7 +3088,7 @@ test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
             FAIL_STACK_ERROR
     } /* end if */
 
-    /* Insert one more object, to force creation of second 
+    /* Insert one more object, to force creation of second
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
@@ -3406,7 +3406,7 @@ test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
             FAIL_STACK_ERROR
     } /* end if */
 
-    /* Insert one more object, to force creation of second 
+    /* Insert one more object, to force creation of second
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
@@ -4433,7 +4433,7 @@ error:
  *              block, fill all direct blocks in the row of indirect
  *              blocks that are 2 levels deep, fill all indirect blocks
  *              that are three levels deep, fill all rows of indirect blocks
- *              that are four levels deep and start first direct block in 
+ *              that are four levels deep and start first direct block in
  *              indirect blocks five levels deep
  *
  * Return:	Success:	0
@@ -5886,7 +5886,7 @@ error:
  * Function:	test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
- *              add object too large for all direct blocks in first row of 
+ *              add object too large for all direct blocks in first row of
  *              indirect blocks, to force skipping a row of indirect blocks
  *              (and range of skipped blocks), then backfill all direct blocks
  *              skipped and extend to next "normal" direct block.
@@ -6254,7 +6254,7 @@ error:
  * Function:	test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
- *              add object too large for all direct blocks in first row of 
+ *              add object too large for all direct blocks in first row of
  *              indirect blocks, to force skipping a row of indirect blocks
  *              (and range of skipped blocks), then add object that is too
  *              large for initial block size in skipped indirect blocks, then
@@ -9644,7 +9644,7 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_FREE(fh, 2) - (DBLOCK_SIZE(fh, 0) / 2);
     if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
         FAIL_STACK_ERROR
-    
+
     PASSED()
 
     /* Close the fractal heap */
@@ -9814,7 +9814,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
                 FAIL_STACK_ERROR
         } /* end for */
     } /* end for */
-    
+
     /* Check for closing & re-opening the heap */
     if(tparam->reopen_heap) {
         /* Close heap */
@@ -9840,7 +9840,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
             FAIL_STACK_ERROR
     } /* end for */
-    
+
     /* Check for closing & re-opening the heap */
     if(tparam->reopen_heap) {
         /* Close heap */
@@ -9977,7 +9977,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
                 FAIL_STACK_ERROR
         } /* end for */
     } /* end for */
-    
+
     /* Check for closing & re-opening the heap */
     if(tparam->reopen_heap) {
         /* Close heap */

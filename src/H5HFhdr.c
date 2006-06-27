@@ -95,7 +95,7 @@ H5FL_DEFINE(H5HF_hdr_t);
 /*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_alloc
  *
- * Purpose:	Allocate shared fractal heap header 
+ * Purpose:	Allocate shared fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *

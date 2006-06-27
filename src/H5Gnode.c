@@ -1897,7 +1897,7 @@ H5G_node_shared_free (void *_shared)
  *
  * Return:	0(zero) on success/Negative on failure
  *
- * Programmer:  Peter Cao 
+ * Programmer:  Peter Cao
  *              Sept 10, 2005
  *
  *-------------------------------------------------------------------------
@@ -1997,7 +1997,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             lnk.type = H5G_LINK_SOFT;
             lnk.u.soft.name = H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
         } /* else if */
-        else 
+        else
             HDassert(0 && "Unknown entry type");
 
         /* Set up common link data */
@@ -2023,7 +2023,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         if(H5G_stab_insert_real(udata->dst_file, udata->dst_stab, name, &lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "unable to insert the name")
     } /* end of for (i=0; i<sn->nsyms; i++) */
-    
+
 done:
     if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->src_heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")

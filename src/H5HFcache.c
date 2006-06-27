@@ -650,7 +650,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     H5F_addr_decode(f, &p, &heap_addr);
     if(H5F_addr_ne(heap_addr, dblock->hdr->heap_addr))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
-    
+
     /* Address of parent block */
     dblock->parent = par_info->iblock;
     dblock->par_entry = par_info->entry;
@@ -959,7 +959,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     H5F_addr_decode(f, &p, &heap_addr);
     if(H5F_addr_ne(heap_addr, iblock->hdr->heap_addr))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
-    
+
     /* Address of parent block */
     iblock->parent = par_info->iblock;
     iblock->par_entry = par_info->entry;

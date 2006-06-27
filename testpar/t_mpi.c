@@ -833,7 +833,7 @@ static int test_mpio_derived_dtype(char *filename) {
 
 Function: test_mpio_special_collective
 
-Test Whether collective IO is still working when more than one process 
+Test Whether collective IO is still working when more than one process
 has no contribution to IO. To properly test this case, at least FOUR
 processes are needed.
 
@@ -867,7 +867,7 @@ static int test_mpio_special_collective(char *filename) {
     char writedata[2];
     char *buf;
     char expect_val;
-    int  i, irank; 
+    int  i, irank;
     int  count,bufcount;
     int blocklens[2];
     MPI_Aint offsets[2];
@@ -883,7 +883,7 @@ static int test_mpio_special_collective(char *filename) {
     /* create MPI data type */
     etype = MPI_BYTE;
     if(mpi_rank == 0 || mpi_rank == 1) {
-        count = DIMSIZE;    
+        count = DIMSIZE;
         bufcount = 1;
     }
     else {
@@ -895,8 +895,8 @@ static int test_mpio_special_collective(char *filename) {
     offsets[0] = mpi_rank*count;
     blocklens[1] = count;
     offsets[1] = (mpi_size+mpi_rank)*count;
-    
-    if(count !=0) { 
+
+    if(count !=0) {
       if((mpi_err= MPI_Type_hindexed(2,blocklens,offsets,etype,&filetype))
        != MPI_SUCCESS){
       	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
@@ -969,7 +969,7 @@ static int test_mpio_special_collective(char *filename) {
 	printf("MPI_File_close failed. \n");
 	return 1;
     };
-    
+
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
 #ifdef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
     if(retcode != 0) {
@@ -1208,14 +1208,14 @@ main(int argc, char **argv)
      */
     if(mpi_size !=4){
       MPI_BANNER("MPIO special collective io test SKIPPED.");
-      if(mpi_rank == 0){ 
+      if(mpi_rank == 0){
         printf("Use FOUR processes to run this test\n");
         printf("If you still see the <test SKIPPED>, use <-vh> option to verify the test\n");
   }
       ret_code = 0;
       goto sc_finish;
     }
-    
+
 #ifdef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
     MPI_BANNER("MPIO special collective io test...");
     ret_code = test_mpio_special_collective(filenames[0]);
@@ -1230,7 +1230,7 @@ main(int argc, char **argv)
     }
 #endif
 
-sc_finish: 
+sc_finish:
     ret_code = errors_sum(ret_code);
     if (mpi_rank==0 && ret_code > 0){
 	printf("***FAILED with %d total errors\n", ret_code);

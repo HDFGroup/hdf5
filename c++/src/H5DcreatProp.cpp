@@ -262,7 +262,7 @@ H5D_fill_value_t DSetCreatPropList::isFillValueDefined()
 ///		and the filter fails then the entire I/O operation fails.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setFilter( H5Z_filter_t filter_id, unsigned int flags, 
+void DSetCreatPropList::setFilter( H5Z_filter_t filter_id, unsigned int flags,
 	size_t cd_nelmts, const unsigned int cd_values[] ) const
 {
    herr_t ret_value = H5Pset_filter( id, filter_id, flags, cd_nelmts, cd_values );
@@ -329,8 +329,8 @@ int DSetCreatPropList::getNfilters() const
 ///\par Description
 ///		Failure occurs when \a filter_number is out of range.
 //--------------------------------------------------------------------------
-H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, 
-	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, 
+H5Z_filter_t DSetCreatPropList::getFilter(int filter_number,
+	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values,
 	size_t namelen, char name[], unsigned int& filter_config) const
 {
    H5Z_filter_t filter_id;
@@ -360,8 +360,8 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number,
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, 
-	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, 
+void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id,
+	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values,
 	size_t namelen, char name[], unsigned int &filter_config) const
 {
    herr_t ret_value = H5Pget_filter_by_id(id, filter_id, &flags, &cd_nelmts,
@@ -394,7 +394,7 @@ void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id,
 ///		and the filter fails then the entire I/O operation fails.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::modifyFilter( H5Z_filter_t filter_id, unsigned int 
+void DSetCreatPropList::modifyFilter( H5Z_filter_t filter_id, unsigned int
 	flags, size_t cd_nelmts, const unsigned int cd_values[] ) const
 {
    herr_t ret_value = H5Pmodify_filter(id, filter_id, flags, cd_nelmts, cd_values);

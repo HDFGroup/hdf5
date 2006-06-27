@@ -1071,7 +1071,7 @@ H5Aget_create_plist(hid_t attr_id)
     /* Set the character encoding on the new property list */
     if(H5P_set(new_plist, H5A_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
- 
+
     ret_value = new_plist_id;
 
 done:
@@ -1700,7 +1700,7 @@ H5A_close(H5A_t *attr)
         /* Free temporary buffer */
         tmp_buf = H5FL_BLK_FREE(attr_buf, tmp_buf);
     } /* end if */
-    
+
     /* Free dynamicly allocated items */
     if(H5A_free(attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")

@@ -33,7 +33,7 @@ static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
-static void *H5O_efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
+static void *H5O_efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
@@ -427,15 +427,15 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  Peter Cao 
- *              September 29, 2005 
+ * Programmer:  Peter Cao
+ *              September 29, 2005
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst, 
+H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *_udata)
 {
     H5O_efl_t     *efl_src = (H5O_efl_t *) mesg_src;

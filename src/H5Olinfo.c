@@ -282,7 +282,7 @@ H5O_linfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst, 
+H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst,
     hid_t UNUSED dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;

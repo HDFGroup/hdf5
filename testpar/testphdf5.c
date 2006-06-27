@@ -412,10 +412,10 @@ int main(int argc, char **argv)
 	    "independent group and dataset read", &collngroups_params);
  /* By default, do not run big dataset on WIN32. */
 #ifdef WIN32
-    AddTest("-bigdset", big_dataset, NULL, 
+    AddTest("-bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
 #else
-				 AddTest("bigdset", big_dataset, NULL, 
+				 AddTest("bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
 #endif
     AddTest("fill", dataset_fillvalue, NULL,
@@ -453,8 +453,8 @@ int main(int argc, char **argv)
     AddTest((mpi_size < 3)? "-cchunk10" : "cchunk10",
 	coll_chunk10,NULL,
 	"multiple chunk collective IO transferring to independent IO",PARATESTFILE);
-          
-         
+
+
 
 /* irregular collective IO tests*/
     AddTest("ccontw",

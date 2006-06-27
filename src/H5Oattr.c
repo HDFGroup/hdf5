@@ -640,14 +640,14 @@ done:
  * Function:    H5O_attr_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
- *              files for attribute messages. 
+ *              files for attribute messages.
  *
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              Monday, June 26, 2006 
+ *              Monday, June 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -682,16 +682,16 @@ H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *typ
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              November 1, 2005 
+ *              November 1, 2005
  *
- * Modifications: Peter Cao 
+ * Modifications: Peter Cao
  *              December 17, 2005
  *              Datatype conversion for variable length datatype
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst, 
+H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5A_t        *attr_src = (H5A_t *)native_src;
@@ -819,7 +819,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between src and mem datatypes")
             if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, attr_dst->dt, NULL, NULL, dxpl_id, FALSE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between mem and dst datatypes")
-    
+
             /* Determine largest datatype size */
             if(0 == (src_dt_size = H5T_get_size(attr_src->dt)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
@@ -839,39 +839,39 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
 
             /* Create dataspace for number of elements in buffer */
             buf_dim = nelmts;
-    
+
             /* Create the space and set the initial extent */
             if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
-    
+
             /* Atomize */
             if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
                 H5S_close(buf_space);
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
             } /* end if */
-    
+
             /* Allocate memory for recclaim buf */
             if(NULL == (reclaim_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
-    
+
             /* Allocate memory for copying the chunk */
             if(NULL == (buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
-    
+
             HDmemcpy(buf, attr_src->data, attr_src->data_size);
-    
+
             /* Convert from source file to memory */
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
-    
+
             HDmemcpy(reclaim_buf, buf, buf_size);
-    
+
             /* Convert from memory to destination file */
             if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
-    
+
             HDmemcpy(attr_dst->data, buf, attr_dst->data_size);
-    
+
             if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* type conversion */

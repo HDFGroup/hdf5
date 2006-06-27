@@ -48,7 +48,7 @@ typedef struct {
 /* User data for looking up an object in a group */
 typedef struct {
     H5O_link_t *lnk;            /* Link information to set for object */
-    H5O_loc_t  *oloc;           /* Object location to set */     
+    H5O_loc_t  *oloc;           /* Object location to set */
 } H5G_obj_ud2_t;
 
 /* Private macros */
@@ -119,7 +119,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id,
     HDassert(link_size);
 
     /* Compute size of header to use for creation */
-    hdr_size = linfo_size + 
+    hdr_size = linfo_size +
                 ginfo_size +
                 (ginfo->est_num_entries * (link_size + ginfo->est_name_len));
 #else /* H5_GROUP_REVISION */

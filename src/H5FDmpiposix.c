@@ -913,7 +913,7 @@ done:
  *              John Mainzer -- 9/21/05
  *              Modified code to turn off the
  *              H5FD_FEAT_ACCUMULATE_METADATA_WRITE flag.
- *		With the movement of all cache writes to process 0, 
+ *		With the movement of all cache writes to process 0,
  *		this flag has become problematic in PHDF5.
  *
  *-------------------------------------------------------------------------
@@ -1233,10 +1233,10 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* Metadata specific actions */
     /* All metadata is now written from process 0 -- thus this function
-     * needs to be re-written to reflect this.  For now I have simply 
-     * commented out the code that attempts to synchronize metadata 
+     * needs to be re-written to reflect this.  For now I have simply
+     * commented out the code that attempts to synchronize metadata
      * writes between processes, but we should really just flag an error
-     * whenever any process other than process 0 attempts to write 
+     * whenever any process other than process 0 attempts to write
      * metadata.
      * 						-- JRM 9/1/05
      */
@@ -1394,7 +1394,7 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
         if(file->mpi_rank == H5_PAR_META_WRITE) {
 #ifdef WIN32
             /* Map the posix file handle to a Windows file handle */
-            filehandle = _get_osfhandle(file->fd); 
+            filehandle = _get_osfhandle(file->fd);
 
             /* Translate 64-bit integers into form Windows wants */
             /* [This algorithm is from the Windows documentation for SetFilePointer()] */

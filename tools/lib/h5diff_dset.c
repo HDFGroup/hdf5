@@ -26,11 +26,11 @@
  *-------------------------------------------------------------------------
  */
 #if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1, 
+void print_sizes( const char *obj1,
                   const char *obj2,
-                  hid_t f_tid1, 
+                  hid_t f_tid1,
                   hid_t f_tid2,
-                  hid_t m_tid1, 
+                  hid_t m_tid1,
                   hid_t m_tid2 )
 {
  size_t  f_size1, f_size2;       /* size of type in file */
@@ -300,7 +300,7 @@ hsize_t diff_datasetid( hid_t did1,
  */
  if ((m_tid1=h5tools_get_native_type(f_tid1))<0)
   goto error;
- 
+
  if ((m_tid2=h5tools_get_native_type(f_tid2))<0)
   goto error;
 
@@ -316,7 +316,7 @@ hsize_t diff_datasetid( hid_t did1,
  * check for different signed/unsigned types
  *-------------------------------------------------------------------------
  */
- 
+
  sign1=H5Tget_sign(m_tid1);
  sign2=H5Tget_sign(m_tid2);
  if ( sign1 != sign2 )
@@ -325,7 +325,7 @@ hsize_t diff_datasetid( hid_t did1,
    parallel_print("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
    parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
   }
-  
+
   cmp=0;
   options->not_cmp=1;
  }
@@ -366,19 +366,19 @@ hsize_t diff_datasetid( hid_t did1,
   if ( m_size1 < m_size2 )
   {
    H5Tclose(m_tid1);
-   
+
    if ((m_tid1=h5tools_get_native_type(f_tid2))<0)
     goto error;
-   
+
    m_size1 = H5Tget_size( m_tid1 );
   }
   else
   {
    H5Tclose(m_tid2);
-   
+
    if ((m_tid2=h5tools_get_native_type(f_tid1))<0)
     goto error;
-   
+
    m_size2 = H5Tget_size( m_tid2 );
   }
 #if defined (H5DIFF_DEBUG)

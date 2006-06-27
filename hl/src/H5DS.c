@@ -25,11 +25,11 @@
 /*-------------------------------------------------------------------------
  * Function: H5DSset_scale
  *
- * Purpose: The dataset DSID is converted to a Dimension Scale dataset. 
-	*   Creates the CLASS attribute, set to the value "DIMENSION_SCALE" 
-	*   and an empty REFERENCE_LIST attribute. 
- *   If DIMNAME is specified, then an attribute called NAME is created, 
-	*   with the value DIMNAME. 
+ * Purpose: The dataset DSID is converted to a Dimension Scale dataset.
+	*   Creates the CLASS attribute, set to the value "DIMENSION_SCALE"
+	*   and an empty REFERENCE_LIST attribute.
+ *   If DIMNAME is specified, then an attribute called NAME is created,
+	*   with the value DIMNAME.
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
@@ -95,17 +95,17 @@ herr_t H5DSset_scale(hid_t dsid,
 /*-------------------------------------------------------------------------
  * Function: H5DSattach_scale
  *
- * Purpose: Define Dimension Scale DSID to be associated with dimension IDX 
-	*  of Dataset DID. Entries are created in the DIMENSION_LIST and 
-	*  REFERENCE_LIST attributes. 
+ * Purpose: Define Dimension Scale DSID to be associated with dimension IDX
+	*  of Dataset DID. Entries are created in the DIMENSION_LIST and
+	*  REFERENCE_LIST attributes.
  *
  * Return:
  *   Success: SUCCEED
  *   Failure: FAIL
 	*
-	* Fails if: Bad arguments 
- *           If DSID is not a Dimension Scale 
- *           If DID is a Dimension Scale (A Dimension Scale cannot have scales) 
+	* Fails if: Bad arguments
+ *           If DSID is not a Dimension Scale
+ *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -556,20 +556,20 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSdetach_scale
  *
- * Purpose: If possible, deletes association of Dimension Scale DSID with 
-	*     dimension IDX of Dataset DID. This deletes the entries in the 
-	*     DIMENSION_LIST and REFERENCE_LIST attributes. 
+ * Purpose: If possible, deletes association of Dimension Scale DSID with
+	*     dimension IDX of Dataset DID. This deletes the entries in the
+	*     DIMENSION_LIST and REFERENCE_LIST attributes.
  *
  * Return:
  *   Success: SUCCEED
  *   Failure: FAIL
 	*
-	* Fails if: Bad arguments 
- *           The dataset DID or DSID do not exist. 
- *           The DSID is not a Dimension Scale 
- *           DSID is not attached to DID. 
- * Note that a scale may be associated with more than dimension of the same dataset. 
-	* If so, the detach operation only deletes one of the associations, for DID. 
+	* Fails if: Bad arguments
+ *           The dataset DID or DSID do not exist.
+ *           The DSID is not a Dimension Scale
+ *           DSID is not attached to DID.
+ * Note that a scale may be associated with more than dimension of the same dataset.
+	* If so, the detach operation only deletes one of the associations, for DID.
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -934,9 +934,9 @@ out:
  *   0: one of them or both do not match
  *   FAIL (-1): error
 	*
-	* Fails if: Bad arguments 
- *           If DSID is not a Dimension Scale 
- *           If DID is a Dimension Scale (A Dimension Scale cannot have scales) 
+	* Fails if: Bad arguments
+ *           If DSID is not a Dimension Scale
+ *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -1209,7 +1209,7 @@ out:
  *
  *  hid_t DID;               IN: the dataset
  *  unsigned int dim;        IN: the dimension of the dataset
- *  int *idx;                IN/OUT: input the index to start iterating, output the 
+ *  int *idx;                IN/OUT: input the index to start iterating, output the
 	*                             next index to visit. If NULL, start at the first position.
  *  H5DS_iterate_t visitor;  IN: the visitor function
  *  void *visitor_data;      IN: arbitrary data to pass to the visitor function.
@@ -1964,7 +1964,7 @@ int H5DSget_num_scales(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- else 
+ else
  {
   if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
    goto out;

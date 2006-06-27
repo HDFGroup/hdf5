@@ -1289,7 +1289,7 @@ H5T_init_interface(void)
 #if H5T_CONV_INTERNAL_FP_ULLONG
     status |= H5T_register(H5T_PERS_HARD, "flt_ullong", native_float, native_ullong, H5T_conv_float_ullong, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_ullong", native_double, native_ullong, H5T_conv_double_ullong, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_FP_ULLONG */    
+#endif /* H5T_CONV_INTERNAL_FP_ULLONG */
 #if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
     status |= H5T_register(H5T_PERS_HARD, "ldbl_ullong", native_ldouble, native_ullong, H5T_conv_ldouble_ullong, H5AC_dxpl_id, FALSE);
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_ULLONG */
@@ -2629,11 +2629,11 @@ done:
  * Function:	H5Tcompiler_conv
  *
  * Purpose:	Finds out whether the library's conversion function from
- *              type src_id to type dst_id is a compiler (hard) conversion.  
- *              A hard conversion uses compiler's casting; a soft conversion 
+ *              type src_id to type dst_id is a compiler (hard) conversion.
+ *              A hard conversion uses compiler's casting; a soft conversion
  *              uses the library's own conversion function.
  *
- * Return:	TRUE:           hard conversion.	
+ * Return:	TRUE:           hard conversion.
  *		FALSE:          soft conversion.
  *		FAIL:           failed.
  *
@@ -4193,11 +4193,11 @@ done:
  *
  * Modifications:
  *              Added a parameter IS_API to indicate whether to an API
- *              function issued a call to this function.  If a API 
- *              function like H5Tregister() is calling this function to 
- *              register a new hard conversion function, IS_API is TRUE 
- *              and the old path is replaced.  If a private function like 
- *              H5T_init_interface() is trying to register hard conversions, 
+ *              function issued a call to this function.  If a API
+ *              function like H5Tregister() is calling this function to
+ *              register a new hard conversion function, IS_API is TRUE
+ *              and the old path is replaced.  If a private function like
+ *              H5T_init_interface() is trying to register hard conversions,
  *              IS_API is FALSE and the old hard path is not replaced.
  *              Tuesday, Sept 13, 2005
  *
@@ -4288,9 +4288,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     old_npaths=H5T_g.npaths;
 
     /*
-     * If we didn't find the path, if the caller is an API function specifying 
-     * a new hard conversion function, or if the caller is a private function 
-     * specifying a new hard conversion and the path is a soft conversion, then 
+     * If we didn't find the path, if the caller is an API function specifying
+     * a new hard conversion function, or if the caller is a private function
+     * specifying a new hard conversion and the path is a soft conversion, then
      * create a new path and add the new function to the path.
      */
     if (!table || (table && func && is_api) || (table && !table->is_hard && func && !is_api)) {
@@ -4311,8 +4311,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 
     /*
      * If a hard conversion function is specified and none is defined for the
-     * path, or the caller is an API function, or the caller is a private function but 
-     * the existing path is a soft function, then add the new conversion to the path 
+     * path, or the caller is an API function, or the caller is a private function but
+     * the existing path is a soft function, then add the new conversion to the path
      * and initialize its conversion data.
      */
     if (func && (!table || (table && is_api) || (table && !table->is_hard && !is_api))) {
@@ -4504,11 +4504,11 @@ H5T_path_bkg(const H5T_path_t *p)
 /*-------------------------------------------------------------------------
  * Function:	H5T_compiler_conv
  *
- * Purpose:	Private function for H5Tcompiler_conv.  Finds out whether the 
- *              library's conversion function from type SRC to type DST 
+ * Purpose:	Private function for H5Tcompiler_conv.  Finds out whether the
+ *              library's conversion function from type SRC to type DST
  *              is a hard conversion.
  *
- * Return:	TRUE:           hard conversion.	
+ * Return:	TRUE:           hard conversion.
  *		FALSE:          soft conversion.
  *		FAIL:           function failed.
  *

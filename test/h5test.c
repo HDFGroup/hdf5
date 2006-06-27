@@ -293,7 +293,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && 
+    isppdriver = H5P_DEFAULT != fapl &&
 	(H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
@@ -475,7 +475,7 @@ h5_rmprefix(const char *filename)
 	ret_ptr = filename;
     else
 	ret_ptr++;
-    
+
     return(ret_ptr);
 }
 
@@ -953,7 +953,7 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
 	/* use original getenv */
 	if(env)
 	    HDfree(env);
-	env = HDgetenv(name); 
+	env = HDgetenv(name);
     }else{
 	MPI_Comm_rank(comm, &mpi_rank);
 	MPI_Comm_size(comm, &mpi_size);

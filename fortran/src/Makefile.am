@@ -89,7 +89,7 @@ uninstall-local:
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
-	@$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)   
+	@$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)
 
 # Install libhdf5_fortran.settings in lib directory
 settingsdir=$(libdir)

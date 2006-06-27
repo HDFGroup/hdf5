@@ -5427,20 +5427,20 @@ static void gent_longlinks(void)
  */
 static int gent_ldouble(void)
 {
- hid_t       fid;        
+ hid_t       fid;
  hid_t       did;
  hid_t       tid;
  hid_t       sid;
  size_t      size;
- hsize_t     dims[1] = {3};             
+ hsize_t     dims[1] = {3};
  long double buf[3] = {1,2,3};
-  
+
  if ((fid = H5Fcreate(FILE52, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
   goto error;
- 
+
  if ((sid = H5Screate_simple(1, dims, NULL))<0)
   goto error;
- 
+
  if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE))<0)
   goto error;
 
@@ -5452,7 +5452,7 @@ static int gent_ldouble(void)
 
  if (H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
   goto error;
- 
+
  if (H5Sclose(sid)<0)
   goto error;
  if (H5Tclose(tid)<0)
@@ -5461,7 +5461,7 @@ static int gent_ldouble(void)
   goto error;
  if (H5Fclose(fid)<0)
   goto error;
- 
+
  return 0;
 
 error:

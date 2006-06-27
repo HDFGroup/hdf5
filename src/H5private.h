@@ -803,7 +803,7 @@ H5_DLL int HDrand(void);
 #ifdef H5_VMS
 #define HDremove(S) 		HDremove_all(S)
 int HDremove_all(char * fname);
-#else           
+#else
 #define HDremove(S)		remove(S)
 #endif /*H5_VMS*/
 #define HDrename(OLD,NEW)	rename(OLD,NEW)

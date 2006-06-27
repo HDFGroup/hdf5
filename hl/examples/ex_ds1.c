@@ -59,7 +59,7 @@ int main(void)
  if (H5LTmake_dataset_int(fid,DS_2_NAME,rankds,s2_dim,s2_wbuf)<0)
   goto out;
 
-	
+
 /*-------------------------------------------------------------------------
  * attach the DS_1_NAME dimension scale to DSET_NAME at dimension 0
  *-------------------------------------------------------------------------
@@ -100,7 +100,7 @@ int main(void)
 
  /* close file */
  H5Fclose(fid);
- 
+
  return 0;
 
 out:

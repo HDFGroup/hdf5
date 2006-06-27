@@ -60,7 +60,7 @@ typedef struct H5FD_family_t {
     hid_t	memb_fapl_id;	/*file access property list for members	*/
     hsize_t	memb_size;	/*actual size of each member file	*/
     hsize_t	pmem_size;	/*member size passed in from property	*/
-    hsize_t	mem_newsize;	/*new member size passed in as private 
+    hsize_t	mem_newsize;	/*new member size passed in as private
                                  *property. It's used only by h5repart  */
     unsigned	nmembs;		/*number of family members		*/
     unsigned	amembs;		/*number of member slots allocated	*/

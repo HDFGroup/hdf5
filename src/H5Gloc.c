@@ -37,7 +37,7 @@
 
 /* User data for looking up an object in a group */
 typedef struct {
-    H5G_loc_t  *loc;            /* Group location to set */     
+    H5G_loc_t  *loc;            /* Group location to set */
 } H5G_loc_ud1_t;
 
 /* Private macros */

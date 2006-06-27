@@ -319,16 +319,16 @@ done:
  *
  *		John Mainzer, 8/10/05
  *		Reworked this function for a different role.
- *		
- *		It used to be called during cache eviction, where it 
- *		attempted to size the disk space allocation for the 
+ *
+ *		It used to be called during cache eviction, where it
+ *		attempted to size the disk space allocation for the
  *		actual size of the heap.  However, this causes problems
  *		in the parallel case, as the reuslting disk allocations
  *		may not be synchronized.
  *
- *		It is now called from H5HL_remove(), where it is used to 
+ *		It is now called from H5HL_remove(), where it is used to
  *		reduce heap size in response to an entry deletion.  This
- *		means that the function should either do nothing, or 
+ *		means that the function should either do nothing, or
  *		reduce the size of the disk allocation.
  *
  *-------------------------------------------------------------------------
@@ -546,8 +546,8 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
  *
  *	John Mainzer, 2005-08-10
  *	Removed call to H5HL_minimize_heap_space().  It does disk space
- *	allocation, which can cause problems if done at flush time.  
- *	Instead, disk space allocation/deallocation is now done at 
+ *	allocation, which can cause problems if done at flush time.
+ *	Instead, disk space allocation/deallocation is now done at
  *	insert/remove time.
  *
  *-------------------------------------------------------------------------
@@ -956,7 +956,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *
  *		John Mainzer, 8/10/05
  *		Modified code to allocate file space as needed, instead
- *		of allocating it on eviction.  
+ *		of allocating it on eviction.
  *
  *-------------------------------------------------------------------------
  */
@@ -1068,9 +1068,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
         else { /* ...if we can't, allocate a new chunk & release the old */
 	    haddr_t new_addr;
 
-	    /* The new allocation may fail -- to avoid the possiblity of 
+	    /* The new allocation may fail -- to avoid the possiblity of
 	     * file corruption, allocate the new heap first, and then
-	     * deallocate the old.  
+	     * deallocate the old.
 	     */
 
 	    /* allocate new disk space for the heap */

@@ -19,7 +19,7 @@
 #include "H5HLprivate2.h"
 
 /* public LT prototypes			*/
-#include "H5LTpublic.h"		
+#include "H5LTpublic.h"
 
 /*-------------------------------------------------------------------------
  * Private functions
@@ -49,7 +49,7 @@ H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
 H5_HLDLL herr_t  H5LT_find_attribute( hid_t loc_id, const char *name );
 
 
-H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, 
+H5_HLDLL herr_t  H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang,
                                     size_t *slen, hbool_t no_user_buf);
 
 

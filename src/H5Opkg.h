@@ -164,7 +164,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_DTYPE[1];
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_FILL[1];
 
 /* New Fill Value Message. (0x0005) */
-/* 
+/*
  * The new fill value message is fill value plus
  * space allocation time and fill value writing time and whether fill
  * value is defined.
@@ -208,7 +208,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_NAME[1];
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME[1];
 
 /* Shared Object Message. (0x000f) */
-/* 
+/*
  * This message ID never really appears in an object
  * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
  * will be the ID of the pointed-to message.
@@ -222,7 +222,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_CONT[1];
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_STAB[1];
 
 /* New Modification Time Message. (0x0012) */
-/* 
+/*
  * The message is just a `time_t'.
  */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME_NEW[1];

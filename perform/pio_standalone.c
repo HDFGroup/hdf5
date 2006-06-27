@@ -107,7 +107,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         opt_opt = argv[opt_ind][sp];
 
         if (opt_opt == ':' || (cp = strchr(opts, opt_opt)) == 0) {
-	        	                       
+
             if (opt_err)
                 HDfprintf(stderr, "%s: unknown option \"%c\"\n",
                         argv[0], opt_opt);

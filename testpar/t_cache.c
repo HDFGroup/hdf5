@@ -39,8 +39,8 @@ int     	nerrors = 0;
 int		failures = 0;
 hbool_t		verbose = TRUE; /* used to control error messages */
 #if 0
-/* So far we haven't needed this, but that may change.  
- * Keep it around for now 
+/* So far we haven't needed this, but that may change.
+ * Keep it around for now
  */
 hid_t noblock_dxpl_id=(-1);
 #endif
@@ -80,11 +80,11 @@ long local_pins		   = 0;
  * struct datum
  *
  *	Instances of struct datum are used to store information on entries
- *	that may be loaded into the cache.  The individual fields are 
+ *	that may be loaded into the cache.  The individual fields are
  *	discussed below:
  *
  *	header:	Instance of H5C_cache_entry_t used by the for its data.
- *		This field is only used on the file processes, not on the 
+ *		This field is only used on the file processes, not on the
  *		server process.
  *
  *		This field MUST be the first entry in this structure.
@@ -98,27 +98,27 @@ long local_pins		   = 0;
  *
  *	dirty:	Boolean flag indicating whether the entry is dirty.
  *
- *		For current purposes, an entry is clean until it is 
+ *		For current purposes, an entry is clean until it is
  *		modified, and dirty until written to the server (cache
- *		on process 0) or until it is marked clean (all other 
+ *		on process 0) or until it is marked clean (all other
  *		caches).
  *
  *	valid:	Boolean flag indicating whether the entry contains
  *		valid data.  Attempts to read an entry whose valid
  *		flag is not set should trigger an error.
  *
- *	locked:	Boolean flag that is set to true iff the entry is in 
+ *	locked:	Boolean flag that is set to true iff the entry is in
  *		the cache and locked.
  *
- *	global_pinned:	Boolean flag that is set to true iff the entry has 
+ *	global_pinned:	Boolean flag that is set to true iff the entry has
  *		been pinned collectively in all caches.  Since writes must
  *		be collective across all processes, only entries pinned
  *		in this fashion may be marked dirty.
  *
  *	local_pinned:	Boolean flag that is set to true iff the entry
  *		has been pinned in the local cache, but probably not all
- *		caches.  Such pins will typically not be consistant across 
- *		processes, and thus cannot be marked as dirty unless they 
+ *		caches.  Such pins will typically not be consistant across
+ *		processes, and thus cannot be marked as dirty unless they
  *		happen to overlap some collective operation.
  *
  *	index:	Index of this instance of datum in the data_index[] array
@@ -126,7 +126,7 @@ long local_pins		   = 0;
  *
  *****************************************************************************/
 
-struct datum 
+struct datum
 {
     H5C_cache_entry_t	header;
     haddr_t		base_addr;
@@ -143,14 +143,14 @@ struct datum
 /*****************************************************************************
  * data array
  *
- *	The data array is an array of instances of datum of size 
+ *	The data array is an array of instances of datum of size
  *	NUM_DATA_ENTRIES that is used to track the particulars of all
  *	the entries that may be loaded into the cache.
  *
  *	It exists on all processes, although the master copy is maintained
  *	by the server process.  If the cache is performing correctly, all
  *	versions should be effectively identical.  By that I mean that
- *	the data received from the server should always match that in 
+ *	the data received from the server should always match that in
  *	the local version of the data array.
  *
  *****************************************************************************/
@@ -163,8 +163,8 @@ struct datum data[NUM_DATA_ENTRIES];
 /* Many tests use the size of data array as the size of test loops.
  * On some machines, this results in unacceptably long test runs.
  *
- * To deal with this issue, I have introduced the virt_num_data_entries 
- * global, which can be set to a lower value to throtle the length of 
+ * To deal with this issue, I have introduced the virt_num_data_entries
+ * global, which can be set to a lower value to throtle the length of
  * tests.
  *
  * Note that this value must always be divisible by 40, and must be an
@@ -172,7 +172,7 @@ struct datum data[NUM_DATA_ENTRIES];
  * powers of 10 that meet these criteria.
  *
  * Further, this value must be consistant across all processes.
- */ 
+ */
 
 #define STD_VIRT_NUM_DATA_ENTRIES	NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES	(NUM_DATA_ENTRIES / 10)
@@ -191,9 +191,9 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *	This array is necessary, as rename operations can swap the values
  *	of the base_addr fields of two instances of datum.  Without this
  *	array, we would no longer be able to use a binary search on a sorted
- *	list to find the indexes of instances of datum given the values of 
+ *	list to find the indexes of instances of datum given the values of
  *	their base_addr fields.
- *	
+ *
  *****************************************************************************/
 
 int data_index[NUM_DATA_ENTRIES];
@@ -202,7 +202,7 @@ int data_index[NUM_DATA_ENTRIES];
 /*****************************************************************************
  * struct mssg
  *
- *	The mssg structure is used as a generic container for messages to 
+ *	The mssg structure is used as a generic container for messages to
  *	and from the server.  Not all fields are used in all cases.
  *
  *	req:	Integer field containing the type of the message.
@@ -219,7 +219,7 @@ int data_index[NUM_DATA_ENTRIES];
  *
  *	ver:	Version number of a datum.  Not used in all mssgs.
  *
- *	magic:	Magic number for error detection.  Must be set to 
+ *	magic:	Magic number for error detection.  Must be set to
  *		MSSG_MAGIC.
  *
  *****************************************************************************/
@@ -300,7 +300,7 @@ hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 herr_t clear_datum(H5F_t * f, void *  thing, hbool_t dest);
 herr_t destroy_datum(H5F_t UNUSED * f, void * thing);
-herr_t flush_datum(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, haddr_t addr, 
+herr_t flush_datum(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, haddr_t addr,
                    void *thing);
 void * load_datum(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
                   const void UNUSED *udata1, void UNUSED *udata2);
@@ -325,10 +325,10 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 
 /* test utility functions */
 
-void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr, 
+void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t idx, unsigned int flags);
 void local_pin_and_unpin_random_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
-                                        int min_idx, int max_idx, 
+                                        int min_idx, int max_idx,
 				        int min_count, int max_count);
 void local_pin_random_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                             int min_idx, int max_idx);
@@ -355,7 +355,7 @@ hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
                              H5C_t ** cache_ptr_ptr);
 void setup_rand(void);
 hbool_t take_down_cache(hid_t fid);
-void unlock_entry(H5C_t * cache_ptr, H5F_t * file_ptr, 
+void unlock_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t type, unsigned int flags);
 void unpin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
 	         hbool_t global, hbool_t dirty, hbool_t via_unprotect);
@@ -391,19 +391,19 @@ hbool_t smoke_check_5(void);
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
-void 
+void
 print_stats(void)
 {
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
 	      "%d: datum clears / pinned clears / destroys = %ld / %ld / %ld\n",
-              world_mpi_rank, datum_clears, datum_pinned_clears, 
+              world_mpi_rank, datum_clears, datum_pinned_clears,
 	      datum_destroys );
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
 	      "%d: datum flushes / pinned flushes / loads  = %ld / %ld / %ld\n",
-              world_mpi_rank, datum_flushes, datum_pinned_flushes, 
+              world_mpi_rank, datum_flushes, datum_pinned_flushes,
 	      datum_loads );
     HDfprintf(stdout,
 	      "%d: pins: global / global dirty / local = %ld / %ld / %ld\n",
@@ -427,7 +427,7 @@ print_stats(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 void
@@ -468,7 +468,7 @@ reset_stats(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -491,7 +491,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
 	    if ( verbose ) {
-                fprintf(stdout, 
+                fprintf(stdout,
                         "%d:%s: MPI_Comm_group() failed with error %d.\n",
                         world_mpi_rank, fcn_name, mpi_result);
             }
@@ -499,10 +499,10 @@ set_up_file_communicator(void)
     }
 
     if ( success ) {
- 
+
         num_excluded_ranks = 1;
         excluded_ranks[0] = world_server_mpi_rank;
-        mpi_result = MPI_Group_excl(world_group, num_excluded_ranks, 
+        mpi_result = MPI_Group_excl(world_group, num_excluded_ranks,
                                     excluded_ranks, &file_group);
 
         if ( mpi_result != MPI_SUCCESS ) {
@@ -510,7 +510,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout, 
+                fprintf(stdout,
                         "%d:%s: MPI_Group_excl() failed with error %d.\n",
                         world_mpi_rank, fcn_name, mpi_result);
             }
@@ -519,7 +519,7 @@ set_up_file_communicator(void)
 
     if ( success ) {
 
-        mpi_result = MPI_Comm_create(world_mpi_comm, file_group, 
+        mpi_result = MPI_Comm_create(world_mpi_comm, file_group,
                                      &file_mpi_comm);
 
         if ( mpi_result != MPI_SUCCESS ) {
@@ -527,7 +527,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout, 
+                fprintf(stdout,
                         "%d:%s: MPI_Comm_create() failed with error %d.\n",
                         world_mpi_rank, fcn_name, mpi_result);
             }
@@ -541,7 +541,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout, 
+                        fprintf(stdout,
                                 "%d:%s: file_mpi_comm == MPI_COMM_NULL.\n",
                                 world_mpi_rank, fcn_name);
                     }
@@ -555,7 +555,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout, 
+                        fprintf(stdout,
                                 "%d:%s: file_mpi_comm != MPI_COMM_NULL.\n",
                                 world_mpi_rank, fcn_name);
                     }
@@ -573,7 +573,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout, 
+                fprintf(stdout,
                         "%d:%s: MPI_Comm_size() failed with error %d.\n",
                         world_mpi_rank, fcn_name, mpi_result);
             }
@@ -589,7 +589,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout, 
+                fprintf(stdout,
                         "%d:%s: MPI_Comm_rank() failed with error %d.\n",
                         world_mpi_rank, fcn_name, mpi_result);
             }
@@ -609,7 +609,7 @@ set_up_file_communicator(void)
  *
  * Function:	addr_to_datum_index()
  *
- * Purpose:	Given the base address of a datum, find and return its index 
+ * Purpose:	Given the base address of a datum, find and return its index
  *		in the data array.
  *
  * Return:	Success:	index of target datum.
@@ -621,7 +621,7 @@ set_up_file_communicator(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 int
@@ -650,7 +650,7 @@ addr_to_datum_index(haddr_t base_addr)
             ret_value = data_index[middle];
             bottom = top + 1; /* to force exit from while loop */
 
-        } 
+        }
     }
 
     return(ret_value);
@@ -662,7 +662,7 @@ addr_to_datum_index(haddr_t base_addr)
  *
  * Function:	init_data()
  *
- * Purpose:	Initialize the data array, from which cache entries are 
+ * Purpose:	Initialize the data array, from which cache entries are
  *		loaded.
  *
  * Return:	Success:	TRUE
@@ -674,24 +674,24 @@ addr_to_datum_index(haddr_t base_addr)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 void
 init_data(void)
 {
     const char * fcn_name = "init_data()";
-    /* The set of address offsets is chosen so as to avoid allowing the 
+    /* The set of address offsets is chosen so as to avoid allowing the
      * base addresses to fall in a pattern of that will annoy the hash
      * table, and to give a good range of entry sizes.
      *
-     * At present, I am using the first 20 entries of the Fibonacci 
+     * At present, I am using the first 20 entries of the Fibonacci
      * sequence multiplied by 2.  We will see how it works.
      */
     const int num_addr_offsets = 20;
-    const haddr_t addr_offsets[20] = {   2,    2,    4,    6,    10, 
-                                        16,   26,   42,   68,   110, 
-                                       178,  288,  466,  754,  1220, 
+    const haddr_t addr_offsets[20] = {   2,    2,    4,    6,    10,
+                                        16,   26,   42,   68,   110,
+                                       178,  288,  466,  754,  1220,
                                       1974, 3194, 5168, 8362, 13539};
     int i;
     int j = 0;
@@ -720,7 +720,7 @@ init_data(void)
 
         j = (j + 1) % num_addr_offsets;
     }
-    
+
     return;
 
 } /* init_data() */
@@ -742,7 +742,7 @@ init_data(void)
  * 		processes.  This function ensures that all processes agree
  * 		on whether to do an express test.
  *
- * Return:	Success:	Maximum of the values returned by 
+ * Return:	Success:	Maximum of the values returned by
  * 				GetTestExpress() across	all processes.
  *
  *		Failure:	-1
@@ -752,7 +752,7 @@ init_data(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 int
@@ -777,10 +777,10 @@ do_express_test(void)
         nerrors++;
         max_express_test = -1;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", 
+            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n",
                       world_mpi_rank, fcn_name );
         }
-    } 
+    }
 
     return(max_express_test);
 
@@ -794,7 +794,7 @@ do_express_test(void)
  * Purpose:	Ensure that all messages sent by this process have been
  * 		processed before proceeding.
  *
- * 		Do this by exchanging sync req / sync ack messages with 
+ * 		Do this by exchanging sync req / sync ack messages with
  * 		the server.
  *
  * 		Do nothing if nerrors is greater than zero.
@@ -806,7 +806,7 @@ do_express_test(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 void
@@ -830,7 +830,7 @@ do_sync(void)
         mssg.magic     = MSSG_MAGIC;
 
 	if ( ! send_mssg(&mssg, FALSE) ) {
-	
+
 	    nerrors++;
 	    if ( verbose ) {
                 HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
@@ -870,7 +870,7 @@ do_sync(void)
  *
  * Function:	get_max_nerrors()
  *
- * Purpose:	Do an MPI_Allreduce to obtain the maximum value of nerrors 
+ * Purpose:	Do an MPI_Allreduce to obtain the maximum value of nerrors
  *		across all processes.  Return this value.
  *
  * Return:	Success:	Maximum of the nerrors global variables across
@@ -883,7 +883,7 @@ do_sync(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 int
@@ -905,10 +905,10 @@ get_max_nerrors(void)
         nerrors++;
         max_nerrors = -1;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", 
+            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n",
                       world_mpi_rank, fcn_name );
         }
-    } 
+    }
 
     return(max_nerrors);
 
@@ -923,7 +923,7 @@ get_max_nerrors(void)
  *
  * Function:	recv_mssg()
  *
- * Purpose:	Receive a message from any process in the provided instance 
+ * Purpose:	Receive a message from any process in the provided instance
  *		of struct mssg.
  *
  * Return:	Success:	TRUE
@@ -936,7 +936,7 @@ get_max_nerrors(void)
  *
  * 		JRM -- 5/10/06
  *		Added mssg_tag_offset parameter and supporting code.
- *	
+ *
  *****************************************************************************/
 
 #define CACHE_TEST_TAG	99 /* different from any used by the library */
@@ -958,7 +958,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: bad param(s) on entry.\n", 
+            HDfprintf(stdout, "%d:%s: bad param(s) on entry.\n",
                       world_mpi_rank, fcn_name);
         }
     } else {
@@ -976,7 +976,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Recv() failed.\n", 
+                HDfprintf(stdout, "%d:%s: MPI_Recv() failed.\n",
                           world_mpi_rank, fcn_name );
             }
         } else if ( mssg_ptr->magic != MSSG_MAGIC ) {
@@ -992,8 +992,8 @@ recv_mssg(struct mssg_t *mssg_ptr,
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, 
-                          "%d:%s: mssg_ptr->src != status.MPI_SOURCE.\n", 
+                HDfprintf(stdout,
+                          "%d:%s: mssg_ptr->src != status.MPI_SOURCE.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -1010,7 +1010,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
  *
  * Purpose:	Send the provided instance of mssg to the indicated target.
  *
- *		Note that all source and destination ranks are in the 
+ *		Note that all source and destination ranks are in the
  *		global communicator.
  *
  * Return:	Success:	TRUE
@@ -1023,7 +1023,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
  *
  * 		JRM -- 5/10/06
  *		Added the add_req_to_tag parameter and supporting code.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1048,7 +1048,7 @@ send_mssg(struct mssg_t *mssg_ptr,
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: Invalid mssg on entry.\n", 
+            HDfprintf(stdout, "%d:%s: Invalid mssg on entry.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -1070,7 +1070,7 @@ send_mssg(struct mssg_t *mssg_ptr,
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Send() failed.\n", 
+                HDfprintf(stdout, "%d:%s: MPI_Send() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -1097,7 +1097,7 @@ send_mssg(struct mssg_t *mssg_ptr,
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1108,7 +1108,7 @@ setup_derived_types(void)
     int i;
     int result;
     MPI_Datatype mpi_types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_LONG,
-                                 HADDR_AS_MPI_TYPE, MPI_INT, MPI_INT, 
+                                 HADDR_AS_MPI_TYPE, MPI_INT, MPI_INT,
                                  MPI_UNSIGNED};
     int block_len[8] = {1, 1, 1, 1, 1, 1, 1, 1};
     MPI_Aint displs[8];
@@ -1127,7 +1127,7 @@ setup_derived_types(void)
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Address() call failed.\n", 
+            HDfprintf(stdout, "%d:%s: MPI_Address() call failed.\n",
                       world_mpi_rank, fcn_name);
         }
 
@@ -1149,7 +1149,7 @@ setup_derived_types(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Type_struct() call failed.\n", 
+                HDfprintf(stdout, "%d:%s: MPI_Type_struct() call failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -1164,7 +1164,7 @@ setup_derived_types(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Type_commit() call failed.\n", 
+                HDfprintf(stdout, "%d:%s: MPI_Type_commit() call failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -1191,7 +1191,7 @@ setup_derived_types(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1208,7 +1208,7 @@ takedown_derived_types(void)
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Type_free() call failed.\n", 
+            HDfprintf(stdout, "%d:%s: MPI_Type_free() call failed.\n",
             world_mpi_rank, fcn_name);
         }
     }
@@ -1243,10 +1243,10 @@ takedown_derived_types(void)
  *
  * 		JRM -- 5/10/06
  *		Updated for sync message.
- *	
+ *
  *****************************************************************************/
 
-hbool_t 
+hbool_t
 server_main(void)
 {
     const char * fcn_name = "server_main()";
@@ -1260,7 +1260,7 @@ server_main(void)
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: This isn't the server process?!?!?\n", 
+            HDfprintf(stdout, "%d:%s: This isn't the server process?!?!?\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -1289,7 +1289,7 @@ server_main(void)
 
 		case READ_REQ_REPLY_CODE:
                     success = FALSE;
-		    HDfprintf(stdout, "%s: Received read req reply?!?.\n", 
+		    HDfprintf(stdout, "%s: Received read req reply?!?.\n",
 			      fcn_name);
 		    break;
 
@@ -1299,7 +1299,7 @@ server_main(void)
 
 		case SYNC_ACK_CODE:
                     success = FALSE;
-		    HDfprintf(stdout, "%s: Received sync ack?!?.\n", 
+		    HDfprintf(stdout, "%s: Received sync ack?!?.\n",
 			      fcn_name);
 		    break;
 
@@ -1317,7 +1317,7 @@ server_main(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-		        HDfprintf(stdout, "%d:%s: Unknown request code.\n", 
+		        HDfprintf(stdout, "%d:%s: Unknown request code.\n",
                                   world_mpi_rank, fcn_name);
                     }
 		    break;
@@ -1336,7 +1336,7 @@ server_main(void)
  *
  * Purpose:	Serve a read request.
  *
- *		The function accepts a pointer to an instance of struct 
+ *		The function accepts a pointer to an instance of struct
  *		mssg_t as input.  If all sanity checks pass, it sends
  *		a copy of the indicated datum from the data array to
  *		the requesting process.
@@ -1350,7 +1350,7 @@ server_main(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1362,14 +1362,14 @@ serve_read_request(struct mssg_t * mssg_ptr)
     haddr_t target_addr;
     struct mssg_t reply;
 
-    if ( ( mssg_ptr == NULL ) || 
+    if ( ( mssg_ptr == NULL ) ||
          ( mssg_ptr->req != READ_REQ_CODE ) ||
          ( mssg_ptr->magic != MSSG_MAGIC ) ) {
 
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n", 
+            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -1384,7 +1384,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", 
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
                           world_mpi_rank, fcn_name, target_addr);
             }
         } else if ( data[target_index].len != mssg_ptr->len ) {
@@ -1392,9 +1392,9 @@ serve_read_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%d:%s: data[i].len = %d != mssg->len = %d.\n",
-                           world_mpi_rank, fcn_name, 
+                           world_mpi_rank, fcn_name,
                            data[target_index].len, mssg_ptr->len);
             }
         } else if ( ! (data[target_index].valid) ) {
@@ -1402,9 +1402,9 @@ serve_read_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
-                         world_mpi_rank, fcn_name, 
+                         world_mpi_rank, fcn_name,
                          mssg_ptr->src, target_index,
 			target_index,
 			data[target_index].base_addr);
@@ -1427,7 +1427,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
 
         success = send_mssg(&reply, TRUE);
     }
- 
+
     return(success);
 
 } /* serve_read_request() */
@@ -1439,12 +1439,12 @@ serve_read_request(struct mssg_t * mssg_ptr)
  *
  * Purpose:	Serve a sync request.
  *
- *		The function accepts a pointer to an instance of struct 
- *		mssg_t as input.  If all sanity checks pass, it sends a 
+ *		The function accepts a pointer to an instance of struct
+ *		mssg_t as input.  If all sanity checks pass, it sends a
  *		sync ack to the requesting process.
  *
  *		This service exist to allow the sending process to ensure
- *		that all previous messages have been processed before 
+ *		that all previous messages have been processed before
  *		proceeding.
  *
  * Return:	Success:	TRUE
@@ -1456,7 +1456,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1466,14 +1466,14 @@ serve_sync_request(struct mssg_t * mssg_ptr)
     hbool_t success = TRUE;
     struct mssg_t reply;
 
-    if ( ( mssg_ptr == NULL ) || 
+    if ( ( mssg_ptr == NULL ) ||
          ( mssg_ptr->req != SYNC_REQ_CODE ) ||
          ( mssg_ptr->magic != MSSG_MAGIC ) ) {
 
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n", 
+            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -1485,7 +1485,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
         reply.src       = world_mpi_rank;
         reply.dest      = mssg_ptr->src;
         reply.mssg_num  = -1; /* set by send function */
-        reply.base_addr = 0; 
+        reply.base_addr = 0;
         reply.len       = 0;
         reply.ver       = 0;
         reply.magic     = MSSG_MAGIC;
@@ -1495,7 +1495,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
 
         success = send_mssg(&reply, TRUE);
     }
- 
+
     return(success);
 
 } /* serve_sync_request() */
@@ -1507,7 +1507,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
  *
  * Purpose:	Serve a write request.
  *
- *		The function accepts a pointer to an instance of struct 
+ *		The function accepts a pointer to an instance of struct
  *		mssg_t as input.  If all sanity checks pass, it updates
  *		the version number of the target data array entry as
  *		specified in the message.
@@ -1521,10 +1521,10 @@ serve_sync_request(struct mssg_t * mssg_ptr)
  * Modifications:
  *
  *		JRM -- 5/9/06
- *		Added code supporting a write ack message.  This is a 
- *		speculative fix to a bug observed on Cobalt.  If it 
+ *		Added code supporting a write ack message.  This is a
+ *		speculative fix to a bug observed on Cobalt.  If it
  *		doesn't work, it will help narrow down the possibilities.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -1539,14 +1539,14 @@ serve_write_request(struct mssg_t * mssg_ptr)
     struct mssg_t reply;
 #endif /* DO_WRITE_REQ_ACK */
 
-    if ( ( mssg_ptr == NULL ) || 
+    if ( ( mssg_ptr == NULL ) ||
          ( mssg_ptr->req != WRITE_REQ_CODE ) ||
          ( mssg_ptr->magic != MSSG_MAGIC ) ) {
 
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n", 
+            HDfprintf(stdout, "%d:%s: Bad mssg on entry.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -1561,7 +1561,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", 
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n",
                           world_mpi_rank, fcn_name, target_addr);
             }
         } else if ( data[target_index].len != mssg_ptr->len ) {
@@ -1569,9 +1569,9 @@ serve_write_request(struct mssg_t * mssg_ptr)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%d:%s: data[i].len = %d != mssg->len = %d.\n",
-                          world_mpi_rank, fcn_name, 
+                          world_mpi_rank, fcn_name,
                           data[target_index].len, mssg_ptr->len);
             }
         }
@@ -1587,7 +1587,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout, "%d:%s: new ver = %d <= old ver = %d.\n",
-                          world_mpi_rank, fcn_name, 
+                          world_mpi_rank, fcn_name,
                           new_ver_num, data[target_index].ver);
             }
         }
@@ -1617,7 +1617,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
 #endif /* DO_WRITE_REQ_ACK */
 
     }
- 
+
     return(success);
 
 } /* serve_write_request() */
@@ -1630,7 +1630,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
 /*-------------------------------------------------------------------------
  * Function:    clear_datum
  *
- * Purpose:     Mark the datum as clean and destroy it if requested.  
+ * Purpose:     Mark the datum as clean and destroy it if requested.
  *		Do not write it to the server, or increment the version.
  *
  * Return:      SUCCEED
@@ -1690,7 +1690,7 @@ clear_datum(H5F_t * f,
  * Function:    destroy_datum()
  *
  * Purpose:     Destroy the entry.  At present, this means do nothing other
- *		than verify that the entry is clean.  In particular, do not 
+ *		than verify that the entry is clean.  In particular, do not
  *		write it to the server process.
  *
  * Return:      SUCCEED
@@ -1739,7 +1739,7 @@ destroy_datum(H5F_t UNUSED * f,
 /*-------------------------------------------------------------------------
  * Function:    flush_datum
  *
- * Purpose:     Flush the entry to the server process and mark it as clean.  
+ * Purpose:     Flush the entry to the server process and mark it as clean.
  *		Then destroy the entry if requested.
  *
  * Return:      SUCCEED if successful, and FAIL otherwise.
@@ -1790,7 +1790,7 @@ flush_datum(H5F_t *f,
     if ( ( file_mpi_rank != 0 ) && ( entry_ptr->dirty ) ) {
 
         ret_value = FAIL;
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
                   "%d:%s: Flushed dirty entry from non-zero file process.",
                    world_mpi_rank, fcn_name);
     }
@@ -1868,7 +1868,7 @@ flush_datum(H5F_t *f,
     datum_flushes++;
 
     if ( entry_ptr->header.is_pinned ) {
-    
+
         datum_pinned_flushes++;
 	HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
     }
@@ -1880,7 +1880,7 @@ flush_datum(H5F_t *f,
 /*-------------------------------------------------------------------------
  * Function:    load_datum
  *
- * Purpose:     Read the requested entry from the server and mark it as 
+ * Purpose:     Read the requested entry from the server and mark it as
  *              clean.
  *
  * Return:      SUCCEED if successful, FAIL otherwise.
@@ -1990,7 +1990,7 @@ load_datum(H5F_t UNUSED *f,
 
 	    if ( mssg.base_addr != entry_ptr->base_addr ) {
 
-		HDfprintf(stdout, 
+		HDfprintf(stdout,
 			  "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
 			  world_mpi_rank, fcn_name);
 		HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
@@ -2042,7 +2042,7 @@ load_datum(H5F_t UNUSED *f,
 /*-------------------------------------------------------------------------
  * Function:    size_datum
  *
- * Purpose:     Get the size of the specified entry.  Just look at the 
+ * Purpose:     Get the size of the specified entry.  Just look at the
  *		local copy, as size can't change.
  *
  * Return:      SUCCEED
@@ -2131,7 +2131,7 @@ insert_entry(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC_set(file_ptr, -1, &(types[0]), entry_ptr->base_addr, 
+        result = H5AC_set(file_ptr, -1, &(types[0]), entry_ptr->base_addr,
                           (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -2149,7 +2149,7 @@ insert_entry(H5C_t * cache_ptr,
         if ( ! (entry_ptr->header.is_dirty) ) {
 
 	    /* it is possible that we just exceeded the dirty bytes
-	     * threshold, triggering a write of the newly inserted 
+	     * threshold, triggering a write of the newly inserted
 	     * entry.  Test for this, and only flag an error if this
 	     * is not the case.
 	     */
@@ -2161,11 +2161,11 @@ insert_entry(H5C_t * cache_ptr,
 	    if ( ! ( ( aux_ptr != NULL ) &&
 		     ( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC ) &&
 		     ( aux_ptr->dirty_bytes == 0 ) ) ) {
-						    
+
                 nerrors++;
                 if ( verbose ) {
 	            HDfprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n",
-	                      world_mpi_rank, fcn_name, idx, 
+	                      world_mpi_rank, fcn_name, idx,
                               (int)(data[idx].header.is_dirty));
 		}
             }
@@ -2183,7 +2183,7 @@ insert_entry(H5C_t * cache_ptr,
 /*****************************************************************************
  * Function:    local_pin_and_unpin_random_entries()
  *
- * Purpose:     Pin a random number of randomly selected entries in cache, and 
+ * Purpose:     Pin a random number of randomly selected entries in cache, and
  *              then unpin a random number of entries.
  *
  *              Do nothing if nerrors is non-zero on entry.
@@ -2201,8 +2201,8 @@ void
 local_pin_and_unpin_random_entries(H5C_t * cache_ptr,
                                    H5F_t * file_ptr,
                                    int min_idx,
-                                   int max_idx, 
-				   int min_count, 
+                                   int max_idx,
+				   int min_count,
 				   int max_count)
 {
     const char * fcn_name = "local_pin_and_unpin_random_entries()";
@@ -2259,8 +2259,8 @@ local_pin_and_unpin_random_entries(H5C_t * cache_ptr,
  * Function:    local_pin_random_entry()
  *
  * Purpose:     Pin a randomly selected entry in cache, and mark the entry
- *              as being locally pinned.  Since this entry will not in 
- *              general be pinned in any other cache, we can't mark it 
+ *              as being locally pinned.  Since this entry will not in
+ *              general be pinned in any other cache, we can't mark it
  *              dirty.
  *
  *              Do nothing if nerrors is non-zero on entry.
@@ -2340,7 +2340,7 @@ local_unpin_all_entries(H5C_t * cache_ptr,
 
 	idx = 0;
 
-	while ( idx >= 0 ) 
+	while ( idx >= 0 )
 	{
 	    idx = local_unpin_next_pinned_entry(cache_ptr, file_ptr,
 			                        idx, via_unprotect);
@@ -2360,8 +2360,8 @@ local_unpin_all_entries(H5C_t * cache_ptr,
  *
  *              Do nothing if nerrors is non-zero on entry.
  *
- * Return:      Index of the unpinned entry if there is one, or -1 if 
- *              nerrors is non-zero on entry, or if there is no locally 
+ * Return:      Index of the unpinned entry if there is one, or -1 if
+ *              nerrors is non-zero on entry, or if there is no locally
  *              pinned entry.
  *
  * Programmer:  John Mainzer
@@ -2391,7 +2391,7 @@ local_unpin_next_pinned_entry(H5C_t * cache_ptr,
 
 	idx = start_idx;
 
-	while ( ( i < virt_num_data_entries ) && 
+	while ( ( i < virt_num_data_entries ) &&
 		( ! ( data[idx].local_pinned ) ) )
 	{
 	    i++;
@@ -2420,7 +2420,7 @@ local_unpin_next_pinned_entry(H5C_t * cache_ptr,
  * Function:    lock_and_unlock_random_entries()
  *
  * Purpose:     Obtain a random number in the closed interval [min_count,
- *		max_count].  Then protect and unprotect that number of 
+ *		max_count].  Then protect and unprotect that number of
  *		random entries.
  *
  *              Do nothing if nerrors is non-zero on entry.
@@ -2554,7 +2554,7 @@ lock_entry(H5C_t * cache_ptr,
 	HDassert( ! (entry_ptr->locked) );
 
         cache_entry_ptr = H5AC_protect(file_ptr, -1, &(types[0]),
-                                       entry_ptr->base_addr, 
+                                       entry_ptr->base_addr,
                                        NULL, NULL, H5AC_WRITE);
 
         if ( ( cache_entry_ptr != (void *)(&(entry_ptr->header)) ) ||
@@ -2633,12 +2633,12 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
                           "%d:%s: error in H5AC_mark_pinned_entry_dirty().\n",
                           world_mpi_rank, fcn_name);
             }
-        } 
-	else 
+        }
+	else
 	{
 	    global_dirty_pins++;
 	}
@@ -2700,7 +2700,7 @@ mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
                           world_mpi_rank, fcn_name,
 			  "H5AC_mark_pinned_or_protected_entry_dirty()");
             }
-        } 
+        }
 	else if ( ! ( entry_ptr->locked ) )
 	{
 	    global_dirty_pins++;
@@ -2891,9 +2891,9 @@ rename_entry(H5C_t * cache_ptr,
  * Purpose:	Setup the parallel cache for a test, and return the file id
  *		and a pointer to the cache's internal data structures.
  *
- *		To do this, we must create a file, flush it (so that we 
+ *		To do this, we must create a file, flush it (so that we
  *		don't have to worry about entries in the metadata cache),
- *		look up the address of the metadata cache, and then instruct 
+ *		look up the address of the metadata cache, and then instruct
  *		the cache to omit sanity checks on dxpl IDs.
  *
  * Return:	Success:	TRUE
@@ -2905,7 +2905,7 @@ rename_entry(H5C_t * cache_ptr,
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -2930,13 +2930,13 @@ setup_cache_for_test(hid_t * fid_ptr,
     if ( fid < 0 ) {
         nerrors++;
         if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: H5Fcreate() failed.\n", 
+	    HDfprintf(stdout, "%d:%s: H5Fcreate() failed.\n",
                       world_mpi_rank, fcn_name);
         }
     } else if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
         nerrors++;
         if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+	    HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
                       world_mpi_rank, fcn_name);
         }
     } else {
@@ -2946,7 +2946,7 @@ setup_cache_for_test(hid_t * fid_ptr,
     if ( file_ptr == NULL ) {
         nerrors++;
         if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: Can't get file_ptr.\n", 
+	    HDfprintf(stdout, "%d:%s: Can't get file_ptr.\n",
                       world_mpi_rank, fcn_name);
         }
     } else {
@@ -2956,13 +2956,13 @@ setup_cache_for_test(hid_t * fid_ptr,
     if ( cache_ptr == NULL ) {
         nerrors++;
         if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: Can't get cache_ptr.\n", 
+	    HDfprintf(stdout, "%d:%s: Can't get cache_ptr.\n",
                       world_mpi_rank, fcn_name);
         }
     } else if ( cache_ptr->magic != H5C__H5C_T_MAGIC ) {
         nerrors++;
         if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: Bad cache_ptr magic.\n", 
+	    HDfprintf(stdout, "%d:%s: Bad cache_ptr magic.\n",
                       world_mpi_rank, fcn_name);
         }
     } else {
@@ -2978,21 +2978,21 @@ setup_cache_for_test(hid_t * fid_ptr,
 
         config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-        if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config) 
+        if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config)
              != SUCCEED ) {
 
-	    HDfprintf(stdout, 
-                      "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", 
+	    HDfprintf(stdout,
+                      "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n",
                       world_mpi_rank, fcn_name);
 
         } else {
 
             config.rpt_fcn_enabled = TRUE;
 
-            if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config) 
+            if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config)
                  != SUCCEED ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
                          "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
                           world_mpi_rank, fcn_name);
             } else {
@@ -3011,8 +3011,8 @@ setup_cache_for_test(hid_t * fid_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, 
-			  "%d:%s: H5C_set_write_done_callback failed.\n", 
+	        HDfprintf(stdout,
+			  "%d:%s: H5C_set_write_done_callback failed.\n",
                           world_mpi_rank, fcn_name);
             }
 	}
@@ -3029,7 +3029,7 @@ setup_cache_for_test(hid_t * fid_ptr,
  *
  * Function:	setup_noblock_dxpl_id()
  *
- * Purpose:	Setup the noblock_dxpl_id global.  Increment nerrors if 
+ * Purpose:	Setup the noblock_dxpl_id global.  Increment nerrors if
  *		errors are detected.  Do nothing if nerrors is non-zero
  *		on entry.
  *
@@ -3040,22 +3040,22 @@ setup_cache_for_test(hid_t * fid_ptr,
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
-/* So far we haven't needed this, but that may change.  
- * Keep it around for now 
+/* So far we haven't needed this, but that may change.
+ * Keep it around for now
  */
 #if 0
 void
 setup_noblock_dxpl_id(void)
 {
     const char * fcn_name = "setup_noblock_dxpl_id()";
-    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list 
-                                     * class object 
+    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list
+                                     * class object
                                      */
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
-    unsigned block_before_meta_write; /* "block before meta write" 
-                                       * property value 
+    unsigned block_before_meta_write; /* "block before meta write"
+                                       * property value
                                        */
     unsigned library_internal = 1;  /* "library internal" property value */
     H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
@@ -3100,13 +3100,13 @@ setup_noblock_dxpl_id(void)
     block_before_meta_write=0;
     if ( ( nerrors == 0 ) &&
          ( H5P_insert(xfer_plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME,
-                      H5AC_BLOCK_BEFORE_META_WRITE_SIZE, 
+                      H5AC_BLOCK_BEFORE_META_WRITE_SIZE,
                       &block_before_meta_write,
                       NULL, NULL, NULL, NULL, NULL, NULL) < 0 ) ) {
 
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%d:%s: can't insert metadata cache dxpl property 1.\n",
                       world_mpi_rank, fcn_name);
         }
@@ -3120,7 +3120,7 @@ setup_noblock_dxpl_id(void)
 
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%d:%s: can't insert metadata cache dxpl property 2.\n",
                       world_mpi_rank, fcn_name);
         }
@@ -3133,7 +3133,7 @@ setup_noblock_dxpl_id(void)
 
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: unable to set value.\n", world_mpi_rank, 
+            HDfprintf(stdout, "%d:%s: unable to set value.\n", world_mpi_rank,
                       fcn_name);
         }
     }
@@ -3148,7 +3148,7 @@ setup_noblock_dxpl_id(void)
  *
  * Function:	setup_rand()
  *
- * Purpose:	Use gettimeofday() to obtain a seed for rand(), print the 
+ * Purpose:	Use gettimeofday() to obtain a seed for rand(), print the
  *		seed to stdout, and then pass it to srand().
  *
  *		Increment nerrors if any errors are detected.
@@ -3161,7 +3161,7 @@ setup_noblock_dxpl_id(void)
  *
  *		JRM -- 5/9/06
  *		Modified function to facilitate setting predefined seeds.
- *	
+ *
  *****************************************************************************/
 
 void
@@ -3175,14 +3175,14 @@ setup_rand(void)
     struct timeval tv;
     struct timezone tz;
 
-    if ( ( use_predefined_seeds ) && 
+    if ( ( use_predefined_seeds ) &&
          ( world_mpi_size == num_predefined_seeds ) ) {
 
 	    HDassert( world_mpi_rank >= 0 );
 	    HDassert( world_mpi_rank < world_mpi_size );
 
             seed = predefined_seeds[world_mpi_rank];
-	    HDfprintf(stdout, "%d:%s: predefined_seed = %d.\n", 
+	    HDfprintf(stdout, "%d:%s: predefined_seed = %d.\n",
                       world_mpi_rank, fcn_name, seed);
 	    fflush(stdout);
             HDsrand(seed);
@@ -3198,7 +3198,7 @@ setup_rand(void)
             }
         } else {
             seed = (unsigned)tv.tv_usec;
-	    HDfprintf(stdout, "%d:%s: seed = %d.\n", 
+	    HDfprintf(stdout, "%d:%s: seed = %d.\n",
                       world_mpi_rank, fcn_name, seed);
 	    fflush(stdout);
             HDsrand(seed);
@@ -3216,7 +3216,7 @@ setup_rand(void)
  *
  * Purpose:	Take down the parallel cache after a test.
  *
- *		To do this, we must close the file, and delete if if 
+ *		To do this, we must close the file, and delete if if
  *		possible.
  *
  * Return:	Success:	TRUE
@@ -3228,7 +3228,7 @@ setup_rand(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -3242,7 +3242,7 @@ take_down_cache(hid_t fid)
 
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: H5Fclose() failed.\n", 
+            HDfprintf(stdout, "%d:%s: H5Fclose() failed.\n",
                       world_mpi_rank, fcn_name);
         }
 
@@ -3252,7 +3252,7 @@ take_down_cache(hid_t fid)
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: HDremove() failed.\n", 
+                HDfprintf(stdout, "%d:%s: HDremove() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         } else {
@@ -3315,7 +3315,7 @@ unlock_entry(H5C_t * cache_ptr,
             entry_ptr->dirty = TRUE;
         }
 
-        result = H5AC_unprotect(file_ptr, -1, &(types[0]), 
+        result = H5AC_unprotect(file_ptr, -1, &(types[0]),
 			        entry_ptr->base_addr,
                                 (void *)(&(entry_ptr->header)), flags);
 
@@ -3462,15 +3462,15 @@ unpin_entry(H5C_t * cache_ptr,
  *
  *		JRM -- 5/9/06
  *		Added code supporting the write request ack message.  This
- *		message was added to eliminate one possible cause of a 
+ *		message was added to eliminate one possible cause of a
  *		bug spotted on cobalt.  If this doesn't fix the problem,
  *		it will narrow things down a bit.
  *
  *		JRM -- 5/10/06
- *		Added call to do_sync().  This is part of an attempt to 
+ *		Added call to do_sync().  This is part of an attempt to
  *		optimize out the slowdown caused by the addition of the
  *		write request ack message.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -3518,7 +3518,7 @@ server_smoke_check(void)
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: send_mssg() failed on write.\n", 
+                HDfprintf(stdout, "%d:%s: send_mssg() failed on write.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -3534,7 +3534,7 @@ server_smoke_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n", 
+                    HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -3582,7 +3582,7 @@ server_smoke_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on write.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on write.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -3597,7 +3597,7 @@ server_smoke_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n", 
+                    HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -3641,13 +3641,13 @@ server_smoke_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
     }
-    
+
     max_nerrors = get_max_nerrors();
 
     if ( world_mpi_rank == 0 ) {
@@ -3684,7 +3684,7 @@ server_smoke_check(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -3749,7 +3749,7 @@ smoke_check_1(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
         }
 
@@ -3758,7 +3758,7 @@ smoke_check_1(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
         }
 
@@ -3774,7 +3774,7 @@ smoke_check_1(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -3802,7 +3802,7 @@ smoke_check_1(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -3853,7 +3853,7 @@ smoke_check_1(void)
  *
  *		JRM -- 4/28/06
  *		Modified test to rename pinned entries.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -3927,11 +3927,11 @@ smoke_check_2(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   (virt_num_data_entries / 20), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   (virt_num_data_entries / 20),
 					   0, 100);
-	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
-			                       (virt_num_data_entries / 4), 
+	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0,
+			                       (virt_num_data_entries / 4),
 					       0, 3);
         }
 
@@ -3939,8 +3939,8 @@ smoke_check_2(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   (virt_num_data_entries / 10), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   (virt_num_data_entries / 10),
 					   0, 100);
         }
 
@@ -3952,10 +3952,10 @@ smoke_check_2(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   ((virt_num_data_entries / 50) - 1), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   ((virt_num_data_entries / 50) - 1),
                                            0, 100);
         }
 
@@ -3964,10 +3964,10 @@ smoke_check_2(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   (virt_num_data_entries / 100), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   (virt_num_data_entries / 100),
 					   0, 100);
         }
 
@@ -3991,7 +3991,7 @@ smoke_check_2(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -4019,13 +4019,13 @@ smoke_check_2(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
     }
-    
+
     max_nerrors = get_max_nerrors();
 
     if ( world_mpi_rank == 0 ) {
@@ -4054,7 +4054,7 @@ smoke_check_2(void)
  *
  * Purpose:	Third smoke check for the parallel cache.
  *
- *		Use random reads to vary the loads on the diffferent 
+ *		Use random reads to vary the loads on the diffferent
  *		processors.  Also force different cache size adjustments.
  *
  *		In this test, load process 0 heavily, and the other
@@ -4073,7 +4073,7 @@ smoke_check_2(void)
  *							JRM - 1/31/06
  *
  *		Added pinned entry tests.		JRM - 4/14/06
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -4136,7 +4136,7 @@ smoke_check_3(void)
             if ( i > 100 ) {
 
 		lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                               (i - 100), i, 
+                                               (i - 100), i,
                                                min_count, max_count);
             }
         }
@@ -4145,8 +4145,8 @@ smoke_check_3(void)
         min_count = 100 / ((file_mpi_rank + 2) * (file_mpi_rank + 2));
         max_count = min_count + 50;
 
-        for ( i = (virt_num_data_entries / 4); 
-	      i < (virt_num_data_entries / 2); 
+        for ( i = (virt_num_data_entries / 4);
+	      i < (virt_num_data_entries / 2);
 	      i++ )
         {
 
@@ -4176,7 +4176,7 @@ smoke_check_3(void)
             }
 
 	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr,
-                                               0, virt_num_data_entries / 4, 
+                                               0, virt_num_data_entries / 4,
 					       0, (file_mpi_rank + 2));
 
 	}
@@ -4188,14 +4188,14 @@ smoke_check_3(void)
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
 
 
         min_idx = 0;
-        max_idx = ((virt_num_data_entries / 10) / 
+        max_idx = ((virt_num_data_entries / 10) /
                    ((file_mpi_rank + 1) * (file_mpi_rank + 1))) - 1;
         if ( max_idx <= min_idx ) {
 
@@ -4212,15 +4212,15 @@ smoke_check_3(void)
 		HDassert( data[i].global_pinned );
 		HDassert( ! data[i].local_pinned );
 
-		unpin_entry(cache_ptr, file_ptr, i, TRUE, dirty, 
+		unpin_entry(cache_ptr, file_ptr, i, TRUE, dirty,
 			    via_unprotect);
 	    }
 	    if ( i % 2 == 0 ) {
 
 	        lock_entry(cache_ptr, file_ptr, i);
 	        unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	        local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
-				                   virt_num_data_entries / 2, 
+	        local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0,
+				                   virt_num_data_entries / 2,
 						   0, 2);
 	        lock_and_unlock_random_entries(cache_ptr, file_ptr,
                                                min_idx, max_idx, 0, 100);
@@ -4228,7 +4228,7 @@ smoke_check_3(void)
         }
 
         min_idx = 0;
-        max_idx = ((virt_num_data_entries / 10) / 
+        max_idx = ((virt_num_data_entries / 10) /
                    ((file_mpi_rank + 3) * (file_mpi_rank + 3))) - 1;
         if ( max_idx <= min_idx ) {
 
@@ -4254,10 +4254,10 @@ smoke_check_3(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   (virt_num_data_entries / 20), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   (virt_num_data_entries / 20),
                                            min_count, max_count);
         }
 
@@ -4266,9 +4266,9 @@ smoke_check_3(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 40),
                                            min_count, max_count);
         }
@@ -4281,8 +4281,8 @@ smoke_check_3(void)
 
         for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
         {
-	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
-			                       (virt_num_data_entries / 2), 
+	    local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0,
+			                       (virt_num_data_entries / 2),
 					       0, 5);
 
 	    lock_entry(cache_ptr, file_ptr, i);
@@ -4291,7 +4291,7 @@ smoke_check_3(void)
             if ( i > 100 ) {
 
 		lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                               (i - 100), i, 
+                                               (i - 100), i,
                                                min_count, max_count);
             }
         }
@@ -4311,7 +4311,7 @@ smoke_check_3(void)
             }
         }
 
-        /* verify that all instances of datum are back where the started 
+        /* verify that all instances of datum are back where the started
          * and are clean.
          */
 
@@ -4340,13 +4340,13 @@ smoke_check_3(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
     }
-    
+
     max_nerrors = get_max_nerrors();
 
     if ( world_mpi_rank == 0 ) {
@@ -4375,7 +4375,7 @@ smoke_check_3(void)
  *
  * Purpose:	Fourth smoke check for the parallel cache.
  *
- *		Use random reads to vary the loads on the diffferent 
+ *		Use random reads to vary the loads on the diffferent
  *		processors.  Also force different cache size adjustments.
  *
  *		In this test, load process 0 lightly, and the other
@@ -4392,7 +4392,7 @@ smoke_check_3(void)
  *		Added code intended to insure correct operation with large
  *		numbers of processors.
  *							JRM - 1/31/06
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -4445,7 +4445,7 @@ smoke_check_4(void)
             }
         }
 
-        
+
         min_count = 100 * (file_mpi_rank % 4);
         max_count = min_count + 50;
 
@@ -4456,7 +4456,7 @@ smoke_check_4(void)
             if ( i > 100 ) {
 
 		lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                               (i - 100), i, 
+                                               (i - 100), i,
                                                min_count, max_count);
             }
         }
@@ -4464,8 +4464,8 @@ smoke_check_4(void)
         min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
-        for ( i = (virt_num_data_entries / 4); 
-	      i < (virt_num_data_entries / 2); 
+        for ( i = (virt_num_data_entries / 4);
+	      i < (virt_num_data_entries / 2);
 	      i++ )
         {
             insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
@@ -4493,7 +4493,7 @@ smoke_check_4(void)
                                                min_count, max_count);
             }
 
-            local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0, 
+            local_pin_and_unpin_random_entries(cache_ptr, file_ptr, 0,
 			                       (virt_num_data_entries / 4),
                                                0, (file_mpi_rank + 2));
         }
@@ -4512,7 +4512,7 @@ smoke_check_4(void)
 
 
         min_idx = 0;
-        max_idx = (((virt_num_data_entries / 10) / 4) * 
+        max_idx = (((virt_num_data_entries / 10) / 4) *
                    ((file_mpi_rank % 4) + 1)) - 1;
 
         for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
@@ -4538,7 +4538,7 @@ smoke_check_4(void)
         }
 
         min_idx = 0;
-        max_idx = (((virt_num_data_entries / 10) / 8) * 
+        max_idx = (((virt_num_data_entries / 10) / 8) *
                    ((file_mpi_rank % 4) + 1)) - 1;
 
         for ( i = 0; i < (virt_num_data_entries / 2); i+=2 )
@@ -4560,10 +4560,10 @@ smoke_check_4(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
-			                   (virt_num_data_entries / 20), 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
+			                   (virt_num_data_entries / 20),
                                            min_count, max_count);
         }
 
@@ -4572,9 +4572,9 @@ smoke_check_4(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i, 
+	    rename_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
-	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0, 
+	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 40),
                                            min_count, max_count);
         }
@@ -4593,7 +4593,7 @@ smoke_check_4(void)
             if ( i > 100 ) {
 
 		lock_and_unlock_random_entries(cache_ptr, file_ptr,
-                                               (i - 100), i, 
+                                               (i - 100), i,
                                                min_count, max_count);
             }
         }
@@ -4610,7 +4610,7 @@ smoke_check_4(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -4639,13 +4639,13 @@ smoke_check_4(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
     }
-    
+
     max_nerrors = get_max_nerrors();
 
     if ( world_mpi_rank == 0 ) {
@@ -4685,7 +4685,7 @@ smoke_check_4(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -4743,7 +4743,7 @@ smoke_check_5(void)
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -4752,7 +4752,7 @@ smoke_check_5(void)
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 
-	    if ( i % 2 == 0 ) 
+	    if ( i % 2 == 0 )
 	    {
 		mark_pinned_or_protected_entry_dirty(cache_ptr, file_ptr, i);
 	    }
@@ -4760,22 +4760,22 @@ smoke_check_5(void)
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
         }
 
-        for ( i = (virt_num_data_entries / 2) - 1; 
-              i >= (virt_num_data_entries / 4); 
+        for ( i = (virt_num_data_entries / 2) - 1;
+              i >= (virt_num_data_entries / 4);
 	      i-- )
         {
 	    pin_entry(cache_ptr, file_ptr, i, TRUE, FALSE);
 
-	    if ( i % 2 == 0 ) 
+	    if ( i % 2 == 0 )
 	    {
 		if ( i % 4 == 0 )
 		{
-		    mark_pinned_or_protected_entry_dirty(cache_ptr, 
+		    mark_pinned_or_protected_entry_dirty(cache_ptr,
 				                         file_ptr, i);
 		}
 		else
 		{
-		    mark_pinned_entry_dirty(cache_ptr, file_ptr, i, 
+		    mark_pinned_entry_dirty(cache_ptr, file_ptr, i,
 				            FALSE, (size_t)0);
                 }
 	    }
@@ -4794,7 +4794,7 @@ smoke_check_5(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -4822,7 +4822,7 @@ smoke_check_5(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -4866,7 +4866,7 @@ smoke_check_5(void)
  * Modifications:
  *
  *		None.
- *	
+ *
  *****************************************************************************/
 
 int
@@ -4928,7 +4928,7 @@ main(int argc, char **argv)
 
     /* h5_fixname() will hang some processes don't participate.
      *
-     * Thus we set up the fapl global with the world communicator, 
+     * Thus we set up the fapl global with the world communicator,
      * make our calls to h5_fixname(), discard the fapl, and then
      * create it again with the file communicator.
      */
@@ -4937,7 +4937,7 @@ main(int argc, char **argv)
     if ( FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS)) ) {
         nerrors++;
 	if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: H5Pcreate() failed 1.\n", 
+	    HDfprintf(stdout, "%d:%s: H5Pcreate() failed 1.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -4946,20 +4946,20 @@ main(int argc, char **argv)
 
         nerrors++;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 1.\n", 
+            HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 1.\n",
                       world_mpi_rank, fcn_name);
         }
     }
 
     /* fix the file names */
-    for ( u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u ) 
+    for ( u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u )
     {
-        if ( h5_fixname(FILENAME[u], fapl, filenames[u], 
+        if ( h5_fixname(FILENAME[u], fapl, filenames[u],
                         sizeof(filenames[u])) == NULL ) {
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", 
+                HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n",
                           world_mpi_rank, fcn_name);
             }
             break;
@@ -4970,7 +4970,7 @@ main(int argc, char **argv)
     if ( H5Pclose(fapl) < 0 ) {
         nerrors++;
 	if ( verbose ) {
-	    HDfprintf(stdout, "%d:%s: H5Pclose() failed.\n", 
+	    HDfprintf(stdout, "%d:%s: H5Pclose() failed.\n",
                       world_mpi_rank, fcn_name);
         }
     }
@@ -4982,7 +4982,7 @@ main(int argc, char **argv)
         if ( FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS)) ) {
 	    nerrors++;
 	    if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Pcreate() failed 2.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Pcreate() failed 2.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -4991,14 +4991,14 @@ main(int argc, char **argv)
 
             nerrors++;
 	    if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 2.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 2.\n",
                           world_mpi_rank, fcn_name);
             }
         }
     }
 
     setup_rand();
-    
+
     max_nerrors = get_max_nerrors();
 
     if ( max_nerrors != 0 ) {
@@ -5027,10 +5027,10 @@ main(int argc, char **argv)
 #endif
 #if 1
     smoke_check_4();
-#endif   
+#endif
 #if 1
     smoke_check_5();
-#endif   
+#endif
 
 finish:
     /* make sure all processes are finished before final report, cleanup
@@ -5040,7 +5040,7 @@ finish:
     if (MAINPROCESS){		/* only process 0 reports */
 	printf("===================================\n");
 	if (failures){
-	    printf("***metadata cache tests detected %d failures***\n", 
+	    printf("***metadata cache tests detected %d failures***\n",
                    failures);
 	}
 	else{

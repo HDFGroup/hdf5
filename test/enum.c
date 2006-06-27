@@ -428,7 +428,7 @@ test_value_dsnt_exist(void)
 /*-------------------------------------------------------------------------
  * Function:	test_funcs
  *
- * Purpose:	Create an enumeration data type and test some functions 
+ * Purpose:	Create an enumeration data type and test some functions
  *              that are or aren't supposed to work with it.
  *
  * Return:	Success:	0
@@ -468,7 +468,7 @@ test_funcs(void)
     if ((size=H5Tget_offset(type))<0) goto error;
     if (H5Tget_sign(type)<0) goto error;
     if (H5Tget_super(type)<0) goto error;
-    
+
     H5E_BEGIN_TRY {
         ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     } H5E_END_TRY;

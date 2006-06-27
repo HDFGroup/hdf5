@@ -530,7 +530,7 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
     /* Get pointer to path to update */
     path = H5RS_get_str(*path_r_ptr);
     HDassert(path);
-    
+
     /* Check if path needs to be updated */
     full_suffix_len = HDstrlen(full_suffix);
     path_len = HDstrlen(path);

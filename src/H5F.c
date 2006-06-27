@@ -1428,8 +1428,8 @@ done:
  *		property list changes.
  *
  *		J Mainzer, Jun 30, 2005
- *		Added lf parameter so the shared->lf field can be 
- *		initialized prior to the call to H5AC_create() if a 
+ *		Added lf parameter so the shared->lf field can be
+ *		initialized prior to the call to H5AC_create() if a
  *		new instance of H5F_file_t is created.  lf should be
  *		NULL if shared isn't, and vise versa.
  *
@@ -1458,7 +1458,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->freespace_addr = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
         f->shared->lf = lf;
-    
+
 	/*
 	 * Copy the file creation and file access property lists into the
 	 * new file handle.  We do this early because some values might need

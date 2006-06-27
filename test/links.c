@@ -516,7 +516,7 @@ toomany(hid_t fapl)
     hid_t		gid2 = (-1);    /* Datatype ID */
     char                objname[NAME_BUF_SIZE];         /* Object name */
     ssize_t             name_len;       /* Length of object name */
-    char		filename[NAME_BUF_SIZE]; 
+    char		filename[NAME_BUF_SIZE];
 
     TESTING("too many links");
 

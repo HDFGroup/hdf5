@@ -652,12 +652,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 	    } /* end if */
 	    /* 2D dataspace */
 	    else {
-		/* Build partial buffer derived type for contiguous access */				
+		/* Build partial buffer derived type for contiguous access */
 		mrc = MPI_Type_contiguous((int)buf_size, MPI_BYTE,
 			&contig_cont);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
-		/* Build contiguous file's derived type */				
+		/* Build contiguous file's derived type */
 		mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
 			contig_cont, &mpi_cont_type);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
@@ -666,12 +666,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 		mrc = MPI_Type_commit(&mpi_cont_type);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
-		/* Build partial buffer derived type for interleaved access */				
+		/* Build partial buffer derived type for interleaved access */
 		mrc = MPI_Type_contiguous((int)blk_size, MPI_BYTE,
 			&contig_inter);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
-		/* Build interleaved file's derived type */				
+		/* Build interleaved file's derived type */
 		mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
 			contig_inter, &mpi_inter_type);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
@@ -707,7 +707,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 			h5count[0] = buf_size/blk_size;
 		    } /* end else */
 		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-			    h5start, h5stride, h5count, h5block); 
+			    h5start, h5stride, h5count, h5block);
 		    VRFY((hrc >= 0), "H5Sselect_hyperslab");
 		} /* end if */
 		else {
@@ -757,7 +757,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 			h5count[1] = 1;
 		    } /* end else */
 		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-			    h5start, h5stride, h5count, h5block); 
+			    h5start, h5stride, h5count, h5block);
 		    VRFY((hrc >= 0), "H5Sselect_hyperslab");
 		} /* end if */
 		else {
@@ -959,7 +959,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 			    /* Set the base of user's buffer */
 			    buf_p = (unsigned char *)buffer;
 
-			    /* Set the number of bytes to transfer this time */						
+			    /* Set the number of bytes to transfer this time */
 			    nbytes_toxfer = buf_size*blk_size;
 
 			    /* Compute file offset */
@@ -995,7 +995,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 			    /* Set the base of user's buffer */
 			    buf_p=(unsigned char *)buffer;
 
-			    /* Set the number of bytes to transfer this time */						
+			    /* Set the number of bytes to transfer this time */
 			    nbytes_toxfer=buf_size*blk_size;
 
 			    /* Compute file offset */
@@ -1522,7 +1522,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			&contig_cont);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
-		/* Build contiguous file's derived type */				
+		/* Build contiguous file's derived type */
 		mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
 			contig_cont, &mpi_cont_type);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
@@ -1536,7 +1536,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			&contig_inter);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
-		/* Build interleaved file's derived type */				
+		/* Build interleaved file's derived type */
 		mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
 			contig_inter, &mpi_inter_type);
 		VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
@@ -1572,7 +1572,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			h5count[0] = buf_size/blk_size;
 		    } /* end else */
 		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-			    h5start, h5stride, h5count, h5block); 
+			    h5start, h5stride, h5count, h5block);
 		    VRFY((hrc >= 0), "H5Sselect_hyperslab");
 		} /* end if */
 		else {
@@ -1622,7 +1622,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			h5count[1] = 1;
 		    } /* end else */
 		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-			    h5start, h5stride, h5count, h5block); 
+			    h5start, h5stride, h5count, h5block);
 		    VRFY((hrc >= 0), "H5Sselect_hyperslab");
 		} /* end if */
 		else {
@@ -1783,7 +1783,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			    /* Set the base of user's buffer */
 			    buf_p = (unsigned char *)buffer;
 
-			    /* Set the number of bytes to transfer this time */						
+			    /* Set the number of bytes to transfer this time */
 			    nbytes_toxfer = buf_size*blk_size;
 
 			    /* Compute file offset */
@@ -1819,7 +1819,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 			    /* Set the base of user's buffer */
 			    buf_p=(unsigned char *)buffer;
 
-			    /* Set the number of bytes to transfer this time */						
+			    /* Set the number of bytes to transfer this time */
 			    nbytes_toxfer=buf_size*blk_size;
 
 			    /* Compute file offset */
@@ -2303,7 +2303,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 	    } /* end if */
 	    else {
 		/* Set the file driver to the MPI-I/O driver */
-		hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);     
+		hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);
 		if (hrc < 0) {
 		    fprintf(stderr, "HDF5 Property List Set failed\n");
 		    GOTOERROR(FAIL);
@@ -2338,7 +2338,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 	    }
 
 	    break;
-    } 
+    }
 
 done:
     return ret_code;

@@ -117,7 +117,7 @@ typedef herr_t (*H5FS_operator_t)(const H5FS_section_info_t *sect,
 /*****************************/
 /* Library-private Variables */
 /*****************************/
- 
+
 /* Declare a free list to manage the H5FS_section_class_t sequence information */
 H5FL_SEQ_EXTERN(H5FS_section_class_t);
 

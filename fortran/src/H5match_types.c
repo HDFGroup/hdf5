@@ -160,7 +160,7 @@ int main()
 
   /* First, define c_int_x */
 
-#if defined H5_FORTRAN_HAS_INTEGER_1 
+#if defined H5_FORTRAN_HAS_INTEGER_1
   if(sizeof(long_long) == 1)
     writeTypedef("long_long", 1);
   else if(sizeof(long) == 1)
@@ -176,7 +176,7 @@ int main()
    * is as close as we can get. */
 #endif /*H5_FORTRAN_HAS_INTEGER_1 */
 
-#if defined H5_FORTRAN_HAS_INTEGER_2 
+#if defined H5_FORTRAN_HAS_INTEGER_2
   if(sizeof(long_long) == 2)
     writeTypedef("long_long", 2);
   else if(sizeof(long) == 2)
@@ -189,7 +189,7 @@ int main()
     writeTypedefDefault(2);
 #endif /*H5_FORTRAN_HAS_INTEGER_2 */
 
-#if defined H5_FORTRAN_HAS_INTEGER_4 
+#if defined H5_FORTRAN_HAS_INTEGER_4
   if(sizeof(long_long) == 4)
     writeTypedef("long_long", 4);
   else if(sizeof(long) == 4)
@@ -202,7 +202,7 @@ int main()
     writeTypedefDefault(4);
 #endif /*H5_FORTRAN_HAS_INTEGER_4 */
 
-#if defined H5_FORTRAN_HAS_INTEGER_8 
+#if defined H5_FORTRAN_HAS_INTEGER_8
   if(sizeof(long_long) == 8)
     writeTypedef("long_long", 8);
   else if(sizeof(long) == 8)

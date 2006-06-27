@@ -135,7 +135,7 @@ void tts_acreate(void)
             TestErrPrintf("unable to open appropriate attribute.  Test failed!\n");
         else {
             ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
-			
+
             if (ret < 0 || buffer != i)
                 TestErrPrintf("wrong data values. Test failed!\n");
 

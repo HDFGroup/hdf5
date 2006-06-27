@@ -67,21 +67,21 @@ int diff_attr(hid_t loc1_id,
  int        ret=0;
  hsize_t    nfound;
  int        cmp=1;
- 
+
  if ((n1 = H5Aget_num_attrs(loc1_id))<0)
   goto error;
  if ((n2 = H5Aget_num_attrs(loc2_id))<0)
   goto error;
- 
+
  if (n1!=n2)
   return 1;
- 
+
  for ( i = 0; i < n1; i++)
  {
   /* reset buffers for every attribute, we might goto out and call free */
   buf1=NULL;
   buf2=NULL;
-  
+
   /*-------------------------------------------------------------------------
   * open
   *-------------------------------------------------------------------------
@@ -91,13 +91,13 @@ int diff_attr(hid_t loc1_id,
    goto error;
   if ((attr2_id = H5Aopen_idx(loc2_id, (unsigned)i))<0)
    goto error;
-  
+
   /* get name */
   if (H5Aget_name( attr1_id, 255, name1 )<0)
    goto error;
   if (H5Aget_name( attr2_id, 255, name2 )<0)
    goto error;
-  
+
   if (HDstrcmp(name1,name2)!=0)
   {
    if (options->m_verbose)
@@ -109,30 +109,30 @@ int diff_attr(hid_t loc1_id,
    ret=1;
    continue;
   }
-  
+
   /* get the file datatype  */
   if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
    goto error;
   if ((ftype2_id = H5Aget_type( attr2_id )) < 0 )
    goto error;
-  
+
   /* get the dataspace handle  */
   if ((space1_id = H5Aget_space( attr1_id )) < 0 )
    goto error;
   if ((space2_id = H5Aget_space( attr2_id )) < 0 )
    goto error;
-  
+
   /* get dimensions  */
   if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
    goto error;
   if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
    goto error;
-   
+
  /*-------------------------------------------------------------------------
   * check for comparable TYPE and SPACE
   *-------------------------------------------------------------------------
   */
-  
+
   if (diff_can_type(ftype1_id,
    ftype2_id,
    rank1,
@@ -154,7 +154,7 @@ int diff_attr(hid_t loc1_id,
   */
   if (cmp)
   {
-   
+
   /*-------------------------------------------------------------------------
    * read to memory
    *-------------------------------------------------------------------------
@@ -162,20 +162,20 @@ int diff_attr(hid_t loc1_id,
    nelmts1=1;
    for (j=0; j<rank1; j++)
     nelmts1*=dims1[j];
-   
+
    if ((mtype1_id=h5tools_get_native_type(ftype1_id))<0)
     goto error;
-   
+
    if ((mtype2_id=h5tools_get_native_type(ftype2_id))<0)
     goto error;
-   
+
    if ((msize1=H5Tget_size(mtype1_id))==0)
     goto error;
    if ((msize2=H5Tget_size(mtype2_id))==0)
     goto error;
-   
+
    assert(msize1==msize2);
-   
+
    buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
    buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
    if ( buf1==NULL || buf2==NULL){
@@ -186,16 +186,16 @@ int diff_attr(hid_t loc1_id,
     goto error;
    if (H5Aread(attr2_id,mtype2_id,buf2)<0)
     goto error;
-   
+
    /* format output string */
    sprintf(np1,"%s of <%s>",name1,path1);
    sprintf(np2,"%s of <%s>",name2,path2);
-   
+
   /*-------------------------------------------------------------------------
    * array compare
    *-------------------------------------------------------------------------
    */
-   
+
    /* always print name */
    if (options->m_verbose)
    {
@@ -212,7 +212,7 @@ int diff_attr(hid_t loc1_id,
      attr1_id,
      attr2_id);
     print_found(nfound);
-    
+
    }
    /* check first if we have differences */
    else
@@ -268,13 +268,13 @@ int diff_attr(hid_t loc1_id,
     } /*else quiet */
    } /*else verbose */
  }/*cmp*/
- 
+
 
  /*-------------------------------------------------------------------------
   * close
   *-------------------------------------------------------------------------
   */
-  
+
   if (H5Tclose(ftype1_id)<0) goto error;
   if (H5Tclose(ftype2_id)<0) goto error;
   if (H5Tclose(mtype1_id)<0) goto error;
@@ -288,9 +288,9 @@ int diff_attr(hid_t loc1_id,
   if (buf2)
    HDfree(buf2);
  } /* i */
- 
+
  return ret;
-    
+
 error:
  H5E_BEGIN_TRY {
   H5Tclose(ftype1_id);
@@ -306,7 +306,7 @@ error:
   if (buf2)
    HDfree(buf2);
  } H5E_END_TRY;
- 
+
  options->err_stat=1;
  return 0;
 }

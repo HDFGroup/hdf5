@@ -134,7 +134,7 @@ typedef struct H5B_class_t {
 /*****************************/
 /* Library-private Variables */
 /*****************************/
- 
+
 /* Declare a free list to manage the H5B_shared_t struct */
 H5FL_EXTERN(H5B_shared_t);
 

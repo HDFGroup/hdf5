@@ -435,8 +435,8 @@ H5O_pline_free (void *mesg)
  *
  *              Failure:        Negative
  *
- * Programmer:  Peter Cao 
- *              December 27, 2005 
+ * Programmer:  Peter Cao
+ *              December 27, 2005
  *
  *-------------------------------------------------------------------------
  */

@@ -79,7 +79,7 @@
  *
  *						JRM - 7/19/04
  *
- * The TBBT has since been replaced with a skip list.  This change 
+ * The TBBT has since been replaced with a skip list.  This change
  * greatly predates this note.
  *
  *						JRM - 9/26/05
@@ -87,7 +87,7 @@
  * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  This
  *		field is used to validate pointers to instances of H5C_t.
  *
- * aux_ptr:	Pointer to void used to allow wrapper code to associate 
+ * aux_ptr:	Pointer to void used to allow wrapper code to associate
  *		its data with an instance of H5C_t.  The H5C cache code
  *		sets this field to NULL, and otherwise leaves it alone.
  *
@@ -142,10 +142,10 @@
  *		the cache uses the following write_permitted field to
  *		determine whether writes are permitted.
  *
- * write_permitted: If check_write_permitted is NULL, this boolean flag 
+ * write_permitted: If check_write_permitted is NULL, this boolean flag
  *		indicates whether writes are permitted.
  *
- * log_flush:	If provided, this function is called whenever a dirty 
+ * log_flush:	If provided, this function is called whenever a dirty
  *		entry is flushed to disk.
  *
  *
@@ -187,7 +187,7 @@
  * on how frequently the cache is flushed.  We will see how it goes.
  *
  * For now at least, I will not remove dirty entries from the list as they
- * are flushed. (this has been changed -- dirty entries are now removed from 
+ * are flushed. (this has been changed -- dirty entries are now removed from
  * the skip list as they are flushed.  JRM - 10/25/05)
  *
  * slist_len:   Number of entries currently in the skip list
@@ -235,22 +235,22 @@
  *
  * For very frequently used entries, the protect/unprotect overhead can
  * become burdensome.  To avoid this overhead, I have modified the cache
- * to allow entries to be "pinned".  A pinned entry is similar to a 
+ * to allow entries to be "pinned".  A pinned entry is similar to a
  * protected entry, in the sense that it cannot be evicted, and that
  * the entry can be modified at any time.
  *
  * Pinning an entry has the following implications:
  *
  *	1) A pinned entry cannot be evicted.  Thus unprotected
- *         pinned entries reside in the pinned entry list, instead 
+ *         pinned entries reside in the pinned entry list, instead
  *         of the LRU list(s) (or other lists maintained by the current
  *         replacement policy code).
- *                 
+ *
  *      2) A pinned entry can be accessed or modified at any time.
  *         Therefore, the cache must check with the entry owner
  *         before flushing it.  If permission is denied, the
  *         cache just skips the entry in the flush.
- * 
+ *
  *      3) A pinned entry can be marked as dirty (and possibly
  *         change size) while it is unprotected.
  *
@@ -263,20 +263,20 @@
  *
  * Maintaining the pinned entry list requires the following fields:
  *
- * pel_len:	Number of entries currently residing on the pinned 
+ * pel_len:	Number of entries currently residing on the pinned
  * 		entry list.
  *
  * pel_size:	Number of bytes of cache entries currently residing on
  * 		the pinned entry list.
  *
  * pel_head_ptr: Pointer to the head of the doubly linked list of pinned
- * 		but not protected entries.  Note that cache entries on 
+ * 		but not protected entries.  Note that cache entries on
  * 		this list are linked by their next and prev fields.
  *
  *              This field is NULL if the list is empty.
  *
  * pel_tail_ptr: Pointer to the tail of the doubly linked list of pinned
- * 		but not protected entries.  Note that cache entries on 
+ * 		but not protected entries.  Note that cache entries on
  * 		this list are linked by their next and prev fields.
  *
  *              This field is NULL if the list is empty.
@@ -568,24 +568,24 @@
  *		id equal to the array index has been marked dirty while pinned
  *		in the current epoch.
  *
- * pinned_flushes:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an  entry 
- * 		with type id equal to the array index has been flushed while 
+ * pinned_flushes:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an  entry
+ * 		with type id equal to the array index has been flushed while
  * 		pinned in the current epoch.
  *
- * pinned_cleared:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an  entry 
- * 		with type id equal to the array index has been cleared while 
+ * pinned_cleared:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an  entry
+ * 		with type id equal to the array index has been cleared while
  * 		pinned in the current epoch.
  *
  *
- * size_increases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- *		The cells are used to record the number of times an entry 
+ * size_increases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.
+ *		The cells are used to record the number of times an entry
  *		with type id equal to the array index has increased in
  *		size in the current epoch.
  *
- * size_decreases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- *		The cells are used to record the number of times an entry 
+ * size_decreases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.
+ *		The cells are used to record the number of times an entry
  *		with type id equal to the array index has decreased in
  *		size in the current epoch.
  *
@@ -662,8 +662,8 @@
  *		the cache in the current epoch.
  *
  * max_pins:	Array of size_t of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
- *              are used to record the maximum number of times that any single 
- *              entry with type id equal to the array index that has been 
+ *              are used to record the maximum number of times that any single
+ *              entry with type id equal to the array index that has been
  *              marked as pinned in the cache in the current epoch.
  *
  *

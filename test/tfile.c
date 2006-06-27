@@ -1659,8 +1659,8 @@ test_file_getname(void)
 static void
 test_file_double_root_open(void)
 {
-    hid_t file1_id, file2_id; 
-    hid_t grp1_id, grp2_id; 
+    hid_t file1_id, file2_id;
+    hid_t grp1_id, grp2_id;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1698,8 +1698,8 @@ test_file_double_root_open(void)
 static void
 test_file_double_group_open(void)
 {
-    hid_t file1_id, file2_id; 
-    hid_t grp1_id, grp2_id; 
+    hid_t file1_id, file2_id;
+    hid_t grp1_id, grp2_id;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1737,9 +1737,9 @@ test_file_double_group_open(void)
 static void
 test_file_double_dataset_open(void)
 {
-    hid_t file1_id, file2_id; 
-    hid_t dset1_id, dset2_id; 
-    hid_t space_id; 
+    hid_t file1_id, file2_id;
+    hid_t dset1_id, dset2_id;
+    hid_t space_id;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1785,8 +1785,8 @@ test_file_double_dataset_open(void)
 static void
 test_file_double_datatype_open(void)
 {
-    hid_t file1_id, file2_id; 
-    hid_t type1_id, type2_id; 
+    hid_t file1_id, file2_id;
+    hid_t type1_id, type2_id;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */

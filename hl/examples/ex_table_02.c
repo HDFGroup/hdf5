@@ -31,19 +31,19 @@
 
 int main( void )
 {
- typedef struct Particle 
+ typedef struct Particle
  {
   char   name[16];
   int    lati;
   int    longi;
   float  pressure;
-  double temperature; 
+  double temperature;
  } Particle;
 
  Particle  dst_buf[NRECORDS+NRECORDS_ADD];
 
 /* Define an array of Particles */
- Particle  p_data[NRECORDS] = { 
+ Particle  p_data[NRECORDS] = {
  {"zero",0,0, 0.0f, 0.0},
  {"one",10,10, 1.0f, 10.0},
  {"two",  20,20, 2.0f, 20.0},
@@ -67,9 +67,9 @@ int main( void )
                                sizeof( p_data[0].longi),
                                sizeof( p_data[0].pressure),
                                sizeof( p_data[0].temperature)};
- 
+
  /* Define field information */
- const char *field_names[NFIELDS] = 
+ const char *field_names[NFIELDS] =
  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
  hid_t      field_type[NFIELDS];
  hid_t      string_type;
@@ -77,11 +77,11 @@ int main( void )
  hsize_t    chunk_size = 10;
  int        *fill_data = NULL;
  int        compress  = 0;
- herr_t     status; 
+ herr_t     status;
  int        i;
 
-  /* Append particles */ 
- Particle particle_in[ NRECORDS_ADD ] = 
+  /* Append particles */
+ Particle particle_in[ NRECORDS_ADD ] =
  {{ "eight",80,80, 8.0f, 80.0},
  {"nine",90,90, 9.0f, 90.0} };
 
@@ -93,17 +93,17 @@ int main( void )
  field_type[2] = H5T_NATIVE_INT;
  field_type[3] = H5T_NATIVE_FLOAT;
  field_type[4] = H5T_NATIVE_DOUBLE;
-   
+
  /* Create a new file using default properties. */
  file_id = H5Fcreate( "ex_table_02.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* make a table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS, 
-                        dst_size, field_names, dst_offset, field_type, 
+ status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
+                        dst_size, field_names, dst_offset, field_type,
                         chunk_size, fill_data, compress, p_data  );
 
  /* append two records */
- status=H5TBappend_records(file_id, TABLE_NAME,NRECORDS_ADD, dst_size, dst_offset, dst_sizes, 
+ status=H5TBappend_records(file_id, TABLE_NAME,NRECORDS_ADD, dst_size, dst_offset, dst_sizes,
   &particle_in );
 
  /* read the table */
@@ -111,7 +111,7 @@ int main( void )
 
  /* print it by rows */
  for (i=0; i<NRECORDS+NRECORDS_ADD; i++) {
-  printf ("%-5s %-5d %-5d %-5f %-5f", 
+  printf ("%-5s %-5d %-5d %-5f %-5f",
    dst_buf[i].name,
    dst_buf[i].lati,
    dst_buf[i].longi,
@@ -119,7 +119,7 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
- 
+
  /* Close the file. */
  H5Fclose( file_id );
 

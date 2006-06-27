@@ -25,7 +25,7 @@
 #define PAL_ENTRIES  256
 
 static int    read_data(const char* file_name, hsize_t *width, hsize_t *height );
-unsigned char *gbuf = 0;  /* global buffer for image data */        
+unsigned char *gbuf = 0;  /* global buffer for image data */
 
 int main( void )
 {
@@ -34,20 +34,20 @@ int main( void )
  hsize_t        height;                        /* height of image */
  unsigned char  pal[ PAL_ENTRIES * 3 ];        /* palette array */
  hsize_t        pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
- herr_t         status, i, n; 
- 
+ herr_t         status, i, n;
+
  /* create a new HDF5 file using default properties. */
  file_id = H5Fcreate( "ex_image2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* read first data file */
  if (read_data(DATA_FILE1,&width,&height)<0)
   goto out;
- 
+
  /* make the image */
  status=H5IMmake_image_8bit( file_id, IMAGE1_NAME, width, height, gbuf );
 
 /*-------------------------------------------------------------------------
- * define a palette, blue to red tones 
+ * define a palette, blue to red tones
  *-------------------------------------------------------------------------
  */
  for ( i=0, n=0; i<PAL_ENTRIES*3; i+=3, n++)
@@ -71,7 +71,7 @@ int main( void )
  /* read second data file */
  if (read_data(DATA_FILE2,&width,&height)<0)
   goto out;
- 
+
  /* make dataset */
  status=H5IMmake_image_24bit( file_id, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", gbuf );
 

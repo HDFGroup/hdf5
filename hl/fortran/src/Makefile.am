@@ -41,7 +41,7 @@ endif
 #endif
 
 libhdf5hl_fortran_la_SOURCES=H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
-                H5IMff.f90 H5TBff.f90 
+                H5IMff.f90 H5TBff.f90
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
@@ -70,8 +70,8 @@ uninstall-local:
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
-H5LTff.lo:          $(srcdir)/H5LTff.f90 
+H5LTff.lo:          $(srcdir)/H5LTff.f90
 H5IMff.lo:          $(srcdir)/H5IMff.f90
-H5TBff.lo:          $(srcdir)/H5TBff.f90 
+H5TBff.lo:          $(srcdir)/H5TBff.f90
 
 include $(top_srcdir)/config/conclude.am

@@ -196,7 +196,7 @@ typedef struct H5D_istore_it_ud4_t {
     haddr_t             addr_dst;               /* Address of dest. B-tree */
     void                *buf;                   /* Buffer to hold chunk data for read/write */
     size_t              buf_size;               /* Buffer size */
- 
+
     /* needed for converting variable-length data */
     hid_t               tid_src;                /* Datatype ID for source datatype */
     hid_t               tid_dst;                /* Datatype ID for destination datatype */
@@ -911,12 +911,12 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
     int            ret_value = H5B_ITER_CONT;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_chunkmap);
-    
+
     rank = udata->common.mesg->u.chunk.ndims - 1;
- 
+
     if(H5V_chunk_index(rank,lt_key->offset,udata->common.mesg->u.chunk.dim,udata->down_chunks,&chunk_index)<0)
        HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
-    
+
     udata->chunk_addr[chunk_index] = addr;
 
 done:
@@ -969,15 +969,15 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_istore_iter_copy 
+ * Function:    H5D_istore_iter_copy
  *
- * Purpose:     copy chunked raw data from source file and insert to the 
+ * Purpose:     copy chunked raw data from source file and insert to the
  *              B-tree node in the destination file
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              August 20, 2005 
+ * Programmer:  Peter Cao
+ *              August 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2446,8 +2446,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_istore_chunkmap
  *
- * Purpose:     obtain the chunk address and corresponding chunk index	
- *	
+ * Purpose:     obtain the chunk address and corresponding chunk index
+ *
  * Return:	Success:	Non-negative on succeed.
  *
  *		Failure:	negative value
@@ -3510,13 +3510,13 @@ done:
  * Return:	Non-negative on success (with the ISTORE argument initialized
  *		and ready to write to an object header). Negative on failure.
  *
- * Programmer:  Peter Cao	
- *	        August 20, 2005	
+ * Programmer:  Peter Cao
+ *	        August 20, 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,  
+H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     H5O_layout_t *layout_dst,  H5T_t *dt_src, H5O_pline_t *pline, hid_t dxpl_id)
 {
     H5D_istore_it_ud4_t    udata;

@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * This verifies if the storage space allocation methods are compatible between
  * serial and parallel modes.
  *
@@ -23,7 +23,7 @@
 #include "testphdf5.h"
 static int	mpi_size, mpi_rank;
 
-#define DATASETNAME "ExtendibleArray" 
+#define DATASETNAME "ExtendibleArray"
 #define CHUNKSIZE	1000		/* #elements per chunk */
 #define DSETCHUNKS		20000
 #define CLOSE           1
@@ -71,11 +71,11 @@ void
 create_chunked_dataset(const char *filename, int nchunks, write_type write_pattern)
 {
     hid_t       file_id, dataset;                          /* handles */
-    hid_t       dataspace,memspace;  
+    hid_t       dataspace,memspace;
     hid_t       cparms;
     hsize_t      dims[1];
     hsize_t      maxdims[1] = {H5S_UNLIMITED};
-    
+
     hsize_t      chunk_dims[1] ={CHUNKSIZE};
     hsize_t     count[1];
     hsize_t     stride[1];
@@ -85,7 +85,7 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write_patte
     char         buffer[CHUNKSIZE];
     int           i;
 
-    herr_t       hrc;                             
+    herr_t       hrc;
 
     MPI_Offset  filesize,	    /* actual file size */
 		est_filesize;	    /* estimated file size */
@@ -99,12 +99,12 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write_patte
 
 	dims[0]=nchunks*CHUNKSIZE;
 	/* Create the data space with unlimited dimensions. */
-	dataspace = H5Screate_simple (1, dims, maxdims); 
+	dataspace = H5Screate_simple (1, dims, maxdims);
 	VRFY((dataspace >= 0), "");
 
 	memspace = H5Screate_simple(1, chunk_dims, NULL);
 	VRFY((memspace >= 0), "");
- 
+
 	/* Create a new file. If file exists its contents will be overwritten. */
 	file_id = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT,
 		    H5P_DEFAULT);
@@ -183,7 +183,7 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write_patte
      */
 
     MPI_Barrier(MPI_COMM_WORLD);
-}     
+}
 
 
 /*
@@ -242,7 +242,7 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
     memspace = H5Screate_simple(1, chunk_dims, NULL);
     VRFY((memspace >= 0), "");
 
-    dataspace = H5Dget_space(*dataset);            
+    dataspace = H5Dget_space(*dataset);
     VRFY((dataspace >= 0), "");
 
     size[0] = nchunks*CHUNKSIZE;
@@ -256,7 +256,7 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
 	    count[0] = 1;
 	    stride[0] = 1;
 	    block[0] = chunk_dims[0];
-            for (i=0; i<(nchunks+mpi_size-1)/mpi_size; i++){ 
+            for (i=0; i<(nchunks+mpi_size-1)/mpi_size; i++){
 		if (i*mpi_size+mpi_rank < nchunks){
 		    offset[0] = (i*mpi_size+mpi_rank)*chunk_dims[0];
 
@@ -373,14 +373,14 @@ void verify_data(const char *filename, int nchunks, write_type write_pattern, in
     memspace = H5Screate_simple(1, chunk_dims, NULL);
     VRFY((memspace >= 0), "");
 
-    dataspace = H5Dget_space(*dataset);            
+    dataspace = H5Dget_space(*dataset);
     VRFY((dataspace >= 0), "");
 
     /* all processes check all chunks. */
     count[0] = 1;
     stride[0] = 1;
     block[0] = chunk_dims[0];
-    for (i=0; i<nchunks; i++){ 
+    for (i=0; i<nchunks; i++){
 	/* reset buffer values */
 	memset(buffer, -1, CHUNKSIZE);
 
@@ -411,7 +411,7 @@ void verify_data(const char *filename, int nchunks, write_type write_pattern, in
         /* verify content of the chunk */
         for (index = 0; index < CHUNKSIZE; index++)
             VRFY((buffer[index] == value), "data verification");
-        
+
     }
 
     hrc = H5Sclose (dataspace);
@@ -469,7 +469,7 @@ test_chunk_alloc(void)
     hid_t file_id, dataset;
 
     file_id = dataset = -1;
-  
+
     filename = GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend Chunked allocation test on file %s\n", filename);
@@ -480,7 +480,7 @@ test_chunk_alloc(void)
     /* reopen dataset in parallel and check for file size */
     parallel_access_dataset(filename, DSETCHUNKS, open_only, &file_id, &dataset);
     /* reopen dataset in parallel, read and verify the data */
-    verify_data(filename, DSETCHUNKS, none, CLOSE, &file_id, &dataset); 
+    verify_data(filename, DSETCHUNKS, none, CLOSE, &file_id, &dataset);
 
     /* Case 2 */
     /* Create chunked dataset without writing anything */
@@ -494,10 +494,10 @@ test_chunk_alloc(void)
     /* Create chunked dataset and write in the second to last chunk */
     create_chunked_dataset(filename, DSETCHUNKS, sec_last);
     /* Reopen dataset in parallel, read and verify the data. The file and dataset are not closed*/
-    verify_data(filename, DSETCHUNKS, sec_last, NO_CLOSE, &file_id, &dataset); 
+    verify_data(filename, DSETCHUNKS, sec_last, NO_CLOSE, &file_id, &dataset);
     /* All processes write in all the chunks in a interleaved way */
     parallel_access_dataset(filename, DSETCHUNKS, write_all, &file_id, &dataset);
     /* reopen dataset in parallel, read and verify the data */
-    verify_data(filename, DSETCHUNKS, all, CLOSE, &file_id, &dataset); 
+    verify_data(filename, DSETCHUNKS, all, CLOSE, &file_id, &dataset);
 
 }

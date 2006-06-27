@@ -98,12 +98,12 @@ H5S_get_rebuild_status_test(hid_t space_id)
 
     FUNC_ENTER_NOAPI(H5S_get_rebuild_status_test, FAIL)
 
-     /* Get dataspace structures */                                                                         
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))                                               
+     /* Get dataspace structures */
+    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     ret_value = space->select.sel_info.hslab->diminfo_valid;
-   
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S_get_rebuild_status_test() */

@@ -166,7 +166,7 @@ HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
         <Adjust offset for block offset for row>
         <Make new block level the current context>
         <Goto 1>
-    
+
 */
     do {
         /* Walk down the rows in the doubling table until we've found the correct row for the next block */

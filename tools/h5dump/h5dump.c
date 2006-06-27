@@ -756,9 +756,9 @@ print_datatype(hid_t type,unsigned in_group)
             } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==TRUE) {
                 printf("H5T_NATIVE_ULLONG");
             } else {
-                
+
              /* byte order */
-             if (H5Tget_size(type)>1) 
+             if (H5Tget_size(type)>1)
              {
               order = H5Tget_order(type);
               if (H5T_ORDER_LE==order) {
@@ -773,9 +773,9 @@ print_datatype(hid_t type,unsigned in_group)
              } else {
               order_s = "";
              }
-             
+
              /* sign */
-             if ((sign=H5Tget_sign(type))>=0) 
+             if ((sign=H5Tget_sign(type))>=0)
              {
               if (H5T_SGN_NONE==sign) {
                sign_s = " unsigned";
@@ -787,7 +787,7 @@ print_datatype(hid_t type,unsigned in_group)
              } else {
               sign_s = " unknown-sign";
              }
-             
+
              /* print size, order, and sign  */
              printf("%lu-bit%s%s integer",
               (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
@@ -816,9 +816,9 @@ print_datatype(hid_t type,unsigned in_group)
                 printf("H5T_NATIVE_LDOUBLE");
 #endif
             } else {
-                
+
              /* byte order */
-             if (H5Tget_size(type)>1) 
+             if (H5Tget_size(type)>1)
              {
               order = H5Tget_order(type);
               if (H5T_ORDER_LE==order) {
@@ -833,7 +833,7 @@ print_datatype(hid_t type,unsigned in_group)
              } else {
               order_s = "";
              }
-             
+
              /* print size and byte order */
              printf("%lu-bit%s floating-point",
               (unsigned long)(8*H5Tget_size(type)), order_s);
@@ -1678,7 +1678,7 @@ dump_named_datatype(hid_t type, const char *name)
  indentation(indent);
  printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
   dump_header_format->datatypeblockbegin);
- 
+
  if (H5Tget_class(type) == H5T_COMPOUND) {
   print_datatype(type,1);
  } else {
@@ -1686,7 +1686,7 @@ dump_named_datatype(hid_t type, const char *name)
   print_datatype(type,1);
   printf(";\n");
  }
- 
+
  /* print attributes */
  indent += COL;
  H5Aiterate(type, NULL, dump_attr, NULL);

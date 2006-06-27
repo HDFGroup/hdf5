@@ -25,29 +25,29 @@
  *-------------------------------------------------------------------------
  */
 
-void parse_input(int argc, const char* argv[], const char** fname1, const char** fname2, 
+void parse_input(int argc, const char* argv[], const char** fname1, const char** fname2,
                  const char** objname1, const char** objname2, diff_opt_t* options)
 {
  int        i;
  const char *s = NULL;
- 
+
  /* process the command-line */
  memset(options, 0, sizeof (diff_opt_t));
- 
+
 /*-------------------------------------------------------------------------
  * initial check of command line options
  *-------------------------------------------------------------------------
  */
- 
+
  if ( argc==2 && (strcmp("-h",argv[1])==0) )
   usage();
- 
+
  if ( argc<3 )
  {
   printf("Number of arguments is only %d\n", argc );
   usage();
  }
- 
+
 /*-------------------------------------------------------------------------
  * file names are first
  *-------------------------------------------------------------------------
@@ -144,9 +144,9 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
     } /*switch*/
    } /*for*/
   } /*if*/
-  
+
   else /* not single-letter switches */
-   
+
   {
    /* check if it is not a -d, -p parameter */
    if ( '-'==argv[i-1][0] && ('d'==argv[i-1][1] ||'p'==argv[i-1][1] ))
@@ -169,7 +169,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
     } /*objname2*/
    } /*else*/
   } /*else*/
-  
+
  }/*for*/
 }
 
@@ -185,14 +185,14 @@ void  print_results(diff_opt_t* options)
 {
  if (options->m_quiet || options->err_stat)
   return;
- 
+
  if (options->cmn_objs==0)
  {
   printf("No common objects found. Files are not comparable.\n");
   if (!options->m_verbose)
    printf("Use -v for a list of objects.\n");
  }
- 
+
  if (options->not_cmp==1)
  {
   printf("--------------------------------\n");
@@ -201,7 +201,7 @@ void  print_results(diff_opt_t* options)
   if (!options->m_verbose)
    printf("Use -v for a list of objects.\n");
  }
- 
+
 }
 
 /*-------------------------------------------------------------------------
@@ -225,7 +225,7 @@ int check_n_input( const char *str )
 {
  unsigned i;
  char c;
- 
+
  for ( i = 0; i < strlen(str); i++)
  {
   c = str[i];
@@ -259,18 +259,18 @@ int check_n_input( const char *str )
 int check_f_input( const char *str )
 {
  double x;
- 
+
  /*
  the atof return value on a hexadecimal input is different
  on some systems; we do a character check for this
  */
  if (strlen(str)>2 && str[0]=='0' && str[1]=='x')
   return -1;
- 
+
  x=atof(str);
  if (x==0)
   return -1;
- 
+
  return 1;
 }
 

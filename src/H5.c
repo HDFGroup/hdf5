@@ -3127,11 +3127,11 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
  * Function:	HDrand/HDsrand
  *
  * Purpose:	Wrapper function for rand.  If rand_r exists on this system,
- * 		use it. 
+ * 		use it.
  *
  * 		Wrapper function for srand.  If rand_r is available, it will keep
  * 		track of the seed locally instead of using srand() which modifies
- * 		global state and can break other programs. 
+ * 		global state and can break other programs.
  *
  * Return:	Success:	Random number from 0 to RAND_MAX
  *
@@ -3154,7 +3154,7 @@ int HDrand(void)
 
 void HDsrand(unsigned int seed)
 {
-    g_seed = seed; 
+    g_seed = seed;
 }
 
 #endif

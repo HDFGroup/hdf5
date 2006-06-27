@@ -47,8 +47,8 @@ typedef struct {
  H5Z_FILTER_SHUFFLE     2 , shuffle the data
  H5Z_FILTER_FLETCHER32  3 , letcher32 checksum of EDC
  H5Z_FILTER_SZIP        4 , szip compression
- H5Z_FILTER_NBIT        5 , nbit compression              
- H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression      
+ H5Z_FILTER_NBIT        5 , nbit compression
+ H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
 */
 
 #define CDVALUES 2
@@ -139,13 +139,13 @@ int h5repack_cmpdcpl   (const char *fname1,
 
 int check_objects(const char* fname,
                   pack_opt_t *options,
-                  int argc, 
+                  int argc,
                   const char *argv[]);
 
 int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options,
-                 int argc, 
+                 int argc,
                  const char *argv[]);
 
 void print_objlist(const char *filename,

@@ -85,7 +85,7 @@ typedef struct H5HF_t H5HF_t;
 /*****************************/
 /* Library-private Variables */
 /*****************************/
- 
+
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/

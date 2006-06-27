@@ -167,10 +167,10 @@ herr_t
 H5CS_print(FILE *stream)
 {
     H5CS_t	*fstack = H5CS_get_my_stack (); /* Get the correct function stack */
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_print);
-    
+
     /* Sanity check */
     assert(fstack);
 
@@ -270,7 +270,7 @@ H5CS_copy_stack(H5CS_t *new_stack)
 {
     H5CS_t	*old_stack = H5CS_get_my_stack ();
     unsigned    u;                      /* Local index variable */
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_copy_stack);
 
@@ -304,7 +304,7 @@ herr_t
 H5CS_close_stack(H5CS_t *stack)
 {
     unsigned    u;                      /* Local index variable */
-    
+
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_close_stack);
 

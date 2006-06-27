@@ -551,9 +551,9 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 /* Quincey added the condition branch (else if (*((ST*)S) != (ST)((DT)(*((ST*)S))))).
  * It handles a special situation when the source is "float" and assigned the value
- * of "INT_MAX".  Compilers do roundup making this value "INT_MAX+1".  This branch 
+ * of "INT_MAX".  Compilers do roundup making this value "INT_MAX+1".  This branch
  * is to check that situation and return exception for some compilers, mainly GCC.
- * The branch if (*((ST*)S) > (DT)(D_MAX) || (sprec < dprec && *((ST*)S) == 
+ * The branch if (*((ST*)S) > (DT)(D_MAX) || (sprec < dprec && *((ST*)S) ==
  * (DT)(D_MAX))) is for some compilers like Sun, HP, IBM, and SGI where under
  * the same situation the "int" doesn't overflow.  SLU - 2005/9/12
  */
@@ -3697,12 +3697,12 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = s[i];
                         tmp2 = s[i+1];
-                        
+
                         s[i] = s[(tsize-2)-i];
                         s[i+1] = s[(tsize-1)-i];
-                       
+
                         s[(tsize-2)-i] = tmp1;
-                        s[(tsize-1)-i] = tmp2; 
+                        s[(tsize-1)-i] = tmp2;
                     }
                 }
 
@@ -3790,7 +3790,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#ifdef H5_VMS      
+#ifdef H5_VMS
                 } /*Temporary solution to handle VAX special values*/
 #else /*H5_VMS*/
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
@@ -4054,12 +4054,12 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = d[i];
                         tmp2 = d[i+1];
-                        
+
                         d[i] = d[(tsize-2)-i];
                         d[i+1] = d[(tsize-1)-i];
-                       
+
                         d[(tsize-2)-i] = tmp1;
-                        d[(tsize-1)-i] = tmp2; 
+                        d[(tsize-1)-i] = tmp2;
                     }
                 }
 
@@ -9415,7 +9415,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/ 
+#endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/
 
 
 /*-------------------------------------------------------------------------
@@ -9433,7 +9433,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG 
+#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
 herr_t
 H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -9628,12 +9628,12 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = s[i];
                         tmp2 = s[i+1];
-                        
+
                         s[i] = s[(tsize-2)-i];
                         s[i+1] = s[(tsize-1)-i];
-                       
+
                         s[(tsize-2)-i] = tmp1;
-                        s[(tsize-1)-i] = tmp2; 
+                        s[(tsize-1)-i] = tmp2;
                     }
                 }
 
@@ -10058,7 +10058,7 @@ done:
  *              Wednesday, April 21, 2004
  *              There is a new design for exception handling like overflow,
  *              which is passed in as a transfer property.
- *              
+ *
  *              Raymond Lu
  *              Monday, March 13, 2006
  *              Added support for VAX floating-point types.
@@ -10083,7 +10083,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
     uint8_t     tmp1, tmp2;             /*temp variables for swapping bytes*/
-    
+
     /* Conversion-related variables */
     hsize_t	expo;			/*destination exponent		*/
     hsize_t	expo_max;		/*maximal possible exponent value       */
@@ -10428,12 +10428,12 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = d[i];
                         tmp2 = d[i+1];
-                        
+
                         d[i] = d[(tsize-2)-i];
                         d[i+1] = d[(tsize-1)-i];
-                       
+
                         d[(tsize-2)-i] = tmp1;
-                        d[(tsize-1)-i] = tmp2; 
+                        d[(tsize-1)-i] = tmp2;
                     }
                 }
 
@@ -10473,7 +10473,7 @@ done:
  * Function:	H5T_reverse_order
  *
  * Purpose:	Internal assisting function to reverse the order of
- *              a sequence of byte when it's big endian or VAX order.  
+ *              a sequence of byte when it's big endian or VAX order.
  *              The byte sequence simulates the endian order.
  *
  * Return:      Success:        A pointer to the reversed byte sequence
@@ -10512,6 +10512,6 @@ H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
         for (i=0; i<size; i++)
             rev[i] = s[i];
     }
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }

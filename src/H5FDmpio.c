@@ -543,14 +543,14 @@ Description:
         The library won't behave as it asks for only when we find
         that the low-level MPI-IO package doesn't support this.
 
-Parameters: 
+Parameters:
         hid_t dxpl_id	      		in: Data transfer property list identifier
 	H5FD_mpio_chunk_opt_t   	in: The optimization flag for linked chunk IO
                                             or multi-chunk IO.
-                                                
 
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 *
  *-------------------------------------------------------------------------
  */
@@ -590,15 +590,15 @@ Purpose:
 	To set a threshold for doing linked chunk IO
 
 Description:
-        If the number is greater than the threshold set by the user, 
+        If the number is greater than the threshold set by the user,
         the library will do linked chunk IO; otherwise, IO will be done for every chunk.
 
-Parameters: 
+Parameters:
         hid_t dxpl_id	      		in: Data transfer property list identifier
-	unsigned num_proc_per_chunk	in: the threshold of the average number of chunks selected by each process 
+	unsigned num_proc_per_chunk	in: the threshold of the average number of chunks selected by each process
 
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 *
  *-------------------------------------------------------------------------
  */
@@ -637,13 +637,13 @@ Purpose:
 	To set a threshold for doing collective IO for each chunk
 Description:
 	The library will calculate the percentage of the number of process holding selections at each chunk. If that percentage of number of process in the individual chunk is greater than the threshold set by the user, the library will do collective chunk IO for this chunk; otherwise, independent IO will be done for this chunk.
-Parameters: 
-	hid_t dxpl_id	         				
+Parameters:
+	hid_t dxpl_id
 		in: Data transfer property list identifier
-	unsigned percent_num_proc_per_chunk	
+	unsigned percent_num_proc_per_chunk
 		in: the threshold of the percentage of the number of process holding selections per chunk
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 
 
 *
@@ -1701,7 +1701,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 	/* The metadata cache now only writes from process 0, which makes
 	 * this synchronization incorrect.  I'm leaving this code commented
 	 * out instead of deleting it to remind us that we should re-write
-	 * this function so that a metadata write from any other process 
+	 * this function so that a metadata write from any other process
 	 * should flag an error.
 	 *                                  -- JRM 9/1/05
 	 */
@@ -1772,13 +1772,13 @@ done:
 
 #if 0 /* JRM */
     /* Since metadata writes are now done by process 0 only, this broadcast
-     * is no longer needed.  I leave it in and commented out to remind us 
+     * is no longer needed.  I leave it in and commented out to remind us
      * that we need to re-work this function to reflect this reallity.
      *
      *                                          -- JRM 9/1/05
      */
-    /* if only one process writes, need to broadcast the ret_value to 
-     * other processes 
+    /* if only one process writes, need to broadcast the ret_value to
+     * other processes
      */
     if (type!=H5FD_MEM_DRAW) {
 	if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))

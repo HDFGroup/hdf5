@@ -149,7 +149,7 @@ H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
     hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
 #endif /* H5_GROUP_REVISION */
-H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t plist_id);
 
 #ifdef __cplusplus

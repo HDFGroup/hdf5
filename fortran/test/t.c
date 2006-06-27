@@ -132,7 +132,7 @@ nh5_exit_c(int_f *status)
 /*----------------------------------------------------------------------------
  * Name:        h5_group_revision_c
  * Purpose:     Checks if H5_GROUP_REVISION variable defined
- * Inputs:      
+ * Inputs:
  * Returns:     1 if defines, 0 otherwise
  * Programmer:  Elena Pourmal
  *              Saturday, May 13, 2006
@@ -142,7 +142,7 @@ int_f
 nh5_group_revision_c()
 {
     int_f ret =0;
-#ifdef H5_GROUP_REVISION 
+#ifdef H5_GROUP_REVISION
        ret = 1;
 #endif
     return ret;

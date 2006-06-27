@@ -201,7 +201,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
 
  if (rank==0) /* scalar dataset, do not apply */
   return 0;
- 
+
 
 /*-------------------------------------------------------------------------
 	* initialize the assigment object
@@ -219,7 +219,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
   return -1;
-	
+
  /*-------------------------------------------------------------------------
 		* check if we have filters in the pipeline
 		* we want to replace them with the input filters
@@ -294,7 +294,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
 			case H5Z_FILTER_DEFLATE:
 				{
 					unsigned     aggression;     /* the deflate level */
-					
+
 					aggression = obj.filter[i].cd_values[0];
 					/* set up for deflated data */
 					if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
@@ -313,9 +313,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
 					unsigned  options_mask;
 					unsigned  pixels_per_block;
 
-					options_mask     = obj.filter[i].cd_values[0]; 
+					options_mask     = obj.filter[i].cd_values[0];
 					pixels_per_block = obj.filter[i].cd_values[1];
-		
+
 					/* set up for szip data */
 					if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
 						return -1;
@@ -363,12 +363,12 @@ int apply_filters(const char* name,    /* object name from traverse list */
 
 			case H5Z_FILTER_SCALEOFFSET:
 				{
-					H5Z_SO_scale_type_t scale_type; 
-     int                 scale_factor;      
-					
+					H5Z_SO_scale_type_t scale_type;
+     int                 scale_factor;
+
 					scale_type   = obj.filter[i].cd_values[0];
 					scale_factor = obj.filter[i].cd_values[1];
-					
+
 					if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
 						return -1;
 					if (H5Pset_scaleoffset(dcpl_id,scale_type,scale_factor)<0)

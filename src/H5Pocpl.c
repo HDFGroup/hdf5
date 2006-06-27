@@ -37,14 +37,14 @@
  *              unsigned crt_intmd_group; 	IN: Flag to create intermediate group
  *                                                  positive value -- to create intermediate group
  *                                                  otherwise -- do not create intermediate group
- *              For example, H5Pset_create_intermediate_group(plist_id, 1) to create intermediate group; 
+ *              For example, H5Pset_create_intermediate_group(plist_id, 1) to create intermediate group;
  *
  * Note:        XXX: This property should really be an access property. -QAK
  *              XXX: The property is used only at creation time. It should
  *                   be a creation property. However, the property is not
  *                   saved with the group. In that sense, it should be access
  *                   property. We do not have a good solution for this kind
- *                   of property. For now, it is used as a creation property. 
+ *                   of property. For now, it is used as a creation property.
  *                                                                      -PXC
  *
  * Return:      Non-negative on success/Negative on failure
@@ -119,18 +119,18 @@ done:
  *              from one location to another
  *
  * Usage:       H5Pset_copy_group(plist_id, cpy_option)
- *              hid_t plist_id;			IN: Property list to copy object 
+ *              hid_t plist_id;			IN: Property list to copy object
  *              unsigned cpy_option; 		IN: Options to copy object such as
  *                  H5G_COPY_SHALLOW_HIERARCHY_FLAG    -- Copy only immediate members
  *                  H5G_COPY_EXPAND_SOFT_LINK_FLAG     -- Expand soft links into new objects/
- *                  H5G_COPY_EXPAND_EXT_LINK_FLAG      -- Expand external links into new objects 
+ *                  H5G_COPY_EXPAND_EXT_LINK_FLAG      -- Expand external links into new objects
  *                  H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG -- Copy objects that are pointed by references
  *                  H5G_COPY_WITHOUT_ATTR_FLAG         -- Copy object without copying attributes
 *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              March 13, 2006 
+ *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -163,12 +163,12 @@ done:
  * Function:    H5Pget_copy_object
  *
  * Purpose:     Returns the cpy_option, which is set for H5Gcopy(hid_t loc_id,
- *              const char* name, ... ) for copying objects 
+ *              const char* name, ... ) for copying objects
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              March 13, 2006 
+ *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t

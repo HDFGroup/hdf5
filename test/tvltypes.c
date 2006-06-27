@@ -194,7 +194,7 @@ test_vltypes_funcs(void)
 
     size=H5Tget_ebias(type);
     CHECK(size, FAIL, "H5Tget_ebias");
-    
+
     ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     CHECK(ret, FAIL, "H5Tset_pad");
 
@@ -206,7 +206,7 @@ test_vltypes_funcs(void)
 
     ret=H5Tset_offset(type, 16);
     CHECK(ret, FAIL, "H5Tset_offset");
-    
+
     H5E_BEGIN_TRY {
         cset=H5Tget_cset(type);
     } H5E_END_TRY;

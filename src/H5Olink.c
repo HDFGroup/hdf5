@@ -47,7 +47,7 @@ static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *typ
     void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
-static herr_t H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, 
+static herr_t H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_link_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -468,14 +468,14 @@ done:
  * Function:    H5O_link_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
- *              files for link messages. 
+ *              files for link messages.
  *
  * Return:      Success:        Non-negative
  *
  *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
- *              Monday, June 26, 2006 
+ *              Monday, June 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -512,12 +512,12 @@ H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *typ
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              November  7, 2005 
+ *              November  7, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst, 
+H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst,
     hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_link_t           *link_src = (H5O_link_t *) native_src;
@@ -580,12 +580,12 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              November  7, 2005 
+ *              November  7, 2005
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
-H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, 
+static herr_t
+H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
     hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     H5O_link_t           *link_src = (H5O_link_t *)mesg_src;    /* Casting away const OK... -QAK */

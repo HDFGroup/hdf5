@@ -187,8 +187,8 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  * In typical application, this structure is the first field in a
  * structure to be cached.  For historical reasons, the external module
- * is responsible for managing the is_dirty field (this is no longer 
- * completely true.  See the comment on the is_dirty field for details).  
+ * is responsible for managing the is_dirty field (this is no longer
+ * completely true.  See the comment on the is_dirty field for details).
  * All other fields are managed by the cache.
  *
  * The fields of this structure are discussed individually below:
@@ -230,23 +230,23 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  *		Update: Management of the is_dirty field has been largely
  *		      moved into the cache.  The only remaining exceptions
- *		      are the flush and clear functions supplied by the 
- *		      modules using the cache.  These still clear the 
+ *		      are the flush and clear functions supplied by the
+ *		      modules using the cache.  These still clear the
  *		      is_dirty field as before.  -- JRM 7/5/05
  *
  * dirtied:	Boolean flag used to indicate that the entry has been
  * 		dirtied while protected.
  *
  * 		This field is set to FALSE in the protect call, and may
- * 		be set to TRUE by the 
+ * 		be set to TRUE by the
  * 		H5C_mark_pinned_or_protected_entry_dirty()
  * 		call at an time prior to the unprotect call.
  *
- * 		The H5C_mark_pinned_or_protected_entry_dirty() call exists 
+ * 		The H5C_mark_pinned_or_protected_entry_dirty() call exists
  * 		as a convenience function for the fractal heap code which
  * 		may not know if an entry is protected or pinned, but knows
- * 		that is either protected or pinned.  The dirtied field was 
- * 		added as in the parallel case, it is necessary to know 
+ * 		that is either protected or pinned.  The dirtied field was
+ * 		added as in the parallel case, it is necessary to know
  * 		whether a protected entry was dirty prior to the protect call.
  *
  * is_protected: Boolean flag indicating whether this entry is protected
@@ -261,7 +261,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * is_pinned:	Boolean flag indicating whether the entry has been pinned
  * 		in the cache.
  *
- * 		For very hot entries, the protect / unprotect overhead 
+ * 		For very hot entries, the protect / unprotect overhead
  * 		can become excessive.  Thus the cache has been extended
  * 		to allow an entry to be "pinned" in the cache.
  *
@@ -274,14 +274,14 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  * 		2) A pinned entry can be accessed or modified at any time.
  * 		   Therefore, the cache must check with the entry owner
- * 		   before flushing it.  If permission is denied, the 
+ * 		   before flushing it.  If permission is denied, the
  * 		   cache does not flush the entry.
  *
- * 		3) A pinned entry can be marked as dirty (and possibly 
+ * 		3) A pinned entry can be marked as dirty (and possibly
  *		   change size) while it is unprotected.
  *
- *		4) The flush-destroy code must allow pinned entries to 
- *		   be unpinned (and possibly unprotected) during the 
+ *		4) The flush-destroy code must allow pinned entries to
+ *		   be unpinned (and possibly unprotected) during the
  *		   flush.
  *
  *		   					JRM -- 3/16/06
@@ -301,13 +301,13 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  * clear_on_unprotect:  Boolean flag used only in PHDF5.  When H5C is used
  *		to implement the metadata cache In the parallel case, only
- *		the cache with mpi rank 0 is allowed to actually write to 
+ *		the cache with mpi rank 0 is allowed to actually write to
  *		file -- all other caches must retain dirty entries until they
- *		are advised that the entry is clean.  
+ *		are advised that the entry is clean.
  *
- *		This flag is used in the case that such an advisory is 
+ *		This flag is used in the case that such an advisory is
  *		received when the entry is protected.  If it is set when an
- *		entry is unprotected, and the dirtied flag is not set in 
+ *		entry is unprotected, and the dirtied flag is not set in
  *		the unprotect, the entry's is_dirty flag is reset by flushing
  *		it with the H5C__FLUSH_CLEAR_ONLY_FLAG.
  *
@@ -406,7 +406,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *              been flushed to file in its life time.
  *
  * pins:	int32_t containing the number of times this cache entry has
- * 		been pinned in cache in its life time.  
+ * 		been pinned in cache in its life time.
  *
  ****************************************************************************/
 
@@ -416,7 +416,7 @@ typedef struct H5C_cache_entry_t
     size_t		size;
     const H5C_class_t *	type;
     hbool_t		is_dirty;
-    hbool_t		dirtied; 
+    hbool_t		dirtied;
     hbool_t		is_protected;
     hbool_t		is_pinned;
     hbool_t		in_slist;

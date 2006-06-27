@@ -465,7 +465,7 @@ run_test_loop(struct options *opts)
 		    parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
 		    if (parms.interleaved)
 			output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
-				buf_size, opts->blk_size, 
+				buf_size, opts->blk_size,
 				((double)parms.num_dsets * (double)parms.num_bytes)
 				/ ONE_MB);
 		    else
@@ -669,7 +669,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
 	    get_minmax(&read_close_mm, t);
 
 	    read_close_mm_table[i] = read_close_mm;
-	    
+
         }
 
         pio_time_destroy(res.timers);
@@ -739,7 +739,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     }
 
 
-    
+
     if (!parms.h5_write_only) {
         /* Read statistics	*/
         /* Print the raw data throughput if desired */
@@ -1196,7 +1196,7 @@ report_parameters(struct options *opts)
         HDfprintf(output, "2D\n");
     else
         HDfprintf(output, "1D\n");
-	
+
     HDfprintf(output, "rank %d: VFL used for HDF5 I/O=", rank);
     if(opts->h5_use_mpi_posix)
         HDfprintf(output, "MPI-posix driver\n");

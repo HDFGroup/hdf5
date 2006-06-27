@@ -105,7 +105,7 @@
 #define MONSTER_ALT_BASE_ADDR	(haddr_t)(HUGE_ALT_BASE_ADDR + \
                                       (HUGE_ENTRY_SIZE * NUM_HUGE_ENTRIES))
 
-#define MAX_PINS	8	/* Maximum number of entries that can be 
+#define MAX_PINS	8	/* Maximum number of entries that can be
 				 * directly pinned by a single entry.
 				 */
 typedef struct test_entry_t
@@ -116,7 +116,7 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
-    H5C_t               * cache_ptr;	/* pointer to the cache in which 
+    H5C_t               * cache_ptr;	/* pointer to the cache in which
 					 * the entry resides, or NULL if the
 					 * entry is not in cache.
 					 */
@@ -156,7 +156,7 @@ typedef struct test_entry_t
     hbool_t		  is_pinned;	/* entry is currently pinned in
 					 * the cache.
                                          */
-    int			  pinning_ref_count; /* Number of entries that 
+    int			  pinning_ref_count; /* Number of entries that
 					 * pin this entry in the cache.
 					 * When this count drops to zero,
 					 * this entry should be unpinned.
@@ -169,7 +169,7 @@ typedef struct test_entry_t
     int			  pin_type[MAX_PINS]; /* array of the types of entries
 					 * pinned by this entry.
 					 */
-    int			  pin_idx[MAX_PINS]; /* array of the indicies of 
+    int			  pin_idx[MAX_PINS]; /* array of the indicies of
 					 * entries pinned by this entry.
 					 */
     hbool_t		  loaded;       /* entry has been loaded since the

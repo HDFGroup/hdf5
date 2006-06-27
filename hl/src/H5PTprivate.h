@@ -19,7 +19,7 @@
 #include "H5HLprivate2.h"
 
 /* public LT prototypes			*/
-#include "H5PTpublic.h"		
+#include "H5PTpublic.h"
 
 #endif
 

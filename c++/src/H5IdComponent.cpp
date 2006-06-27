@@ -255,7 +255,7 @@ H5std_string IdComponent::inMemFunc(const char* func_name) const
 {
 #ifdef H5_VMS
    H5std_string full_name = fromClass();
-   full_name.append("::"); 
+   full_name.append("::");
    full_name.append(func_name);
 #else
    H5std_string full_name = func_name;

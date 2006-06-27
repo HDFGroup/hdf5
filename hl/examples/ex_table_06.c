@@ -30,13 +30,13 @@
 
 int main( void )
 {
- typedef struct Particle 
+ typedef struct Particle
  {
   char   name[16];
   int    lati;
   int    longi;
   float  pressure;
-  double temperature; 
+  double temperature;
  } Particle;
 
  /* Calculate the size and the offsets of our struct members in memory */
@@ -46,20 +46,20 @@ int main( void )
                                 HOFFSET( Particle, longi ),
                                 HOFFSET( Particle, pressure ),
                                 HOFFSET( Particle, temperature )};
-   
+
   /* Define field information */
-  const char *field_names[NFIELDS]  = 
+  const char *field_names[NFIELDS]  =
   { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
   hid_t      field_type[NFIELDS];
   hid_t      string_type;
   hid_t      file_id;
   hsize_t    chunk_size = 10;
-  Particle   fill_data[1] = 
-  { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */ 
+  Particle   fill_data[1] =
+  { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */
   int        compress  = 0;
   hsize_t    nfields_out;
   hsize_t    nrecords_out;
-  herr_t     status; 
+  herr_t     status;
 
   /* Initialize field_type */
   string_type = H5Tcopy( H5T_C_S1 );
@@ -69,13 +69,13 @@ int main( void )
   field_type[2] = H5T_NATIVE_INT;
   field_type[3] = H5T_NATIVE_FLOAT;
   field_type[4] = H5T_NATIVE_DOUBLE;
-  
+
  /* Create a new file using default properties. */
  file_id = H5Fcreate( "ex_table_06.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make a table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,dst_size, 
-                       field_names, dst_offset, field_type, 
+ status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,dst_size,
+                       field_names, dst_offset, field_type,
                        chunk_size, fill_data, compress, NULL);
 
  /* Get table info  */
@@ -83,7 +83,7 @@ int main( void )
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);
-  
+
  /* Close the file. */
  H5Fclose( file_id );
 

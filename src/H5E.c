@@ -108,7 +108,7 @@ static ssize_t H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream, hbool_t bk_compatible);
-static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
+static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func,
                             H5E_walk_stack_t stack_func, hbool_t bk_compatible, void *client_data);
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
 static herr_t  H5E_walk_stack_cb(unsigned n, const H5E_error_stack_t *err_desc, void *client_data);
@@ -1991,7 +1991,7 @@ H5E_print_stack(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
     if(bk_compatible) {
         if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, H5E_walk_cb, NULL, TRUE, (void*)&eprint)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
-    } else {        
+    } else {
         if(H5E_walk_stack(estack, H5E_WALK_DOWNWARD, NULL, H5E_walk_stack_cb, FALSE, (void*)&eprint)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
     }
@@ -2102,16 +2102,16 @@ done:
  *		means to start at the API and end at the inner-most function
  *		where the error was first detected.
  *
- *		The function pointed to by STACK_FUNC will be called for 
- *		each error record in the error stack. It's arguments will 
- *		include an index number (beginning at zero regardless of 
- *		stack traversal	direction), an error stack entry, and the 
+ *		The function pointed to by STACK_FUNC will be called for
+ *		each error record in the error stack. It's arguments will
+ *		include an index number (beginning at zero regardless of
+ *		stack traversal	direction), an error stack entry, and the
  *		CLIENT_DATA pointer passed to H5E_print_stack.
  *
  *		The function FUNC is also provided for backward compatibility.
  *		When BK_COMPATIBLE is set to be TRUE, FUNC is used to be
  *		compatible with older library.  If BK_COMPATIBLE is FALSE,
- *		STACK_FUNC is used.   
+ *		STACK_FUNC is used.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2126,13 +2126,13 @@ done:
  *
  *              Raymond Lu
  *              Friday, May 12, 2006
- *              Added backward compatibility support.  FUNC is for older 
+ *              Added backward compatibility support.  FUNC is for older
  *              library; STACK_FUNC is for new library.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, H5E_walk_stack_t stack_func, 
+H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, H5E_walk_stack_t stack_func,
         hbool_t bk_compatible, void *client_data)
 {
     int		i;              /* Local index variable */
@@ -2216,9 +2216,9 @@ done:
  * Purpose:	This is a default error stack traversal callback function
  *		that prints error messages to the specified output stream.
  *		It is not meant to be called directly but rather as an
- *		argument to the H5Ewalk_stack() function.  This function is 
- *		called also by H5Eprint_stack().  Application writers are 
- *		encouraged to use this function as a model for their own 
+ *		argument to the H5Ewalk_stack() function.  This function is
+ *		called also by H5Eprint_stack().  Application writers are
+ *		encouraged to use this function as a model for their own
  *		error stack walking functions.
  *
  *		N is a counter for how many times this function has been
@@ -2351,7 +2351,7 @@ H5E_walk_stack_cb(unsigned n, const H5E_error_stack_t *err_desc, void *client_da
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *		Thursday, May 11, 2006
  *
  * Modifications:

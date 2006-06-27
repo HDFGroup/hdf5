@@ -45,7 +45,7 @@ static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
-static herr_t H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, 
+static herr_t H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -305,13 +305,13 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  Peter Cao 
- *              September 10, 2005 
+ * Programmer:  Peter Cao
+ *              September 10, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, 
+H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
@@ -356,19 +356,19 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              September 28, 2005 
+ * Programmer:  Peter Cao
+ *              September 28, 2005
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
-H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc, 
+static herr_t
+H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hbool_t UNUSED *modified, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     H5G_bt_it_ud5_t     udata;      /* B-tree user data */
     const H5O_stab_t    *stab_src = (const H5O_stab_t *)mesg_src;
     H5O_stab_t          *stab_dst = (H5O_stab_t *)mesg_dst;
-    H5F_t               *file_src = parent_src_oloc->file; 
+    H5F_t               *file_src = parent_src_oloc->file;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_stab_post_copy_file)

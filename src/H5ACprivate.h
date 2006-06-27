@@ -229,7 +229,7 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG	H5C__FLUSH_MARKED_ENTRIES_FLAG
 
 
-/* #defines of flags used to report entry status in the 
+/* #defines of flags used to report entry status in the
  * H5AC_get_entry_status() call.
  */
 
@@ -261,7 +261,7 @@ H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                           void *  thing,
 					   hbool_t size_changed,
                                            size_t  new_size);
-H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(H5F_t * f, 
+H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(H5F_t * f,
 		                                        void *  thing);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);

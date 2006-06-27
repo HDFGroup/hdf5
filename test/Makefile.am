@@ -91,7 +91,7 @@ flush2.chkexe_: flush1.chkexe_
 # Temporary files.  These files are the ones created by setting the
 # HDF5_NOCLEANUP environment variable and running `make test' without
 # specifying a file prefix or low-level driver.  Changing the file
-# prefix or low-level driver with environment variables will influence 
+# prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
             tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 stab[1-2].h5 \

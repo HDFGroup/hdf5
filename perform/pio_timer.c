@@ -38,11 +38,11 @@
 /* global variables */
 pio_time   *timer_g;            /* timer: global for stub functions     */
 
-/* 
+/*
  * Function:  sub_time
  * Purpose:   Struct two time values, and return the difference, in microseconds
- * 
- * 	      Note that the function assumes that a > b 
+ *
+ * 	      Note that the function assumes that a > b
  * Programmer: Leon Arber, 1/27/06
  */
 static double sub_time(struct timeval* a, struct timeval* b)
@@ -145,7 +145,7 @@ set_time(pio_time *pt, timer_type t, int start_stop)
 
             } else {
                 pt->total_time[t] += MPI_Wtime() - pt->mpi_timer[t];
-		pt->mpi_timer[t] = MPI_Wtime(); 
+		pt->mpi_timer[t] = MPI_Wtime();
 
 		/* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
 		 * we compute the time it took to close the file after the last read/write finished */
@@ -165,7 +165,7 @@ set_time(pio_time *pt, timer_type t, int start_stop)
 		else if(t == HDF5_FINE_READ_FIXED_DIMS)
 		    pt->total_time[HDF5_FILE_READ_OPEN] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_READ_FIXED_DIMS]));
 
-		
+
             } else {
                 struct timeval sys_t;
 
@@ -183,7 +183,7 @@ set_time(pio_time *pt, timer_type t, int start_stop)
 		    pt->total_time[HDF5_FILE_WRITE_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_WRITE_FIXED_DIMS]));
 		else if(t == HDF5_GROSS_READ_FIXED_DIMS)
 		    pt->total_time[HDF5_FILE_READ_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_READ_FIXED_DIMS]));
-	
+
             }
         }
 

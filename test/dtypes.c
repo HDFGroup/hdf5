@@ -522,7 +522,7 @@ test_compound_1(void)
         printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
-       
+
     size = 128;
     H5E_BEGIN_TRY {
         ret = H5Tset_precision(complex_id, size);
@@ -532,7 +532,7 @@ test_compound_1(void)
         printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
-  
+
     H5E_BEGIN_TRY {
         ret = H5Tget_pad(complex_id, &lsb, &msb);
     } H5E_END_TRY;
@@ -550,7 +550,7 @@ test_compound_1(void)
         printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
- 
+
     H5E_BEGIN_TRY {
         lsb = H5Tget_inpad(complex_id);
     } H5E_END_TRY;
@@ -3159,7 +3159,7 @@ test_conv_str_3(void)
     if (H5Tget_strpad(type)<0) goto error;
     if (H5Tset_offset(type, 0)<0) goto error;
     if (H5Tget_order(type)<0) goto error;
-    
+
     H5E_BEGIN_TRY {
         ret=H5Tset_precision(type, nelmts);
     } H5E_END_TRY;
@@ -3168,7 +3168,7 @@ test_conv_str_3(void)
         printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
-  
+
     H5E_BEGIN_TRY {
         size=H5Tget_ebias(type);
     } H5E_END_TRY;
@@ -3511,10 +3511,10 @@ test_bitfield_funcs(void)
      * First create a bitfield type.
      */
     if((type = H5Tcopy(H5T_STD_B32LE))<0) goto error;
-    
+
     /*
      * Offset a 12-byte value in the middle of a 16 and 32 byte
-     * field.  Pad unused bits with ones. 
+     * field.  Pad unused bits with ones.
      *    ____ ____ __10 1010 1010 10__ ____ ____
      */
     if(H5Tset_precision(type, 12)<0) goto error;
@@ -3531,7 +3531,7 @@ test_bitfield_funcs(void)
         printf("Operation not allowed for this type.\n");
         goto error;
     } /* end if */
-   
+
     H5E_BEGIN_TRY {
         inpad=H5Tget_inpad(type);
     } H5E_END_TRY;
@@ -3811,7 +3811,7 @@ opaque_long(void)
 /*-------------------------------------------------------------------------
  * Function:	opaque_funcs
  *
- * Purpose:	Test some type functions that are and aren't supposed to 
+ * Purpose:	Test some type functions that are and aren't supposed to
  *              work with opaque type.
  *
  * Return:	Success:	0
@@ -3839,7 +3839,7 @@ opaque_funcs(void)
     /* Build opaque type */
     if ((type=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
     if (H5Tset_tag(type, "opaque source type")<0) TEST_ERROR
-        
+
     if ((size=H5Tget_size(type))==0) goto error;
 
     H5E_BEGIN_TRY {
@@ -4351,7 +4351,7 @@ conv_except(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst
         user_data->num_precision++;
     else if(except_type == H5T_CONV_EXCEPT_TRUNCATE)
         user_data->num_truncate++;
-    else 
+    else
         user_data->num_other++;
 
     return(H5T_CONV_UNHANDLED);

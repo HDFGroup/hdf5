@@ -58,7 +58,7 @@ const char *FILENAME[] = {
 
 /*
  * Count up or down depending on whether the machine is big endian, little
- * endian, or VAX (OpenVMS).  If local variable `endian' is H5T_ORDER_BE then 
+ * endian, or VAX (OpenVMS).  If local variable `endian' is H5T_ORDER_BE then
  * the result will be I, otherwise the result will be Z-(I+1).  VAX is printed
  * as little endian.
  */
@@ -90,7 +90,7 @@ static int skip_overflow_tests_g = 0;
 /* OpenVMS doesn't have this feature.  Make sure to disable it*/
 #ifdef H5_VMS
 #undef HANDLE_SIGFPE
-#endif 
+#endif
 
 /*
  * Decide what values of floating-point number we want to test.  They are
@@ -635,7 +635,7 @@ test_hard_query(void)
         printf("Can't query conversion function\n");
         goto error;
     }
-    
+
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
     H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
@@ -659,7 +659,7 @@ test_hard_query(void)
 /*-------------------------------------------------------------------------
  * Function:	expt_handle
  *
- * Purpose:	Gets called from test_particular_fp_integer() for data type 
+ * Purpose:	Gets called from test_particular_fp_integer() for data type
  *              conversion exceptions.
  *
  * Return:	H5T_CONV_HANDLED        1
@@ -679,7 +679,7 @@ expt_handle(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst
     signed char         fill_value1 = 7;
     int                 fill_value2 = 13;
 
-    if(except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW || 
+    if(except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW ||
         except_type == H5T_CONV_EXCEPT_TRUNCATE) {
         if(*(hbool_t*)user_data)
             *(signed char*)dst_buf = fill_value1;
@@ -696,10 +696,10 @@ expt_handle(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst
  *
  * Purpose:     Tests hard conversions from floating numbers to integers in
  *              a special situation when the source is "float" and assigned
- *              the value of "INT_MAX".  A compiler may do roundup making 
+ *              the value of "INT_MAX".  A compiler may do roundup making
  *              this value "INT_MAX+1".  When this float value is casted to
- *              int, overflow happens.  This test makes sure the library 
- *              returns exception in this situation.  
+ *              int, overflow happens.  This test makes sure the library
+ *              returns exception in this situation.
  *
  *              Also verifies the library handles conversion from double to
  *              signed char correctly when the value of double is SCHAR_MAX.
@@ -736,7 +736,7 @@ static int test_particular_fp_integer(void)
     size_t      j;
 
     TESTING("hard particular floating number -> integer conversions");
-    
+
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) {
         H5_FAILED();
         printf("Can't create data transfer property list\n");
@@ -782,7 +782,7 @@ static int test_particular_fp_integer(void)
         printf("        src = ");
         for (j=0; j<src_size1; j++)
             printf(" %02x", saved_buf1[ENDIAN(src_size1, j, endian)]);
-        
+
         HDmemcpy(&x, saved_buf1, src_size1);
         printf(" %29.20e\n", x);
 
@@ -812,7 +812,7 @@ static int test_particular_fp_integer(void)
         goto error;
     }
 
-    memcpy(&dst_i, buf2, dst_size2); 
+    memcpy(&dst_i, buf2, dst_size2);
 
     /* Print errors */
     if(dst_i != fill_value) {
@@ -826,7 +826,7 @@ static int test_particular_fp_integer(void)
         printf("        src = ");
         for (j=0; j<src_size2; j++)
             printf(" %02x", saved_buf2[ENDIAN(src_size2, j, endian)]);
-        
+
         HDmemcpy(&x, saved_buf2, src_size2);
         printf(" %29.20e\n", x);
 
@@ -855,7 +855,7 @@ static int test_particular_fp_integer(void)
         free(saved_buf1);
     if(saved_buf2)
         free(saved_buf2);
-   
+
     PASSED();
     return 0;
 
@@ -2681,7 +2681,7 @@ my_isnan(dtype_t type, void *val)
     }
 
 #ifdef H5_VMS
-    /* For "float" and "double" on OpenVMS/Alpha, NaN is 
+    /* For "float" and "double" on OpenVMS/Alpha, NaN is
      * actually a valid value of maximal value.*/
     if(!retval) {
 	if (FLT_FLOAT==type) {
@@ -2726,15 +2726,15 @@ my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
     ssize_t ret1=0, ret2=0;
 
     bits = (unsigned char*)calloc(1, size);
-    
+
 #ifdef H5_VMS
     if(H5T_ORDER_VAX==endian) {
         for (i = 0; i < size; i += 4) {
             bits[i] = val[(size-2)-i];
             bits[i+1] = val[(size-1)-i];
-           
+
             bits[(size-2)-i] = val[i];
-            bits[(size-1)-i] = val[i+1]; 
+            bits[(size-1)-i] = val[i+1];
         }
     } else {
         for (i=0; i<size; i++)
@@ -2953,9 +2953,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
             } else if(src_type == FLT_DOUBLE && dst_type == FLT_FLOAT) {
-                /*Temporary solution for VMS.  Cap double values between maximal and minimal 
+                /*Temporary solution for VMS.  Cap double values between maximal and minimal
                  *destination values because VMS return exception when overflows or underflows.
-                 *Same below.*/ 
+                 *Same below.*/
                 INIT_FP_NORM(double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
             } else if(src_type == FLT_DOUBLE) {
@@ -2989,7 +2989,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             } else
                 goto error;
 #endif /*H5_VMS*/
-            
+
             break;
         case TEST_DENORM:
             if(src_type == FLT_FLOAT) {
@@ -3129,7 +3129,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             continue; /*no error*/
 
 #ifdef H5_VMS
-        /* For "float" and "double" on OpenVMS/Alpha, NaN is 
+        /* For "float" and "double" on OpenVMS/Alpha, NaN is
          * a valid value of maximal value.*/
         if (FLT_FLOAT==src_type &&
                 my_isnan(src_type, saved+j*sizeof(float))) {
@@ -3266,7 +3266,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 for (k = 0; k < src_size; k += 4) {
                     tmp[k] = saved[j*src_size+(src_size-2)-k];
                     tmp[k+1] = saved[j*src_size+(src_size-1)-k];
-                                      
+
                     tmp[(src_size-2)-k] = saved[j*src_size+k];
                     tmp[(src_size-1)-k] = saved[j*src_size+k+1];
                 }
@@ -3286,7 +3286,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                     for (k = 0; k < src_size; k += 4) {
                         tmp[k] = buf[j*dst_size+(dst_size-2)-k];
                         tmp[k+1] = buf[j*dst_size+(dst_size-1)-k];
-                                          
+
                         tmp[(dst_size-2)-k] = buf[j*dst_size+k];
                         tmp[(dst_size-1)-k] = buf[j*dst_size+k+1];
                     }
@@ -4957,7 +4957,7 @@ run_int_fp_conv(const char *name)
         SKIPPED();
         HDputs("    Test skipped due to compiler error in handling conversion.");
     }
-#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */   
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #if H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
 #else /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */

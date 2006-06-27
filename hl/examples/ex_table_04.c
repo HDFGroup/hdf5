@@ -30,24 +30,24 @@
 
 int main( void )
 {
- typedef struct Particle 
+ typedef struct Particle
  {
   char   name[16];
   int    lati;
   int    longi;
   float  pressure;
-  double temperature; 
+  double temperature;
  } Particle;
 
  /* Define a subset of Particle, with latitude and longitude fields */
- typedef struct Position 
+ typedef struct Position
  {
   int    lati;
   int    longi;
  } Position;
 
  /* Define a subset of Particle, with name and pressure fields */
- typedef struct NamePressure 
+ typedef struct NamePressure
  {
   char   name[16];
   float  pressure;
@@ -76,12 +76,12 @@ int main( void )
  hid_t      string_type;
  hid_t      file_id;
  hsize_t    chunk_size = 10;
- Particle   fill_data[1] = 
- { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */ 
+ Particle   fill_data[1] =
+ { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */
  hsize_t    start;                       /* Record to start reading/writing */
  hsize_t    nrecords;                    /* Number of records to read/write */
  int        compress  = 0;
- herr_t     status; 
+ herr_t     status;
  int        i;
  Particle  *p_data = NULL;               /* Initially no data */
  float      pressure_in [NRECORDS] =     /* Define new values for the field "Pressure"  */
@@ -89,21 +89,21 @@ int main( void )
  Position   position_in[NRECORDS] = {    /* Define new values for "Latitude,Longitude"  */
  {0,0},
  {10,10},
- {20,20}, 
- {30,30}, 
+ {20,20},
+ {30,30},
  {40,40},
- {50,50}, 
- {60,60},    
+ {50,50},
+ {60,60},
  {70,70} };
  NamePressure   namepre_in[NRECORDS] =  /* Define new values for "Name,Pressure"  */
  { {"zero",0.0f},
- {"one",   1.0f}, 
- {"two",   2.0f}, 
- {"three", 3.0f}, 
+ {"one",   1.0f},
+ {"two",   2.0f},
+ {"three", 3.0f},
  {"four",  4.0f},
  {"five",  5.0f},
- {"six",   6.0f}, 
- {"seven", 7.0f}, 
+ {"six",   6.0f},
+ {"seven", 7.0f},
   };
  size_t field_sizes_pos[2]=
  {
@@ -111,12 +111,12 @@ int main( void )
   sizeof(position_in[0].lati)
  };
  size_t field_sizes_namepre[2]=
- { 
+ {
   sizeof(namepre_in[0].name),
   sizeof(namepre_in[0].pressure)
  };
  size_t field_sizes_pre[1]=
- { 
+ {
   sizeof(namepre_in[0].pressure)
  };
 
@@ -133,20 +133,20 @@ int main( void )
  file_id = H5Fcreate( "ex_table_04.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make the table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS, 
-                         dst_size,field_names, dst_offset, field_type, 
+ status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
+                         dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, p_data  );
 
  /* Write the pressure field starting at record 2 */
- start    = 2;      
- nrecords = 3; 
- status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Pressure", start, nrecords, 
+ start    = 2;
+ nrecords = 3;
+ status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Pressure", start, nrecords,
    sizeof( float ), 0, field_sizes_pre, pressure_in  );
 
  /* Write the new longitude and latitude information starting at record 2 */
- start    = 2;      
- nrecords = 3; 
- status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Latitude,Longitude", start, nrecords, 
+ start    = 2;
+ nrecords = 3;
+ status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Latitude,Longitude", start, nrecords,
    sizeof( Position ), field_offset_pos, field_sizes_pos,  position_in  );
 
  /* read the table */
@@ -154,7 +154,7 @@ int main( void )
 
  /* print it by rows */
  for (i=0; i<NRECORDS; i++) {
-  printf ("%-5s %-5d %-5d %-5f %-5f", 
+  printf ("%-5s %-5d %-5d %-5f %-5f",
    dst_buf[i].name,
    dst_buf[i].lati,
    dst_buf[i].longi,
@@ -162,12 +162,12 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
- 
+
 /*-------------------------------------------------------------------------
  * end
  *-------------------------------------------------------------------------
  */
- 
+
  /* Close the file. */
  H5Fclose( file_id );
 

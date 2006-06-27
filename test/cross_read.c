@@ -16,7 +16,7 @@
  * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
  *              Thursday, March 23, 2006
  *
- * Purpose:     Check if floating-point data created on OpenVMS (VAX type), Solaris, 
+ * Purpose:     Check if floating-point data created on OpenVMS (VAX type), Solaris,
  *              and Linux machines can be read on the machine running this test.
  */
 
@@ -116,7 +116,7 @@ static int read_data(char *fname)
     H5Tclose(datatype);
     H5Dclose(dataset);
     H5Fclose(file);
-    
+
     /* Failure */
     if (nerrors) {
         printf("total of %d errors out of %d elements\n", nerrors, NX*NY);

@@ -292,9 +292,9 @@ done:
  *
  * Usage:       H5Gcreate_expand(loc_id, char *name, gcpl_id, gapl_id)
  *              hid_t loc_id;	  IN: File or group identifier
- *              const char *name; IN: Absolute or relative name of the new group 
- *              hid_t gcpl_id;	  IN: Property list for group creation             
- *              hid_t gapl_id;	  IN: Property list for group access             
+ *              const char *name; IN: Absolute or relative name of the new group
+ *              hid_t gcpl_id;	  IN: Property list for group creation
+ *              hid_t gapl_id;	  IN: Property list for group access
  *
  * Example:	To create missing groups "A" and "B01" along the given path "/A/B01/grp"
  *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
@@ -1066,23 +1066,23 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Gcopy
  *
- * Purpose:     Copy an object (group or dataset) to destination location 
+ * Purpose:     Copy an object (group or dataset) to destination location
  *              within a file or cross files. PLIST_ID is a property list
  *              which is used to pass user options and properties to the
- *              copy. 
+ *              copy.
  *
  *              OPTIONS THAT MAY APPLY TO COPY IN THE FUTURE.
  *                  H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG
  *                      Do not create missing groups when create a group (default)
  *                      Create missing groups when create a group
  *                  H5G_COPY_SHALLOW_HIERARCHY_FLAG
- *                      Recursively copy all objects below the group (default) 
+ *                      Recursively copy all objects below the group (default)
  *                      Only immediate members.
  *                  H5G_COPY_EXPAND_SOFT_LINK_FLAG
- *                      Keep soft links as they are (default) 
+ *                      Keep soft links as they are (default)
  *                      Expand them into new objects
  *                  H5G_COPY_EXPAND_EXT_LINK_FLAG
- *                      Keep external links as they are (default) 
+ *                      Keep external links as they are (default)
  *                      Expand them into new objects
  *                  H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG
  *                      Update only the values of object references (default)
@@ -1094,26 +1094,26 @@ done:
  *              PROPERTIES THAT MAY APPLY TO COPY IN FUTURE
  *                  Change data layout such as chunk size
  *                  Add filter such as data compression.
- *                  Add an attribute to the copied object(s) that say the  date/time 
+ *                  Add an attribute to the copied object(s) that say the  date/time
  *                      for the copy or other information about the source file.
  *
  * Usage:      H5Gcopy(src_loc_id, src_name, dst_loc_id, dst_name, plist_id)
- *             hid_t src_loc_id         IN: Source file or group identifier. 
+ *             hid_t src_loc_id         IN: Source file or group identifier.
  *             const char *src_name     IN: Name of the source object to be copied
- *             hid_t dst_loc_id         IN: Destination file or group identifier 
- *             const char *dst_name     IN: Name of the destination object 
- *             hid_t plist_id           IN: Properties which apply to the copy       
- *              
+ *             hid_t dst_loc_id         IN: Destination file or group identifier
+ *             const char *dst_name     IN: Name of the destination object
+ *             hid_t plist_id           IN: Properties which apply to the copy
+ *
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              June 4, 2005 
+ * Programmer:  Peter Cao
+ *              June 4, 2005
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t plist_id)
 {
     H5G_loc_t	loc;                    /* Source group group location */
@@ -2987,12 +2987,12 @@ H5G_unmount(H5G_t *grp)
 /*-------------------------------------------------------------------------
  * Function:    H5G_copy
  *
- * Purpose:     Copy an object to destination location 
+ * Purpose:     Copy an object to destination location
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              June 4, 2005 
+ * Programmer:  Peter Cao
+ *              June 4, 2005
  *
  *-------------------------------------------------------------------------
  */

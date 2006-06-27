@@ -70,12 +70,12 @@ const char *FILENAME[] = {
 #define NUM_ATTRIBUTES 4
 #define ATTR_NAME_LEN 40
 #define DIM_SIZE_1 12
-#define DIM_SIZE_2  6 
+#define DIM_SIZE_2  6
 #define CHUNK_SIZE_1 5          /* Not an even fraction of dimension sizes, so we test copying partial chunks */
 #define CHUNK_SIZE_2 5
-#define NUM_SUB_GROUPS  20 
-#define NUM_WIDE_LOOP_GROUPS  10 
-#define NUM_DATASETS  10 
+#define NUM_SUB_GROUPS  20
+#define NUM_WIDE_LOOP_GROUPS  10
+#define NUM_DATASETS  10
 
 char src_obj_full_name[215];  /* the full path + name of the object to be copied */
 
@@ -185,8 +185,8 @@ addr_reset(void)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              Saturday, December 17, 2005 
+ * Programmer:  Peter Cao
+ *              Saturday, December 17, 2005
  *
  * Modifications:
  *
@@ -213,7 +213,7 @@ test_copy_attach_attribute_vl(hid_t loc_id)
         for(j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = j+1;
     } /* end for */
-    
+
     if ( (aid = H5Acreate(loc_id, "vlen attribute", tid, sid, H5P_DEFAULT)) < 0)
         goto done;
 
@@ -242,8 +242,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -274,8 +274,8 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         if ( H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
             goto done;
 
-        if (aid > 0) 
-            H5Aclose(aid); 
+        if (aid > 0)
+            H5Aclose(aid);
 
          aid = -1;
     }
@@ -283,9 +283,9 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
     ret_value = 0;
 
 done:
-    if (sid > 0) 
+    if (sid > 0)
         H5Sclose(sid);
-    if (aid > 0) 
+    if (aid > 0)
         H5Aclose(aid);
 
     return ret_value;
@@ -300,7 +300,7 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005 
+ *              Tuesday, November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -337,9 +337,9 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
     return 0;
 
 done:
-    if (sid > 0) 
+    if (sid > 0)
         H5Sclose(sid);
-    if (aid > 0) 
+    if (aid > 0)
         H5Aclose(aid);
 
     return -1;
@@ -354,7 +354,7 @@ done:
  * Return:      TRUE if attributes are equal/FALSE if they are different
  *
  * Programmer:  Peter Cao
- *              Saturday, December 17, 2005 
+ *              Saturday, December 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -471,7 +471,7 @@ error:
  * Return:	TRUE if objects have same attributes/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  * Note:	This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
@@ -543,7 +543,7 @@ error:
  * Return:	TRUE if buffer are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
- *              Monday, November 21, 2005 
+ *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -602,7 +602,7 @@ error:
  * Return:	TRUE if datasets are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005 
+ *              Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -780,7 +780,7 @@ error:
  * Return:	TRUE if group are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -928,8 +928,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -973,17 +973,17 @@ test_copy_named_datatype(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the datatype for copy */ 
+    /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR;
 
-    /* open the copied datatype */ 
+    /* open the copied datatype */
     if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR;
 
     /* Compare the datatypes */
@@ -1024,7 +1024,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 22, 2005 
+ *              Tuesday, November 22, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1066,17 +1066,17 @@ test_copy_named_datatype_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the datatype for copy */ 
+    /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL)) < 0) TEST_ERROR;
 
-    /* open the copied datatype */ 
+    /* open the copied datatype */
     if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL)) < 0) TEST_ERROR;
 
     /* Compare the datatypes */
@@ -1117,7 +1117,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 22, 2005 
+ *              Tuesday, November 22, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1165,17 +1165,17 @@ test_copy_named_datatype_vl_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the datatype for copy */ 
+    /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR;
 
-    /* open the copied datatype */ 
+    /* open the copied datatype */
     if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR;
 
     /* Compare the datatypes */
@@ -1215,8 +1215,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -1257,7 +1257,7 @@ test_copy_dataset_simple(hid_t fapl)
 
     /* create 2D dataspace */
     if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
-  
+
     /* create 2D int dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -1282,17 +1282,17 @@ test_copy_dataset_simple(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1335,7 +1335,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1367,7 +1367,7 @@ test_copy_dataset_simple_empty(hid_t fapl)
 
     /* create 2D dataspace */
     if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
-  
+
     /* create 2D int dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -1389,17 +1389,17 @@ test_copy_dataset_simple_empty(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1440,8 +1440,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -1519,17 +1519,17 @@ test_copy_dataset_compound(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1571,8 +1571,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -1647,17 +1647,17 @@ test_copy_dataset_chunked(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1701,7 +1701,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1764,17 +1764,17 @@ test_copy_dataset_chunked_empty(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1818,7 +1818,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1902,17 +1902,17 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -1955,7 +1955,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2035,17 +2035,17 @@ test_copy_dataset_compressed(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -2091,7 +2091,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2163,17 +2163,17 @@ test_copy_dataset_compact(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPACT)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPACT)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -2215,8 +2215,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -2260,7 +2260,7 @@ test_copy_dataset_external(hid_t fapl)
 
     /* create dataspace */
     if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR;
-  
+
     /* set dataset creation plist */
     size = DIM_SIZE_1 * sizeof (int);
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
@@ -2290,7 +2290,7 @@ test_copy_dataset_external(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
 /* Don't change the address in the destination file for this test, it causes the
  * external file list's heap to be at a different location and generates a false
  * negative for this test.  The test is _slightly_ weaker because of this, but
@@ -2304,10 +2304,10 @@ test_copy_dataset_external(hid_t fapl)
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -2351,7 +2351,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005 
+ *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2393,7 +2393,7 @@ test_copy_dataset_named_dtype(hid_t fapl)
     /* create named datatype */
     if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -2418,17 +2418,17 @@ test_copy_dataset_named_dtype(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -2472,7 +2472,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005 
+ *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2518,7 +2518,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     /* create named datatype _inside_ hierarchy to copy */
     if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if ( (H5Tcommit(gid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR;
-  
+
     /* create first dataset at SRC file */
     if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -2555,17 +2555,17 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -2611,7 +2611,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005 
+ *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2657,7 +2657,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     /* create named datatype _outside_ hierarchy to copy */
     if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR;
-  
+
     /* create first dataset at SRC file */
     if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -2694,17 +2694,17 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -2743,14 +2743,14 @@ error:
  * Function:    test_copy_dataset_multi_ohdr_chunks
  *
  * Purpose:     Create a pair of datasets that add attributes in a way that
- *              creates lots of object header chunks in SRC file and copy 
+ *              creates lots of object header chunks in SRC file and copy
  *              datasets to DST file
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005 
+ *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2828,17 +2828,17 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -2883,7 +2883,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, October 31, 2005 
+ *              Tuesday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -2929,7 +2929,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     /* create named datatype _outside_ hierarchy to copy */
     if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR;
-  
+
     /* create first dataset at SRC file */
     if ( (did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -2969,17 +2969,17 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -3024,8 +3024,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3070,7 +3070,7 @@ test_copy_dataset_contig_vl(hid_t fapl)
 
     /* create datatype */
     if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -3089,17 +3089,17 @@ test_copy_dataset_contig_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -3153,8 +3153,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Saturday, December 10, 2005 
+ * Programmer:  Peter Cao
+ *              Saturday, December 10, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3201,7 +3201,7 @@ test_copy_dataset_chunked_vl(hid_t fapl)
 
     /* create datatype */
     if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR;
-  
+
     /* create and set chunk plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR;
@@ -3227,17 +3227,17 @@ test_copy_dataset_chunked_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -3291,8 +3291,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Sunday, December 11, 2005 
+ * Programmer:  Peter Cao
+ *              Sunday, December 11, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3342,7 +3342,7 @@ test_copy_dataset_compact_vl(hid_t fapl)
     /* create and set compact plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR;
 
@@ -3364,17 +3364,17 @@ test_copy_dataset_compact_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -3422,14 +3422,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy_attribute_vl
  *
- * Purpose:     Create a simple dataset with vlen attributes in SRC file 
+ * Purpose:     Create a simple dataset with vlen attributes in SRC file
  *               and copy it to DST file  (Note: dataset has no data)
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Saturday, December , 2005 
+ * Programmer:  Peter Cao
+ *              Saturday, December , 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3462,7 +3462,7 @@ test_copy_attribute_vl(hid_t fapl)
 
     /* create 2D dataspace */
     if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
-  
+
     /* create 2D int dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -3491,10 +3491,10 @@ test_copy_attribute_vl(hid_t fapl)
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the attributes are equal */
@@ -3537,14 +3537,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compressed_vl
  *
- * Purpose:     Create a compressed, chunked, VLEN dataset in SRC 
+ * Purpose:     Create a compressed, chunked, VLEN dataset in SRC
  *              file and copy it to DST file
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Tuesday, December 27, 2005 
+ * Programmer:  Peter Cao
+ *              Tuesday, December 27, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3576,7 +3576,7 @@ test_copy_dataset_compressed_vl(hid_t fapl)
         for (j = 0; j < DIM_SIZE_2; j++) {
             buf[i][j].len = j + 1;
             buf[i][j].p = (int *)HDmalloc(buf[i][j].len * sizeof(int));
-            for (k = 0; k < (int)buf[i][j].len; k++) 
+            for (k = 0; k < (int)buf[i][j].len; k++)
                 ((int *)buf[i][j].p)[k] = i * 10000 + j * 100 + k;
         }
     }
@@ -3634,10 +3634,10 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -3693,8 +3693,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -3738,17 +3738,17 @@ test_copy_group_empty(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_EMPTY)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -3788,8 +3788,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -3842,7 +3842,7 @@ test_copy_group(hid_t fapl)
     /* add a dataset to the group */
     if ( (did = H5Dcreate(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR;
     if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
-    
+
     /* close dataspace */
     if ( H5Sclose(sid) < 0) TEST_ERROR;
 
@@ -3869,17 +3869,17 @@ test_copy_group(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -3923,7 +3923,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005 
+ *              Tuesday, November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4011,17 +4011,17 @@ test_copy_group_deep(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -4065,7 +4065,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005 
+ *              Tuesday, November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4122,17 +4122,17 @@ test_copy_group_loop(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -4175,7 +4175,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November 1, 2005 
+ *              Tuesday, November 1, 2005
  *
  * Note:        Create groups w/lots of entries in each level, so that "dense"
  *              group form is used.
@@ -4251,17 +4251,17 @@ test_copy_group_wide_loop(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -4303,8 +4303,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
@@ -4356,7 +4356,7 @@ test_copy_group_links(hid_t fapl)
     /* add a dataset to the group */
     if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR;
     if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
-    
+
     /* close dataspace */
     if ( H5Sclose(sid) < 0) TEST_ERROR;
 
@@ -4384,17 +4384,17 @@ test_copy_group_links(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the group for copy */ 
+    /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_LINK)) < 0) TEST_ERROR;
 
-    /* open the destination group */ 
+    /* open the destination group */
     if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR;
 
     /* Check if the groups are equal */
@@ -4438,7 +4438,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, September 30, 2005 
+ *              Tuesday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4488,7 +4488,7 @@ test_copy_soft_link(hid_t fapl)
     /* add a dataset to the group */
     if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR;
     if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
-    
+
     /* close dataspace */
     if ( H5Sclose(sid) < 0) TEST_ERROR;
 
@@ -4510,17 +4510,17 @@ test_copy_soft_link(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset through the soft link for copy */ 
+    /* open the dataset through the soft link for copy */
     if ( (did = H5Dopen(fid_src, NAME_LINK_SOFT)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -4564,7 +4564,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005 
+ *              Tuesday, November  8, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4604,7 +4604,7 @@ test_copy_exist(hid_t fapl)
 
     /* create 2D dataspace */
     if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
-  
+
     /* create 2D int dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -4629,7 +4629,7 @@ test_copy_exist(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
@@ -4666,13 +4666,13 @@ error:
  * Function:    test_copy_path
  *
  * Purpose:     Create a simple dataset in SRC file and copy it to DST file
- *              using a full path name 
+ *              using a full path name
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005 
+ *              Tuesday, November  8, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4713,7 +4713,7 @@ test_copy_path(hid_t fapl)
 
     /* create 2D dataspace */
     if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
-  
+
     /* create 2D int dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -4738,7 +4738,7 @@ test_copy_path(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
@@ -4761,10 +4761,10 @@ test_copy_path(hid_t fapl)
     /* copy the dataset from SRC to DST, using full path */
     if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SUB_SUB)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -4807,7 +4807,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Tuesday, November  8, 2005 
+ *              Tuesday, November  8, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4839,7 +4839,7 @@ test_copy_same_file_named_datatype(hid_t fapl)
     /* copy the datatype from SRC to DST */
     if ( H5Gcopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the copied datatype */ 
+    /* open the copied datatype */
     if ( (tid2 = H5Topen(fid, NAME_DATATYPE_SIMPLE2)) < 0) TEST_ERROR;
 
     /* Compare the datatypes */
@@ -4876,7 +4876,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005 
+ *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4957,7 +4957,7 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     /* create and set compact plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR;
 
@@ -4982,17 +4982,17 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5122,17 +5122,17 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5245,7 +5245,7 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
      /* create and set chunk plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR;
- 
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR;
 
@@ -5270,17 +5270,17 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5395,7 +5395,7 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR;
     if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR;
- 
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR;
 
@@ -5420,17 +5420,17 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5480,14 +5480,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact_vl_vl
  *
- * Purpose:     Create a compact dataset w/nested VLEN datatype 
+ * Purpose:     Create a compact dataset w/nested VLEN datatype
  *              in SRC file and copy it to DST file
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Saturday, February 11, 2006 
+ * Programmer:  Peter Cao
+ *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5554,7 +5554,7 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     /* create and set compact plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR;
 
@@ -5576,17 +5576,17 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5635,14 +5635,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_contig_vl_vl
  *
- * Purpose:     Create a compact dataset w/nested VLEN datatype 
+ * Purpose:     Create a compact dataset w/nested VLEN datatype
  *              in SRC file and copy it to DST file
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *              Saturday, February 11, 2006 
+ * Programmer:  Peter Cao
+ *              Saturday, February 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5708,7 +5708,7 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
 
     /* create and set compact plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
-  
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
@@ -5730,17 +5730,17 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -5863,7 +5863,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
      /* create and set chunk plist */
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR;
- 
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR;
 
@@ -5885,16 +5885,16 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -6020,7 +6020,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR;
     if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR;
- 
+
     /* create dataset at SRC file */
     if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR;
 
@@ -6042,16 +6042,16 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
+
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
     if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
 
-    /* open the dataset for copy */ 
+    /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
-    /* open the destination dataset */ 
+    /* open the destination dataset */
     if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
 
     /* Check if the datasets are equal */
@@ -6107,8 +6107,8 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Peter Cao 
- *               March 11, 2006 
+ * Programmer:  Peter Cao
+ *               March 11, 2006
  *
  * Modifications:
  *
@@ -6221,8 +6221,8 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
 
     /* create destination file */
     if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
-   
-    /* Create an uncopied object in destination file so that addresses in source and destination 
+
+    /* Create an uncopied object in destination file so that addresses in source and destination
        files aren't the same */
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
@@ -6240,10 +6240,10 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     if ((flag & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
         if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, "/new_g0/new_g00", pid) < 0) TEST_ERROR;
 
-        /* open the group for copy */ 
+        /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-        /* open the destination group */ 
+        /* open the destination group */
         if ( (gid2 = H5Gopen(fid_dst, "/new_g0/new_g00")) < 0) TEST_ERROR;
 
     } else if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
@@ -6253,27 +6253,27 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
         /* (So group comparison works properly) */
         if ( H5Gunlink(fid_src, NAME_DATASET_SUB_SUB) < 0) TEST_ERROR;
 
-        /* open the group for copy */ 
+        /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_LINK2)) < 0) TEST_ERROR;
 
-        /* open the destination group */ 
+        /* open the destination group */
         if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR;
 
     } else if(flag & H5G_COPY_WITHOUT_ATTR_FLAG) {
         if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
 
-        /* open the group for copy */ 
+        /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-        /* open the destination group */ 
+        /* open the destination group */
         if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
     } else if(flag & H5G_COPY_SHALLOW_HIERARCHY_FLAG) {
         if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
 
-        /* open the group for copy */ 
+        /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
-        /* open the destination group */ 
+        /* open the destination group */
         if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
 
         /* Set the copy depth */
@@ -6320,20 +6320,20 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:   	main 
+ * Function:   	main
  *
- * Purpose:     Test H5Gcopy() 
+ * Purpose:     Test H5Gcopy()
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao 
- *              Friday, September 30, 2005 
+ * Programmer:  Peter Cao
+ *              Friday, September 30, 2005
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-int 
+int
 main(void)
 {
     int         nerrors = 0;
@@ -6378,18 +6378,18 @@ main(void)
     nerrors += test_copy_group(fapl);
     nerrors += test_copy_group_deep(fapl);
     nerrors += test_copy_group_loop(fapl);
-    nerrors += test_copy_group_wide_loop(fapl);  
-    nerrors += test_copy_group_links(fapl);  
-    nerrors += test_copy_soft_link(fapl);  
-    nerrors += test_copy_exist(fapl);  
-    nerrors += test_copy_path(fapl);  
-    nerrors += test_copy_same_file_named_datatype(fapl);  
+    nerrors += test_copy_group_wide_loop(fapl);
+    nerrors += test_copy_group_links(fapl);
+    nerrors += test_copy_soft_link(fapl);
+    nerrors += test_copy_exist(fapl);
+    nerrors += test_copy_path(fapl);
+    nerrors += test_copy_same_file_named_datatype(fapl);
     nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, "H5Gcopy(): without attributes");
     nerrors += test_copy_option(fapl, H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG, "H5Gcopy(): with missing groups");
     nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, "H5Gcopy(): expand soft link");
     nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, "H5Gcopy(): shallow group copy");
 
-/* TODO: not implemented 
+/* TODO: not implemented
     nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, "H5Gcopy: expand external link");
     nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, "H5Gcopy: expand object reference");
 */
@@ -6397,7 +6397,7 @@ main(void)
 /* TODO: Add more tests for copying objects in same file */
 
 
-/* TODO: Add more tests for copying objects in mounted files 
+/* TODO: Add more tests for copying objects in mounted files
     nerrors += test_copy_mount(fapl);
 */
 

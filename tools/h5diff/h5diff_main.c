@@ -58,19 +58,19 @@ int main(int argc, const char *argv[])
  const char *objname2  = NULL;
  hsize_t    nfound=0;
  diff_opt_t options;
- 
+
  parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
- 
+
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
- 
+
  print_results(&options);
- 
+
 /*-------------------------------------------------------------------------
  * exit code
  *   >0 if differences, 0 if no differences, <0 if error
  *-------------------------------------------------------------------------
  */
- 
+
  ret= (nfound==0 ? 0 : 1 );
  if (options.err_stat)
   ret=-1;

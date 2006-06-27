@@ -985,11 +985,11 @@ herr_t H5LTget_dataset_info( hid_t loc_id,
   /* get the dataspace handle */
   if ( (sid = H5Dget_space( did )) < 0 )
    goto out;
-  
+
   /* get dimensions */
   if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
    goto out;
-  
+
   /* terminate access to the dataspace */
   if ( H5Sclose( sid ) < 0 )
    goto out;
@@ -1756,7 +1756,7 @@ static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
 /*-------------------------------------------------------------------------
  * Function: H5LTfind_attribute
  *
- * Purpose: Inquires if an attribute named attr_name exists attached to 
+ * Purpose: Inquires if an attribute named attr_name exists attached to
  *          the object loc_id.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -2039,7 +2039,7 @@ out:
 hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
 {
  extern int yyparse(void);
- hid_t   type_id; 
+ hid_t   type_id;
 
  if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
      goto out;
@@ -2048,7 +2048,7 @@ hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
      fprintf(stderr, "only DDL is supported for now.\n");
      goto out;
  }
- 
+
  input_len = strlen(text);
  myinput = strdup(text);
 
@@ -2118,17 +2118,17 @@ print_enum(hid_t type, char* str, int indt)
     size_t           dst_size;      /*destination value type size    */
     int              i;
     herr_t           ret = SUCCEED;
-    
+
     if((nmembs = H5Tget_nmembers(type))==0)
         goto out;
     assert(nmembs>0);
     if((super = H5Tget_super(type))<0)
         goto out;
-   
+
     /* Use buffer of INT or UNSIGNED INT to print enum values because
      * we don't expect these values to be so big that INT or UNSIGNED
      * INT can't hold.
-     */ 
+     */
     if (H5T_SGN_NONE == H5Tget_sign(super)) {
         native = H5T_NATIVE_UINT;
     } else {
@@ -2137,7 +2137,7 @@ print_enum(hid_t type, char* str, int indt)
 
     super_size = H5Tget_size(super);
     dst_size = H5Tget_size(native);
-    
+
     /* Get the names and raw values of all members */
     name = (char**)calloc((size_t)nmembs, sizeof(char *));
     value = (unsigned char*)calloc((size_t)nmembs, MAX(dst_size, super_size));
@@ -2154,7 +2154,7 @@ print_enum(hid_t type, char* str, int indt)
         if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT)<0)
             goto out;
     }
-    
+
     /*
      * Sort members by increasing value
      *    ***not implemented yet***
@@ -2167,7 +2167,7 @@ print_enum(hid_t type, char* str, int indt)
         strcat(str, tmp_str);
  sprintf(tmp_str, "%*s   ", MAX(0, 16 - nchars), "");
         strcat(str, tmp_str);
-        
+
  if (H5T_SGN_NONE == H5Tget_sign(native)) {
      /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
       *strangely, unless use another pointer "copy".*/
@@ -2226,7 +2226,7 @@ herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *
     size_t      str_len = INCREMENT;
     char        *text_str;
     herr_t      ret = -1;
-   
+
     if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
         goto out;
 
@@ -2265,7 +2265,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *slen, 
+herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *slen,
                             hbool_t no_user_buf)
 {
     H5T_class_t tcls;
@@ -2282,15 +2282,15 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
            *dt_str = tmp;
         }
     }
-   
+
     if(lang != H5LT_DDL) {
         sprintf(*dt_str, "only DDL is supported for now");
         goto out;
     }
-    
+
     if((tcls = H5Tget_class(dtype))<0)
         goto out;
-    
+
     switch (tcls) {
         case H5T_INTEGER:
             if (H5Tequal(dtype, H5T_STD_I8BE)) {
@@ -2451,7 +2451,7 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
             if (H5Tequal(tmp_type, str_type)) {
                 strcat(*dt_str, "CTYPE H5T_C_S1;\n");
                 goto next;
-            } 
+            }
 
             /* Change the endianness and see if they're equal. */
             if((order = H5Tget_order(tmp_type))<0)
@@ -2463,7 +2463,7 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
                 if(H5Tset_order(str_type, H5T_ORDER_BE)<0)
                     goto out;
             }
-            
+
             if (H5Tequal(tmp_type, str_type)) {
                 strcat(*dt_str, "H5T_C_S1;\n");
                 goto next;
@@ -2481,7 +2481,7 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
                 goto out;
             if(H5Tset_strpad(str_type, str_pad)<0)
                 goto out;
-            
+
             /* Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
                 strcat(*dt_str, "CTYPE H5T_FORTRAN_S1;\n");
@@ -2523,7 +2523,7 @@ next:
             /* Print lead-in */
             sprintf(*dt_str, "H5T_OPAQUE {\n");
             indent += COL;
-            
+
             indentation(indent + COL, *dt_str);
             sprintf(tmp_str, "OPQ_SIZE %lu;\n", (unsigned long)H5Tget_size(dtype));
             strcat(*dt_str, tmp_str);
@@ -2531,7 +2531,7 @@ next:
             indentation(indent + COL, *dt_str);
             sprintf(tmp_str, "OPQ_TAG \"%s\";\n", H5Tget_tag(dtype));
             strcat(*dt_str, tmp_str);
-            
+
             /* Print closing */
             indent -= COL;
             indentation(indent + COL, *dt_str);
@@ -2548,14 +2548,14 @@ next:
             sprintf(*dt_str, "H5T_ENUM {\n");
             indent += COL;
             indentation(indent + COL, *dt_str);
-            
+
             if((super = H5Tget_super(dtype))<0)
                 goto out;
             if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
-                goto out;            
+                goto out;
             strcat(*dt_str, stmp);
             free(stmp);
             strcat(*dt_str, ";\n");
@@ -2588,7 +2588,7 @@ next:
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
-                goto out;            
+                goto out;
             strcat(*dt_str, stmp);
             free(stmp);
             strcat(*dt_str, "\n");
@@ -2633,7 +2633,7 @@ next:
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
             if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
-                goto out;            
+                goto out;
             strcat(*dt_str, stmp);
             free(stmp);
             strcat(*dt_str, "\n");
@@ -2655,7 +2655,7 @@ next:
             size_t      mlen;
             char*       mtmp;
             int         nmembs;
-           
+
             if((nmembs = H5Tget_nmembers(dtype))<0)
                 goto out;
 
@@ -2679,7 +2679,7 @@ next:
                     goto out;
                 mtmp = (char*)calloc(mlen, sizeof(char));
                 if(H5LTdtype_to_text(mtype, mtmp, lang, &mlen)<0)
-                    goto out;            
+                    goto out;
                 strcat(*dt_str, mtmp);
                 free(mtmp);
 

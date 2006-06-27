@@ -196,7 +196,7 @@ H5D_init_interface(void)
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode             = H5D_XFER_IO_XFER_MODE_DEF;
-    H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF; 
+    H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
     unsigned def_mpio_chunk_opt_num               = H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF;
     unsigned def_mpio_chunk_opt_ratio             = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
 #endif /* H5_HAVE_PARALLEL */

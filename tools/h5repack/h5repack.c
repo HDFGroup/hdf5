@@ -65,7 +65,7 @@ static void aux_initglb_filter(pack_opt_t *options)
 int h5repack(const char* infile,
              const char* outfile,
              pack_opt_t *options,
-             int argc, 
+             int argc,
              const char *argv[])
 {
  /* check input */

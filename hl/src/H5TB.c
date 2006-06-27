@@ -3686,40 +3686,40 @@ herr_t H5TB_common_append_records( hid_t dataset_id,
  hid_t    mem_space_id = H5I_BADID;
  hsize_t  dims[1];
  hsize_t  mem_dims[1];
- 
+
  /* Extend the dataset */
  dims[0] = nrecords + orig_table_size;
  if ( H5Dextend ( dataset_id, dims ) < 0 )
   goto out;
- 
+
  /* Create a simple memory data space */
  mem_dims[0]=nrecords;
  if ( (mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0 )
   goto out;
- 
+
  /* Get a copy of the new file data space for writing */
  if ( (space_id = H5Dget_space( dataset_id )) < 0 )
   goto out;
- 
+
  /* Define a hyperslab in the dataset */
  offset[0] = orig_table_size;
  count[0] = nrecords;
  if ( H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL)<0)
   goto out;
- 
+
  /* Write the records */
  if ( H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data )<0)
   goto out;
- 
+
  /* Terminate access to the dataspace */
  if ( H5Sclose( mem_space_id ) < 0 )
   goto out;
- 
+
  if ( H5Sclose( space_id ) < 0 )
   goto out;
- 
+
  return 0;
- 
+
 out:
  H5E_BEGIN_TRY
   H5Sclose(mem_space_id);
@@ -3760,38 +3760,38 @@ herr_t H5TB_common_read_records( hid_t dataset_id,
  hid_t    space_id = H5I_BADID;
  hid_t    mem_space_id = H5I_BADID;
  hsize_t  mem_size[1];
- 
+
  /* Make sure the read request is in bounds */
  if ( start + nrecords > table_size )
   goto out;
- 
+
  /* Get the dataspace handle */
  if ( (space_id = H5Dget_space( dataset_id )) < 0 )
   goto out;
- 
+
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start;
  count[0]  = nrecords;
  if ( H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
   goto out;
- 
+
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
  if ((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
   goto out;
  if ((H5Dread( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data))<0)
   goto out;
- 
+
  /* Terminate access to the memory dataspace */
  if ( H5Sclose( mem_space_id ) < 0 )
   goto out;
- 
+
  /* Terminate access to the dataspace */
  if ( H5Sclose( space_id ) < 0 )
   goto out;
- 
+
  return 0;
- 
+
 out:
  H5E_BEGIN_TRY
   H5Sclose(space_id);

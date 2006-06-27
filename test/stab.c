@@ -290,7 +290,7 @@ lifecycle(hid_t fapl)
     unsigned	nmsgs;		        /* Number of messages in group's header */
     H5G_stat_t  obj_stat;               /* Object info */
     char        objname[NAME_BUF_SIZE];         /* Object name */
-    char	filename[NAME_BUF_SIZE]; 
+    char	filename[NAME_BUF_SIZE];
     off_t       empty_size;             /* Size of an empty file */
     unsigned    u;                      /* Local index variable */
     off_t       file_size;              /* Size of each file created */
@@ -505,7 +505,7 @@ long_compact(hid_t fapl)
     hid_t	gid = (-1);             /* Group ID */
     hid_t	gid2 = (-1);            /* Group ID */
     char        *objname;               /* Object name */
-    char	filename[NAME_BUF_SIZE]; 
+    char	filename[NAME_BUF_SIZE];
     off_t       empty_size;             /* Size of an empty file */
     off_t       file_size;              /* Size of each file created */
 
@@ -750,7 +750,7 @@ no_compact(hid_t fapl)
     hid_t	gid2 = (-1);            /* Datatype ID */
     hid_t       gcpl = (-1);            /* Group creation property list ID */
     char        objname[NAME_BUF_SIZE];         /* Object name */
-    char	filename[NAME_BUF_SIZE]; 
+    char	filename[NAME_BUF_SIZE];
     off_t       empty_size;             /* Size of an empty file */
     off_t       file_size;              /* Size of each file created */
     size_t      lheap_size_hint;        /* Local heap size */
@@ -875,7 +875,7 @@ gcpl_on_root(hid_t fapl)
     hid_t       gcpl = (-1);            /* Group creation property list ID */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
-    char	filename[NAME_BUF_SIZE]; 
+    char	filename[NAME_BUF_SIZE];
 
     TESTING("setting root group creation properties");
 

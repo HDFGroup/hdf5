@@ -36,7 +36,7 @@
  */
 int check_objects(const char* fname,
                   pack_opt_t *options,
-                  int argc, 
+                  int argc,
                   const char *argv[])
 {
  hid_t         fid;

@@ -15,7 +15,7 @@
 ## Run automake to generate a Makefile.in from this file.
 #
 # HDF5-C++ Makefile(.in)
-# 
+#
 
 include $(top_srcdir)/config/commence.am
 
@@ -42,10 +42,10 @@ testhdf5_SOURCES=testhdf5.cpp tattr.cpp tfile.cpp th5s.cpp h5cpputil.cpp
 # Tell conclude.am that these are C++ tests.
 HDF_CXX=yes
 
-# Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that 
+# Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
 # holds *.ii files, which are template entity instantiations.
 # This entire directory should be cleaned.
-mostlyclean-local: 
+mostlyclean-local:
 	@if test -d ii_files; then                                       \
 	  $(RM) -rf ii_files;                                           \
 	fi

@@ -536,9 +536,9 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
 	*
 	*      Pedro Vicente Nunes, THG, 2005-10-19
  *        pass to the prefix in h5tools_simple_prefix the total position
-	*								instead of the current stripmine position i; this is necessary 
-	*								to print the array indices 
-	*        new field sm_pos in h5tools_context_t, the current stripmine element position 
+	*								instead of the current stripmine position i; this is necessary
+	*								to print the array indices
+	*        new field sm_pos in h5tools_context_t, the current stripmine element position
  *-------------------------------------------------------------------------
  */
 void
@@ -682,7 +682,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                     multiline++;
 
                   /* pass to the prefix in h5tools_simple_prefix the total position
-		     instead of the current stripmine position i; this is necessary 
+		     instead of the current stripmine position i; this is necessary
 		     to print the array indices */
                 curr_pos = ctx->sm_pos + i;
 

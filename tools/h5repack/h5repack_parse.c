@@ -189,12 +189,12 @@ obj_list_t* parse_filter(const char *str,
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_SCALEOFFSET
 	* scaleoffset has the format SOFF=<scale_factor,scale_type>
-	* scale_type can be 
+	* scale_type can be
 	*   integer datatype, H5Z_SO_INT (IN)
 	*   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
 	*   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
 	* for integer datatypes, scale_factor denotes Minimum Bits
-	* for float datatypes, scale_factor denotes decimal scale factor 
+	* for float datatypes, scale_factor denotes decimal scale factor
  *  examples
 	*  SOFF=31,IN
 	*  SOFF=3,DF

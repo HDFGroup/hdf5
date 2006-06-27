@@ -100,7 +100,7 @@ static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
 static int        display_dtype = FALSE;
- 
+
 static const char *s_opts ="FfhGgDdTV";
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
@@ -158,12 +158,12 @@ static struct long_options l_opts[] = {
     { NULL, 0, '\0' }
 };
 
-static void 
+static void
 leave(int ret)
 {
    h5tools_close();
-   exit(ret); 
-}  
+   exit(ret);
+}
 
 
 static void                                                                                                                    usage(const char *prog)
@@ -176,9 +176,9 @@ static void                                                                     
      fprintf(stdout, "\n");
      fprintf(stdout, "Please send your comments and questions to help@hdfgroup.org\n");
      fprintf(stdout, "\n");
-     fprintf(stdout, "Usage: %s [OPTIONS] file\n", prog); 
+     fprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
      fprintf(stdout, "\n");
-     fprintf(stdout, "      OPTIONS\n"); 
+     fprintf(stdout, "      OPTIONS\n");
      fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
      fprintf(stdout, "     -V, --version         Print version number and exit\n");
      fprintf(stdout, "     -f, --file            Print file information\n");
@@ -190,7 +190,7 @@ static void                                                                     
      fprintf(stdout, "     -T, --dtypemetadata   Print datatype metadata\n");
      fprintf(stdout, "\n");
 }
- 
+
 
 /*-------------------------------------------------------------------------
  * Function: ceil_log10
@@ -216,7 +216,7 @@ ceil_log10(unsigned long x)
         pow10 *= 10;
         ret++;
     } /* end while */
-    
+
     return(ret);
 }
 
@@ -573,7 +573,7 @@ printf("walk: fullname = %s\n", fullname);
 
                 /* Track the layout type for dataset */
                 (iter->dset_layouts[lout])++;
-                
+
                 num_ext = H5Pget_external_count(dcpl);
                 assert (num_ext >= 0);
 
@@ -581,19 +581,19 @@ printf("walk: fullname = %s\n", fullname);
 
                 /* Track different filters */
 
-                if ((nfltr=H5Pget_nfilters(dcpl)) >= 0) { 
+                if ((nfltr=H5Pget_nfilters(dcpl)) >= 0) {
 
                 if (nfltr == 0) iter->dset_comptype[0]++;
                    for (u=0; u < nfltr; u++) {
                      fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0, NULL);
-                     if (fltr < (H5_NFILTERS_IMPL-1)) 
+                     if (fltr < (H5_NFILTERS_IMPL-1))
                         iter->dset_comptype[fltr]++;
                      else
                         iter->dset_comptype[H5_NFILTERS_IMPL-1]++; /*other filters*/
                    }
 
                 } /*endif nfltr */
-                
+
                 ret = H5Pclose(dcpl);
                 assert(ret >= 0);
 
@@ -670,7 +670,7 @@ parse_start:
             print_version(progname);
             leave(EXIT_SUCCESS);
             break;
-	
+
         default:
             usage(progname);
             leave(EXIT_FAILURE);
@@ -889,10 +889,10 @@ main(int argc, const char *argv[])
                total += iter.dset_type_info[u].count;
            } /* end for */
            printf("\tTotal dataset datatype count: %lu\n", total);
-        } 
+        }
        } /* end if */
     } /* display dset */
-    
+
     H5Eset_auto_stack(H5E_DEFAULT, func, edata);
 
     leave(d_status);

@@ -32,13 +32,13 @@
 
 int main( void )
 {
- typedef struct Particle 
+ typedef struct Particle
  {
   char   name[16];
   int    lati;
   int    longi;
   float  pressure;
-  double temperature; 
+  double temperature;
  } Particle;
 
  Particle  dst_buf[ NRECORDS + NRECORDS_INS ];
@@ -57,7 +57,7 @@ int main( void )
                                sizeof( dst_buf[0].temperature)};
 
  /* Define an array of Particles */
- Particle  p_data[NRECORDS] = { 
+ Particle  p_data[NRECORDS] = {
  {"zero",0,0, 0.0f, 0.0},
  {"one",10,10, 1.0f, 10.0},
  {"two",  20,20, 2.0f, 20.0},
@@ -69,15 +69,15 @@ int main( void )
   };
 
  /* Define field information */
- const char *field_names[NFIELDS]  = 
+ const char *field_names[NFIELDS]  =
  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
  hid_t      field_type[NFIELDS];
  hid_t      string_type;
  hid_t      file_id;
  hsize_t    chunk_size = 10;
  int        compress  = 0;
- Particle   fill_data[1] = 
- { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */ 
+ Particle   fill_data[1] =
+ { {"no data",-1,-1, -99.0f, -99.0} };   /* Fill value particle */
  hsize_t    start1;                      /* Record to start reading from 1st table */
  hsize_t    nrecords;                    /* Number of records to insert */
  hsize_t    start2;                      /* Record to start writing in 2nd table */
@@ -85,7 +85,7 @@ int main( void )
  int        i;
  hsize_t    nfields_out;
  hsize_t    nrecords_out;
- 
+
  /* Initialize the field field_type */
  string_type = H5Tcopy( H5T_C_S1 );
  H5Tset_size( string_type, 16 );
@@ -94,24 +94,24 @@ int main( void )
  field_type[2] = H5T_NATIVE_INT;
  field_type[3] = H5T_NATIVE_FLOAT;
  field_type[4] = H5T_NATIVE_DOUBLE;
- 
+
  /* Create a new file using default properties. */
  file_id = H5Fcreate( "ex_table_09.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-  
+
  /* Make 2 tables: TABLE2_NAME is empty  */
- status=H5TBmake_table( "Table Title",file_id,TABLE1_NAME,NFIELDS,NRECORDS, 
-                         dst_size,field_names, dst_offset, field_type, 
+ status=H5TBmake_table( "Table Title",file_id,TABLE1_NAME,NFIELDS,NRECORDS,
+                         dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, p_data  );
- 
- status=H5TBmake_table( "Table Title",file_id,TABLE2_NAME,NFIELDS,NRECORDS, 
-                         dst_size,field_names, dst_offset, field_type, 
+
+ status=H5TBmake_table( "Table Title",file_id,TABLE2_NAME,NFIELDS,NRECORDS,
+                         dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, NULL  );
- 
- 
+
+
  /* Add 2 records from TABLE1_NAME to TABLE2_NAME  */
- start1    = 3;      
- nrecords  = NRECORDS_INS; 
- start2    = 6;      
+ start1    = 3;
+ nrecords  = NRECORDS_INS;
+ start2    = 6;
  status=H5TBadd_records_from( file_id, TABLE1_NAME, start1, nrecords, TABLE2_NAME, start2 );
 
  /* read TABLE2_NAME: it should have 2 more records now */
@@ -122,10 +122,10 @@ int main( void )
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);
-  
+
  /* print it by rows */
  for (i=0; i<nrecords_out; i++) {
-  printf ("%-5s %-5d %-5d %-5f %-5f", 
+  printf ("%-5s %-5d %-5d %-5f %-5f",
    dst_buf[i].name,
    dst_buf[i].lati,
    dst_buf[i].longi,
@@ -133,10 +133,10 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
- 
+
  /* Close the file. */
  H5Fclose( file_id );
- 
+
  return 0;
 }
 

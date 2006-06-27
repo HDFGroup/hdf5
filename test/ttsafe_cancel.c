@@ -148,7 +148,7 @@ void *tts_cancel_thread(void UNUSED *arg)
     cleanup_structure->datatype = datatype;
     cleanup_structure->dataspace = dataspace;
     pthread_cleanup_push(cancellation_cleanup, cleanup_structure);
-	
+
 
     datavalue = 1;
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
@@ -177,7 +177,7 @@ void *tts_cancel_thread(void UNUSED *arg)
      * execute the cleanup routine.
      */
     pthread_cleanup_pop(0);
-	
+
     return NULL;
 }
 
