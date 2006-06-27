@@ -36,9 +36,9 @@ static herr_t H5TB_attach_attributes(const char *table_title,
 
 static hid_t H5TB_create_type(hid_t loc_id,
                               const char *dset_name,
-                              size_t dst_size,
-                              const size_t *dst_offset,
-                              const size_t *dst_sizes,
+                              size_t type_size,
+                              const size_t *field_offset,
+                              const size_t *field_sizes,
                               hid_t ftype_id);
 
 /*-------------------------------------------------------------------------
@@ -295,9 +295,9 @@ out:
 herr_t H5TBappend_records( hid_t loc_id,
                            const char *dset_name,
                            hsize_t nrecords,
-                           size_t dst_size,
-                           const size_t *dst_offset,
-                           const size_t *dst_sizes,
+                           size_t type_size,
+                           const size_t *field_offset,
+                           const size_t *field_sizes,
                            const void *data )
 {
  hid_t    did;
@@ -320,7 +320,7 @@ herr_t H5TBappend_records( hid_t loc_id,
  if ( (tid = H5Dget_type( did )) < 0 )
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
   goto out;
 
  /* Append the records */
@@ -379,9 +379,9 @@ herr_t H5TBwrite_records( hid_t loc_id,
                           const char *dset_name,
                           hsize_t start,
                           hsize_t nrecords,
-                          size_t dst_size,
-                          const size_t *dst_offset,
-                          const size_t *dst_sizes,
+                          size_t type_size,
+                          const size_t *field_offset,
+                          const size_t *field_sizes,
                           const void *data )
 {
 
@@ -403,7 +403,7 @@ herr_t H5TBwrite_records( hid_t loc_id,
  if ( (tid = H5Dget_type( did )) < 0 )
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
   goto out;
 
  /* Get the dataspace handle */
@@ -492,7 +492,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
                               hsize_t nrecords,
                               size_t type_size,
                               const size_t *field_offset,
-                              const size_t *dst_sizes,
+                              const size_t *field_sizes,
                               const void *data )
 {
 
@@ -554,9 +554,9 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
    size_native=H5Tget_size(nmtype_id);
 
    /* Adjust, if necessary */
-   if (dst_sizes[j]!=size_native)
+   if (field_sizes[j]!=size_native)
    {
-    if (H5Tset_size(nmtype_id, dst_sizes[j])<0)
+    if (H5Tset_size(nmtype_id, field_sizes[j])<0)
      goto out;
    }
 
@@ -662,7 +662,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
                                hsize_t nrecords,
                                size_t type_size,
                                const size_t *field_offset,
-                               const size_t *dst_sizes,
+                               const size_t *field_sizes,
                                const void *data )
 {
 
@@ -672,7 +672,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
  hid_t    member_type_id;
  hid_t    nmtype_id;
  hsize_t  count[1];
- hsize_t offset[1];
+ hsize_t  offset[1];
  hid_t    sid=-1;
  char     *member_name;
  hsize_t  i, j;
@@ -693,14 +693,9 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
  if ( (tid = H5Dget_type( did )) < 0 )
   goto out;
 
- /* Get the number of fields */
- if ( H5Tget_nmembers( tid ) < 0 )
-  goto out;
-
  /* Create a write id */
  if ( ( write_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0 )
   goto out;
-
 
  /* Iterate tru the members */
  for ( i = 0; i < nfields; i++)
@@ -721,9 +716,9 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
 
   size_native=H5Tget_size(nmtype_id);
 
-  if (dst_sizes[i]!=size_native)
+  if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id, dst_sizes[i])<0)
+   if (H5Tset_size(nmtype_id, field_sizes[i])<0)
     goto out;
   }
 
@@ -823,9 +818,9 @@ out:
 
 herr_t H5TBread_table( hid_t loc_id,
                        const char *dset_name,
-                       size_t dst_size,
-                       const size_t *dst_offset,
-                       const size_t *dst_sizes,
+                       size_t type_size,
+                       const size_t *field_offset,
+                       const size_t *field_sizes,
                        void *dst_buf )
 {
  hid_t    did;
@@ -850,7 +845,7 @@ herr_t H5TBread_table( hid_t loc_id,
  if ((ftype_id=H5Dget_type (did))<0)
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,ftype_id))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id))<0)
   goto out;
 
  /* read */
@@ -905,9 +900,9 @@ herr_t H5TBread_records( hid_t loc_id,
                          const char *dset_name,
                          hsize_t start,
                          hsize_t nrecords,
-                         size_t dst_size,
-                         const size_t *dst_offset,
-                         const size_t *dst_sizes,
+                         size_t type_size,
+                         const size_t *field_offset,
+                         const size_t *field_sizes,
                          void *data )
 {
 
@@ -935,7 +930,7 @@ herr_t H5TBread_records( hid_t loc_id,
  if ( (ftype_id = H5Dget_type( did )) < 0 )
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,ftype_id))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id))<0)
   goto out;
 
  /* Read the records */
@@ -1024,7 +1019,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
                              hsize_t nrecords,
                              size_t type_size,
                              const size_t *field_offset,
-                             const size_t *dst_sizes,
+                             const size_t *field_sizes,
                              void *data )
 {
 
@@ -1077,9 +1072,9 @@ herr_t H5TBread_fields_name( hid_t loc_id,
 
    size_native=H5Tget_size(nmtype_id);
 
-   if (dst_sizes[j]!=size_native)
+   if (field_sizes[j]!=size_native)
    {
-    if (H5Tset_size(nmtype_id, dst_sizes[j])<0)
+    if (H5Tset_size(nmtype_id, field_sizes[j])<0)
      goto out;
    }
    /* the field in the file is found by its name */
@@ -1180,7 +1175,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
                               hsize_t nrecords,
                               size_t type_size,
                               const size_t *field_offset,
-                              const size_t *dst_sizes,
+                              const size_t *field_sizes,
                               void *data )
 {
 
@@ -1232,9 +1227,9 @@ herr_t H5TBread_fields_index( hid_t loc_id,
 
   size_native=H5Tget_size(nmtype_id);
 
-  if (dst_sizes[i]!=size_native)
+  if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id, dst_sizes[i])<0)
+   if (H5Tset_size(nmtype_id, field_sizes[i])<0)
     goto out;
   }
 
@@ -1509,9 +1504,9 @@ herr_t H5TBinsert_record( hid_t loc_id,
                           const char *dset_name,
                           hsize_t start,
                           hsize_t nrecords,
-                          size_t dst_size,
-                          const size_t *dst_offset,
-                          const size_t *dst_sizes,
+                          size_t type_size,
+                          const size_t *field_offset,
+                          const size_t *field_sizes,
                           void *data )
 {
 
@@ -1547,15 +1542,15 @@ herr_t H5TBinsert_record( hid_t loc_id,
   goto out;
 
  /* Create the memory data type. */
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
   goto out;
 
  read_nrecords = ntotal_records - start;
- tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, dst_size );
+ tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, type_size );
 
  /* Read the records after the inserted one(s) */
- if ( H5TBread_records( loc_id, dset_name, start, read_nrecords, dst_size, dst_offset,
-  dst_sizes, tmp_buf ) < 0 )
+ if ( H5TBread_records( loc_id, dset_name, start, read_nrecords, type_size, field_offset,
+  field_sizes, tmp_buf ) < 0 )
   return -1;
 
  /* Extend the dataset */
@@ -3566,9 +3561,9 @@ out:
 static
 hid_t H5TB_create_type(hid_t loc_id,
                        const char *dset_name,
-                       size_t dst_size,
-                       const size_t *dst_offset,
-                       const size_t *dst_sizes,
+                       size_t type_size,
+                       const size_t *field_offset,
+                       const size_t *field_sizes,
                        hid_t ftype_id)
 {
  hid_t    mem_type_id;
@@ -3599,7 +3594,7 @@ hid_t H5TB_create_type(hid_t loc_id,
   goto out;
 
  /* create the memory data type */
- if ((mem_type_id=H5Tcreate(H5T_COMPOUND,dst_size))<0)
+ if ((mem_type_id=H5Tcreate(H5T_COMPOUND,type_size))<0)
   goto out;
 
  /* get each field ID and adjust its size, if necessary */
@@ -3610,12 +3605,12 @@ hid_t H5TB_create_type(hid_t loc_id,
   if ((nmtype_id=H5Tget_native_type(mtype_id,H5T_DIR_DEFAULT))<0)
    goto out;
   size_native=H5Tget_size(nmtype_id);
-  if (dst_sizes[i]!=size_native)
+  if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id,dst_sizes[i])<0)
+   if (H5Tset_size(nmtype_id,field_sizes[i])<0)
     goto out;
   }
-  if (H5Tinsert(mem_type_id,fnames[i],dst_offset[i],nmtype_id) < 0 )
+  if (H5Tinsert(mem_type_id,fnames[i],field_offset[i],nmtype_id) < 0 )
    goto out;
   if (H5Tclose(mtype_id)<0)
    goto out;
