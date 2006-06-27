@@ -81,6 +81,7 @@ LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 LT_FCOMPILE=$(LT) --mode=compile $(F9X)
 LT_LINK_FLIB=$(LT) --mode=link $(F9X) -static $(DYNAMIC_DIRS)
 LT_LINK_FEXE=$(LT) --mode=link $(F9X) $(LT_STATIC_EXEC) $(DYNAMIC_DIRS)
+FORTMODFILES=h5a h5d h5e h5f h5g h5i h5p h5r h5s h5t h5z h5fortran_flags h5fortran_types h5global h5lib hdf5
 
 ## Optional variables. We must declare them here because Irix pmake
 ## complains if it sees a reference to a variable which has never been

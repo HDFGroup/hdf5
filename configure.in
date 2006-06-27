@@ -1585,7 +1585,7 @@ case "X-$enableval" in
     AC_MSG_RESULT([suppressed])
     ;;
 esac
-   
+ 
 dnl ----------------------------------------------------------------------
 dnl Turn on debugging by setting compiler flags
 dnl

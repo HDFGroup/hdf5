@@ -196,7 +196,9 @@ uninstall:
 	fi
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then	      \
 	  if test -f "$(libdir)/hdf5.$(F9XMODEXT)" -o -f "$(libdir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(libdir)/*.$(F9XMODEXT);			      \
+	    for f in $(FORTMODFILES); do                                    \
+	      set -x; $(RM) $(libdir)/$$f.$(F9XMODEXT);                     \
+	    done                                                            \
 	  fi;								      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
