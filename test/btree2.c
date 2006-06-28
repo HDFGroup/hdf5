@@ -5575,10 +5575,14 @@ main(void)
 {
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
+    int		ExpressMode;
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
+    ExpressMode = GetTestExpress();
+    if (ExpressMode > 1)
+	printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Test B-tree record insertion */
     /* Iteration, find & index routines tested in these routines as well */
@@ -5595,7 +5599,10 @@ main(void)
     nerrors += test_insert_level2_2internal_split(fapl);
     nerrors += test_insert_level2_3internal_redistrib(fapl);
     nerrors += test_insert_level2_3internal_split(fapl);
-    nerrors += test_insert_lots(fapl);
+    if (ExpressMode > 1)
+	printf("***Express test mode on.  test_insert_lots skipped\n");
+    else
+	nerrors += test_insert_lots(fapl);
 
     /* Test B-tree record removal */
     /* Querying the number of records routine also tested in these routines as well */
@@ -5619,7 +5626,10 @@ main(void)
     nerrors += test_remove_level2_2internal_merge_right(fapl);
     nerrors += test_remove_level2_3internal_merge(fapl);
     nerrors += test_remove_level2_collapse_right(fapl);
-    nerrors += test_remove_lots(fapl);
+    if (ExpressMode > 1)
+	printf("***Express test mode on.  test_remove_lots skipped\n");
+    else
+	nerrors += test_remove_lots(fapl);
 
     /* Test more complex B-tree queries */
     nerrors += test_find_neighbor(fapl);

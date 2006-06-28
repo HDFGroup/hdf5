@@ -13162,45 +13162,41 @@ curr_test = FHEAP_TEST_REOPEN;
          */
 #ifndef QAK
 	if (ExpressMode > 1)
-	    printf("***Express test mode on.  Some tests skipped\n");
+	    printf("***Express test mode on.  test_abs_start_5th_recursive_indirect is skipped\n");
 	else
-            nerrors += test_abs_start_5th_recursive_indirect(fapl, &cparam, &tparam);
+	    nerrors += test_abs_start_5th_recursive_indirect(fapl, &cparam, &tparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
 #ifndef QAK
         /* Skip blocks insertion */
-	if (ExpressMode > 1)
-	    printf("***Express test mode on.  Some tests skipped\n");
-	else {
-            nerrors += test_abs_skip_start_block(fapl, &cparam, &tparam);
-            nerrors += test_abs_skip_start_block_add_back(fapl, &cparam, &tparam);
-            nerrors += test_abs_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_skip_2nd_block(fapl, &cparam, &tparam);
-            nerrors += test_abs_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_one_partial_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_row_skip_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_direct_skip_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_skip_start_block(fapl, &cparam, &tparam);
+	nerrors += test_abs_skip_start_block_add_back(fapl, &cparam, &tparam);
+	nerrors += test_abs_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_skip_2nd_block(fapl, &cparam, &tparam);
+	nerrors += test_abs_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_one_partial_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_row_skip_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_direct_skip_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
 
-            /* Additional skipped block insertion tests */
-            nerrors += test_abs_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
-        } /* end else */
+	/* Additional skipped block insertion tests */
+	nerrors += test_abs_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
