@@ -323,6 +323,9 @@ TOOLTEST tvms.ddl tvms.h5
 # test for binary output
 TOOLTEST tbin.ddl -d integer -b out.bin test1.h5
 
+# test for binary output using a file type form -F DI
+TOOLTEST tbin2.ddl -d integer -b out2.bin -F DI test1.h5
+
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
 fi

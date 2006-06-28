@@ -353,7 +353,9 @@ struct subset_t {
 };
 
 extern FILE   *rawdatastream;       /* output stream for raw data */
-extern int bin_output;              /* binary output */
+extern int     bin_output;          /* binary output */
+extern int     bin_form;            /* binary form */
+
 
 
 /* Strings for output */

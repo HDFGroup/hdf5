@@ -21,6 +21,7 @@ usage: h5dump [OPTIONS] file
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -o F, --output=F     Output raw data into file F
      -b F                 Output raw data into file F in binary form (use with -d)
+     -F T                 Form of binary output (T can be NA for native type or DI for the disk file type)
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
      -x, --xml            Output in XML using Schema

@@ -52,13 +52,10 @@ const char  *progname = "h5dump";
 
 int                 d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
-static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-
+static table_t      *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 static size_t       prefix_len = 1024;
-static char  *prefix;
-
-static const char  *driver = NULL;      /* The driver to open the file with. */
-
+static char         *prefix;
+static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
 
 /* things to display or which are set via command line parameters */
@@ -351,7 +348,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:s:S:A";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -601,6 +598,7 @@ usage(const char *prog)
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -b F                 Output raw data into file F in binary form (use with -d)\n");
+    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type or DI for the disk file type)\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -2702,6 +2700,35 @@ set_output_file(const char *fname, int is_bin)
  return -1;
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	set_binary_form
+ *
+ * Purpose:	
+ *
+ * Return:	
+ *
+ * Programmer:	Pedro Vicente Nunes
+ *             June 28, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_binary_form(const char *form)
+{
+ int bform=-1;
+
+ if (strcmp(form,"NA")==0) /* native form */
+  bform = 0;
+ else if (strcmp(form,"DI")==0) /* file type form */
+  bform = 1;
+
+ return bform;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    handle_attributes
  *
@@ -3273,6 +3300,16 @@ parse_start:
             }
 
             bin_output = TRUE;
+            last_was_dset = FALSE;
+            break;
+
+      case 'F':
+            if ( ( bin_form = set_binary_form(opt_arg)) < 0){
+                /* failed to set binary form */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+
             last_was_dset = FALSE;
             break;
 
@@ -6050,4 +6087,6 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
     /* Append object name to prefix */
     HDstrcat(HDstrcat(*prfx, "/"), name);
 } /* end add_prefix */
+
+
 

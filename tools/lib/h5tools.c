@@ -47,6 +47,8 @@
 int         compound_data;
 FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it */
 int         bin_output;    /* binary output */
+int         bin_form;      /* binary form */
+
 
 /* local prototypes */
 static int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem);
@@ -1194,7 +1196,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _
     if (p_type < 0) {
         f_type = H5Dget_type(dset);
 
-        if (info->raw)
+        if (info->raw || bin_form == 1 )
             p_type = H5Tcopy(f_type);
         else
             p_type = h5tools_get_native_type(f_type);
