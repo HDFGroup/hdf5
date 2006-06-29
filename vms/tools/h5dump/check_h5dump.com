@@ -5,6 +5,7 @@ $ !
 $ !
 $ ! Define h5dump symbol
 $ !
+$! set message/notext/nofacility/noidentification/noseverity
 $ current_dir = F$DIRECTRY()
 $ len = F$LENGTH(current_dir)
 $ temp = F$EXTRACT(0, len-10, current_dir)
@@ -18,30 +19,255 @@ $ create h5dump.log
 $ !
 $ ! h5dump tests
 $ !
-$ CALL TOOLTEST  tgroup-1.ddl "tgroup.h5"
-$ ! CALL TOOLTEST  tgroup-x.ddl "tgroup.h5"
 $
 $
+$ 
+$ ! Test for displaying groups
+$ CALL TOOLTEST tgroup-1.ddl "tgroup.h5"
+$ ! Test for displaying the selected groups
+$ CALL TOOLTEST tgroup-2.ddl "--group=/g2 --group / -g /y tgroup.h5"
+$
+$ ! Test for displaying simple space datasets
+$ CALL TOOLTEST tdset-1.ddl "tdset.h5"
+$ ! Test for displaying selected datasets
+$ CALL TOOLTEST tdset-2.ddl "-"""H""" -d dset1 -d /dset2 --dataset=dset3 tdset.h5"
+$ ! Test for displaying attributes
+$ CALL TOOLTEST tattr-1.ddl "tattr.h5"
+$ ! Test for displaying the selected attributes of string type and scalar space
+$ CALL TOOLTEST tattr-2.ddl "-a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5"
+$ ! Test for header and error messages
+$ CALL TOOLTEST tattr-3.ddl "--header -a /attr2 --attribute=/attr tattr.h5"
+$ ! Test for displaying attributes in shared datatype (also in group and dataset)
+$ CALL TOOLTEST tnamed_dtype_attr.ddl "tnamed_dtype_attr.h5"
+$
+$ ! Test for displaying soft links
+$ CALL TOOLTEST tslink-1.ddl "tslink.h5"
+$ ! Test for displaying the selected link
+$ CALL TOOLTEST tslink-2.ddl "-l slink2 tslink.h5"
+$
+$ ! Tests for hard links
+$ CALL TOOLTEST thlink-1.ddl "thlink.h5"
+$ CALL TOOLTEST thlink-2.ddl "-d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5"
+$ CALL TOOLTEST thlink-3.ddl "-d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5"
+$ CALL TOOLTEST thlink-4.ddl "-g /g1 thlink.h5"
+$ CALL TOOLTEST thlink-5.ddl "-d /dset1 -g /g2 -d /g1/dset2 thlink.h5"
+$
+$ ! Tests for compound data types
+$ CALL TOOLTEST tcomp-1.ddl "tcompound.h5"
+$ ! test for named data types
+$ CALL TOOLTEST tcomp-2.ddl "-t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5"
+$ ! Test for unamed type 
+$ CALL TOOLTEST tcomp-3.ddl "-t /#6632:0 -g /group2 tcompound.h5"
+$ ! Test complicated compound datatype
+$ CALL TOOLTEST tcomp-4.ddl "tcompound_complex.h5"
+$
+$ ! Test for the nested compound type
+$ CALL TOOLTEST tnestcomp-1.ddl "tnestedcomp.h5"
+$
+$ ! test for options
+$ CALL TOOLTEST tall-1.ddl "tall.h5"
+$ CALL TOOLTEST tall-2.ddl "--header -g /g1/g1.1 -a attr2 tall.h5"
+$ CALL TOOLTEST tall-3.ddl "-d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5"
+$
+$ ! Test for loop detection
+$ CALL TOOLTEST tloop-1.ddl "tloop.h5"
+$
+$ ! Test for string 
+$ CALL TOOLTEST tstr-1.ddl "tstr.h5"
+$ CALL TOOLTEST tstr-2.ddl "tstr2.h5"
+$
+$ ! Test for file created by Lib SAF team
+$ CALL TOOLTEST tsaf.ddl "tsaf.h5"
+$
+$ ! Test for file with variable length data
+$ CALL TOOLTEST tvldtypes1.ddl "tvldtypes1.h5"
+$ CALL TOOLTEST tvldtypes2.ddl "tvldtypes2.h5"
+$ CALL TOOLTEST tvldtypes3.ddl "tvldtypes3.h5"
+$ CALL TOOLTEST tvldtypes4.ddl "tvldtypes4.h5"
+$ CALL TOOLTEST tvldtypes5.ddl "tvldtypes5.h5"
+$
+$ ! Test for file with variable length string data
+$ CALL TOOLTEST tvlstr.ddl "tvlstr.h5"
+$
+$ ! Test for files with array data
+$ CALL TOOLTEST tarray1.ddl "tarray1.h5"
+$ CALL TOOLTEST tarray2.ddl "tarray2.h5"
+$ CALL TOOLTEST tarray3.ddl "tarray3.h5"
+$ CALL TOOLTEST tarray4.ddl "tarray4.h5"
+$ CALL TOOLTEST tarray5.ddl "tarray5.h5"
+$ CALL TOOLTEST tarray6.ddl "tarray6.h5"
+$ CALL TOOLTEST tarray7.ddl "tarray7.h5"
+$
+$ ! Test for files with empty data
+$ CALL TOOLTEST tempty.ddl "tempty.h5"
+$
+$ ! Test for files with groups that have comments
+$ CALL TOOLTEST tgrp_comments.ddl "tgrp_comments.h5"
+$
+$ ! Test the --filedriver flag
+$ CALL TOOLTEST tsplit_file.ddl "--filedriver=split tsplit_file"
+$ CALL TOOLTEST tfamily.ddl "--filedriver=family tfamily%05d.h5"
+$ CALL TOOLTEST tmulti.ddl "--filedriver=multi tmulti"
+$
+$ ! Test for files with group names which reach > 1024 bytes in size
+$ CALL TOOLTEST tlarge_objname.ddl -w157 "tlarge_objname.h5"
+$
+$ ! Test '-A' to suppress data but print attr's
+$ CALL TOOLTEST tall-2A.ddl "-"""A""" tall.h5"
+$
+$ ! Test '-r' to print attributes in ASCII instead of decimal
+$ CALL TOOLTEST tall-2B.ddl "-"""A""" -r tall.h5"
+$
+$ ! Test Subsetting
+$ CALL TOOLTEST tall-4s.ddl "--dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5"
+$ CALL TOOLTEST tall-5s.ddl "-d """/g1/g1.1/dset1.1.2[0;2;10;]""" tall.h5"
+$ CALL TOOLTEST tdset-3s.ddl "-d """/dset1[1,1;;;]""" tdset.h5"
+$ CALL TOOLTEST tdset2-1s.ddl "-d """/dset1[;3,2;4,4;1,4]""" tdset2.h5"
+$
+$ ! Test printing characters in ASCII instead of decimal
+$ CALL TOOLTEST tchar1.ddl -r "tchar.h5"
+$
+$ ! Test failure handling
+$ ! Missing file name
+$ CALL TOOLTEST "tnofilename.ddl"
+$
+$ ! rev. 2004
+$
+$ ! Tests for super block
+$ CALL TOOLTEST tboot1.ddl "-"""H""" -"""B""" -d dset tfcontents1.h5"
+$ CALL TOOLTEST tboot2.ddl "-"""B""" tfcontents2.h5"
+$
+$ ! Test -p with a non existing dataset
+$ CALL TOOLTEST tperror.ddl "-p -d bogus tfcontents1.h5"
+$
+$ ! Test for file contents
+$ CALL TOOLTEST tcontents.ddl "-n tfcontents1.h5"
+$
+$ ! Tests for storage layout
+$ ! Compact
+$ CALL TOOLTEST tcompact.ddl "-"""H""" -p -d compact tfilters.h5"
+$ ! Contiguous
+$ CALL TOOLTEST tcontiguos.ddl "-"""H""" -p -d contiguous tfilters.h5"
+$ ! Chunked
+$ CALL TOOLTEST tchunked.ddl "-"""H""" -p -d chunked tfilters.h5"
+$ ! External 
+$ CALL TOOLTEST texternal.ddl "-"""H""" -p -d external tfilters.h5"
+$
+$ ! Fill values
+$ CALL TOOLTEST tfill.ddl "-p tfvalues.h5"
+$
+$ ! Several datatype, with references , print path
+$ CALL TOOLTEST treference.ddl  "tattr2.h5"
+$
+$ ! Escape/not escape non printable characters
+$ CALL TOOLTEST tstringe.ddl "-e tstr3.h5"
+$ CALL TOOLTEST tstring.ddl "tstr3.h5"
+$ ! Char data as ASCII with non escape
+$ CALL TOOLTEST tstring2.ddl "-r -d str4 tstr3.h5"
+$
+$ ! Array indices print/not print
+$ CALL TOOLTEST tindicesyes.ddl "taindices.h5"
+$ CALL TOOLTEST tindicesno.ddl "-y taindices.h5"
+$
+$
+$ ! tests for filters
+$ ! SZIP
+$ !option="-H -p -d szip tfilters.h5"
+$ !if test $USE_FILTER_SZIP != "yes"; then
+$  !SKIP $option
+$ !else
+$  !CALL TOOLTEST tszip.ddl $option
+$ !fi
+$ !# deflate
+$ !option="-H -p -d deflate tfilters.h5"
+$ !if test $USE_FILTER_DEFLATE != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tdeflate.ddl $option
+$ !fi
+$ !# shuffle
+$ !option="-H -p -d shuffle tfilters.h5"
+$ !if test $USE_FILTER_SHUFFLE != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tshuffle.ddl $option
+$ !fi
+$ !# fletcher32
+$ !option="-H -p -d fletcher32  tfilters.h5"
+$ !if test $USE_FILTER_FLETCHER32 != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tfletcher32.ddl $option
+$ !fi
+$ !# nbit
+$ !option="-H -p -d nbit  tfilters.h5"
+$ !if test $USE_FILTER_NBIT != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tnbit.ddl $option
+$ !fi
+$ !# scaleoffset
+$ !option="-H -p -d scaleoffset  tfilters.h5"
+$ !if test $USE_FILTER_SCALEOFFSET != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tscaleoffset.ddl $option
+$ !fi
+$ !# all
+$ !option="-H -p -d all  tfilters.h5"
+$ !if test $USE_FILTER_FLETCHER32 != "yes" -o  $USE_FILTER_SZIP != "yes" -o  $USE_FILTER_DEFLATE != "yes" -o  $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_NBIT != "yes" -o  $USE_FILTER_SCALEOFFSET != "yes"; then
+$ ! SKIP $option
+$ !else
+$ ! CALL  TOOLTEST tallfilters.ddl $option
+$ !fi
+$ ! User defined
+$ CALL TOOLTEST tuserfilter.ddl "-"""H"""  -p -d myfilter  tfilters.h5"
+$    
+$ ! Test for displaying dataset and attribute of null space
+$ CALL TOOLTEST tnullspace.ddl "tnullspace.h5"
+$
+$ ! Test for displaying objects with very long names
+$ CALL TOOLTEST tlonglinks.ddl "tlonglinks.h5"
+$
+$ ! Test for long double (some systems do not have long double)
+$ ! CALL TOOLTEST tldouble.ddl "tldouble.h5"
+$
+$ ! Test for vms
+$ CALL TOOLTEST tvms.ddl "tvms.h5"
+$
+$ !test for binary output
+$ CALL TOOLTEST tbin.ddl "-d integer -b out.bin test1.h5"
+$ !
 $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
 $ base = F$EXTRACT(0,len-3,P1)
 $ actual = base + "out"
+$ actual_err = base + "err"
 $
 $ begin = "Testing h5dump "
 $ !
 $ ! Run the test and save output in the 'actual' file
 $ !
-$ define sys$output 'actual'
+$ define/nolog sys$output 'actual'
+$ define/nolog sys$error  'actual_err'
 $ write  sys$output "#############################"
 $ write  sys$output "Expected output for 'h5dump ''P2''"
 $ write  sys$output "#############################"
+$ ON ERROR THEN CONTINUE
 $ h5dump 'P2
 $ deassign sys$output
+$ deassign sys$error
+$ if F$SEARCH(actual_err) .NES. ""
+$ then
+$ set message/notext/nofacility/noidentification/noseverity
+$    append 'actual_err' 'actual'
+$ set message/ntext/facility/identification/severity
+$ endif
 $ !
 $ ! Compare the results
 $ !
-$ diff/output=h5dump_temp 'actual' 'P1'
+$ diff/output=h5dump_temp/ignore=(spacing,trailing_spaces,blank_lines) 'actual' 'P1'
 $ open/read temp_out h5dump_temp.dif
 $ read temp_out record1
 $ close temp_out
@@ -53,10 +279,10 @@ $ err_code = F$EXTRACT(len-1,1,record1)
 $ if err_code .eqs. "0" 
 $  then
 $    result = "PASSED"
-$    line = F$FAO("!15AS !50AS !70AS", begin, P1, result) 
+$    line = F$FAO("!15AS !50AS !70AS", begin, P2, result) 
 $  else
 $    result = "*FAILED*"
-$    line = F$FAO("!15AS !49AS !69AS", begin, P1, result) 
+$    line = F$FAO("!15AS !49AS !69AS", begin, P2, result) 
 $ endif
 $ !
 $ ! Print test result
@@ -69,7 +295,8 @@ $ append h5dump_temp.dif h5dump.log
 $ !
 $ ! Delete temporary files
 $ !
-$ del *.out;*
+$! del *.out;*
+$! del *.dif;*
 $ !
 $ENDSUBROUTINE
 
