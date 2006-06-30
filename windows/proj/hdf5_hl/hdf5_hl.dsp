@@ -41,8 +41,8 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\..\proj\hdf5_hl\Release"
 # PROP Intermediate_Dir "..\..\..\proj\hdf5_hl\Release"
 # PROP Target_Dir ""
-# ADD BASE F90 /compile_only /nologo /warn:nofileopt
-# ADD F90 /compile_only /nologo /warn:nofileopt
+# ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
+# ADD F90 /compile_only /include:"..\..\..\proj\hdf5_hl\Release/" /nologo /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -66,8 +66,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\..\proj\hdf5_hl\Debug"
 # PROP Intermediate_Dir "..\..\..\proj\hdf5_hl\Debug"
 # PROP Target_Dir ""
-# ADD BASE F90 /check:bounds /compile_only /dbglibs /debug:full /nologo /traceback /warn:argument_checking /warn:nofileopt
-# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /nologo /traceback /warn:argument_checking /warn:nofileopt
+# ADD BASE F90 /check:bounds /compile_only /dbglibs /debug:full /include:"Debug/" /nologo /traceback /warn:argument_checking /warn:nofileopt
+# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /include:"..\..\..\proj\hdf5_hl\Debug/" /nologo /traceback /warn:argument_checking /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -120,18 +120,6 @@ SOURCE=..\..\..\hl\src\H5TB.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\H5IM.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\H5LT.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\H5TA.h
-# End Source File
 # End Group
 # End Target
 # End Project
