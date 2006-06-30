@@ -110,7 +110,7 @@ $ CALL TOOLTEST tfamily.ddl "--filedriver=family tfamily%05d.h5"
 $ CALL TOOLTEST tmulti.ddl "--filedriver=multi tmulti"
 $
 $ ! Test for files with group names which reach > 1024 bytes in size
-$ CALL TOOLTEST tlarge_objname.ddl -w157 "tlarge_objname.h5"
+$ CALL TOOLTEST tlarge_objname.ddl "-w157 tlarge_objname.h5"
 $
 $ ! Test '-A' to suppress data but print attr's
 $ CALL TOOLTEST tall-2A.ddl "-"""A""" tall.h5"
@@ -120,12 +120,12 @@ $ CALL TOOLTEST tall-2B.ddl "-"""A""" -r tall.h5"
 $
 $ ! Test Subsetting
 $ CALL TOOLTEST tall-4s.ddl "--dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5"
-$ CALL TOOLTEST tall-5s.ddl "-d """/g1/g1.1/dset1.1.2[0;2;10;]""" tall.h5"
-$ CALL TOOLTEST tdset-3s.ddl "-d """/dset1[1,1;;;]""" tdset.h5"
-$ CALL TOOLTEST tdset2-1s.ddl "-d """/dset1[;3,2;4,4;1,4]""" tdset2.h5"
+$ CALL TOOLTEST tall-5s.ddl "-d """/"g"1/"g"1.1/"dset"1.1.2[0;2;10;]""" tall.h5"
+$ CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[1,1;;;]""" tdset.h5"
+$ CALL TOOLTEST tdset2-1s.ddl "-d """/"dset"1[;3,2;4,4;1,4]""" tdset2.h5"
 $
 $ ! Test printing characters in ASCII instead of decimal
-$ CALL TOOLTEST tchar1.ddl -r "tchar.h5"
+$ CALL TOOLTEST tchar1.ddl "-r tchar.h5"
 $
 $ ! Test failure handling
 $ ! Missing file name
