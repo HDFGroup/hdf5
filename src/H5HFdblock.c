@@ -217,6 +217,11 @@ H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_destroy)
+#ifdef QAK
+HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
+HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
+HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -249,23 +254,23 @@ HDfprintf(stderr, "%s: root direct block\n", FUNC);
 HDfprintf(stderr, "%s: root indirect block\n", FUNC);
 #endif /* QAK */
 
-        /* Detach from parent indirect block */
-        if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
-        dblock->parent = NULL;
-        dblock->par_entry = 0;
-
         /* Adjust heap statistics */
         hdr->man_alloc_size -= dblock->size;
 
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
+HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
+HDfprintf(stderr, "%s: dblock->parent->nchildren = %u\n", FUNC, dblock->parent->nchildren);
+HDfprintf(stderr, "%s: dblock->par_entry = %u\n", FUNC, dblock->par_entry);
 HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
 #endif /* QAK */
         /* Check for this direct block being the highest in the heap */
         if((dblock->block_off + dblock->size) == hdr->man_iter_off) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
+#endif /* QAK */
             /* Move 'next block' iterator backwards (may shrink heap) */
-            if(H5HF_hdr_reverse_iter(hdr, dxpl_id) < 0)
+            if(H5HF_hdr_reverse_iter(hdr, dxpl_id, dblock_addr) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reverse 'next block' iterator")
         } /* end if */
 #if 0
@@ -282,6 +287,12 @@ HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't create range section for direct block being destroyed")
         } /* end else */
 #endif /* 0 */
+
+        /* Detach from parent indirect block */
+        if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
+        dblock->parent = NULL;
+        dblock->par_entry = 0;
     } /* end else */
 
     /* Release direct block's disk space */
@@ -292,7 +303,6 @@ HDfprintf(stderr, "%s: Before releasing direct block's space, dblock_addr = %a\n
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
     /* Remove direct block from metadata cache */
-    /* (direct block "destroy" callback will be called by cache) */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
     dblock = NULL;
@@ -380,10 +390,16 @@ HDfprintf(stderr, "%s: root direct block, dblock_addr = %a\n", FUNC, dblock_addr
         unsigned next_entry;        /* Iterator's next block entry */
         size_t next_size;           /* Size of next direct block to create */
 
+#ifdef QAK
+HDfprintf(stderr, "%s: before updating iterator\n", FUNC);
+#endif /* QAK */
         /* Update iterator to reflect any previous increments as well as allow for requested direct block size */
         if(H5HF_hdr_update_iter(hdr, dxpl_id, min_dblock_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "unable to update block iterator")
 
+#ifdef QAK
+HDfprintf(stderr, "%s: after updating iterator\n", FUNC);
+#endif /* QAK */
         /* Retrieve information about current iterator position */
         if(H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")

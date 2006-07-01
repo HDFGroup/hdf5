@@ -402,7 +402,8 @@ H5_DLL herr_t H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries);
 H5_DLL herr_t H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size);
 H5_DLL herr_t H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries);
-H5_DLL herr_t H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    haddr_t dblock_addr);
 H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF_hdr_empty(H5HF_hdr_t *hdr);
 
@@ -533,6 +534,7 @@ H5_DLL unsigned H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos);
 H5_DLL hsize_t H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row);
 H5_DLL hsize_t H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row);
 H5_DLL herr_t H5HF_get_id_off_test(const H5HF_t *fh, const void *id, hsize_t *obj_off);
+H5_DLL herr_t H5HF_debug_test(const H5HF_t *fh);
 #endif /* H5HF_TESTING */
 
 #endif /* _H5HFpkg_H */

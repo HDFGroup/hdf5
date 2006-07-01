@@ -144,5 +144,6 @@ H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
 H5_DLL herr_t H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect,
     FILE *stream, int indent, int fwidth);
 
+H5_DLL herr_t H5FS_debug_test(const H5FS_t *fspace);
 #endif /* _H5FSprivate_H */
 

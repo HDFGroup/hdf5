@@ -15,7 +15,7 @@
 /* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, May  2, 2006
  *
- * Purpose:	File free space functions.
+ * Purpose:	Free space tracking functions.
  *
  * Note:	(Used to be in the H5HFflist.c file, prior to the date above)
  *
@@ -2534,4 +2534,25 @@ H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_close() */
+
+herr_t
+H5FS_debug_test(const H5FS_t *fspace)
+{
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_debug_test)
+
+    HDfprintf(stderr, "%s: fspace->merge_list = %p\n", FUNC, fspace->merge_list);
+    if(fspace->merge_list) {
+        H5SL_node_t *merge_node;
+        H5FS_section_info_t *sect;
+
+        merge_node = H5SL_last(fspace->merge_list);
+        HDfprintf(stderr, "%s: last merge node = %p\n", FUNC, merge_node);
+        if(merge_node) {
+            sect = H5SL_item(merge_node);
+            HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", FUNC, sect->size, sect->addr, sect->type);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
 

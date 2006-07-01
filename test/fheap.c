@@ -12869,7 +12869,6 @@ error:
 } /* test_abs_remove_all_root_direct() */
 #endif /* QAK2 */
 
-#ifdef NOT_YET
 
 /*-------------------------------------------------------------------------
  * Function:	test_abs_remove_2nd_indirect
@@ -12966,8 +12965,8 @@ HDfprintf(stderr, "empty_size = %lu\n", (unsigned long)empty_size);
     test_desc = H5MM_malloc(HDstrlen(del_str) + HDstrlen(base_desc));
     sprintf(test_desc, base_desc, del_str);
     TESTING(test_desc);
-    H5MM_xfree(del_str);
-    H5MM_xfree(test_desc);
+    del_str = H5MM_xfree(del_str);
+    test_desc = H5MM_xfree(test_desc);
 
     /* Initialize the heap ID structure */
     HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
@@ -13042,7 +13041,6 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_abs_remove_2nd_indirect() */
-#endif /* NOT_YET */
 #endif /* QAK */
 
 
@@ -13095,8 +13093,8 @@ main(void)
     for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
 #else /* QAK */
 HDfprintf(stderr, "Uncomment test loop!\n");
-/* curr_test = FHEAP_TEST_NORMAL; */
-curr_test = FHEAP_TEST_REOPEN;
+curr_test = FHEAP_TEST_NORMAL;
+/* curr_test = FHEAP_TEST_REOPEN; */
 #endif /* QAK */
         /* Clear the testing parameters */
         HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
@@ -13257,9 +13255,10 @@ HDfprintf(stderr, "Uncomment tests!\n");
                 tparam.del_dir = del_dir;
 #else /* QAK */
 HDfprintf(stderr, "Uncomment test loops!\n");
-tparam.drain_half = HEAP_DEL_DRAIN_ALL;
-/* tparam.drain_half = HEAP_DEL_DRAIN_HALF; */
-tparam.del_dir = HEAP_DEL_REVERSE;
+/* tparam.drain_half = HEAP_DEL_DRAIN_ALL; */
+tparam.drain_half = HEAP_DEL_DRAIN_HALF;
+tparam.del_dir = HEAP_DEL_FORWARD;
+/* tparam.del_dir = HEAP_DEL_REVERSE; */
 #endif /* QAK */
 
 #ifndef QAK
@@ -13273,9 +13272,7 @@ tparam.del_dir = HEAP_DEL_REVERSE;
 #else /* QAK2 */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK2 */
-#ifdef NOT_YET
                 nerrors += test_abs_remove_2nd_indirect(fapl, &cparam, &tparam);
-#endif /* NOT_YET */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */

@@ -600,6 +600,11 @@ HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
         if(H5HF_sect_range_from_single(hdr, sect1, dblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't convert single section into range section")
 
+#ifdef QAK
+HDfprintf(stderr, "%s: sect1->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect1->sect_info.addr, sect1->sect_info.size, sect1->sect_info.type, (sect1->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sect_info.addr, sect2->sect_info.size, sect2->sect_info.type, (sect2->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+#endif /* QAK */
+
         /* Destroy direct block */
         if(H5HF_man_dblock_destroy(hdr, dxpl_id, dblock, dblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release direct block")
@@ -1134,6 +1139,10 @@ H5HF_sect_range_deserialize(const uint8_t *buf, haddr_t sect_addr,
     if(NULL == (new_sect = H5HF_sect_node_new(H5HF_FSPACE_SECT_RANGE, sect_addr, sect_size, H5FS_SECT_SERIALIZED)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "allocation failed for direct block free list section")
 
+    /* Range's indirect block */
+    /* (Section needs to be "revived" before this is correct) */
+    new_sect->u.range.iblock = NULL;
+
     /* Range's row */
     UINT16DECODE(buf, new_sect->u.range.row);
 
@@ -1176,7 +1185,6 @@ H5HF_sect_range_can_merge(H5FS_section_info_t *_sect1,
     H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
-    hsize_t sect2_off;                  /* Offset of second section in heap */
     size_t dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr); /* Direct block's overhead */
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -1191,19 +1199,17 @@ H5HF_sect_range_can_merge(H5FS_section_info_t *_sect1,
 HDfprintf(stderr, "%s: sect1->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect1->sect_info.addr, sect1->sect_info.size, sect1->sect_info.type, (sect1->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sect_info.addr, sect2->sect_info.size, sect2->sect_info.type, (sect2->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* QAK */
-    /* Check to see if we should revive either section */
-    if(sect1->sect_info.state != H5FS_SECT_LIVE)
-        if(H5HF_sect_range_revive(hdr, dxpl_id, sect1) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
-    if(sect2->sect_info.state != H5FS_SECT_LIVE)
-        if(H5HF_sect_revive(hdr, dxpl_id, sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive free section")
 
     /* Check for special case of delayed conversion of 2nd section from
      *  single -> range section
      */
     if(sect2->sect_info.type == H5HF_FSPACE_SECT_SINGLE) {
         size_t dblock_size;                 /* Section's direct block's size */
+
+        /* Check to see if we should revive the section */
+        if(sect2->sect_info.state != H5FS_SECT_LIVE)
+            if(H5HF_sect_revive(hdr, dxpl_id, sect2) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive free section")
 
         /* Check for section occupying entire direct block */
         dblock_size = sect2->u.single.dblock_size;
@@ -1236,6 +1242,7 @@ HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1.u.range = {%p, %u, %u, %u}\n", FUNC, sect1->u.range.iblock, sect1->u.range.row, sect1->u.range.col, sect1->u.range.num_entries);
+HDfprintf(stderr, "%s: sect2.u.range = {%p, %u, %u, %u}\n", FUNC, sect2->u.range.iblock, sect2->u.range.row, sect2->u.range.col, sect2->u.range.num_entries);
 #endif /* QAK */
 
     /* Range section can only merge with other range sections */
@@ -1243,25 +1250,9 @@ HDfprintf(stderr, "%s: sect1.u.range = {%p, %u, %u, %u}\n", FUNC, sect1->u.range
         HGOTO_DONE(FALSE)
 
 #ifdef QAK
-HDfprintf(stderr, "%s: sect2.u.range = {%p, %u, %u, %u}\n", FUNC, sect2->u.range.iblock, sect2->u.range.row, sect2->u.range.col, sect2->u.range.num_entries);
-HDfprintf(stderr, "%s: sect2.u.range.iblock->nchildren = %u\n", FUNC, sect2->u.range.iblock->nchildren);
-#endif /* QAK */
-
-    /* Check if second section is in indirect block that's being deleted */
-    if(sect2->u.range.iblock->nchildren == 0)
-        HGOTO_DONE(TRUE)
-
-    /* Check if second section is past end of "next block" iterator */
-    sect2_off = sect2->u.range.iblock->block_off;
-    sect2_off += hdr->man_dtable.row_block_off[sect2->u.range.row];
-    sect2_off += hdr->man_dtable.row_block_size[sect2->u.range.row] * sect2->u.range.col;
-#ifdef QAK
 HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
-HDfprintf(stderr, "%s: sect2.u.range.iblock->block_off = %Hu\n", FUNC, sect2->u.range.iblock->block_off);
-HDfprintf(stderr, "%s: hdr->man_dtable.row_block_off[%u] = %Hu\n", FUNC, sect2->u.range.row, hdr->man_dtable.row_block_off[sect2->u.range.row]);
-HDfprintf(stderr, "%s: sect2_off = %Hu\n", FUNC, sect2_off);
 #endif /* QAK */
-    if(sect2_off > hdr->man_iter_off)
+    if(sect2->sect_info.addr >= hdr->man_iter_off)
         HGOTO_DONE(TRUE)
 
     /* Check if second section adjoins first section & is in the same row */
@@ -1307,10 +1298,8 @@ H5HF_sect_range_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 
     /* Check arguments. */
     HDassert(sect1);
-    HDassert(sect1->sect_info.state == H5FS_SECT_LIVE);
     HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_RANGE);
     HDassert(sect2);
-    HDassert(sect2->sect_info.state == H5FS_SECT_LIVE);
     HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_RANGE);
 
 #ifdef QAK
@@ -1362,27 +1351,26 @@ static htri_t
 H5HF_sect_range_can_shrink(H5FS_section_info_t *_sect, void UNUSED *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
+    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_range_can_shrink)
 
     /* Check arguments. */
     HDassert(sect);
-    HDassert(sect->sect_info.state == H5FS_SECT_LIVE);
+    HDassert(sect->sect_info.type == H5HF_FSPACE_SECT_RANGE);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_range_can_shrink", sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect->u.range = {%p, %u, %u, %u}\n", "H5HF_sect_range_can_shrink", sect->u.range.iblock, sect->u.range.row, sect->u.range.col, sect->u.range.num_entries);
-if(sect->u.range.iblock != NULL)
-    HDfprintf(stderr, "%s: sect->u.range.iblock->nchildren = %u\n", "H5HF_sect_range_can_shrink", sect->u.range.iblock->nchildren);
 #endif /* QAK */
 
-    /* If section has no parent, it should go away */
-    if(sect->u.range.iblock == NULL)
-        HGOTO_DONE(TRUE)
-
-    /* If section is in an indirect block with no children, it should go away */
-    if(sect->u.range.iblock->nchildren == 0)
+    /* Check if section is past end of "next block" iterator */
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", "H5HF_sect_range_can_shrink", hdr->man_iter_off);
+#endif /* QAK */
+    if(sect->sect_info.addr >= hdr->man_iter_off)
         HGOTO_DONE(TRUE)
 
 done:
@@ -1415,7 +1403,7 @@ H5HF_sect_range_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
     /* Check arguments. */
     HDassert(sect);
     HDassert(*sect);
-    HDassert((*sect)->sect_info.state == H5FS_SECT_LIVE);
+    HDassert((*sect)->sect_info.type == H5HF_FSPACE_SECT_RANGE);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: (*sect).sect_info = {%a, %Hu, %u}\n", FUNC, (*sect)->sect_info.addr, (*sect)->sect_info.size, (*sect)->sect_info.type);

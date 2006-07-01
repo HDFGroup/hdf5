@@ -147,6 +147,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
         haddr_t new_iblock_addr;       /* New indirect block's address */
         H5HF_indirect_t *new_iblock;   /* Pointer to new indirect block */
         unsigned nrows;                /* Number of rows in new indirect block */
+        unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting parent indirect block */
 
         /* Compute # of rows in child indirect block */
         nrows = (H5V_log2_gen(hdr->man_dtable.row_block_size[row]) - hdr->man_dtable.first_row_bits) + 1;
@@ -160,12 +161,21 @@ HDfprintf(stderr, "%s: entry = %Zu\n", FUNC, entry);
         /* Locate child indirect block */
         new_iblock_addr = iblock->ents[entry].addr;
 
+        /* Check if we need to (re-)create the child indirect block */
+        if(!H5F_addr_defined(new_iblock_addr)) {
+            if(H5HF_man_iblock_create(hdr, dxpl_id, iblock, entry, nrows, nrows, &new_iblock_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
+
+            /* Indicate that the parent indirect block was modified */
+            cache_flags |= H5AC__DIRTIED_FLAG;
+        } /* end if */
+
         /* Lock new indirect block */
         if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, nrows, iblock, entry, rw)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
         /* Release the current indirect block */
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, iblock, cache_flags) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
         /* Switch variables to use new indirect block */
@@ -230,6 +240,9 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
     /* Look for free space */
     if((node_found = H5HF_space_find(hdr, dxpl_id, (hsize_t)request, sec_node)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
+#ifdef QAK
+HDfprintf(stderr, "%s: After H5HF_space_find(), node_found = %t\n", FUNC, node_found);
+#endif /* QAK */
 
     /* If we didn't find a node, go create a direct block big enough to hold the requested block */
     if(!node_found)

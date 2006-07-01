@@ -165,12 +165,28 @@ HDfprintf(stderr, "%s: indirect block ref. count at zero, iblock->addr = %a\n", 
  *      from cache.
  */
         if(iblock->nchildren == 0) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n", FUNC, iblock->addr);
+#endif /* QAK */
             /* Check for deleting root indirect block (and no root direct block) */
             if(iblock->block_off == 0 && iblock->hdr->man_dtable.curr_root_rows > 0) {
                 /* Reset root pointer information */
                 iblock->hdr->man_dtable.curr_root_rows = 0;
                 iblock->hdr->man_dtable.table_addr = HADDR_UNDEF;
             } /* end if */
+
+            /* Detach from parent indirect block */
+            if(iblock->parent) {
+                /* Detach from parent indirect block */
+                if(H5HF_man_iblock_detach(iblock->parent, H5AC_dxpl_id, iblock->par_entry) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
+                iblock->parent = NULL;
+                iblock->par_entry = 0;
+            } /* end if */
+
+            /* Release space for indirect block on disk */
+            if(H5MF_xfree(iblock->hdr->f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block disk space")
 
             /* Unlock indirect block with delete flag */
             if(H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, tmp_iblock, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
@@ -382,7 +398,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_double)
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Extending root indirect block\n", FUNC);
+HDfprintf(stderr, "%s: Extending root indirect block, min_dblock_size = %Zu\n", FUNC, min_dblock_size);
 #endif /* QAK */
 
     /* Get "new block" iterator information */
@@ -392,9 +408,19 @@ HDfprintf(stderr, "%s: Extending root indirect block\n", FUNC);
 
     /* Make certain the iterator is at the root indirect block */
     HDassert(iblock->parent == NULL);
+#ifdef QAK
+HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
+#endif /* QAK */
+    HDassert(iblock->block_off == 0);
 
     /* Keep this for later */
     old_nrows = iblock->nrows;
+#ifdef QAK
+HDfprintf(stderr, "%s: old_nrows = %u\n", FUNC, old_nrows);
+HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
+HDfprintf(stderr, "%s: next_row = %u\n", FUNC, next_row);
+HDfprintf(stderr, "%s: next_size = %Hu\n", FUNC, next_size);
+#endif /* QAK */
 
     /* Check for skipping over direct block rows */
     if(iblock->nrows < hdr->man_dtable.max_direct_rows && min_dblock_size > next_size) {
@@ -415,7 +441,7 @@ HDfprintf(stderr, "%s: Extending root indirect block\n", FUNC);
     new_nrows = MAX(min_nrows, MIN(2 * iblock->nrows, iblock->max_rows));
 #ifdef QAK
 HDfprintf(stderr, "%s: min_nrows = %u, new_nrows = %u\n", FUNC, min_nrows, new_nrows);
-HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
+HDfprintf(stderr, "%s: iblock->nrows = %u, iblock->max_rows = %u\n", FUNC, iblock->nrows, iblock->max_rows);
 HDfprintf(stderr, "%s: new_next_entry = %u\n", FUNC, new_next_entry);
 #endif /* QAK */
 
@@ -659,6 +685,10 @@ HDfprintf(stderr, "%s: Reverting root indirect block\n", FUNC);
     if(H5HF_hdr_reset_iter(hdr, (hsize_t)dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
+    /* Extend heap to just cover first direct block */
+    if(H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size, (hssize_t)hdr->man_dtable.row_dblock_free[0]) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
+
 done:
     if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
@@ -826,7 +856,8 @@ HDfprintf(stderr, "%s: child_iblock->child_free_space = %Hu\n", FUNC, child_iblo
 #ifdef QAK
 HDfprintf(stderr, "%s: old_sec_node->u.indirect.indir_row = %u\n", FUNC, old_sec_node->u.indirect.indir_row);
 HDfprintf(stderr, "%s: hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row] = %Hu\n", FUNC, hdr->man_dtable.row_block_size[old_sec_node->u.indirect.indir_row]);
-HDfprintf(stderr, "%s: old_sec_node->sect_addr = %a\n", FUNC, old_sec_node->sect_addr);
+HDfprintf(stderr, "%s: old_sec_node->sect_info.addr = %a\n", FUNC, old_sec_node->sect_info.addr);
+HDfprintf(stderr, "%s: dblock_entry = %u\n", FUNC, dblock_entry);
 #endif /* QAK */
     if(H5HF_man_dblock_create(dxpl_id, hdr, child_iblock, dblock_entry, &dblock_addr, &dblock_sec_node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap direct block")
@@ -1028,7 +1059,8 @@ H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_ad
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_attach)
 #ifdef QAK
-HDfprintf(stderr, "%s: iblock = %p, entry = %u, child_addr = %a, iblock_nrows = %u\n", FUNC, iblock, entry, child_addr);
+HDfprintf(stderr, "%s: iblock = %p, entry = %u, child_addr = %a\n", FUNC, iblock, entry, child_addr);
+HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC, iblock->block_off, iblock->nchildren);
 #endif /* QAK */
 
     /*
@@ -1036,6 +1068,7 @@ HDfprintf(stderr, "%s: iblock = %p, entry = %u, child_addr = %a, iblock_nrows = 
      */
     HDassert(iblock);
     HDassert(H5F_addr_defined(child_addr));
+    HDassert(!H5F_addr_defined(iblock->ents[entry].addr));
 
     /* Increment the reference count on this indirect block */
     if(H5HF_iblock_incr(iblock) < 0)
@@ -1076,12 +1109,15 @@ done:
 herr_t
 H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry)
 {
+#ifdef OLD_WAY
     unsigned start_children;            /* # of children of iblock when routine was entered */
+#endif /* OLD_WAY */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_detach)
 #ifdef QAK
-HDfprintf(stderr, "%s: iblock = %p, entry = %u, dblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock, entry, dblock_addr);
+HDfprintf(stderr, "%s: iblock = %p, entry = %u\n", FUNC, iblock, entry);
+HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC, iblock->block_off, iblock->nchildren);
 #endif /* QAK */
 
     /*
@@ -1101,7 +1137,9 @@ HDfprintf(stderr, "%s: iblock = %p, entry = %u, dblock_addr = %a, iblock_nrows =
     /* (Track the initial # of children before the block gets modified, because
      *  this routine is called recursively)
      */
+#ifdef OLD_WAY
     start_children = iblock->nchildren;
+#endif /* OLD_WAY */
     iblock->nchildren--;
 
     /* Reduce the max. entry used, if necessary */
@@ -1138,13 +1176,6 @@ HDfprintf(stderr, "%s: iblock = %p, entry = %u, dblock_addr = %a, iblock_nrows =
         } /* end if */
     } /* end if */
 
-    /* Free indirect block disk space, if it has no children (i.e. it's been deleted) */
-    if(start_children == 1) {
-        HDassert(iblock->nchildren == 0);
-        if(H5MF_xfree(iblock->hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block disk space")
-    } /* end if */
-
     /* Mark indirect block as modified */
     if(H5HF_iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
@@ -1157,6 +1188,10 @@ HDfprintf(stderr, "%s: iblock = %p, entry = %u, dblock_addr = %a, iblock_nrows =
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't decrement reference count on shared indirect block")
 
 done:
+#ifdef QAK
+HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
+HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC, iblock->block_off, iblock->nchildren);
+#endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_detach() */
 
