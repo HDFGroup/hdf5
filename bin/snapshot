@@ -50,10 +50,7 @@ printenv | sort
 echo ===Done Dumping environment variables===
 
 # Where are the snapshots stored?
-#ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
-# Since file format is unstable, put snapshot files in a temporary non-
-# anonymous ftp accessiable directory.
-ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/unstable_format
+ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
 ARCHIVES=$ARCHIVES_default
 
 # Where is the zlib library?
