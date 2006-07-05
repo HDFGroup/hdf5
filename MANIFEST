@@ -482,6 +482,7 @@
 ./src/H5FSprivate.h
 ./src/H5FSpublic.h
 ./src/H5G.c
+./src/H5Gdeprec.c
 ./src/H5Gent.c
 ./src/H5Glink.c
 ./src/H5Gloc.c
@@ -527,6 +528,10 @@
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
+./src/H5L.c
+./src/H5Lpkg.h
+./src/H5Lprivate.h
+./src/H5Lpublic.h
 ./src/H5MF.c
 ./src/H5MFprivate.h
 ./src/H5MM.c
@@ -565,10 +570,12 @@
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
 ./src/H5Pgcpl.c
+./src/H5Plcpl.c
 ./src/H5Pocpl.c
 ./src/H5Ppkg.h
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
+./src/H5Pstrcpl.c
 ./src/H5Ptest.c
 ./src/H5R.c
 ./src/H5Rprivate.h

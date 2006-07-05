@@ -172,6 +172,28 @@ New Features
 
     Library:
     --------
+       - Add H5L link APIs.  Old APIs (H5Glink, H5Gmove, etc.) are still
+         supported but deprecated.
+         New APIs are:
+            H5Llink - create a link to an object given its ID
+            H5Lmove - just like H5Gmove2
+            H5Lcopy - copy a link without copying the underlying object
+            H5Lcreate_hard - like H5Glink2 for hard links
+            H5Lcreate_soft - like H5Glink2 for soft links
+            H5Lunlink - just like H5Gunlink
+            H5Lget_linkval - just link H5Gget_linkval
+            H5Lget_linkinfo - gets link-specific info (like H5Gget_objinfo)
+
+         In addition, H5Gcreate_expand, H5Tcommit_expand, and H5Dcreate_expand
+         no longer create links to objects; objects must be manually linked
+         using H5Llink or they will be deleted when the ID is closed.
+
+         Link Creation Property Lists can be used to pass character
+         encoding (ASCII or UTF-8) for link names and to set the Intermediate
+         Group Creation Flag:
+            H5Pset_char_encoding, H5Pget_char_encoding
+            H5Pset_copy_object, H5Pget_copy_object
+         -JML 2006/7/5
        - Added managements of collective IO supports for chunking storage
          inside parallel HDF5
          1) Implemented One IO with collective mode for all chunks in the
