@@ -33,6 +33,7 @@
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"         /* Links			  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
 /* Private typedefs */
@@ -113,7 +114,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id,
     ginfo_size = H5O_mesg_size(H5O_GINFO_ID, f, ginfo);
     HDassert(ginfo_size);
 
-    lnk.type = H5G_LINK_HARD;
+    lnk.type = H5L_LINK_HARD;
     lnk.name = &null_char;
     link_size = H5O_mesg_size(H5O_LINK_ID, f, &lnk);
     HDassert(link_size);
@@ -776,7 +777,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                 /* Release memory for link names (and memory for soft link values) */
                 for(u = 0; u < linfo.nlinks; u++) {
                     H5MM_xfree(lnk_table[u].name);
-                    if(lnk_table[u].type == H5G_LINK_SOFT)
+                    if(lnk_table[u].type == H5L_LINK_SOFT)
                         H5MM_xfree(lnk_table[u].u.soft.name);
                 } /* end for */
 

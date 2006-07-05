@@ -604,7 +604,7 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
     /* Set link info */
     if(udata->lnk) {
         /* Set (default) common info for link */
-        udata->lnk->cset = H5T_CSET_ASCII;
+        udata->lnk->cset = H5F_CRT_DEFAULT_CSET;
         udata->lnk->ctime = 0;
         udata->lnk->name = H5MM_xstrdup(udata->name);
 
@@ -627,14 +627,14 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
             /* Set link type */
-            udata->lnk->type = H5G_LINK_SOFT;
+            udata->lnk->type = H5L_LINK_SOFT;
         } /* end if */
         else {
             /* Set address of object */
             udata->lnk->u.hard.addr = ent->header;
 
             /* Set link type */
-            udata->lnk->type = H5G_LINK_HARD;
+            udata->lnk->type = H5L_LINK_HARD;
         } /* end else */
     } /* end if */
 

@@ -27,11 +27,6 @@
 /* Forward references of package typedefs */
 typedef struct H5A_t H5A_t;
 
-/* Attribute creation properties */
-#define H5A_CHAR_ENCODING_NAME  "character_encoding"
-#define H5A_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
-#define H5A_CHAR_ENCODING_DEF   H5F_CRT_DEFAULT_CSET
-
 /* Library private functions in package */
 H5_DLL struct H5O_loc_t *H5A_oloc(H5A_t *attr);
 H5_DLL H5G_name_t *H5A_nameof(H5A_t *attr);

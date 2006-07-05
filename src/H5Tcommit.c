@@ -28,12 +28,13 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
+#include "H5Lprivate.h"		/* Links				*/
 #include "H5Oprivate.h"		/* Object headers			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Static local functions */
-static herr_t H5T_commit(H5G_loc_t *loc, const char *name, H5T_t *type,
+static herr_t H5T_commit(H5F_t *file, H5T_t *type,
     hid_t dxpl_id, hid_t tcpl_id, hid_t tapl_id);
 static H5T_t *H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id);
 
@@ -77,7 +78,11 @@ herr_t
 H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_loc_t	loc;
+    H5G_loc_t	type_loc;
+    H5F_t       *file;
     H5T_t	*type = NULL;
+    hbool_t     uncommit = FALSE;          /* TRUE if H5T_commit needs to be undone */
+    H5T_state_t old_state;                 /* The state of the datatype before H5T_commit. */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tcommit, FAIL)
@@ -91,11 +96,48 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-    /* Commit the type */
-    if(H5T_commit(&loc, name, type, H5AC_dxpl_id, H5P_DATATYPE_CREATE_DEFAULT, H5P_DEFAULT) < 0)
+    /* Find the insertion file */
+    if(NULL == (file = H5G_insertion_file(&loc, name, H5AC_dxpl_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point")
+
+    /* Record the type's state so that we can revert to it if linking fails */
+    old_state = type->shared->state;
+
+    /* Write the type to disk */
+    if(H5T_commit(file, type, H5AC_dxpl_id, H5P_DATATYPE_CREATE_DEFAULT, H5P_DEFAULT) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
+    if(H5G_loc(type_id, &type_loc) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get committed datatype's location")
+
+    /* Link the type into the group hierarchy */
+    if( H5L_link(&loc, name, &type_loc, H5AC_dxpl_id, H5P_DEFAULT) < 0)
+    {
+        uncommit = TRUE;    /* Linking failed, and we need to undo H5T_commit. */
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to create link to type")
+    }
+
 done:
+    /* If the datatype was committed but couldn't be linked, we need to return it to the state it was in
+     * before it was committed. */
+    if(TRUE == uncommit)
+    {
+	if(type->shared->state == H5T_STATE_OPEN && H5F_addr_defined(type->oloc.addr)) {
+            /* Remove the datatype from the list of opened objects in the file */
+            if(H5FO_top_decr(type->oloc.file, type->oloc.addr) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
+            if(H5FO_delete(type->oloc.file, H5AC_dxpl_id, type->oloc.addr) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
+	    if(H5O_close(&(type->oloc)) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
+            if(H5O_delete(file, H5AC_dxpl_id, type->oloc.addr) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
+            /* Mark datatype as being back in memory */
+            if(H5T_set_loc(type, file, H5T_LOC_MEMORY))
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
+	    type->oloc.addr = HADDR_UNDEF;
+            type->shared->state = old_state;
+	} /* end if */    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit() */
 
@@ -105,8 +147,10 @@ done:
  * Function:	H5Tcommit_expand
  *
  * Purpose:	Save a transient datatype to a file and turn the type handle
- *		into a named, immutable type.
- *              Add property to create missing groups along the path.
+ *		into a "named", immutable type.
+ *
+ *              The resulting ID should be linked into the file with
+ *              H5Lcreate or it will be deleted when closed.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -116,20 +160,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
+H5Tcommit_expand(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t	loc;
     H5T_t	*type = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tcommit_expand, FAIL)
-    H5TRACE5("e","isiii",loc_id,name,type_id,tcpl_id,tapl_id);
+    H5TRACE4("e","iiii",loc_id,type_id,tcpl_id,tapl_id);
 
     /* Check arguments */
     if(H5G_loc (loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
@@ -150,7 +192,7 @@ H5Tcommit_expand(hid_t loc_id, const char *name, hid_t type_id, hid_t tcpl_id, h
 #endif /* LATER */
 
     /* Commit the type */
-    if(H5T_commit(&loc, name, type, H5AC_dxpl_id, tcpl_id, tapl_id) < 0)
+    if(H5T_commit(loc.oloc->file, type, H5AC_dxpl_id, tcpl_id, tapl_id) < 0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -173,18 +215,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_commit(H5G_loc_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
+H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id,
     hid_t tcpl_id, hid_t UNUSED tapl_id)
 {
-    H5F_t	*file = NULL;
+/*    H5F_t	*file = NULL; */
     H5P_genplist_t  *tc_plist;          /* Property list created */
     H5G_loc_t   type_loc;               /* Dataset location */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
-    HDassert(loc);
-    HDassert(name && *name);
+    HDassert(file);
     HDassert(type);
     HDassert(tcpl_id != H5P_DEFAULT);
 #ifdef LATER
@@ -200,10 +241,6 @@ H5T_commit(H5G_loc_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is already committed")
     if(H5T_STATE_IMMUTABLE == type->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is immutable")
-
-    /* Find the insertion file */
-    if(NULL == (file = H5G_insertion_file(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point")
 
     /* Check for a "sensible" datatype to store on disk */
     if(H5T_is_sensible(type) <= 0)
@@ -232,20 +269,13 @@ H5T_commit(H5G_loc_t *loc, const char *name, H5T_t *type, hid_t dxpl_id,
     if(NULL == (tc_plist = H5I_object(tcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-    /*
-     * Give the datatype a name.  That is, create and add a new object to the
-     * group this datatype is being initially created in.
-     */
-    if(H5G_insert(loc, name, &type_loc, dxpl_id, tc_plist) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name datatype")
-
     type->shared->state = H5T_STATE_OPEN;
     type->shared->fo_count=1;
 
     /* Add datatype to the list of open objects in the file */
     if(H5FO_top_incr(type->oloc.file, type->oloc.addr) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, FAIL, "can't incr object ref. count")
-    if(H5FO_insert(type->oloc.file, type->oloc.addr, type->shared) < 0)
+    if(H5FO_insert(type->oloc.file, type->oloc.addr, type->shared, TRUE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 
     /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
@@ -470,7 +500,7 @@ H5T_open(H5G_loc_t *loc, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found")
 
         /* Add the datatype to the list of opened objects in the file */
-        if(H5FO_insert(dt->oloc.file, dt->oloc.addr, dt->shared) < 0)
+        if(H5FO_insert(dt->oloc.file, dt->oloc.addr, dt->shared, FALSE) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
         /* Increment object count for the object in the top file */

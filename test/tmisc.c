@@ -3830,8 +3830,8 @@ test_misc23(void)
     * test H5Gcreate_expand()
     **********************************************************************/
 
-    /* Create group creation property list */
-    create_id = H5Pcreate(H5P_GROUP_CREATE);
+    /* Create link creation property list */
+    create_id = H5Pcreate(H5P_LINK_CREATE);
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
@@ -3839,8 +3839,11 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
 
-    tmp_id = H5Gcreate_expand(file_id, "/A/B01/grp", create_id, access_id);
+    tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Llink(file_id, "/A/B01/grp", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     /* Query that the name of the new group is correct */
     status = H5Iget_name( tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE );
@@ -3862,29 +3865,41 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Gclose");
 
 
-    tmp_id = H5Gcreate_expand(file_id, "/A/B02/C02/grp", create_id, access_id);
+    tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Llink(file_id, "/A/B02/C02/grp", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    tmp_id = H5Gcreate_expand(group_id, "B03/grp/", create_id, access_id);
+    tmp_id = H5Gcreate_expand(group_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Llink(group_id, "B03/grp/", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    if ( (tmp_id = H5Gcreate_expand(group_id, "/A/B04/grp/", create_id, access_id)) < 0)
+    if ( (tmp_id = H5Gcreate_expand(group_id, H5P_DEFAULT, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Llink(group_id, "/A/B04/grp/", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
 
 
-    if ( (tmp_id = H5Gcreate_expand(file_id, "/A/B05/C05/A", create_id, access_id)) < 0)
+    if ( (tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
+
+    status = H5Llink(file_id, "/A/B05/C05/A", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
@@ -3898,8 +3913,8 @@ test_misc23(void)
     * test new H5Dcreate
     **********************************************************************/
 
-    /* Create dataset creation property list */
-    create_id = H5Pcreate(H5P_DATASET_CREATE);
+    /* Create link creation property list */
+    create_id = H5Pcreate(H5P_LINK_CREATE);
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
@@ -3907,36 +3922,51 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
 
-    tmp_id = H5Dcreate(file_id, "/A/B06/dset", type_id, space_id, create_id);
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Llink(file_id, "/A/B06/dset", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
+    
+    status = H5Dclose(tmp_id);
+    CHECK(status, FAIL, "H5Dclose");
+
+
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
+    CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Llink(file_id, "/A/B07/B07/dset", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate(file_id, "/A/B07/B07/dset", type_id, space_id, create_id);
+    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Llink(group_id, "B08/dset", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate(group_id, "B08/dset", type_id, space_id, create_id);
+    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
+
+    status = H5Llink(group_id, "/A/B09/dset", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate(group_id, "/A/B09/dset", type_id, space_id, create_id);
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Dclose(tmp_id);
-    CHECK(status, FAIL, "H5Dclose");
-
-
-    tmp_id = H5Dcreate(file_id, "/A/B10/C10/A/dset", type_id, space_id, create_id);
-    CHECK(tmp_id, FAIL, "H5Dcreate");
+    status = H5Llink(file_id, "/A/B10/C10/A/dset", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
@@ -3948,7 +3978,6 @@ test_misc23(void)
     status = H5Sclose(space_id);
     CHECK(status, FAIL, "H5Sclose");
 
-
     status = H5Pclose(create_id);
     CHECK(status, FAIL, "H5Pclose");
 
@@ -3957,20 +3986,22 @@ test_misc23(void)
     * test new H5Tcommit
     **********************************************************************/
 
-    /* Create datatype creation property list */
-    create_id = H5Pcreate(H5P_DATATYPE_CREATE);
+    /* Create link creation property list */
+    create_id = H5Pcreate(H5P_LINK_CREATE);
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
     status = H5Pset_create_intermediate_group(create_id, TRUE);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
-
     tmp_id = H5Tcopy(H5T_NATIVE_INT16);
     CHECK(tmp_id, FAIL, "H5Tcopy");
 
-    status = H5Tcommit_expand(file_id, "/A/B11/dtype", tmp_id, create_id, access_id);
+    status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Llink(file_id, "/A/B11/dtype", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
@@ -3979,8 +4010,11 @@ test_misc23(void)
     tmp_id = H5Tcopy(H5T_NATIVE_INT32);
     CHECK(tmp_id, FAIL, "H5Tcopy");
 
-    status = H5Tcommit_expand(file_id, "/A/B12/C12/dtype", tmp_id, create_id, access_id);
+    status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Llink(file_id, "/A/B12/C12/dtype", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
@@ -3989,8 +4023,11 @@ test_misc23(void)
     tmp_id = H5Tcopy(H5T_NATIVE_INT64);
     CHECK(tmp_id, FAIL, "H5Tcopy");
 
-    status = H5Tcommit_expand(group_id, "B13/dtype", tmp_id, create_id, access_id);
+    status = H5Tcommit_expand(group_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
+ 
+    status = H5Llink(group_id, "B13/C12/dtype", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
@@ -3999,8 +4036,11 @@ test_misc23(void)
     tmp_id = H5Tcopy(H5T_NATIVE_FLOAT);
     CHECK(tmp_id, FAIL, "H5Tcopy");
 
-    status = H5Tcommit_expand(group_id, "/A/B14/dtype", tmp_id, create_id, access_id);
+    status = H5Tcommit_expand(group_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Llink(group_id, "/A/B14/dtype", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
@@ -4009,8 +4049,11 @@ test_misc23(void)
     tmp_id = H5Tcopy(H5T_NATIVE_DOUBLE);
     CHECK(tmp_id, FAIL, "H5Tcopy");
 
-    status = H5Tcommit_expand(file_id, "/A/B15/C15/A/dtype", tmp_id, create_id, access_id);
+    status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
+
+    status = H5Llink(file_id, "/A/B15/C15/A/dtype", tmp_id, create_id);
+    CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");

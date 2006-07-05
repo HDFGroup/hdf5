@@ -978,7 +978,7 @@ test_copy_named_datatype(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR;
@@ -1071,7 +1071,7 @@ test_copy_named_datatype_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL)) < 0) TEST_ERROR;
@@ -1170,7 +1170,7 @@ test_copy_named_datatype_vl_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the datatype for copy */
     if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR;
@@ -1287,7 +1287,7 @@ test_copy_dataset_simple(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
@@ -1394,7 +1394,7 @@ test_copy_dataset_simple_empty(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
@@ -1524,7 +1524,7 @@ test_copy_dataset_compound(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR;
@@ -1652,7 +1652,7 @@ test_copy_dataset_chunked(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
@@ -1769,7 +1769,7 @@ test_copy_dataset_chunked_empty(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
@@ -1907,7 +1907,7 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
@@ -2040,7 +2040,7 @@ test_copy_dataset_compressed(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
@@ -2168,7 +2168,7 @@ test_copy_dataset_compact(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPACT)) < 0) TEST_ERROR;
@@ -2302,7 +2302,7 @@ test_copy_dataset_external(hid_t fapl)
 #endif /* 0 */
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR;
@@ -2423,7 +2423,7 @@ test_copy_dataset_named_dtype(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR;
@@ -2560,7 +2560,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -2699,7 +2699,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -2833,7 +2833,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -2974,7 +2974,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -3094,7 +3094,7 @@ test_copy_dataset_contig_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -3232,7 +3232,7 @@ test_copy_dataset_chunked_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -3369,7 +3369,7 @@ test_copy_dataset_compact_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -3489,7 +3489,7 @@ test_copy_attribute_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
@@ -3632,7 +3632,7 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR;
@@ -3743,7 +3743,7 @@ test_copy_group_empty(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_EMPTY)) < 0) TEST_ERROR;
@@ -3874,7 +3874,7 @@ test_copy_group(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -4016,7 +4016,7 @@ test_copy_group_deep(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -4127,7 +4127,7 @@ test_copy_group_loop(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -4256,7 +4256,7 @@ test_copy_group_wide_loop(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -4389,7 +4389,7 @@ test_copy_group_links(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the group for copy */
     if ( (gid = H5Gopen(fid_src, NAME_GROUP_LINK)) < 0) TEST_ERROR;
@@ -4515,7 +4515,7 @@ test_copy_soft_link(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset through the soft link for copy */
     if ( (did = H5Dopen(fid_src, NAME_LINK_SOFT)) < 0) TEST_ERROR;
@@ -4634,11 +4634,11 @@ test_copy_exist(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE,fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE,fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* try to copy the dataset from SRC to DST again (should fail) */
     H5E_BEGIN_TRY {
-        ret = H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT);
+        ret = H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if( ret >= 0) TEST_ERROR;
 
@@ -4744,7 +4744,7 @@ test_copy_path(hid_t fapl)
 
     /* copy the dataset from SRC to DST (should fail - intermediate groups not there) */
     H5E_BEGIN_TRY {
-        ret = H5Gcopy(fid_src, NAME_DATASET_SUB_SUB, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT);
+        ret = H5Gcopy(fid_src, NAME_DATASET_SUB_SUB, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if( ret >= 0) TEST_ERROR;
 
@@ -4759,7 +4759,7 @@ test_copy_path(hid_t fapl)
     if ( H5Gclose(gid) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST, using full path */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
@@ -4837,7 +4837,7 @@ test_copy_same_file_named_datatype(hid_t fapl)
 
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the copied datatype */
     if ( (tid2 = H5Topen(fid, NAME_DATATYPE_SIMPLE2)) < 0) TEST_ERROR;
@@ -4987,7 +4987,7 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -5127,7 +5127,7 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -5275,7 +5275,7 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -5425,7 +5425,7 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR;
@@ -5581,7 +5581,7 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
@@ -5735,7 +5735,7 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
@@ -5889,7 +5889,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
@@ -6046,7 +6046,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT) < 0) TEST_ERROR;
+    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* open the dataset for copy */
     if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR;
@@ -6115,14 +6115,14 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
+test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const char* test_desciption)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1;                             /* Dataset ID */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
     hid_t gid_sub=-1, gid_sub_sub=-1;           /* Sub-group ID */
-    hid_t pid=-1;				/* Property ID */
+    hid_t pid=-1, lcpl_id=-1;			/* Property IDs */
     unsigned cpy_flags;                         /* Object copy flags */
     int depth = -1;                             /* Copy depth */
     hsize_t dim2d[2];
@@ -6237,8 +6237,16 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     if ( cpy_flags != flag) TEST_ERROR;
 
     /* copy the group from SRC to DST */
-    if ((flag & H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG) > 0) {
-        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, "/new_g0/new_g00", pid) < 0) TEST_ERROR;
+    if (crt_intermediate_grp) {
+        /* Create link creation plist to pass in intermediate group creation */
+        if ( (lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR;
+#ifdef H5_GROUP_REVISION
+        if ( H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) TEST_ERROR;
+#endif /* H5_GROUP_REVISION */
+
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, "/new_g0/new_g00", pid, lcpl_id) < 0) TEST_ERROR;
+
+        if ( H5Pclose(lcpl_id) < 0) TEST_ERROR;
 
         /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -6247,7 +6255,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
         if ( (gid2 = H5Gopen(fid_dst, "/new_g0/new_g00")) < 0) TEST_ERROR;
 
     } else if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
-        if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, pid) < 0) TEST_ERROR;
+        if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, pid, H5P_DEFAULT) < 0) TEST_ERROR;
 
         /* Unlink dataset to copy from original location */
         /* (So group comparison works properly) */
@@ -6260,7 +6268,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
         if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR;
 
     } else if(flag & H5G_COPY_WITHOUT_ATTR_FLAG) {
-        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid, H5P_DEFAULT) < 0) TEST_ERROR;
 
         /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -6268,7 +6276,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
         /* open the destination group */
         if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR;
     } else if(flag & H5G_COPY_SHALLOW_HIERARCHY_FLAG) {
-        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid) < 0) TEST_ERROR;
+        if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid, H5P_DEFAULT) < 0) TEST_ERROR;
 
         /* open the group for copy */
         if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR;
@@ -6298,7 +6306,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
     /* close the DST file */
     if ( H5Fclose(fid_dst) < 0) TEST_ERROR;
 
-    /* close property */
+    /* close properties */
     if ( H5Pclose(pid) < 0) TEST_ERROR;
 
     PASSED();
@@ -6306,6 +6314,7 @@ test_copy_option(hid_t fapl, unsigned flag, const char* test_desciption)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(lcpl_id);
         H5Pclose(pid);
     	H5Sclose(sid);
     	H5Dclose(did);
@@ -6384,14 +6393,16 @@ main(void)
     nerrors += test_copy_exist(fapl);
     nerrors += test_copy_path(fapl);
     nerrors += test_copy_same_file_named_datatype(fapl);
-    nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, "H5Gcopy(): without attributes");
-    nerrors += test_copy_option(fapl, H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG, "H5Gcopy(): with missing groups");
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, "H5Gcopy(): expand soft link");
-    nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, "H5Gcopy(): shallow group copy");
+    nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Gcopy(): without attributes");
+#ifdef H5_GROUP_REVISION
+    nerrors += test_copy_option(fapl, 0, TRUE, "H5Gcopy(): with missing groups");
+#endif /* H5_GROUP_REVISION */
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Gcopy(): expand soft link");
+    nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Gcopy(): shallow group copy");
 
 /* TODO: not implemented
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, "H5Gcopy: expand external link");
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, "H5Gcopy: expand object reference");
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Gcopy: expand external link");
+    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, FALSE, "H5Gcopy: expand object reference");
 */
 
 /* TODO: Add more tests for copying objects in same file */

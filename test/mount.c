@@ -453,7 +453,7 @@ test_mntlnk(hid_t fapl)
 /*-------------------------------------------------------------------------
  * Function:	test_move
  *
- * Purpose:	An object cannot be moved or renamed with H5Gmove() in such a
+ * Purpose:	An object cannot be moved or renamed with in such a
  *		way that the new location would be in a different file than
  *		the original location.
  *
@@ -486,9 +486,9 @@ test_move(hid_t fapl)
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
     /* First rename an object in the mounted file, then try it across files */
-    if (H5Gmove(file1, "/mnt1/rename_a/x", "/mnt1/rename_b/y")<0) goto error;
+    if (H5Lmove(file1, "/mnt1/rename_a/x", H5L_SAME_LOC, "/mnt1/rename_b/y", H5P_DEFAULT)<0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Gmove(file1, "/mnt1/rename_b/y",  "/y");
+	status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -796,7 +796,7 @@ test_mvmpt(hid_t fapl)
     if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT)<0) TEST_ERROR
 
     /* Rename the mount point */
-    if (H5Gmove(file1, "/mnt_move_a", "/mnt_move_b")<0) TEST_ERROR
+    if (H5Lmove(file1, "/mnt_move_a", H5L_SAME_LOC, "/mnt_move_b", H5P_DEFAULT)<0) TEST_ERROR
 
     /* Access something under the new name */
     if (H5Gget_objinfo(file1, "/mnt_move_b/file2", TRUE, NULL)<0) TEST_ERROR
@@ -864,7 +864,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link by renaming something */
     H5E_BEGIN_TRY {
-	status = H5Gmove(file1, "/mnt1/file2", "/file2");
+	status = H5Lmove(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -1450,7 +1450,7 @@ test_mount_after_unmount(hid_t fapl)
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
     /* (It is "disconnected" because it's parent file has been unmounted) */
-    if(H5Gmove2(gidAMX,"M/Y",gidAMX,"M/Z") < 0)
+    if(H5Lmove(gidAMX,"M/Y",gidAMX,"M/Z", H5P_DEFAULT) < 0)
 	TEST_ERROR
 
     /* Close group in file #3 */

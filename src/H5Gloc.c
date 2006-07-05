@@ -370,7 +370,7 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
     HDassert(obj_loc);
 
     /* "Translate" object location into link object */
-    lnk.type = H5G_LINK_HARD;
+    lnk.type = H5L_LINK_HARD;
 #ifdef H5_HAVE_GETTIMEOFDAY
     {
         struct timeval now_tv;
@@ -381,7 +381,7 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 #else /* H5_HAVE_GETTIMEOFDAY */
     lnk.ctime = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
-    lnk.cset = H5T_CSET_ASCII;          /* XXX: Allow user to set this */
+    lnk.cset = H5F_CRT_DEFAULT_CSET;
     /* Casting away const OK -QAK */
     lnk.name = (char *)name;
     lnk.u.hard.addr = obj_loc->oloc->addr;
@@ -397,7 +397,6 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_insert() */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc_exists

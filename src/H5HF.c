@@ -152,7 +152,7 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
     hdr = NULL;
 
     /* Add heap to list of open objects in file */
-    if(H5FO_insert(f, fh->hdr->heap_addr, fh) < 0)
+    if(H5FO_insert(f, fh->hdr->heap_addr, fh, FALSE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert heap into list of open objects")
 
     /* Set open object count */
@@ -228,7 +228,7 @@ HDfprintf(stderr, "%s: hdr->rc = %u\n", FUNC, hdr->rc);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
         /* Add heap to list of open objects in file */
-        if(H5FO_insert(f, fh->hdr->heap_addr, fh) < 0)
+        if(H5FO_insert(f, fh->hdr->heap_addr, fh, FALSE) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert heap into list of open objects")
 
         /* Set open object count */

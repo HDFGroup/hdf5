@@ -31,19 +31,13 @@
 
 #include "H5public.h"
 #include "H5Ipublic.h"
+#include "H5Lpublic.h"
 #include "H5Opublic.h"
 #include "H5Tpublic.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* Types of links */
-typedef enum H5G_link_t {
-    H5G_LINK_ERROR	= -1,
-    H5G_LINK_HARD	= 0,
-    H5G_LINK_SOFT	= 1
-} H5G_link_t;
 
 /*
  * An object has a certain type. The first few numbers are reserved for use
@@ -105,17 +99,10 @@ typedef struct H5G_stat_t {
 } H5G_stat_t;
 #endif /* QAK */
 
-#define H5G_SAME_LOC 0
-#define H5Glink(cur_loc_id, type, cur_name, new_name) \
-    H5Glink2(cur_loc_id, cur_name, type, H5G_SAME_LOC, new_name)
-#define H5Gmove(src_loc_id, src_name, dst_name) \
-    H5Gmove2(src_loc_id, src_name, H5G_SAME_LOC, dst_name)
-
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
 
 /* Flags for object copy (H5Gcopy) */
-#define H5G_COPY_CREATE_INTERMEDIATE_GROUP_FLAG (0x0001u)   /* Create missing groups when create a group */
 #define H5G_COPY_SHALLOW_HIERARCHY_FLAG         (0x0002u)   /* Copy only immediate members */
 #define H5G_COPY_EXPAND_SOFT_LINK_FLAG          (0x0004u)   /* Expand soft links into new objects */
 #define H5G_COPY_EXPAND_EXT_LINK_FLAG           (0x0008u)   /* Expand external links into new objects */
@@ -131,26 +118,41 @@ H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
 H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
 H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name, size_t size);
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
-H5_DLL herr_t H5Gmove2(hid_t src_loc, const char *src, hid_t dst_loc,
-			const char *dst);
-H5_DLL herr_t H5Glink2(hid_t src_loc, const char *cur_name, H5G_link_t type,
-		        hid_t dst_loc, const char *new_name);
-H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
 			      hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
-H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size,
-			      char *buf/*out*/);
 H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name,
 			      const char *comment);
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 			   char *buf);
 #ifdef H5_GROUP_REVISION
-H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, const char *name, hid_t gcpl_id,
+H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id,
     hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
 #endif /* H5_GROUP_REVISION */
 H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-        const char *dst_name, hid_t plist_id);
+        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
+
+/* Functions and variables defined for compatibility with previous versions
+ * of the HDF5 API.
+ * Use of these functions and variables is depreciated.
+ */
+H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5L_link_t type,
+               const char *cur_name, const char *new_name);
+H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,
+                      const char *dst_name);
+H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name,
+                   H5L_link_t type, hid_t new_loc_id, const char *new_name);
+H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name,
+                       hid_t dst_loc_id, const char *dst_name);
+H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
+H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name,
+                      size_t size, char *buf/*out*/);
+
+#define H5G_LINK_ERROR H5L_LINK_ERROR
+#define H5G_LINK_HARD H5L_LINK_HARD
+#define H5G_LINK_SOFT H5L_LINK_SOFT
+#define H5G_link_t H5L_link_t
+#define H5G_SAME_LOC H5L_SAME_LOC
 
 #ifdef __cplusplus
 }

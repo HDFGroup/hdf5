@@ -28,7 +28,7 @@
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 #
 # HDF5-C++ Makefile(.in)
-# 
+#
 SOURCES = $(dsets_SOURCES) $(testhdf5_SOURCES)
 
 srcdir = @srcdir@
@@ -630,10 +630,10 @@ uninstall-am: uninstall-info-am
         build-tests check-clean check-install check-p check-s check-vfd \
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
-# Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that 
+# Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
 # holds *.ii files, which are template entity instantiations.
 # This entire directory should be cleaned.
-mostlyclean-local: 
+mostlyclean-local:
 	@if test -d ii_files; then                                       \
 	  $(RM) -rf ii_files;                                           \
 	fi

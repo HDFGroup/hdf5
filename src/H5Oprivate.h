@@ -39,6 +39,7 @@
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
+#include "H5Lpublic.h"         /* Link functions                       */
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -153,7 +154,7 @@ typedef struct H5O_link_soft_t {
 } H5O_link_soft_t;
 
 typedef struct H5O_link_t {
-    H5G_link_t  type;                   /* Type of link */
+    H5L_link_t  type;                   /* Type of link */
     time_t      ctime;                  /* Time link was createed */
     H5T_cset_t  cset;                   /* Character set of link name	*/
     char	*name;			/* Link name */
@@ -364,6 +365,12 @@ H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
+
+/*
+ * These functions operate on links
+ */
+H5_DLL void *H5O_link_copy(const void *_mesg, void *_dest, unsigned update_flags);
+
 
 /*
  * These functions operate on object locations

@@ -414,7 +414,7 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Name component is too long"))==NULL)
 if((H5E_COMPLEN_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_LINK_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Link count failure"))==NULL)
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Link failure"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_LINK_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")

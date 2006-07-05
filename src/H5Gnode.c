@@ -1987,14 +1987,14 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
 
             /* Construct link information for eventual insertion */
-            lnk.type = H5G_LINK_HARD;
+            lnk.type = H5L_LINK_HARD;
             lnk.u.hard.addr = new_oloc.addr;
         } /* ( H5F_addr_defined(src_ent->header)) */
         else if(H5G_CACHED_SLINK == src_ent->type) {
             /* it is a soft link */
 
             /* Construct link information for eventual insertion */
-            lnk.type = H5G_LINK_SOFT;
+            lnk.type = H5L_LINK_SOFT;
             lnk.u.soft.name = H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
         } /* else if */
         else
@@ -2011,7 +2011,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 #else /* H5_HAVE_GETTIMEOFDAY */
         lnk.ctime = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
-        lnk.cset = H5T_CSET_ASCII;          /* XXX: Allow user to set this */
+        lnk.cset = H5F_CRT_DEFAULT_CSET;          /* XXX: Allow user to set this */
         /* lnk.name = name; */              /* This will be set in callback */
 
         /* Determine name of source object */

@@ -38,7 +38,6 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_link_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_link_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_link_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_link_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
@@ -76,9 +75,12 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
 /* Current version of link information */
 #define H5O_LINK_VERSION 	1
 
+#endif /* H5_GROUP_REVISION */
+
 /* Declare a free list to manage the H5O_link_t struct */
 H5FL_DEFINE_STATIC(H5O_link_t);
 
+#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_link_decode
@@ -122,7 +124,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
     /* Get the type of the link */
     lnk->type = *p++;
-    if(lnk->type < H5G_LINK_HARD || lnk->type > H5G_LINK_SOFT)
+    if(lnk->type < H5L_LINK_HARD || lnk->type > H5L_LINK_SOFT)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
 
     /* Get the link creation time from the file */
@@ -146,12 +148,12 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
     /* Get the appropriate information for each type of link */
     switch(lnk->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             /* Get the address of the object the link points to */
             H5F_addr_decode(f, &p, &(lnk->u.hard.addr));
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             /* Get the link value */
             UINT16DECODE(p, len)
             if(len == 0)
@@ -176,7 +178,7 @@ done:
         if(lnk != NULL) {
             if(lnk->name != NULL)
                 H5MM_xfree(lnk->name);
-            if(lnk->type == H5G_LINK_SOFT && lnk->u.soft.name != NULL)
+            if(lnk->type == H5L_LINK_SOFT && lnk->u.soft.name != NULL)
                 H5MM_xfree(lnk->u.soft.name);
             H5FL_FREE(H5O_link_t, lnk);
         } /* end if */
@@ -236,12 +238,12 @@ H5O_link_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     /* Store the appropriate information for each type of link */
     switch(lnk->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             /* Store the address of the object the link points to */
             H5F_addr_encode(f, &p, lnk->u.hard.addr);
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             /* Store the link value */
             len = (uint16_t)HDstrlen(lnk->u.soft.name);
             HDassert(len > 0);
@@ -251,12 +253,13 @@ H5O_link_encode(H5F_t *f, uint8_t *p, const void *_mesg)
             break;
 
         default:
-            HDassert((lnk->type == H5G_LINK_HARD) || (lnk->type == H5G_LINK_SOFT));
+            HDassert((lnk->type == H5L_LINK_HARD) || (lnk->type == H5L_LINK_SOFT));
             break;
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_link_encode() */
+#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -277,7 +280,7 @@ H5O_link_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-static void *
+void *
 H5O_link_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
@@ -295,7 +298,7 @@ H5O_link_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     *dest = *lnk;
     HDassert(lnk->name);
     dest->name = H5MM_xstrdup(lnk->name);
-    if(lnk->type == H5G_LINK_SOFT)
+    if(lnk->type == H5L_LINK_SOFT)
         dest->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
 
     /* Set return value */
@@ -306,6 +309,7 @@ done:
 } /* end H5O_link_copy() */
 
 
+#ifdef H5_GROUP_REVISION
 /*-------------------------------------------------------------------------
  * Function:    H5O_link_size
  *
@@ -341,17 +345,17 @@ H5O_link_size(const H5F_t *f, const void *_mesg)
 
     /* Add the appropriate length for each type of link */
     switch(lnk->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             ret_value += H5F_SIZEOF_ADDR(f);
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             ret_value += 2 +                            /* Link value length */
                         HDstrlen(lnk->u.soft.name);     /* Link value */
             break;
 
         default:
-            HDassert((lnk->type == H5G_LINK_HARD) || (lnk->type == H5G_LINK_SOFT));
+            HDassert((lnk->type == H5L_LINK_HARD) || (lnk->type == H5L_LINK_SOFT));
             break;
     } /* end switch */
 
@@ -381,7 +385,7 @@ H5O_link_reset(void *_mesg)
 
     if(lnk) {
         /* Free information for link (but don't free link pointer) */
-        if(lnk->type == H5G_LINK_SOFT)
+        if(lnk->type == H5L_LINK_SOFT)
             lnk->u.soft.name = H5MM_xfree(lnk->u.soft.name);
         lnk->name = H5MM_xfree(lnk->name);
     } /* end if */
@@ -444,7 +448,7 @@ H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     HDassert(lnk);
 
     /* Decrement reference count to the object, for hard links */
-    if(lnk->type == H5G_LINK_HARD) {
+    if(lnk->type == H5L_LINK_HARD) {
         H5O_loc_t oloc;
 
         /* Construct object location for object, in order to decrement it's ref count */
@@ -545,12 +549,12 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
 
     /* "Deep copy" other information for each kind of link */
     switch(link_src->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             /* Set link's address undefined here, will be fixed up in "post copy" callback */
             link_dst->u.hard.addr = HADDR_UNDEF;
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             /* Copy the soft link's value */
             if(NULL == (link_dst->u.soft.name = H5MM_xstrdup(link_src->u.soft.name)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -641,7 +645,7 @@ H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
 
     /* Additional "deep copy" for each kind of link */
     switch(link_src->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             /* Copy the object pointed to */
             {
                 H5O_loc_t src_oloc;             /* Temporary object location for source object */
@@ -669,7 +673,7 @@ H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
             } /* end case */
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             HGOTO_DONE(SUCCEED)
             break;
 
@@ -715,8 +719,8 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Link Type:", (lnk->type == H5G_LINK_HARD ? "Hard" :
-                  (lnk->type == H5G_LINK_SOFT ? "Soft" : "Unknown")));
+	      "Link Type:", (lnk->type == H5L_LINK_HARD ? "Hard" :
+                  (lnk->type == H5L_LINK_SOFT ? "Soft" : "Unknown")));
 
     tm = HDlocaltime(&(lnk->ctime));
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
@@ -730,12 +734,12 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 	      "Link Name:", lnk->name);
 
     switch(lnk->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                       "Object address:", lnk->u.hard.addr);
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                       "Link Value:", lnk->u.soft.name);
             break;

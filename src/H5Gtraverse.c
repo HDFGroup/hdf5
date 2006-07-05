@@ -32,7 +32,9 @@
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Lprivate.h"		/* Links				*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Ppublic.h"		/* Property Lists			*/
 
 /* Private typedefs */
 
@@ -163,7 +165,7 @@ H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     /* Sanity check */
     HDassert(grp_loc);
     HDassert(lnk);
-    HDassert(lnk->type == H5G_LINK_SOFT);
+    HDassert(lnk->type == H5L_LINK_SOFT);
     HDassert(nlinks);
 
     /* Set up temporary location */
@@ -423,7 +425,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
             /* Set the object location, if it's a hard link set the address also */
             obj_loc.oloc->file = grp_loc.oloc->file;
-            if(lnk.type == H5G_LINK_HARD)
+            if(lnk.type == H5L_LINK_HARD)
                 obj_loc.oloc->addr = lnk.u.hard.addr;
             obj_loc_valid = TRUE;
 
@@ -432,7 +434,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
              * is the last component of the name and the H5G_TARGET_SLINK bit of
              * TARGET is set then we don't follow it.
              */
-            if(H5G_LINK_SOFT == lnk.type &&
+            if(H5L_LINK_SOFT == lnk.type &&
                     (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
                 if((*nlinks)-- <= 0)
                     HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "too many links")
@@ -506,7 +508,6 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                 /* Insert new group into current group's symbol table */
                 if(H5G_loc_insert(&grp_loc, H5G_comp_g, &obj_loc, TRUE, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group")
-
                 /* Close new group */
                 if(H5O_close(obj_loc.oloc) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")

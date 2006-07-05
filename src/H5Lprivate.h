@@ -12,14 +12,32 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+/*
+ * This file contains private information about the H5DL module
+ * for dealing with links in an HDF5 file.
+ */
+#ifndef _H5Lprivate_H
+#define _H5Lprivate_H
 
-/* Private header files */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
+/* Include package's public header */
+#include "H5Lpublic.h"
 
-/* Local datatypes */
+/* Private headers needed by this file */
+#include "H5Gprivate.h"
+#include "H5Oprivate.h"
 
-/* Static function prototypes */
+/* Definitions for creating intermediate groups */
+#define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group"
+#define H5L_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
+#define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
 
+
+/* Functions that understand link messages */
+/* forward reference for later use */
+struct H5HL_t; /* defined in H5HLprivate.h */
+
+H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
+    H5G_loc_t *obj_loc, hid_t dxpl, hid_t lcpl_id);
+H5_DLL hid_t H5L_get_default_lcpl();
+
+#endif /* _H5Lprivate_H */

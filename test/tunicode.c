@@ -373,6 +373,11 @@ void test_vl_string(hid_t fid, const char *string)
  * test_objnames
  * Tests that UTF-8 can be used for object names in the file.
  * Tests groups, datasets, named datatypes, and soft links.
+ * Note that this test doesn't actually mark the names as being
+ * in UTF-8.  At the time this test was written, that feature
+ * didn't exist in HDF5, and when the character encoding property
+ * was added to links it didn't change how they were stored in the file,
+ * -JML 2/2/2006
  */
 void test_objnames(hid_t fid, const char* string)
 {
@@ -552,7 +557,7 @@ void test_attrname(hid_t fid, const char * string)
 }
 
 /*
- * test_attrname
+ * test_compound
  * Test that compound datatypes can have UTF-8 field names.
  */
 void test_compound(hid_t fid, const char * string)

@@ -74,21 +74,15 @@
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
                                                     H5G_CRT_GINFO_EST_NAME_LEN}
 
-/* Definitions for creating intermediate groups */
-#define H5G_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group"
-#define H5G_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
-#define H5G_CRT_INTERMEDIATE_GROUP_DEF          0
-
 /* definitions for copying objects */
 #define H5G_CPY_OPTION_NAME 			"copy object"
 #define H5G_CPY_OPTION_SIZE			sizeof(unsigned)
 #define H5G_CPY_OPTION_DEF			0
 
-
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
     H5G_NAME_MOVE = 0,          /* H5*move call    */
-    H5G_NAME_UNLINK,            /* H5Gunlink call  */
+    H5G_NAME_UNLINK,            /* H5Lunlink call  */
     H5G_NAME_MOUNT,             /* H5Fmount call   */
     H5G_NAME_UNMOUNT            /* H5Funmount call */
 } H5G_names_op_t;
@@ -128,8 +122,6 @@ H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL herr_t H5G_free(H5G_t *grp);
 H5_DLL H5G_t *H5G_open(H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
-H5_DLL herr_t H5G_insert(H5G_loc_t *loc, const char *name,
-    H5G_loc_t *obj_loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 H5_DLL herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
 H5_DLL H5F_t *H5G_insertion_file(H5G_loc_t *loc, const char *name, hid_t dxpl_id);

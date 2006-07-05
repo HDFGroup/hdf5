@@ -145,7 +145,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
         H5F_t *f;               IN/OUT: File's opened object info set
         haddr_t addr;           IN: Address of object to insert
         void *obj;              IN: Pointer to object to insert
-        int type;               IN: Type of object being inserted
+        hbool_t delete_flag;    IN: Whether to 'mark' this object for deletion
 
  RETURNS
     Returns a non-negative on success, negative on failure
@@ -157,7 +157,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_insert(const H5F_t *f, haddr_t addr, void *obj)
+H5FO_insert(const H5F_t *f, haddr_t addr, void *obj, hbool_t delete_flag)
 {
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -178,7 +178,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, void *obj)
     /* Assign information */
     open_obj->addr=addr;
     open_obj->obj=obj;
-    open_obj->deleted=0;
+    open_obj->deleted=delete_flag;
 
     /* Insert into container */
     if(H5SL_insert(f->shared->open_objs,&open_obj->addr,open_obj)<0)
@@ -289,7 +289,7 @@ H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
  PURPOSE
     Check if an object is marked to be deleted when it is closed
  USAGE
-    htri_t H5FO_mark(f,addr)
+    htri_t H5FO_marked(f,addr)
         const H5F_t *f;         IN: File opened object is in
         haddr_t addr;           IN: Address of object to delete
 

@@ -329,7 +329,8 @@ lifecycle(hid_t fapl)
     if(H5Pset_est_link_info(gcpl, LIFECYCLE_EST_NUM_ENTRIES, LIFECYCLE_EST_NAME_LEN) < 0) TEST_ERROR;
 
     /* Create group for testing lifecycle */
-    if((gid = H5Gcreate_expand(fid, LIFECYCLE_TOP_GROUP, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((H5Lcreate(fid, LIFECYCLE_TOP_GROUP, gid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Query group creation property settings */
     if(H5Pget_local_heap_size_hint(gcpl, &lheap_size_hint) < 0) TEST_ERROR;
@@ -787,7 +788,8 @@ no_compact(hid_t fapl)
     if(est_name_len != H5G_CRT_GINFO_EST_NAME_LEN) TEST_ERROR;
 
     /* Create group for testing lifecycle */
-    if((gid = H5Gcreate_expand(fid, NO_COMPACT_TOP_GROUP, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((H5Lcreate(fid, NO_COMPACT_TOP_GROUP, gid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close GCPL */
     if(H5Pclose(gcpl) < 0) TEST_ERROR;
@@ -873,6 +875,7 @@ gcpl_on_root(hid_t fapl)
     hid_t	gid2 = (-1);            /* Datatype ID */
     hid_t       fcpl = (-1);            /* File creation property list ID */
     hid_t       gcpl = (-1);            /* Group creation property list ID */
+    hid_t       lcpl = (-1);            /* Link creation property list ID */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     char	filename[NAME_BUF_SIZE];
@@ -912,14 +915,15 @@ gcpl_on_root(hid_t fapl)
     if(H5Pclose(gcpl) < 0) TEST_ERROR;
 
     /* Create a group creation property list, with intermediate group creation set */
-    if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR;
-    if(H5Pset_create_intermediate_group(gcpl, TRUE) < 0) TEST_ERROR
+    if((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR;
+    if(H5Pset_create_intermediate_group(lcpl, TRUE) < 0) TEST_ERROR
 
     /* Create a group and intermediate groups, to check if root group settings are inherited */
-    if((gid2 = H5Gcreate_expand(gid, GCPL_ON_ROOT_BOTTOM_GROUP, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate_expand(gid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((H5Lcreate(gid, GCPL_ON_ROOT_BOTTOM_GROUP, gid2, lcpl)) < 0) TEST_ERROR
 
-    /* Close GCPL */
-    if(H5Pclose(gcpl) < 0) TEST_ERROR;
+    /* Close LCPL */
+    if(H5Pclose(lcpl) < 0) TEST_ERROR;
 
     /* Query the group creation properties */
     if((gcpl = H5Gget_create_plist(gid2)) < 0) TEST_ERROR;
@@ -1022,6 +1026,7 @@ main(void)
     nerrors += read_old(fapl);
     nerrors += no_compact(fapl);
     nerrors += gcpl_on_root(fapl);
+
 #endif /* H5_GROUP_REVISION */
     if (nerrors) goto error;
 

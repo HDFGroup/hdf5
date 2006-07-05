@@ -12,14 +12,25 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+/*
+ * Programmer: James Laird <matzke@llnl.gov>
+ *             Friday, December 1, 2005
+ *
+ * Purpose:     This file contains declarations which are visible
+ *              only within the H5L package. Source files outside the
+ *              H5L package should include H5Lprivate.h instead.
+ */
+#ifndef H5L_PACKAGE
+#error "Do not include this file outside the H5L package!"
+#endif
 
-/* Private header files */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
+#ifndef _H5Lpkg_H
+#define _H5Lpkg_H
 
-/* Local datatypes */
+/* Get package's private header */
+#include "H5Lprivate.h"
 
-/* Static function prototypes */
+
+
+#endif /* _H5Lpkg_H */
 

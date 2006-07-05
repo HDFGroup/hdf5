@@ -111,6 +111,8 @@ H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
 H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t *size);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
+H5_DLL hid_t H5Dcreate_expand(hid_t file_id, hid_t type_id,
+			 hid_t space_id, hid_t plist_id);
 
 
 #ifdef __cplusplus

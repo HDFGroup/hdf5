@@ -56,6 +56,8 @@ hid_t H5P_CLS_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_CLS_OBJECT_COPY_g         = FAIL;
+hid_t H5P_CLS_LINK_CREATE_g         = FAIL;
+hid_t H5P_CLS_STRING_CREATE_g         = FAIL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
@@ -74,6 +76,7 @@ hid_t H5P_LST_DATATYPE_CREATE_g     = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_LST_OBJECT_COPY_g         = FAIL;
+hid_t H5P_LST_LINK_CREATE_g         = FAIL;
 
 /* Track the revision count of a class, to make comparisons faster */
 static unsigned H5P_next_rev=0;
@@ -238,10 +241,14 @@ H5P_init_interface(void)
     H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;
     /* Object creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
-     * - Default value for "intermediate group creation"
      */
     H5P_genclass_t  *ocrt_class;    /* Pointer to object (dataset, group, or datatype) creation property list class created */
-    unsigned    intmd_group = H5G_CRT_INTERMEDIATE_GROUP_DEF;
+    /* String creation property class variables.  In sequence, they are,
+     * - Creation property list class to modify
+     * - Default value for "character encoding"
+     */
+    H5P_genclass_t  *strcrt_class;  /* Pointer to string creation class */
+    H5T_cset_t  char_encoding = H5P_CHAR_ENCODING_DEF;
     /* Object copy property class variables.  In sequence, they are,
      * - Copy property list class to modify
      * - Default value for "object copy parameters"
@@ -283,18 +290,6 @@ H5P_init_interface(void)
     /* Register the object class */
     if ((H5P_CLS_OBJECT_CREATE_g = H5I_register (H5I_GENPROP_CLS, ocrt_class))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
-
-    /* Get the number of properties in the object class */
-    if(H5P_get_nprops_pclass(ocrt_class,&nprops,FALSE)<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
-
-    /* Assume that if there are properties in the class, they are the default ones */
-    if(nprops==0) {
-        /* Register create intermediate groups */
-        if(H5P_register(ocrt_class,H5G_CRT_INTERMEDIATE_GROUP_NAME,H5G_CRT_INTERMEDIATE_GROUP_SIZE,
-                 &intmd_group,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    } /* end if */
 
     /* Create object copy property  class */
 
@@ -436,13 +431,47 @@ H5P_init_interface(void)
     if ((H5P_CLS_DATATYPE_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
+    /* Create string creation property class
+     * Objects that contain strings should inherit from this class 
+     * For example, links and attributes have names associated with them. */
+
+    /* Allocate the string creation class */
+    assert(H5P_CLS_STRING_CREATE_g==(-1));
+    if (NULL==(strcrt_class = H5P_create_class (root_class,"string create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the string class */
+    if ((H5P_CLS_STRING_CREATE_g = H5I_register (H5I_GENPROP_CLS, strcrt_class))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Get the number of properties in the string class */
+    if(H5P_get_nprops_pclass(strcrt_class,&nprops,FALSE)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register character encoding */
+        if(H5P_register(strcrt_class,H5P_CHAR_ENCODING_NAME,H5P_CHAR_ENCODING_SIZE,
+                 &char_encoding,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    } /* end if */
+
     /* Allocate the attribute creation class */
     assert(H5P_CLS_ATTRIBUTE_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (ocrt_class,"attribute create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (strcrt_class,"attribute create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the attribute creation class */
     if ((H5P_CLS_ATTRIBUTE_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+
+    /* Allocate the link creation class */
+    assert(H5P_CLS_LINK_CREATE_g==(-1));
+    if (NULL==(pclass = H5P_create_class (strcrt_class,"link create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+
+    /* Register the link creation class */
+    if ((H5P_CLS_LINK_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
 done:
@@ -503,8 +532,10 @@ H5P_term_interface(void)
                         H5P_LST_GROUP_ACCESS_g =
                         H5P_LST_DATATYPE_CREATE_g =
                         H5P_LST_DATATYPE_ACCESS_g =
+                        H5P_CLS_STRING_CREATE_g =
                         H5P_LST_ATTRIBUTE_CREATE_g =
                         H5P_LST_OBJECT_COPY_g =
+                        H5P_LST_LINK_CREATE_g =
                         H5P_LST_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -526,8 +557,10 @@ H5P_term_interface(void)
                         H5P_CLS_GROUP_ACCESS_g =
                         H5P_CLS_DATATYPE_CREATE_g =
                         H5P_CLS_DATATYPE_ACCESS_g =
+                        H5P_CLS_STRING_CREATE_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
                         H5P_CLS_OBJECT_COPY_g =
+                        H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */

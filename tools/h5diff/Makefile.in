@@ -361,7 +361,7 @@ ph5diff_SOURCES = ph5diff_main.c h5diff_common.c
 h5diffgentest_SOURCES = h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
-LDADD = $(LIBH5TOOLS) $(LIBHDF5) 
+LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

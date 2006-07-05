@@ -28,6 +28,7 @@
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"        /* Memory Management                    */
 
 /* Private macros */
 #define H5G_NO_CHANGE   (-1)            /*see H5G_ent_modified()             */
@@ -436,12 +437,12 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
 
     /* Build correct information for symbol table entry based on link type */
     switch(lnk->type) {
-        case H5G_LINK_HARD:
+        case H5L_LINK_HARD:
             ent->type = H5G_NOTHING_CACHED;
             ent->header = lnk->u.hard.addr;
             break;
 
-        case H5G_LINK_SOFT:
+        case H5L_LINK_SOFT:
             {
                 size_t	lnk_offset;		/* Offset to sym-link value	*/
 

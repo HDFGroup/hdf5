@@ -296,7 +296,7 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
     /* Create link message from object entry */
     HDassert(ent->type == H5G_NOTHING_CACHED || ent->type == H5G_CACHED_SLINK);
 /* XXX: Set character set & creation time for real? */
-    lnk->cset = H5T_CSET_ASCII;
+    lnk->cset = H5F_CRT_DEFAULT_CSET;
     lnk->ctime = 0;
     lnk->name = H5MM_xstrdup(name);   /* Casting away const OK -QAK */
     HDassert(lnk->name);

@@ -25,6 +25,11 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
+/* String creation properties */
+#define H5P_CHAR_ENCODING_NAME  "character_encoding"
+#define H5P_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
+#define H5P_CHAR_ENCODING_DEF   H5F_CRT_DEFAULT_CSET
+
 /* Forward declarations for anonymous H5P objects */
 typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;

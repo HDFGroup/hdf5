@@ -188,7 +188,7 @@ MINOR, OHDR, H5E_CANTPACK, Can't pack messages
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object
 MINOR, GROUP, H5E_CANTCLOSEOBJ, Can't close object
 MINOR, GROUP, H5E_COMPLEN, Name component is too long
-MINOR, GROUP, H5E_LINK, Link count failure
+MINOR, GROUP, H5E_LINK, Link failure
 MINOR, GROUP, H5E_SLINK, Symbolic link error
 MINOR, GROUP, H5E_PATH, Problem with path to object
 

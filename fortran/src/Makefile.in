@@ -830,7 +830,7 @@ uninstall-local:
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
-	@$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)   
+	@$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)
 
 #Specify what Automake needs to create: first the H5fort_type_defines.h
 # header, then H5match_types which includes that header, then

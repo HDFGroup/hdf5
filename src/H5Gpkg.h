@@ -245,7 +245,7 @@ typedef struct {
 } H5G_linkvalue_soft_t;
 
 typedef struct {
-    H5G_link_t type;                    /* Type of link */
+    H5L_link_t type;                    /* Type of link */
     union {
         H5G_linkvalue_hard_t hard;      /* Information for hard link */
         H5G_linkvalue_soft_t soft;      /* Information for soft link */
@@ -273,6 +273,7 @@ H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
 /*
  * Utility functions
  */
+H5_DLL char * H5G_normalize(const char *name);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL const char * H5G_component(const char *name, size_t *size_p);
 H5_DLL herr_t H5G_traverse_term_interface(void);
@@ -318,6 +319,8 @@ H5_DLL herr_t H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name,
     const H5O_link_t *lnk, H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_ent_debug(H5F_t *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
 			     int indent, int fwidth, haddr_t heap);
+
+struct H5HL_t; /* defined in H5HLprivate.h */
 
 /* Functions that understand symbol table nodes */
 H5_DLL herr_t H5G_node_init(H5F_t *f);

@@ -1872,16 +1872,16 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5G_link_t link_type = va_arg (ap, H5G_link_t); /*lint !e64 Type mismatch not really occuring */
+		    H5L_link_t link_type = va_arg (ap, H5L_link_t); /*lint !e64 Type mismatch not really occuring */
 		    switch (link_type) {
-		    case H5G_LINK_ERROR:
-			fprintf (out, "H5G_LINK_ERROR");
+		    case H5L_LINK_ERROR:
+			fprintf (out, "H5L_LINK_ERROR");
 			break;
-		    case H5G_LINK_HARD:
-			fprintf (out, "H5G_LINK_HARD");
+		    case H5L_LINK_HARD:
+			fprintf (out, "H5L_LINK_HARD");
 			break;
-		    case H5G_LINK_SOFT:
-			fprintf (out, "H5G_LINK_SOFT");
+		    case H5L_LINK_SOFT:
+			fprintf (out, "H5L_LINK_SOFT");
 			break;
 		    default:
 			fprintf (out, "%ld", (long)link_type);
@@ -1904,7 +1904,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf (out, "H5G_UNKNOWN");
 			break;
 		    case H5G_LINK:
-			fprintf (out, "H5G_LINK");
+			fprintf (out, "H5L_LINK");
 			break;
 		    case H5G_GROUP:
 			fprintf (out, "H5G_GROUP");

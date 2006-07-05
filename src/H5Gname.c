@@ -814,6 +814,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 /* Make certain that the source and destination names are full (not relative) paths */
                 src_path_r = H5RS_dup(names->loc->path->full_path_r);
                 if(*(H5RS_get_str(names->dst_name)) != '/') {
+                    HDassert(names->dst_loc && names->dst_loc->path);
                     /* Create reference counted string for full dst path */
                     if((dst_path_r = H5G_build_fullpath_refstr_refstr(names->dst_loc->path->full_path_r, names->dst_name)) == NULL)
                         HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build destination path name")
@@ -890,6 +891,9 @@ H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5G_name_replace, FAIL)
+
+    /* Check arguments */
+    HDassert(loc && loc->path);
 
     /* Check if the object we are manipulating has a path */
     if(loc->path->full_path_r) {

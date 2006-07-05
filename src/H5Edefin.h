@@ -115,7 +115,7 @@ hid_t H5E_NOENCODER_g      = FAIL;      /* Filter present but encoding disabled 
 hid_t H5E_CANTOPENOBJ_g    = FAIL;      /* Can't open object */
 hid_t H5E_CANTCLOSEOBJ_g   = FAIL;      /* Can't close object */
 hid_t H5E_COMPLEN_g        = FAIL;      /* Name component is too long */
-hid_t H5E_LINK_g           = FAIL;      /* Link count failure */
+hid_t H5E_LINK_g           = FAIL;      /* Link-related failure */
 hid_t H5E_SLINK_g          = FAIL;      /* Symbolic link error */
 hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 

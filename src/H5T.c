@@ -420,7 +420,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 #define H5T_INIT_TYPE_STRING_COMMON {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_STRING)				      \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)				      \
-    dt->shared->u.atomic.u.s.cset = H5T_CSET_ASCII;				      \
+    dt->shared->u.atomic.u.s.cset = H5F_CRT_DEFAULT_CSET;				      \
 }
 
 #define H5T_INIT_TYPE_CSTRING_CORE {					      \
@@ -3104,7 +3104,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
 
                     /* Insert opened named datatype into opened object list for the file */
-                    if(H5FO_insert(old_dt->oloc.file, old_dt->oloc.addr, new_dt->shared)<0)
+                    if(H5FO_insert(old_dt->oloc.file, old_dt->oloc.addr, new_dt->shared, FALSE)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
                     /* Increment object count for the object in the top file */
