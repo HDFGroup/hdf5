@@ -32,12 +32,16 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG=testhdf5 lheap fheap ohdr stab gheap btree2 cache cache_api \
+# These tests (fheap, btree2) are under development and are not used by
+# the library yet. Move them to the end so that their failure do not block
+# other current library code tests.
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname vfd ntypes dangle dtransform reserved cross_read
+           getname vfd ntypes dangle dtransform reserved cross_read \
+	   fheap btree2
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.

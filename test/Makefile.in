@@ -73,18 +73,18 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
-am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) fheap$(EXEEXT) \
-	ohdr$(EXEEXT) stab$(EXEEXT) gheap$(EXEEXT) btree2$(EXEEXT) \
-	cache$(EXEEXT) cache_api$(EXEEXT) pool$(EXEEXT) \
-	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
-	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
-	cmpd_dset$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
-	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
-	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
-	flush2$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
-	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
-	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
-	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT)
+am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
+	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
+	pool$(EXEEXT) hyperslab$(EXEEXT) istore$(EXEEXT) \
+	bittests$(EXEEXT) dt_arith$(EXEEXT) dtypes$(EXEEXT) \
+	dsets$(EXEEXT) cmpd_dset$(EXEEXT) extend$(EXEEXT) \
+	external$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
+	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
+	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) enum$(EXEEXT) \
+	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
+	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
+	fheap$(EXEEXT) btree2$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = gen_deflate$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_filters$(EXEEXT) \
 @BUILD_ALL_CONDITIONAL_TRUE@	gen_new_array$(EXEEXT) \
@@ -618,12 +618,16 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG = testhdf5 lheap fheap ohdr stab gheap btree2 cache cache_api \
+# These tests (fheap, btree2) are under development and are not used by
+# the library yet. Move them to the end so that their failure do not block
+# other current library code tests.
+TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname vfd ntypes dangle dtransform reserved cross_read
+           getname vfd ntypes dangle dtransform reserved cross_read \
+	   fheap btree2
 
 @BUILD_ALL_CONDITIONAL_FALSE@BUILD_ALL_PROGS = 
 
