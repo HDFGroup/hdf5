@@ -2202,13 +2202,13 @@ END SUBROUTINE h5pget_cache_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top"><em>hid_t</em> <code>plist</code></td>
             <td valign="top">IN: Identifier of property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em>&nbsp;<code>max_ndims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>int</em>&nbsp;<code>max_ndims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Size of the <code>dims</code> array.</td></tr>
         <tr>
-		    <td valign="top"><em>hsize_t *</em> <code>dims</code></td>
+            <td valign="top"><em>hsize_t *</em> <code>dims</code></td>
             <td valign="top">OUT: Array to store the chunk dimensions.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -4872,13 +4872,14 @@ END SUBROUTINE h5pget_small_data_block_size_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
-            <td valign="top">OUT: Pointer to location to return the symbol table's B-tree 1/2 rank.</td></tr>
+            <td valign="top"><em>unsigned *</em> <code>ik</code></td>
+            <td valign="top">OUT: Pointer to location to return the 
+                symbol table's B-tree 1/2 rank.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned *</em> <code>size</code></td>
+            <td valign="top"><em>unsigned *</em> <code>size</code></td>
             <td valign="top">OUT: Pointer to location to return the symbol table's leaf node 1/2 size.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -6625,7 +6626,8 @@ END SUBROUTINE h5pset_cache_f
     <ul><table>
         <tr>
           <td valign="top"><em>hid_t</em> <code>plist</code></td>
-          <td valign="top">IN: Identifier for property list to query.</td></tr>
+          <td valign="top">IN: Dataset creation property list
+              identifier.</td></tr>
         <tr>
           <td valign="top"><em>int</em> <code>ndims</code></td>
           <td valign="top">IN: The number of dimensions of each chunk.</td></tr>
@@ -9979,13 +9981,14 @@ END SUBROUTINE h5pset_small_data_block_size_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Identifier for property list to query.</td></tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File creation property list 
+                identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned</em> <code>ik</code></td>
+            <td valign="top"><em>unsigned</em> <code>ik</code></td>
             <td valign="top">IN: Symbol table tree rank.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned</em> <code>lk</code></td>
+            <td valign="top"><em>unsigned</em> <code>lk</code></td>
             <td valign="top">IN: Symbol table node size.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -10822,7 +10825,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 13 June 2006");
+document.writeln("Last modified: 15 June 2006");
 -->
 </SCRIPT>
  
