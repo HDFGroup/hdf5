@@ -14,8 +14,7 @@ GROUP "/" {
       DATA {
       (0): "quote "  backspace form feed new line
             tab	 new line
-            carriage return
-           "
+            carriage return           "
       }
    }
    DATASET "str2" {
