@@ -321,7 +321,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     SVNROOT=http://sleipnir.hdfgroup.uiuc.edu/svn/repos
     # Check out the current version from CVS
     # (cd $BASEDIR; cvs -Q co -P -d current ${CVSVERSION} hdf5 ) || exit 1
-    (cd $BASEDIR; svn -Q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
+    (cd $BASEDIR; svn -q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
 fi # Do CVS checkout
 
 
