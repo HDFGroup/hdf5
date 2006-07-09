@@ -285,8 +285,10 @@ PREVIOUS=${BASEDIR}/previous
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 if [ $H5VERSION != hdf5 ]; then
     CVSVERSION="-r $H5VERSION"
+    SVNVERSION="hdf5/branches/$H5VERSION"
 else
     CVSVERSION=				# use the default (main) version
+    SVNVERSION=hdf5/trunk		# use the default (trunk) version
 fi
 
 # Try finding a version of diff that supports the -I option too.
@@ -316,8 +318,10 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
 	echo "CVSROOT not defined!" 1>&2
 	exit 1
     fi
+    SVNROOT=http://sleipnir.hdfgroup.uiuc.edu/svn/repos
     # Check out the current version from CVS
-    (cd $BASEDIR; cvs -Q co -P -d current ${CVSVERSION} hdf5 ) || exit 1
+    # (cd $BASEDIR; cvs -Q co -P -d current ${CVSVERSION} hdf5 ) || exit 1
+    (cd $BASEDIR; svn -q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
 fi # Do CVS checkout
 
 
@@ -437,7 +441,8 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ARCHIVES}..."
 	    bin/release -d $ARCHIVES $METHODS
 	    perl bin/h5vers -i
-	    cvs -Q commit -m "Snapshot $RELEASE_VERSION"
+	    # cvs -Q commit -m "Snapshot $RELEASE_VERSION"
+	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
     fi
