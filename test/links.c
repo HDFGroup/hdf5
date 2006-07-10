@@ -699,14 +699,14 @@ test_h5l_create(hid_t fapl)
     if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Link nameless datatype into nameless group */
-    if(H5Lcreate(group_id, "datatype", type_id, H5P_DEFAULT)<0) TEST_ERROR;
+    if(H5Llink(group_id, "datatype", type_id, H5P_DEFAULT)<0) TEST_ERROR;
 
     /* Create LCPL with intermediate group creation flag set */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) <0) TEST_ERROR;
     if(H5Pset_create_intermediate_group(lcpl_id, TRUE) <0) TEST_ERROR;
 
     /* Link nameless dataset into nameless group with intermediate group */
-    if(H5Lcreate(group_id, "inter_group/dataset", dset_id, lcpl_id)<0) TEST_ERROR;
+    if(H5Llink(group_id, "inter_group/dataset", dset_id, lcpl_id)<0) TEST_ERROR;
 
     /* Close IDs for dataset and datatype */
     if(H5Dclose(dset_id)<0) TEST_ERROR;
@@ -716,7 +716,7 @@ test_h5l_create(hid_t fapl)
     if((type_id = H5Topen(group_id, "datatype"))<0) TEST_ERROR;
 
     /* Link nameless group to root group and close the group ID*/
-    if(H5Lcreate(file_id, "/group", group_id, H5P_DEFAULT)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/group", group_id, H5P_DEFAULT)<0) TEST_ERROR;
     if(H5Gclose(group_id)<0) TEST_ERROR;
 
     /* Open dataset through root group and verify its data */
@@ -797,7 +797,7 @@ test_lcpl(hid_t fapl)
 
     /* Create and link a group with the default LCPL */
     if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/group", group_id, H5P_DEFAULT)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/group", group_id, H5P_DEFAULT)<0) TEST_ERROR;
     if(H5Gclose(group_id)<0) TEST_ERROR;
 
     /* Check that its character encoding is the default */
@@ -807,7 +807,7 @@ test_lcpl(hid_t fapl)
     /* Create and commit a datatype with the default LCPL */
     if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if(H5Tcommit_expand(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/type", type_id, H5P_DEFAULT)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/type", type_id, H5P_DEFAULT)<0) TEST_ERROR;
     if(H5Tclose(type_id)<0) TEST_ERROR;    
 
     /* Check that its character encoding is the default */
@@ -821,7 +821,7 @@ test_lcpl(hid_t fapl)
 
     /* Create a dataset using the default LCPL */
     if ((dset_id = H5Dcreate_expand(file_id, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) <0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/dataset", dset_id, H5P_DEFAULT)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/dataset", dset_id, H5P_DEFAULT)<0) TEST_ERROR;
     if(H5Dclose(dset_id)<0) TEST_ERROR;
 
     /* Check that its character encoding is the default */
@@ -834,7 +834,7 @@ test_lcpl(hid_t fapl)
 
     /* Create and link a group with the new LCPL */
     if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/group2", group_id, lcpl_id)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/group2", group_id, lcpl_id)<0) TEST_ERROR;
     if(H5Gclose(group_id)<0) TEST_ERROR;
 
     /* Check that its character encoding is UTF-8 */
@@ -844,7 +844,7 @@ test_lcpl(hid_t fapl)
     /* Create and commit a datatype with the new LCPL */
     if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR;
     if(H5Tcommit_expand(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/type2", type_id, lcpl_id)<0) TEST_ERROR;    
+    if(H5Llink(file_id, "/type2", type_id, lcpl_id)<0) TEST_ERROR;    
     if(H5Tclose(type_id)<0) TEST_ERROR;    
 
     /* Check that its character encoding is UTF-8 */
@@ -853,7 +853,7 @@ test_lcpl(hid_t fapl)
 
     /* Create a dataset using the new LCPL */
     if ((dset_id = H5Dcreate_expand(file_id, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) <0) TEST_ERROR;
-    if(H5Lcreate(file_id, "/dataset2", dset_id, lcpl_id)<0) TEST_ERROR;
+    if(H5Llink(file_id, "/dataset2", dset_id, lcpl_id)<0) TEST_ERROR;
     if(H5Dclose(dset_id)<0) TEST_ERROR;
 
     /* Check that its character encoding is UTF-8 */
@@ -1233,7 +1233,7 @@ test_move_preserves(hid_t fapl_id)
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) < 0) TEST_ERROR;
     /* Create a group with that lcpl */
     if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) <0) TEST_ERROR;
-    if(H5Lcreate(file_id, "group", group_id, lcpl_id) < 0) TEST_ERROR;
+    if(H5Llink(file_id, "group", group_id, lcpl_id) < 0) TEST_ERROR;
     if(H5Gclose(group_id) < 0) TEST_ERROR;
 
     /* Get the group's link's creation time */

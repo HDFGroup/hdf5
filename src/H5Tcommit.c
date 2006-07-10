@@ -150,7 +150,7 @@ done:
  *		into a "named", immutable type.
  *
  *              The resulting ID should be linked into the file with
- *              H5Lcreate or it will be deleted when closed.
+ *              H5Llink or it will be deleted when closed.
  *
  * Return:	Non-negative on success/Negative on failure
  *

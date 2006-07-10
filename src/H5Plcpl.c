@@ -29,7 +29,7 @@
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_create_intermediate_group
  *
- * Purpose:     set crt_intmd_group so that H5Lcreate(), H5Llink, etc.
+ * Purpose:     set crt_intmd_group so that H5Lcreate_*, H5Llink, etc.
  *              will create missing groups along the given path "name"
  *
  * Note:        XXX: This property should really be an access property. -QAK
@@ -67,7 +67,7 @@ done:
  * Function:    H5Pget_create_intermediate_group
  *
  * Purpose:     Returns the crt_intmd_group, which is set to create missing
- *              groups during H5Lcreate, etc.
+ *              groups during H5Llink, etc.
  *
  * Return:      Non-negative on success/Negative on failure
  *

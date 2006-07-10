@@ -263,10 +263,10 @@ done:
  *              property list GAPL_ID.
  *
  *              The resulting ID should be linked into the file with
- *              H5Lcreate or it will be deleted when closed.
+ *              H5Llink or it will be deleted when closed.
  *
  *              Given the default setting, H5Gcreate_expand() followed by
- *              H5Lcreate() will have the same function as H5Gcreate().
+ *              H5Llink() will have the same function as H5Gcreate().
  *
  * Usage:       H5Gcreate_expand(loc_id, char *name, gcpl_id, gapl_id)
  *              hid_t loc_id;	  IN: File or group identifier

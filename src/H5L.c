@@ -104,9 +104,9 @@ static herr_t H5L_unlink(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,
     H5G_loc_t *dst_loc, const char *dst_name, hbool_t copy_flag,
     hid_t lcpl_id, hid_t dxpl_id);
-static herr_t H5L_move_rename_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/);
-static herr_t H5L_move_rename_dest_cb(H5G_loc_t *grp_loc/*in*/,
+static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/);
 static herr_t H5L_get_linkinfo(H5G_loc_t *loc, const char *name,
     H5L_linkinfo_t *linkbuf/*out*/, hid_t dxpl_id);
@@ -196,10 +196,10 @@ H5L_term_interface(void)
  * Function:	H5Lmove
  *
  * Purpose:	Renames an object within an HDF5 file and moves it to a new
- *              group using H5Lrename and H5Lmove.  The original name SRC
- *		is unlinked from the group graph and the inserted with the new
- *              name DST (which can specify a new path for the object) as an atomic
- *              operation. The names are interpreted relative to SRC_LOC_ID and
+ *              group.  The original name SRC is unlinked from the group graph
+ *              and the inserted with the new name DST (which can specify a
+ *              new path for the object) as an atomic operation. The names
+ *              are interpreted relative to SRC_LOC_ID and
  *              DST_LOC_ID, which are either file IDs or group ID.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1099,11 +1099,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move_rename_dest_cb
+ * Function:	H5L_move_dest_cb
  *
  * Purpose:	Second callback for moving and renaming an object.  This routine
  *              inserts a new link into the group returned by the traversal.
- *              It is called by H5L_move_rename_cb.
+ *              It is called by H5L_move_cb.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1113,14 +1113,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_move_rename_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/)
 {
     H5L_trav_ud10_t *udata = (H5L_trav_ud10_t *)_udata;   /* User data passed in */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_move_rename_dest_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_move_dest_cb)
 
     /* Make sure an object with this name doesn't already exist */
     if(obj_loc != NULL)
@@ -1157,7 +1157,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move_rename_cb
+ * Function:	H5L_move_cb
  *
  * Purpose:	Callback for moving and renaming an object.  This routine
  *              replaces the names of open objects with the moved object
@@ -1171,7 +1171,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_move_rename_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/)
 {
     H5L_trav_ud4_t *udata = (H5L_trav_ud4_t *)_udata;   /* User data passed in */
@@ -1181,7 +1181,7 @@ H5L_move_rename_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t 
     char * orig_name = NULL;            /* The name of the link in this group */
     herr_t ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_move_rename_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_move_cb)
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -1189,7 +1189,7 @@ H5L_move_rename_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t 
 
     /* Check for operations on '.' */
     if(lnk == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or rename")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or copy")
 
     /* Get object type */
     switch(lnk->type) {
@@ -1217,7 +1217,7 @@ H5L_move_rename_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t 
     orig_name = H5MM_xstrdup(name);
 
     /* Insert the link into its new location */
-    if(H5G_traverse(udata->dst_loc, udata->dst_name, H5G_TARGET_NORMAL, H5L_move_rename_dest_cb, &udata_out, udata->dxpl_id) < 0)
+    if(H5G_traverse(udata->dst_loc, udata->dst_name, H5G_TARGET_NORMAL, H5L_move_dest_cb, &udata_out, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
@@ -1253,7 +1253,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5L_move
  *
- * Purpose:	Atomically move and rename or copy a link.
+ * Purpose:	Atomically move or copy a link.
  *
  *              Creates a copy of a link in a new destination with a new name.
  *              SRC_LOC and SRC_NAME together define the link's original
@@ -1317,7 +1317,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     udata.dxpl_id = dxpl_id;
 
     /* Do the move */
-    if(H5G_traverse(src_loc, src_name, H5G_TARGET_MOUNT|H5G_TARGET_SLINK, H5L_move_rename_cb, &udata, dxpl_id) < 0)
+    if(H5G_traverse(src_loc, src_name, H5G_TARGET_MOUNT|H5G_TARGET_SLINK, H5L_move_cb, &udata, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")    
 
 done:

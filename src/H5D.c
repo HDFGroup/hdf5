@@ -1256,7 +1256,7 @@ done:
  *		create other datasets.
  *
  *              The resulting ID should be linked into the file with
- *              H5Lcreate or it will be deleted when closed.
+ *              H5Llink or it will be deleted when closed.
  *
  * Return:	Success:	The object ID of the new dataset.  At this
  *				point, the dataset is ready to receive its
