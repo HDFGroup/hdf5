@@ -35,6 +35,8 @@
 extern "C" {
 #endif
 
+#define H5AC__MAX_TRACE_FILE_NAME_LEN	1024
+
 /****************************************************************************
  *
  * structure H5AC_cache_config_t
@@ -53,6 +55,11 @@ extern "C" {
  * considerable interaction between this value and the other fields in this
  * structure.
  *
+ * Similarly, the open_trace_file, close_trace_file, and trace_file_name
+ * fields do not appear in H5C_auto_size_ctl_t, as most trace file 
+ * issues are handled at the H5AC level.  The one exception is storage of
+ * the pointer to the trace file, which is handled by H5C.
+ *
  * The structure is in H5ACpublic.h as we may wish to allow different
  * configuration options for metadata and raw data caches.
  *
@@ -68,6 +75,36 @@ extern "C" {
  *	automatic cache resize code is run, and reports on its activities.
  *
  *	This is a debugging function, and should normally be turned off.
+ *
+ * open_trace_file: Boolean field indicating whether the trace_file_name
+ * 	field should be used to open a trace file for the cache.
+ *
+ * 	The trace file is a debuging feature that allow the capture of
+ * 	top level metadata cache requests for purposes of debugging and/or
+ * 	optimization.  This field should normally be set to FALSE, as 
+ * 	trace file collection imposes considerable overhead.
+ *
+ * 	This field should only be set to TRUE when the trace_file_name
+ * 	contains the full path of the desired trace file, and either
+ * 	there is no open trace file on the cache, or the close_trace_file
+ * 	field is also TRUE.
+ *
+ * close_trace_file: Boolean field indicating whether the current trace
+ * 	file (if any) should be closed.
+ *
+ * 	See the above comments on the open_trace_file field.  This field
+ * 	should be set to FALSE unless there is an open trace file on the
+ * 	cache that you wish to close.
+ *
+ * trace_file_name: Full path of the trace file to be opened if the
+ * 	open_trace_file field is TRUE.
+ *
+ * 	In the parallel case, an ascii representation of the mpi rank of 
+ * 	the process will be appended to the file name to yield a unique
+ * 	trace file name for each process.
+ *
+ * 	The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
+ * 	characters.
  *
  * set_initial_size: Boolean flag indicating whether the size of the
  *      initial size of the cache is to be set to the value given in
@@ -265,55 +302,59 @@ extern "C" {
  *
  ****************************************************************************/
 
-#define H5AC__CURR_CACHE_CONFIG_VERSION  1
+#define H5AC__CURR_CACHE_CONFIG_VERSION 1
 
 typedef struct H5AC_cache_config_t
 {
     /* general configuration fields: */
-    int                         version;
+    int                      version;
 
-    hbool_t			rpt_fcn_enabled;
+    hbool_t		     rpt_fcn_enabled;
 
-    hbool_t                     set_initial_size;
-    size_t                      initial_size;
+    hbool_t		     open_trace_file;
+    hbool_t                  close_trace_file;
+    char                     trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + 1];
 
-    double                      min_clean_fraction;
+    hbool_t                  set_initial_size;
+    size_t                   initial_size;
 
-    size_t                      max_size;
-    size_t                      min_size;
+    double                   min_clean_fraction;
 
-    long int                    epoch_length;
+    size_t                   max_size;
+    size_t                   min_size;
+
+    long int                 epoch_length;
 
 
     /* size increase control fields: */
-    enum H5C_cache_incr_mode    incr_mode;
+    enum H5C_cache_incr_mode incr_mode;
 
-    double                      lower_hr_threshold;
+    double                   lower_hr_threshold;
 
-    double                      increment;
+    double                   increment;
 
-    hbool_t                     apply_max_increment;
-    size_t                      max_increment;
+    hbool_t                  apply_max_increment;
+    size_t                   max_increment;
 
 
     /* size decrease control fields: */
-    enum H5C_cache_decr_mode    decr_mode;
+    enum H5C_cache_decr_mode decr_mode;
 
-    double                      upper_hr_threshold;
+    double                   upper_hr_threshold;
 
-    double                      decrement;
+    double                   decrement;
 
-    hbool_t                     apply_max_decrement;
-    size_t                      max_decrement;
+    hbool_t                  apply_max_decrement;
+    size_t                   max_decrement;
 
-    int                         epochs_before_eviction;
+    int                      epochs_before_eviction;
 
-    hbool_t                     apply_empty_reserve;
-    double                      empty_reserve;
+    hbool_t                  apply_empty_reserve;
+    double                   empty_reserve;
 
 
     /* parallel configuration fields: */
-    int				dirty_bytes_threshold;
+    int                      dirty_bytes_threshold;
 
 } H5AC_cache_config_t;
 

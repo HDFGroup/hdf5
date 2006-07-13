@@ -2049,6 +2049,28 @@ case "X-$GROUPREVISION" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like the metadata trace file code compiled in
+dnl
+AC_MSG_CHECKING([whether metadata trace file code is enabled])
+AC_ARG_ENABLE([metadata-trace-file],
+              [AC_HELP_STRING([--enable-metadata-trace-file],
+                              [Enable metadata trace file collection.])],
+              [METADATATRACEFILE=$enableval])
+
+case "X-$METADATATRACEFILE" in
+  X-yes)
+      METADATATRACEFILE=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([METADATA_TRACE_FILE], [1],
+                [Define if the metadata trace file code is to be compiled in])
+    ;;
+  *)
+      METADATATRACEFILE=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Enable tracing of the API
 dnl This must come after the enable-debug since it depends on debug.
 dnl

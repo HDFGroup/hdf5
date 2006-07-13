@@ -87,6 +87,18 @@
  * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  This
  *		field is used to validate pointers to instances of H5C_t.
  *
+ * trace_file_ptr:  File pointer pointing to the trace file, which is used
+ *              to record cache operations for use in simulations and design
+ *              studies.  This field will usually be NULL, indicating that
+ *              no trace file should be recorded.
+ *
+ *              Since much of the code supporting the parallel metadata
+ *              cache is in H5AC, we don't write the trace file from 
+ *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
+ *
+ *              When we get to using H5C in other places, we may add
+ *              code to write trace file data at the H5C level as well.
+ *
  * aux_ptr:	Pointer to void used to allow wrapper code to associate
  *		its data with an instance of H5C_t.  The H5C cache code
  *		sets this field to NULL, and otherwise leaves it alone.
@@ -701,6 +713,8 @@
 struct H5C_t
 {
     uint32_t			magic;
+
+    FILE *			trace_file_ptr;
 
     void *			aux_ptr;
 

@@ -38,6 +38,11 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Cprivate.h"		/* cache				*/
 
+#ifdef H5_METADATA_TRACE_FILE
+#define H5AC__TRACE_FILE_ENABLED	1
+#else /* H5_METADATA_TRACE_FILE */
+#define H5AC__TRACE_FILE_ENABLED	0
+#endif /* H5_METADATA_TRACE_FILE */
 
 /* Types of metadata objects cached */
 typedef enum {
@@ -185,6 +190,9 @@ extern hid_t H5AC_ind_dxpl_id;
 {                                                                             \
   /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
   /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
+  /* hbool_t     open_trace_file        = */ FALSE,                           \
+  /* hbool_t     close_trace_file       = */ FALSE,                           \
+  /* char        trace_file_name[]      = */ "",                              \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ ( 1 * 1024 * 1024),              \
   /* double      min_clean_fraction     = */ 0.5,                             \
@@ -251,6 +259,9 @@ H5_DLL herr_t H5AC_pin_protected_entry(H5F_t * f, void *  thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, const void *udata1, void *udata2,
                            H5AC_protect_t rw);
+H5_DLL herr_t H5AC_resize_pinned_entry(H5F_t * f,
+                                       void *  thing,
+                                       size_t  new_size);
 H5_DLL herr_t H5AC_unpin_entry(H5F_t * f,
 		               void *  thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
@@ -267,6 +278,10 @@ H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
+
+H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
+                                 const H5AC_class_t *type, haddr_t addr);
+
 H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
                                            void (* write_done)(void));
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
@@ -289,6 +304,11 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
                                                H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t * config_ptr);
+
+H5_DLL herr_t H5AC_close_trace_file( H5AC_t * cache_ptr);
+
+H5_DLL herr_t H5AC_open_trace_file(H5AC_t * cache_ptr,
+		                   const char * trace_file_name);
 
 #endif /* !_H5ACprivate_H */
 

@@ -115,7 +115,7 @@ hid_t H5E_NOENCODER_g      = FAIL;      /* Filter present but encoding disabled 
 hid_t H5E_CANTOPENOBJ_g    = FAIL;      /* Can't open object */
 hid_t H5E_CANTCLOSEOBJ_g   = FAIL;      /* Can't close object */
 hid_t H5E_COMPLEN_g        = FAIL;      /* Name component is too long */
-hid_t H5E_LINK_g           = FAIL;      /* Link-related failure */
+hid_t H5E_LINK_g           = FAIL;      /* Link failure */
 hid_t H5E_SLINK_g          = FAIL;      /* Symbolic link error */
 hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 
@@ -156,6 +156,8 @@ hid_t H5E_CANTPIN_g        = FAIL;      /* Unable to pin cache entry */
 hid_t H5E_CANTUNPIN_g      = FAIL;      /* Unable to un-pin cache entry */
 hid_t H5E_CANTMARKDIRTY_g  = FAIL;      /* Unable to mark a pinned entry as dirty */
 hid_t H5E_CANTDIRTY_g      = FAIL;      /* Unable to mark metadata as dirty */
+hid_t H5E_CANTEXPUNGE_g    = FAIL;      /* Unable to expunge a metadata cache entry */
+hid_t H5E_CANTRESIZE_g     = FAIL;      /* Unable to resize a metadata cache entry */
 
 /* Parallel MPI errors */
 hid_t H5E_MPI_g            = FAIL;      /* Some MPI function failed */

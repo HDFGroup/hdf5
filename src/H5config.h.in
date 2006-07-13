@@ -398,6 +398,9 @@
    values correctly. */
 #undef LLONG_TO_LDOUBLE_CORRECT
 
+/* Define if the metadata trace file code is to be compiled in */
+#undef METADATA_TRACE_FILE
+
 /* Define if your system can handle complicated MPI derived datatype
    correctly. */
 #undef MPI_COMPLEX_DERIVED_DATATYPE_WORKS

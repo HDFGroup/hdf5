@@ -196,7 +196,7 @@ H5_DLLVAR hid_t H5E_NOENCODER_g;     /* Filter present but encoding disabled */
 H5_DLLVAR hid_t H5E_CANTOPENOBJ_g;   /* Can't open object */
 H5_DLLVAR hid_t H5E_CANTCLOSEOBJ_g;  /* Can't close object */
 H5_DLLVAR hid_t H5E_COMPLEN_g;       /* Name component is too long */
-H5_DLLVAR hid_t H5E_LINK_g;          /* Link count failure */
+H5_DLLVAR hid_t H5E_LINK_g;          /* Link failure */
 H5_DLLVAR hid_t H5E_SLINK_g;         /* Symbolic link error */
 H5_DLLVAR hid_t H5E_PATH_g;          /* Problem with path to object */
 
@@ -253,6 +253,8 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTUNPIN        (H5OPEN H5E_CANTUNPIN_g)
 #define H5E_CANTMARKDIRTY    (H5OPEN H5E_CANTMARKDIRTY_g)
 #define H5E_CANTDIRTY        (H5OPEN H5E_CANTDIRTY_g)
+#define H5E_CANTEXPUNGE      (H5OPEN H5E_CANTEXPUNGE_g)
+#define H5E_CANTRESIZE       (H5OPEN H5E_CANTRESIZE_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g; /* Unable to serialize data from cache */
 H5_DLLVAR hid_t H5E_CANTLOAD_g;      /* Unable to load metadata into cache */
@@ -267,6 +269,8 @@ H5_DLLVAR hid_t H5E_CANTPIN_g;       /* Unable to pin cache entry */
 H5_DLLVAR hid_t H5E_CANTUNPIN_g;     /* Unable to un-pin cache entry */
 H5_DLLVAR hid_t H5E_CANTMARKDIRTY_g; /* Unable to mark a pinned entry as dirty */
 H5_DLLVAR hid_t H5E_CANTDIRTY_g;     /* Unable to mark metadata as dirty */
+H5_DLLVAR hid_t H5E_CANTEXPUNGE_g;   /* Unable to expunge a metadata cache entry */
+H5_DLLVAR hid_t H5E_CANTRESIZE_g;    /* Unable to resize a metadata cache entry */
 
 /* Parallel MPI errors */
 #define H5E_MPI              (H5OPEN H5E_MPI_g)

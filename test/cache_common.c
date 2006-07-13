@@ -1449,6 +1449,69 @@ takedown_cache(H5C_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	expunge_entry()
+ *
+ * Purpose:	Expunge the entry indicated by the type and index.
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              7/6/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+expunge_entry(H5C_t * cache_ptr,
+              int32_t type,
+              int32_t idx)
+{
+    /* const char * fcn_name = "expunge_entry()"; */
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    if ( pass ) {
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+	HDassert( entry_ptr->cache_ptr == cache_ptr );
+        HDassert( ! ( entry_ptr->header.is_protected ) );
+        HDassert( ! ( entry_ptr->is_protected ) );
+        HDassert( ! ( entry_ptr->header.is_pinned ) );
+	HDassert( ! ( entry_ptr->is_pinned ) );
+
+        result = H5C_expunge_entry(NULL, -1, -1, cache_ptr, &(types[type]),
+                                   entry_ptr->addr);
+
+        if ( result < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_expunge_entry().";
+
+        }
+    }
+
+    return;
+
+} /* expunge_entry() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	flush_cache()
  *
  * Purpose:	Flush the specified cache, destroying all entries if
@@ -1709,7 +1772,7 @@ mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
                                      int32_t type,
                                      int32_t idx)
 {
-    const char * fcn_name = "mark_pinned_or_protected_entry_dirty()";
+    /* const char * fcn_name = "mark_pinned_or_protected_entry_dirty()"; */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;

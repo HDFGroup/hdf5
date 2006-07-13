@@ -586,6 +586,16 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to mark metadata as dirty"))==N
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTDIRTY_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTEXPUNGE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to expunge a metadata cache entry"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTEXPUNGE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTRESIZE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to resize a metadata cache entry"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTRESIZE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Parallel MPI errors */
 assert(H5E_MPI_g==(-1));

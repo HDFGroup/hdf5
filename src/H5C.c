@@ -1043,10 +1043,13 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		QAK -- 11/27/04
  *		Switched over to using skip list routines.
  *
+ *		JRM -- 6/27/06
+ *		Added fail_val parameter.
+ *
  *-------------------------------------------------------------------------
  */
 
-#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)                       \
+#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
@@ -1057,7 +1060,7 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
                                                                                \
     if ( H5SL_insert((cache_ptr)->slist_ptr, entry_ptr, &(entry_ptr)->addr)    \
                                                                          < 0 ) \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                             \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val),                       \
                     "Can't insert entry in skip list")                         \
                                                                                \
     (entry_ptr)->in_slist = TRUE;                                              \
@@ -2459,6 +2462,9 @@ done:
  *		JRM -- 3/16/06
  *		Added initialization for the pinned entry related fields.
  *
+ *		JRM -- 5/31/06
+ *		Added initialization for the trace_file_ptr field.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2512,6 +2518,8 @@ H5C_create(size_t		      max_cache_size,
      */
 
     cache_ptr->magic 				= H5C__H5C_T_MAGIC;
+
+    cache_ptr->trace_file_ptr			= NULL;
 
     cache_ptr->aux_ptr				= aux_ptr;
 
@@ -2690,7 +2698,11 @@ done:
  */
 void
 H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
+#ifndef NDEBUG
                             int32_t version,
+#else /* NDEBUG */
+                            UNUSED int32_t version,
+#endif /* NDEBUG */
                             double hit_rate,
                             enum H5C_resize_status status,
                             size_t old_max_cache_size,
@@ -2951,6 +2963,116 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_expunge_entry
+ *
+ * Purpose:     Use this function to tell the cache to expunge an entry 
+ * 		from the cache without writing it to disk even if it is 
+ * 		dirty.  The entry may not be either pinned or protected.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              6/29/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_expunge_entry(H5F_t *             f,
+                  hid_t               primary_dxpl_id,
+                  hid_t               secondary_dxpl_id,
+	          H5C_t *	      cache_ptr,
+                  const H5C_class_t * type,
+                  haddr_t 	      addr)
+{
+    herr_t		result;
+    herr_t		ret_value = SUCCEED;      /* Return value */
+    hbool_t		first_flush = TRUE;
+    H5C_cache_entry_t *	entry_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5C_expunge_entry, FAIL)
+
+    HDassert( H5F_addr_defined(addr) );
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( type );
+    HDassert( type->clear );
+    HDassert( type->dest );
+
+#if H5C_DO_EXTREME_SANITY_CHECKS
+        if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "LRU sanity check failed.\n");
+        }
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+
+    if ( ( entry_ptr == NULL ) || ( entry_ptr->type != type ) ) {
+
+        /* the target doesn't exist in the cache, so we are done. */
+        HGOTO_DONE(SUCCEED)
+    }
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->type == type );
+
+    if ( entry_ptr->is_protected ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
+		    "Target entry is protected.")
+    }
+
+    if ( entry_ptr->is_pinned ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
+		    "Target entry is pinned.")
+    }
+
+    /* If we get this far, call H5C_flush_single_entry() with the 
+     * H5C__FLUSH_INVALIDATE_FLAG and the H5C__FLUSH_CLEAR_ONLY_FLAG.
+     * This will clear the entry, and then delete it from the cache.
+     */
+
+    result = H5C_flush_single_entry(f,
+                                    primary_dxpl_id,
+                                    secondary_dxpl_id,
+                                    cache_ptr,
+                                    entry_ptr->type,
+                                    entry_ptr->addr,
+                                    H5C__FLUSH_INVALIDATE_FLAG | 
+				    H5C__FLUSH_CLEAR_ONLY_FLAG,
+                                    &first_flush,
+                                    TRUE);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
+                    "H5C_flush_single_entry() failed.")
+    }
+
+done:
+
+#if H5C_DO_EXTREME_SANITY_CHECKS
+        if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "LRU sanity check failed.\n");
+        }
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_expunge_entry() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_flush_cache
  *
  * Purpose:	Flush (and possibly destroy) the entries contained in the
@@ -3179,6 +3301,7 @@ H5C_flush_cache(H5F_t *  f,
     }
 
 done:
+
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3678,6 +3801,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_get_trace_file_ptr
+ *
+ * Purpose:     Get the trace_file_ptr field from the cache.
+ *
+ *              This field will either be NULL (which indicates that trace
+ *              file logging is turned off), or contain a pointer to the 
+ *              open file to which trace file data is to be written.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              1/20/06
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_get_trace_file_ptr(H5C_t * cache_ptr,
+                       FILE ** trace_file_ptr_ptr)
+{
+    herr_t		ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_get_trace_file_ptr, FAIL)
+
+    /* This would normally be an assert, but we need to use an HGOTO_ERROR
+     * call to shut up the compiler.
+     */
+    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
+    }
+
+    if ( trace_file_ptr_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL trace_file_ptr_ptr")
+    }
+
+    *trace_file_ptr_ptr = cache_ptr->trace_file_ptr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_get_trace_file_ptr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_insert_entry
  *
  * Purpose:     Adds the specified thing to the cache.  The thing need not
@@ -3932,7 +4103,7 @@ H5C_insert_entry(H5F_t * 	     f,
     if ( entry_ptr->is_dirty ) {
 
         entry_ptr->flush_marker = set_flush_marker;
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
 
     } else {
 
@@ -4359,7 +4530,7 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
     if ( ! (entry_ptr->in_slist) ) {
 
-	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
     H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
@@ -4426,7 +4597,7 @@ H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
 
         if ( ! (entry_ptr->in_slist) ) {
 
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
         }
 
         H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
@@ -4565,7 +4736,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
-    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
 
     H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty, FAIL)
 
@@ -4584,6 +4755,107 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_rename_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_resize_pinned_entry
+ *
+ * Purpose:	Resize a pinned entry.  The target entry MUST be
+ * 		be pinned, and MUST not be unprotected.
+ *
+ * 		Resizing an entry dirties it, so if the entry is not 
+ * 		already dirty, the function places the entry on the 
+ * 		skip list.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/5/06
+ *
+ * Modifications:
+ *
+ * 		None
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_resize_pinned_entry(H5C_t * cache_ptr,
+                        void *  thing,
+                        size_t  new_size)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5C_cache_entry_t *	entry_ptr;
+
+    FUNC_ENTER_NOAPI(H5C_resize_pinned_entry, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( thing );
+
+    entry_ptr = (H5C_cache_entry_t *)thing;
+
+    if ( new_size <= 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
+                    "New size is non-positive.")
+    }
+
+    if ( ! ( entry_ptr->is_pinned ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
+                    "Entry isn't pinned??")
+    }
+
+    if ( entry_ptr->is_protected ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
+                    "Entry is protected??")
+    }
+
+    /* resizing dirties entries -- mark the entry as dirty if it 
+     * isn't already 
+     */
+    entry_ptr->is_dirty = TRUE;
+
+    /* update for change in entry size if necessary */
+    if ( entry_ptr->size != new_size ) {
+
+        /* update the protected entry list */
+        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
+                                        (cache_ptr->pel_size), \
+                                        (entry_ptr->size), (new_size));
+
+        /* update the hash table */
+	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
+                                          (new_size));
+
+        /* if the entry is in the skip list, update that too */
+        if ( entry_ptr->in_slist ) {
+
+	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
+                                              (new_size));
+        }
+
+        /* update statistics just before changing the entry size */
+	H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
+                                                (new_size));
+
+	/* finally, update the entry size proper */
+	entry_ptr->size = new_size;
+    }
+
+    if ( ! (entry_ptr->in_slist) ) {
+
+	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+    }
+
+    H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_resize_pinned_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -4705,6 +4977,11 @@ done:
  *		JRM -- 5/3/06
  *		Added code to set the new dirtied field in
  *		H5C_cache_entry_t to FALSE prior to return.
+ *
+ *		JRM -- 6/23/06
+ *		Modified code to allow dirty entries to be loaded from
+ *		disk.  This is necessary as a bug fix in the object 
+ *		header code requires us to modify a header as it is read.
  *
  *-------------------------------------------------------------------------
  */
@@ -4852,8 +5129,16 @@ H5C_protect(H5F_t *	        f,
 
         /* Insert the entry in the hash table.  It can't be dirty yet, so
          * we don't even check to see if it should go in the skip list.
+         *
+         * This is no longer true -- due to a bug fix, we may modify
+         * data on load to repair a file.
          */
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
+
+        if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_slist) ) ) {
+
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL)
+        }
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
@@ -5356,6 +5641,49 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_set_skip_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_set_trace_file_ptr
+ *
+ * Purpose:     Set the trace_file_ptr field for the cache.
+ *
+ *              This field must either be NULL (which turns of trace
+ *              file logging), or be a pointer to an open file to which
+ *              trace file data is to be written.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              1/20/06
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_set_trace_file_ptr(H5C_t * cache_ptr,
+                       FILE * trace_file_ptr)
+{
+    herr_t		ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_set_trace_file_ptr, FAIL)
+
+    /* This would normally be an assert, but we need to use an HGOTO_ERROR
+     * call to shut up the compiler.
+     */
+    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
+    }
+
+    cache_ptr->trace_file_ptr = trace_file_ptr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_set_trace_file_ptr() */
 
 
 /*-------------------------------------------------------------------------
@@ -5984,6 +6312,12 @@ H5C_unprotect(H5F_t *		  f,
     pin_entry        = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     unpin_entry      = ( (flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
 
+    /* Changing the size of an entry dirties it.  Thus, set the
+     * dirtied flag if the size_changed flag is set.
+     */
+
+    dirtied |= size_changed;
+
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
@@ -6120,7 +6454,7 @@ H5C_unprotect(H5F_t *		  f,
 
         if ( ! (entry_ptr->in_slist) ) {
 
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
         }
     }
 
@@ -8272,6 +8606,12 @@ done:
  *		JRM - 7/21/04
  *		Updated function for the addition of the hash table.
  *
+ *		JRM - 6/23/06
+ *		Deleted assertion that verified that a newly loaded
+ *		entry is clean.  Due to a bug fix, this need not be 
+ *		the case, as our code will attempt to repair errors
+ *		on load.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -8282,7 +8622,11 @@ H5C_load_entry(H5F_t *             f,
                haddr_t             addr,
                const void *        udata1,
                void *              udata2,
+#ifndef NDEBUG
                hbool_t		   skip_file_checks)
+#else /* NDEBUG */
+               UNUSED hbool_t	   skip_file_checks)
+#endif /* NDEBUG */
 {
     void *		thing = NULL;
     void *		ret_value = NULL;
@@ -8304,7 +8648,30 @@ H5C_load_entry(H5F_t *             f,
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
-    HDassert( entry_ptr->is_dirty == FALSE );
+    /* In general, an entry should be clean just after it is loaded.
+     * 
+     * However, when this code is used in the metadata cache, it is
+     * possible that object headers will be dirty at this point, as 
+     * the load function will alter object headers if necessary to 
+     * fix an old bug.
+     *
+     * To support this bug fix, I have replace the old assert:
+     *
+     * 	HDassert( entry_ptr->is_dirty == FALSE );
+     *
+     * with:
+     *
+     * 	HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
+     *
+     * Note that type id 4 is associated with object headers in the metadata
+     * cache.
+     *
+     * When we get to using H5C for other purposes, we may wish to 
+     * tighten up the assert so that the loophole only applies to the
+     * metadata cache.
+     */
+
+    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
 
     entry_ptr->addr = addr;
     entry_ptr->type = type;

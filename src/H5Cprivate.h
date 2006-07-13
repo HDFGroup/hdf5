@@ -35,6 +35,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
 
+
 #define H5C_DO_SANITY_CHECKS		0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 
@@ -799,6 +800,13 @@ H5_DLL herr_t H5C_dest(H5F_t * f,
 
 H5_DLL herr_t H5C_dest_empty(H5C_t * cache_ptr);
 
+H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
+		                hid_t               primary_dxpl_id,
+                                hid_t               secondary_dxpl_id,
+                                H5C_t *             cache_ptr,
+                                const H5C_class_t * type,
+                                haddr_t             addr);
+
 H5_DLL herr_t H5C_flush_cache(H5F_t *  f,
                               hid_t    primary_dxpl_id,
                               hid_t    secondary_dxpl_id,
@@ -829,6 +837,9 @@ H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
                                    hbool_t * is_dirty_ptr,
                                    hbool_t * is_protected_ptr,
 				   hbool_t * is_pinned_ptr);
+
+H5_DLL herr_t H5C_get_trace_file_ptr(H5C_t * cache_ptr,
+		                     FILE ** trace_file_ptr_ptr);
 
 H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               primary_dxpl_id,
@@ -873,6 +884,10 @@ H5_DLL void * H5C_protect(H5F_t *             f,
 
 H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr);
 
+H5_DLL herr_t H5C_resize_pinned_entry(H5C_t * cache_ptr,
+                                      void *  thing,
+                                      size_t  new_size);
+
 H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);
 
@@ -881,6 +896,9 @@ H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
 H5_DLL herr_t H5C_set_skip_flags(H5C_t * cache_ptr,
                                  hbool_t skip_file_checks,
                                  hbool_t skip_dxpl_id_checks);
+
+H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t * cache_ptr,
+		                     FILE * trace_file_ptr);
 
 H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
                         const char * cache_name,

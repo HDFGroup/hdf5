@@ -423,6 +423,10 @@ haddr_t type_and_index_to_addr(int32_t type,
                                int32_t idx);
 #endif
 
+void expunge_entry(H5C_t * cache_ptr,
+                   int32_t type,
+                   int32_t idx);
+
 void insert_entry(H5C_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
