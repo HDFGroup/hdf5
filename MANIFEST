@@ -1342,6 +1342,7 @@
 ./test/gass_read.c
 ./test/gass_write.c
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
@@ -1360,6 +1361,7 @@
 ./test/istore.c
 ./test/lheap.c
 ./test/links.c
+./test/mergemsg.h5
 ./test/mount.c
 ./test/mtime.c
 ./test/noencoder.h5
