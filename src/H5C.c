@@ -791,10 +791,13 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
  *		QAK -- 11/27/04
  *		Switched over to using skip list routines.
  *
+ *		JRM -- 7/13/06
+ *		Added fail_val parameter
+ *
  *-------------------------------------------------------------------------
  */
 
-#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)                       \
+#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
@@ -803,8 +806,10 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
     HDassert( !((entry_ptr)->in_slist) );                                      \
                                                                                \
-    if ( H5SL_insert((cache_ptr)->slist_ptr, &entry_ptr->addr, entry_ptr) < 0 ) \
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Can't insert entry in skip list") \
+    if ( H5SL_insert((cache_ptr)->slist_ptr, &entry_ptr->addr, entry_ptr)      \
+		                                                      < 0 )    \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fail_val),                       \
+		    "Can't insert entry in skip list")                         \
                                                                                \
     (entry_ptr)->in_slist = TRUE;                                              \
     (cache_ptr)->slist_len++;                                                  \
@@ -2559,7 +2564,7 @@ H5C_flush_cache(H5F_t *  f,
 
                 if ( entry_ptr->is_dirty ) {
 
-                    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+                    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
                 }
                 entry_ptr = entry_ptr->next;
             }
@@ -2757,7 +2762,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     if ( entry_ptr->is_dirty ) {
 
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
@@ -2862,7 +2867,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
     if ( entry_ptr->is_dirty ) {
 
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
     H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, FAIL)
@@ -2911,8 +2916,14 @@ done:
  *
  * Modifications:
  *
- *		JRM - 7/21/04
+ *		JRM -- 7/21/04
  *		Updated for the addition of the hash table.
+ *
+ *              JRM -- 7/13/06
+ *              Modified code to allow dirty entries to be loaded from
+ *              disk.  This is necessary as a bug fix in the object
+ *              header code requires us to modify a header as it is read.
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -3027,8 +3038,16 @@ H5C_protect(H5F_t *	       f,
 
         /* Insert the entry in the hash table.  It can't be dirty yet, so
          * we don't even check to see if it should go in the skip list.
+	 *
+	 * This is no longer true -- due to a bug fix, we may modify
+	 * data on load to repair a file.
          */
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
+
+	if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_slist) ) ) {
+
+	    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL)
+	}
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
@@ -3152,7 +3171,7 @@ H5C_unprotect(H5F_t *		  f,
 
     if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_slist) ) ) {
 
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
     /* this implementation of the "deleted" option is a bit inefficient, as
@@ -3858,6 +3877,13 @@ done:
  *		JRM - 7/21/04
  *		Updated function for the addition of the hash table.
  *
+ *              JRM - 7/13/06
+ *              Deleted assertion that verified that a newly loaded
+ *              entry is clean.  Due to a bug fix, this need not be
+ *              the case, as our code will attempt to repair errors
+ *              on load.
+ *
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3890,7 +3916,31 @@ H5C_load_entry(H5F_t *             f,
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
-    HDassert( entry_ptr->is_dirty == FALSE );
+    /* In general, an entry should be clean just after it is loaded.
+     *
+     * However, when this code is used in the metadata cache, it is
+     * possible that object headers will be dirty at this point, as
+     * the load function will alter object headers if necessary to
+     * fix an old bug.
+     *
+     * To support this bug fix, I have replace the old assert:
+     *
+     *  HDassert( entry_ptr->is_dirty == FALSE );
+     *
+     * with:
+     *
+     *  HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
+     *
+     * Note that type id 4 is associated with object headers in the metadata
+     * cache.
+     *
+     * When we get to using H5C for other purposes, we may wish to
+     * tighten up the assert so that the loophole only applies to the
+     * metadata cache.
+     */
+
+    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
+
 
     entry_ptr->addr = addr;
     entry_ptr->type = type;
