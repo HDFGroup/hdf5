@@ -676,6 +676,7 @@
 ./test/flush2.c
 ./test/gen_cross.c
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_group.c			_DO_NOT_DISTRIBUTE_
@@ -697,6 +698,7 @@
 ./test/le_data.h5
 ./test/lheap.c
 ./test/links.c
+./test/mergemsg.h5
 ./test/mount.c
 ./test/mtime.c
 ./test/noencoder.h5
