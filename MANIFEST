@@ -902,7 +902,7 @@
 ./tools/misc/testfiles/h5stat_filters-d.ddl
 ./tools/misc/testfiles/h5stat_filters.ddl
 ./tools/misc/testfiles/h5stat_filters-dT.ddl
-./tools/misc/testfiles/h5stat_filters-f.ddl
+./tools/misc/testfiles/h5stat_filters-file.ddl
 ./tools/misc/testfiles/h5stat_filters-F.ddl
 ./tools/misc/testfiles/h5stat_filters-g.ddl
 ./tools/misc/testfiles/h5stat_filters.h5

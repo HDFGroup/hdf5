@@ -113,7 +113,7 @@ TOOLTEST h5stat_help2.ddl --help
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
 TOOLTEST h5stat_filters.ddl h5stat_filters.h5
-TOOLTEST h5stat_filters-f.ddl  -f   h5stat_filters.h5
+TOOLTEST h5stat_filters-file.ddl  -f   h5stat_filters.h5
 TOOLTEST h5stat_filters-F.ddl  -F   h5stat_filters.h5
 TOOLTEST h5stat_filters-d.ddl  -d   h5stat_filters.h5
 TOOLTEST h5stat_filters-g.ddl  -g   h5stat_filters.h5
