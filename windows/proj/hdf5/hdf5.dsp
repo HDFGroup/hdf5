@@ -896,6 +896,21 @@ SOURCE=..\..\..\src\H5G.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Gdeprec.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Gent.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1339,6 +1354,21 @@ SOURCE=..\..\..\src\H5I.c
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 # PROP Intermediate_Dir "..\..\..\proj\hdf5\Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5L.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
 
@@ -1843,7 +1873,37 @@ SOURCE=..\..\..\src\H5Pgcpl.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Plcpl.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Pocpl.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Pstrcpl.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
