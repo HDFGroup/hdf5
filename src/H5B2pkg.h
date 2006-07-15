@@ -147,11 +147,6 @@ typedef struct H5B2_internal_t {
     unsigned    nrec;           /* Number of records in node                  */
 } H5B2_internal_t;
 
-/* B-tree metadata statistics info */
-typedef struct H5B2_stat_t {
-    int placeholder;            /* Replace this with real metadata statistic fields */
-} H5B2_stat_t;
-
 
 /*****************************/
 /* Package Private Variables */

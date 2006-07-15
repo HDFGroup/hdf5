@@ -169,30 +169,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_term_interface
- *
- * Purpose:	Terminate any resources allocated in H5L_init_interface.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, January 24, 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5L_term_interface(void)
-{
-    int	n=0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_term_interface)
-
-    /* The H5L interface currently has no resources that need to be freed. */
-      
-    FUNC_LEAVE_NOAPI(n)
-}
-
-/*-------------------------------------------------------------------------
  * Function:	H5Lmove
  *
  * Purpose:	Renames an object within an HDF5 file and moves it to a new
@@ -616,7 +592,6 @@ herr_t
 H5L_link(H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
            hid_t dxpl_id, hid_t lcpl_id)
 {
-    char *norm_new_name = NULL;	        /* Pointer to normalized new name */
     H5F_t *file = NULL;                 /* File link will be in */
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */

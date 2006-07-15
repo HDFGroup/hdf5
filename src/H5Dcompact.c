@@ -160,8 +160,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
-    H5F_t *f_dst,  H5O_layout_t *layout_dst, H5T_t *dt_src, hid_t dxpl_id)
+H5D_compact_copy(const H5O_layout_t *layout_src, H5F_t *f_dst,  H5O_layout_t *layout_dst,
+    H5T_t *dt_src, hid_t dxpl_id)
 {
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
     hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
@@ -175,9 +175,8 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     FUNC_ENTER_NOAPI(H5D_compact_copy, FAIL)
 
     /* Check args */
-    HDassert(f_src);
-    HDassert(f_dst);
     HDassert(layout_src && H5D_COMPACT == layout_src->type);
+    HDassert(f_dst);
     HDassert(layout_dst && H5D_COMPACT == layout_dst->type);
 
     /* If there's a source datatype, set up type conversion information */

@@ -68,14 +68,14 @@
 struct H5D_io_info_t;
 typedef herr_t (*H5D_io_read_func_t)(struct H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,haddr_t addr,
+    const H5S_t *file_space, const H5S_t *mem_space, haddr_t addr,
     void *buf/*out*/);
 
 
 /* Write directly from app buffer to file */
 typedef herr_t (*H5D_io_write_func_t)(struct H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,haddr_t addr,
+    const H5S_t *file_space, const H5S_t *mem_space, haddr_t addr,
     const void *buf);
 
 /* Function pointers for I/O on particular types of dataset layouts */
@@ -279,7 +279,7 @@ H5_DLL ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
     const void *buf);
-H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
+H5_DLL herr_t H5D_compact_copy(const H5O_layout_t *layout_src,
     H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, hid_t dxpl_id);
 
 /* Functions that operate on indexed storage */

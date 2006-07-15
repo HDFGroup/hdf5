@@ -993,11 +993,10 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 	else
 #endif
          {
-	  if((io_info->ops.read)(io_info,
-            (size_t)nelmts, H5T_get_size(dataset->shared->type),
-				       file_space, mem_space,0,
-            buf/*out*/)<0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous read failed ");
+            if((io_info->ops.read)(io_info, (size_t)nelmts,
+                    H5T_get_size(dataset->shared->type), file_space, mem_space,
+                    (haddr_t)0, buf/*out*/) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous read failed ");
 	}
 
 #ifdef H5S_DEBUG
@@ -1252,11 +1251,10 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	else
 #endif
         {
-	  if((io_info->ops.write)(io_info,
-            (size_t)nelmts, H5T_get_size(dataset->shared->type),
-				       file_space, mem_space,0,
-                                        buf/*out*/)<0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed ");
+            if((io_info->ops.write)(io_info, (size_t)nelmts,
+                    H5T_get_size(dataset->shared->type), file_space, mem_space,
+                    (haddr_t)0, buf/*out*/) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed ");
 	}
 
 #ifdef H5S_DEBUG
@@ -1517,31 +1515,28 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
 	else {/* sequential or independent read */
 #endif
-	/* Get first node in chunk skip list */
-	  chunk_node=H5SL_first(fm.fsel);
+            /* Get first node in chunk skip list */
+            chunk_node=H5SL_first(fm.fsel);
 
-           while(chunk_node) {
-            H5D_chunk_info_t *chunk_info;   /* chunk information */
+            while(chunk_node) {
+                H5D_chunk_info_t *chunk_info;   /* chunk information */
 
-	     /* Get the actual chunk information from the skip list node */
-	     chunk_info=H5SL_item(chunk_node);
+                /* Get the actual chunk information from the skip list node */
+                chunk_info=H5SL_item(chunk_node);
 
-	     /* Pass in chunk's coordinates in a union. */
-	     store.chunk.offset = chunk_info->coords;
-	     store.chunk.index = chunk_info->index;
+                /* Pass in chunk's coordinates in a union. */
+                store.chunk.offset = chunk_info->coords;
+                store.chunk.index = chunk_info->index;
 
-	     /* Perform the actual read operation */
-             status = (io_info->ops.read)(io_info,
-                       chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
-                       chunk_info->fspace, chunk_info->mspace, 0,buf);
+                /* Perform the actual read operation */
+                if((io_info->ops.read)(io_info, chunk_info->chunk_points,
+                        H5T_get_size(dataset->shared->type), chunk_info->fspace,
+                        chunk_info->mspace, (haddr_t)0, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
 
-	     /* Check return value from optimized read */
-             if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
-
-             chunk_node = H5SL_next(chunk_node);
-
-	   }
+                /* Advance to next chunk in list */
+                chunk_node = H5SL_next(chunk_node);
+            }
 #ifdef H5_HAVE_PARALLEL
 	}
 #endif
@@ -1840,34 +1835,29 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked write failed in collective mode");
 	}
 	else {/* sequential or independent write */
+#endif /* H5_HAVE_PARALLEL */
+            /* Get first node in chunk skip list */
+            chunk_node=H5SL_first(fm.fsel);
 
- #endif /* H5_HAVE_PARALLEL */
-	/* Get first node in chunk skip list */
-	chunk_node=H5SL_first(fm.fsel);
+            while(chunk_node) {
+                H5D_chunk_info_t *chunk_info;       /* Chunk information */
 
-         while(chunk_node) {
-            H5D_chunk_info_t *chunk_info;       /* Chunk information */
+                /* Get the actual chunk information from the skip list node */
+                chunk_info=H5SL_item(chunk_node);
 
-	  /* Get the actual chunk information from the skip list node */
-	  chunk_info=H5SL_item(chunk_node);
+                /* Pass in chunk's coordinates in a union. */
+                store.chunk.offset = chunk_info->coords;
+                store.chunk.index = chunk_info->index;
 
-	  /* Pass in chunk's coordinates in a union. */
-	  store.chunk.offset = chunk_info->coords;
-	  store.chunk.index = chunk_info->index;
+                /* Perform the actual read operation */
+                if((io_info->ops.write)(io_info, chunk_info->chunk_points,
+                        H5T_get_size(dataset->shared->type), chunk_info->fspace,
+                        chunk_info->mspace, (haddr_t)0, buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
 
-	  /* Perform the actual read operation */
-
-          status = (io_info->ops.write)(io_info,
-                    chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
-                    chunk_info->fspace, chunk_info->mspace, 0,buf);
-
-	   /* Check return value from optimized read */
-          if (status<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
-
-            chunk_node = H5SL_next(chunk_node);
-
-	 }
+                /* Advance to next chunk in list */
+                chunk_node = H5SL_next(chunk_node);
+            } /* end while */
 #ifdef H5_HAVE_PARALLEL
 	}
 #endif

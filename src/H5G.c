@@ -929,9 +929,10 @@ H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     obj_open = TRUE;
 
     /* Get correct property lists */
-    if(H5P_DEFAULT == lcpl_id)
+    if(H5P_DEFAULT == lcpl_id) {
         if((lcpl_id = H5L_get_default_lcpl()) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to get default lcpl")
+    } /* end if */
     else
         if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
@@ -2160,17 +2161,13 @@ static herr_t
 H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
          hid_t ocpypl_id, hid_t lcpl_id)
 {
-    H5P_genplist_t  *gcrt_plist=NULL;           /* Group create property list created */
     H5P_genplist_t  *gcpy_plist=NULL;           /* Group copy property list created */
     hid_t           dxpl_id=H5AC_dxpl_id;
     H5G_name_t      new_path;                   /* Copied object group hier. path */
     H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
     hbool_t         entry_inserted=FALSE;       /* Flag to indicate that the new entry was inserted into a group */
-    hbool_t         gcrt_plist_created=FALSE;   /* Flag to indicate if H5G_CREATE_INTERMEDIATE_GROUP_FLAG is set */
     unsigned        cpy_option = 0;             /* Copy options */
-    H5P_genclass_t  *gcrt_class;	       /* Group creation property class */
-    hid_t	    gcplist_id = H5P_DEFAULT;   /* Group creation property list */
     herr_t          ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_copy, FAIL);

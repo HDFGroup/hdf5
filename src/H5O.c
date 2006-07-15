@@ -4077,11 +4077,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     H5O_t                  *oh_dst = NULL;         /* Object header for destination object */
     unsigned               chunkno = 0, mesgno = 0;
     size_t                 hdr_size;
-    haddr_t                addr_new;
+    haddr_t                addr_new = HADDR_UNDEF;
     H5O_mesg_t             *mesg_src;               /* Message in source object header */
     H5O_mesg_t             *mesg_dst;               /* Message in source object header */
     const H5O_msg_class_t  *copy_type;              /* Type of message to use for copying */
-    const H5O_obj_class_t  *obj_class;              /* Type of object we are copying */
+    const H5O_obj_class_t  *obj_class = NULL;       /* Type of object we are copying */
     void                   *udata = NULL;           /* User data for passing to message callbacks */
     herr_t                 ret_value = SUCCEED;
 
@@ -4285,6 +4285,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
 
     /* Set the dest. object location to the first chunk address */
+    HDassert(H5F_addr_defined(addr_new));
     oloc_dst->addr = addr_new;
 
     /* Allocate space for the address mapping of the object copied */

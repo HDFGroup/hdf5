@@ -70,7 +70,7 @@
 /*-------------------------------------------------------------------------
  * Function:	H5B2_stat_info
  *
- * Purpose:	Retrieve metadata statistics for the fractal heap
+ * Purpose:	Retrieve metadata statistics for a v2 B-tree
  *
  * Return:	Success:	non-negative
  *
@@ -101,6 +101,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
 /* XXX: Fill in metadata statistics for the heap */
+    info = info; /* Quiet compiler for now) */
 
 done:
     /* Release B-tree header node */

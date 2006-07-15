@@ -441,7 +441,7 @@ H5O_pline_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
+H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
     void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
     void *_udata)
 {
@@ -452,7 +452,6 @@ H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
     FUNC_ENTER_NOAPI_NOINIT(H5O_pline_pre_copy_file)
 
     /* check args */
-    HDassert(file_src);
     HDassert(pline_src);
 
     /* If the user data is non-NULL, assume we are copying a dataset

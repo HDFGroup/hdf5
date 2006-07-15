@@ -1378,7 +1378,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
 #if H5_SIZEOF_LONG_DOUBLE !=0
  long double        templdouble;
 #endif
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
  static char        fmt_llong[8], fmt_ullong[8];
  if (!fmt_llong[0]) {
   sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
@@ -1391,7 +1391,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  if (H5Tequal(tid, H5T_NATIVE_FLOAT)) 
  {
   memcpy(&tempfloat, mem, sizeof(float));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%g ", tempfloat);
 #else
   if (1 != fwrite(&tempfloat, size, 1, stream)) 
@@ -1401,7 +1401,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) 
  {
   memcpy(&tempdouble, mem, sizeof(double));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%g ", tempdouble);
 #else
   if (1 != fwrite(&tempdouble, size, 1, stream)) 
@@ -1412,7 +1412,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) 
  {
   memcpy(&templdouble, mem, sizeof(long double));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%Lf ", templdouble);
 #else
   if (1 != fwrite(&templdouble, size, 1, stream)) 
@@ -1442,7 +1442,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++) 
   {
    memcpy(&tempuchar, &s[i], sizeof(unsigned char));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "%d", tempuchar);
 #else
    if (1 != fwrite(&tempuchar, size, 1, stream)) 
@@ -1453,7 +1453,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_INT)) 
  {
   memcpy(&tempint, mem, sizeof(int));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%d ", tempint);
 #else
   if (1 != fwrite(&tempint, size, 1, stream)) 
@@ -1463,7 +1463,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_UINT)) 
  {
   memcpy(&tempuint, mem, sizeof(unsigned int));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%u ", tempuint);
 #else
   if (1 != fwrite(&tempuint, size, 1, stream)) 
@@ -1473,7 +1473,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_SCHAR))
  {
   memcpy(&tempschar, mem, sizeof(char));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%d ", tempschar);
 #else
   if (1 != fwrite(&tempschar, size, 1, stream)) 
@@ -1483,7 +1483,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_UCHAR))
  {
   memcpy(&tempuchar, mem, sizeof(unsigned char));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%u ", tempuchar);
 #else
   if (1 != fwrite(&tempuchar, size, 1, stream)) 
@@ -1493,7 +1493,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_SHORT))
  {
   memcpy(&tempshort, mem, sizeof(short));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%d ", tempshort);
 #else
   if (1 != fwrite(&tempshort, size, 1, stream)) 
@@ -1503,7 +1503,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_USHORT))
  {
   memcpy(&tempushort, mem, sizeof(unsigned short));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%u ", tempushort);
 #else
   if (1 != fwrite(&tempushort, size, 1, stream)) 
@@ -1513,7 +1513,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_LONG))
  {
   memcpy(&templong, mem, sizeof(long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%ld ", templong);
 #else
   if (1 != fwrite(&templong, size, 1, stream)) 
@@ -1523,7 +1523,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_ULONG))
  {
   memcpy(&tempulong, mem, sizeof(unsigned long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, "%lu ", tempulong);
 #else
   if (1 != fwrite(&tempulong, size, 1, stream)) 
@@ -1533,7 +1533,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_LLONG))
  {
   memcpy(&templlong, mem, sizeof(long_long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, fmt_llong, templlong);
 #else
   if (1 != fwrite(&templlong, size, 1, stream)) 
@@ -1543,7 +1543,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tequal(tid, H5T_NATIVE_ULLONG))
  {
   memcpy(&tempullong, mem, sizeof(unsigned long_long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
   fprintf(stream, fmt_ullong, tempullong);
 #else
   if (1 != fwrite(&tempullong, size, 1, stream)) 
@@ -1555,7 +1555,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   if (sizeof(hssize_t) == sizeof(int)) 
   {
    memcpy(&tempint, mem, sizeof(int));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "%d ", tempint);
 #else
    if (1 != fwrite(&tempint, size, 1, stream)) 
@@ -1565,7 +1565,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   else if (sizeof(hssize_t) == sizeof(long)) 
   {
    memcpy(&templong, mem, sizeof(long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "%ld ", templong);
 #else
    if (1 != fwrite(&templong, size, 1, stream)) 
@@ -1575,7 +1575,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   else
   {
    memcpy(&templlong, mem, sizeof(long_long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, fmt_llong, templlong);
 #else
    if (1 != fwrite(&templlong, size, 1, stream)) 
@@ -1588,7 +1588,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   if (sizeof(hsize_t) == sizeof(int)) 
   {
    memcpy(&tempuint, mem, sizeof(unsigned int));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "%u ", tempuint);
 #else
    if (1 != fwrite(&tempuint, size, 1, stream)) 
@@ -1598,7 +1598,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   else if (sizeof(hsize_t) == sizeof(long)) 
   {
    memcpy(&tempulong, mem, sizeof(unsigned long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "%lu ", tempulong);
 #else
    if (1 != fwrite(&tempulong, size, 1, stream)) 
@@ -1608,7 +1608,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   else
   {
    memcpy(&tempullong, mem, sizeof(unsigned long_long));
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, fmt_ullong, tempullong);
 #else
    if (1 != fwrite(&tempullong, size, 1, stream)) 
@@ -1641,7 +1641,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   unsigned int i;
   if (1==size) 
   {
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "0x%02x", mem[0]);
 #else
    if (1 != fwrite(&mem[0], size, 1, stream)) 
@@ -1652,7 +1652,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   {
    for (i = 0; i < size; i++)
    {
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
     fprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
     if (1 != fwrite(&mem[i], sizeof(char), 1, stream)) 
@@ -1718,7 +1718,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   size_t i;
   if (1==size) 
   {
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
    fprintf(stream, "0x%02x", mem[0]);
 #else
    if (1 != fwrite(&mem[0], size, 1, stream)) 
@@ -1729,7 +1729,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   {
    for (i = 0; i < size; i++)
    {
-#if DEBUG_H5DUMP_BIN
+#ifdef DEBUG_H5DUMP_BIN
     fprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
     if (1 != fwrite(&mem[i], sizeof(char), 1, stream)) 

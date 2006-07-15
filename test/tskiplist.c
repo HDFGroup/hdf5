@@ -1175,7 +1175,6 @@ test_skiplist_remove_first(void)
     unsigned data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
     unsigned sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90};
     unsigned *found_item;    /* Item found in skip list */
-    unsigned find_item;  /* Item to add to skip list */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */

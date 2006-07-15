@@ -10197,7 +10197,7 @@ test_abs_random_managed(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, f
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    unsigned long seed;                 /* Random # seed */
+    unsigned long seed = 0;             /* Random # seed */
     size_t      num_ids = 0;            /* # of heap IDs in array */
     size_t      alloc_ids = 0;          /* # of heap IDs allocated in array */
     hsize_t     total_obj_added;        /* Size of objects added */
@@ -10354,7 +10354,7 @@ test_abs_random_pow2_managed(hsize_t size_limit, hid_t fapl, H5HF_create_t *cpar
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    unsigned long seed;                 /* Random # seed */
+    unsigned long seed = 0;             /* Random # seed */
     size_t      num_ids = 0;            /* # of heap IDs in array */
     size_t      alloc_ids = 0;          /* # of heap IDs allocated in array */
     hsize_t     total_obj_added;        /* Size of objects added */

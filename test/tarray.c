@@ -189,7 +189,6 @@ test_array_funcs(void)
     int                 size;
     H5T_pad_t           inpad;
     H5T_norm_t          norm;
-    H5T_sign_t          sign;
     H5T_cset_t          cset;
     H5T_str_t           strpad;
     herr_t		ret;	    /* Generic return value */

@@ -66,6 +66,7 @@ H5Glink(hid_t cur_loc_id, H5L_link_t type, const char *cur_name, const char *new
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Glink2
@@ -75,34 +76,34 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5Glink2(hid_t cur_loc_id, const char *cur_name,
-                   H5L_link_t type, hid_t new_loc_id, const char *new_name)
+herr_t
+H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
+    hid_t new_loc_id, const char *new_name)
 {
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Glink2, FAIL)
 
-    if(type == H5L_LINK_HARD)
-    {
-         if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)
-          HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
+    if(type == H5L_LINK_HARD) {
+        if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
-    else if(type == H5L_LINK_SOFT)
-    {
+    else if(type == H5L_LINK_SOFT) {
         /* Soft links only need one location, the new_loc_id, but it's possible that
          * new_loc_id is H5L_SAME_LOC */
         if(new_loc_id == H5L_SAME_LOC)
             new_loc_id = cur_loc_id;
 
         if((ret_value = H5Lcreate_soft(cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)
-          HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else
-      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gmove
@@ -125,6 +126,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gmove2
@@ -146,6 +148,7 @@ herr_t H5Gmove2(hid_t src_loc_id, const char *src_name,
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gunlink
@@ -168,6 +171,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gget_linkval
@@ -190,4 +194,4 @@ herr_t H5Gget_linkval(hid_t loc_id, const char *name,
 done:
     FUNC_LEAVE_API(ret_value)
 }
-
+

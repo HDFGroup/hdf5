@@ -1007,9 +1007,9 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
     hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
     hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
-    size_t      src_dt_size;            /* Source datatype size */
-    size_t      mem_dt_size;            /* Memory datatype size */
-    size_t      dst_dt_size;            /* Destination datatype size */
+    size_t      src_dt_size = 0;        /* Source datatype size */
+    size_t      mem_dt_size = 0;        /* Memory datatype size */
+    size_t      dst_dt_size = 0;        /* Destination datatype size */
     size_t      max_dt_size;            /* Max. datatype size */
     size_t      nelmts = 0;             /* Number of elements in buffer */
     size_t      src_nbytes;             /* Number of bytes to read from source */
@@ -1030,8 +1030,8 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src,
 
     /* Check args */
     HDassert(f_src);
-    HDassert(f_dst);
     HDassert(layout_src && H5D_CONTIGUOUS == layout_src->type);
+    HDassert(f_dst);
     HDassert(layout_dst && H5D_CONTIGUOUS == layout_dst->type);
 
     /* Allocate space for destination raw data */

@@ -650,7 +650,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hid_t dxp
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
                 /* copy compact raw data */
-                if(H5D_compact_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, dxpl_id) < 0)
+                if(H5D_compact_copy(layout_src, file_dst, layout_dst, udata->src_dtype, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
 
             	layout_dst->u.compact.dirty = TRUE;

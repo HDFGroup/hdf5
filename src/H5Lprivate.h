@@ -38,6 +38,6 @@ struct H5HL_t; /* defined in H5HLprivate.h */
 
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
     H5G_loc_t *obj_loc, hid_t dxpl, hid_t lcpl_id);
-H5_DLL hid_t H5L_get_default_lcpl();
+H5_DLL hid_t H5L_get_default_lcpl(void);
 
 #endif /* _H5Lprivate_H */

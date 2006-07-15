@@ -95,6 +95,11 @@ typedef struct H5B2_class_t {
 
 } H5B2_class_t;
 
+/* v2 B-tree metadata statistics info */
+typedef struct H5B2_stat_t {
+    int none;         /* No information yet */
+} H5B2_stat_t;
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -125,6 +130,10 @@ H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t *nrec);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr);
+
+/* Statistics routines */
+H5_DLL herr_t H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, H5B2_stat_t *info);
 
 #endif /* _H5B2private_H */
 

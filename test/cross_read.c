@@ -43,8 +43,7 @@ static int read_data(char *fname)
     hid_t	dt;
     double      data_in[NX][NY]; /* input buffer */
     double      data_out[NX][NY]; /* output buffer */
-    int         i, j, rank;
-    herr_t      status;
+    int         i, j;
     unsigned 	nerrors = 0;
 
     pathname[0] = '\0';
@@ -153,7 +152,7 @@ int main(void)
     nerrors += read_data(filename);
 
     if (nerrors) {
-        printf("***** %lu FAILURE%s! *****\n",
+        printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         HDexit(1);
     }

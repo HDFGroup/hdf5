@@ -445,9 +445,8 @@ test_value_dsnt_exist(void)
 static int
 test_funcs(void)
 {
-    hid_t	type=-1, cwg=-1;
+    hid_t	type=-1;
     c_e1	val;
-    signed char	val8;
     int         size;
     H5T_pad_t   inpad;
     H5T_cset_t  cset;
