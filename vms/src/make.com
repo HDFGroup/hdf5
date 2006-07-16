@@ -36,13 +36,13 @@ $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDstdio,"+-
         "H5FDstream, H5FL, H5FO,"+-
         "H5FS, H5FScache, H5FSdbg,"+-
-        "H5G, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
+        "H5G, H5Gdeprec, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
         "H5HF, H5HFcache, H5HFdbg, H5HFint, H5HFtest, H5HFstat,"+-
         "H5HFdblock, H5HFdtable, H5HFhdr, H5HFiblock,"+-
         "H5HFiter, H5HFsection, H5HFspace,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
-        "H5MP, H5MPtest, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
+        "H5MP, H5MPtest,H5L, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omtime,"+-
         "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab,"+-
