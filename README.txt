@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-alpha4 released on Sun Jul 16 13:42:12 CDT 2006
+HDF5 version 1.8.0-alpha5 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
