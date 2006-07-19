@@ -864,6 +864,12 @@
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh
 
+./tools/h5copy/testh5copy.sh
+./tools/h5copy/Makefile.in
+./tools/h5copy/h5copy.c
+./tools/h5copy/Makefile.am
+
+
 ./tools/lib/Makefile.am
 ./tools/lib/Makefile.in
 ./tools/lib/h5diff.c

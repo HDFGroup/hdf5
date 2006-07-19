@@ -13,14 +13,24 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-# All subdirectories
-SUBDIRS=lib h5dump h5diff h5ls misc h5import h5repack h5jam h5copy
+# Include src and tools/lib directories
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+
+# Test programs and scripts
+TEST_SCRIPT=$(srcdir)/testh5copy.sh
+check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5copy$(EXEEXT)
+
+# This is our main target, the h5copy tool
+bin_PROGRAMS=h5copy
+
+# All programs depend on the hdf5 and h5tools libraries
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
