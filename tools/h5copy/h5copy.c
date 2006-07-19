@@ -29,7 +29,7 @@ int   d_status;
  *
  * Return: void
  *
- * Programmer:	Pedro Vicente Nunes, 7/8/2006
+ * Programmer: Pedro Vicente Nunes, 7/8/2006
  *
  * Modifications:
  *
@@ -66,9 +66,9 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
 
 
 /*-------------------------------------------------------------------------
- * Function:	parse_flag
+ * Function: parse_flag
  *
- * Purpose:	read the flag -f STRING
+ * Purpose: read the flag -f STRING
  *
  * STRING is one of the following (API symbol and description)
  *
@@ -78,10 +78,10 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
  * REF      H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
  * ATTR     H5G_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
  *
- * Return:	Success:    SUCCEED
- *		       Failure:    FAIL
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
  *
- * Programmer:	Pedro Vicente Nunes, 7/8/2006
+ * Programmer: Pedro Vicente Nunes, 7/8/2006
  *
  * Modifications:
  *
@@ -128,11 +128,11 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function: main
  *
- * Purpose:	main program
+ * Purpose: main program
  *
- * Programmer:	Pedro Vicente Nunes
+ * Programmer: Pedro Vicente Nunes
  *
  * Modifications:
  *
@@ -153,8 +153,8 @@ main (int argc, const char *argv[])
  char         *x;
  unsigned     flag=0;
  int          verbose=0;
- hid_t        pid;	
-	char         str_flag[20];
+ hid_t        pid; 
+ char         str_flag[20];
  
  /* switches come before non-switch arguments */
  for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) 
