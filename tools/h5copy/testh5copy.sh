@@ -13,6 +13,11 @@
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 #
 # Tests for the h5copy tool
+#
+# Pedro Vicente Nunes
+# pvn@hdfgroup.org
+# Thursday, July 20, 2006
+#
 
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
@@ -38,7 +43,18 @@ TESTING() {
 
 TOOLTEST() {
     
-    TESTING $H5COPY $@
+ TESTING $H5COPY $@
+ (
+  cd $srcdir/../testfiles
+  $RUNSERIAL $H5COPY_BIN $@
+ ) > output.out
+ RET=$?
+ if [ $RET != 0 ] ; then
+  echo "*FAILED*"
+  nerrors="`expr $nerrors + 1`"
+ else
+  echo " PASSED"
+ fi
 
  
 }
@@ -54,11 +70,13 @@ TOOLTEST() {
 ##############################################################################
 
 
-#TOOLTEST -v test1.h5/array test1.out.h5/array
+TOOLTEST -v test1.h5/array test1.out.h5/array
+TOOLTEST -v test1.h5/integer test1.out.h5/integer_copy
+TOOLTEST -v test1.h5/g1 test1.out.h5/g1
 
 
-#if test $nerrors -eq 0 ; then
-#	echo "All h5copy tests passed."
-#fi
+if test $nerrors -eq 0 ; then
+	echo "All h5copy tests passed."
+fi
 
-#exit $nerrors
+exit $nerrors
