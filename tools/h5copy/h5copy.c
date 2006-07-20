@@ -42,9 +42,7 @@ usage (void)
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
       A pair of 2 HDF5 files (input and output). Each file name\n\
-      is optionally followed by a slash and an object\n\
-      name within the file (if no object is specified\n\
-      within the file then all objects are copied)\n\
+      is followed by a slash and an object name within the file\n\
    OPTIONS\n\
       -h               Print a usage message and exit\n\
       -v               Print information about OBJECTS and OPTIONS\n\
