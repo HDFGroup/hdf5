@@ -14,29 +14,70 @@
 #
 
 # Check that all the files in MANIFEST exist and that (if this is a
-# CVS checkout) that all the CVS-managed files appear in the
+# SVN checkout) that all the SVN-managed files appear in the
 # MANIFEST.
 
 verbose=yes
 MANIFEST=/tmp/H5_MANIFEST.$$
 
+# function definitions
+
+GETSVNENTRIES ()
+# Purpose: Extract filenames from the svn entries file
+# $1: directory name in which the svn entries is.
+# steps:
+# 1. remove all single line entries so that step 2 does not fail on them. 
+# 2. merge all multiple lines entries into single lines.
+# 3. remove all non file entries.
+# 4. insert a blank line because some entries files has no kind="file"
+#    entry and ed does not like to do g on an empty file.
+# 5. remove everything except the file name.
+# 6. remove all blank lines, including the inserted one.
+{
+SVNENTRY=/tmp/H5_SVNENTRY.$$
+cp $1/entries $SVNENTRY
+chmod u+w $SVNENTRY	# entries file is not writable.
+ed - $SVNENTRY <<EOF
+g/^<.*>$/d
+g/^</.,/>$/j
+v/kind="file"/d
+a
+
+.
+g/.*name="/s///
+g/".*/s///
+g/^$/d
+w
+q
+EOF
+cat $SVNENTRY
+rm $SVNENTRY
+}
+
+
+# Main
+test "$verbose" && echo "   Checking MANIFEST..." 1>&2
 # clean up $MANIFEST file when exits
 trap "rm -f $MANIFEST" 0
+
+if [ ! -f MANIFEST ]; then
+    echo MANIFEST file not found. Abort.
+    exit 1
+fi
 
 # Copy the manifest file to get a list of file names.
 grep '^\.' MANIFEST | expand | cut -f1 -d' ' >$MANIFEST
 
-test "$verbose" && echo "   Checking MANIFEST..." 1>&2
-test -f $MANIFEST || exit 1
 for file in `cat $MANIFEST`; do
     if [ ! -f $file ]; then
        echo "- $file"
        fail=yes
     fi
 done
-for cvs in `find . -type d -name CVS -print`; do
-    path=`echo $cvs |sed 's/\/CVS//'`
-    for file in `grep '^\/' $cvs/Entries |cut -d/ -f2`; do
+
+for svn in `find . -type d -name .svn -print`; do
+    path=`echo $svn |sed 's/\/.svn//'`
+    for file in `GETSVNENTRIES $svn`; do
 	if (grep $path/$file$ $MANIFEST >/dev/null); then
 	    :
 	else
@@ -49,7 +90,7 @@ done
 if [ "X$fail" = "Xyes" ]; then
     cat 1>&2 <<EOF
 The MANIFEST is out of date. Files marked with a minus sign (-) no
-longer exist; files marked with a plus sign (+) are CVS-managed but do
+longer exist; files marked with a plus sign (+) are SVN-managed but do
 not appear in the MANIFEST.  Please remedy the situation and try again.
 EOF
     exit 1
