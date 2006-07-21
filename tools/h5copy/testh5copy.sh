@@ -55,28 +55,18 @@ TOOLTEST() {
  else
   echo " PASSED"
  fi
-
- 
 }
 
-
-
-
-
 ##############################################################################
+###           T H E   T E S T S                                            ###
 ##############################################################################
-###			  T H E   T E S T S                                            ###
-##############################################################################
-##############################################################################
-
 
 TOOLTEST -v test1.h5/array test1.out.h5/array
 TOOLTEST -v test1.h5/integer test1.out.h5/integer_copy
 TOOLTEST -v test1.h5/g1 test1.out.h5/g1
 
-
 if test $nerrors -eq 0 ; then
-	echo "All h5copy tests passed."
+    echo "All h5copy tests passed."
 fi
 
 exit $nerrors
