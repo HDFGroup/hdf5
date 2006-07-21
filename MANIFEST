@@ -1673,6 +1673,7 @@
 ./windows/test/hdf5timingtest.bat
 
 #windows tools
+./windows/tools/testfiles/binread/binread.dsp
 ./windows/tools/h5diffdll/h5diffdll.dsp
 ./windows/tools/h5debug/h5debug.dsp
 ./windows/tools/h5debugdll/h5debugdll.dsp
