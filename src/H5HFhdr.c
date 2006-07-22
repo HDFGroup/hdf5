@@ -68,10 +68,6 @@
 /* Local Prototypes */
 /********************/
 
-/* Free space section routines */
-static herr_t H5HF_hdr_skip_ranges(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries);
-
 
 /*********************/
 /* Package Variables */
@@ -153,13 +149,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hsize_t
-H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, hsize_t iblock_size)
+static herr_t
+H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
 {
     hsize_t acc_heap_size;      /* Accumumated heap space */
+    hsize_t iblock_size;        /* Size of indirect block to calculate for */
     hsize_t acc_dblock_free;    /* Accumumated direct block free space */
+    size_t max_dblock_free;     /* Max. direct block free space */
     unsigned curr_row;          /* Current row in block */
-    hsize_t ret_value;          /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_compute_free_space)
 
@@ -167,22 +165,27 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, hsize_t iblock_size)
      * Check arguments.
      */
     HDassert(hdr);
-    HDassert(iblock_size > hdr->man_dtable.cparam.max_direct_size);
+    HDassert(iblock_row >= hdr->man_dtable.max_direct_rows);
 
     /* Set the free space in direct blocks */
     acc_heap_size = 0;
     acc_dblock_free = 0;
+    max_dblock_free = 0;
+    iblock_size = hdr->man_dtable.row_block_size[iblock_row];
     curr_row = 0;
     while(acc_heap_size < iblock_size) {
         acc_heap_size += hdr->man_dtable.row_block_size[curr_row] *
                 hdr->man_dtable.cparam.width;
-        acc_dblock_free += hdr->man_dtable.row_dblock_free[curr_row] *
+        acc_dblock_free += hdr->man_dtable.row_tot_dblock_free[curr_row] *
                 hdr->man_dtable.cparam.width;
+        if(hdr->man_dtable.row_max_dblock_free[curr_row] > max_dblock_free)
+            max_dblock_free = hdr->man_dtable.row_max_dblock_free[curr_row];
         curr_row++;
     } /* end while */
 
-    /* Set return value */
-    ret_value = acc_dblock_free;
+    /* Set direct block free space values for indirect block */
+    hdr->man_dtable.row_tot_dblock_free[iblock_row] = acc_dblock_free;
+    hdr->man_dtable.row_max_dblock_free[iblock_row] = max_dblock_free;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_compute_free_space() */
@@ -226,15 +229,19 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 
     /* Set the free space in direct blocks */
     for(u = 0; u < hdr->man_dtable.max_root_rows; u++) {
-        if(u < hdr->man_dtable.max_direct_rows)
-            hdr->man_dtable.row_dblock_free[u] = hdr->man_dtable.row_block_size[u] -
+        if(u < hdr->man_dtable.max_direct_rows) {
+            hdr->man_dtable.row_tot_dblock_free[u] = hdr->man_dtable.row_block_size[u] -
                     H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
+            hdr->man_dtable.row_max_dblock_free[u] = hdr->man_dtable.row_tot_dblock_free[u];
+        } /* end if */
         else
-            hdr->man_dtable.row_dblock_free[u] = H5HF_hdr_compute_free_space(hdr, hdr->man_dtable.row_block_size[u]);
+            if(H5HF_hdr_compute_free_space(hdr, u) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize direct block free space for indirect block")
 #ifdef QAK
 HDfprintf(stderr, "%s: row_block_size[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_block_size[u]);
 HDfprintf(stderr, "%s: row_block_off[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_block_off[u]);
-HDfprintf(stderr, "%s: row_dblock_free[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_dblock_free[u]);
+HDfprintf(stderr, "%s: row_tot_dblock_free[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_tot_dblock_free[u]);
+HDfprintf(stderr, "%s: row_max_dblock_free[%Zu] = %Zu\n", FUNC, u, hdr->man_dtable.row_max_dblock_free[u]);
 #endif /* QAK */
     } /* end for */
 
@@ -652,10 +659,7 @@ herr_t
 H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
     unsigned start_entry, unsigned nentries)
 {
-    hsize_t sect_off;                   /* Offset of free section in heap */
-    unsigned curr_row;                  /* Current row in indirect block */
-    unsigned curr_col;                  /* Current column in indirect block */
-    unsigned u;                         /* Local index variables */
+    hsize_t sect_off;                   /* Offset of section in heap space */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_skip_blocks)
@@ -670,46 +674,11 @@ HDfprintf(stderr, "%s: start_entry = %u, nentries = %u\n", FUNC, start_entry, ne
     HDassert(iblock);
     HDassert(nentries);
 
-    /* Compute starting column & row */
-    curr_row = start_entry / hdr->man_dtable.cparam.width;
-    curr_col = start_entry % hdr->man_dtable.cparam.width;
-
-    /* Initialize information for rows skipped over */
-    sect_off = iblock->block_off;
-    for(u = 0; u < curr_row; u++)
-        sect_off += hdr->man_dtable.row_block_size[u] * hdr->man_dtable.cparam.width;
-    sect_off += hdr->man_dtable.row_block_size[curr_row] * curr_col;
+    /* Add 'indirect' section for blocks skipped in this row */
+    if(H5HF_sect_indirect_add(hdr, dxpl_id, iblock, start_entry, nentries, &sect_off) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section for indirect block's free space")
 #ifdef QAK
-HDfprintf(stderr, "%s: sect_off = %Zu\n", FUNC, sect_off);
-#endif /* QAK */
-
-    /* Loop over the blocks to skip */
-    for(u = start_entry; u < (start_entry + nentries); /* u is advanced in loop */) {
-        unsigned row_entries;           /* Number of entries in a particular row */
-
-        /* Compute number of entries in (possible partial) current row */
-        row_entries = MIN(hdr->man_dtable.cparam.width - curr_col, (start_entry + nentries) - u);
-#ifdef QAK
-HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-HDfprintf(stderr, "%s: curr_col = %u, curr_row = %u\n", FUNC, curr_col, curr_row);
-HDfprintf(stderr, "%s: row_entries = %u, hdr->man_dtable.row_dblock_free[%u] = %Hu\n", FUNC, row_entries, curr_row, hdr->man_dtable.row_dblock_free[curr_row]);
-#endif /* QAK */
-
-        /* Add 'range' section for blocks skipped in this row */
-        if(H5HF_sect_range_add(hdr, dxpl_id, sect_off, hdr->man_dtable.row_dblock_free[curr_row],
-                iblock, curr_row, curr_col, row_entries) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create range section for indirect block's free space")
-
-        /* Advance row & column position */
-        sect_off += row_entries * hdr->man_dtable.row_block_size[curr_row];
-        curr_row++;
-        curr_col = 0;           /* (first partial row aligns this) */
-
-        /* Increment index variable */
-        u += row_entries;
-    } /* end for */
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_off = %Zu\n", FUNC, sect_off);
+HDfprintf(stderr, "%s: sect_off = %Hu\n", FUNC, sect_off);
 #endif /* QAK */
 
     /* Advance the new block iterator */
@@ -719,120 +688,6 @@ HDfprintf(stderr, "%s: sect_off = %Zu\n", FUNC, sect_off);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_skip_blocks() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_skip_ranges
- *
- * Purpose:	Add skipped indirect ranges to free space for heap
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Apr  4 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_hdr_skip_ranges(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
-    unsigned start_entry, unsigned nentries)
-{
-    hsize_t sect_off;                   /* Offset of free section in heap */
-    size_t row_dblock_free_space;       /* Size of free space for row of direct blocks in a row */
-    size_t acc_row_dblock_free_space;   /* Accumulated size of free space for row of direct blocks in a row */
-    unsigned curr_row;                  /* Current row in indirect block */
-    unsigned curr_col;                  /* Current column in indirect block */
-    unsigned u, w;                      /* Local index variables */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_skip_ranges)
-#ifdef QAK
-HDfprintf(stderr, "%s: start_entry = %u, nentries = %u\n", FUNC, start_entry, nentries);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(iblock);
-    HDassert(nentries);
-
-    /* Compute starting column & row */
-    curr_row = start_entry / hdr->man_dtable.cparam.width;
-    curr_col = start_entry % hdr->man_dtable.cparam.width;
-#ifdef QAK
-HDfprintf(stderr, "%s: curr_col = %u, curr_row = %u\n", FUNC, curr_col, curr_row);
-#endif /* QAK */
-
-    /* Initialize information for rows skipped over */
-    sect_off = iblock->block_off;
-    for(u = 0; u < curr_row; u++)
-        sect_off += hdr->man_dtable.row_block_size[u] * hdr->man_dtable.cparam.width;
-    sect_off += hdr->man_dtable.row_block_size[curr_row] * curr_col;
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_off = %Zu\n", FUNC, sect_off);
-#endif /* QAK */
-
-    /* Loop over the blocks to skip */
-    for(u = start_entry; u < (start_entry + nentries); /* u is advanced in loop */) {
-        unsigned row_entries;       /* Number of entries in a particular row */
-        unsigned num_rows;          /* Number of rows in indirect blocks referenced */
-
-        /* Compute number of rows in indirect blocks covered by entry */
-        num_rows = (H5V_log2_of2((uint32_t)hdr->man_dtable.row_block_size[curr_row]) -
-                H5V_log2_of2(hdr->man_dtable.cparam.start_block_size)) - 1;
-
-        /* Compute number of entries in (possible partial) current row */
-        row_entries = MIN(hdr->man_dtable.cparam.width - curr_col, (start_entry + nentries) - u);
-#ifdef QAK
-HDfprintf(stderr, "%s: u = %u\n", FUNC, u);
-HDfprintf(stderr, "%s: curr_col = %u, curr_row = %u\n", FUNC, curr_col, curr_row);
-HDfprintf(stderr, "%s: row_entries = %u, num_rows = %u\n", FUNC, row_entries, num_rows);
-#endif /* QAK */
-
-        /* Loop over rows in indirect blocks covered */
-        acc_row_dblock_free_space = 0;
-        for(w = 0; w < num_rows; w++) {
-
-            /* Compute free space in direct blocks for this row */
-            row_dblock_free_space = hdr->man_dtable.cparam.width * hdr->man_dtable.row_dblock_free[w];
-            acc_row_dblock_free_space += row_dblock_free_space;
-#ifdef QAK
-HDfprintf(stderr, "%s: w = %u\n", FUNC, w);
-HDfprintf(stderr, "%s: hdr->man_dtable.row_dblock_free[%u] = %Zu\n", FUNC, w, hdr->man_dtable.row_dblock_free[w]);
-#endif /* QAK */
-
-            /* Add "indirect" free space section for blocks in this row */
-
-            /* Create free list section node for blocks skipped over */
-            if(H5HF_sect_indirect_add(hdr, dxpl_id, (sect_off + hdr->man_dtable.row_block_off[w]),
-                    hdr->man_dtable.row_dblock_free[w], iblock, curr_row, curr_col, row_entries, w, num_rows) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section for indirect block's free space")
-        } /* end for */
-#ifdef QAK
-HDfprintf(stderr, "%s: acc_row_dblock_free_space = %Zu\n", FUNC, acc_row_dblock_free_space);
-#endif /* QAK */
-
-        /* Advance row & column position */
-        sect_off += row_entries * hdr->man_dtable.row_block_size[curr_row];
-        curr_row++;
-        curr_col = 0;           /* (first partial row aligns this) */
-
-        /* Advance outer loop index */
-        u += row_entries;
-    } /* end for */
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_off = %Zu\n", FUNC, sect_off);
-#endif /* QAK */
-
-    /* Advance the new block iterator */
-    if(H5HF_hdr_inc_iter(hdr, (sect_off - hdr->man_iter_off), nentries) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_skip_ranges() */
 
 
 /*-------------------------------------------------------------------------
@@ -1036,8 +891,8 @@ HDfprintf(stderr, "%s: child_rows_needed = %u\n", FUNC, child_rows_needed);
 HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
 #endif /* QAK */
 
-                    /* Add skipped indirect ranges to heap's free space */
-                    if(H5HF_hdr_skip_ranges(hdr, dxpl_id, iblock, next_entry, (child_entry - next_entry)) < 0)
+                    /* Add skipped indirect blocks to heap's free space */
+                    if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, (child_entry - next_entry)) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
                 } /* end if */
                 else {

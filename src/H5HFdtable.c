@@ -116,8 +116,10 @@ H5HF_dtable_init(H5HF_dtable_t *dtable)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block size table")
     if(NULL == (dtable->row_block_off = H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table block offset table")
-    if(NULL == (dtable->row_dblock_free = H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table direct block free space table")
+    if(NULL == (dtable->row_tot_dblock_free = H5MM_malloc(dtable->max_root_rows * sizeof(hsize_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table total direct block free space table")
+    if(NULL == (dtable->row_max_dblock_free = H5MM_malloc(dtable->max_root_rows * sizeof(size_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create doubling table max. direct block free space table")
     tmp_block_size = dtable->cparam.start_block_size;
     acc_block_off = dtable->cparam.start_block_size * dtable->cparam.width;
     dtable->row_block_size[0] = dtable->cparam.start_block_size;
@@ -205,8 +207,11 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
     /* Free the block offset lookup table for the doubling table */
     H5MM_xfree(dtable->row_block_off);
 
-    /* Free the direct block free space lookup table for the doubling table */
-    H5MM_xfree(dtable->row_dblock_free);
+    /* Free the total direct block free space lookup table for the doubling table */
+    H5MM_xfree(dtable->row_tot_dblock_free);
+
+    /* Free the max. direct block free space lookup table for the doubling table */
+    H5MM_xfree(dtable->row_max_dblock_free);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_dest() */

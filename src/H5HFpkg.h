@@ -126,9 +126,10 @@
 
 /* Free space section types for fractal heap */
 /* (values stored in free space data structures in file) */
-#define H5HF_FSPACE_SECT_SINGLE         0       /* Section is actual bytes in a direct block */
-#define H5HF_FSPACE_SECT_RANGE          1       /* Section is a range of direct blocks */
-#define H5HF_FSPACE_SECT_INDIRECT       2       /* Section is a range of _indirect_ blocks in an indirect block row */
+#define H5HF_FSPACE_SECT_SINGLE         0       /* Section is a range of actual bytes in a direct block */
+#define H5HF_FSPACE_SECT_FIRST_ROW      1       /* Section is first range of blocks in an indirect block row */
+#define H5HF_FSPACE_SECT_NORMAL_ROW     2       /* Section is a range of blocks in an indirect block row */
+#define H5HF_FSPACE_SECT_INDIRECT      3       /* Section is a span of blocks in an indirect block */
 
 /****************************/
 /* Package Private Typedefs */
@@ -158,10 +159,15 @@ typedef struct H5HF_dtable_t {
     hsize_t     num_id_first_row;   /* Number of IDs in first row of table */
     hsize_t     *row_block_size;    /* Block size per row of indirect block */
     hsize_t     *row_block_off;     /* Cumulative offset per row of indirect block */
-    hsize_t     *row_dblock_free;   /* Free space in dblocks for this row */
+    hsize_t     *row_tot_dblock_free;   /* Total free space in dblocks for this row */
                                     /* (For indirect block rows, it's the total
                                      * free space in all direct blocks referenced
-                                     * from the indirect block
+                                     * from the indirect block)
+                                     */
+    size_t      *row_max_dblock_free;   /* Max. free space in dblocks for this row */
+                                    /* (For indirect block rows, it's the maximum
+                                     * free space in a direct block referenced
+                                     * from the indirect block)
                                      */
 } H5HF_dtable_t;
 
@@ -205,18 +211,39 @@ typedef struct H5HF_free_section_t {
                                                 /* (Needed to retrieve root direct block) */
         } single;
         struct {
-            H5HF_indirect_t *iblock;            /* Indirect block for free section */
+            struct H5HF_free_section_t *under;  /* Pointer to indirect block underlying row section */
             unsigned    row;                    /* Row for range of blocks */
             unsigned    col;                    /* Column for range of blocks */
             unsigned    num_entries;            /* Number of entries covered */
-        } range;
+
+            /* Fields that aren't stored */
+            hbool_t     checked_out;            /* Flag to indicate that a row section is temporarily out of the free space manager */
+        } row;
         struct {
-            H5HF_indirect_t *iblock;            /* Indirect block for free section */
+            /* Holds either a pointer to an indirect block (if its "live") or
+             *  the block offset of it's indirect block (if its "serialized")
+             *  (This allows the indirect block that the section is within to
+             *          be compared with other sections, whether its serialized
+             *          or not)
+             */
+            union {
+                H5HF_indirect_t *iblock;        /* Indirect block for free section */
+                hsize_t iblock_off;             /* Indirect block offset in "heap space" */
+            } u;
             unsigned    row;                    /* Row for range of blocks */
             unsigned    col;                    /* Column for range of blocks */
             unsigned    num_entries;            /* Number of entries covered */
-            unsigned    indir_row;              /* Row for indirect range of blocks */
-            unsigned    indir_nrows;            /* Number of rows in indirect blocks */
+
+            /* Fields that aren't stored */
+            struct H5HF_free_section_t *parent; /* Pointer to "parent" indirect section */
+            unsigned    par_entry;              /* Entry within parent indirect section */
+            hsize_t     span_size;              /* Size of space tracked, in "heap space" */
+            unsigned    iblock_entries;         /* Number of entries in indirect block where section is located */
+            unsigned    rc;                     /* Reference count of outstanding row & child indirect sections */
+            unsigned    dir_nrows;              /* Number of direct rows in section */
+            struct H5HF_free_section_t **dir_rows;  /* Array of pointers to outstanding row sections */
+            unsigned    indir_nents;            /* Number of indirect entries in section */
+            struct H5HF_free_section_t **indir_ents; /* Array of pointers to outstanding child indirect sections */
         } indirect;
     } u;
 } H5HF_free_section_t;
@@ -332,7 +359,7 @@ typedef struct H5HF_parent_t {
 typedef struct {
     H5HF_hdr_t *hdr;            /* Fractal heap header */
     hid_t dxpl_id;              /* DXPL ID for operation */
-    H5HF_direct_t *dblock;      /* Direct block */
+    hbool_t adjoin;             /* Whether two spans of blocks adjoin each other */
 } H5HF_add_ud1_t;
 
 /*****************************/
@@ -351,8 +378,11 @@ H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
 /* H5HF single section inherits serializable properties from H5FS_section_class_t */
 H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_SINGLE[1];
 
-/* H5HF range section inherits serializable properties from H5FS_section_class_t */
-H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_RANGE[1];
+/* H5HF 'first' row section inherits serializable properties from H5FS_section_class_t */
+H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_FIRST_ROW[1];
+
+/* H5HF 'normal' row section inherits serializable properties from H5FS_section_class_t */
+H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1];
 
 /* H5HF indirect section inherits serializable properties from H5FS_section_class_t */
 H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1];
@@ -415,9 +445,7 @@ H5_DLL herr_t H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     size_t min_dblock_size);
 H5_DLL herr_t H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id,
     size_t min_dblock_size);
-H5_DLL herr_t H5HF_man_iblock_alloc_range(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t **sec_node);
-H5_DLL herr_t H5HF_man_iblock_alloc_indirect(H5HF_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5HF_man_iblock_alloc_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t **sec_node);
 H5_DLL herr_t H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *par_iblock, unsigned par_entry, unsigned nrows,
@@ -429,6 +457,8 @@ H5_DLL H5HF_indirect_t *H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL herr_t H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry,
     haddr_t dblock_addr);
 H5_DLL herr_t H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry);
+H5_DLL herr_t H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry,
+    haddr_t *child_addr);
 
 /* Direct block routines */
 H5_DLL herr_t H5HF_man_dblock_new(H5HF_hdr_t *fh, hid_t dxpl_id, size_t request,
@@ -494,11 +524,11 @@ H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,
     H5HF_free_section_t **node);
 H5_DLL herr_t H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *node);
-H5_DLL herr_t H5HF_space_return(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *node);
+    H5HF_free_section_t *node, unsigned flags);
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
+    unsigned new_class);
 
 /* Free space section routines */
 H5_DLL H5HF_free_section_t *H5HF_sect_single_new(hsize_t sect_off,
@@ -508,21 +538,14 @@ H5_DLL herr_t H5HF_sect_single_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
 H5_DLL herr_t H5HF_sect_single_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, size_t amt);
-H5_DLL herr_t H5HF_sect_range_add(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t sect_off,
-    hsize_t sect_size, H5HF_indirect_t *iblock,
-    unsigned row, unsigned col, unsigned nentries);
-H5_DLL herr_t H5HF_sect_range_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5HF_sect_row_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
-H5_DLL herr_t H5HF_sect_range_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *sect);
+H5_DLL herr_t H5HF_sect_row_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect, unsigned *entry_p);
+H5_DLL H5HF_indirect_t *H5HF_sect_row_get_iblock(H5HF_free_section_t *sect);
 H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    hsize_t sect_off, hsize_t sect_size, H5HF_indirect_t *iblock,
-    unsigned row, unsigned col, unsigned nentries,
-    unsigned indir_row, unsigned indir_nrows);
-H5_DLL herr_t H5HF_sect_indirect_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *sect);
-H5_DLL herr_t H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_free_section_t *sect);
+    H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries,
+    hsize_t *sect_off);
 
 /* Testing routines */
 #ifdef H5HF_TESTING

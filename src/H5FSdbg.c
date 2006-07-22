@@ -122,8 +122,14 @@ H5FS_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Total free space tracked:",
 	      hdr->tot_space);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Number of free space sections tracked:",
-	      hdr->sect_count);
+	      "Total number of free space sections tracked:",
+	      hdr->tot_sect_count);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Number of serializable free space sections tracked:",
+	      hdr->serial_sect_count);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Number of ghost free space sections tracked:",
+	      hdr->ghost_sect_count);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of free space section classes:",
 	      hdr->nclasses);

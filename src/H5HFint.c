@@ -115,11 +115,11 @@ HDfprintf(stderr, "%s: obj_off = %Hu\n", FUNC, obj_off);
     /* Set up target bottom & top rows */
     if(locate_indirect) {
         bot_row = hdr->man_dtable.max_direct_rows;
-        top_row = hdr->man_dtable.max_direct_rows + (H5V_log2_of2(hdr->man_dtable.cparam.width) + 1);
+        top_row = hdr->man_dtable.max_direct_rows + H5V_log2_of2(hdr->man_dtable.cparam.width);
     } /* end if */
     else {
         bot_row = 0;
-        top_row = hdr->man_dtable.max_direct_rows;
+        top_row = hdr->man_dtable.max_direct_rows - 1;
     } /* end else */
 #ifdef QAK
 HDfprintf(stderr, "%s: bot_row = %u, top_row = %u\n", FUNC, bot_row, top_row);
@@ -143,7 +143,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
     /* Check for indirect block row */
-    while(row < bot_row || row >= top_row) {
+    while(row < bot_row || row > top_row) {
         haddr_t new_iblock_addr;       /* New indirect block's address */
         H5HF_indirect_t *new_iblock;   /* Pointer to new indirect block */
         unsigned nrows;                /* Number of rows in new indirect block */
@@ -196,7 +196,8 @@ HDfprintf(stderr, "%s: row = %u, col = %u\n", FUNC, row, col);
     } /* end while */
 
     /* Set return parameters */
-    *ret_entry = (row * hdr->man_dtable.cparam.width) + col;
+    if(ret_entry)
+        *ret_entry = (row * hdr->man_dtable.cparam.width) + col;
     *ret_iblock = iblock;
 
 done:
@@ -296,40 +297,22 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
     HDassert(obj);
     HDassert(id);
 
-    /* Check for indirect section */
-    if(sec_node->sect_info.type == H5HF_FSPACE_SECT_INDIRECT) {
+    /* Check for row section */
+    if(sec_node->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
+            sec_node->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW) {
 #ifdef QAK
 HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
-HDfprintf(stderr, "%s: sec_node->sect_info.size = %Zu\n", FUNC, sec_node->sect_info.size);
-HDfprintf(stderr, "%s: sec_node->u.indirect.iblock = %p\n", FUNC, sec_node->u.indirect.iblock);
-if(sec_node->sect_info.state == H5FS_SECT_LIVE && sec_node->u.indirect.iblock)
-    HDfprintf(stderr, "%s: sec_node->u.indirect.iblock->addr = %a\n", FUNC, sec_node->u.indirect.iblock->addr);
-HDfprintf(stderr, "%s: sec_node->u.indirect.row = %u\n", FUNC, sec_node->u.indirect.row);
-HDfprintf(stderr, "%s: sec_node->u.indirect.col = %u\n", FUNC, sec_node->u.indirect.col);
-HDfprintf(stderr, "%s: sec_node->u.indirect.num_entries = %u\n", FUNC, sec_node->u.indirect.num_entries);
-HDfprintf(stderr, "%s: sec_node->u.indirect.indir_row = %u\n", FUNC, sec_node->u.indirect.indir_row);
-HDfprintf(stderr, "%s: sec_node->u.indirect.indir_nrows = %u\n", FUNC, sec_node->u.indirect.indir_nrows);
+HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
+HDfprintf(stderr, "%s: sec_node->sect_info.type = %s\n", FUNC, (sec_node->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "H5HF_FSPACE_SECT_FIRST_ROW" : "H5HF_FSPACE_SECT_NORMAL_ROW"));
+HDfprintf(stderr, "%s: sec_node->u.row.under = %p\n", FUNC, sec_node->u.row.under);
+HDfprintf(stderr, "%s: sec_node->u.row.row = %u\n", FUNC, sec_node->u.row.row);
+HDfprintf(stderr, "%s: sec_node->u.row.col = %u\n", FUNC, sec_node->u.row.col);
+HDfprintf(stderr, "%s: sec_node->u.row.num_entries = %u\n", FUNC, sec_node->u.row.num_entries);
 #endif /* QAK */
 
-        /* Allocate 'single' selection out of 'indirect' selection */
-        if(H5HF_man_iblock_alloc_indirect(hdr, dxpl_id, &sec_node) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up indirect free section")
-    } /* end if */
-    /* Check for range section */
-    else if(sec_node->sect_info.type == H5HF_FSPACE_SECT_RANGE) {
-#ifdef QAK
-HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
-HDfprintf(stderr, "%s: sec_node->sect_info.size = %Zu\n", FUNC, sec_node->sect_info.size);
-HDfprintf(stderr, "%s: sec_node->u.range.iblock = %p\n", FUNC, sec_node->u.range.iblock);
-if(sec_node->sect_info.state == H5FS_SECT_LIVE && sec_node->u.range.iblock)
-    HDfprintf(stderr, "%s: sec_node->u.range.iblock->addr = %a\n", FUNC, sec_node->u.range.iblock->addr);
-HDfprintf(stderr, "%s: sec_node->u.range.row = %u\n", FUNC, sec_node->u.range.row);
-HDfprintf(stderr, "%s: sec_node->u.range.col = %u\n", FUNC, sec_node->u.range.col);
-HDfprintf(stderr, "%s: sec_node->u.range.num_entries = %u\n", FUNC, sec_node->u.range.num_entries);
-#endif /* QAK */
-        /* Allocate 'single' selection out of 'range' selection */
-        if(H5HF_man_iblock_alloc_range(hdr, dxpl_id, &sec_node) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up range free section")
+        /* Allocate 'single' selection out of 'row' selection */
+        if(H5HF_man_iblock_alloc_row(hdr, dxpl_id, &sec_node) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up row section")
     } /* end if */
     HDassert(sec_node->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
 
@@ -630,7 +613,7 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
     /* Return free space to the heap's list of space */
-    if(H5HF_space_return(hdr, dxpl_id, sec_node) < 0)
+    if(H5HF_space_add(hdr, dxpl_id, sec_node, H5FS_ADD_RETURNED_SPACE) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
 
 done:

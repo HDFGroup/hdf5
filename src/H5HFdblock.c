@@ -96,6 +96,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
 {
     H5HF_free_section_t *sec_node; /* Pointer to free space section for block */
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block */
+    haddr_t dblock_addr;                /* Direct block's address */
     size_t free_space;                  /* Free space in new block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -105,7 +106,6 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
      * Check arguments.
      */
     HDassert(hdr);
-    HDassert(addr_p);
 
     /*
      * Allocate file and memory data structures.
@@ -148,22 +148,22 @@ HDmemset(dblock->blk, 0, dblock->size);
 #endif /* H5_USING_PURIFY */
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
+    if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 #ifdef QAK
-HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, *addr_p);
+HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, dblock_addr);
 #endif /* QAK */
 
     /* Attach to parent indirect block, if there is one */
     dblock->parent = par_iblock;
     if(dblock->parent)
-        if(H5HF_man_iblock_attach(dblock->parent, par_entry, *addr_p) < 0)
+        if(H5HF_man_iblock_attach(dblock->parent, par_entry, dblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach direct block to parent indirect block")
     dblock->par_entry = par_entry;
 
     /* Create a new 'single' section for the free space in the block */
     if(NULL == (sec_node = H5HF_sect_single_new((dblock->block_off + H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr)),
-            free_space, dblock->parent, dblock->par_entry, *addr_p, dblock->size)))
+            free_space, dblock->parent, dblock->par_entry, dblock_addr, dblock->size)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for new direct block's free space")
 
     /* Check what to do with section node */
@@ -172,17 +172,21 @@ HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, *addr_p);
         *ret_sec_node = sec_node;
     else {
         /* Add new free space to the heap's list of space */
-        if(H5HF_space_add(hdr, dxpl_id, sec_node) < 0)
+        if(H5HF_space_add(hdr, dxpl_id, sec_node, 0) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
     } /* end else */
 
     /* Cache the new fractal heap direct block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, *addr_p, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache")
 
     /* Increase the allocated heap size */
     if(H5HF_hdr_inc_alloc(hdr, dblock->size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
+
+    /* Set the address of of direct block, if requested */
+    if(addr_p)
+        *addr_p = dblock_addr;
 
 done:
     if(ret_value < 0)
@@ -242,7 +246,6 @@ HDfprintf(stderr, "%s: root direct block\n", FUNC);
         HDassert(!H5HF_man_iter_ready(&hdr->next_block));
 
         /* Reset root pointer information */
-        hdr->man_dtable.curr_root_rows = 0;
         hdr->man_dtable.table_addr = HADDR_UNDEF;
 
         /* Reset header information back to "empty heap" state */
@@ -282,7 +285,7 @@ HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
             par_col = dblock->par_entry % hdr->man_dtable.cparam.width;
 
             /* Add a 'range' section for the space in the destroyed block */
-            if(H5HF_sect_range_add(hdr, dxpl_id, dblock->block_off, hdr->man_dtable.row_dblock_free[par_row],
+            if(H5HF_sect_range_add(hdr, dxpl_id, dblock->block_off, hdr->man_dtable.row_tot_dblock_free[par_row],
                     dblock->parent, par_row, par_col, 1) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't create range section for direct block being destroyed")
         } /* end else */
@@ -380,7 +383,7 @@ HDfprintf(stderr, "%s: root direct block, dblock_addr = %a\n", FUNC, dblock_addr
         hdr->man_dtable.table_addr = dblock_addr;
 
         /* Extend heap to cover new direct block */
-        if(H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size, (hssize_t)hdr->man_dtable.row_dblock_free[0]) < 0)
+        if(H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size, (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
     } /* end if */
     /* Root entry already exists, allocate direct block from root indirect block */

@@ -97,7 +97,8 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
     const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for fractal heap */
         H5HF_FSPACE_SECT_CLS_SINGLE,
-        H5HF_FSPACE_SECT_CLS_RANGE,
+        H5HF_FSPACE_SECT_CLS_FIRST_ROW,
+        H5HF_FSPACE_SECT_CLS_NORMAL_ROW,
         H5HF_FSPACE_SECT_CLS_INDIRECT};
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -194,55 +195,18 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
- *		May  2 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(node);
-    HDassert(hdr->fspace);
-
-    /* Add to the free space for the heap */
-    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, 0, NULL) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_space_add() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_space_return
- *
- * Purpose:	Return a freedsection to the free space for the heap
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 15 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_space_return(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
+H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
+    unsigned flags)
 {
     H5HF_add_ud1_t udata;               /* User data for free space manager 'add' */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_return)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)
 
     /*
      * Check arguments.
@@ -258,15 +222,15 @@ H5HF_space_return(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
     /* Construct user data */
     udata.hdr = hdr;
     udata.dxpl_id = dxpl_id;
-    udata.dblock = NULL;
+    udata.adjoin = 0;
 
     /* Add to the free space for the heap */
-    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
+    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_space_return() */
+} /* end H5HF_space_add() */
 
 
 /*-------------------------------------------------------------------------
@@ -323,4 +287,42 @@ HDfprintf(stderr, "%s: nsects = %Hu\n", FUNC, nsects);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_space_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_change_sect_class
+ *
+ * Purpose:	Change a section's class
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		July 10 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned new_class)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_sect_change_class)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(hdr->fspace);
+    HDassert(sect);
+
+    /* Notify the free space manager that a section has changed class */
+    if(H5FS_sect_change_class(hdr->fspace, (H5FS_section_info_t *)sect, new_class) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, FAIL, "can't modify class of free space section")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_sect_change_class() */
 

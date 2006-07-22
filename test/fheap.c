@@ -812,9 +812,55 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	fill_partial row
+ *
+ * Purpose:	Fill up part of a row of direct blocks in an non-root indirect block
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+fill_partial_row(H5HF_t *fh, hid_t dxpl, unsigned row, unsigned width,
+    size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
+{
+    size_t      block_size;             /* Size of direct block in this row */
+    unsigned    u;                      /* Local index variable */
+
+    /* Sanity check */
+    HDassert(fh);
+    HDassert(state);
+
+    /* Get some information for the heap */
+    block_size = DBLOCK_SIZE(fh, row);
+
+    /* Loop over filling direct blocks, until indirect row is full */
+    for(u = 0; u < width; u++) {
+        /* Adjust stats for new block */
+        state->man_alloc_size += block_size;
+
+        /* Fill a direct heap block up */
+        if(fill_heap(fh, dxpl, row, obj_size, state, keep_ids))
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Operations succeeded */
+    return(0);
+
+error:
+    return(1);
+} /* fill_partial_row() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	fill_row
  *
- * Purpose:	Fill up a row of direct blocks in an non-root indirect block
+ * Purpose:	Fill up entire row of direct blocks in an non-root indirect block
  *
  * Return:	Success:	0
  *
@@ -829,27 +875,13 @@ static int
 fill_row(H5HF_t *fh, hid_t dxpl, unsigned row, size_t obj_size,
     fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
-    size_t      block_size;             /* Size of direct block in this row */
-    unsigned    width;                  /* Width of heap's doubling table */
-    unsigned    u;                      /* Local index variable */
-
     /* Sanity check */
     HDassert(fh);
     HDassert(state);
 
-    /* Get some information for the heap */
-    block_size = DBLOCK_SIZE(fh, row);
-    width = DTABLE_WIDTH(fh);
-
-    /* Loop over filling direct blocks, until indirect row is full */
-    for(u = 0; u < width; u++) {
-        /* Adjust stats for new block */
-        state->man_alloc_size += block_size;
-
-        /* Fill a direct heap block up */
-        if(fill_heap(fh, dxpl, row, obj_size, state, keep_ids))
-            FAIL_STACK_ERROR
-    } /* end for */
+    /* Fill the entire row (with the partial row fill routine) */
+    if(fill_partial_row(fh, dxpl, row, DTABLE_WIDTH(fh), obj_size, state, keep_ids))
+        FAIL_STACK_ERROR
 
     /* Operations succeeded */
     return(0);
@@ -1343,7 +1375,6 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
     if(HDmemcmp(cparam, &test_cparam, sizeof(H5HF_create_t)))
         FAIL_STACK_ERROR
-    PASSED()
 
     /* Close the fractal heap */
     if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
@@ -1354,6 +1385,8 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1442,13 +1475,14 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     /* Close the fractal heap */
     if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
         TEST_ERROR
-    PASSED()
 
     /* Close the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1551,8 +1585,6 @@ test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -1562,6 +1594,8 @@ test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1650,8 +1684,6 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -1661,6 +1693,8 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1748,8 +1782,6 @@ test_abs_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -1759,6 +1791,8 @@ test_abs_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1855,8 +1889,6 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -1866,6 +1898,8 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -1962,8 +1996,6 @@ test_abs_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     if(fill_heap(fh, dxpl, 0, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -1973,6 +2005,8 @@ test_abs_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2075,8 +2109,6 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2086,6 +2118,8 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2170,8 +2204,6 @@ test_abs_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2181,6 +2213,8 @@ test_abs_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2273,8 +2307,6 @@ test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2284,6 +2316,8 @@ test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2372,8 +2406,6 @@ test_abs_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     if(fill_root_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2383,6 +2415,8 @@ test_abs_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2484,8 +2518,6 @@ test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2495,6 +2527,8 @@ test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2581,8 +2615,6 @@ test_abs_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2592,6 +2624,8 @@ test_abs_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2676,8 +2710,6 @@ test_abs_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2687,6 +2719,8 @@ test_abs_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2776,8 +2810,6 @@ test_abs_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2787,6 +2819,8 @@ test_abs_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2885,8 +2919,6 @@ test_abs_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2896,6 +2928,8 @@ test_abs_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -2986,8 +3020,6 @@ test_abs_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
     if(fill_2nd_indirect(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -2997,6 +3029,8 @@ test_abs_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3095,8 +3129,6 @@ test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3106,6 +3138,8 @@ test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3202,8 +3236,6 @@ test_abs_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
     if(fill_2nd_indirect(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3213,6 +3245,8 @@ test_abs_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3305,8 +3339,6 @@ test_abs_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
     if(fill_2nd_indirect_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3316,6 +3348,8 @@ test_abs_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3413,8 +3447,6 @@ test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3424,6 +3456,8 @@ test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3514,8 +3548,6 @@ test_abs_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
     if(fill_all_2nd_indirect_rows(fh, dxpl, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3525,6 +3557,8 @@ test_abs_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3623,8 +3657,6 @@ test_abs_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3634,6 +3666,8 @@ test_abs_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3733,8 +3767,6 @@ test_abs_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
     if(fill_2nd_indirect_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3744,6 +3776,8 @@ test_abs_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3839,8 +3873,6 @@ test_abs_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
     if(fill_3rd_indirect_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3850,6 +3882,8 @@ test_abs_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -3945,8 +3979,6 @@ test_abs_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
     if(fill_all_3rd_indirect_rows(fh, dxpl, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -3956,6 +3988,8 @@ test_abs_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4059,8 +4093,6 @@ test_abs_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4070,6 +4102,8 @@ test_abs_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4178,8 +4212,6 @@ test_abs_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
     if(fill_3rd_indirect_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4189,6 +4221,8 @@ test_abs_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4289,8 +4323,6 @@ test_abs_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
     if(fill_4th_indirect_row(fh, dxpl, 1, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4300,6 +4332,8 @@ test_abs_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4400,8 +4434,6 @@ test_abs_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
     if(fill_all_4th_indirect_rows(fh, dxpl, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4411,6 +4443,8 @@ test_abs_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4555,8 +4589,6 @@ test_abs_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4566,6 +4598,8 @@ test_abs_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4666,8 +4700,6 @@ test_abs_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4677,6 +4709,8 @@ test_abs_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4797,8 +4831,6 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4808,6 +4840,8 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -4946,8 +4980,6 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -4957,6 +4989,8 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -5075,8 +5109,6 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
             FAIL_STACK_ERROR
     } /* end if */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -5086,6 +5118,8 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -5269,8 +5303,6 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -5280,6 +5312,8 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -5509,8 +5543,6 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -5520,6 +5552,8 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -5689,8 +5723,6 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -5700,6 +5732,8 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -5859,8 +5893,6 @@ test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -5870,6 +5902,8 @@ test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -6034,17 +6068,17 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(file) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -6227,8 +6261,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -6238,6 +6270,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -6466,8 +6500,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -6477,6 +6509,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -6672,8 +6706,6 @@ test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -6683,6 +6715,8 @@ test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -6693,6 +6727,255 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_abs_fill_direct_skip_indirect_two_rows_add_skipped() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped
+ *
+ * Purpose:	Test filling all direct blocks in root indirect block, then
+ *              add object too large for initial block in first two rows of
+ *              indirect blocks, to force extension of non-root
+ *              indirect block, then add object too large for first row of
+ *              indirect blocks, (and ranges of skipped blocks), then backfill
+ *              and extend.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[1024];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned    max_dblock_rows;        /* Max. # of rows (of direct blocks) in the root indirect block */
+    size_t      obj_size;               /* Size of object */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    unsigned    u, v;                   /* Local index variables */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Create absolute heap */
+    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+        FAIL_STACK_ERROR
+    if(H5HF_get_id_len(fh, &id_len) < 0)
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        FAIL_STACK_ERROR
+    if(H5HF_get_heap_addr(fh, &fh_addr) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+
+    /* Retrieve info about heap */
+    num_first_indirect_rows = IBLOCK_MAX_DROWS(fh, 1);
+    max_dblock_rows = DTABLE_MAX_DROWS(fh);
+
+    /*
+     * Test absolute heap
+     */
+    TESTING("filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend");
+
+    /* Fill direct blocks in root indirect block */
+    if(fill_root_direct(fh, dxpl, SMALL_OBJ_SIZE1, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Insert large object, to force creation of two rows of indirect blocks and
+     * range of skipped blocks that are too small to hold the large object
+     */
+    obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
+    state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
+    if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Insert an object to fill up the (biggest) heap block created */
+    obj_size = DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
+    if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Insert large object that can't fit in first row of indirect blocks
+     * previously skipped, but is small enough to fit into second row of
+     * skipped blocks.
+     */
+    obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 3) + 1;
+    state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 2);
+    if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Insert an object to fill up the (2nd biggest) heap block created */
+    obj_size = DBLOCK_FREE(fh, max_dblock_rows - 2) - obj_size;
+    if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Fill rows skipped over in indirect block's direct blocks */
+    for(u = 0; u < num_first_indirect_rows; u++) {
+        /* Direct block rows in first row of skipped 2nd level indirect blocks */
+        for(v = 0; v < cparam->managed.width; v++)
+            if(fill_row(fh, dxpl, u, SMALL_OBJ_SIZE1, &state, NULL))
+                FAIL_STACK_ERROR
+
+        /* Direct block rows in second row of skipped 2nd level indirect blocks */
+        for(v = 0; v < cparam->managed.width; v++)
+            if(fill_row(fh, dxpl, u, SMALL_OBJ_SIZE1, &state, NULL))
+                FAIL_STACK_ERROR
+
+        /* Direct block row in used 2nd level indirect block */
+        if(fill_row(fh, dxpl, u, SMALL_OBJ_SIZE1, &state, NULL))
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Fill rows in second row of skipped 2nd level indirect blocks (and used 2nd level block) */
+
+    /* Finish blocks in partially used 2nd level indirect block */
+    if(fill_partial_row(fh, dxpl, num_first_indirect_rows, cparam->managed.width - 1, SMALL_OBJ_SIZE1, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Direct block rows in skipped 2nd level indirect blocks */
+    /* (less the one indirect block already used) */
+    for(v = 0; v < cparam->managed.width - 1; v++)
+        if(fill_row(fh, dxpl, num_first_indirect_rows, SMALL_OBJ_SIZE1, &state, NULL))
+            FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Direct block row in used 3rd row 2nd level indirect block */
+    if(fill_row(fh, dxpl, num_first_indirect_rows, SMALL_OBJ_SIZE1, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(tparam->reopen_heap) {
+        /* Close heap */
+        if(H5HF_close(fh, dxpl) < 0)
+            TEST_ERROR
+
+        /* Re-open heap */
+        if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Add one more object, to create another "large" block */
+    obj_size = SMALL_OBJ_SIZE1;
+    state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
+    if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
+        FAIL_STACK_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
@@ -6846,8 +7129,6 @@ test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -6857,6 +7138,8 @@ test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -7039,8 +7322,6 @@ test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -7050,6 +7331,8 @@ test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -7247,8 +7530,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -7258,6 +7539,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -7463,8 +7746,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -7474,6 +7755,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -7689,8 +7972,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -7700,6 +7981,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -7929,8 +8212,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -7940,6 +8221,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -8153,8 +8436,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -8164,6 +8445,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -8409,8 +8692,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -8420,6 +8701,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -8715,8 +8998,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -8726,6 +9007,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -8997,8 +9280,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -9008,6 +9289,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -9323,8 +9606,6 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     if(add_obj(fh, dxpl, 10, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -9334,6 +9615,8 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -9474,8 +9757,6 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -9485,6 +9766,8 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -9645,8 +9928,6 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     if(add_obj(fh, dxpl, 20, obj_size, &state, NULL))
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -9656,6 +9937,8 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -9860,8 +10143,6 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
                 FAIL_STACK_ERROR
     } /* end for */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -9871,6 +10152,8 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -9997,8 +10280,6 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
                 FAIL_STACK_ERROR
     } /* end for */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -10008,6 +10289,8 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -10147,8 +10430,6 @@ test_abs_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
                 FAIL_STACK_ERROR
     } /* end for */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -10158,6 +10439,8 @@ test_abs_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -10240,6 +10523,7 @@ HDfprintf(stderr, "Fractal heap header address: %a\n", fh_addr);
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
 #ifdef QAK
+/* seed = (unsigned long)1153176468; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
     HDsrandom(seed);
@@ -10282,6 +10566,9 @@ HDfprintf(stderr, "num_ids = %Zu, total_obj_added = %Hu, obj_size = %Zu\n", num_
         /* Increment the amount of objects added */
         total_obj_added += obj_size;
     } /* end while */
+#ifdef QAK
+HDfprintf(stderr, "num_ids = %Zu, total_obj_added = %Hu, size_limit = %Hu\n", num_ids, total_obj_added, size_limit);
+#endif /* QAK */
 
     /* Verify reading the objects written out */
     for(u = 0; u < num_ids; u++) {
@@ -10302,8 +10589,6 @@ HDfprintf(stderr, "num_ids = %Zu, total_obj_added = %Hu, obj_size = %Zu\n", num_
             FAIL_STACK_ERROR
     } /* end for */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -10312,18 +10597,22 @@ HDfprintf(stderr, "num_ids = %Zu, total_obj_added = %Hu, obj_size = %Zu\n", num_
     if(H5Fclose(file) < 0)
         TEST_ERROR
 
-    /* All tests passed */
+    /* Free resources */
     H5MM_xfree(ids);
+
+    /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
+    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh, dxpl);
 	H5Fclose(file);
         H5MM_xfree(ids);
     } H5E_END_TRY;
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return(1);
 } /* test_abs_random_managed() */
 
@@ -10422,7 +10711,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
         /* Increment object count */
         num_ids++;
 #ifdef QAK
-if((num_ids % 100000) == 1)
+if((num_ids % 100000) == 0)
     HDfprintf(stderr, "num_ids = %Zu, total_obj_added = %Hu, obj_size = %Zu\n", num_ids, total_obj_added, obj_size);
 #endif /* QAK */
 
@@ -10472,8 +10761,6 @@ if((num_ids % 100000) == 1)
             FAIL_STACK_ERROR
     } /* end for */
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -10482,18 +10769,22 @@ if((num_ids % 100000) == 1)
     if(H5Fclose(file) < 0)
         TEST_ERROR
 
-    /* All tests passed */
+    /* Free resources */
     H5MM_xfree(ids);
+
+    /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
+    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh, dxpl);
 	H5Fclose(file);
         H5MM_xfree(ids);
     } H5E_END_TRY;
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return(1);
 } /* test_abs_random_pow2_managed() */
 #endif /* QAK */
@@ -10609,8 +10900,6 @@ test_abs_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     if(ret >= 0)
         FAIL_STACK_ERROR
 
-    PASSED()
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         TEST_ERROR
@@ -10620,6 +10909,8 @@ test_abs_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR
 
     /* All tests passed */
+    PASSED()
+
     return(0);
 
 error:
@@ -10787,9 +11078,9 @@ test_abs_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     if(file_size != empty_size)
         TEST_ERROR
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -11000,9 +11291,9 @@ test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     if(file_size != empty_size)
         TEST_ERROR
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -11161,11 +11452,11 @@ test_abs_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
 
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(file) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR
 
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename)) == 0)
@@ -11175,9 +11466,9 @@ test_abs_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     if(file_size != empty_size)
         TEST_ERROR
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -11448,9 +11739,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     if(file_size != empty_size)
         TEST_ERROR
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -11804,9 +12095,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     if(file_size != empty_size)
         TEST_ERROR
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -11968,9 +12259,9 @@ test_abs_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -12164,9 +12455,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -12334,9 +12625,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -12505,9 +12796,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -12680,9 +12971,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -12849,9 +13140,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -13023,9 +13314,9 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
     H5MM_xfree(keep_ids.lens);
     H5MM_xfree(keep_ids.offs);
 
+    /* All tests passed */
     PASSED()
 
-    /* All tests passed */
     return(0);
 
 error:
@@ -13181,6 +13472,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 	nerrors += test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
 	nerrors += test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
 	nerrors += test_abs_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
+	nerrors += test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(fapl, &cparam, &tparam);
 	nerrors += test_abs_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
 	nerrors += test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
 	nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);

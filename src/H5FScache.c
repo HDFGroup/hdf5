@@ -173,8 +173,14 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     /* Total space tracked */
     H5F_DECODE_LENGTH(f, p, hdr->tot_space);
 
-    /* # of free space sections tracked */
-    H5F_DECODE_LENGTH(f, p, hdr->sect_count);
+    /* Total # of free space sections tracked */
+    H5F_DECODE_LENGTH(f, p, hdr->tot_sect_count);
+
+    /* # of serializable free space sections tracked */
+    H5F_DECODE_LENGTH(f, p, hdr->serial_sect_count);
+
+    /* # of ghost free space sections tracked */
+    H5F_DECODE_LENGTH(f, p, hdr->ghost_sect_count);
 
     /* # of section classes */
     UINT16DECODE(p, hdr->nclasses);
@@ -279,8 +285,14 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         /* Total space tracked */
         H5F_ENCODE_LENGTH(f, p, hdr->tot_space);
 
-        /* # of free space sections tracked */
-        H5F_ENCODE_LENGTH(f, p, hdr->sect_count);
+        /* Total # of free space sections tracked */
+        H5F_ENCODE_LENGTH(f, p, hdr->tot_sect_count);
+
+        /* # of serializable free space sections tracked */
+        H5F_ENCODE_LENGTH(f, p, hdr->serial_sect_count);
+
+        /* # of ghost free space sections tracked */
+        H5F_ENCODE_LENGTH(f, p, hdr->ghost_sect_count);
 
         /* # of section classes */
         UINT16ENCODE(p, hdr->nclasses);

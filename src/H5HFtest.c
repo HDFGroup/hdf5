@@ -288,7 +288,7 @@ H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
     HDassert(fh);
 
     /* Return direct block free space */
-    ret_value = fh->hdr->man_dtable.row_dblock_free[row];
+    ret_value = fh->hdr->man_dtable.row_tot_dblock_free[row];
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_get_dblock_free_test() */

@@ -83,6 +83,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Glink2, FAIL)
+    H5TRACE5("e","isLlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
     if(type == H5L_LINK_HARD) {
         if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)

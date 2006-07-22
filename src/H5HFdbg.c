@@ -435,7 +435,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     HDfprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
 
     /* Iterate over the free space sections, to detect overlaps with this block */
-    if(H5FS_iterate(hdr->fspace, H5HF_dblock_debug_cb, &udata) < 0)
+    if(H5FS_iterate(f, dxpl_id, hdr->fspace, H5HF_dblock_debug_cb, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
 
     /* Close the free space information */
@@ -488,7 +488,6 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
-    size_t dblock_size;                 /* Current direct block size */
     char temp_str[64];                  /* Temporary string, for formatting */
     size_t	u, v;                   /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -557,7 +556,6 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
                     temp_str,
                     iblock->ents[off].addr);
         } /* end for */
-        dblock_size *= 2;
     } /* end for */
     HDfprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
     if(iblock->nrows > hdr->man_dtable.max_direct_rows) {
@@ -633,8 +631,8 @@ H5HF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section type:",
 	      (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
-                  (sect->sect_info.type == H5HF_FSPACE_SECT_RANGE ? "range" :
-                      (sect->sect_info.type == H5HF_FSPACE_SECT_INDIRECT ? "indirect" : "unknown"))));
+                  (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "first row" :
+                  (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "normal row" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section state:",
 	      (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
@@ -697,7 +695,7 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     udata.fwidth = fwidth;
 
     /* Iterate over all the free space sections */
-    if(H5FS_iterate(hdr->fspace, H5HF_sects_debug_cb, &udata) < 0)
+    if(H5FS_iterate(f, dxpl_id, hdr->fspace, H5HF_sects_debug_cb, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
 
     /* Close the free space information */

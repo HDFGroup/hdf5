@@ -60,7 +60,9 @@
     /* Free space header specific fields */                                   \
     + 1 /* Client ID */                                                       \
     + H5F_SIZEOF_SIZE(f) /* Total free space tracked */                       \
-    + H5F_SIZEOF_SIZE(f) /* # of sections tracked */                          \
+    + H5F_SIZEOF_SIZE(f) /* Total # of sections tracked */                    \
+    + H5F_SIZEOF_SIZE(f) /* # of serializable sections tracked */             \
+    + H5F_SIZEOF_SIZE(f) /* # of ghost sections tracked */                    \
     + 2 /* Number of section classes */                                       \
     + 2 /* Shrink percent */                                                  \
     + 2 /* Expand percent */                                                  \
@@ -82,7 +84,9 @@ typedef struct H5FS_hdr_t {
 
     /* Statistics */
     hsize_t tot_space;          /* Total amount of space tracked              */
-    hsize_t sect_count;         /* # of sections tracked                      */
+    hsize_t tot_sect_count;     /* Total # of sections tracked                */
+    hsize_t serial_sect_count;  /* # of serializable sections tracked         */
+    hsize_t ghost_sect_count;   /* # of un-serializable sections tracked      */
 
     /* Creation information */
     H5FS_client_t client;       /* Type of user of this free space manager    */
@@ -100,7 +104,9 @@ typedef struct H5FS_hdr_t {
 
 /* Free space section bin info */
 typedef struct H5FS_bin_t {
-    size_t sect_count;          /* Total # of sections in this bin */
+    size_t tot_sect_count;      /* Total # of sections in this bin */
+    size_t serial_sect_count;   /* # of serializable sections in this bin */
+    size_t ghost_sect_count;    /* # of un-serializable sections in this bin */
     H5SL_t *bin_list;           /* Skip list of differently sized sections */
 } H5FS_bin_t;
 
@@ -112,11 +118,14 @@ struct H5FS_t {
     /* Computed/cached values */
     haddr_t addr;               /* Address of free space header on disk       */
     unsigned nbins;             /* Number of bins                             */
-    size_t serial_size;         /* Total serialized size of all section nodes */
-    size_t size_count;          /* Number of differently sized sections       */
+    size_t serial_size;         /* Total size of all serializable sections    */
+    size_t tot_size_count;      /* Total number of differently sized sections */
+    size_t serial_size_count;   /* Total number of differently sized serializable sections */
+    size_t ghost_size_count;    /* Total number of differently sized un-serializable sections */
     unsigned sect_prefix_size;  /* Size of the section serialization prefix (in bytes) */
     unsigned sect_off_size;     /* Size of a section offset (in bytes)        */
     unsigned sect_len_size;     /* Size of a section length (in bytes)        */
+    hbool_t must_deserialize;   /* Sections must be deserialized              */
     hbool_t dirty;              /* Space information is dirty                 */
 
     /* Memory data structures (not stored directly) */
