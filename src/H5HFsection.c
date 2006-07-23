@@ -761,10 +761,8 @@ static htri_t
 H5HF_sect_single_can_shrink(H5FS_section_info_t *_sect, void *_udata)
 {
     H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-#ifndef NDEBUG
     H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
-#endif /* NDEBUG */
     size_t dblock_size;                 /* Section's direct block's size */
     size_t dblock_overhead;             /* Direct block's overhead */
     htri_t ret_value = FALSE;           /* Return value */
