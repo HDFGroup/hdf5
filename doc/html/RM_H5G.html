@@ -544,6 +544,7 @@ SUBROUTINE
     </table></ul>
 </dl>
 
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Gget_objinfo" -->
 <hr>
@@ -560,12 +561,28 @@ SUBROUTINE
   <dt><strong>Description:</strong>
     <dd><code>H5Gget_objinfo</code> returns information about the 
         specified object through the <code>statbuf</code> argument. 
-        <code>loc_id</code> (a file or group identifier) and 
-        <code>name</code> together determine the object.  
+        <p>
+        A file or group identifier, <code>loc_id</code>, 
+        and an object name, <code>name</code>, relative to <code>loc_id</code>,
+        are commonly used to specify the object.  
+        However, if the object identifier is already known to the application,
+        an alternative approach is to use that identifier, 
+        <code>obj_id</code>, in place of <code>loc_id</code>, 
+        and a dot (<code>.</code>) in place of <code>name</code>.  
+        Thus, the alternative versions of the first portion of an 
+        <code>H5Gget_objinfo</code> call would be as follows:
+        <br>
+        <code>
+        &nbsp;&nbsp;&nbsp;&nbsp;H5Gget_objinfo (loc_id name&nbsp;&nbsp;...)
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;H5Gget_objinfo (obj_id .&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)
+        </code>
+        <p>
         If the object is a symbolic link and <code>follow_link</code> is
-        zero (<code>0</code>), then the information returned is that for the link itself;
-        otherwise the link is followed and information is returned about
-        the object to which the link points.  
+        zero (<code>0</code>), 
+        then the information returned describes the link itself;
+        otherwise the link is followed and the information returned 
+        describes the object to which the link points.  
         If <code>follow_link</code> is non-zero but the final symbolic link 
         is dangling (does not point to anything), then an error is returned.  
         The <code>statbuf</code> fields are undefined for an error.  
@@ -579,7 +596,7 @@ SUBROUTINE
                       unsigned long fileno[2];
                       unsigned long objno[2];
                       unsigned nlink;
-                      int type;
+                      H5G_obj_t type;
                       time_t mtime; 
                       size_t linklen;
                       H5O_stat_t ohdr;
@@ -631,17 +648,28 @@ SUBROUTINE
         <p>
         The fields in the <code>H5O_stat_t</code> struct contain information
         about the object header for the object queried:
-            <ul><dl>
-                <dt><code>size</code>
-                <dd>The total size of all the object header information in
-                    the file (for all chunks).
-                <dt><code>free</code>
-                <dd>The size of unused space in the object header.
-                <dt><code>nmesgs</code>
-                <dd>The number of object header messages.
-                <dt><code>nchunks</code>
-                <dd>The number of chunks the object header is broken up into.
-            </dl> </ul>
+        <div align=center>
+        <table width=80%>
+          <tr><td align=left valign=top>
+            <code>size</code>
+          </td><td align=left valign=top>
+            The total size of all the object header information in
+            the file (for all chunks).
+          </td></tr><tr><td align=left valign=top>
+            <code>free</code>
+          </td><td align=left valign=top>
+            The size of unused space in the object header.
+          </td></tr><tr><td align=left valign=top>
+            <code>nmesgs</code>
+          </td><td align=left valign=top>
+            The number of object header messages.
+          </td></tr><tr><td align=left valign=top>
+            <code>nchunks&nbsp;&nbsp;</code>
+          </td><td align=left valign=top>
+            The number of chunks the object header is broken up into.
+          </td></tr>
+        </table>
+        </div>
 
         <p>
         Other fields may be added to this structure in the future.
@@ -652,17 +680,26 @@ SUBROUTINE
   <dt><strong>Parameters:</strong>
     <ul><table>
       <tr>
-	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
-        <td valign="top">IN: File or group identifier.</td></tr>
+        <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.
+            <br>
+            <i>Alternative:</i> An object identifier, 
+            <code>obj_id</code>.</td></tr>
       <tr>
-	    <td valign="top"><em>const char</em> <code>*name</code></td>
-        <td valign="top">IN: Name of the object for which status is being sought.</td></tr>
+        <td valign="top"><em>const char</em> <code>*name</code></td>
+        <td valign="top">IN: Name of the object for which status is being 
+            sought.
+            <br>
+            <i>Alternative:</i> If the preceding parameter is the 
+            object&rsquo;s direct identifier, i.e., the <code>obj_id</code>, 
+            this parameter should be a dot (<code>.</code>).</td></tr>
 	  <tr>
-	    <td valign="top"><em>hbool_t</em> <code>follow_link</code></td>
+        <td valign="top"><em>hbool_t</em> <code>follow_link</code></td>
         <td valign="top">IN: Link flag.</td></tr>
       <tr>
-	    <td valign="top"><em>H5G_stat_t</em>&nbsp;<code>*statbuf&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-        <td valign="top">OUT: Buffer in which to return information about the object.</td></tr>
+        <td valign="top"><em>H5G_stat_t</em>&nbsp;<code>*statbuf&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">OUT: Buffer in which to return information about 
+            the object.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd> Returns a non-negative value if successful, with the fields of 
@@ -677,7 +714,7 @@ SUBROUTINE
 	</pre>
 -->		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -697,6 +734,7 @@ SUBROUTINE
             <code>H5G_stat_t</code> struct in this release.</td></tr>
     </table></ul>
 </dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Gget_objname_by_idx" -->
@@ -1573,7 +1611,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 February 2006");
+document.writeln("Last modified: 25 July 2006");
 -->
 </SCRIPT>
  
