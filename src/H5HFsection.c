@@ -69,11 +69,11 @@ static herr_t H5HF_sect_node_free(H5HF_free_section_t *sect,
 static H5FS_section_info_t *H5HF_sect_single_deserialize(const H5FS_section_class_t *cls,
     hid_t dxpl_id, const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size,
     unsigned *des_flags);
-static htri_t H5HF_sect_single_can_merge(H5FS_section_info_t *sect1,
-    H5FS_section_info_t *sect2, void *udata);
+static htri_t H5HF_sect_single_can_merge(const H5FS_section_info_t *sect1,
+    const H5FS_section_info_t *sect2, void *udata);
 static herr_t H5HF_sect_single_merge(H5FS_section_info_t *sect1,
     H5FS_section_info_t *sect2, void *udata);
-static htri_t H5HF_sect_single_can_shrink(H5FS_section_info_t *sect,
+static htri_t H5HF_sect_single_can_shrink(const H5FS_section_info_t *sect,
     void *udata);
 static herr_t H5HF_sect_single_shrink(H5FS_section_info_t **_sect,
     void *udata);
@@ -88,8 +88,7 @@ static H5HF_free_section_t *H5HF_sect_row_create(haddr_t sect_off,
 static herr_t H5HF_sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
 static herr_t H5HF_sect_row_from_single(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect, H5HF_direct_t *dblock);
-static herr_t H5HF_sect_row_iblock_same(const H5HF_free_section_t *sect1,
-    const H5HF_free_section_t *sect2);
+static herr_t H5HF_sect_row_free_real(H5HF_free_section_t *sect);
 
 /* 'row' section callbacks */
 static herr_t H5HF_sect_row_init_cls(H5FS_section_class_t *cls, void *udata);
@@ -99,11 +98,11 @@ static herr_t H5HF_sect_row_serialize(const H5FS_section_class_t *cls,
 static H5FS_section_info_t *H5HF_sect_row_deserialize(const H5FS_section_class_t *cls,
     hid_t dxpl_id, const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size,
     unsigned *des_flags);
-static htri_t H5HF_sect_row_can_merge(H5FS_section_info_t *sect1,
-    H5FS_section_info_t *sect2, void *udata);
+static htri_t H5HF_sect_row_can_merge(const H5FS_section_info_t *sect1,
+    const H5FS_section_info_t *sect2, void *udata);
 static herr_t H5HF_sect_row_merge(H5FS_section_info_t *sect1,
     H5FS_section_info_t *sect2, void *udata);
-static htri_t H5HF_sect_row_can_shrink(H5FS_section_info_t *sect,
+static htri_t H5HF_sect_row_can_shrink(const H5FS_section_info_t *sect,
     void *udata);
 static herr_t H5HF_sect_row_shrink(H5FS_section_info_t **sect,
     void *udata);
@@ -112,8 +111,9 @@ static herr_t H5HF_sect_row_valid(const H5FS_section_class_t *cls,
     const H5FS_section_info_t *sect);
 
 /* 'indirect' section routines */
-static H5HF_free_section_t *H5HF_sect_indirect_new(haddr_t sect_off,
-    hsize_t sect_size, H5HF_indirect_t *iblock, hsize_t iblock_off,
+static H5HF_free_section_t *H5HF_sect_indirect_new(H5HF_hdr_t *hdr,
+    haddr_t sect_off, hsize_t sect_size,
+    H5HF_indirect_t *iblock, hsize_t iblock_off,
     unsigned row, unsigned col, unsigned nentries);
 static herr_t H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, hbool_t first_child, unsigned space_flags,
@@ -134,14 +134,13 @@ static hbool_t H5HF_sect_indirect_is_first(H5HF_free_section_t *sect);
 static H5HF_indirect_t * H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect);
 static herr_t H5HF_sect_indirect_span_size(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect);
-static herr_t H5HF_sect_indirect_iblock_entries(H5HF_hdr_t *hdr,
-    H5HF_free_section_t *sect);
-static herr_t H5HF_sect_indirect_iblock_same(const H5HF_free_section_t *sect1,
-    const H5HF_free_section_t *sect2);
-static hbool_t H5HF_sect_indirect_is_last_row(const H5HF_free_section_t *row_sect);
+static hsize_t H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect);
+static H5HF_free_section_t * H5HF_sect_indirect_top(H5HF_free_section_t *sect);
 static herr_t H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect1, H5HF_free_section_t *sect2);
-static herr_t H5HF_sect_indirect_shrink_row(H5HF_free_section_t *row_sect);
+static herr_t H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
+static herr_t H5HF_sect_indirect_shrink(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect);
 static herr_t H5HF_sect_indirect_serialize(H5HF_hdr_t *hdr,
     const H5HF_free_section_t *sect, uint8_t *buf);
 static H5FS_section_info_t *H5HF_sect_indirect_deserialize(H5HF_hdr_t *hdr,
@@ -167,7 +166,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_SINGLE[1] = {{
     /* Class variables */
     H5HF_FSPACE_SECT_SINGLE,		/* Section type                 */
     0,					/* Extra serialized size        */
-    0,					/* Class flags                  */
+    H5FS_CLS_MERGE_SYM,			/* Class flags                  */
     NULL,				/* Class private info           */
 
     /* Class methods */
@@ -194,7 +193,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_FIRST_ROW[1] = {{
     /* Class variables */
     H5HF_FSPACE_SECT_FIRST_ROW,		/* Section type                 */
     0,					/* Extra serialized size        */
-    0,					/* Class flags                  */
+    H5FS_CLS_MERGE_SYM,			/* Class flags                  */
     NULL,				/* Class private info           */
 
     /* Class methods */
@@ -218,7 +217,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1] = {{
     /* Class variables */
     H5HF_FSPACE_SECT_NORMAL_ROW,	/* Section type                 */
     0,					/* Extra serialized size        */
-    H5FS_CLS_GHOST_OBJ,			/* Class flags                  */
+    H5FS_CLS_MERGE_SYM|H5FS_CLS_SEPAR_OBJ|H5FS_CLS_GHOST_OBJ,	/* Class flags                  */
     NULL,				/* Class private info           */
 
     /* Class methods */
@@ -228,10 +227,10 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1] = {{
     /* Object methods */
     NULL,				/* Serialize section            */
     NULL,				/* Deserialize section          */
-    H5HF_sect_row_can_merge,		/* Can sections merge?          */
-    H5HF_sect_row_merge,		/* Merge sections               */
-    H5HF_sect_row_can_shrink,		/* Can section shrink container?*/
-    H5HF_sect_row_shrink,		/* Shrink container w/section   */
+    NULL,				/* Can sections merge?          */
+    NULL,				/* Merge sections               */
+    NULL,				/* Can section shrink container?*/
+    NULL,				/* Shrink container w/section   */
     H5HF_sect_row_free,			/* Free section                 */
     H5HF_sect_row_valid,		/* Check validity of section    */
     NULL,				/* Dump debugging for section   */
@@ -245,7 +244,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1] = {{
     /* Class variables */
     H5HF_FSPACE_SECT_INDIRECT,		/* Section type                 */
     0,					/* Extra serialized size        */
-    H5FS_CLS_GHOST_OBJ,			/* Class flags                  */
+    H5FS_CLS_MERGE_SYM|H5FS_CLS_GHOST_OBJ,			/* Class flags                  */
     NULL,				/* Class private info           */
 
     /* Class methods */
@@ -607,11 +606,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5HF_sect_single_can_merge(H5FS_section_info_t *_sect1,
-    H5FS_section_info_t *_sect2, void UNUSED *_udata)
+H5HF_sect_single_can_merge(const H5FS_section_info_t *_sect1,
+    const H5FS_section_info_t *_sect2, void UNUSED *_udata)
 {
-    H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
-    H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
+    const H5HF_free_section_t *sect1 = (const H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
+    const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_can_merge)
@@ -619,16 +618,13 @@ H5HF_sect_single_can_merge(H5FS_section_info_t *_sect1,
     /* Check arguments. */
     HDassert(sect1);
     HDassert(sect2);
+    HDassert(sect1->sect_info.type == sect2->sect_info.type);   /* Checks "MERGE_SYM" flag */
     HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_single_can_merge", sect1->sect_info.addr, sect1->sect_info.size, sect1->sect_info.type, (sect1->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_single_can_merge", sect2->sect_info.addr, sect2->sect_info.size, sect2->sect_info.type, (sect2->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* QAK */
-
-    /* Single section can only merge with other single sections */
-    if(sect1->sect_info.type != sect2->sect_info.type)
-        HGOTO_DONE(FALSE)
 
     /* Check if second section adjoins first section */
     /* (This can only occur within a direct block, due to the direct block
@@ -676,7 +672,9 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 
     /* Check arguments. */
     HDassert(sect1);
+    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
     HDassert(sect2);
+    HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
     HDassert(H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr));
 
 #ifdef QAK
@@ -758,45 +756,46 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5HF_sect_single_can_shrink(H5FS_section_info_t *_sect, void *_udata)
+H5HF_sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
-    H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Fractal heap free section */
+    const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
     H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
-    size_t dblock_size;                 /* Section's direct block's size */
-    size_t dblock_overhead;             /* Direct block's overhead */
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_can_shrink)
 
     /* Check arguments. */
     HDassert(sect);
-    HDassert(sect->sect_info.state == H5FS_SECT_LIVE);
 
 #ifdef QAK
-HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_single_can_shrink", sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* QAK */
 
-    /* Check for section occupying entire direct block */
-    dblock_size = sect->u.single.dblock_size;
-    dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
+    /* Check for section occupying entire root direct block */
+    /* (We shouldn't ever have a single section that occupies an entire
+     *      direct block, unless it's in the root direct block (because it
+     *      would have been converted into a row section, if there was an
+     *      indirect block that covered it)
+     */
+    if(hdr->man_dtable.curr_root_rows == 0) {
+        size_t dblock_size;                 /* Section's direct block's size */
+        size_t dblock_overhead;             /* Direct block's overhead */
+
+        dblock_size = hdr->man_dtable.cparam.start_block_size;
+        dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
 #ifdef QAK
-HDfprintf(stderr, "%s: dblock_size = %Zu\n", FUNC, dblock_size);
-HDfprintf(stderr, "%s: dblock_overhead = %Zu\n", FUNC, dblock_overhead);
+HDfprintf(stderr, "%s: dblock_size = %Zu\n", "H5HF_sect_single_can_shrink", dblock_size);
+HDfprintf(stderr, "%s: dblock_overhead = %Zu\n", "H5HF_sect_single_can_shrink", dblock_overhead);
 #endif /* QAK */
-    if((dblock_size - dblock_overhead) == sect->sect_info.size) {
-        /* We shouldn't ever have a single section that occupies an entire
-         *      direct block, unless it's in the root direct block (and
-         *      therefore there's no parent indirect block to hook into)
-         */
-        HDassert(hdr->man_dtable.curr_root_rows == 0);
-        HGOTO_DONE(TRUE)
+        if((dblock_size - dblock_overhead) == sect->sect_info.size)
+            HGOTO_DONE(TRUE)
     } /* end if */
     else {
         /* We shouldn't have a situation where the 'next block' iterator
          *      is moved before a direct block that still has objects within it.
          */
-        HDassert(hdr->man_dtable.curr_root_rows == 0 || hdr->man_iter_off > sect->sect_info.addr);
+        HDassert(hdr->man_iter_off > sect->sect_info.addr);
         HGOTO_DONE(FALSE)
     } /* end else */
 
@@ -841,12 +840,13 @@ H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
 HDfprintf(stderr, "%s: (*sect).sect_info = {%a, %Hu, %u}\n", FUNC, (*sect)->sect_info.addr, (*sect)->sect_info.size, (*sect)->sect_info.type);
 #endif /* QAK */
 
-    /* Check to see if we should revive either section */
+    /* Check to see if we should revive section */
     if((*sect)->sect_info.state != H5FS_SECT_LIVE)
         if(H5HF_sect_single_revive(hdr, dxpl_id, (*sect)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 
     /* Protect the direct block for the section */
+    /* (should be a root direct block) */
     dblock_addr = (*sect)->u.single.dblock_addr;
     HDassert(dblock_addr == hdr->man_dtable.table_addr);
 #ifdef QAK
@@ -946,7 +946,7 @@ HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_single
         /* (not enough information to check on a single section in a root direct block) */
         if(sect->u.single.parent != NULL) {
             H5HF_indirect_t *iblock;    /* Indirect block that section's direct block resides in */
-            H5HF_direct_t *dblock;      /* Direct block for section */
+            unsigned dblock_status = 0; /* Direct block's status in the metadata cache */
             herr_t status;              /* Generic status value */
 
 #ifdef QAK
@@ -958,21 +958,33 @@ HDfprintf(stderr, "%s: sect->u.single = {%p, %u, %a, %Zu}\n", "H5HF_sect_single_
             HDassert(H5F_addr_eq(iblock->ents[sect->u.single.par_entry].addr,
                     sect->u.single.dblock_addr));
 
-            /* Protect the direct block for the section */
-            dblock = H5HF_man_dblock_protect(iblock->hdr, H5AC_dxpl_id, sect->u.single.dblock_addr, sect->u.single.dblock_size, iblock, sect->u.single.par_entry, H5AC_READ);
-            HDassert(dblock);
-
-            /* Sanity check settings for section */
-            HDassert(sect->u.single.dblock_size > 0);
-            HDassert(sect->u.single.dblock_size == dblock->size);
-            HDassert(dblock->size > sect->sect_info.size);
-            HDassert(H5F_addr_lt(dblock->block_off, sect->sect_info.addr));
-            HDassert(H5F_addr_ge((dblock->block_off + dblock->size),
-                    (sect->sect_info.addr + sect->sect_info.size)));
-
-            /* Release direct block */
-            status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, sect->u.single.dblock_addr, dblock, H5AC__NO_FLAGS_SET);
+            /* Check the direct block's status in the metadata cache */
+            status = H5AC_get_entry_status(iblock->hdr->f, sect->u.single.dblock_addr, &dblock_status);
             HDassert(status >= 0);
+
+            /* If the direct block for the section isn't already protected,
+             *  protect it here in order to check single section's sanity
+             *  against it.
+             */
+            if(!(dblock_status & H5AC_ES__IS_PROTECTED)) {
+                H5HF_direct_t *dblock;      /* Direct block for section */
+
+                /* Protect the direct block for the section */
+                dblock = H5HF_man_dblock_protect(iblock->hdr, H5AC_dxpl_id, sect->u.single.dblock_addr, sect->u.single.dblock_size, iblock, sect->u.single.par_entry, H5AC_READ);
+                HDassert(dblock);
+
+                /* Sanity check settings for section */
+                HDassert(sect->u.single.dblock_size > 0);
+                HDassert(sect->u.single.dblock_size == dblock->size);
+                HDassert(dblock->size > sect->sect_info.size);
+                HDassert(H5F_addr_lt(dblock->block_off, sect->sect_info.addr));
+                HDassert(H5F_addr_ge((dblock->block_off + dblock->size),
+                        (sect->sect_info.addr + sect->sect_info.size)));
+
+                /* Release direct block */
+                status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, sect->u.single.dblock_addr, dblock, H5AC__NO_FLAGS_SET);
+                HDassert(status >= 0);
+            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -1080,40 +1092,6 @@ HDfprintf(stderr, "%s: hdr->man_dtable.curr_root_rows = %u\n", FUNC, hdr->man_dt
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_sect_row_from_single() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_sect_row_iblock_same
- *
- * Purpose:	Check if two row sections are located in the same indirect block
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July  6 2006
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5HF_sect_row_iblock_same(const H5HF_free_section_t *row_sect1,
-    const H5HF_free_section_t *row_sect2)
-{
-    htri_t ret_value;           /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_iblock_same)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(row_sect1);
-    HDassert(row_sect2);
-
-    /* Compare the underlying indirect sections */
-    ret_value = H5HF_sect_indirect_iblock_same(row_sect1->u.row.under, row_sect2->u.row.under);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_sect_row_iblock_same() */
 
 
 /*-------------------------------------------------------------------------
@@ -1490,20 +1468,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5HF_sect_row_can_merge(H5FS_section_info_t *_sect1,
-    H5FS_section_info_t *_sect2, void *_udata)
+H5HF_sect_row_can_merge(const H5FS_section_info_t *_sect1,
+    const H5FS_section_info_t *_sect2, void UNUSED *_udata)
 {
-    H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
-    H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
-    H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
+    const H5HF_free_section_t *sect1 = (const H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
+    const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
+    H5HF_free_section_t *top_indir_sect1, *top_indir_sect2; /* Top indirect section for each row */
     htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_can_merge)
 
     /* Check arguments. */
     HDassert(sect1);
+    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
     HDassert(sect2);
+    HDassert(sect1->sect_info.type == sect2->sect_info.type);   /* Checks "MERGE_SYM" flag */
     HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
 #ifdef QAK
@@ -1513,46 +1492,29 @@ HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_row_c
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1->u.row = {%p, %u, %u, %u, %t}\n", "H5HF_sect_row_can_merge", sect1->u.row.under, sect1->u.row.row, sect1->u.row.col, sect1->u.row.num_entries, sect1->u.row.checked_out);
-if(sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-            sect2->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW)
-    HDfprintf(stderr, "%s: sect2->u.row = {%p, %u, %u, %u, %t}\n", "H5HF_sect_row_can_merge", sect2->u.row.under, sect2->u.row.row, sect2->u.row.col, sect2->u.row.num_entries, sect2->u.row.checked_out);
+HDfprintf(stderr, "%s: sect2->u.row = {%p, %u, %u, %u, %t}\n", "H5HF_sect_row_can_merge", sect2->u.row.under, sect2->u.row.row, sect2->u.row.col, sect2->u.row.num_entries, sect2->u.row.checked_out);
 #endif /* QAK */
 
-    /* Row section can only merge with other row sections */
-    if(!((sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-                sect1->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW)
-            && (sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-                sect2->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW)))
-        HGOTO_DONE(FALSE)
-
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", "H5HF_sect_row_can_merge", hdr->man_iter_off);
-#endif /* QAK */
-    /* If second section is after current 'next block' iterator and it's the
-     *  last row in the underlying indirect section, it should go away
-     */
-    if(sect2->sect_info.addr >= hdr->man_iter_off && H5HF_sect_indirect_is_last_row(sect2))
-        HGOTO_DONE(TRUE)
+    /* Get the top indirect section underlying each row */
+    top_indir_sect1 = H5HF_sect_indirect_top(sect1->u.row.under);
+    HDassert(top_indir_sect1);
+    top_indir_sect2 = H5HF_sect_indirect_top(sect2->u.row.under);
+    HDassert(top_indir_sect2);
 
     /* Check if second section shares the same underlying indirect block as
      *  the first section, but doesn't already have same underlying indirect
      *  section.
      */
-    if(H5HF_sect_row_iblock_same(sect1, sect2)) {
-        HDassert((sect1->u.row.row != sect2->u.row.row) ||
-                (((sect1->u.row.col + sect1->u.row.num_entries) - 1)
-                    < sect2->u.row.col));
-        if(sect1->u.row.under != sect2->u.row.under) {
-            size_t dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr); /* Direct block's overhead */
-
+    if(top_indir_sect1 != top_indir_sect2) {
+        if(H5HF_sect_indirect_iblock_off(top_indir_sect1) == H5HF_sect_indirect_iblock_off(top_indir_sect2)) {
 #ifdef QAK
-HDfprintf(stderr, "%s: dblock_overhead = %Zu\n", "H5HF_sect_row_can_merge", dblock_overhead);
+HDfprintf(stderr, "%s: top_indir_sect1->sect_info.addr = %a\n", "H5HF_sect_row_can_merge", top_indir_sect1->sect_info.addr);
+HDfprintf(stderr, "%s: top_indir_sect1->u.indirect.span_size = %Hu\n", "H5HF_sect_row_can_merge", top_indir_sect1->u.indirect.span_size);
+HDfprintf(stderr, "%s: top_indir_sect2->sect_info.addr = %a\n", "H5HF_sect_row_can_merge", top_indir_sect2->sect_info.addr);
 #endif /* QAK */
             /* Check if second section adjoins first section */
-            if(H5F_addr_eq(sect1->sect_info.addr + (sect1->u.row.num_entries * (sect1->sect_info.size + dblock_overhead)), sect2->sect_info.addr)) {
-                udata->adjoin = TRUE;
+            if(H5F_addr_eq((top_indir_sect1->sect_info.addr + top_indir_sect1->u.indirect.span_size), top_indir_sect2->sect_info.addr))
                 HGOTO_DONE(TRUE)
-            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -1595,58 +1557,32 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 
     /* Check arguments. */
     HDassert(sect1);
-    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-            sect1->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
     HDassert(sect2);
-    HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-            sect2->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+    HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect1->sect_info.addr, sect1->sect_info.size, sect1->sect_info.type, (sect1->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sect_info.addr, sect2->sect_info.size, sect2->sect_info.type, (sect2->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* QAK */
 
+    /* Check to see if we should revive first section */
+    if(sect1->sect_info.state != H5FS_SECT_LIVE)
+        if(H5HF_sect_row_revive(hdr, dxpl_id, sect1) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
+
     /* Check to see if we should revive second section */
     if(sect2->sect_info.state != H5FS_SECT_LIVE)
         if(H5HF_sect_row_revive(hdr, dxpl_id, sect2) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 #ifdef QAK
-HDfprintf(stderr, "%s: sect2->u.row = {%p, %u, %u, %u}\n", FUNC, sect2->u.row.under, sect2->u.row.row, sect2->u.row.col, sect2->u.row.num_entries);
+HDfprintf(stderr, "%s: sect1->u.row = {%p, %u, %u, %u, %t}\n", FUNC, sect1->u.row.under, sect1->u.row.row, sect1->u.row.col, sect1->u.row.num_entries, sect1->u.row.checked_out);
+HDfprintf(stderr, "%s: sect2->u.row = {%p, %u, %u, %u, %t}\n", FUNC, sect2->u.row.under, sect2->u.row.row, sect2->u.row.col, sect2->u.row.num_entries, sect2->u.row.checked_out);
 #endif /* QAK */
 
-    /* Check if rows adjoin each other */
-    /* (as opposed to second row just being after the end of the heap and
-     *  needed to be pruned away)
-     */
-    if(udata->adjoin) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Merging underlying indirect blocks\n", FUNC);
-#endif /* QAK */
-        /* Check to see if we should revive first section */
-        if(sect1->sect_info.state != H5FS_SECT_LIVE)
-            if(H5HF_sect_row_revive(hdr, dxpl_id, sect1) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
-#ifdef QAK
-HDfprintf(stderr, "%s: sect1->u.row = {%p, %u, %u, %u}\n", FUNC, sect1->u.row.under, sect1->u.row.row, sect1->u.row.col, sect1->u.row.num_entries);
-#endif /* QAK */
-
-        /* Merge rows' underlying indirect sections together */
-        if(H5HF_sect_indirect_merge_row(hdr, dxpl_id, sect1, sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTMERGE, FAIL, "can't merge underlying indirect sections")
-    } /* end if */
-    else {
-#ifdef QAK
-HDfprintf(stderr, "%s: Shrinking away second section\n", FUNC);
-#endif /* QAK */
-        /* Shrink size of underlying indirect section */
-        if(H5HF_sect_indirect_shrink_row(sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section")
-
-        /* Get rid of second section */
-        if(H5HF_sect_row_free((H5FS_section_info_t *)sect2) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
-        sect2 = NULL;
-    } /* end else */
+    /* Merge rows' underlying indirect sections together */
+    if(H5HF_sect_indirect_merge_row(hdr, dxpl_id, sect1, sect2) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMERGE, FAIL, "can't merge underlying indirect sections")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1672,7 +1608,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5HF_sect_row_can_shrink(H5FS_section_info_t *_sect, void UNUSED *_udata)
+H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void UNUSED *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
     H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
@@ -1683,19 +1619,18 @@ H5HF_sect_row_can_shrink(H5FS_section_info_t *_sect, void UNUSED *_udata)
 
     /* Check arguments. */
     HDassert(sect);
-    HDassert(sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-            sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+    HDassert(sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", "H5HF_sect_row_can_shrink", sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
-HDfprintf(stderr, "%s: sect->u.row = {%p, %u, %u, %u}\n", "H5HF_sect_row_can_shrink", sect->u.row.under, sect->u.row.row, sect->u.row.col, sect->u.row.num_entries);
+HDfprintf(stderr, "%s: sect->u.row = {%p, %u, %u, %u, %t}\n", "H5HF_sect_row_can_shrink", sect->u.row.under, sect->u.row.row, sect->u.row.col, sect->u.row.num_entries, sect->u.row.checked_out);
 #endif /* QAK */
 
     /* Check if section is past end of "next block" iterator */
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", "H5HF_sect_row_can_shrink", hdr->man_iter_off);
 #endif /* QAK */
-    if(sect->sect_info.addr >= hdr->man_iter_off && H5HF_sect_indirect_is_last_row(sect))
+    if(sect->sect_info.addr >= hdr->man_iter_off)
         HGOTO_DONE(TRUE)
 
 done:
@@ -1718,9 +1653,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
+H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
+    H5HF_free_section_t *top_indir_sect; /* Top indirect section for row */
+    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
+    hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_shrink)
@@ -1728,21 +1667,19 @@ H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
     /* Check arguments. */
     HDassert(sect);
     HDassert(*sect);
-    HDassert((*sect)->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-            (*sect)->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+    HDassert((*sect)->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: (*sect)->sect_info = {%a, %Hu, %u, %s}\n", FUNC, (*sect)->sect_info.addr, (*sect)->sect_info.size, (*sect)->sect_info.type, ((*sect)->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: (*sect)->u.row = {%p, %u, %u, %u}\n", FUNC, (*sect)->u.row.under, (*sect)->u.row.row, (*sect)->u.row.col, (*sect)->u.row.num_entries);
 #endif /* QAK */
 
-    /* Shrink size of underlying indirect section */
-    if(H5HF_sect_indirect_shrink_row(*sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section")
+    /* Get the top indirect section underlying each row */
+    top_indir_sect = H5HF_sect_indirect_top((*sect)->u.row.under);
 
-    /* Get rid of section */
-    if(H5HF_sect_row_free((H5FS_section_info_t *)*sect) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+    /* Shrink size of underlying indirect section */
+    if(H5HF_sect_indirect_shrink(hdr, dxpl_id, top_indir_sect) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't shrink underlying indirect section")
 
     /* Indicate that the section has been released */
     *sect = NULL;
@@ -1750,6 +1687,38 @@ HDfprintf(stderr, "%s: (*sect)->u.row = {%p, %u, %u, %u}\n", FUNC, (*sect)->u.ro
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_sect_row_shrink() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_sect_row_free_real
+ *
+ * Purpose:	Free a 'row' section node
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_sect_row_free_real(H5HF_free_section_t *sect)
+{
+    herr_t ret_value = SUCCEED;               /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_free_real)
+
+    HDassert(sect);
+
+    /* Release the section */
+    if(H5HF_sect_node_free(sect, NULL) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5HF_sect_row_free_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1782,7 +1751,7 @@ H5HF_sect_row_free(H5FS_section_info_t *_sect)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't detach section node")
 
     /* Release the section */
-    if(H5HF_sect_node_free(sect, NULL) < 0)
+    if(H5HF_sect_row_free_real(sect) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
 
 done:
@@ -1932,83 +1901,11 @@ HDfprintf(stderr, "%s: acc_span_size = %Hu\n", "H5HF_sect_indirect_span_size", a
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_sect_indirect_iblock_entries
+ * Function:	H5HF_sect_indirect_iblock_off
  *
- * Purpose:	Compute the number of entries for the iblock that an
- *              indirect section is located in
+ * Purpose:	Get the offset of the indirect block for the section
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July  3 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_sect_indirect_iblock_entries(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
-{
-    unsigned nrows;                     /* Number of rows in target indirect block */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_iblock_entries)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(sect);
-
-    /* If the section is 'live', just use it's indirect block */
-    if(sect->sect_info.state == H5FS_SECT_LIVE) {
-        HDassert(sect->u.indirect.u.iblock);
-        nrows = sect->u.indirect.u.iblock->nrows;
-    } /* end if */
-    else {
-        hsize_t curr_off;               /* Current search offset */
-        hsize_t iblock_off;             /* Temporary copy of indirect block's offset */
-        unsigned curr_row, curr_col;    /* Current search row & column */
-
-        /* Set starting offset for search */
-        iblock_off = sect->u.indirect.u.iblock_off;
-
-        curr_off = 0;
-        do {
-            /* Compute block's new offset */
-            iblock_off -= curr_off;
-
-            /* Look up row & column in new indirect block for object */
-            if(H5HF_dtable_lookup(&hdr->man_dtable, iblock_off, &curr_row, &curr_col) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
-            HDassert(curr_row >= hdr->man_dtable.max_direct_rows);
-
-            /* Compute offset of block indicated */
-            curr_off = hdr->man_dtable.row_block_off[curr_row] + 
-                    hdr->man_dtable.row_block_size[curr_row] * curr_col;
-        } while(curr_off != iblock_off);
-
-        /* Compute # of rows in indirect block */
-        nrows = (H5V_log2_gen(hdr->man_dtable.row_block_size[curr_row]) - hdr->man_dtable.first_row_bits) + 1;
-#ifdef QAK
-HDfprintf(stderr, "%s: nrows = %u\n", FUNC, nrows);
-#endif /* QAK */
-    } /* end else */
-    HDassert(nrows);
-
-    /* Compute number of entries in indirect block */
-    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * nrows;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_sect_indirect_iblock_entries() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_sect_indirect_iblock_same
- *
- * Purpose:	Check if two indirect sections are located in the same indirect block
- *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Offset of indirect block in "heap space" (can't fail)
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -2016,77 +1913,65 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5HF_sect_indirect_iblock_same(const H5HF_free_section_t *sect1,
-    const H5HF_free_section_t *sect2)
+static hsize_t
+H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect)
 {
-    htri_t ret_value;           /* Return value */
+    hsize_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_iblock_same)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_iblock_off)
 
     /*
      * Check arguments.
      */
-    HDassert(sect1);
-    HDassert(sect2);
+    HDassert(sect);
 
-    ret_value = ((sect1->sect_info.state == H5FS_SECT_LIVE ?  sect1->u.indirect.u.iblock->block_off : sect1->u.indirect.u.iblock_off)
-            == (sect2->sect_info.state == H5FS_SECT_LIVE ?  sect2->u.indirect.u.iblock->block_off : sect2->u.indirect.u.iblock_off));
+    ret_value = sect->sect_info.state == H5FS_SECT_LIVE ?  sect->u.indirect.u.iblock->block_off : sect->u.indirect.u.iblock_off;
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Leaving, ret_value = %t\n", "H5HF_sect_indirect_iblock_same", ret_value);
+HDfprintf(stderr, "%s: Leaving, ret_value = %Hu\n", "H5HF_sect_indirect_iblock_off", ret_value);
 #endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_sect_indirect_iblock_same() */
+} /* end H5HF_sect_indirect_iblock_off() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_sect_indirect_is_last_row
+ * Function:	H5HF_sect_indirect_top
  *
- * Purpose:	Check if a row is the last row in an indirect section
+ * Purpose:	Get the "top" indirect section
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Pointer to the top indirect sectin (can't fail)
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
- *		July 18 2006
+ *		July  6 2006
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
-H5HF_sect_indirect_is_last_row(const H5HF_free_section_t *row_sect)
+static H5HF_free_section_t *
+H5HF_sect_indirect_top(H5HF_free_section_t *sect)
 {
-    const H5HF_free_section_t *sect;    /* Underlying indirect section */
-    hbool_t ret_value;           /* Return value */
+    H5HF_free_section_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_is_last_row)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_top)
 
     /*
      * Check arguments.
      */
-    HDassert(row_sect);
+    HDassert(sect);
 
-    /* Check for any child indirect sections or if this row is not the last row */
-    sect = row_sect->u.row.under;
 #ifdef QAK
-HDfprintf(stderr, "%s: sect->u.indirect.indir_nents = %u\n", "H5HF_sect_indirect_is_last_row", sect->u.indirect.indir_nents);
-HDfprintf(stderr, "%s: sect->u.indirect.row = %u\n", "H5HF_sect_indirect_is_last_row", sect->u.indirect.row);
-HDfprintf(stderr, "%s: sect->u.indirect.dir_nrows = %u\n", "H5HF_sect_indirect_is_last_row", sect->u.indirect.dir_nrows);
-HDfprintf(stderr, "%s: row_sect->u.row.row = %u\n", "H5HF_sect_indirect_is_last_row", row_sect->u.row.row);
+HDfprintf(stderr, "%s: sect1->u.indirect.parent = %p\n", "H5HF_sect_indirect_top", sect->u.indirect.parent);
 #endif /* QAK */
-    if(sect->u.indirect.indir_nents > 0)
-        ret_value = FALSE;
-    else if(((sect->u.indirect.row + sect->u.indirect.dir_nrows) - 1) ==
-            row_sect->u.row.row)
-        ret_value = TRUE;
+    if(sect->u.indirect.parent)
+        ret_value = H5HF_sect_indirect_top(sect->u.indirect.parent);
     else
-        ret_value = FALSE;
+        ret_value = sect;
 
 #ifdef QAK
-HDfprintf(stderr, "%s: ret_value = %t\n", "H5HF_sect_indirect_is_last_row", ret_value);
+HDfprintf(stderr, "%s: Leaving, ret_value = %p\n", "H5HF_sect_indirect_top", ret_value);
 #endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_sect_indirect_is_last_row() */
+} /* end H5HF_sect_indirect_top() */
 
 
 /*-------------------------------------------------------------------------
@@ -2179,7 +2064,7 @@ H5HF_sect_indirect_term_cls(H5FS_section_class_t *cls)
  *-------------------------------------------------------------------------
  */
 static H5HF_free_section_t *
-H5HF_sect_indirect_new(haddr_t sect_off, hsize_t sect_size,
+H5HF_sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size,
     H5HF_indirect_t *iblock, hsize_t iblock_off, unsigned row, unsigned col,
     unsigned nentries)
 {
@@ -2192,6 +2077,7 @@ H5HF_sect_indirect_new(haddr_t sect_off, hsize_t sect_size,
     /*
      * Check arguments.
      */
+    HDassert(hdr);
     HDassert(nentries);
 
     /* Create free space section node */
@@ -2202,19 +2088,23 @@ H5HF_sect_indirect_new(haddr_t sect_off, hsize_t sect_size,
     /* Set the 'indirect' specific fields */
     if(iblock) {
         sect->u.indirect.u.iblock = iblock;
+        sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+                sect->u.indirect.u.iblock->max_rows;
         if(H5HF_iblock_incr(sect->u.indirect.u.iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
         iblock_incr = TRUE;
     } /* end if */
-    else
+    else {
         sect->u.indirect.u.iblock_off = iblock_off;
+        sect->u.indirect.iblock_entries = 0;
+    } /* end else */
     sect->u.indirect.row = row;
     sect->u.indirect.col = col;
     sect->u.indirect.num_entries = nentries;
 
-    /* Reset the non-stored fields, they are computed later, on demand */
-    sect->u.indirect.span_size = 0;
-    sect->u.indirect.iblock_entries = 0;
+    /* Compute span size of indirect section */
+    if(H5HF_sect_indirect_span_size(hdr, sect) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, NULL, "can't compute span size of section")
 
     /* This indirect section doesn't (currently) have a parent */
     sect->u.indirect.parent = NULL;
@@ -2272,7 +2162,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* QAK */
 
     /* Create free space section node */
-    if(NULL == (sect = H5HF_sect_indirect_new(row_sect->sect_info.addr, 
+    if(NULL == (sect = H5HF_sect_indirect_new(hdr, row_sect->sect_info.addr, 
             row_sect->sect_info.size, iblock, iblock->block_off,
             row_sect->u.row.row, row_sect->u.row.col, row_sect->u.row.num_entries)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section")
@@ -2349,6 +2239,7 @@ HDfprintf(stderr, "%s: end_row = %u, end_col = %u\n", FUNC, end_row, end_col);
      * Check arguments.
      */
     HDassert(sect);
+    HDassert(sect->u.indirect.span_size > 0);
 
     /* Reset reference count for indirect section */
     sect->u.indirect.rc = 0;
@@ -2495,7 +2386,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
                     child_iblock = NULL;
 
                 /* Create free space section node */
-                if(NULL == (child_sect = H5HF_sect_indirect_new(curr_off, (hsize_t)0,
+                if(NULL == (child_sect = H5HF_sect_indirect_new(hdr, curr_off, (hsize_t)0,
                         child_iblock, curr_off, 0, 0, child_nentries)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
 
@@ -2606,7 +2497,7 @@ HDfprintf(stderr, "%s: sect_off = %Hu\n", FUNC, sect_off);
 #endif /* QAK */
 
     /* Create free space section node */
-    if(NULL == (sect = H5HF_sect_indirect_new(sect_off, (hsize_t)0, iblock,
+    if(NULL == (sect = H5HF_sect_indirect_new(hdr, sect_off, (hsize_t)0, iblock,
             iblock->block_off, start_row, start_col, nentries)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
 
@@ -2617,10 +2508,6 @@ HDfprintf(stderr, "%s: sect_off = %Hu\n", FUNC, sect_off);
 
     /* Get end of section offset to return, if requested */
     if(end_off) {
-        /* Set the span size of the new section */
-        if(H5HF_sect_indirect_span_size(hdr, sect) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute span size of section")
-
         /* Compute the end of the section */
         *end_off = sect_off + sect->u.indirect.span_size;
 #ifdef QAK
@@ -2730,6 +2617,10 @@ HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.ind
     /* Set the pointer to the section's indirect block */
     sect->u.indirect.u.iblock = sec_iblock;
 
+    /* Set the number of entries in the indirect block */
+    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+            sect->u.indirect.u.iblock->max_rows;
+
     /* Unlock indirect block */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, sec_iblock->addr, sec_iblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
@@ -2792,6 +2683,10 @@ HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.ind
 
     /* Set the pointer to the section's indirect block */
     sect->u.indirect.u.iblock = sect_iblock;
+
+    /* Set the number of entries in the indirect block */
+    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+            sect->u.indirect.u.iblock->max_rows;
 
     /* Section is "live" now */
     sect->sect_info.state = H5FS_SECT_LIVE;
@@ -2868,6 +2763,8 @@ HDfprintf(stderr, "%s: row_start_entry = %u, row_end_entry = %u\n", FUNC, row_st
     end_col = end_entry % hdr->man_dtable.cparam.width;
 
     /* Additional sanity check */
+    HDassert(sect->u.indirect.span_size > 0);
+    HDassert(sect->u.indirect.iblock_entries > 0);
     HDassert(sect->u.indirect.dir_rows);
     HDassert(sect->u.indirect.dir_rows[(row_sect->u.row.row - start_row)] == row_sect);
 #ifdef QAK
@@ -2915,9 +2812,8 @@ HDfprintf(stderr, "%s: row_entry = %u\n", FUNC, row_entry);
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section")
     } /* end if */
 
-    /* Adjust indirect section's span size, if it's set */
-    if(sect->u.indirect.span_size > 0)
-        sect->u.indirect.span_size -= row_sect->sect_info.size;
+    /* Adjust indirect section's span size */
+    sect->u.indirect.span_size -= row_sect->sect_info.size;
 
     /* Check how to adjust section for allocated entry */
     if(sect->u.indirect.num_entries > 1) {
@@ -3033,7 +2929,7 @@ HDfprintf(stderr, "%s: iblock = %p, iblock_off = %Hu\n", FUNC, iblock, iblock_of
 #endif /* QAK */
 
             /* Create peer indirect section */
-            if(NULL == (peer_sect = H5HF_sect_indirect_new(sect->sect_info.addr,
+            if(NULL == (peer_sect = H5HF_sect_indirect_new(hdr, sect->sect_info.addr,
                     sect->sect_info.size, iblock, iblock_off, start_row, start_col,
                     peer_nentries)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
@@ -3073,12 +2969,10 @@ HDfprintf(stderr, "%s: iblock = %p, iblock_off = %Hu\n", FUNC, iblock, iblock_of
             /* Transfer/update cached information about indirect block */
             peer_sect->u.indirect.iblock_entries = sect->u.indirect.iblock_entries;
             peer_sect->u.indirect.span_size = row_sect->sect_info.addr - peer_sect->sect_info.addr;
-            if(sect->u.indirect.span_size > 0)
-                /* (span for row section has already been removed) */
-                sect->u.indirect.span_size -= peer_sect->u.indirect.span_size;
 
             /* Update information for current section */
             sect->sect_info.addr = row_sect->sect_info.addr + hdr->man_dtable.row_block_size[new_start_row];
+            sect->u.indirect.span_size -= peer_sect->u.indirect.span_size; /* (span for row section has already been removed) */
             sect->u.indirect.row = new_start_row;
             sect->u.indirect.col = row_sect->u.row.col + 1;
             sect->u.indirect.num_entries -= (peer_nentries + 1); /* Transferred entries, plus the entry allocated out of the row */
@@ -3134,6 +3028,8 @@ H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
      */
     HDassert(hdr);
     HDassert(sect);
+    HDassert(sect->u.indirect.span_size > 0);
+    HDassert(sect->u.indirect.iblock_entries > 0);
 #ifdef QAK
 HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
 #endif /* QAK */
@@ -3192,8 +3088,7 @@ HDfprintf(stderr, "%s: Child is at start of indirect section\n", FUNC);
                 sect->u.indirect.col = 0;
             } /* end if */
             sect->u.indirect.num_entries--;
-            if(sect->u.indirect.span_size > 0)
-                sect->u.indirect.span_size -= hdr->man_dtable.row_block_size[start_row];
+            sect->u.indirect.span_size -= hdr->man_dtable.row_block_size[start_row];
 
             /* Adjust indirect entry information */
             sect->u.indirect.indir_nents--;
@@ -3215,8 +3110,7 @@ HDfprintf(stderr, "%s: Child is at end of indirect section\n", FUNC);
 
             /* Adjust span of blocks covered */
             sect->u.indirect.num_entries--;
-            if(sect->u.indirect.span_size > 0)
-                sect->u.indirect.span_size -= hdr->man_dtable.row_block_size[end_row];
+            sect->u.indirect.span_size -= hdr->man_dtable.row_block_size[end_row];
 
             /* Adjust indirect entry information */
             sect->u.indirect.indir_nents--;
@@ -3233,7 +3127,6 @@ HDfprintf(stderr, "%s: Child is at end of indirect section\n", FUNC);
             unsigned peer_start_col;    /* Starting column for new peer indirect section */
             unsigned child_row;         /* Row where child entry is located */
             unsigned new_nentries;      /* New number of entries for current indirect section */
-            unsigned old_nentries;      /* Old number of entries for current indirect section */
             unsigned u;                 /* Local index variable */
 
 #ifdef QAK
@@ -3248,11 +3141,11 @@ HDfprintf(stderr, "%s: Child is in middle of indirect section\n", FUNC);
             peer_start_col = (child_entry + 1) % hdr->man_dtable.cparam.width;
             child_row = child_entry / hdr->man_dtable.cparam.width;
             new_nentries = sect->u.indirect.num_entries - (peer_nentries + 1);
-            old_nentries = sect->u.indirect.num_entries;
 #ifdef QAK
 HDfprintf(stderr, "%s: peer_nentries = %u, peer_start_row = %u, peer_start_col = %u\n", FUNC, peer_nentries, peer_start_row, peer_start_col);
 HDfprintf(stderr, "%s: new_nentries = %u\n", FUNC, new_nentries);
 #endif /* QAK */
+            HDassert(child_row >= hdr->man_dtable.max_direct_rows);
 
             /* Get indirect block information for peer */
             if(sect->sect_info.state == H5FS_SECT_LIVE) {
@@ -3268,7 +3161,7 @@ HDfprintf(stderr, "%s: iblock = %p, iblock_off = %Hu\n", FUNC, iblock, iblock_of
 #endif /* QAK */
 
             /* Update the number of entries in current section & calculate it's span size */
-            /* (Will use this to compute the section address for th peer section */
+            /* (Will use this to compute the section address for the peer section */
             sect->u.indirect.num_entries = new_nentries;
             if(H5HF_sect_indirect_span_size(hdr, sect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute span size of section")
@@ -3285,7 +3178,7 @@ HDfprintf(stderr, "%s: peer_sect_addr = %a\n", FUNC, peer_sect_addr);
 #endif /* QAK */
 
             /* Create peer indirect section */
-            if(NULL == (peer_sect = H5HF_sect_indirect_new(peer_sect_addr,
+            if(NULL == (peer_sect = H5HF_sect_indirect_new(hdr, peer_sect_addr,
                     sect->sect_info.size, iblock, iblock_off, peer_start_row,
                     peer_start_col, peer_nentries)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
@@ -3299,11 +3192,11 @@ HDfprintf(stderr, "%s: peer_sect_addr = %a\n", FUNC, peer_sect_addr);
 
             /* Transfer child indirect sections between current & peer sections */
             HDmemcpy(&peer_sect->u.indirect.indir_ents[0],
-                &sect->u.indirect.indir_ents[old_nentries - peer_nentries], 
+                &sect->u.indirect.indir_ents[sect->u.indirect.indir_nents - peer_nentries], 
                 (sizeof(H5HF_free_section_t *) * peer_nentries));
             sect->u.indirect.indir_nents -= (peer_nentries + 1); /* Transferred blocks, plus child entry */
 #ifdef QAK
-HDfprintf(stderr, "%s: sect->u.indirect.indir_nents = %u, old_nentries = %u\n", FUNC, sect->u.indirect.indir_nents, old_nentries);
+HDfprintf(stderr, "%s: sect->u.indirect.indir_nents = %u\n", FUNC, sect->u.indirect.indir_nents);
 #endif /* QAK */
 
             /* Re-target transferred row sections to point to new underlying indirect section */
@@ -3485,7 +3378,6 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *row_sect1, H5HF_free_section_t *row_sect2)
 {
     H5HF_free_section_t *sect1, *sect2; /* Indirect sections underlying row sections */
-    hsize_t iblock_off1, iblock_off2;   /* The offset of the indirect blocks for the indirect sections (in "heap space") */
     unsigned start_entry1;              /* Start entry for section #1 */
     unsigned start_row1, start_col1;    /* Starting row & column for section #1 */
     unsigned end_entry1;                /* End entry for section #1 */
@@ -3494,6 +3386,8 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned start_row2, start_col2;    /* Starting row & column for section #2 */
     unsigned end_row2, end_col2;        /* Ending row & column for section #2 */
     unsigned end_entry2;                /* End entry for section #2 */
+    hbool_t merged_rows;                /* Flag to indicate that rows was merged together */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_merge_row)
@@ -3509,20 +3403,23 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     HDassert(row_sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
 
     /* Set up indirect section information */
-    sect1 = row_sect1->u.row.under;
-    sect2 = row_sect2->u.row.under;
+    sect1 = H5HF_sect_indirect_top(row_sect1->u.row.under);
+    HDassert(sect1);
+    sect2 = H5HF_sect_indirect_top(row_sect2->u.row.under);
+    HDassert(sect2);
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect1->sect_info.addr, sect1->sect_info.size, sect1->sect_info.type, (sect1->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sect_info.addr, sect2->sect_info.size, sect2->sect_info.type, (sect2->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* QAK */
 
     /* Sanity check some assumptions about the indirect sections */
-    HDassert(sect1->u.indirect.dir_nrows > 0);
-    HDassert(sect1->u.indirect.dir_rows);
-    HDassert(sect1->u.indirect.indir_nents == 0);
-    HDassert(sect1->u.indirect.indir_ents == NULL);
-    HDassert(sect2->u.indirect.dir_nrows > 0);
-    HDassert(sect2->u.indirect.dir_rows);
+    HDassert(sect1->sect_info.state == H5FS_SECT_LIVE);
+    HDassert(sect1->u.indirect.span_size > 0);
+    HDassert(sect1->u.indirect.iblock_entries > 0);
+    HDassert(sect2->sect_info.state == H5FS_SECT_LIVE);
+    HDassert(sect2->u.indirect.span_size > 0);
+    HDassert(sect2->u.indirect.iblock_entries > 0);
+    HDassert(sect1->u.indirect.iblock_entries == sect2->u.indirect.iblock_entries);
 
     /* Set up span information */
     start_row1 = sect1->u.indirect.row;
@@ -3531,8 +3428,8 @@ HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sec
     end_entry1 = (start_entry1 + sect1->u.indirect.num_entries) - 1;
     end_row1 = end_entry1 / hdr->man_dtable.cparam.width;
     end_col1 = end_entry1 % hdr->man_dtable.cparam.width;
-    HDassert(end_row1 == row_sect1->u.row.row);
 #ifdef QAK
+HDfprintf(stderr, "%s: sect1->u.indirect.dir_nrows = %u\n", FUNC, sect1->u.indirect.dir_nrows);
 HDfprintf(stderr, "%s: start_row1 = %u, start_col1 = %u, start_entry1 = %u\n", FUNC, start_row1, start_col1, start_entry1);
 HDfprintf(stderr, "%s: sect1->u.indirect.num_entries = %u\n", FUNC, sect1->u.indirect.num_entries);
 HDfprintf(stderr, "%s: end_row1 = %u, end_col1 = %u, end_entry1 = %u\n", FUNC, end_row1, end_col1, end_entry1);
@@ -3543,51 +3440,58 @@ HDfprintf(stderr, "%s: end_row1 = %u, end_col1 = %u, end_entry1 = %u\n", FUNC, e
     end_entry2 = (start_entry2 + sect2->u.indirect.num_entries) - 1;
     end_row2 = end_entry2 / hdr->man_dtable.cparam.width;
     end_col2 = end_entry2 % hdr->man_dtable.cparam.width;
-    HDassert(start_row2 == row_sect2->u.row.row);
 #ifdef QAK
+HDfprintf(stderr, "%s: sect2->u.indirect.dir_nrows = %u\n", FUNC, sect2->u.indirect.dir_nrows);
 HDfprintf(stderr, "%s: start_row2 = %u, start_col2 = %u, start_entry2 = %u\n", FUNC, start_row2, start_col2, start_entry2);
 HDfprintf(stderr, "%s: sect2->u.indirect.num_entries = %u\n", FUNC, sect2->u.indirect.num_entries);
 HDfprintf(stderr, "%s: end_row2 = %u, end_col2 = %u, end_entry2 = %u\n", FUNC, end_row2, end_col2, end_entry2);
 #endif /* QAK */
-    if(sect1->sect_info.state == H5FS_SECT_LIVE)
-        iblock_off1 = sect1->u.indirect.u.iblock->block_off;
-    else
-        iblock_off1 = sect1->u.indirect.u.iblock_off;
-    if(sect2->sect_info.state == H5FS_SECT_LIVE)
-        iblock_off2 = sect2->u.indirect.u.iblock->block_off;
-    else
-        iblock_off2 = sect2->u.indirect.u.iblock_off;
-#ifdef QAK
-HDfprintf(stderr, "%s: iblock_off1 = %Hu\n", FUNC, iblock_off1);
-HDfprintf(stderr, "%s: iblock_off2 = %Hu\n", FUNC, iblock_off2);
-#endif /* QAK */
 
-    /* Determine if the two indirect sections are in the same indirect block */
-    if(iblock_off1 == iblock_off2) {
-        unsigned src_row2;      /* Source row for copying from second section */
-        unsigned new_dir_nrows; /* New value for number of direct rows in first section */
-        unsigned nrows_moved;   /* Number of rows to move from second section to first */
-        unsigned u;                 /* Local index variable */
+    /* Check for direct sections in second section */
+    /* (second indirect section can be parent of indirect section for second
+     *          row, and thus have no row sections of it's own)
+     */
+    if(sect2->u.indirect.dir_nrows > 0) {
+        unsigned new_dir_nrows1;        /* New value for number of direct rows in first section */
+        unsigned src_row2;              /* Source row for copying from second section */
+        unsigned nrows_moved2;          /* Number of rows to move from second section to first */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: sect1->u.indirect.dir_nrows = %u\n", FUNC, sect1->u.indirect.dir_nrows);
-HDfprintf(stderr, "%s: sect2->u.indirect.dir_nrows = %u\n", FUNC, sect2->u.indirect.dir_nrows);
-#endif /* QAK */
+        /* Sanity check child row assumptions */
+        /* (second indirect section should be at top of equal or deeper
+         *      hier. of row/indirect sections, so if second indirect section
+         *      has child row sections, first indirect section _must_ have
+         *      them also)
+         */
+        HDassert(sect1->u.indirect.dir_nrows > 0);
+        HDassert(sect1->u.indirect.dir_rows);
 
-        /* Check for sections sharing a row */
-        if(end_row1 == start_row2) {
+        /* Check for sections sharing a row in the same underlying indirect block */
+        if(row_sect1->u.row.under->u.indirect.u.iblock->block_off == row_sect2->u.row.under->u.indirect.u.iblock->block_off
+                && end_row1 == start_row2) {
+            H5HF_free_section_t *last_row_sect1;        /* Last row in first indirect section */
 #ifdef QAK
 HDfprintf(stderr, "%s: Sections share a row\n", FUNC);
 #endif /* QAK */
 
+            /* Locate the last row section in first indirect section, if we don't already have it */
+            if(row_sect1->u.row.row != end_row1)
+                last_row_sect1 = sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows - 1];
+            else
+                last_row_sect1 = row_sect1;
+            HDassert(last_row_sect1);
+            HDassert(last_row_sect1->u.row.row == end_row1);
+
             /* Adjust info for first row section, to absorb second row section */
-            HDassert((row_sect1->u.row.col + row_sect1->u.row.num_entries) == row_sect2->u.row.col);
-            row_sect1->u.row.num_entries += row_sect2->u.row.num_entries;
+            HDassert((last_row_sect1->u.row.col + last_row_sect1->u.row.num_entries) == row_sect2->u.row.col);
+            last_row_sect1->u.row.num_entries += row_sect2->u.row.num_entries;
 
             /* Set up parameters for transfer of rows */
             src_row2 = 1;
-            nrows_moved = sect2->u.indirect.dir_nrows - 1;
-            new_dir_nrows = (sect1->u.indirect.dir_nrows + sect2->u.indirect.dir_nrows) - 1;
+            nrows_moved2 = sect2->u.indirect.dir_nrows - 1;
+            new_dir_nrows1 = (sect1->u.indirect.dir_nrows + sect2->u.indirect.dir_nrows) - 1;
+
+            /* Indicate that the rows were merged */
+            merged_rows = TRUE;
         } /* end if */
         else {
 #ifdef QAK
@@ -3596,114 +3500,150 @@ HDfprintf(stderr, "%s: Sections don't share a row\n", FUNC);
 
             /* Set up parameters for transfer of rows */
             src_row2  = 0;
-            nrows_moved = sect2->u.indirect.dir_nrows;
-            new_dir_nrows = sect1->u.indirect.dir_nrows + sect2->u.indirect.dir_nrows;
+            nrows_moved2 = sect2->u.indirect.dir_nrows;
+            new_dir_nrows1 = sect1->u.indirect.dir_nrows + sect2->u.indirect.dir_nrows;
+
+            /* Indicate that the rows were _not_ merged */
+            merged_rows = FALSE;
         } /* end else */
 #ifdef QAK
+HDfprintf(stderr, "%s: new_dir_nrows1 = %u\n", FUNC, new_dir_nrows1);
 HDfprintf(stderr, "%s: src_row2 = %u\n", FUNC, src_row2);
-HDfprintf(stderr, "%s: nrows_moved = %u\n", FUNC, nrows_moved);
-HDfprintf(stderr, "%s: new_dir_nrows = %u\n", FUNC, new_dir_nrows);
+HDfprintf(stderr, "%s: nrows_moved2 = %u\n", FUNC, nrows_moved2);
 #endif /* QAK */
 
         /* Check if we need to move additional rows */
-        if(nrows_moved > 0) {
+        if(nrows_moved2 > 0) {
             /* Extend the first section's row array */
-            if(NULL == (sect1->u.indirect.dir_rows = H5MM_realloc(sect1->u.indirect.dir_rows, sizeof(H5HF_free_section_t *) * new_dir_nrows)))
+            if(NULL == (sect1->u.indirect.dir_rows = H5MM_realloc(sect1->u.indirect.dir_rows, sizeof(H5HF_free_section_t *) * new_dir_nrows1)))
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array")
 
             /* Transfer the second section's rows to first section */
             HDmemcpy(&sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows], 
                 &sect2->u.indirect.dir_rows[src_row2], 
-                (sizeof(H5HF_free_section_t *) * nrows_moved));
+                (sizeof(H5HF_free_section_t *) * nrows_moved2));
 
             /* Re-target the row sections moved from second section */
-            for(u = sect1->u.indirect.dir_nrows; u < new_dir_nrows; u++)
+            for(u = sect1->u.indirect.dir_nrows; u < new_dir_nrows1; u++)
                 sect1->u.indirect.dir_rows[u]->u.row.under = sect1;
 
             /* Adjust reference counts to account for transferred rows */
-            sect1->u.indirect.rc += nrows_moved;
-            sect2->u.indirect.rc -= nrows_moved;
+            sect1->u.indirect.rc += nrows_moved2;
+            sect2->u.indirect.rc -= nrows_moved2;
+
+            /* Update information for first section */
+            sect1->u.indirect.dir_nrows = new_dir_nrows1;
         } /* end if */
+    } /* end if */
+    else
+        /* Indicate that the rows were _not_ merged */
+        merged_rows = FALSE;
 
-        /* Check for indirect sections in second section */
-        if(sect2->u.indirect.indir_nents > 0) {
-            HDassert(sect2->u.indirect.rc > 0);
-            HDassert(sect2->u.indirect.indir_ents);
+    /* Check for indirect sections in second section */
+    if(sect2->u.indirect.indir_nents > 0) {
+        unsigned new_indir_nents1;      /* New value for number of indirect entries in first section */
 
-            /* Copy over any child indirect sections in second section */
+        /* Some sanity checks on second indirect section */
+        HDassert(sect2->u.indirect.rc > 0);
+        HDassert(sect2->u.indirect.indir_ents);
 
-            /* Re-target the child indirect sections moved from second section */
+        /* Set up parameters for transfer of entries */
+        new_indir_nents1 = sect1->u.indirect.indir_nents + sect2->u.indirect.indir_nents;
 
-            /* Adjust reference counts for transferred child indirect sections */
-
-HDfprintf(stderr, "%s: moving child indirect sections between indirect sections not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "moving child indirect sections between two indirect sections not supported yet")
+        /* Check if first section can just take over second section's memory buffer */
+        if(sect1->u.indirect.indir_ents == NULL) {
+            sect1->u.indirect.indir_ents = sect2->u.indirect.indir_ents;
+            sect2->u.indirect.indir_ents = NULL;
         } /* end if */
+        else {
+            /* Extend the first section's entry array */
+            if(NULL == (sect1->u.indirect.indir_ents = H5MM_realloc(sect1->u.indirect.indir_ents, sizeof(H5HF_free_section_t *) * new_indir_nents1)))
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for row section pointer array")
+
+            /* Transfer the second section's entries to first section */
+            HDmemcpy(&sect1->u.indirect.indir_ents[sect1->u.indirect.indir_nents], 
+                &sect2->u.indirect.indir_ents[0], 
+                (sizeof(H5HF_free_section_t *) * sect2->u.indirect.indir_nents));
+        } /* end else */
+
+        /* Re-target the child indirect sections moved from second section */
+        for(u = sect1->u.indirect.indir_nents; u < new_indir_nents1; u++)
+            sect1->u.indirect.indir_ents[u]->u.indirect.parent = sect1;
+
+        /* Adjust reference counts for transferred child indirect sections */
+        sect1->u.indirect.rc += sect2->u.indirect.indir_nents;
+        sect2->u.indirect.rc -= sect2->u.indirect.indir_nents;
 
         /* Update information for first section */
-        sect1->u.indirect.dir_nrows = new_dir_nrows;
-        sect1->u.indirect.num_entries += sect2->u.indirect.num_entries;
-        if(sect1->u.indirect.span_size) {
-            if(sect2->u.indirect.span_size)
-                sect1->u.indirect.span_size += sect2->u.indirect.span_size;
-            else
-                sect1->u.indirect.span_size = 0;
-        } /* end if */
-        if(sect1->u.indirect.iblock_entries == 0)
-            sect1->u.indirect.iblock_entries = sect2->u.indirect.iblock_entries;
+        sect1->u.indirect.indir_nents = new_indir_nents1;
+    } /* end if */
 
-        /* Make certain we've tracked the first section's dependents correctly */
-        HDassert(sect1->u.indirect.rc == 
-                (sect1->u.indirect.indir_nents + sect1->u.indirect.dir_nrows));
+    /* Update information for first section */
+    sect1->u.indirect.num_entries += sect2->u.indirect.num_entries;
+    sect1->u.indirect.span_size += sect2->u.indirect.span_size;
 
-        /* Wrap up, for indirect sections not sharing a row */
-        /* (want this to be after the first indirection section is consistent again) */
-        if(end_row1 == start_row2) {
+    /* Make certain we've tracked the first section's dependents correctly */
+    HDassert(sect1->u.indirect.rc == 
+            (sect1->u.indirect.indir_nents + sect1->u.indirect.dir_nrows));
+
+    /* Wrap up, freeing or re-inserting second row section */
+    /* (want this to be after the first indirection section is consistent again) */
+    if(merged_rows) {
 #ifdef QAK
 HDfprintf(stderr, "%s: Finishing sections share a row\n", FUNC);
 #endif /* QAK */
-            /* Release second row section */
-            /* (also releases second indirect section, since all of it's other
-             *  dependents are gone)
-             */
-            HDassert(sect2->u.indirect.rc == 1);
-            if(H5HF_sect_row_free((H5FS_section_info_t *)row_sect2) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section")
-        } /* end if */
-        else {
+        /* Release second row section */
+        /* (indirectly releases second indirect section, since all of it's
+         *  other dependents are gone)
+         */
+        HDassert(sect2->u.indirect.rc == 1);
+        if(H5HF_sect_row_free((H5FS_section_info_t *)row_sect2) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free row section")
+    } /* end if */
+    else {
 #ifdef QAK
 HDfprintf(stderr, "%s: Finishing sections don't share a row\n", FUNC);
 #endif /* QAK */
-            /* Decrement ref. count on second indirect section's parent */
-            HDassert(sect2->u.indirect.rc == 0);
-            if(sect2->u.indirect.parent)
-                if(H5HF_sect_indirect_decr(sect2->u.indirect.parent) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't decrement ref. count on parent indirect section")
+        /* Decrement ref. count on second indirect section's parent */
+        HDassert(sect2->u.indirect.rc == 0);
+        if(sect2->u.indirect.parent)
+            if(H5HF_sect_indirect_decr(sect2->u.indirect.parent) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't decrement ref. count on parent indirect section")
 
-            /* Free second indirect section */
-            if(H5HF_sect_indirect_free(sect2) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+        /* Free second indirect section */
+        if(H5HF_sect_indirect_free(sect2) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
 
-            /* Re-add the second section's first row */
-            /* (it's already been added to first section, but it's been removed
-             *  from the free space manager and needs to be re-added)
-            */
+        /* Re-add the second section's first row */
+        /* (it's already been added to first indirect section, but it's been removed
+         *  from the free space manager and needs to be re-added)
+        */
 #ifdef QAK
 HDfprintf(stderr, "%s: Re-inserting second row section\n", FUNC);
 #endif /* QAK */
-            row_sect2->sect_info.type = H5HF_FSPACE_SECT_NORMAL_ROW;
-            HDassert(row_sect2->u.row.under == sect1);
-            if(H5HF_space_add(hdr, dxpl_id, row_sect2, H5FS_ADD_RETURNED_SPACE) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add second row section to free space")
+        row_sect2->sect_info.type = H5HF_FSPACE_SECT_NORMAL_ROW;
+        if(H5HF_space_add(hdr, dxpl_id, row_sect2, 0) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't re-add second row section to free space")
 #ifdef QAK
 HDfprintf(stderr, "%s: Done re-inserting second row section\n", FUNC);
 #endif /* QAK */
-        } /* end else */
-    } /* end if */
-    else {
-HDfprintf(stderr, "%s: merging two indirect sections in different indirect blocks not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "merging two indirect sections in different indirect blocks not supported yet")
     } /* end else */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: sect1->u.indirect.iblock_entries = %u\n", FUNC, sect1->u.indirect.iblock_entries);
+HDfprintf(stderr, "%s: sect1->u.indirect.num_entries = %u\n", FUNC, sect1->u.indirect.num_entries);
+#endif /* QAK */
+    /* Check if we can create parent indirect section for first section */
+    /* (i.e. merged indirect sections cover an entire indirect block) */
+    if(sect1->u.indirect.iblock_entries == sect1->u.indirect.num_entries) {
+#ifdef QAK
+HDfprintf(stderr, "%s: creating parent indirect section\n", FUNC);
+#endif /* QAK */
+        /* Build parent section for fully populated indirect section */
+        HDassert(sect1->u.indirect.parent == NULL);
+        if(H5HF_sect_indirect_build_parent(hdr, sect1) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create parent for full indirect section")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3711,44 +3651,141 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_sect_indirect_shrink_row
+ * Function:	H5HF_sect_indirect_build_parent
  *
- * Purpose:	"Shrink" an indirect by eliminating it's last row
+ * Purpose:	Build a parent indirect section for a full indirect section
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *              Tuesday, July 18, 2006
+ *              Friday, July 21, 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_indirect_shrink_row(H5HF_free_section_t *row_sect)
+H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 {
-    H5HF_free_section_t *sect;          /* Indirect section underlying row section */
+    H5HF_indirect_t *par_iblock;        /* Indirect block for parent section */
+    H5HF_free_section_t *par_sect;      /* Parent indirect section */
+    unsigned par_row, par_col;          /* Row & column in parent indirect section */
+    unsigned par_entry;                 /* Entry within parent indirect section */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_shrink_row)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_build_parent)
+#ifdef QAK
+HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+#endif /* QAK */
 
     /* Sanity check parameters */
-    HDassert(row_sect);
-    HDassert(row_sect->u.row.under);
+    HDassert(hdr);
+    HDassert(sect);
+    HDassert(sect->u.indirect.span_size > 0);
+    HDassert(sect->u.indirect.iblock_entries > 0);
+    HDassert(sect->u.indirect.iblock_entries == sect->u.indirect.num_entries);
+    HDassert(sect->u.indirect.u.iblock);
+    HDassert(sect->u.indirect.parent == NULL);
+#ifdef QAK
+HDfprintf(stderr, "%s: sect->u.indirect = {%p, %u, %u, %u}\n", FUNC, sect->u.indirect.u.iblock, sect->u.indirect.row, sect->u.indirect.col, sect->u.indirect.num_entries);
+#endif /* QAK */
 
-    /* Set up indirect section information */
-    sect = row_sect->u.row.under;
+    /* Get information for creating parent indirect section */
+    par_entry = sect->u.indirect.u.iblock->par_entry;
+    par_row = par_entry / hdr->man_dtable.cparam.width;
+    par_col = par_entry % hdr->man_dtable.cparam.width;
+    HDassert(par_row >= hdr->man_dtable.max_direct_rows);
+#ifdef QAK
+HDfprintf(stderr, "%s: par_entry = %u, par_row = %u, par_col = %u\n", FUNC, par_entry, par_row, par_col);
+#endif /* QAK */
+    par_iblock = sect->u.indirect.u.iblock->parent;
+    HDassert(par_iblock);
+
+    /* Create parent indirect section */
+    if(NULL == (par_sect = H5HF_sect_indirect_new(hdr, sect->sect_info.addr, 
+            sect->sect_info.size, par_iblock, par_iblock->block_off,
+            par_row, par_col, 1)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
+
+    /* No rows of direct blocks covered in parent, reset direct row information */
+    par_sect->u.indirect.dir_nrows = 0;
+    par_sect->u.indirect.dir_rows = NULL;
+
+    /* Allocate space for the child indirect sections */
+    par_sect->u.indirect.indir_nents = 1;
+    if(NULL == (par_sect->u.indirect.indir_ents = H5MM_malloc(sizeof(H5HF_free_section_t *))))
+        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "allocation failed for indirect section pointer array")
+
+    /* Attach sections together */
+    sect->u.indirect.parent = par_sect;
+    sect->u.indirect.par_entry = par_entry;
+    par_sect->u.indirect.indir_ents[0] = sect;
+    par_sect->u.indirect.rc = 1;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_sect_indirect_build_parent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_sect_indirect_shrink
+ *
+ * Purpose:	"Shrink" container w/section
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 24, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_sect_indirect_shrink(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_shrink)
+
+    /* Sanity check parameters */
+    HDassert(hdr);
+    HDassert(sect);
 
     /* Sanity check some assumptions about the indirect section */
-    HDassert(sect->u.indirect.dir_nrows > 0);
-    HDassert(sect->u.indirect.dir_rows);
-    HDassert(sect->u.indirect.indir_nents == 0);
-    HDassert(sect->u.indirect.indir_ents == NULL);
+    HDassert(sect->u.indirect.dir_nrows > 0 || sect->u.indirect.indir_nents > 0);
+#ifdef QAK
+HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+HDfprintf(stderr, "%s: sect->u.indirect = {%p, %u, %u, %u}\n", FUNC, sect->u.indirect.u.iblock, sect->u.indirect.row, sect->u.indirect.col, sect->u.indirect.num_entries);
+HDfprintf(stderr, "%s: sect->u.indirect.span_size = %Hu\n", FUNC, sect->u.indirect.span_size);
+HDfprintf(stderr, "%s: sect->u.indirect.parent = %p\n", FUNC, sect->u.indirect.parent);
+#endif /* QAK */
 
-    /* Decrement the number of rows */
-    /* (other cleanup will be taken care of when the section is freed) */
-    sect->u.indirect.dir_nrows--;
+    /* Walk through direct rows, freeing them */
+    for(u = 0; u < sect->u.indirect.dir_nrows; u++) {
+        /* Remove the normal rows from free space manager */
+        if(sect->u.indirect.dir_rows[u]->sect_info.type != H5HF_FSPACE_SECT_FIRST_ROW) {
+            HDassert(sect->u.indirect.dir_rows[u]->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+            if(H5HF_space_remove(hdr, dxpl_id, sect->u.indirect.dir_rows[u]) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove section from heap free space")
+        } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_sect_indirect_shrink_row() */
+        /* Release the row section */
+        if(H5HF_sect_row_free_real(sect->u.indirect.dir_rows[u]) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node")
+    } /* end for */
+
+    /* Walk through indirect entries, freeing them (recursively) */
+    for(u = 0; u < sect->u.indirect.indir_nents; u++)
+        if(H5HF_sect_indirect_shrink(hdr, dxpl_id, sect->u.indirect.indir_ents[u]) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free child section node")
+
+    /* Free the indirect section itself */
+    if(H5HF_sect_indirect_free(sect) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_sect_indirect_shrink() */
 
 
 /*-------------------------------------------------------------------------
@@ -3894,8 +3931,8 @@ HDfprintf(stderr, "%s: nentries = %u\n", FUNC, nentries);
 #endif /* QAK */
 
     /* Create free space section node */
-    if(NULL == (new_sect = H5HF_sect_indirect_new(sect_addr, sect_size, NULL,
-            iblock_off, start_row, start_col, nentries)))
+    if(NULL == (new_sect = H5HF_sect_indirect_new(hdr, sect_addr, sect_size,
+            NULL, iblock_off, start_row, start_col, nentries)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section")
 
     /* Compute start entry */
@@ -3994,7 +4031,6 @@ H5HF_sect_indirect_valid(const H5FS_section_class_t *row_cls, const H5HF_free_se
     unsigned end_row;           /* Row for last block covered */
     unsigned end_col;           /* Column for last block covered */
     unsigned end_entry;         /* Entry for last block covered */
-    unsigned dir_nrows;         /* Number of direct rows in section */
     unsigned u;                 /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_valid)
@@ -4042,22 +4078,38 @@ HDfprintf(stderr, "%s: start_row = %u, start_col = %u, start_entry = %u\n", "H5H
 HDfprintf(stderr, "%s: end_row = %u, end_col = %u, end_entry = %u\n", "H5HF_sect_indirect_valid", end_row, end_col, end_entry);
 #endif /* QAK */
 
-    /* Iterate over direct rows, checking pointer references */
-    dir_nrows = (end_row - start_row) + 1;
-    HDassert(dir_nrows == sect->u.indirect.dir_nrows);
-    for(u = 0; u < dir_nrows; u++) {
-        const H5HF_free_section_t *tmp_row_sect;    /* Pointer to row section */
+    /* Sanity check any direct rows */
+    if(sect->u.indirect.dir_nrows > 0) {
+        unsigned dir_nrows;         /* Number of direct rows in section */
+        unsigned max_dir_row;       /* Maximum direct row in section */
 
-        tmp_row_sect = sect->u.indirect.dir_rows[u];
-        HDassert(tmp_row_sect->u.row.under == sect);
-        HDassert(tmp_row_sect->u.row.row == (start_row + u));
-        if(u < (dir_nrows - 1)) {
-            const H5HF_free_section_t *tmp2_row_sect;    /* Pointer to row section */
+        /* Check for indirect rows in section */
+        if(end_row >= hdr->man_dtable.max_direct_rows)
+            max_dir_row = hdr->man_dtable.max_direct_rows - 1;
+        else
+            max_dir_row = end_row;
 
-            tmp2_row_sect = sect->u.indirect.dir_rows[u + 1];
-            HDassert(tmp_row_sect->u.row.row != tmp2_row_sect->u.row.row);
-        } /* end if */
-    } /* end for */
+        /* Iterate over direct rows, checking pointer references */
+        dir_nrows = (max_dir_row - start_row) + 1;
+        HDassert(dir_nrows == sect->u.indirect.dir_nrows);
+        for(u = 0; u < dir_nrows; u++) {
+            const H5HF_free_section_t *tmp_row_sect;    /* Pointer to row section */
+
+            tmp_row_sect = sect->u.indirect.dir_rows[u];
+            HDassert(tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW
+                    || tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+            HDassert(tmp_row_sect->u.row.under == sect);
+            HDassert(tmp_row_sect->u.row.row == (start_row + u));
+            if(u < (dir_nrows - 1)) {
+                const H5HF_free_section_t *tmp_row_sect2;    /* Pointer to row section */
+
+                tmp_row_sect2 = sect->u.indirect.dir_rows[u + 1];
+                HDassert(tmp_row_sect->u.row.row < tmp_row_sect2->u.row.row);
+                HDassert(H5F_addr_lt(tmp_row_sect->sect_info.addr, tmp_row_sect2->sect_info.addr));
+                HDassert(tmp_row_sect->sect_info.size <= tmp_row_sect2->sect_info.size);
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5HF_sect_indirect_valid() */

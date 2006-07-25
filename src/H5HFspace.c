@@ -138,6 +138,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_space_add
+ *
+ * Purpose:	Add a section to the free space for the heap
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 15 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
+    unsigned flags)
+{
+    H5HF_add_ud1_t udata;               /* User data for free space manager 'add' */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(node);
+
+    /* Check if the free space for the heap has been initialized */
+    if(!hdr->fspace)
+        if(H5HF_space_start(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
+
+    /* Construct user data */
+    udata.hdr = hdr;
+    udata.dxpl_id = dxpl_id;
+
+    /* Add to the free space for the heap */
+    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_add() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_space_find
  *
  * Purpose:	Attempt to find space in a fractal heap
@@ -185,52 +233,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_space_add
+ * Function:	H5HF_space_remove
  *
- * Purpose:	Add a section to the free space for the heap
+ * Purpose:	Remove a section from the free space for the heap
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
- *		May 15 2006
+ *		July 24 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
-    unsigned flags)
+H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
 {
-    H5HF_add_ud1_t udata;               /* User data for free space manager 'add' */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_remove)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
+    HDassert(hdr->fspace);
     HDassert(node);
 
-    /* Check if the free space for the heap has been initialized */
-    if(!hdr->fspace)
-        if(H5HF_space_start(hdr, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
-
-    /* Construct user data */
-    udata.hdr = hdr;
-    udata.dxpl_id = dxpl_id;
-    udata.adjoin = 0;
-
-    /* Add to the free space for the heap */
-    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
+    /* Remove from the free space for the heap */
+    if(H5FS_remove(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove section from heap free space")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_space_add() */
+} /* end H5HF_space_remove() */
 
 
 /*-------------------------------------------------------------------------
@@ -310,6 +346,9 @@ H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigne
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_space_sect_change_class)
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
 
     /*
      * Check arguments.

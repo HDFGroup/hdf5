@@ -359,7 +359,6 @@ typedef struct H5HF_parent_t {
 typedef struct {
     H5HF_hdr_t *hdr;            /* Fractal heap header */
     hid_t dxpl_id;              /* DXPL ID for operation */
-    hbool_t adjoin;             /* Whether two spans of blocks adjoin each other */
 } H5HF_add_ud1_t;
 
 /*****************************/
@@ -521,10 +520,12 @@ H5_DLL hbool_t H5HF_man_iter_ready(H5HF_block_iter_t *biter);
 
 /* Free space manipulation routines */
 H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id);
-H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,
-    H5HF_free_section_t **node);
 H5_DLL herr_t H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node, unsigned flags);
+H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,
+    H5HF_free_section_t **node);
+H5_DLL herr_t H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *node);
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,

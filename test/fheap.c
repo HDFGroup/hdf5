@@ -13535,7 +13535,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
 #ifndef QAK
-#ifndef QAK
+#ifndef QAK2
         {
         fheap_test_del_dir_t del_dir;        /* Deletion direction */
         fheap_test_del_drain_t drain_half;   /* Deletion draining */
@@ -13545,13 +13545,13 @@ HDfprintf(stderr, "Uncomment tests!\n");
             tparam.drain_half = drain_half;
             for(del_dir = HEAP_DEL_FORWARD; del_dir < HEAP_DEL_NDIRS; del_dir++) {
                 tparam.del_dir = del_dir;
-#else /* QAK */
+#else /* QAK2 */
 HDfprintf(stderr, "Uncomment test loops!\n");
 /* tparam.drain_half = HEAP_DEL_DRAIN_ALL; */
 tparam.drain_half = HEAP_DEL_DRAIN_HALF;
-tparam.del_dir = HEAP_DEL_FORWARD;
-/* tparam.del_dir = HEAP_DEL_REVERSE; */
-#endif /* QAK */
+/* tparam.del_dir = HEAP_DEL_FORWARD; */
+tparam.del_dir = HEAP_DEL_REVERSE;
+#endif /* QAK2 */
 
 #ifndef QAK
 #ifndef QAK2
@@ -13568,11 +13568,11 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
-#ifndef QAK
+#ifndef QAK2
             } /* end for */
         } /* end for */
         } /* end block */
-#endif /* QAK */
+#endif /* QAK2 */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */

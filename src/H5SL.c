@@ -1324,7 +1324,7 @@ H5SL_prev(H5SL_node_t *slist_node)
  NAME
     H5SL_last
  PURPOSE
-    Gets a pointer to the lsat node in a skip list
+    Gets a pointer to the last node in a skip list
  USAGE
     H5SL_node_t *H5SL_last(slist)
         H5SL_t *slist;          IN: Pointer to skip list

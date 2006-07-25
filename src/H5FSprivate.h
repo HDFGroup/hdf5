@@ -42,6 +42,12 @@
 #define H5FS_CLS_GHOST_OBJ      0x01    /* Objects in this class shouldn't be
                                          *      serialized to the file.
                                          */
+#define H5FS_CLS_SEPAR_OBJ      0x02    /* Objects in this class shouldn't
+                                         *      participate in merge operations
+                                         */
+#define H5FS_CLS_MERGE_SYM      0x04    /* Objects in this class only merge
+                                         *      with other objects in this class
+                                         */
 
 /* Flags for H5FS_add() */
 #define H5FS_ADD_DESERIALIZING  0x01    /* Free space is being deserialized
@@ -86,9 +92,9 @@ typedef struct H5FS_section_class_t {
     /* Object methods */
     herr_t (*serialize)(const struct H5FS_section_class_t *, const H5FS_section_info_t *, uint8_t *);        /* Routine to serialize a "live" section into a buffer */
     H5FS_section_info_t *(*deserialize)(const struct H5FS_section_class_t *, hid_t dxpl_id, const uint8_t *, haddr_t, hsize_t, unsigned *);     /* Routine to deserialize a buffer into a "live" section */
-    htri_t (*can_merge)(H5FS_section_info_t *, H5FS_section_info_t *, void *);  /* Routine to determine if two nodes are mergable */
+    htri_t (*can_merge)(const H5FS_section_info_t *, const H5FS_section_info_t *, void *);  /* Routine to determine if two nodes are mergable */
     herr_t (*merge)(H5FS_section_info_t *, H5FS_section_info_t *, void *);      /* Routine to merge two nodes */
-    htri_t (*can_shrink)(H5FS_section_info_t *, void *);        /* Routine to determine if node can shrink container */
+    htri_t (*can_shrink)(const H5FS_section_info_t *, void *);        /* Routine to determine if node can shrink container */
     herr_t (*shrink)(H5FS_section_info_t **, void *);   /* Routine to shrink container */
     herr_t (*free)(H5FS_section_info_t *);              /* Routine to free node */
     herr_t (*valid)(const struct H5FS_section_class_t *, const H5FS_section_info_t *);   /* Routine to check if a section is valid */
@@ -147,6 +153,8 @@ H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
     size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata);
 H5_DLL herr_t H5FS_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     H5FS_section_info_t *node, unsigned flags, void *op_data);
+H5_DLL herr_t H5FS_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    H5FS_section_info_t *node);
 H5_DLL htri_t H5FS_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     hsize_t request, H5FS_section_info_t **node);
 H5_DLL herr_t H5FS_iterate(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_operator_t op, void *op_data);
