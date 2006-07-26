@@ -1702,6 +1702,7 @@
 ./windows/tools/testfiles/testh5repack_detect_szipdll/testh5repack_detect_szipdll.dsp
 ./windows/tools/testfiles/h5repart_gentest/h5repart_gentest.dsp
 ./windows/tools/testfiles/h5reparttst/h5reparttst.dsp
+./windows/tools/testfiles/binread/binread.dsp
 ./windows/tools/toolslib/toolslib.dsp
 ./windows/tools/toolslibD/toolslibD.dsp
 ./windows/tools/h5stat/h5stat.dsp
