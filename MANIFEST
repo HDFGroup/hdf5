@@ -1446,6 +1446,7 @@
 ./vms/tools/h5ls/check_h5ls.com
 ./vms/tools/h5ls/make.com
 ./vms/tools/h5diff/check.com
+./vms/tools/h5diff/check_h5diff.com
 ./vms/tools/h5diff/make.com
 ./vms/tools/h5import/make.com
 ./vms/tools/h5jam/make.com
