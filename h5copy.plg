@@ -1,0 +1,34 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: h5copy - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\fangguo\LOCALS~1\Temp\RSP1AF.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /I "..\..\..\src" /I "..\..\..\tools\lib" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"../../../tools/h5copy/Debug/h5copy.pch" /YX /Fo"../../../tools/h5copy/Debug/" /Fd"../../../tools/h5copy/Debug/" /FD /GZ  /c 
+"D:\muqun\hdf5-current-test\hdf5-2006-7-26\tools\h5copy\h5copy.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\fangguo\LOCALS~1\Temp\RSP1AF.tmp" 
+Creating temporary file "C:\DOCUME~1\fangguo\LOCALS~1\Temp\RSP1B0.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  zdll.lib szlibdll.lib /nologo /subsystem:console /incremental:yes /pdb:"../../../tools/h5copy/Debug/h5copy.pdb" /debug /machine:I386 /nodefaultlib:"libc.lib" /out:"../../../tools/h5copy/Debug/h5copy.exe" /pdbtype:sept 
+"\muqun\hdf5-current-test\hdf5-2006-7-26\tools\h5copy\Debug\h5copy.obj"
+"\muqun\hdf5-current-test\hdf5-2006-7-26\proj\hdf5\Debug\hdf5d.lib"
+"\muqun\hdf5-current-test\hdf5-2006-7-26\tools\toolslib\Debug\toolslib.lib"
+]
+Creating command line "link.exe @C:\DOCUME~1\fangguo\LOCALS~1\Temp\RSP1B0.tmp"
+<h3>Output Window</h3>
+Compiling...
+h5copy.c
+Linking...
+
+
+
+<h3>Results</h3>
+h5copy.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
