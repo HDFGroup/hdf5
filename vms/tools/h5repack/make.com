@@ -31,7 +31,7 @@ $!
 $ ccc 'cobj 
 $ type sys$input
        Creating h5repack
-$ link/debug/exe=h5repack.exe -
+$ link/exe=h5repack.exe -
            h5repack_main, h5repack, h5repack_copy, h5repack_filters, -
            h5repack_list, h5repack_opttable, h5repack_parse, h5repack_refs, -
            h5repack_verify, -
