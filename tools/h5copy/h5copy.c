@@ -228,6 +228,16 @@ main (int argc, const char *argv[])
  if (!oname_src || !*oname_src) 
   oname_src = root_name;
 
+/*-------------------------------------------------------------------------
+ * test for error in opening input file
+ *-------------------------------------------------------------------------*/
+ if (fid_src==-1)
+ {
+  printf("Could not open file/object <%s>...Exiting\n",fname_src);
+  if (fname_src)
+   free(fname_src);
+  return 1;
+ }
 
 /*-------------------------------------------------------------------------
  * last argument, same logic, but the file does not exist, so we attempt to
