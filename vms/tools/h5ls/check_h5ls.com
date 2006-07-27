@@ -81,7 +81,14 @@ $ CALL TOOLTEST tempty.ls "-w80 -d tempty.h5"
 
 $! test for all dataset types written to attributes
 $! enable -S for avoiding printing NATIVE types
-$ CALL TOOLTEST tattr2.ls "-w80 -v -S tattr2.h5"
+$! This test will report failure for line 311 of the tattr2.ls file 
+$! contains
+$! Modified:  XXXX-XX-XX XX:XX:XX XXX
+$! instead of
+$! Modified:  2004-07-06 19:36:17 CST
+$! UNIX shell script does replacement on the fly in the actual output
+$! file; I do not know what can I do on VMS EIP 07/27/06
+$ CALL TOOLTEST tattr2.ls "-w80 -v -"""S""" tattr2.h5"
 
 $
 $ 
