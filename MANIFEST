@@ -1694,6 +1694,7 @@
 ./windows/tools/h5importdll/h5importdll.dsp
 ./windows/tools/taligndll/taligndll.dsp
 ./windows/tools/h5jam/h5jam.dsp
+./windows/tools/h5copy/h5copy.dsp
 ./windows/tools/testfiles/h5difftst/h5difftst.dsp
 ./windows/tools/testfiles/h5dumptst/h5dumptst.dsp
 ./windows/tools/testfiles/h5importtst/h5importtst.dsp
