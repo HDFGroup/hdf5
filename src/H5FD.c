@@ -553,6 +553,8 @@ done:
  *              Thursday, October 23, 2003
  *
  * Modifications:
+ *  Pedro Vicente Nunes, Wednesday, July 26, 2006
+ *  added a HGOTO_ERROR call in the case the copy function returns NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -569,6 +571,8 @@ H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size, const void *old_p
         /* Allow the driver to copy or do it ourselves */
         if (copy_func) {
             new_pl = (copy_func)(old_pl);
+            if(new_pl==NULL)
+                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "property list copy failed")
         } else if (pl_size>0) {
             if((new_pl = H5MM_malloc(pl_size))==NULL)
                 HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "property list allocation failed")

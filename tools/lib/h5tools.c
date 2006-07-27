@@ -16,8 +16,8 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 23, 1998
  *
- * Purpose:	A library for displaying the values of a dataset in a human
- *		readable format.
+ * Purpose: A library for displaying the values of a dataset in a human
+ *  readable format.
  */
 
 #include <stdio.h>
@@ -41,11 +41,11 @@
 #define H5TOOLS_BUFSIZE         (1024)
 #endif  /* 1 */
 
-#define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
+#define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
 
 /* global variables */
 int         compound_data;
-FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it */
+FILE       *rawdatastream; /* should initialize to stdout but gcc moans about it */
 int         bin_output;    /* binary output */
 int         bin_form;      /* binary form */
 
@@ -68,7 +68,7 @@ static const char *drivernames[]={
     "multi",
 #ifdef H5_HAVE_STREAM
     "stream",
-#endif	/* H5_HAVE_STREAM */
+#endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
     "mpio",
     "mpiposix"
@@ -84,7 +84,7 @@ enum {
    ,MULTI_IDX
 #ifdef H5_HAVE_STREAM
    ,STREAM_IDX
-#endif	/* H5_HAVE_STREAM */
+#endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
    ,MPIO_IDX
    ,MPIPOSIX_IDX
@@ -111,17 +111,17 @@ void
 h5tools_init(void)
 {
     if (!h5tools_init_g) {
-	if (!rawdatastream)
-	    rawdatastream = stdout;
+ if (!rawdatastream)
+     rawdatastream = stdout;
 
-	h5tools_init_g++;
+ h5tools_init_g++;
     }
 }
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     H5Tools Library
- * Purpose:	Close the H5 Tools library
+ * Purpose: Close the H5 Tools library
  * Description:
  *      Close or release resources such as files opened by the library. This
  *      should be called after all other h5tools functions have been called.
@@ -138,12 +138,12 @@ void
 h5tools_close(void)
 {
     if (h5tools_init_g) {
-	if (rawdatastream && rawdatastream != stdout) {
-	    if (fclose(rawdatastream))
-		perror("closing rawdatastream");
-	    else
-		rawdatastream = NULL;
-	}
+ if (rawdatastream && rawdatastream != stdout) {
+     if (fclose(rawdatastream))
+  perror("closing rawdatastream");
+     else
+  rawdatastream = NULL;
+ }
 
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
@@ -159,14 +159,14 @@ h5tools_close(void)
         } /* end if */
 #endif
 
-	h5tools_init_g = 0;
+ h5tools_init_g = 0;
     }
 }
 
 /*-------------------------------------------------------------------------
  * Audience:    Private
  * Chapter:     H5Tools Library
- * Purpose:	Get a FAPL for a driver
+ * Purpose: Get a FAPL for a driver
  * Description:
  *      Get a FAPL for a given VFL driver name.
  * Return:
@@ -174,6 +174,8 @@ h5tools_close(void)
  * Programmer:
  *      Quincey Koziol, 2004-02-04
  * Modifications:
+ *      Pedro Vicente Nunes, Thursday, July 27, 2006
+ *   Added error return conditions for the H5Pset_fapl calls
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -198,7 +200,8 @@ int UNUSED argc, const char UNUSED *argv[]
             /* Set member size to be 0 to indicate the current first member size
              * is the member size.
              */
-            H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
+            if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = FAMILY_IDX;
@@ -206,7 +209,9 @@ int UNUSED argc, const char UNUSED *argv[]
     } else if (!strcmp(driver, drivernames[SPLIT_IDX])) {
         /* SPLIT Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+            
+            if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = SPLIT_IDX;
@@ -214,7 +219,9 @@ int UNUSED argc, const char UNUSED *argv[]
     } else if (!strcmp(driver, drivernames[MULTI_IDX])) {
         /* MULTI Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+            
+            if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = MULTI_IDX;
@@ -223,24 +230,28 @@ int UNUSED argc, const char UNUSED *argv[]
     } else if (!strcmp(driver, drivernames[STREAM_IDX])) {
         /* STREAM Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_stream(fapl, NULL);
+            
+            if (H5Pset_fapl_stream(fapl, NULL)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = STREAM_IDX;
         } /* end if */
-#endif	/* H5_HAVE_STREAM */
+#endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
     } else if (!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-            /* Initialize the MPI library, if it wasn't already */
+       
+           /* Initialize the MPI library, if it wasn't already */
             if(!h5tools_mpi_init_g) {
                 MPI_Init(&argc, (char ***)&argv);
 
                 h5tools_mpi_init_g=1;
             } /* end if */
+
+            if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = MPIO_IDX;
@@ -248,14 +259,16 @@ int UNUSED argc, const char UNUSED *argv[]
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
-
+           
             /* Initialize the MPI library, if it wasn't already */
             if(!h5tools_mpi_init_g) {
                 MPI_Init(&argc, (char ***)&argv);
 
                 h5tools_mpi_init_g=1;
             } /* end if */
+
+            if (H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE)<0)
+             goto error;
 
             if(drivernum)
                 *drivernum = MPIPOSIX_IDX;
@@ -266,6 +279,11 @@ int UNUSED argc, const char UNUSED *argv[]
     }
 
     return(fapl);
+
+error:
+    if(fapl!=H5P_DEFAULT)
+     H5Pclose(fapl);
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -422,8 +440,8 @@ h5tools_ncols(const char *s)
  *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
  *      Robb Matzke, 1999-09-29
- *	If a new prefix is printed then the current element number is set back
- *	to zero.
+ * If a new prefix is printed then the current element number is set back
+ * to zero.
  *      pvn, 2004-07-08
  * Added support for printing array indices:
  *  the indentation is printed before the prefix (printed one indentation
@@ -440,16 +458,16 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     int i, indentlevel = 0;
 
     if (!ctx->need_prefix)
-	return;
+ return;
 
     memset(&prefix, 0, sizeof(h5tools_str_t));
     memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-	    fputs(OPT(info->line_suf, ""), stream);
+     fputs(OPT(info->line_suf, ""), stream);
      putc('\n', stream);
-	    fputs(OPT(info->line_sep, ""), stream);
+     fputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -466,7 +484,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
          * the ctx->indent_level is negative so we need to skip the above and
          * just print out the default indent levels.
          */
-	indentlevel = ctx->default_indent_level;
+ indentlevel = ctx->default_indent_level;
     }
 
     /* when printing array indices, print the indentation before the prefix
@@ -524,23 +542,23 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
  * Programmer:
  *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
- * 	Robb Matzke, 1999-06-04
- *	The `container' argument is the optional dataset for reference types.
+ *  Robb Matzke, 1999-06-04
+ * The `container' argument is the optional dataset for reference types.
  *
- * 	Robb Matzke, 1999-09-29
- *	Understands the `per_line' property which indicates that every Nth
- *	element should begin a new line.
+ *  Robb Matzke, 1999-09-29
+ * Understands the `per_line' property which indicates that every Nth
+ * element should begin a new line.
  *
  *      Robb Matzke, LLNL, 2003-06-05
  *      Do not dereference the memory for a variable-length string here.
  *      Deref in h5tools_str_sprint() instead so recursive types are
  *      handled correctly.
-	*
-	*      Pedro Vicente Nunes, THG, 2005-10-19
+ *
+ *      Pedro Vicente Nunes, THG, 2005-10-19
  *        pass to the prefix in h5tools_simple_prefix the total position
-	*								instead of the current stripmine position i; this is necessary
-	*								to print the array indices
-	*        new field sm_pos in h5tools_context_t, the current stripmine element position
+ *        instead of the current stripmine position i; this is necessary
+ *        to print the array indices
+ *        new field sm_pos in h5tools_context_t, the current stripmine element position
  *-------------------------------------------------------------------------
  */
 void
@@ -548,15 +566,15 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
-    unsigned char	*mem = (unsigned char*)_mem;
-    hsize_t		i;		/*element counter		*/
-    char		*s, *section;	/*a section of output		*/
-    int			secnum;		/*section sequence number	*/
-    size_t		size;		/*size of each datum		*/
-    size_t		ncols = 80;	/*available output width	*/
-    h5tools_str_t	buffer;		/*string into which to render	*/
-    int			multiline;	/*datum was multiline		*/
-    hsize_t		curr_pos;		/* total data element position 		*/
+    unsigned char *mem = (unsigned char*)_mem;
+    hsize_t  i;  /*element counter  */
+    char  *s, *section; /*a section of output  */
+    int   secnum;  /*section sequence number */
+    size_t  size;  /*size of each datum  */
+    size_t  ncols = 80; /*available output width */
+    h5tools_str_t buffer;  /*string into which to render */
+    int   multiline; /*datum was multiline  */
+    hsize_t  curr_pos;  /* total data element position   */
     int                 elmt_counter = 0;/*counts the # elements printed.
                                           *I (ptl?) needed something that
                                           *isn't going to get reset when a new
@@ -684,8 +702,8 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                     multiline++;
 
                   /* pass to the prefix in h5tools_simple_prefix the total position
-		     instead of the current stripmine position i; this is necessary
-		     to print the array indices */
+       instead of the current stripmine position i; this is necessary
+       to print the array indices */
                 curr_pos = ctx->sm_pos + i;
 
                 h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
@@ -728,22 +746,22 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                            int indentlevel)
 {
     herr_t              ret;                    /*the value to return   */
-    hid_t		f_space;		/*file data space	*/
-    int			i;                      /*counters		*/
-    hsize_t		zero = 0;               /*vector of zeros	*/
-    unsigned int	flags;			/*buffer extent flags	*/
-    hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
+    hid_t  f_space;  /*file data space */
+    int   i;                      /*counters  */
+    hsize_t  zero = 0;               /*vector of zeros */
+    unsigned int flags;   /*buffer extent flags */
+    hsize_t  total_size[H5S_MAX_RANK];/*total size of dataset*/
 
     /* Print info */
-    h5tools_context_t	ctx;			/*print context		*/
-    size_t		p_type_nbytes;		/*size of memory type	*/
+    h5tools_context_t ctx;   /*print context  */
+    size_t  p_type_nbytes;  /*size of memory type */
 
     /* Stripmine info */
-    hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
-    hsize_t		sm_nbytes;		/*bytes per stripmine	*/
-    hsize_t		sm_nelmts;		/*elements per stripmine*/
-    unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
-    hid_t		sm_space;		/*stripmine data space	*/
+    hsize_t  sm_size[H5S_MAX_RANK]; /*stripmine size */
+    hsize_t  sm_nbytes;  /*bytes per stripmine */
+    hsize_t  sm_nelmts;  /*elements per stripmine*/
+    unsigned char      *sm_buf = NULL;  /*buffer for raw data */
+    hid_t  sm_space;  /*stripmine data space */
 
     hsize_t             count;
 
@@ -772,7 +790,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-	assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));
+ assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));
     ctx.size_last_dim = (int)(total_size[ctx.ndims - 1]);
 
     count = sset->count[ctx.ndims - 1];
@@ -874,7 +892,7 @@ done:
 /*-------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     H5Tools Library
- * Purpose:	Print some values from a dataset with a simple data space.
+ * Purpose: Print some values from a dataset with a simple data space.
  * Description:
  *      This is a special case of h5tools_dump_dset(). This function only
  *      intended for dumping datasets -- it does strip mining and some other
@@ -893,30 +911,30 @@ static int
 h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                          hid_t p_type, int indentlevel)
 {
-    hid_t		f_space;		/*file data space	*/
-    hsize_t		elmtno;			/*counter		*/
-    int			i;			/*counter		*/
-    int			carry;			/*counter carry value	*/
-    hsize_t		zero[8];		/*vector of zeros	*/
-    unsigned int	flags;			/*buffer extent flags	*/
-    hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
+    hid_t  f_space;  /*file data space */
+    hsize_t  elmtno;   /*counter  */
+    int   i;   /*counter  */
+    int   carry;   /*counter carry value */
+    hsize_t  zero[8];  /*vector of zeros */
+    unsigned int flags;   /*buffer extent flags */
+    hsize_t  total_size[H5S_MAX_RANK];/*total size of dataset*/
 
     /* Print info */
-    h5tools_context_t	ctx;			/*print context		*/
-    size_t		p_type_nbytes;		/*size of memory type	*/
-    hsize_t		p_nelmts;		/*total selected elmts	*/
+    h5tools_context_t ctx;   /*print context  */
+    size_t  p_type_nbytes;  /*size of memory type */
+    hsize_t  p_nelmts;  /*total selected elmts */
 
     /* Stripmine info */
-    hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
-    hsize_t		sm_nbytes;		/*bytes per stripmine	*/
-    hsize_t		sm_nelmts;		/*elements per stripmine*/
-    unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
-    hid_t		sm_space;		/*stripmine data space	*/
+    hsize_t  sm_size[H5S_MAX_RANK]; /*stripmine size */
+    hsize_t  sm_nbytes;  /*bytes per stripmine */
+    hsize_t  sm_nelmts;  /*elements per stripmine*/
+    unsigned char      *sm_buf = NULL;  /*buffer for raw data */
+    hid_t  sm_space;  /*stripmine data space */
 
     /* Hyperslab info */
-    hsize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
-    hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
-    hsize_t		hs_nelmts;		/*elements in request	*/
+    hsize_t  hs_offset[H5S_MAX_RANK];/*starting offset */
+    hsize_t  hs_size[H5S_MAX_RANK]; /*size this pass */
+    hsize_t  hs_nelmts;  /*elements in request */
 
     /* VL data special information */
     unsigned int        vl_data = 0;            /*contains VL datatypes */
@@ -1068,16 +1086,16 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_simple_mem
+ * Function: h5tools_dump_simple_mem
  *
- * Purpose:	Print some values from memory with a simple data space.
- *		This is a special case of h5tools_dump_mem().
+ * Purpose: Print some values from memory with a simple data space.
+ *  This is a special case of h5tools_dump_mem().
  *
- * Return:	Success:    SUCCEED
+ * Return: Success:    SUCCEED
  *
- *		Failure:    FAIL
+ *  Failure:    FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, July 23, 1998
  *
  * Modifications:
@@ -1088,9 +1106,9 @@ static int
 h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
                         hid_t type, hid_t space, void *mem, int indentlevel)
 {
-    int			i;			/*counters		*/
-    hsize_t		nelmts;			/*total selected elmts	*/
-    h5tools_context_t	ctx;			/*printing context	*/
+    int   i;   /*counters  */
+    hsize_t  nelmts;   /*total selected elmts */
+    h5tools_context_t ctx;   /*printing context */
 
     /*
      * Check that everything looks okay.  The dimensionality must not be too
@@ -1142,34 +1160,34 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_dset
+ * Function: h5tools_dump_dset
  *
- * Purpose:	Print some values from a dataset DSET to the file STREAM
- *		after converting all types to P_TYPE (which should be a
- *		native type).  If P_TYPE is a negative value then it will be
- *		computed from the dataset type using only native types.
+ * Purpose: Print some values from a dataset DSET to the file STREAM
+ *  after converting all types to P_TYPE (which should be a
+ *  native type).  If P_TYPE is a negative value then it will be
+ *  computed from the dataset type using only native types.
  *
- * Note:	This function is intended only for datasets since it does
- *		some things like strip mining which are unnecessary for
- *		smaller objects such as attributes. The easiest way to print
- *		small objects is to read the object into memory and call
- *		h5tools_dump_mem().
+ * Note: This function is intended only for datasets since it does
+ *  some things like strip mining which are unnecessary for
+ *  smaller objects such as attributes. The easiest way to print
+ *  small objects is to read the object into memory and call
+ *  h5tools_dump_mem().
  *
- * Return:	Success:    SUCCEED
+ * Return: Success:    SUCCEED
  *
- *		Failure:    FAIL
+ *  Failure:    FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Thursday, July 23, 1998
  *
  * Modifications:
- * 		Robb Matzke, 1999-06-07
- *		If info->raw is set then the memory datatype will be the same
- *		as the file datatype.
+ *   Robb Matzke, 1999-06-07
+ *  If info->raw is set then the memory datatype will be the same
+ *  as the file datatype.
  *
- *		Bill Wendling, 2001-02-27
- *		Renamed to ``h5tools_dump_dset'' and added the subsetting
- *		parameter.
+ *  Bill Wendling, 2001-02-27
+ *  Renamed to ``h5tools_dump_dset'' and added the subsetting
+ *  parameter.
  *
  *-------------------------------------------------------------------------
  */
@@ -1234,17 +1252,17 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_mem
+ * Function: h5tools_dump_mem
  *
- * Purpose:	Displays the data contained in MEM. MEM must have the
- *		specified data TYPE and SPACE.  Currently only simple data
- *		spaces are allowed and only the `all' selection.
+ * Purpose: Displays the data contained in MEM. MEM must have the
+ *  specified data TYPE and SPACE.  Currently only simple data
+ *  spaces are allowed and only the `all' selection.
  *
- * Return:	Success:    SUCCEED
+ * Return: Success:    SUCCEED
  *
- *		Failure:    FAIL
+ *  Failure:    FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer: Robb Matzke
  *              Wednesday, January 20, 1999
  *
  * Modifications:
@@ -1259,16 +1277,16 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t 
 
     /* Use default values */
     if (!stream)
-	stream = stdout;
+ stream = stdout;
 
     if (!info) {
-	memset(&info_dflt, 0, sizeof(info_dflt));
-	info = &info_dflt;
+ memset(&info_dflt, 0, sizeof(info_dflt));
+ info = &info_dflt;
     }
 
     /* Check the data space */
     if (H5Sis_simple(space) <= 0)
-	return -1;
+ return -1;
 
     return h5tools_dump_simple_mem(stream, info, obj_id, type, space, mem,
                                    indentlevel);
@@ -1287,7 +1305,7 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t 
  *
  *-------------------------------------------------------------------------
  */
-void init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims)
+void init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 {
  int i;
 
@@ -1304,14 +1322,14 @@ void init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims)
 
 
 /*-------------------------------------------------------------------------
- * Function:	do_bin_output
+ * Function: do_bin_output
  *
- * Purpose:	Dump memory buffer to a binary file stream
+ * Purpose: Dump memory buffer to a binary file stream
  *
- * Return:	Success:    SUCCEED
- *		       Failure:    FAIL
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
  *
- * Programmer:	Pedro Vicente Nunes
+ * Programmer: Pedro Vicente Nunes
  *             Friday, June 2, 2006
  *
  * Modifications:
@@ -1321,9 +1339,9 @@ void init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims)
 static 
 int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 {
- unsigned char	*mem  = (unsigned char*)_mem;
+ unsigned char *mem  = (unsigned char*)_mem;
  size_t         size; /* datum size */
- hsize_t		      i;		  /* element counter		*/
+ hsize_t        i;    /* element counter  */
 
  size = H5Tget_size(tid);
 
@@ -1341,14 +1359,14 @@ int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 
 
 /*-------------------------------------------------------------------------
- * Function:	render_bin_output
+ * Function: render_bin_output
  *
- * Purpose:	Write one element of memory buffer to a binary file stream
+ * Purpose: Write one element of memory buffer to a binary file stream
  *
- * Return:	Success:    SUCCEED
- *		       Failure:    FAIL
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
  *
- * Programmer:	Pedro Vicente Nunes
+ * Programmer: Pedro Vicente Nunes
  *             Friday, June 2, 2006
  *
  * Modifications:
@@ -1361,7 +1379,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
 #if 0
  #define DEBUG_H5DUMP_BIN 1
 #endif
- unsigned char	    *mem  = (unsigned char*)_mem;
+ unsigned char     *mem  = (unsigned char*)_mem;
  size_t             size;   /* datum size */
  float              tempfloat;
  double             tempdouble;
@@ -1664,7 +1682,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tget_class(tid) == H5T_ARRAY) 
  {
   int     k, ndims;
-  hsize_t	i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
+  hsize_t i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
   hid_t   memb;
 
   /* get the array's base datatype for each element */
@@ -1677,10 +1695,10 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   /* calculate the number of array elements */
   for (k = 0, nelmts = 1; k < ndims; k++)
   {
-			temp_nelmts = nelmts;
-			temp_nelmts *= dims[k];
+   temp_nelmts = nelmts;
+   temp_nelmts *= dims[k];
    nelmts = (size_t)temp_nelmts;
-		}
+  }
    
   /* dump the array element */
   for (i = 0; i < nelmts; i++) 
@@ -1694,7 +1712,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  else if (H5Tget_class(tid) == H5T_VLEN) 
  {
   unsigned int i;
-  hsize_t	nelmts;
+  hsize_t nelmts;
   hid_t   memb;
   
   /* get the VL sequences's base datatype for each element */
