@@ -2725,6 +2725,11 @@ set_binary_form(const char *form)
   bform = 0;
  else if (strcmp(form,"DI")==0) /* file type form */
   bform = 1;
+ else if (strcmp(form,"LI")==0) /* convert to little endian */
+  bform = 2;
+ else if (strcmp(form,"BI")==0) /* convert to big endian */
+  bform = 3;
+
 
  return bform;
 }
