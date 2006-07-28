@@ -41,11 +41,11 @@ $ CALL TOOLTEST test3.h5
 $ CALL TOOLTEST test4.h5
 $ CALL TOOLTEST test5.h5
 $ 
-$ # use test4.h5 to write some filters  (this file has  no filters)
+$! # use test4.h5 to write some filters  (this file has  no filters)
 $ 
 $! # gzip with individual object
 $ CALL TOOLTEST test4.h5 "-f dset1:""GZIP""=1  -l dset1:""CHUNK""=20x10"
-$   
+$!   
 $! # gzip for all 
 $ CALL TOOLTEST test4.h5 "-f ""GZIP""=1"
 $! 
@@ -54,7 +54,7 @@ $ CALL TOOLTEST test4.h5 "-f dset2:""SHUF""  -l dset2:""CHUNK""=20x10"
 $!   
 $! 
 $! # shuffle for all
-$ CALL TOOLTEST test4.h5 "-f """HUF"""
+$ CALL TOOLTEST test4.h5 "-f ""SHUF"""
 $!   
 $! # fletcher32  with individual object
 $ CALL TOOLTEST test4.h5 "-f dset2:""FLET""  -l dset2:""CHUNK""=20x10"
@@ -94,13 +94,13 @@ $! # nbit add
 $ CALL TOOLTEST test_nbit.h5 "-f dset_int31:""NBIT"""
 $! 
 $! # scaleoffset add
-$ CALL TOOLTEST test_scaleoffset.h5 "-f dset_none:""S""+""O""=31"
+$! CALL TOOLTEST test_scaleoffset.h5 "-f dset_none:""S+O""=31"
 $! 
 $! # scaleoffset copy
-$ CALL TOOLTEST test_scaleoffset.h5
+$! CALL TOOLTEST test_scaleoffset.h5
 $! 
 $! # scaleoffset remove
-$ CALL TOOLTEST test_scaleoffset.h5 "-f dset_scaleoffset:""NONE"""
+$! CALL TOOLTEST test_scaleoffset.h5 "-f dset_scaleoffset:""NONE"""
 $! 
 $! #limit
 $ CALL TOOLTEST test4.h5 "-f ""GZIP""=1 -m 1024"
@@ -114,7 +114,7 @@ $! # layout options (these files have no filters)
 $! #########################################################
 $!
 $ CALL TOOLTEST test4.h5 "-l dset2:""CHUNK""=20x10"
-$ CALL TOOLTEST test4.h5 "-l """HUNK""=20x10"
+$ CALL TOOLTEST test4.h5 "-l ""CHUNK""=20x10"
 $ CALL TOOLTEST test4.h5 "-l dset2:""CONTI"""
 $ CALL TOOLTEST test4.h5 "-l ""CONTI"""
 $ CALL TOOLTEST test4.h5 "-l dset2:""COMPA"""
@@ -140,32 +140,39 @@ $TOOLTEST: SUBROUTINE
 
 $ len =  F$LENGTH(P1)
 $ base = F$EXTRACT(0,len-3,P1)
-$ output = base + "out.h5"
+$ output_file = base + "out.h5"
 $ output_err = base + ".err"
+$ output_out = base + ".out"
 $
 $ begin = "Testing h5repack"
 $ !
 $ ! Run the test and save output in the 'actual' file
 $ !
-$ define/nolog sys$error  'output_err'
+$! define/nolog sys$error  'output_err'
+$! define/nolog sys$output 'output_out'
 $ ON ERROR THEN CONTINUE
-$ h5repack -i 'P1 -o 'output' 'P2
-$ h5diff 'P1 'output'
-$ deassign sys$error
-$ if F$SEARCH(output_err) .NES. ""
-$ then
-$    result = "PASSED"
+$ h5repack -i 'P1 -o 'output_file' 'P2
+$ h5diff 'P1 'output_file'
+$! deassign sys$error
+$! deassign sys$output
+$! if F$SEARCH(output_err) .EQS. "" .AND. F$SEARCH(output_out) .EQS. "" 
+$! then
+$!    result = "PASSED"
+$!    line = F$FAO("!16AS !20AS !43AS !70AS", begin, P1, P2, result) 
+$!  else
+$!    result = "*FAILED*"
+$!    line = F$FAO("!16AS !20AS !42AS !69AS", begin, P1, P2, result) 
+$! endif
+$    result = "......"
 $    line = F$FAO("!16AS !20AS !43AS !70AS", begin, P1, P2, result) 
-$  else
-$    result = "*FAILED*"
-$    line = F$FAO("!16AS !20AS !42AS !69AS", begin, P1, P2, result) 
-$ endif
+
 $ !
 $ ! Print test result
 $ ! 
 $  write sys$output line
 $ ! 
 $ del *out.h5;*
+$! del *.out;*
 $ !
 $ENDSUBROUTINE
 
