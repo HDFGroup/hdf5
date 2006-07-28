@@ -598,7 +598,7 @@ usage(const char *prog)
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -b F                 Output raw data into file F in binary form (use with -d)\n");
-    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type or DI for the disk file type)\n");
+    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type, DI for the disk file type, LI or BI for pre-existing little or big endian types)\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
