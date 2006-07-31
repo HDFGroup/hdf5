@@ -416,8 +416,10 @@ H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);
 H5_DLL herr_t H5HF_dtable_dest(H5HF_dtable_t *dtable);
 H5_DLL herr_t H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off,
     unsigned *row, unsigned *col);
-H5_DLL unsigned H5HF_dtable_size_to_row(H5HF_dtable_t *dtable, size_t block_size);
-H5_DLL unsigned H5HF_dtable_size_to_rows(H5HF_dtable_t *dtable, hsize_t size);
+H5_DLL unsigned H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size);
+H5_DLL unsigned H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size);
+H5_DLL hsize_t H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row,
+    unsigned start_col, unsigned num_entries);
 
 /* Heap header routines */
 H5_DLL herr_t H5HF_hdr_incr(H5HF_hdr_t *hdr);
@@ -545,8 +547,7 @@ H5_DLL herr_t H5HF_sect_row_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, unsigned *entry_p);
 H5_DLL H5HF_indirect_t *H5HF_sect_row_get_iblock(H5HF_free_section_t *sect);
 H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries,
-    hsize_t *sect_off);
+    H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries);
 
 /* Testing routines */
 #ifdef H5HF_TESTING

@@ -394,14 +394,14 @@ HDfprintf(stderr, "%s: root direct block, dblock_addr = %a\n", FUNC, dblock_addr
         size_t next_size;           /* Size of next direct block to create */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: before updating iterator\n", FUNC);
+HDfprintf(stderr, "%s: before updating iterator, hdr->man_iter_off = %Hu, hdr->man_size = %Hu\n", FUNC, hdr->man_iter_off, hdr->man_size);
 #endif /* QAK */
         /* Update iterator to reflect any previous increments as well as allow for requested direct block size */
         if(H5HF_hdr_update_iter(hdr, dxpl_id, min_dblock_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUPDATE, FAIL, "unable to update block iterator")
 
 #ifdef QAK
-HDfprintf(stderr, "%s: after updating iterator\n", FUNC);
+HDfprintf(stderr, "%s: after updating iterator, hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
 #endif /* QAK */
         /* Retrieve information about current iterator position */
         if(H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)

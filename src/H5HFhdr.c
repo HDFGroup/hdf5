@@ -270,6 +270,7 @@ done:
 herr_t
 H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
 {
+    size_t dblock_overhead;             /* Direct block's overhead */
     herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_init)
@@ -324,6 +325,12 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
     /* Make shared heap info reference counted */
     if(H5HF_hdr_finish_init(hdr) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared fractal heap header")
+
+    /* Extra checking for possible gap between max. direct block size minus
+     * overhead and standalone object size */
+    dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
+    if((cparam->managed.max_direct_size - dblock_overhead) < cparam->standalone_size)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
 
 done:
     if(ret_value < 0)
@@ -516,6 +523,12 @@ H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
      * Check arguments.
      */
     HDassert(hdr);
+#ifdef QAK
+HDfprintf(stderr, "%s; new_size = %Hu, extra_free = %Hd\n", FUNC, new_size, extra_free);
+HDfprintf(stderr, "%s; hdr->total_size = %Hu\n", FUNC, hdr->total_size);
+HDfprintf(stderr, "%s; hdr->man_size = %Hu\n", FUNC, hdr->man_size);
+HDfprintf(stderr, "%s; hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
+#endif /* QAK */
 
     /* Set the total space in heap */
     hdr->total_size = new_size;
@@ -635,6 +648,9 @@ H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
     /* Set the offset of the iterator in the heap */
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu, curr_off = %Hu\n", FUNC, hdr->man_iter_off, curr_off);
+#endif /* QAK */
     hdr->man_iter_off = curr_off;
 
 done:
@@ -659,7 +675,8 @@ herr_t
 H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
     unsigned start_entry, unsigned nentries)
 {
-    hsize_t sect_off;                   /* Offset of section in heap space */
+    unsigned row, col;                  /* Row & column of entry */
+    hsize_t sect_size;                  /* Size of section in heap space */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_skip_blocks)
@@ -674,16 +691,25 @@ HDfprintf(stderr, "%s: start_entry = %u, nentries = %u\n", FUNC, start_entry, ne
     HDassert(iblock);
     HDassert(nentries);
 
-    /* Add 'indirect' section for blocks skipped in this row */
-    if(H5HF_sect_indirect_add(hdr, dxpl_id, iblock, start_entry, nentries, &sect_off) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section for indirect block's free space")
+    /* Compute the span within the heap to skip */
+    row = start_entry / hdr->man_dtable.cparam.width;
+    col = start_entry % hdr->man_dtable.cparam.width;
+    sect_size = H5HF_dtable_span_size(&hdr->man_dtable, row, col, nentries);
 #ifdef QAK
-HDfprintf(stderr, "%s: sect_off = %Hu\n", FUNC, sect_off);
+HDfprintf(stderr, "%s: Check 1.0 - hdr->man_iter_off = %Hu, sect_size = %Hu\n", FUNC, hdr->man_iter_off, sect_size);
 #endif /* QAK */
+    HDassert(sect_size > 0);
 
     /* Advance the new block iterator */
-    if(H5HF_hdr_inc_iter(hdr, (sect_off - hdr->man_iter_off), nentries) < 0)
+    if(H5HF_hdr_inc_iter(hdr, sect_size, nentries) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
+#ifdef QAK
+HDfprintf(stderr, "%s: Check 2.0 - hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
+#endif /* QAK */
+
+    /* Add 'indirect' section for blocks skipped in this row */
+    if(H5HF_sect_indirect_add(hdr, dxpl_id, iblock, start_entry, nentries) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section for indirect block's free space")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1092,9 +1118,12 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
 #ifdef QAK
 HDfprintf(stderr, "%s: Heap empty\n", FUNC);
 #endif /* QAK */
-                /* Reset header information back to "empty heap" state */
-                if(H5HF_hdr_empty(hdr) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty")
+                /* Reset iterator offset */
+                hdr->man_iter_off = 0;
+
+                /* Reset 'next block' iterator */
+                if(H5HF_man_iter_reset(&hdr->next_block) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
             } /* end else */
         } /* end if */
         else {
@@ -1194,11 +1223,20 @@ H5HF_hdr_empty(H5HF_hdr_t *hdr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_empty)
 #ifdef QAK
-HDfprintf(stderr, "%s: Reseting heap header to empty\n", FUNC);
+HDfprintf(stderr, "%s: Resetting heap header to empty\n", FUNC);
 #endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
+
+    /* Reset block iterator, if necessary */
+    if(H5HF_man_iter_ready(&hdr->next_block)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: 'next block' iterator is ready\n", FUNC);
+#endif /* QAK */
+        if(H5HF_man_iter_reset(&hdr->next_block) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
+    } /* end if */
 
     /* Shrink heap size */
     hdr->total_size = hdr->std_size;

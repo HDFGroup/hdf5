@@ -58,6 +58,10 @@
                                          *      as a result of freeing an
                                          *      object)
                                          */
+#define H5FS_ADD_SKIP_VALID     0x04    /* Don't check validity after adding
+                                         *      this section.  (state of the
+                                         *      managed sections is in flux)
+                                         */
 
 /* Flags for deserialize callback  */
 #define H5FS_DESERIALIZE_NO_ADD  0x01   /* Don't add section to free space
@@ -90,6 +94,7 @@ typedef struct H5FS_section_class_t {
     herr_t (*term_cls)(struct H5FS_section_class_t *);                  /* Routine to terminate class-specific settings */
 
     /* Object methods */
+    herr_t (*add)(H5FS_section_info_t *, unsigned *, void *);       /* Routine called when section is about to be added to manager */
     herr_t (*serialize)(const struct H5FS_section_class_t *, const H5FS_section_info_t *, uint8_t *);        /* Routine to serialize a "live" section into a buffer */
     H5FS_section_info_t *(*deserialize)(const struct H5FS_section_class_t *, hid_t dxpl_id, const uint8_t *, haddr_t, hsize_t, unsigned *);     /* Routine to deserialize a buffer into a "live" section */
     htri_t (*can_merge)(const H5FS_section_info_t *, const H5FS_section_info_t *, void *);  /* Routine to determine if two nodes are mergable */

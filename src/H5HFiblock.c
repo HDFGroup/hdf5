@@ -181,6 +181,10 @@ HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n",
                 /* Reset root pointer information */
                 iblock->hdr->man_dtable.curr_root_rows = 0;
                 iblock->hdr->man_dtable.table_addr = HADDR_UNDEF;
+
+                /* Reset header information back to "empty heap" state */
+                if(H5HF_hdr_empty(iblock->hdr) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty")
             } /* end if */
 
             /* Detach from parent indirect block */

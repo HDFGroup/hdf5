@@ -354,7 +354,7 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     hdr = fh->hdr;
 
     /* Check if object is large enough to be standalone */
-    if(size >= hdr->standalone_size) {
+    if(size > hdr->standalone_size) {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
     } /* end if */
     else {
@@ -582,8 +582,19 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
          *      a reference loop and the objects couldn't be removed from
          *      the metadata cache - QAK)
          */
-        if(H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
+#ifdef QAK
+HDfprintf(stderr, "%s; fh->hdr->man_iter_off = %Hu\n", FUNC, fh->hdr->man_iter_off);
+HDfprintf(stderr, "%s; fh->hdr->man_size = %Hu\n", FUNC, fh->hdr->man_size);
+HDfprintf(stderr, "%s; fh->hdr->rc = %Zu\n", FUNC, fh->hdr->rc);
+#endif /* QAK */
+        /* Reset block iterator, if necessary */
+        if(H5HF_man_iter_ready(&fh->hdr->next_block)) {
+            if(H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
+        } /* end if */
+#ifdef QAK
+HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr->rc);
+#endif /* QAK */
 
         /* Decrement the reference count on the heap header */
         if(H5HF_hdr_decr(fh->hdr) < 0)

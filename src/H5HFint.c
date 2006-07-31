@@ -281,7 +281,7 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
     size_t obj_size, const void *obj, void *id)
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to modify */
-    haddr_t dblock_addr;                /* Direct block address */
+    haddr_t dblock_addr = HADDR_UNDEF;  /* Direct block address */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_insert)
@@ -386,6 +386,9 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
         H5HF_ID_ENCODE(id, hdr, (dblock->block_off + blk_off), obj_size);
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, (dblock->block_off + blk_off), obj_size);
+#endif /* QAK */
     } /* end if */
     else {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "inserting within mapped managed blocks not supported yet")

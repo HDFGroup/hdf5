@@ -231,7 +231,7 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5HF_dtable_size_to_row(H5HF_dtable_t *dtable, size_t block_size)
+H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
 {
     unsigned row;               /* Row where block will fit */
 
@@ -265,7 +265,7 @@ H5HF_dtable_size_to_row(H5HF_dtable_t *dtable, size_t block_size)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5HF_dtable_size_to_rows(H5HF_dtable_t *dtable, hsize_t size)
+H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
 {
     unsigned rows;              /* # of rows required for indirect block */
 
@@ -280,4 +280,85 @@ H5HF_dtable_size_to_rows(H5HF_dtable_t *dtable, hsize_t size)
 
     FUNC_LEAVE_NOAPI(rows)
 } /* end H5HF_dtable_size_to_rows() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_dtable_span_size
+ *
+ * Purpose:	Compute the size covered by a span of entries
+ *
+ * Return:	Non-zero span size on success/zero on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		July 25 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row,
+    unsigned start_col, unsigned num_entries)
+{
+    unsigned start_entry;       /* Entry for first block covered */
+    unsigned end_row;           /* Row for last block covered */
+    unsigned end_col;           /* Column for last block covered */
+    unsigned end_entry;         /* Entry for last block covered */
+    hsize_t acc_span_size;      /* Accumulated span size */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_span_size)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(dtable);
+    HDassert(num_entries > 0);
+
+    /* Compute starting entry */
+    start_entry = (start_row * dtable->cparam.width) + start_col;
+
+    /* Compute ending entry, column & row */
+    end_entry = (start_entry + num_entries) - 1;
+    end_row = end_entry / dtable->cparam.width;
+    end_col = end_entry % dtable->cparam.width;
+#ifdef QAK
+HDfprintf(stderr, "%s: start_row = %u, start_col = %u, start_entry = %u\n", "H5HF_sect_indirect_span_size", start_row, start_col, start_entry);
+HDfprintf(stderr, "%s: end_row = %u, end_col = %u, end_entry = %u\n", "H5HF_sect_indirect_span_size", end_row, end_col, end_entry);
+#endif /* QAK */
+
+    /* Initialize accumulated span size */
+    acc_span_size = 0;
+
+    /* Compute span size covered */
+
+    /* Check for multi-row span */
+    if(start_row != end_row) {
+        /* Accomodate partial starting row */
+        if(start_col > 0) {
+            acc_span_size = dtable->row_block_size[start_row] *
+                    (dtable->cparam.width - start_col);
+            start_row++;
+        } /* end if */
+
+        /* Accumulate full rows */
+        while(start_row < end_row) {
+            acc_span_size += dtable->row_block_size[start_row] *
+                    dtable->cparam.width;
+            start_row++;
+        } /* end while */
+
+        /* Accomodate partial ending row */
+        acc_span_size += dtable->row_block_size[start_row] *
+                (end_col + 1);
+    } /* end if */
+    else {
+        /* Span is in same row */
+        acc_span_size = dtable->row_block_size[start_row] *
+                ((end_col - start_col) + 1);
+    } /* end else */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: acc_span_size = %Hu\n", "H5HF_dtable_span_size", acc_span_size);
+#endif /* QAK */
+    FUNC_LEAVE_NOAPI(acc_span_size)
+} /* end H5HF_sect_indirect_span_size() */
 

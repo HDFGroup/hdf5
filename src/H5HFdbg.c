@@ -622,20 +622,22 @@ H5HF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
     HDassert(udata);
 
     /* Print generic section information */
+    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
+	      "Section type:",
+	      (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
+                  (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "first row" :
+                  (sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW ? "normal row" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
 	      "Section address:",
 	      sect->sect_info.addr);
     HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
 	      "Section size:",
 	      sect->sect_info.size);
-    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-	      "Section type:",
-	      (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
-                  (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "first row" :
-                  (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "normal row" : "unknown"))));
+#ifdef QAK
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section state:",
 	      (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
+#endif /* QAK */
 
     /* Dump section-specific debugging information */
     if(H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) < 0)
