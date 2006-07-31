@@ -46,7 +46,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
-#define NUM_THREAD              16
+#define NUM_THREAD              16 
 #define FILENAME                "ttsafe_error.h5"
 
 /* Having a common dataset name is an error */
@@ -54,8 +54,8 @@
 #define EXPECTED_ERROR_DEPTH	8
 #define WRITE_NUMBER		37
 
-static herr_t error_callback(void *);
-static herr_t walk_error_callback(unsigned, const H5E_error_t *, void *);
+static herr_t error_callback(hid_t , void *);
+static herr_t walk_error_callback(unsigned, const H5E_error_stack_t *, void *);
 static void *tts_error_thread(void *);
 
 /* Global variables */
@@ -81,14 +81,14 @@ void tts_error(void)
     int ret;
 
     /* Must initialize these at runtime */
-    expected[0].maj_num = H5E_DATASET;
-    expected[0].min_num = H5E_CANTINIT;
+    expected[0].maj_num = H5E_ATOM;
+    expected[0].min_num = H5E_CANTREGISTER;
 
-    expected[1].maj_num = H5E_DATASET;
+    expected[1].maj_num = H5E_SYM;
     expected[1].min_num = H5E_CANTINIT;
 
     expected[2].maj_num = H5E_SYM;
-    expected[2].min_num = H5E_EXISTS;
+    expected[2].min_num = H5E_CANTINSERT;
 
     expected[3].maj_num = H5E_SYM;
     expected[3].min_num = H5E_NOTFOUND;
@@ -168,7 +168,7 @@ void *tts_error_thread(void UNUSED *arg)
     H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto(error_callback, NULL);
+    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL); 
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -200,7 +200,7 @@ void *tts_error_thread(void UNUSED *arg)
 }
 
 static
-herr_t error_callback(void *client_data)
+herr_t error_callback(hid_t estack_id, void *client_data)
 {
     int ret;
 
@@ -209,11 +209,11 @@ herr_t error_callback(void *client_data)
     error_count++;
     ret=pthread_mutex_unlock(&error_mutex);
     assert(ret==0);
-    return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, client_data);
+    return H5Ewalk_stack(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 
 static
-herr_t walk_error_callback(unsigned n, const H5E_error_t *err_desc, void UNUSED *client_data)
+herr_t walk_error_callback(unsigned n, const H5E_error_stack_t *err_desc, void UNUSED *client_data)
 {
     hid_t maj_num, min_num;
 
