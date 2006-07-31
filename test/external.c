@@ -105,7 +105,6 @@ test_1a(hid_t file)
     hsize_t	file_size;		/*sizeof external file segment	*/
 
     TESTING("fixed-size data space, exact storage");
-
     /* Create the dataset */
     if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = max_size[0] = 100;
@@ -152,7 +151,6 @@ test_1a(hid_t file)
     if (H5Dclose (dset)<0) goto error;
     PASSED();
     return 0;
-
  error:
     H5E_BEGIN_TRY {
 	H5Pclose(dcpl);
@@ -600,7 +598,7 @@ test_2 (hid_t fapl)
 	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};
 
     TESTING("read external dataset");
-
+    
     /* Write the data to external files directly */
     for (i=0; i<4; i++) {
 	for (j=0; j<25; j++) {
@@ -833,48 +831,59 @@ main (void)
     char	filename[1024];		/*file name for test_1* funcs	*/
     hid_t	grp=-1;			/*group to emit diagnostics	*/
     int		nerrors=0;		/*number of errors		*/
+    const char *envval = NULL;
 
-    h5_reset();
-    fapl = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	goto error;
+    /* Don't run this test using the split file driver */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "split")) {
+	h5_reset();
+	fapl = h5_fileaccess();
+	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	    goto error;
+	}
+	if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
+	if (H5Gclose (grp)<0) goto error;
+
+	nerrors += test_1a(file);
+	nerrors += test_1b(file);
+	nerrors += test_1c(file);
+	nerrors += test_1d(file);
+	nerrors += test_1e(file);
+	nerrors += test_1f(file);
+	nerrors += test_1g();
+	nerrors += test_1h();
+	nerrors += test_2(fapl);
+	nerrors += test_3(fapl);
+	if (nerrors>0) goto error;
+
+	if (H5Fclose(file)<0) goto error;
+	puts("All external storage tests passed.");
+	if (h5_cleanup(FILENAME, fapl)) {
+	    remove("extern_1a.raw");
+	    remove("extern_1b.raw");
+	    remove("extern_2a.raw");
+	    remove("extern_2b.raw");
+	    remove("extern_3a.raw");
+	    remove("extern_3b.raw");
+	    remove("extern_4a.raw");
+	    remove("extern_4b.raw");
+	}
     }
-    if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
-    if (H5Gclose (grp)<0) goto error;
-
-    nerrors += test_1a(file);
-    nerrors += test_1b(file);
-    nerrors += test_1c(file);
-    nerrors += test_1d(file);
-    nerrors += test_1e(file);
-    nerrors += test_1f(file);
-    nerrors += test_1g();
-    nerrors += test_1h();
-    nerrors += test_2(fapl);
-    nerrors += test_3(fapl);
-    if (nerrors>0) goto error;
-
-    if (H5Fclose(file)<0) goto error;
-    puts("All external storage tests passed.");
-    if (h5_cleanup(FILENAME, fapl)) {
-	remove("extern_1a.raw");
-	remove("extern_1b.raw");
-	remove("extern_2a.raw");
-	remove("extern_2b.raw");
-	remove("extern_3a.raw");
-	remove("extern_3b.raw");
-	remove("extern_4a.raw");
-	remove("extern_4b.raw");
+    else
+    {
+	puts("All external storage tests skipped - Incompatible with current Virtual File Driver");
     }
     return 0;
 
- error:
-    H5E_BEGIN_TRY {
-	H5Fclose(file);
-	H5Pclose(fapl);
-    } H5E_END_TRY;
-    nerrors = MAX(1, nerrors);
-    printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
-    return 1;
+    error:
+	H5E_BEGIN_TRY {
+	    H5Fclose(file);
+	    H5Pclose(fapl);
+	} H5E_END_TRY;
+	nerrors = MAX(1, nerrors);
+	printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
+	return 1;
 }

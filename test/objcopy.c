@@ -6347,84 +6347,94 @@ main(void)
 {
     int         nerrors = 0;
     hid_t	fapl;
+    const char *envval = NULL;
+    
+    /* Don't run this test using the core, split, or multi file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
+	/* Setup */
+	h5_reset();
+	fapl = h5_fileaccess();
 
-    /* Setup */
-    h5_reset();
-    fapl = h5_fileaccess();
-
-    /* The tests... */
-    nerrors += test_copy_named_datatype(fapl);
-    nerrors += test_copy_named_datatype_vl(fapl);
-    nerrors += test_copy_named_datatype_vl_vl(fapl);
-    nerrors += test_copy_dataset_simple(fapl);
-    nerrors += test_copy_dataset_simple_empty(fapl);
-    nerrors += test_copy_dataset_compound(fapl);
-    nerrors += test_copy_dataset_chunked(fapl);
-    nerrors += test_copy_dataset_chunked_empty(fapl);
-    nerrors += test_copy_dataset_chunked_sparse(fapl);
-    nerrors += test_copy_dataset_compressed(fapl);
-    nerrors += test_copy_dataset_compact(fapl);
-    nerrors += test_copy_dataset_external(fapl);
-    nerrors += test_copy_dataset_named_dtype(fapl);
-    nerrors += test_copy_dataset_named_dtype_hier(fapl);
-    nerrors += test_copy_dataset_named_dtype_hier_outside(fapl);
-    nerrors += test_copy_dataset_multi_ohdr_chunks(fapl);
-    nerrors += test_copy_dataset_attr_named_dtype(fapl);
-    nerrors += test_copy_dataset_contig_vl(fapl);
-    nerrors += test_copy_dataset_chunked_vl(fapl);
-    nerrors += test_copy_dataset_compact_vl(fapl);
-    nerrors += test_copy_dataset_compressed_vl(fapl);
-    nerrors += test_copy_attribute_vl(fapl);
-    nerrors += test_copy_dataset_compact_named_vl(fapl);
-    nerrors += test_copy_dataset_contig_named_vl(fapl);
-    nerrors += test_copy_dataset_chunked_named_vl(fapl);
-    nerrors += test_copy_dataset_compressed_named_vl(fapl);
-    nerrors += test_copy_dataset_compact_vl_vl(fapl);
-    nerrors += test_copy_dataset_contig_vl_vl(fapl);
-    nerrors += test_copy_dataset_chunked_vl_vl(fapl);
-    nerrors += test_copy_dataset_compressed_vl_vl(fapl);
-    nerrors += test_copy_group_empty(fapl);
-    nerrors += test_copy_group(fapl);
-    nerrors += test_copy_group_deep(fapl);
-    nerrors += test_copy_group_loop(fapl);
-    nerrors += test_copy_group_wide_loop(fapl);
-    nerrors += test_copy_group_links(fapl);
-    nerrors += test_copy_soft_link(fapl);
-    nerrors += test_copy_exist(fapl);
-    nerrors += test_copy_path(fapl);
-    nerrors += test_copy_same_file_named_datatype(fapl);
-    nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Gcopy(): without attributes");
+	/* The tests... */
+	nerrors += test_copy_named_datatype(fapl);
+	nerrors += test_copy_named_datatype_vl(fapl);
+	nerrors += test_copy_named_datatype_vl_vl(fapl);
+	nerrors += test_copy_dataset_simple(fapl);
+	nerrors += test_copy_dataset_simple_empty(fapl);
+	nerrors += test_copy_dataset_compound(fapl);
+	nerrors += test_copy_dataset_chunked(fapl);
+	nerrors += test_copy_dataset_chunked_empty(fapl);
+	nerrors += test_copy_dataset_chunked_sparse(fapl);
+	nerrors += test_copy_dataset_compressed(fapl);
+	nerrors += test_copy_dataset_compact(fapl);
+	nerrors += test_copy_dataset_external(fapl);
+	nerrors += test_copy_dataset_named_dtype(fapl);
+	nerrors += test_copy_dataset_named_dtype_hier(fapl);
+	nerrors += test_copy_dataset_named_dtype_hier_outside(fapl);
+	nerrors += test_copy_dataset_multi_ohdr_chunks(fapl);
+	nerrors += test_copy_dataset_attr_named_dtype(fapl);
+	nerrors += test_copy_dataset_contig_vl(fapl);
+	nerrors += test_copy_dataset_chunked_vl(fapl);
+	nerrors += test_copy_dataset_compact_vl(fapl);
+	nerrors += test_copy_dataset_compressed_vl(fapl);
+	nerrors += test_copy_attribute_vl(fapl);
+	nerrors += test_copy_dataset_compact_named_vl(fapl);
+	nerrors += test_copy_dataset_contig_named_vl(fapl);
+	nerrors += test_copy_dataset_chunked_named_vl(fapl);
+	nerrors += test_copy_dataset_compressed_named_vl(fapl);
+	nerrors += test_copy_dataset_compact_vl_vl(fapl);
+	nerrors += test_copy_dataset_contig_vl_vl(fapl);
+	nerrors += test_copy_dataset_chunked_vl_vl(fapl);
+	nerrors += test_copy_dataset_compressed_vl_vl(fapl);
+	nerrors += test_copy_group_empty(fapl);
+	nerrors += test_copy_group(fapl);
+	nerrors += test_copy_group_deep(fapl);
+	nerrors += test_copy_group_loop(fapl);
+	nerrors += test_copy_group_wide_loop(fapl);
+	nerrors += test_copy_group_links(fapl);
+	nerrors += test_copy_soft_link(fapl);
+	nerrors += test_copy_exist(fapl);
+	nerrors += test_copy_path(fapl);
+	nerrors += test_copy_same_file_named_datatype(fapl);
+	nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Gcopy(): without attributes");
 #ifdef H5_GROUP_REVISION
-    nerrors += test_copy_option(fapl, 0, TRUE, "H5Gcopy(): with missing groups");
+	nerrors += test_copy_option(fapl, 0, TRUE, "H5Gcopy(): with missing groups");
 #endif /* H5_GROUP_REVISION */
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Gcopy(): expand soft link");
-    nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Gcopy(): shallow group copy");
+	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Gcopy(): expand soft link");
+	nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Gcopy(): shallow group copy");
 
-/* TODO: not implemented
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Gcopy: expand external link");
-    nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, FALSE, "H5Gcopy: expand object reference");
-*/
+    /* TODO: not implemented
+	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Gcopy: expand external link");
+	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXPAND_OBJ_REFERENCE_FLAG, FALSE, "H5Gcopy: expand object reference");
+    */
 
-/* TODO: Add more tests for copying objects in same file */
+    /* TODO: Add more tests for copying objects in same file */
 
 
-/* TODO: Add more tests for copying objects in mounted files
-    nerrors += test_copy_mount(fapl);
-*/
+    /* TODO: Add more tests for copying objects in mounted files
+	nerrors += test_copy_mount(fapl);
+    */
 
-    /* Reset file address checking info */
-    addr_reset();
+	/* Reset file address checking info */
+	addr_reset();
 
-    /* Results */
-    if (nerrors) {
-	printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
-	       nerrors, (1 == nerrors ? "" : "S"));
-        exit(1);
+	/* Results */
+	if (nerrors) {
+	    printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
+		    nerrors, (1 == nerrors ? "" : "S"));
+	    exit(1);
+	}
+
+	puts ("All object copying tests passed.");
+	h5_cleanup(FILENAME, fapl);
     }
-
-    puts ("All object copying tests passed.");
-    h5_cleanup(FILENAME, fapl);
-
+    else
+    {
+        puts("All object copying tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
 } /* main */
 

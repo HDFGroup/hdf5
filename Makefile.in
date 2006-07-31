@@ -862,6 +862,15 @@ check-install: installcheck
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# Run tests with different Virtual File Drivers.
+# Currently, only invoke check-vfd in the test directory.
+check-vfd:
+	@@SETX@; for d in src test; do                                 \
+	  if test $$d != .; then                                       \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
+	  fi;                                                          \
+	done
+
 # Automake wants to make config.status depend on configure.  This
 # makes sense, but config.status can't always be regenerated
 # properly, which can cause builds to fail.

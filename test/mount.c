@@ -453,7 +453,7 @@ test_mntlnk(hid_t fapl)
 /*-------------------------------------------------------------------------
  * Function:	test_move
  *
- * Purpose:	An object cannot be moved or renamed with in such a
+ * Purpose:	An object cannot be moved or renamed with H5Gmove() in such a
  *		way that the new location would be in a different file than
  *		the original location.
  *
@@ -486,9 +486,9 @@ test_move(hid_t fapl)
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
     /* First rename an object in the mounted file, then try it across files */
-    if (H5Lmove(file1, "/mnt1/rename_a/x", H5L_SAME_LOC, "/mnt1/rename_b/y", H5P_DEFAULT)<0) goto error;
+    if (H5Gmove(file1, "/mnt1/rename_a/x", "/mnt1/rename_b/y")<0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT);
+	status = H5Gmove(file1, "/mnt1/rename_b/y",  "/y");
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -796,7 +796,7 @@ test_mvmpt(hid_t fapl)
     if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT)<0) TEST_ERROR
 
     /* Rename the mount point */
-    if (H5Lmove(file1, "/mnt_move_a", H5L_SAME_LOC, "/mnt_move_b", H5P_DEFAULT)<0) TEST_ERROR
+    if (H5Gmove(file1, "/mnt_move_a", "/mnt_move_b")<0) TEST_ERROR
 
     /* Access something under the new name */
     if (H5Gget_objinfo(file1, "/mnt_move_b/file2", TRUE, NULL)<0) TEST_ERROR
@@ -864,7 +864,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link by renaming something */
     H5E_BEGIN_TRY {
-	status = H5Lmove(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT);
+	status = H5Gmove(file1, "/mnt1/file2", "/file2");
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -1450,7 +1450,7 @@ test_mount_after_unmount(hid_t fapl)
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
     /* (It is "disconnected" because it's parent file has been unmounted) */
-    if(H5Lmove(gidAMX,"M/Y",gidAMX,"M/Z", H5P_DEFAULT) < 0)
+    if(H5Gmove2(gidAMX,"M/Y",gidAMX,"M/Z") < 0)
 	TEST_ERROR
 
     /* Close group in file #3 */
@@ -3823,45 +3823,56 @@ main(void)
 {
     int		nerrors = 0;
     hid_t	fapl = -1;
+    const char *envval = NULL;
 
-    h5_reset();
-    fapl = h5_fileaccess();
-    if (setup(fapl)<0) goto error;
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
+	h5_reset();
+	fapl = h5_fileaccess();
+	if (setup(fapl)<0) goto error;
 
-    nerrors += test_basic(fapl);
-    nerrors += test_illegal(fapl);
-    nerrors += test_hide(fapl);
-    nerrors += test_assoc(fapl);
-    nerrors += test_mntlnk(fapl);
-    nerrors += test_unlink(fapl);
-    nerrors += test_move(fapl);
-    nerrors += test_mvmpt(fapl);
-    nerrors += test_preopen(fapl);
-    nerrors += test_postopen(fapl);
-    nerrors += test_interlink(fapl);
-    nerrors += test_uniformity(fapl);
-    nerrors += test_close(fapl);
-    nerrors += test_mount_after_close(fapl);
-    nerrors += test_mount_after_unmount(fapl);
-    nerrors += test_missing_unmount(fapl);
-    nerrors += test_hold_open_file(fapl);
-    nerrors += test_hold_open_group(fapl);
-    nerrors += test_fcdegree_same(fapl);
-    nerrors += test_fcdegree_semi(fapl);
-    nerrors += test_fcdegree_strong(fapl);
-    nerrors += test_acc_perm(fapl);
-    nerrors += test_mult_mount(fapl);
-    nerrors += test_nested_survive(fapl);
-    nerrors += test_close_parent(fapl);
-    nerrors += test_cut_graph(fapl);
-    nerrors += test_symlink(fapl);
+	nerrors += test_basic(fapl);
+	nerrors += test_illegal(fapl);
+	nerrors += test_hide(fapl);
+	nerrors += test_assoc(fapl);
+	nerrors += test_mntlnk(fapl);
+	nerrors += test_unlink(fapl);
+	nerrors += test_move(fapl);
+	nerrors += test_mvmpt(fapl);
+	nerrors += test_preopen(fapl);
+	nerrors += test_postopen(fapl);
+	nerrors += test_interlink(fapl);
+	nerrors += test_uniformity(fapl);
+	nerrors += test_close(fapl);
+	nerrors += test_mount_after_close(fapl);
+	nerrors += test_mount_after_unmount(fapl);
+	nerrors += test_missing_unmount(fapl);
+	nerrors += test_hold_open_file(fapl);
+	nerrors += test_hold_open_group(fapl);
+	nerrors += test_fcdegree_same(fapl);
+	nerrors += test_fcdegree_semi(fapl);
+	nerrors += test_fcdegree_strong(fapl);
+	nerrors += test_acc_perm(fapl);
+	nerrors += test_mult_mount(fapl);
+	nerrors += test_nested_survive(fapl);
+	nerrors += test_close_parent(fapl);
+	nerrors += test_cut_graph(fapl);
+	nerrors += test_symlink(fapl);
 
-    if (nerrors) goto error;
-    puts("All mount tests passed.");
-    h5_cleanup(FILENAME, fapl);
+	if (nerrors) goto error;
+	puts("All mount tests passed.");
+	h5_cleanup(FILENAME, fapl);
+    }
+    else
+    {
+        puts("All mount tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
 
- error:
-    puts("***** MOUNT ERRORS *****");
-    return 1;
+    error:
+        puts("***** MOUNT ERRORS *****");
+        return 1;
 }
+

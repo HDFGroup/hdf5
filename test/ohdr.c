@@ -66,7 +66,8 @@ main(void)
     H5O_loc_t	oh_loc;
     time_t	time_new, ro;
     int		i;
-
+    const char  *envval = NULL;
+ 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
@@ -286,37 +287,47 @@ main(void)
 
     /* Test reading dataset with undefined object header message */
     TESTING("reading object with unknown header message");
-    {
-        char testfile[512]="";
-        char *srcdir = getenv("srcdir");
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+        {
+	    char testfile[512]="";
+	    char *srcdir = getenv("srcdir");
 
-        /* Build path to test file */
-        if (srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_BOGUS) + 1) < sizeof(testfile))){
-            HDstrcpy(testfile, srcdir);
-            HDstrcat(testfile, "/");
-        }
-        HDstrcat(testfile, FILE_BOGUS);
+	    /* Build path to test file */
+	    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_BOGUS) + 1) < sizeof(testfile))){
+		HDstrcpy(testfile, srcdir);
+		HDstrcat(testfile, "/");
+	    }
+	    HDstrcat(testfile, FILE_BOGUS);
 
-        if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, fapl))<0)
-            goto error;
+	    if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, fapl))<0)
+		goto error;
 
-        /* Open the dataset with the unknown header message (generated with gen_bogus.c) */
-        if((dset=H5Dopen(file,"/Dataset1"))<0)
-            goto error;
-        if (H5Dclose(dset)<0) goto error;
+	    /* Open the dataset with the unknown header message (generated with gen_bogus.c) */
+	    if((dset=H5Dopen(file,"/Dataset1"))<0)
+		goto error;
+	    if (H5Dclose(dset)<0) goto error;
 
-        if (H5Fclose(file)<0) goto error;
+	    if (H5Fclose(file)<0) goto error;
+	}
+	PASSED();
     }
-    PASSED();
+    else 
+    {
+        SKIPPED();
+        puts("   Test not compatible with current Virtual File Driver");
+    }
 
     puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 
- error:
-     puts("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY {
-	H5Fclose(file);
-    } H5E_END_TRY;
-    return 1;
+    error:
+        puts("*** TESTS FAILED ***");
+        H5E_BEGIN_TRY {
+            H5Fclose(file);
+        } H5E_END_TRY;
+        return 1;
 }

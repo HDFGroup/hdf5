@@ -19,6 +19,9 @@
 # checked back into the CVS repository.
 #
 
+
+CHECKVAL=check
+
 # function definitions
 TIMESTAMP()
 {
@@ -188,6 +191,9 @@ while [ $# -gt 0 ] ; do
 	--*)
 	    OP_CONFIGURE="$OP_CONFIGURE $1"
 	    ;;
+	check-vfd)
+	    CHECKVAL=check-vfd
+	    ;;
 	op-configure)
 	    shift
 	    if [ $# -lt 1 ]; then
@@ -314,10 +320,11 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
 
     # verify proper cvs setting
-    if [ -z "$CVSROOT" ]; then
-	echo "CVSROOT not defined!" 1>&2
-	exit 1
-    fi
+    # if [ -z "$CVSROOT" ]; then
+    #	  echo "CVSROOT not defined!" 1>&2
+    #  	  exit 1
+    #  fi
+
     SVNROOT=http://sleipnir.hdfgroup.uiuc.edu/svn/repos
     # Check out the current version from CVS
     # (cd $BASEDIR; cvs -Q co -P -d current ${CVSVERSION} hdf5 ) || exit 1
@@ -392,7 +399,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	    TIMESTAMP "make" && \
 	    ${MAKE} && \
 	    TIMESTAMP "check" && \
-	    ${MAKE} check && \
+	    ${MAKE} ${CHECKVAL} && \
 	    TIMESTAMP "install" && \
 	    ${MAKE} install-all && \
 	    TIMESTAMP "check-install" && \
@@ -442,7 +449,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    bin/release -d $ARCHIVES $METHODS
 	    perl bin/h5vers -i
 	    # cvs -Q commit -m "Snapshot $RELEASE_VERSION"
-	    svn -q commit -m "Snapshot $RELEASE_VERSION"
+	     svn -q commit -m "Snapshot $RELEASE_VERSION"   
 	)
 	errcode=$?
     fi

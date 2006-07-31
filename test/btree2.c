@@ -5576,81 +5576,92 @@ main(void)
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
     int		ExpressMode;
+    const char  *envval = NULL;
+ 
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+	/* Reset library */
+	h5_reset();
+	fapl = h5_fileaccess();
+	ExpressMode = GetTestExpress();
+	if (ExpressMode > 1)
+	    printf("***Express test mode on.  Some tests may be skipped\n");
 
-    /* Reset library */
-    h5_reset();
-    fapl = h5_fileaccess();
-    ExpressMode = GetTestExpress();
-    if (ExpressMode > 1)
-	printf("***Express test mode on.  Some tests may be skipped\n");
+	/* Test B-tree record insertion */
+	/* Iteration, find & index routines tested in these routines as well */
+	nerrors += test_insert_basic(fapl);
+	nerrors += test_insert_split_root(fapl);
+	nerrors += test_insert_level1_2leaf_redistrib(fapl);
+	nerrors += test_insert_level1_2leaf_split(fapl);
+	nerrors += test_insert_level1_3leaf_redistrib(fapl);
+	nerrors += test_insert_level1_3leaf_split(fapl);
+	nerrors += test_insert_make_level2(fapl);
+	nerrors += test_insert_level2_leaf_redistrib(fapl);
+	nerrors += test_insert_level2_leaf_split(fapl);
+	nerrors += test_insert_level2_2internal_redistrib(fapl);
+	nerrors += test_insert_level2_2internal_split(fapl);
+	nerrors += test_insert_level2_3internal_redistrib(fapl);
+	nerrors += test_insert_level2_3internal_split(fapl);
+	if (ExpressMode > 1)
+	    printf("***Express test mode on.  test_insert_lots skipped\n");
+	else
+	    nerrors += test_insert_lots(fapl);
 
-    /* Test B-tree record insertion */
-    /* Iteration, find & index routines tested in these routines as well */
-    nerrors += test_insert_basic(fapl);
-    nerrors += test_insert_split_root(fapl);
-    nerrors += test_insert_level1_2leaf_redistrib(fapl);
-    nerrors += test_insert_level1_2leaf_split(fapl);
-    nerrors += test_insert_level1_3leaf_redistrib(fapl);
-    nerrors += test_insert_level1_3leaf_split(fapl);
-    nerrors += test_insert_make_level2(fapl);
-    nerrors += test_insert_level2_leaf_redistrib(fapl);
-    nerrors += test_insert_level2_leaf_split(fapl);
-    nerrors += test_insert_level2_2internal_redistrib(fapl);
-    nerrors += test_insert_level2_2internal_split(fapl);
-    nerrors += test_insert_level2_3internal_redistrib(fapl);
-    nerrors += test_insert_level2_3internal_split(fapl);
-    if (ExpressMode > 1)
-	printf("***Express test mode on.  test_insert_lots skipped\n");
+	/* Test B-tree record removal */
+	/* Querying the number of records routine also tested in these routines as well */
+	nerrors += test_remove_basic(fapl);
+	nerrors += test_remove_level1_noredistrib(fapl);
+	nerrors += test_remove_level1_redistrib(fapl);
+	nerrors += test_remove_level1_2leaf_merge(fapl);
+	nerrors += test_remove_level1_3leaf_merge(fapl);
+	nerrors += test_remove_level1_promote(fapl);
+	nerrors += test_remove_level1_promote_2leaf_redistrib(fapl);
+	nerrors += test_remove_level1_promote_3leaf_redistrib(fapl);
+	nerrors += test_remove_level1_promote_2leaf_merge(fapl);
+	nerrors += test_remove_level1_promote_3leaf_merge(fapl);
+	nerrors += test_remove_level1_collapse(fapl);
+	nerrors += test_remove_level2_promote(fapl);
+	nerrors += test_remove_level2_promote_2internal_redistrib(fapl);
+	nerrors += test_remove_level2_promote_3internal_redistrib(fapl);
+	nerrors += test_remove_level2_promote_2internal_merge(fapl);
+	nerrors += test_remove_level2_promote_3internal_merge(fapl);
+	nerrors += test_remove_level2_2internal_merge_left(fapl);
+	nerrors += test_remove_level2_2internal_merge_right(fapl);
+	nerrors += test_remove_level2_3internal_merge(fapl);
+	nerrors += test_remove_level2_collapse_right(fapl);
+	if (ExpressMode > 1)
+	    printf("***Express test mode on.  test_remove_lots skipped\n");
+	else
+	    nerrors += test_remove_lots(fapl);
+
+	/* Test more complex B-tree queries */
+	nerrors += test_find_neighbor(fapl);
+
+	/* Test deleting B-trees */
+	nerrors += test_delete(fapl);
+
+	/* Test modifying B-tree records */
+	nerrors += test_modify(fapl);
+
+	if(nerrors)
+	    goto error;
+	puts("All v2 B-tree tests passed.");
+	h5_cleanup(FILENAME, fapl);
+    }
     else
-	nerrors += test_insert_lots(fapl);
-
-    /* Test B-tree record removal */
-    /* Querying the number of records routine also tested in these routines as well */
-    nerrors += test_remove_basic(fapl);
-    nerrors += test_remove_level1_noredistrib(fapl);
-    nerrors += test_remove_level1_redistrib(fapl);
-    nerrors += test_remove_level1_2leaf_merge(fapl);
-    nerrors += test_remove_level1_3leaf_merge(fapl);
-    nerrors += test_remove_level1_promote(fapl);
-    nerrors += test_remove_level1_promote_2leaf_redistrib(fapl);
-    nerrors += test_remove_level1_promote_3leaf_redistrib(fapl);
-    nerrors += test_remove_level1_promote_2leaf_merge(fapl);
-    nerrors += test_remove_level1_promote_3leaf_merge(fapl);
-    nerrors += test_remove_level1_collapse(fapl);
-    nerrors += test_remove_level2_promote(fapl);
-    nerrors += test_remove_level2_promote_2internal_redistrib(fapl);
-    nerrors += test_remove_level2_promote_3internal_redistrib(fapl);
-    nerrors += test_remove_level2_promote_2internal_merge(fapl);
-    nerrors += test_remove_level2_promote_3internal_merge(fapl);
-    nerrors += test_remove_level2_2internal_merge_left(fapl);
-    nerrors += test_remove_level2_2internal_merge_right(fapl);
-    nerrors += test_remove_level2_3internal_merge(fapl);
-    nerrors += test_remove_level2_collapse_right(fapl);
-    if (ExpressMode > 1)
-	printf("***Express test mode on.  test_remove_lots skipped\n");
-    else
-	nerrors += test_remove_lots(fapl);
-
-    /* Test more complex B-tree queries */
-    nerrors += test_find_neighbor(fapl);
-
-    /* Test deleting B-trees */
-    nerrors += test_delete(fapl);
-
-    /* Test modifying B-tree records */
-    nerrors += test_modify(fapl);
-
-    if(nerrors)
-        goto error;
-    puts("All v2 B-tree tests passed.");
-    h5_cleanup(FILENAME, fapl);
+    {
+        puts("All v2 B-tree tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
 
-error:
-    puts("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY {
-	H5Pclose(fapl);
-    } H5E_END_TRY;
-    return 1;
+    error:
+        puts("*** TESTS FAILED ***");
+        H5E_BEGIN_TRY {
+            H5Pclose(fapl);
+        } H5E_END_TRY;
+        return 1;
+
 } /* end main() */
 

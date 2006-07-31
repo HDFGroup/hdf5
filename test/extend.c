@@ -160,43 +160,54 @@ main (void)
     static hsize_t		maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     char			filename[1024];
     int				i, j;
+    const char *envval = NULL;
 
-    h5_reset();
-    fapl = h5_fileaccess();
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "split")) {
+	h5_reset();
+	fapl = h5_fileaccess();
 
-    /* Initialize buffer and space */
-    for (i=0; i<NX; i++) {
-	for (j=0; j<NY; j++) {
-	    buf1[i][j] = i*NY+j;
+	/* Initialize buffer and space */
+	for (i=0; i<NX; i++) {
+	    for (j=0; j<NY; j++) {
+		buf1[i][j] = i*NY+j;
+	    }
 	}
+	if ((mem_space = H5Screate_simple (2, dims, maxdims))<0) TEST_ERROR;
+
+	/* Create the file */
+	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+	if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+	/* Create the dataset which is originally NX by NY */
+	if((cparms = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+	if (H5Pset_chunk (cparms, 2, chunk_dims)<0) TEST_ERROR;
+	nerrors += write_data("extendible dataset with incremental allocation",file,"dataset1",cparms,mem_space)<0 	?1:0;
+	if(H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY)<0) TEST_ERROR;
+	nerrors += write_data("extendible dataset with early allocation",file,"dataset2",cparms,mem_space)<0 	?1:0;
+
+	if (H5Pclose (cparms)<0) TEST_ERROR;
+	if (H5Sclose (mem_space)<0) TEST_ERROR;
+
+	if (H5Fclose (file)<0) TEST_ERROR;
+	if (nerrors) {
+	    printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
+	    exit(1);
+	}
+	printf("All extend tests passed.\n");
+	h5_cleanup(FILENAME, fapl);
     }
-    if ((mem_space = H5Screate_simple (2, dims, maxdims))<0) TEST_ERROR;
-
-    /* Create the file */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
-
-    /* Create the dataset which is originally NX by NY */
-    if((cparms = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
-    if (H5Pset_chunk (cparms, 2, chunk_dims)<0) TEST_ERROR;
-    nerrors += write_data("extendible dataset with incremental allocation",file,"dataset1",cparms,mem_space)<0 	?1:0;
-    if(H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY)<0) TEST_ERROR;
-    nerrors += write_data("extendible dataset with early allocation",file,"dataset2",cparms,mem_space)<0 	?1:0;
-
-    if (H5Pclose (cparms)<0) TEST_ERROR;
-    if (H5Sclose (mem_space)<0) TEST_ERROR;
-
-    if (H5Fclose (file)<0) TEST_ERROR;
-    if (nerrors) {
-	printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
-	exit(1);
+    else
+    {
+        puts("All extend tests skipped - Incompatible with current Virtual File Driver");
     }
-    printf("All extend tests passed.\n");
-    h5_cleanup(FILENAME, fapl);
     return 0;
 
- error:
-    printf("*** One or more extend tests failed ***\n");
-    return 1;
+    error:
+        printf("*** One or more extend tests failed ***\n");
+        return 1;
+
 }
 

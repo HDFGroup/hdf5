@@ -5989,74 +5989,85 @@ main(void)
     double rdcc_w0;
     int			nerrors=0;
     char		filename[1024];
+    const char *envval = NULL;
 
-    h5_reset();
-    fapl = h5_fileaccess();
+    /* Don't run this test using certain file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+	h5_reset();
+	fapl = h5_fileaccess();
 
-    /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+	/* Set the random # seed */
+	HDsrandom((unsigned long)HDtime(NULL));
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0)<0) goto error;
-    rdcc_nbytes=0;
-    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0)<0) goto error;
+	/* Turn off the chunk cache, so all the chunks are immediately written to disk */
+	if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0)<0) goto error;
+	rdcc_nbytes=0;
+	if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0)<0) goto error;
 
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	goto error;
+	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	    goto error;
+	}
+
+	/* Cause the library to emit initial messages */
+	if ((grp = H5Gcreate (file, "emit diagnostics", 0))<0) goto error;
+	if (H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted")<0)
+	    goto error;
+	if (H5Gclose (grp)<0) goto error;
+
+	nerrors += test_create(file)<0 	?1:0;
+	nerrors += test_simple_io(fapl)<0	?1:0;
+	nerrors += test_compact_io(fapl)<0  ?1:0;
+	nerrors += test_max_compact(fapl)<0  ?1:0;
+	nerrors += test_conv_buffer(file)<0	?1:0;
+	nerrors += test_tconv(file)<0	?1:0;
+	nerrors += test_filters(file)<0	?1:0;
+	nerrors += test_onebyte_shuffle(file)<0 ?1:0;
+	nerrors += test_nbit_int(file)<0 ?1:0;
+	nerrors += test_nbit_float(file)<0         ?1:0;
+	nerrors += test_nbit_double(file)<0         ?1:0;
+	nerrors += test_nbit_array(file)<0 ?1:0;
+	nerrors += test_nbit_compound(file)<0 ?1:0;
+	nerrors += test_nbit_compound_2(file)<0 ?1:0;
+	nerrors += test_nbit_compound_3(file)<0 ?1:0;
+	nerrors += test_scaleoffset_int(file)<0 ?1:0;
+	nerrors += test_scaleoffset_int_2(file)<0 ?1:0;
+	nerrors += test_scaleoffset_float(file)<0 ?1:0;
+	nerrors += test_scaleoffset_float_2(file)<0 ?1:0;
+	nerrors += test_scaleoffset_double(file)<0 ?1:0;
+	nerrors += test_scaleoffset_double_2(file)<0 ?1:0;
+	nerrors += test_multiopen (file)<0	?1:0;
+	nerrors += test_types(file)<0       ?1:0;
+	nerrors += test_userblock_offset(fapl)<0     ?1:0;
+	nerrors += test_missing_filter(file)<0	?1:0;
+	nerrors += test_can_apply(file)<0	?1:0;
+	nerrors += test_set_local(fapl)<0	?1:0;
+	nerrors += test_can_apply_szip(file)<0	?1:0;
+	nerrors += test_compare_dcpl(file)<0	?1:0;
+	nerrors += test_filter_delete(file)<0	?1:0;
+	nerrors += test_filters_endianess()<0	?1:0;
+	nerrors += test_zero_dims(file)<0	?1:0;
+	nerrors += test_missing_chunk(file)<0	?1:0;
+
+	if (H5Fclose(file)<0) goto error;
+
+	if (nerrors) goto error;
+	printf("All dataset tests passed.\n");
+	h5_cleanup(FILENAME, fapl);
     }
-
-    /* Cause the library to emit initial messages */
-    if ((grp = H5Gcreate (file, "emit diagnostics", 0))<0) goto error;
-    if (H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted")<0)
-	goto error;
-    if (H5Gclose (grp)<0) goto error;
-
-    nerrors += test_create(file)<0 	?1:0;
-    nerrors += test_simple_io(fapl)<0	?1:0;
-    nerrors += test_compact_io(fapl)<0  ?1:0;
-    nerrors += test_max_compact(fapl)<0  ?1:0;
-    nerrors += test_conv_buffer(file)<0	?1:0;
-    nerrors += test_tconv(file)<0	?1:0;
-    nerrors += test_filters(file)<0	?1:0;
-    nerrors += test_onebyte_shuffle(file)<0 ?1:0;
-    nerrors += test_nbit_int(file)<0 ?1:0;
-    nerrors += test_nbit_float(file)<0         ?1:0;
-    nerrors += test_nbit_double(file)<0         ?1:0;
-    nerrors += test_nbit_array(file)<0 ?1:0;
-    nerrors += test_nbit_compound(file)<0 ?1:0;
-    nerrors += test_nbit_compound_2(file)<0 ?1:0;
-    nerrors += test_nbit_compound_3(file)<0 ?1:0;
-    nerrors += test_scaleoffset_int(file)<0 ?1:0;
-    nerrors += test_scaleoffset_int_2(file)<0 ?1:0;
-    nerrors += test_scaleoffset_float(file)<0 ?1:0;
-    nerrors += test_scaleoffset_float_2(file)<0 ?1:0;
-    nerrors += test_scaleoffset_double(file)<0 ?1:0;
-    nerrors += test_scaleoffset_double_2(file)<0 ?1:0;
-    nerrors += test_multiopen (file)<0	?1:0;
-    nerrors += test_types(file)<0       ?1:0;
-    nerrors += test_userblock_offset(fapl)<0     ?1:0;
-    nerrors += test_missing_filter(file)<0	?1:0;
-    nerrors += test_can_apply(file)<0	?1:0;
-    nerrors += test_set_local(fapl)<0	?1:0;
-    nerrors += test_can_apply_szip(file)<0	?1:0;
-    nerrors += test_compare_dcpl(file)<0	?1:0;
-    nerrors += test_filter_delete(file)<0	?1:0;
-    nerrors += test_filters_endianess()<0	?1:0;
-    nerrors += test_zero_dims(file)<0	?1:0;
-    nerrors += test_missing_chunk(file)<0	?1:0;
-
-    if (H5Fclose(file)<0) goto error;
-
-    if (nerrors) goto error;
-    printf("All dataset tests passed.\n");
-    h5_cleanup(FILENAME, fapl);
+    else
+    {
+	puts("All dataset tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
 
- error:
-    nerrors = MAX(1, nerrors);
-    printf("***** %d DATASET TEST%s FAILED! *****\n",
-	   nerrors, 1 == nerrors ? "" : "S");
-    return 1;
+    error:
+	nerrors = MAX(1, nerrors);
+	printf("***** %d DATASET TEST%s FAILED! *****\n",
+		nerrors, 1 == nerrors ? "" : "S");
+	return 1;
 }

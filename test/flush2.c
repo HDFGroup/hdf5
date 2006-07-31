@@ -55,60 +55,72 @@ main(void)
     double	error;
     hsize_t	i, j;
     char	name[1024];
+    const char *envval = NULL;
 
     h5_reset();
     fapl = h5_fileaccess();
     TESTING("H5Fflush (part2)");
 
-    /* Open the file */
-    h5_fixname(FILENAME[0], fapl, name, sizeof name);
-    if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
+    /* Don't run this test using the core or split file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
+	/* Open the file */
+	h5_fixname(FILENAME[0], fapl, name, sizeof name);
+	if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
 
-    /* Open the dataset */
-    if ((dset=H5Dopen(file, "dset"))<0) goto error;
-    if ((space=H5Dget_space(dset))<0) goto error;
-    if (H5Sget_simple_extent_dims(space, ds_size, NULL)<0) goto error;
-    assert(100==ds_size[0] && 100==ds_size[1]);
+	/* Open the dataset */
+	if ((dset=H5Dopen(file, "dset"))<0) goto error;
+	if ((space=H5Dget_space(dset))<0) goto error;
+	if (H5Sget_simple_extent_dims(space, ds_size, NULL)<0) goto error;
+	assert(100==ds_size[0] && 100==ds_size[1]);
 
-    /* Read some data */
-    if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
-		the_data)<0) goto error;
-    for (i=0; i<ds_size[0]; i++) {
-	for (j=0; j<ds_size[1]; j++) {
-	    /*
-	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 5.0 compiler.
-	     * 1998-11-06 ptl
-	     */
-	    error = fabs(the_data[i][j]-(double)(hssize_t)i/((hssize_t)j+1));
-	    if (error>0.0001) {
-		H5_FAILED();
-		printf("    dset[%lu][%lu] = %g\n",
-		       (unsigned long)i, (unsigned long)j, the_data[i][j]);
-		printf("    should be %g\n",
-		       (double)(hssize_t)i/(hssize_t)(j+1));
-		goto error;
+	/* Read some data */
+	if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
+		    the_data)<0) goto error;
+	for (i=0; i<ds_size[0]; i++) {
+	    for (j=0; j<ds_size[1]; j++) {
+		/*
+		    * The extra cast in the following statement is a bug workaround
+		    * for the Win32 version 5.0 compiler.
+		    * 1998-11-06 ptl
+		    */
+		error = fabs(the_data[i][j]-(double)(hssize_t)i/((hssize_t)j+1));
+		if (error>0.0001) {
+		    H5_FAILED();
+		    printf("    dset[%lu][%lu] = %g\n",
+			    (unsigned long)i, (unsigned long)j, the_data[i][j]);
+		    printf("    should be %g\n",
+			    (double)(hssize_t)i/(hssize_t)(j+1));
+		    goto error;
+		}
 	    }
 	}
-    }
 
-    /* Open some groups */
-    if ((groups=H5Gopen(file, "some_groups"))<0) goto error;
-    for (i=0; i<100; i++) {
-	sprintf(name, "grp%02u", (unsigned)i);
-	if ((grp=H5Gopen(groups, name))<0) goto error;
-	if (H5Gclose(grp)<0) goto error;
-    }
+	/* Open some groups */
+	if ((groups=H5Gopen(file, "some_groups"))<0) goto error;
+	for (i=0; i<100; i++) {
+	    sprintf(name, "grp%02u", (unsigned)i);
+	    if ((grp=H5Gopen(groups, name))<0) goto error;
+	    if (H5Gclose(grp)<0) goto error;
+	}
 
-    if (H5Gclose(groups)<0) goto error;
-    if (H5Dclose(dset)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
-    PASSED();
-    h5_cleanup(FILENAME, fapl);
+	if (H5Gclose(groups)<0) goto error;
+	if (H5Dclose(dset)<0) goto error;
+	if (H5Fclose(file)<0) goto error;
+	PASSED();
+	h5_cleanup(FILENAME, fapl);
+    }
+    else
+    {
+        SKIPPED();
+        puts("    Test not compatible with current Virtual File Driver");
+    }
     return 0;
 
- error:
-    return 1;
+    error:
+        return 1;
 }
 
 

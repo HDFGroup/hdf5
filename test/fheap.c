@@ -16428,6 +16428,7 @@ main(void)
     unsigned    u;                      /* Local index variable */
     unsigned	nerrors = 0;            /* Cumulative error count */
     int		ExpressMode;
+    const char *envval = NULL;          /* File Driver value from environment */
 
     /* Reset library */
     h5_reset();
@@ -16435,6 +16436,12 @@ main(void)
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
 	printf("***Express test mode on.  Some tests may be skipped\n");
+
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family"))
+    {
 
     /* Initialize heap's creation parameters */
     init_small_cparam(&cparam);
@@ -16711,6 +16718,10 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #else /* QAK */
 HDfprintf(stderr, "Uncomment cleanup!\n");
 #endif /* QAK */
+    } /* end if(HDstrcmp(envval=="...")) */
+    else {
+        printf("All fractal heap tests skipped - Incompatible with current Virtual File Driver");
+    }
 
     return 0;
 

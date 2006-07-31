@@ -1459,38 +1459,49 @@ main(void)
 {
     int		nerrors = 0;
     hid_t	fapl;
+    const char  *envval = NULL;
 
-    h5_reset();
-    fapl = h5_fileaccess();
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
+	h5_reset();
+	fapl = h5_fileaccess();
 
-    /* The tests... */
-    nerrors += mklinks(fapl) < 0 ? 1 : 0;
-    nerrors += cklinks(fapl) < 0 ? 1 : 0;
-    nerrors += new_links(fapl) < 0 ? 1 : 0;
-    nerrors += ck_new_links(fapl) < 0 ? 1 : 0;
-    nerrors += long_links(fapl) < 0 ? 1 : 0;
-    nerrors += toomany(fapl) < 0 ? 1 : 0;
+	/* The tests... */
+	nerrors += mklinks(fapl) < 0 ? 1 : 0;
+	nerrors += cklinks(fapl) < 0 ? 1 : 0;
+	nerrors += new_links(fapl) < 0 ? 1 : 0;
+	nerrors += ck_new_links(fapl) < 0 ? 1 : 0;
+	nerrors += long_links(fapl) < 0 ? 1 : 0;
+	nerrors += toomany(fapl) < 0 ? 1 : 0;
 
-    /* Test new H5L link creation routine */
+	/* Test new H5L link creation routine */
 #ifdef H5_GROUP_REVISION
-    nerrors += test_h5l_create(fapl);
-    nerrors += test_lcpl(fapl);
+	nerrors += test_h5l_create(fapl);
+	nerrors += test_lcpl(fapl);
 #endif
-    nerrors += test_move(fapl);
-    nerrors += test_copy(fapl);
+	nerrors += test_move(fapl);
+	nerrors += test_copy(fapl);
 #ifdef H5_GROUP_REVISION
-    nerrors += test_move_preserves(fapl);
+	nerrors += test_move_preserves(fapl);
 #endif
-    nerrors += test_compat(fapl);
+	nerrors += test_compat(fapl);
 
-    /* Results */
-    if (nerrors) {
-	printf("***** %d LINK TEST%s FAILED! *****\n",
-	       nerrors, 1 == nerrors ? "" : "S");
-	exit(1);
+	/* Results */
+	if (nerrors) {
+	    printf("***** %d LINK TEST%s FAILED! *****\n",
+		    nerrors, 1 == nerrors ? "" : "S");
+	    exit(1);
+	}
+	printf("All link tests passed.\n");
+	h5_cleanup(FILENAME, fapl);
     }
-    printf("All link tests passed.\n");
-    h5_cleanup(FILENAME, fapl);
+    else
+    {
+        puts("All link tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
+
 }
 

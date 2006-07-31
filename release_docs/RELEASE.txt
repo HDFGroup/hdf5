@@ -45,6 +45,9 @@ New Features
 
     Configuration:
     --------------
+        - 'make check-vfd' can now be run from the top level directory. Not all
+          tests that 'make check' invokes work with certain Virtual File Drivers,
+          so those tests have been skipped. - MAM 2006/7/17  
         - Added the variable HDF5TestExpress to control how long tests run.
           Setting it to a value between 0 and 3 controls how thoroughly the
           library is tested, with 0 being an "exhaustive run" and 3 being a

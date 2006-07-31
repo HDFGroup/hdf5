@@ -2144,75 +2144,87 @@ main(void)
     hid_t	fapl, fapl2, file;
     int		nerrors = 0;
     char	filename[1024];
+    const char *envval = NULL;
 
-    /* Metadata cache parameters */
-    int mdc_nelmts;
-    size_t rdcc_nelmts;
-    size_t rdcc_nbytes;
-    double rdcc_w0;
+    /* Don't run this test using the wrong file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+	/* Metadata cache parameters */
+	int mdc_nelmts;
+	size_t rdcc_nelmts;
+	size_t rdcc_nbytes;
+	double rdcc_w0;
 
-    /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+	/* Set the random # seed */
+	HDsrandom((unsigned long)HDtime(NULL));
 
-    /* Open */
-    h5_reset();
-    fapl = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	/* Open */
+	h5_reset();
+	fapl = h5_fileaccess();
+	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
 
-    /* Make copy of regular fapl, to turn down the elements in the metadata cache */
-    if((fapl2=H5Pcopy(fapl))<0)
-        goto error;
+	/* Make copy of regular fapl, to turn down the elements in the metadata cache */
+	if((fapl2=H5Pcopy(fapl))<0)
+	    goto error;
 
-    /* Get FAPL cache settings */
-    if(H5Pget_cache(fapl2,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0)<0)
-        printf("H5Pget_cache failed\n");
+	/* Get FAPL cache settings */
+	if(H5Pget_cache(fapl2,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0)<0)
+	    printf("H5Pget_cache failed\n");
 
-    /* Change FAPL cache settings */
-    mdc_nelmts=1;
-    if(H5Pset_cache(fapl2,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)<0)
-        printf("H5Pset_cache failed\n");
+	/* Change FAPL cache settings */
+	mdc_nelmts=1;
+	if(H5Pset_cache(fapl2,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)<0)
+	    printf("H5Pset_cache failed\n");
 
-    /* Tests */
-    nerrors += test_one(file);
-    nerrors += test_many(file);
-    nerrors += test_symlink(file);
-    nerrors += test_rename(file);
-    nerrors += test_new_move();
-    nerrors += check_new_move();
-    nerrors += test_filespace();
+	/* Tests */
+	nerrors += test_one(file);
+	nerrors += test_many(file);
+	nerrors += test_symlink(file);
+	nerrors += test_rename(file);
+	nerrors += test_new_move();
+	nerrors += check_new_move();
+	nerrors += test_filespace();
 
-    /* Test creating & unlinking lots of objects with default FAPL */
-    nerrors += test_create_unlink("create and unlink large number of objects",fapl);
-    /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
-    nerrors += test_create_unlink("create and unlink large number of objects with small cache",fapl2);
+	/* Test creating & unlinking lots of objects with default FAPL */
+	nerrors += test_create_unlink("create and unlink large number of objects",fapl);
+	/* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
+	nerrors += test_create_unlink("create and unlink large number of objects with small cache",fapl2);
 
-    nerrors += test_link_slashes();
-    nerrors += test_unlink_slashes();
+	nerrors += test_link_slashes();
+	nerrors += test_unlink_slashes();
 
-    /* Test specific B-tree removal issues */
-    nerrors += test_unlink_rightleaf(file);
-    nerrors += test_unlink_rightnode(file);
-    nerrors += test_unlink_middlenode(file);
+	/* Test specific B-tree removal issues */
+	nerrors += test_unlink_rightleaf(file);
+	nerrors += test_unlink_rightnode(file);
+	nerrors += test_unlink_middlenode(file);
 
-    /* Test "resurrecting" objects */
-    nerrors += test_resurrect_dataset();
-    nerrors += test_resurrect_datatype();
-    nerrors += test_resurrect_group();
+	/* Test "resurrecting" objects */
+	nerrors += test_resurrect_dataset();
+	nerrors += test_resurrect_datatype();
+	nerrors += test_resurrect_group();
 
-    /* Test unlinking chunked datasets */
-    nerrors += test_unlink_chunked_dataset();
+	/* Test unlinking chunked datasets */
+	nerrors += test_unlink_chunked_dataset();
 
-    /* Close */
-    if (H5Pclose(fapl2)<0) TEST_ERROR;
-    if (H5Fclose(file)<0) TEST_ERROR;
-    if (nerrors) {
-	printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
-	exit(1);
+	/* Close */
+	if (H5Pclose(fapl2)<0) TEST_ERROR;
+	if (H5Fclose(file)<0) TEST_ERROR;
+	if (nerrors) {
+	    printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
+	    exit(1);
+	}
+	puts("All unlink tests passed.");
+	h5_cleanup(FILENAME, fapl);
     }
-    puts("All unlink tests passed.");
-    h5_cleanup(FILENAME, fapl);
+    else
+    {
+        puts("All unlink tests skipped - Incompatible with current Virtual File Driver");
+    }
     return 0;
- error:
-    return 1;
+
+    error:
+	return 1;
 }

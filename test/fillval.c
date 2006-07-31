@@ -1410,56 +1410,67 @@ int
 main(int argc, char *argv[])
 {
     int		nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;
+    const char  *envval = NULL;
     hid_t	fapl=-1;
 
-    if (argc>=2) {
-	test_contig = test_chunk = test_compact = 0;
-	for (argno=1; argno<argc; argno++) {
-	    if (!strcmp(argv[argno], "contiguous")) {
-		test_contig = 1;
-	    } else if (!strcmp(argv[argno], "chunked")) {
-		test_chunk = 1;
-	    } else if (!strcmp(argv[argno], "compact")) {
-                test_compact =1;
-            } else {
-		fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-		exit(1);
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
+        if (argc>=2) {
+	    test_contig = test_chunk = test_compact = 0;
+	    for (argno=1; argno<argc; argno++) {
+		if (!strcmp(argv[argno], "contiguous")) {
+		    test_contig = 1;
+		} else if (!strcmp(argv[argno], "chunked")) {
+		    test_chunk = 1;
+		} else if (!strcmp(argv[argno], "compact")) {
+		    test_compact =1;
+		} else {
+		    fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
+		    exit(1);
+		}
 	    }
 	}
+
+	h5_reset();
+	fapl = h5_fileaccess();
+
+	nerrors += test_getset();
+
+	/* Chunked storage layout tests */
+	if (test_chunk) {
+	    nerrors += test_create(fapl, FILENAME[0], H5D_CHUNKED);
+	    nerrors += test_rdwr  (fapl, FILENAME[2], H5D_CHUNKED);
+	    nerrors += test_extend(fapl, FILENAME[4], H5D_CHUNKED);
+	}
+
+	/* Contiguous storage layout tests */
+	if (test_contig) {
+	    nerrors += test_create(fapl, FILENAME[1], H5D_CONTIGUOUS);
+	    nerrors += test_rdwr  (fapl, FILENAME[3], H5D_CONTIGUOUS);
+	    nerrors += test_extend(fapl, FILENAME[5], H5D_CONTIGUOUS);
+	    nerrors += test_compatible();
+	}
+
+	/* Compact dataset storage tests */
+	if (test_compact) {
+	    nerrors += test_create(fapl, FILENAME[6], H5D_COMPACT);
+	    nerrors += test_rdwr  (fapl, FILENAME[7], H5D_COMPACT);
+	}
+
+	if (nerrors) goto error;
+	puts("All fill value tests passed.");
+	if (h5_cleanup(FILENAME, fapl)) remove(FILE_NAME_RAW);
     }
-
-    h5_reset();
-    fapl = h5_fileaccess();
-
-    nerrors += test_getset();
-
-    /* Chunked storage layout tests */
-    if (test_chunk) {
-	nerrors += test_create(fapl, FILENAME[0], H5D_CHUNKED);
-	nerrors += test_rdwr  (fapl, FILENAME[2], H5D_CHUNKED);
-	nerrors += test_extend(fapl, FILENAME[4], H5D_CHUNKED);
+    else
+    {
+        puts("All fill value tests skipped - Incompatible with current Virtual File Driver");
     }
-
-    /* Contiguous storage layout tests */
-    if (test_contig) {
-	nerrors += test_create(fapl, FILENAME[1], H5D_CONTIGUOUS);
-	nerrors += test_rdwr  (fapl, FILENAME[3], H5D_CONTIGUOUS);
-	nerrors += test_extend(fapl, FILENAME[5], H5D_CONTIGUOUS);
-	nerrors += test_compatible();
-    }
-
-    /* Compact dataset storage tests */
-    if (test_compact) {
-        nerrors += test_create(fapl, FILENAME[6], H5D_COMPACT);
-        nerrors += test_rdwr  (fapl, FILENAME[7], H5D_COMPACT);
-    }
-
-    if (nerrors) goto error;
-    puts("All fill value tests passed.");
-    if (h5_cleanup(FILENAME, fapl)) remove(FILE_NAME_RAW);
     return 0;
 
- error:
-    puts("***** FILL VALUE TESTS FAILED *****");
-    return 1;
+    error:
+        puts("***** FILL VALUE TESTS FAILED *****");
+        return 1;
+
 }

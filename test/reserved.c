@@ -424,18 +424,30 @@ main(void)
 {
     int num_errs=0;
     hid_t fapl;
+    const char *envval = NULL;
 
-    num_errs+=rsrv_ohdr();
-    num_errs+=rsrv_heap();
-    num_errs+=rsrv_vlen();
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL) 
+        envval = "nomatch";
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+	num_errs+=rsrv_ohdr();
+	num_errs+=rsrv_heap();
+	num_errs+=rsrv_vlen();
 
-    if(num_errs > 0)
-        printf("**** %d FAILURE%s! ****\n", num_errs, num_errs==1?"":"S");
+	if(num_errs > 0)
+	    printf("**** %d FAILURE%s! ****\n", num_errs, num_errs==1?"":"S");
+	else
+	    puts("All address space reservation tests passed.");
+
+	fapl = h5_fileaccess();
+	h5_cleanup(FILENAME, fapl);
+	return num_errs;
+    }
     else
-        puts("All address space reservation tests passed.");
+    {
+        puts("All address space reservation tests skippped - Incompatible with current Virtual File Driver");
+    }
+    return 0;
 
-    fapl = h5_fileaccess();
-    h5_cleanup(FILENAME, fapl);
-    return num_errs;
 }
 
