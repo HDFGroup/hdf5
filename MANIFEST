@@ -1089,9 +1089,10 @@
 ./tools/testfiles/tvms.ddl
 ./tools/testfiles/tldouble.h5
 ./tools/testfiles/tvms.h5
-./tools/testfiles/tbin.ddl
+./tools/testfiles/tbin1.ddl
 ./tools/testfiles/tbin2.ddl
 ./tools/testfiles/tbin3.ddl
+./tools/testfiles/tbin4.ddl
 
 
 # Expected output from h5ls tests

@@ -598,7 +598,10 @@ usage(const char *prog)
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -b F                 Output raw data into file F in binary form (use with -d)\n");
-    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type, DI for the disk file type, LI or BI for pre-existing little or big endian types)\n");
+    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type,\n");
+    fprintf(stdout, "                          DI for the disk file type, LE or BE for pre-existing little or big endian types)\n");
+    fprintf(stdout, "                          E.g., to dump a dataset called 'integer' in a file called `test1.h5', use\n");
+    fprintf(stdout, "                          h5dump -b bin.out -F LE -d integer test1.h5\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -2725,9 +2728,9 @@ set_binary_form(const char *form)
   bform = 0;
  else if (strcmp(form,"DI")==0) /* file type form */
   bform = 1;
- else if (strcmp(form,"LI")==0) /* convert to little endian */
+ else if (strcmp(form,"LE")==0) /* convert to little endian */
   bform = 2;
- else if (strcmp(form,"BI")==0) /* convert to big endian */
+ else if (strcmp(form,"BE")==0) /* convert to big endian */
   bform = 3;
 
 

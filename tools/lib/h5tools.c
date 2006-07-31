@@ -1736,7 +1736,6 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
  }
  else 
  {
-  /* all other types get printed as hexadecimal */
   size_t i;
   if (1==size) 
   {

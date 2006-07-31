@@ -21,7 +21,10 @@ usage: h5dump [OPTIONS] file
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -o F, --output=F     Output raw data into file F
      -b F                 Output raw data into file F in binary form (use with -d)
-     -F T                 Form of binary output (T can be NA for native type, DI for the disk file type, LI or BI for pre-existing little or big endian types)
+     -F T                 Form of binary output (T can be NA for native type,
+                          DI for the disk file type, LE or BE for pre-existing little or big endian types)
+                          E.g., to dump a dataset called 'integer' in a file called `test1.h5', use
+                          h5dump -b bin.out -F LE -d integer test1.h5
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
      -x, --xml            Output in XML using Schema

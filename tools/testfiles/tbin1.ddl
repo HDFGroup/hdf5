@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d integer -b out3.bin -F LE test1.h5'
+Expected output for 'h5dump -d integer -b out1.bin test1.h5'
 #############################
 HDF5 "test1.h5" {
 DATASET "integer" {

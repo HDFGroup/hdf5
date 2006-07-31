@@ -321,9 +321,10 @@ TOOLTEST tlonglinks.ddl tlonglinks.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST tbin.ddl -d integer -b out.bin test1.h5
+TOOLTEST tbin1.ddl -d integer -b out1.bin test1.h5
 TOOLTEST tbin2.ddl -d integer -b out2.bin -F DI test1.h5
-TOOLTEST tbin3.ddl -d integer -b out3.bin -F LI test1.h5
+TOOLTEST tbin3.ddl -d integer -b out3.bin -F LE test1.h5
+TOOLTEST tbin4.ddl -d integer -b out4.bin -F BE test1.h5
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
