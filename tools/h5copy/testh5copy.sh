@@ -45,8 +45,12 @@ TOOLTEST() {
     
  TESTING $H5COPY $@
  (
-  cd $srcdir/../testfiles
-  $RUNSERIAL $H5COPY_BIN $@
+    echo "#############################"
+    echo " output for '$H5COPY $@'" 
+    echo "#############################"
+    cd $srcdir/../testfiles
+#	echo " pwd = `pwd`" 
+    $RUNSERIAL $H5COPY_BIN $@
  ) > output.out
  RET=$?
  if [ $RET != 0 ] ; then
@@ -65,8 +69,8 @@ TOOLTEST() {
 #TOOLTEST -v test1.h5/integer test1.out.h5/integer_copy
 #TOOLTEST -v test1.h5/g1 test1.out.h5/g1
 
-#if test $nerrors -eq 0 ; then
-#    echo "All h5copy tests passed."
-#fi
+if test $nerrors -eq 0 ; then
+    echo "All h5copy tests passed."
+fi
 
 exit $nerrors

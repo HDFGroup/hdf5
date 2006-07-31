@@ -19,6 +19,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if 0
+#define H5COPY_DEBUG
+#endif
+
 const char *progname="h5copy";
 int   d_status;
 
@@ -153,6 +157,9 @@ main (int argc, const char *argv[])
  int          verbose=0;
  hid_t        pid; 
  char         str_flag[20];
+
+ /* initialize h5tools lib */
+ h5tools_init();
  
  /* switches come before non-switch arguments */
  for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) 
@@ -209,6 +216,9 @@ main (int argc, const char *argv[])
 
  while (fname_src && *fname_src) 
  {
+#ifdef H5COPY_DEBUG
+ printf("%s\n",fname_src);
+#endif
   fid_src = h5tools_fopen(fname_src, NULL, NULL, 0, argc, argv);
   
   if (fid_src>=0) 
@@ -240,7 +250,7 @@ main (int argc, const char *argv[])
  }
 
 /*-------------------------------------------------------------------------
- * last argument, same logic, but the file does not exist, so we attempt to
+ * last argument, same logic, but the file might not exist, so we attempt to
  * create one instead
  *-------------------------------------------------------------------------*/
 
@@ -341,6 +351,8 @@ main (int argc, const char *argv[])
   free(fname_src);
  if (fname_dst)
   free(fname_dst);
+
+ h5tools_close();
  
 
  return 0;
@@ -356,6 +368,8 @@ error:
   free(fname_src);
  if (fname_dst)
   free(fname_dst);
+
+ h5tools_close();
  
  
  return 1;
