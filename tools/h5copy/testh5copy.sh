@@ -33,8 +33,8 @@ test -d ../testfiles || mkdir ../testfiles
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 TESTING() {
-    SPACES="                                                               "
-    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+	SPACES="                                                               "
+	    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*. If h5copy can complete
@@ -42,32 +42,31 @@ TESTING() {
 # the `nerrors' global variable.
 
 TOOLTEST() {
-    
- TESTING $H5COPY $@
- (
-    echo "#############################"
-    echo " output for '$H5COPY $@'" 
-    echo "#############################"
-    cd $srcdir/../testfiles
-#	echo " pwd = `pwd`" 
-    $RUNSERIAL $H5COPY_BIN $@
- ) > output.out
- RET=$?
- if [ $RET != 0 ] ; then
-  echo "*FAILED*"
-  nerrors="`expr $nerrors + 1`"
- else
-  echo " PASSED"
- fi
+    TESTING $H5COPY $@
+    (
+	echo "#############################"
+	echo " output for '$H5COPY $@'"
+	echo "#############################"
+	$RUNSERIAL $H5COPY_BIN $@
+    ) > output.out
+    RET=$?
+    if [ $RET != 0 ] ; then
+	echo "*FAILED*"
+	echo "failed result is:"
+	cat output.out
+	nerrors="`expr $nerrors + 1`"
+    else
+	echo " PASSED"
+    fi
 }
 
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-#TOOLTEST -v test1.h5/array test1.out.h5/array
-#TOOLTEST -v test1.h5/integer test1.out.h5/integer_copy
-#TOOLTEST -v test1.h5/g1 test1.out.h5/g1
+TOOLTEST -v $srcdir/../testfiles/test1.h5/array test1.out.h5/array
+TOOLTEST -v $srcdir/../testfiles/test1.h5/integer test1.out.h5/integer_copy
+TOOLTEST -v $srcdir/../testfiles/test1.h5/g1 test1.out.h5/g1
 
 if test $nerrors -eq 0 ; then
     echo "All h5copy tests passed."
