@@ -1441,6 +1441,8 @@
 ./vms/test/make.com
 
 ./vms/make.com
+./vms/tools/h5copy/make.com
+./vms/tools/h5copy/check_h5copy.com
 ./vms/tools/h5dump/make.com
 ./vms/tools/h5dump/check.com
 ./vms/tools/h5dump/check_h5dump.com

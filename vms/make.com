@@ -26,6 +26,7 @@ $ copy [.src]make.com           [-.src]
 $ copy [.src]h5pubconf.h        [-.src]
 $ copy [.test]*.com             [-.test]
 $ copy [.examples]*.com         [-.examples]
+$ copy [.tools.h5copy]*.com     [-.tools.h5copy]
 $ copy [.tools.h5dump]*.com     [-.tools.h5dump]
 $ copy [.tools.h5ls]*.com       [-.tools.h5ls]
 $ copy [.tools.h5diff]*.com     [-.tools.h5diff]
@@ -56,6 +57,7 @@ $ hdf5src              = hdf5top_dir + "SRC]"
 $ hdf5test             = hdf5top_dir + "TEST]"
 $ hdf5examples         = hdf5top_dir + "EXAMPLES]"
 $ hdf5tools_lib        = hdf5top_dir + "TOOLS.LIB]"
+$ hdf5tools_h5copy     = hdf5top_dir + "TOOLS.H5COPY]"
 $ hdf5tools_h5diff     = hdf5top_dir + "TOOLS.H5DIFF]"
 $ hdf5tools_h5dump     = hdf5top_dir + "TOOLS.H5DUMP]"
 $ hdf5tools_h5ls       = hdf5top_dir + "TOOLS.H5LS]"
@@ -80,6 +82,10 @@ $ @make.com
 $!
 $ write sys$output "Building tools library"
 $ set def 'hdf5tools_lib'
+$ @make.com
+$!
+$ write sys$output "Building h5copy"
+$ set def 'hdf5tools_h5copy'
 $ @make.com
 $!
 $ write sys$output "Building h5diff"
