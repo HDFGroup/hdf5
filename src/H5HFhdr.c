@@ -364,9 +364,6 @@ H5HF_hdr_incr(H5HF_hdr_t *hdr)
     /* Sanity check */
     HDassert(hdr);
 
-/* XXX: When "un-evictable" feature is finished, mark the header as
- *      unevictable on the first block to share it.  - QAK
- */
     /* Mark header as un-evictable when a block is depending on it */
     if(hdr->rc == 0)
         if(H5AC_pin_protected_entry(hdr->f, hdr) < 0)

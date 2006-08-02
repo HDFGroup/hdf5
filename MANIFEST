@@ -481,6 +481,7 @@
 ./src/H5FSpkg.h
 ./src/H5FSprivate.h
 ./src/H5FSpublic.h
+./src/H5FSsection.c
 ./src/H5G.c
 ./src/H5Gdeprec.c
 ./src/H5Gent.c

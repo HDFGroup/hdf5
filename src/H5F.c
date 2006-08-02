@@ -27,7 +27,6 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5FSprivate.h"	/* File free space                      */
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -2332,13 +2331,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         for (i = 0; i < f->mtab.nmounts; i++)
             if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
                 nerrors++;
-
-    /* Flush any cached free space info */
-    /* (Make certain that this is before the metadata cache flush, so the
-     *  updated free space info in the metadata cache gets flushed out to disk)
-     */
-    if (H5FS_flush(f, dxpl_id, flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush free space info")
 
     /* Flush any cached dataset storage raw data */
     if (H5D_flush(f, dxpl_id, flags) < 0)

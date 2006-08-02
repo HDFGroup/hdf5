@@ -312,9 +312,9 @@ main(int argc, char *argv[])
          * Debug a free space header.
          */
 
-        status = H5FS_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5FS_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(!HDmemcmp(sig, H5FS_SECTS_MAGIC, H5FS_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, H5FS_SIZEOF_MAGIC)) {
         /*
          * Debug free space serialized sections.
          */

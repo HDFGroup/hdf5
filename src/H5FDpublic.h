@@ -69,7 +69,7 @@ typedef enum H5FD_mem_t {
  *      -QAK
  */
 #define H5FD_MEM_FSPACE_HDR     H5FD_MEM_OHDR
-#define H5FD_MEM_FSPACE_SECTS   H5FD_MEM_LHEAP
+#define H5FD_MEM_FSPACE_SINFO   H5FD_MEM_LHEAP
 
 /*
  * A free-list map which maps all types of allocation requests to a single

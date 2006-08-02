@@ -177,7 +177,7 @@ H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
     udata.dxpl_id = dxpl_id;
 
     /* Add to the free space for the heap */
-    if(H5FS_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
+    if(H5FS_sect_add(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node, flags, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't add section to heap free space")
 
 done:
@@ -221,7 +221,7 @@ H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_secti
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
     /* Search for free space in the heap */
-    if((node_found = H5FS_find(hdr->f, dxpl_id, hdr->fspace, request, (H5FS_section_info_t **)node)) < 0)
+    if((node_found = H5FS_sect_find(hdr->f, dxpl_id, hdr->fspace, request, (H5FS_section_info_t **)node)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
 
     /* Set return value */
@@ -261,7 +261,7 @@ H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
     HDassert(node);
 
     /* Remove from the free space for the heap */
-    if(H5FS_remove(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node) < 0)
+    if(H5FS_sect_remove(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)node) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove section from heap free space")
 
 done:
@@ -341,7 +341,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned new_class)
+H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect, unsigned new_class)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -358,7 +358,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(sect);
 
     /* Notify the free space manager that a section has changed class */
-    if(H5FS_sect_change_class(hdr->fspace, (H5FS_section_info_t *)sect, new_class) < 0)
+    if(H5FS_sect_change_class(hdr->f, dxpl_id, hdr->fspace, (H5FS_section_info_t *)sect, new_class) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, FAIL, "can't modify class of free space section")
 
 done:

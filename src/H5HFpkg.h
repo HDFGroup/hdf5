@@ -530,8 +530,8 @@ H5_DLL herr_t H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node);
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
-H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
-    unsigned new_class);
+H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect, unsigned new_class);
 
 /* Free space section routines */
 H5_DLL H5HF_free_section_t *H5HF_sect_single_new(hsize_t sect_off,
@@ -559,7 +559,6 @@ H5_DLL unsigned H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos);
 H5_DLL hsize_t H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row);
 H5_DLL hsize_t H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row);
 H5_DLL herr_t H5HF_get_id_off_test(const H5HF_t *fh, const void *id, hsize_t *obj_off);
-H5_DLL herr_t H5HF_debug_test(const H5HF_t *fh);
 #endif /* H5HF_TESTING */
 
 #endif /* _H5HFpkg_H */

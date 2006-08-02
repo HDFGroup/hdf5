@@ -32,7 +32,6 @@
 /* Private headers needed by this file */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
 /* Library Private Macros */
@@ -151,29 +150,31 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
+
+/* Free space manager routines */
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr,
     const H5FS_create_t *fs_create, size_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata);
 H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
     size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata);
-H5_DLL herr_t H5FS_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *node, unsigned flags, void *op_data);
-H5_DLL herr_t H5FS_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *node);
-H5_DLL htri_t H5FS_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    hsize_t request, H5FS_section_info_t **node);
-H5_DLL herr_t H5FS_iterate(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_operator_t op, void *op_data);
-H5_DLL herr_t H5FS_get_sect_count(const H5FS_t *fspace, hsize_t *nsects);
-H5_DLL herr_t H5FS_sect_change_class(H5FS_t *fspace, H5FS_section_info_t *sect,
-    unsigned new_class);
-H5_DLL herr_t H5FS_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
+
+/* Free space section routines */
+H5_DLL herr_t H5FS_sect_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    H5FS_section_info_t *node, unsigned flags, void *op_data);
+H5_DLL herr_t H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    H5FS_section_info_t *node);
+H5_DLL htri_t H5FS_sect_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    hsize_t request, H5FS_section_info_t **node);
+H5_DLL herr_t H5FS_sect_iterate(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_operator_t op, void *op_data);
+H5_DLL herr_t H5FS_get_sect_count(const H5FS_t *fspace, hsize_t *nsects);
+H5_DLL herr_t H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
+    H5FS_section_info_t *sect, unsigned new_class);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect,
     FILE *stream, int indent, int fwidth);
 
-H5_DLL herr_t H5FS_debug_test(const H5FS_t *fspace);
 #endif /* _H5FSprivate_H */
 

@@ -102,7 +102,8 @@ static herr_t H5HF_sect_single_valid(const H5FS_section_class_t *cls,
 static H5HF_free_section_t *H5HF_sect_row_create(haddr_t sect_off,
     hsize_t sect_size, hbool_t is_first, unsigned row, unsigned col,
     unsigned nentries, H5HF_free_section_t *under_sect);
-static herr_t H5HF_sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
+static herr_t H5HF_sect_row_first(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect);
 static herr_t H5HF_sect_row_from_single(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect, H5HF_direct_t *dblock);
 static herr_t H5HF_sect_row_free_real(H5HF_free_section_t *sect);
@@ -145,11 +146,12 @@ static herr_t H5HF_sect_indirect_revive_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
 static herr_t H5HF_sect_indirect_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, H5HF_indirect_t *sect_iblock);
-static herr_t H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr,
+static herr_t H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *row_sect, hbool_t *alloc_from_start);
-static herr_t H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr,
+static herr_t H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, unsigned child_entry);
-static herr_t H5HF_sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
+static herr_t H5HF_sect_indirect_first(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect);
 static hbool_t H5HF_sect_indirect_is_first(H5HF_free_section_t *sect);
 static H5HF_indirect_t * H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect);
 static hsize_t H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect);
@@ -333,6 +335,10 @@ H5HF_sect_init_cls(H5FS_section_class_t *cls, H5HF_hdr_t *hdr)
     cls_prvt->hdr = hdr;
     cls->cls_private = cls_prvt;
 
+    /* Increment reference count on heap header */
+    if(H5HF_hdr_incr(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared heap header")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_sect_init_cls() */
@@ -354,15 +360,26 @@ done:
 static herr_t
 H5HF_sect_term_cls(H5FS_section_class_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_term_cls)
+    H5HF_sect_private_t *cls_prvt;      /* Pointer to class private info */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_term_cls)
 
     /* Check arguments. */
     HDassert(cls);
 
-    /* Free the class private information */
-    cls->cls_private = H5MM_xfree(cls->cls_private);
+    /* Get pointer to class private info */
+    cls_prvt = cls->cls_private;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* Decrement reference count on heap header */
+    if(H5HF_hdr_decr(cls_prvt->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+
+    /* Free the class private information */
+    cls->cls_private = H5MM_xfree(cls_prvt);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_sect_term_cls() */
 
 
@@ -1372,7 +1389,7 @@ HDfprintf(stderr, "%s: sect->u.row = {%p, %u, %u, %u, %t}\n", FUNC, sect->u.row.
 
     /* Forward row section to indirect routines, to handle reducing underlying indirect section */
     alloc_from_start = FALSE;
-    if(H5HF_sect_indirect_reduce_row(hdr, sect, &alloc_from_start) < 0)
+    if(H5HF_sect_indirect_reduce_row(hdr, dxpl_id, sect, &alloc_from_start) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce underlying section")
 
     /* Determine entry allocated */
@@ -1427,7 +1444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
+H5HF_sect_row_first(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1446,7 +1463,7 @@ H5HF_sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
         sect->sect_info.type = H5HF_FSPACE_SECT_FIRST_ROW;
     else {
         /* Change row section to be the "first row" */
-        if(H5HF_space_sect_change_class(hdr, sect, H5HF_FSPACE_SECT_FIRST_ROW) < 0)
+        if(H5HF_space_sect_change_class(hdr, dxpl_id, sect, H5HF_FSPACE_SECT_FIRST_ROW) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row")
     } /* end else */
 
@@ -2602,6 +2619,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize indirect section")
 
                 /* If we have a valid child indirect block, release it now */
+                /* (will be pinned, if rows reference it) */
                 if(child_iblock)
                     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, child_iblock->addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
@@ -2934,7 +2952,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect,
+H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *row_sect,
     hbool_t *alloc_from_start)
 {
     H5HF_free_section_t *sect;          /* Indirect section underlying row section */
@@ -3015,14 +3033,14 @@ HDfprintf(stderr, "%s: row_entry = %u\n", FUNC, row_entry);
         is_first = H5HF_sect_indirect_is_first(sect);
 
         /* Remove this indirect section from parent indirect section */
-        if(H5HF_sect_indirect_reduce(hdr, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
+        if(H5HF_sect_indirect_reduce(hdr, dxpl_id, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section")
         sect->u.indirect.parent = NULL;
         sect->u.indirect.par_entry = 0;
 
         /* If we weren't the first section, set "first row" for this indirect section */
         if(!is_first)
-            if(H5HF_sect_indirect_first(hdr, sect) < 0)
+            if(H5HF_sect_indirect_first(hdr, dxpl_id, sect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section")
     } /* end if */
 
@@ -3063,7 +3081,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.dir_nrows = %u\n", FUNC, sect->u.indirec
 
                     /* Make new "first row" in indirect section */
                     if(row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW)
-                        if(H5HF_sect_row_first(hdr, sect->u.indirect.dir_rows[0]) < 0)
+                        if(H5HF_sect_row_first(hdr, dxpl_id, sect->u.indirect.dir_rows[0]) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section")
                 } /* end if */
                 else {
@@ -3076,7 +3094,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.dir_nrows = %u\n", FUNC, sect->u.indirec
 
                     /* Make new "first row" in indirect section */
                     if(row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW)
-                        if(H5HF_sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
+                        if(H5HF_sect_indirect_first(hdr, dxpl_id, sect->u.indirect.indir_ents[0]) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for child indirect section")
                 } /* end else */
             } /* end if */
@@ -3233,7 +3251,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
+H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect,
     unsigned child_entry)
 {
     unsigned start_entry;               /* Entry for first block covered */
@@ -3281,14 +3299,14 @@ HDfprintf(stderr, "%s: end_entry = %u, end_row = %u, end_col = %u\n", FUNC, end_
             is_first = H5HF_sect_indirect_is_first(sect);
 
             /* Reduce parent indirect section */
-            if(H5HF_sect_indirect_reduce(hdr, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
+            if(H5HF_sect_indirect_reduce(hdr, dxpl_id, sect->u.indirect.parent, sect->u.indirect.par_entry) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce parent indirect section")
             sect->u.indirect.parent = NULL;
             sect->u.indirect.par_entry = 0;
 
             /* If we weren't the first section, set "first row" for this indirect section */
             if(!is_first)
-                if(H5HF_sect_indirect_first(hdr, sect) < 0)
+                if(H5HF_sect_indirect_first(hdr, dxpl_id, sect) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for indirect section")
         } /* end if */
 
@@ -3323,7 +3341,7 @@ HDfprintf(stderr, "%s: Child is at start of indirect section\n", FUNC);
             HDassert(sect->u.indirect.indir_ents[0]);
 
             /* Make new "first row" in new first indirect child section */
-            if(H5HF_sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
+            if(H5HF_sect_indirect_first(hdr, dxpl_id, sect->u.indirect.indir_ents[0]) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for child indirect section")
         } /* end if */
         else if(child_entry == end_entry) {
@@ -3436,7 +3454,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.indir_nents = %u\n", FUNC, sect->u.indir
                 peer_sect->u.indirect.indir_ents[u]->u.indirect.parent = peer_sect;
 
             /* Make new "first row" in peer section */
-            if(H5HF_sect_indirect_first(hdr, peer_sect->u.indirect.indir_ents[0]) < 0)
+            if(H5HF_sect_indirect_first(hdr, dxpl_id, peer_sect->u.indirect.indir_ents[0]) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't make new 'first row' for peer indirect section")
 
             /* Adjust reference counts for current & peer sections */
@@ -3512,7 +3530,7 @@ H5HF_sect_indirect_is_first(H5HF_free_section_t *sect)
         ret_value = TRUE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_sect_indirect_first() */
+} /* end H5HF_sect_indirect_is_first() */
 
 
 /*-------------------------------------------------------------------------
@@ -3529,7 +3547,7 @@ H5HF_sect_indirect_is_first(H5HF_free_section_t *sect)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
+H5HF_sect_indirect_first(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -3548,7 +3566,7 @@ H5HF_sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
         HDassert(sect->u.indirect.dir_rows[0]);
 
         /* Change first row section in indirect section to be the "first row" */
-        if(H5HF_sect_row_first(hdr, sect->u.indirect.dir_rows[0]) < 0)
+        if(H5HF_sect_row_first(hdr, dxpl_id, sect->u.indirect.dir_rows[0]) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set row section to be first row")
     } /* end if */
     else {
@@ -3558,7 +3576,7 @@ H5HF_sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
         HDassert(sect->u.indirect.indir_ents[0]);
 
         /* Forward to first child indirect section */
-        if(H5HF_sect_indirect_first(hdr, sect->u.indirect.indir_ents[0]) < 0)
+        if(H5HF_sect_indirect_first(hdr, dxpl_id, sect->u.indirect.indir_ents[0]) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set child indirect section to be first row")
     } /* end else */
 

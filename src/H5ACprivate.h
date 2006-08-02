@@ -58,6 +58,7 @@ typedef enum {
     H5AC_FHEAP_DBLOCK_ID, /*fractal heap direct block		     */
     H5AC_FHEAP_IBLOCK_ID, /*fractal heap indirect block		     */
     H5AC_FSPACE_HDR_ID,	/*free space header			     */
+    H5AC_FSPACE_SINFO_ID,/*free space sections			     */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;

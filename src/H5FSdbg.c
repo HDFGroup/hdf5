@@ -74,9 +74,9 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_hdr_debug
+ * Function:	H5FS_debug
  *
- * Purpose:	Prints debugging info about a free space header.
+ * Purpose:	Prints debugging info about a free space manager.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -87,12 +87,13 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
+H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    H5FS_hdr_t	*hdr = NULL;            /* Free space header info */
+    H5FS_t	*fspace = NULL;         /* Free space header info */
+    H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FS_hdr_debug, FAIL)
+    FUNC_ENTER_NOAPI(H5FS_debug, FAIL)
 
     /*
      * Check arguments.
@@ -103,10 +104,15 @@ H5FS_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
+    /* Initialize user data for protecting the free space manager */
+    fs_prot.nclasses = 0;
+    fs_prot.classes = NULL;
+    fs_prot.cls_init_udata = NULL;
+
     /*
      * Load the free space header.
      */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &fs_prot, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Print opening message */
@@ -117,50 +123,50 @@ H5FS_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Free space client:",
-	      (hdr->client == H5FS_CLIENT_FHEAP_ID ? "Fractal heap" : "Unknown"));
+	      (fspace->client == H5FS_CLIENT_FHEAP_ID ? "Fractal heap" : "Unknown"));
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total free space tracked:",
-	      hdr->tot_space);
+	      fspace->tot_space);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total number of free space sections tracked:",
-	      hdr->tot_sect_count);
+	      fspace->tot_sect_count);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of serializable free space sections tracked:",
-	      hdr->serial_sect_count);
+	      fspace->serial_sect_count);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of ghost free space sections tracked:",
-	      hdr->ghost_sect_count);
+	      fspace->ghost_sect_count);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of free space section classes:",
-	      hdr->nclasses);
+	      fspace->nclasses);
     HDfprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth,
 	      "Shrink percent:",
-	      hdr->shrink_percent);
+	      fspace->shrink_percent);
     HDfprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth,
 	      "Expand percent:",
-	      hdr->expand_percent);
+	      fspace->expand_percent);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "# of bits for section address space:",
-	      hdr->max_sect_addr);
+	      fspace->max_sect_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Maximum section size:",
-	      hdr->max_sect_size);
+	      fspace->max_sect_size);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Serialized sections address:",
-	      hdr->sect_addr);
+	      fspace->sect_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Serialized sections size used:",
-	      hdr->sect_size);
+	      fspace->sect_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Serialized sections size allocated:",
-	      hdr->alloc_sect_size);
+	      fspace->alloc_sect_size);
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_hdr_debug() */
+} /* end H5FS_debug() */
 
 
 /*-------------------------------------------------------------------------
@@ -219,7 +225,8 @@ herr_t
 H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     haddr_t fs_addr, haddr_t client_addr)
 {
-    H5FS_hdr_t	*hdr = NULL;            /* Free space header info */
+    H5FS_t	*fspace = NULL;         /* Free space header info */
+    H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     H5FS_client_t client;               /* The client of the free space */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -236,19 +243,24 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
     HDassert(H5F_addr_defined(fs_addr));
     HDassert(H5F_addr_defined(client_addr));
 
+    /* Initialize user data for protecting the free space manager */
+    fs_prot.nclasses = 0;
+    fs_prot.classes = NULL;
+    fs_prot.cls_init_udata = NULL;
+
     /*
      * Load the free space header.
      */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Retrieve the client id */
-    client = hdr->client;
+    client = fspace->client;
 
     /* Release the free space header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
-    hdr = NULL;
+    fspace = NULL;
 
     /* Print opening message */
     HDfprintf(stream, "%*sFree Space Sections...\n", indent, "");
@@ -268,7 +280,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
     } /* end switch */
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)

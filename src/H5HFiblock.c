@@ -509,7 +509,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
         if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, FAIL, "unable to move fractal heap root indirect block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */
 

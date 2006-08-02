@@ -327,35 +327,3 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_id_off_test() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_debug_test
- *
- * Purpose:	Debugging routine for testing
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, June 20, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_debug_test(const H5HF_t *fh)
-{
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_debug_test)
-
-    /* Check arguments. */
-    HDassert(fh);
-    HDassert(fh->hdr);
-
-    HDfprintf(stderr, "%s: fh->hdr->man_iter_off = %Hu\n", FUNC, fh->hdr->man_iter_off);
-    HDfprintf(stderr, "%s: fh->hdr->fspace = %p\n", FUNC, fh->hdr->fspace);
-    if(fh->hdr->fspace)
-        H5FS_debug_test(fh->hdr->fspace);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HF_debug_test() */
-
