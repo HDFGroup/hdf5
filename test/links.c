@@ -32,6 +32,8 @@ const char *FILENAME[] = {
 #define NAME_BUF_SIZE   1024
 #define MAX_NAME_LEN    ((64*1024)+1024)
 
+#define LE_FILENAME "le_extlink1.h5"
+
 /* The group_new.h5 is generated from gen_new_fill.c in HDF5 'test' directory
  * for version 1.7 (after "compact group" checkin).  To get this data file,
  * simply compile gen_new_group.c with HDF5 library (after compact group
@@ -681,6 +683,71 @@ toomany(hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    ud_link_compat
+ *
+ * Purpose:     Ensure that User-defined links (introduced in 1.8) can be
+ *              handled by HDF5 1.6.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  James Laird
+ *              Tuesday, July 25, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+ud_link_compat(hid_t fapl)
+{
+    hid_t       fid = (-1);
+    H5G_stat_t  sb;
+    char      * srcdir = getenv("srcdir");      /* The source directory */
+    char        pathbuf[NAME_BUF_SIZE];         /* Path to the files */
+    char        namebuf[NAME_BUF_SIZE];
+
+    TESTING("compatibility with User-defined links");
+
+    /*
+     * Create the name of the file to open (in case we are using the --srcdir
+     * option and the file is in a different directory from this test).
+     */
+    if (srcdir && ((HDstrlen(srcdir) + 2) < sizeof(pathbuf)) )
+    {
+        HDstrcpy(pathbuf, srcdir);
+        HDstrcat(pathbuf, "/");
+    }
+    else
+        HDstrcpy(pathbuf, "");
+
+    if(HDstrlen(pathbuf) + HDstrlen(LE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
+    HDstrcpy(namebuf, pathbuf);
+    HDstrcat(namebuf, LE_FILENAME);
+
+    /* Open a file with an external link in it */
+    if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* Trying to open the link or get info about it should fail. */
+    H5E_BEGIN_TRY {
+        if(H5Gopen(fid, "ext_link") >= 0) TEST_ERROR
+        if(H5Gget_objinfo(fid, "ext_link", FALSE, &sb) >= 0) TEST_ERROR
+    } H5E_END_TRY
+
+    /* There isn't much more we can do with the link. We shouldn't try moving
+     * it or deleting it. */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY
+    return 1;
+} /* end ud_link_compat() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test links
@@ -712,6 +779,7 @@ main(void)
     nerrors += ck_new_links(fapl) < 0 ? 1 : 0;
     nerrors += long_links(fapl) < 0 ? 1 : 0;
     nerrors += toomany(fapl) < 0 ? 1 : 0;
+    nerrors += ud_link_compat(fapl) < 0 ? 1 : 0;
 
     /* Results */
     if (nerrors) {
