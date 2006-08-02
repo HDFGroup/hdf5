@@ -58,15 +58,13 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-if BUILD_ALL_CONDITIONAL
-  BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
-                  gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-                  gen_nullspace space_overflow gen_cross
-else
-  BUILD_ALL_PROGS=
-endif
+BUILD_ALL_PROGS=gen_deflate gen_filters gen_new_array gen_new_fill   \
+                gen_new_group gen_new_mtime gen_new_super gen_noencoder \
+                gen_nullspace space_overflow gen_cross gen_udlinks
 
-noinst_PROGRAMS=$(BUILD_ALL_PROGS)
+if BUILD_ALL_CONDITIONAL
+  noinst_PROGRAMS=$(BUILD_ALL_PROGS)
+endif
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
@@ -118,7 +116,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tconfig.c tfile.c tgenprop.c \
-    th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c ttime.c trefer.c trefstr.c  \
+    th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c ttime.c trefer.c trefstr.c  \
     tselect.c tskiplist.c ttst.c tunicode.c tvltypes.c tvlstr.c
 
 include $(top_srcdir)/config/conclude.am

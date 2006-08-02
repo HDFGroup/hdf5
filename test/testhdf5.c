@@ -50,6 +50,7 @@ main(int argc, char *argv[])
     AddTest("skiplist", test_skiplist, NULL,  "Skip Lists", NULL);
     AddTest("refstr", test_refstr, NULL,  "Reference Counted Strings", NULL);
     AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL);
+    AddTest("objects", test_h5o, cleanup_file, "Generic Object Functions", NULL);
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);

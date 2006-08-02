@@ -294,7 +294,8 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
     HDassert(name);
 
     /* Create link message from object entry */
-    HDassert(ent->type == H5G_NOTHING_CACHED || ent->type == H5G_CACHED_SLINK);
+    HDassert(ent->type == H5G_NOTHING_CACHED || ent->type == H5G_CACHED_SLINK
+        || ent->type == H5G_CACHED_ULINK);
 /* XXX: Set character set & creation time for real? */
     lnk->cset = H5F_CRT_DEFAULT_CSET;
     lnk->ctime = 0;
@@ -302,7 +303,7 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
     HDassert(lnk->name);
     switch(ent->type) {
         case H5G_NOTHING_CACHED:
-            lnk->type = H5G_LINK_HARD;
+            lnk->type = H5L_LINK_HARD;
             lnk->u.hard.addr = ent->header;
             break;
 
@@ -310,7 +311,7 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
             {
                 const char *s;          /* Pointer to link value in heap */
 
-                lnk->type = H5G_LINK_SOFT;
+                lnk->type = H5L_LINK_SOFT;
 
                 s = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
                 HDassert(s);
@@ -318,6 +319,25 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
                 /* Copy to link */
                 lnk->u.soft.name = H5MM_xstrdup(s);
                 HDassert(lnk->u.soft.name);
+            }
+            break;
+
+        case H5G_CACHED_ULINK:
+            {
+                const char *s;          /* Pointer to link name in heap */
+
+                /* Copy link type and udata size from entry info */
+                lnk->type = ent->cache.ulink.link_type;
+                lnk->u.ud.size = ent->cache.ulink.udata_size;
+
+                /* Get pointer to udata in heap */
+                s = H5HL_offset_into(ent->file, heap, ent->cache.ulink.udata_offset);
+                HDassert(s);
+
+                /* Read udata from heap */
+                if(NULL== (lnk->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
+                  HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for user link data")
+                HDmemcpy(lnk->u.ud.udata, s, lnk->u.ud.size);
             }
             break;
 
@@ -454,9 +474,11 @@ H5G_link_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound")
 
     /* Determine type of object */
-    if(ltable.lnks[idx].type == H5G_LINK_SOFT)
+    if(ltable.lnks[idx].type == H5L_LINK_SOFT)
         ret_value = H5G_LINK;
-    else {
+    else if(ltable.lnks[idx].type >= H5L_LINK_UD_MIN)
+        ret_value = H5G_UDLINK;
+    else if(ltable.lnks[idx].type == H5L_LINK_HARD){
         H5O_loc_t tmp_oloc;             /* Temporary object location */
 
         /* Build temporary object location */
@@ -466,7 +488,9 @@ H5G_link_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
         /* Get the type of the object */
         if((ret_value = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
-    } /* end else */
+    } else{
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
+    }/* end else */
 
 done:
     /* Release link table */
@@ -501,7 +525,7 @@ H5G_link_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     H5G_link_ud2_t *udata = (H5G_link_ud2_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5O_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_link_remove_cb)
 
     /* check arguments */
     HDassert(lnk);
@@ -509,20 +533,32 @@ H5G_link_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 
     /* If we've found the right link, get the object type */
     if(HDstrcmp(lnk->name, udata->name) == 0) {
-        if(lnk->type == H5G_LINK_SOFT)
+        switch(lnk->type)
+        {
+          case H5L_LINK_HARD:
+            {
+                H5O_loc_t tmp_oloc;             /* Temporary object location */
+
+                /* Build temporary object location */
+                tmp_oloc.file = udata->file;
+                tmp_oloc.addr = lnk->u.hard.addr;
+
+                /* Get the type of the object */
+                /* Note: no way to check for error :-( */
+                *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
+            }
+            break;
+
+          case H5L_LINK_SOFT:
             *(udata->obj_type) = H5G_LINK;
-        else {
-            H5O_loc_t tmp_oloc;             /* Temporary object location */
+            break;
 
-            /* Build temporary object location */
-            tmp_oloc.file = udata->file;
-            tmp_oloc.addr = lnk->u.hard.addr;
+          default:  /* User-defined link */
+            if(lnk->type < H5L_LINK_UD_MIN)
+               HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type");
 
-            /* Get the type of the object */
-            /* Note: no way to check for error :-( */
-            *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
-        } /* end else */
-
+            *(udata->obj_type) = H5G_UDLINK;
+        }
         /* Stop the iteration, we found the correct link */
         HGOTO_DONE(H5O_ITER_STOP)
     } /* end if */

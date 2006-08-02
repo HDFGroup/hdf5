@@ -36,7 +36,9 @@
 #include "H5SLprivate.h"	/* Skip lists				*/
 
 #define H5G_SIZE_HINT   256    /* default root grp size hint         */
-#define H5G_NLINKS	16	/*max symlinks to follow per lookup  */
+
+/* H5G_NLINKS is deprecated */
+#define H5G_NLINKS H5L_NLINKS_DEF
 
 /*
  * Various types of object header information can be cached in a symbol
@@ -49,8 +51,9 @@ typedef enum H5G_type_t {
     H5G_NOTHING_CACHED  = 0,    /*nothing is cached, must be 0               */
     H5G_CACHED_STAB     = 1,    /*symbol table, `stab'                       */
     H5G_CACHED_SLINK	= 2, 	/*symbolic link				     */
+    H5G_CACHED_ULINK	= 3, 	/*user-defined link		             */
 
-    H5G_NCACHED         = 3     /*THIS MUST BE LAST                          */
+    H5G_NCACHED         = 4     /*THIS MUST BE LAST                          */
 } H5G_type_t;
 
 /*
@@ -69,6 +72,12 @@ typedef union H5G_cache_t {
     struct {
 	size_t	lval_offset;		/*link value offset		     */
     } slink;
+
+    struct {
+        size_t  udata_size;             /*size of user data buffer            */
+        size_t  udata_offset;           /*link's user data buffer             */
+        H5L_link_t link_type;           /*link type ID                        */
+    } ulink;
 } H5G_cache_t;
 
 /*
@@ -232,25 +241,17 @@ typedef struct H5G_bt_it_ud5_t {
 } H5G_bt_it_ud5_t;
 
 /* Typedef for path traversal operations */
+/* grp_loc is the location of the group in which the targeted object is located.
+ * name is the last component of the object's name
+ * lnk is the link between the group and the object
+ * obj_loc is the target of the traversal (or NULL if the object doesn't exist)
+ * operator_data is whatever udata was supplied when H5G_traverse was called
+ * own_obj_loc should be set to TRUE if this callback takes ownership of obj_loc,
+ *     and FALSE if obj_loc needs to be deleted.
+ */
 typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc/*in*/, const char *name,
-    const H5O_link_t *lnk/*in*/, H5G_loc_t *obj_loc/*out*/, void *operator_data/*in,out*/);
-
-/* "value" information for a link (as opposed to "name" of link) */
-typedef struct {
-    haddr_t addr;                       /* Address of object linked to */
-} H5G_linkvalue_hard_t;
-
-typedef struct {
-    char *name;                         /* Link value */
-} H5G_linkvalue_soft_t;
-
-typedef struct {
-    H5L_link_t type;                    /* Type of link */
-    union {
-        H5G_linkvalue_hard_t hard;      /* Information for hard link */
-        H5G_linkvalue_soft_t soft;      /* Information for soft link */
-    } u;
-} H5G_linkvalue_t;
+    const H5O_link_t *lnk/*in*/, H5G_loc_t *obj_loc/*out*/, void *operator_data/*in,out*/,
+    hbool_t *own_obj_loc/*out*/);
 
 /*
  * During name lookups (see H5G_traverse()) we sometimes want information about
@@ -260,7 +261,8 @@ typedef struct {
 #define H5G_TARGET_NORMAL	0x0000
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
-#define H5G_CRT_INTMD_GROUP	0x0004
+#define H5G_TARGET_UDLINK	0x0004
+#define H5G_CRT_INTMD_GROUP	0x0008
 
 /*
  * This is the class identifier to give to the B-tree functions.
@@ -278,7 +280,8 @@ H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL const char * H5G_component(const char *name, size_t *size_p);
 H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
-    unsigned target, H5G_traverse_t op, void *op_data, hid_t dxpl_id);
+    unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
+    hid_t dxpl_id);
 
 /*
  * Functions that understand symbol tables but not names.  The
@@ -377,7 +380,8 @@ H5_DLL H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
 H5_DLL herr_t H5G_obj_remove(H5O_loc_t *oloc, const char *name,
     H5G_obj_t *obj_type, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_find(H5G_loc_t *loc, const char *name,
-    unsigned traverse_flags, H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t dxpl_id);
+    unsigned traverse_flags, H5O_link_t *lnk, H5O_loc_t *obj_oloc,
+    hid_t lapl_id, hid_t dxpl_id);
 
 /*
  * These functions operate on group hierarchy names.

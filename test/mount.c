@@ -71,8 +71,8 @@ setup(hid_t fapl)
     if (H5Gclose(H5Gcreate(file, "/mnt1/file1", (size_t)0))<0) goto error;
     if (H5Gclose(H5Gcreate(file, "/mnt_unlink", (size_t)0))<0) goto error;
     if (H5Gclose(H5Gcreate(file, "/mnt_move_a", (size_t)0))<0) goto error;
-    if (H5Glink(file, H5G_LINK_HARD, "/mnt1/file1", "/file1")<0) goto error;
-    if (H5Glink(file, H5G_LINK_HARD, "/mnt1", "/mnt1_link")<0) goto error;
+    if (H5Glink(file, H5L_LINK_HARD, "/mnt1/file1", "/file1")<0) goto error;
+    if (H5Glink(file, H5L_LINK_HARD, "/mnt1", "/mnt1_link")<0) goto error;
     if (H5Fclose(file)<0) goto error;
 
     /* file 2 */
@@ -486,9 +486,9 @@ test_move(hid_t fapl)
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
     /* First rename an object in the mounted file, then try it across files */
-    if (H5Gmove(file1, "/mnt1/rename_a/x", "/mnt1/rename_b/y")<0) goto error;
+    if (H5Lmove(file1, "/mnt1/rename_a/x", H5L_SAME_LOC, "/mnt1/rename_b/y", H5P_DEFAULT, H5P_DEFAULT)<0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Gmove(file1, "/mnt1/rename_b/y",  "/y");
+	status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -796,7 +796,7 @@ test_mvmpt(hid_t fapl)
     if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT)<0) TEST_ERROR
 
     /* Rename the mount point */
-    if (H5Gmove(file1, "/mnt_move_a", "/mnt_move_b")<0) TEST_ERROR
+    if (H5Lmove(file1, "/mnt_move_a", H5L_SAME_LOC, "/mnt_move_b", H5P_DEFAULT, H5P_DEFAULT)<0) TEST_ERROR
 
     /* Access something under the new name */
     if (H5Gget_objinfo(file1, "/mnt_move_b/file2", TRUE, NULL)<0) TEST_ERROR
@@ -854,7 +854,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link directly */
     H5E_BEGIN_TRY {
-	status = H5Glink(file1, H5G_LINK_HARD, "/mnt1/file2",  "/file2");
+	status = H5Glink(file1, H5L_LINK_HARD, "/mnt1/file2",  "/file2");
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -864,7 +864,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link by renaming something */
     H5E_BEGIN_TRY {
-	status = H5Gmove(file1, "/mnt1/file2", "/file2");
+	status = H5Lmove(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -1108,9 +1108,9 @@ test_mount_after_close(hid_t fapl)
         TEST_ERROR
     if((gidABM = H5Gcreate(gidAB , "M", (size_t)0)) < 0) /* Mount point */
         TEST_ERROR
-    if(H5Glink(gidAB, H5G_LINK_SOFT, "./M/X/Y", "C") < 0) /* Soft link */
+    if(H5Glink(gidAB, H5L_LINK_SOFT, "./M/X/Y", "C") < 0) /* Soft link */
         TEST_ERROR
-    if(H5Glink(gidAB, H5G_LINK_SOFT, "/A", "T") < 0) /* Soft link */
+    if(H5Glink(gidAB, H5L_LINK_SOFT, "/A", "T") < 0) /* Soft link */
         TEST_ERROR
 
     /* Close groups and file */
@@ -1144,7 +1144,7 @@ test_mount_after_close(hid_t fapl)
         TEST_ERROR
     if((did = H5Dcreate(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if(H5Glink(gidX, H5G_LINK_SOFT, "./Y", "T") < 0) /* Soft link */
+    if(H5Glink(gidX, H5L_LINK_SOFT, "./Y", "T") < 0) /* Soft link */
         TEST_ERROR
 
     /* Write data to the dataset. */
@@ -1450,7 +1450,7 @@ test_mount_after_unmount(hid_t fapl)
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
     /* (It is "disconnected" because it's parent file has been unmounted) */
-    if(H5Gmove2(gidAMX,"M/Y",gidAMX,"M/Z") < 0)
+    if(H5Lmove(gidAMX,"M/Y",gidAMX,"M/Z", H5P_DEFAULT, H5P_DEFAULT) < 0)
 	TEST_ERROR
 
     /* Close group in file #3 */
@@ -3686,7 +3686,7 @@ test_symlink(hid_t fapl)
         TEST_ERROR
 
     /* Create soft link to mounted object */
-    if(H5Glink(fid1, H5G_LINK_SOFT, "./A/D/H", "L") < 0) /* Soft link */
+    if(H5Glink(fid1, H5L_LINK_SOFT, "./A/D/H", "L") < 0) /* Soft link */
         TEST_ERROR
 
     if(H5Fclose(fid1) < 0)

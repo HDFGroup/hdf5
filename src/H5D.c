@@ -228,6 +228,7 @@ H5D_init_interface(void)
 
     H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
     size_t          nprops;                 /* Number of properties */
+    H5P_genclass_t  *acc_pclass;
     herr_t          ret_value                = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
@@ -427,6 +428,20 @@ H5D_init_interface(void)
     /* Get the default DXPL cache information */
     if (H5D_get_dxpl_cache_real(H5P_DATASET_XFER_DEFAULT, &H5D_def_dxpl_cache) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve default DXPL info")
+
+    /* ========== Dataset Access Property Class Initialization ============*/
+    assert(H5P_CLS_DATASET_ACCESS_g!=-1);
+
+    /* Get the pointer to dataset creation class */
+    if(NULL == (acc_pclass = H5I_object(H5P_CLS_DATASET_ACCESS_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_DATASET_ACCESS_g == (-1)) {
+        /* Register the default dataset access property list */
+        if((H5P_LST_DATASET_ACCESS_g = H5P_create_id(acc_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1213,11 +1228,11 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
     if(H5G_loc(dset_id, &dset_loc) <0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to get location for dataset")
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get location for dataset")
 
     /* Link the new dataset */
-    if( H5L_link(&loc, name, &dset_loc, H5AC_dxpl_id, H5P_DEFAULT) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to create link to dataset")
+    if( H5L_link(&loc, name, &dset_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to dataset")
 
     ret_value = dset_id;
 
@@ -1277,7 +1292,7 @@ done:
  */
 hid_t
 H5Dcreate_expand(hid_t loc_id, hid_t type_id, hid_t space_id,
-	  hid_t dcpl_id)
+	  hid_t dcpl_id, hid_t dapl_id)
 {
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
     H5D_t	   *new_dset = NULL;    /* New dataset's info */
@@ -1285,7 +1300,7 @@ H5Dcreate_expand(hid_t loc_id, hid_t type_id, hid_t space_id,
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Dcreate_expand, FAIL)
-    H5TRACE4("i","iiii",loc_id,type_id,space_id,dcpl_id);
+    H5TRACE5("i","iiiii",loc_id,type_id,space_id,dcpl_id,dapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1299,6 +1314,13 @@ H5Dcreate_expand(hid_t loc_id, hid_t type_id, hid_t space_id,
     else
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* build and open the new dataset */
     if(NULL == (new_dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, H5AC_dxpl_id)))
@@ -1363,7 +1385,7 @@ H5Dopen(hid_t loc_id, const char *name)
     H5G_loc_reset(&dset_loc);
 
     /* Find the dataset object */
-    if(H5G_loc_find(&loc, name, &dset_loc, dxpl_id) < 0)
+    if(H5G_loc_find(&loc, name, &dset_loc, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
     ent_found = TRUE;
 
@@ -1395,6 +1417,91 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dopen_expand
+ *
+ * Purpose:	Finds a dataset named NAME at LOC_ID, opens it, and returns
+ *		its ID.	 The dataset should be close when the caller is no
+ *		longer interested in it.
+ *
+ *              Takes a dataset access property list
+ *
+ * Return:	Success:	A new dataset ID
+ *		Failure:	FAIL
+ *
+ * Programmer:	James Laird
+ *		Thursday, July 27, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
+{
+    H5D_t       *dset = NULL;
+    H5G_loc_t	 loc;		        /* Object location of group */
+    H5G_loc_t	 dset_loc;		/* Object location of dataset */
+    H5G_name_t   path;            	/* Dataset group hier. path */
+    H5O_loc_t    oloc;            	/* Dataset object location */
+    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
+    hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
+    hid_t        ret_value;
+
+    FUNC_ENTER_API(H5Dopen_expand, FAIL)
+    H5TRACE3("i","isi",loc_id,name,dapl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+
+    /* Set up dataset location to fill in */
+    dset_loc.oloc = &oloc;
+    dset_loc.path = &path;
+    H5G_loc_reset(&dset_loc);
+
+    /* Find the dataset object */
+    if(H5G_loc_find(&loc, name, &dset_loc, dapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
+    ent_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&oloc, dxpl_id) != H5G_DATASET)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Open the dataset */
+    if((dset = H5D_open(&dset_loc, dxpl_id)) == NULL) {
+        ent_found = FALSE;      /* Reset this, since H5D_open 'owns' it and then free's it on failure */
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
+    } /* end if */
+
+    /* Register an atom for the dataset */
+    if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
+
+done:
+    if(ret_value < 0) {
+        if(dset != NULL) {
+            if(H5D_close(dset) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        } /* end if */
+        else {
+            if(ent_found)
+                H5G_name_free(&path);
+        } /* end else */
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------

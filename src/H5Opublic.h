@@ -30,6 +30,7 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+#include "H5Ipublic.h"
 
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
@@ -41,6 +42,12 @@ typedef struct H5O_stat_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
+H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
+H5_DLL herr_t H5Oclose(hid_t object_id);
+H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
+H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 
 #ifdef __cplusplus
 }

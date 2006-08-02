@@ -90,19 +90,20 @@ am_libhdf5_la_OBJECTS = H5.lo H5dbg.lo H5A.lo H5AC.lo H5B.lo \
 	H5Fmount.lo H5Fsfile.lo H5Fsuper.lo H5FD.lo H5FDcore.lo \
 	H5FDfamily.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
 	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDstdio.lo \
-	H5FDstream.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo H5FSsection.lo \
-	H5G.lo H5Gdeprec.lo H5Gent.lo H5Glink.lo H5Gloc.lo H5Gname.lo \
-	H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo H5Gtest.lo \
-	H5Gtraverse.lo H5HF.lo H5HFcache.lo H5HFdbg.lo H5HFdblock.lo \
-	H5HFdtable.lo H5HFhdr.lo H5HFiblock.lo H5HFint.lo H5HFiter.lo \
-	H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HG.lo \
-	H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo H5MM.lo \
-	H5MP.lo H5MPtest.lo H5L.lo H5O.lo H5Oattr.lo H5Obogus.lo \
-	H5Ocache.lo H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo \
-	H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omtime.lo \
-	H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo H5Oshared.lo \
-	H5Ostab.lo H5P.lo H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo \
-	H5Pfcpl.lo H5Pgcpl.lo H5Plcpl.lo H5Pocpl.lo H5Pstrcpl.lo \
+	H5FDstream.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
+	H5FSsection.lo H5G.lo H5Gdeprec.lo H5Gent.lo H5Glink.lo \
+	H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo \
+	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFcache.lo H5HFdbg.lo \
+	H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFiblock.lo \
+	H5HFint.lo H5HFiter.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo \
+	H5HFtest.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo \
+	H5I.lo H5MF.lo H5MM.lo H5MP.lo H5MPtest.lo H5L.lo \
+	H5Lexternal.lo H5O.lo H5Oattr.lo H5Obogus.lo H5Ocache.lo \
+	H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oginfo.lo \
+	H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omtime.lo H5Oname.lo \
+	H5Onull.lo H5Opline.lo H5Osdspace.lo H5Oshared.lo H5Ostab.lo \
+	H5P.lo H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
+	H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pstrcpl.lo \
 	H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo \
 	H5Smpio.lo H5Snone.lo H5Spoint.lo H5Sselect.lo H5Stest.lo \
 	H5SL.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo \
@@ -402,12 +403,12 @@ libhdf5_la_SOURCES = H5.c H5dbg.c H5A.c H5AC.c H5B.c H5Bcache.c \
         H5HFhdr.c H5HFiblock.c H5HFint.c H5HFiter.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
-        H5MP.c H5MPtest.c H5L.c H5O.c H5Oattr.c H5Obogus.c H5Ocache.c \
+        H5MP.c H5MPtest.c H5L.c H5Lexternal.c H5O.c H5Oattr.c H5Obogus.c H5Ocache.c \
         H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pacpl.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pgcpl.c     \
-        H5Plcpl.c H5Pocpl.c H5Pstrcpl.c H5Ptest.c H5R.c H5RC.c  \
+        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pstrcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
         H5Sselect.c H5Stest.c \
         H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
@@ -590,8 +591,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FScache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FSdbg.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FSsection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fmount.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsfile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsuper.Plo@am__quote@
@@ -627,6 +628,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HP.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5I.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5L.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Lexternal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MF.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5MP.Plo@am__quote@
@@ -657,6 +659,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pfapl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pfcpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pgcpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Plapl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Plcpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pocpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pstrcpl.Plo@am__quote@

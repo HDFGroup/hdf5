@@ -118,6 +118,8 @@ TOOLTEST tcompound_complex.h5.xml --xml tcompound_complex.h5
 TOOLTEST tobjref.h5.xml --xml tobjref.h5
 TOOLTEST topaque.h5.xml --xml topaque.h5
 TOOLTEST tslink.h5.xml --xml tslink.h5
+TOOLTEST tudlink.h5.xml --xml tudlink.h5
+TOOLTEST textlink.h5.xml --xml textlink.h5
 TOOLTEST tstr.h5.xml --xml tstr.h5
 TOOLTEST tstr2.h5.xml --xml tstr2.h5
 TOOLTEST tref.h5.xml --xml tref.h5

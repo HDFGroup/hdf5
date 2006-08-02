@@ -52,7 +52,7 @@ typedef enum H5G_obj_t {
     H5G_DATASET,		/* Object is a dataset		*/
     H5G_TYPE,			/* Object is a named data type	*/
     H5G_LINK,		        /* Object is a symbolic link	*/
-    H5G_RESERVED_4,		/* Reserved for future use	*/
+    H5G_UDLINK,		        /* Object is a user-defined link */
     H5G_RESERVED_5,		/* Reserved for future use	*/
     H5G_RESERVED_6,		/* Reserved for future use	*/
     H5G_RESERVED_7		/* Reserved for future use	*/
@@ -63,30 +63,6 @@ typedef enum H5G_obj_t {
 #define H5G_NUSERTYPES	(H5G_NTYPES-H5G_NLIBTYPES)
 #define H5G_USERTYPE(X)	(8+(X))		/* User defined types		*/
 
-#ifdef QAK
-/* Information about an object */
-typedef struct H5G_obj_stat_t {
-    haddr_t 		objno;		/* Object number		*/
-    unsigned 		nlink;		/* Number of hard links to object*/
-    time_t		mtime;		/* Modification time		*/
-    H5O_stat_t          ohdr;           /* Object header information    */
-} H5G_obj_stat_t;
-
-typedef struct H5G_slink_stat_t {
-    size_t		linklen;	/* Symbolic link value length	*/
-} H5G_slink_stat_t;
-
-typedef struct H5G_stat_t {
-    unsigned long 	fileno;		/* File number			*/
-    H5T_cset_t          cset;           /* Character set of link name	*/
-    time_t		ctime;		/* Creation time		*/
-    H5G_obj_t 		type;		/* Object type			*/
-    union {
-        H5G_obj_stat_t  obj;		/* Information about objects    */
-        H5G_slink_stat_t slink;		/* Information about symbolic links */
-    } u;
-} H5G_stat_t;
-#else /* QAK */
 /* Information about an object */
 typedef struct H5G_stat_t {
     unsigned long 	fileno[2];	/*file number			*/
@@ -97,7 +73,6 @@ typedef struct H5G_stat_t {
     size_t		linklen;	/*symbolic link value length	*/
     H5O_stat_t          ohdr;           /* Object header information    */
 } H5G_stat_t;
-#endif /* QAK */
 
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
@@ -112,6 +87,7 @@ typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 
 H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
 H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
+H5_DLL hid_t H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id);
 H5_DLL herr_t H5Gclose(hid_t group_id);
 H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
 			  H5G_iterate_t op, void *op_data);
@@ -154,8 +130,10 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name,
 #define H5G_link_t H5L_link_t
 #define H5G_SAME_LOC H5L_SAME_LOC
 
+
 #ifdef __cplusplus
 }
 #endif
 #endif
+
 

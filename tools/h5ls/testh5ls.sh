@@ -118,6 +118,10 @@ TOOLTEST tdset-1.ls -w80 -r -d tdset.h5
 # test for displaying soft links
 TOOLTEST tslink-1.ls -w80 -r tslink.h5
 
+# test for displaying external and user-defined links
+TOOLTEST textlink-1.ls -w80 -r textlink.h5
+TOOLTEST tudlink-1.ls -w80 -r tudlink.h5
+
 # tests for hard links
 TOOLTEST thlink-1.ls -w80 thlink.h5
 

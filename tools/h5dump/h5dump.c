@@ -271,6 +271,10 @@ static const h5dump_header_t standardformat = {
     "",				/*dataend */
     SOFTLINK,			/*softlinkbegin */
     "",				/*softlinkend */
+    EXTLINK,			/*extlinkbegin */
+    "",				/*extlinkend */
+    UDLINK,			/*udlinkbegin */
+    "",				/*udlinkend */
     SUBSET,			/*subsettingbegin */
     "",				/*subsettingend */
     START,			/*startbegin */
@@ -300,6 +304,10 @@ static const h5dump_header_t standardformat = {
     "}",			/*datablockend */
     "{",			/*softlinkblockbegin */
     "}",			/*softlinkblockend */
+    "{",			/*extlinkblockbegin */
+    "}",			/*extlinkblockend */
+    "{",			/*udlinkblockbegin */
+    "}",			/*udlinkblockend */
     "{",			/*strblockbegin */
     "}",			/*strblockend */
     "{",			/*enumblockbegin */
@@ -1398,10 +1406,17 @@ dump_all(hid_t group, const char *name, void * op_data)
     hid_t       obj;
     char       *obj_path = NULL;        /* Full path of object */
     H5G_stat_t  statbuf;
+    H5L_linkinfo_t linfo;              /* Link information */
     herr_t      ret = SUCCEED;
 
     /* Stat the object */
     if(H5Gget_objinfo(group, name, FALSE, &statbuf) < 0) {
+        error_msg(progname, "unable to get object information\n");
+        d_status = EXIT_FAILURE;
+        ret = FAIL;
+        goto done;
+    } /* end if */
+    if(H5Lget_linkinfo(group, name, &linfo, H5P_DEFAULT) < 0) {
         error_msg(progname, "unable to get object information\n");
         d_status = EXIT_FAILURE;
         ret = FAIL;
@@ -1433,7 +1448,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                 indentation(indent + COL);
             }
 
-            if (H5Gget_linkval(group, name, statbuf.linklen, targbuf) < 0) {
+            if (H5Lget_linkval(group, name, statbuf.linklen, targbuf, H5P_DEFAULT) < 0) {
                 error_msg(progname, "unable to get link value\n");
                 d_status = EXIT_FAILURE;
                 ret = FAIL;
@@ -1516,7 +1531,128 @@ dump_all(hid_t group, const char *name, void * op_data)
             HDfree(targbuf);
             break;
         }
+        case H5G_UDLINK:
+        {
+            indentation(indent);
+            switch(linfo.linkclass)
+            {
+              case H5L_LINK_EXTERNAL:
+              {
+                char *targbuf;
+                char *filename;
+                char *targname;
+                targbuf = HDmalloc(statbuf.linklen);
+                HDassert(targbuf);
+                if (!doxml) {
+                    begin_obj(dump_header_format->extlinkbegin, name,
+                            dump_header_format->extlinkblockbegin);
+                }
+                if (H5Lget_linkval(group, name, statbuf.linklen, targbuf, H5P_DEFAULT) < 0) {
+                    error_msg(progname, "unable to get external link value\n");
+                    d_status = EXIT_FAILURE;
+                    ret = FAIL;
+                } else {
+                    if(H5Lunpack_elink_val(targbuf, &filename, &targname) < 0) {
+                      error_msg(progname, "unable to unpack external link value\n");
+                      d_status = EXIT_FAILURE;
+                      ret = FAIL;
+                    } else {
+                      if (!doxml) {
+                          indentation(indent + COL);
+                          printf("LINKCLASS %d\n", linfo.linkclass);
+                          indentation(indent + COL);
+                          printf("TARGETFILE \"%s\"\n", filename);
+                          indentation(indent + COL);
+                          printf("TARGETPATH \"%s\"\n", targname);
+                      }
+                      else /* XML */
+                      {
+                        char linkxid[100];
+                        char parentxid[100];
+                        char *t_name = xml_escape_the_name(name);
+                        char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
+                        char *t_obj_path = xml_escape_the_name(obj_path);
+                        char *t_filename = xml_escape_the_name(filename);
+                        char *t_targname = xml_escape_the_name(targname);
 
+                        /* Create OBJ-XIDs for the parent and object */
+                        xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
+                        xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
+
+                            printf("<%sExternalLink LinkName=\"%s\" "
+                                  "OBJ-XID=\"%s\" "
+                                  "H5SourcePath=\"%s\" "
+                                  "TargetFilename=\"%s\"  "
+                                  "TargetPath=\"%s\"  "
+                                  "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                    xmlnsprefix,
+                                    t_name,         /* LinkName */
+                                    linkxid,        /* OBJ-XID */
+                                    t_obj_path,     /* H5SourcePath */
+                                    filename,       /* TargetFilename */
+                                    targname,       /* TargetPath*/
+                                    parentxid,      /* Parents */
+                                    t_prefix);      /* H5ParentPaths */
+                        HDfree(t_prefix);
+                        HDfree(t_name);
+                        HDfree(t_filename);
+                        HDfree(t_targname);
+                        HDfree(t_obj_path);
+                      }
+                    }
+                }
+                if (!doxml) {
+                    end_obj(dump_header_format->extlinkend,
+                            dump_header_format->extlinkblockend);
+                }
+                HDfree(targbuf);
+              }
+              break;
+              default:
+                  if (!doxml) {
+                      begin_obj(dump_header_format->udlinkbegin, name,
+                                dump_header_format->udlinkblockbegin);
+                      indentation(indent + COL);
+                  }
+                  if (!doxml) {
+                      printf("LINKCLASS %d\n", linfo.linkclass);
+                  }
+                  else /* XML */
+                  {
+                    char linkxid[100];
+                    char parentxid[100];
+                    char *t_name = xml_escape_the_name(name);
+                    char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
+                    char *t_obj_path = xml_escape_the_name(obj_path);
+
+                    /* Create OBJ-XIDs for the parent and object */
+                    xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
+                    xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
+
+                        printf("<%sUserDefined LinkName=\"%s\" "
+                               "OBJ-XID=\"%s\" "
+                               "H5SourcePath=\"%s\" "
+                               "LinkClass=\"%d\"  "
+                               "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                xmlnsprefix,
+                                t_name,             /* LinkName */
+                                linkxid,            /* OBJ-XID */
+                                t_obj_path,         /* H5SourcePath */
+                                linfo.linkclass,    /* LinkClass */
+                                parentxid,          /* Parents */
+                                t_prefix);          /* H5ParentPaths */
+                    HDfree(t_prefix);
+                    HDfree(t_name);
+                    HDfree(t_obj_path);
+                  }
+                  if (!doxml) {
+                      indentation(indent);
+                      end_obj(dump_header_format->udlinkend,
+                              dump_header_format->udlinkblockend);
+                  }
+            }
+            break;
+          }
         case H5G_GROUP:
             if ((obj = H5Gopen(group, name)) < 0) {
                 error_msg(progname, "unable to dump group \"%s\"\n", name);
@@ -2003,7 +2139,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_ai)
 
     /* Print all the values. */
     if (obj_data == DATASET_DATA) {
-        hid_t       f_type = H5Dget_type(obj_id); 
+        hid_t       f_type = H5Dget_type(obj_id);
         char        string_prefix[64];
         h5tool_format_t    string_dataformat;
 
@@ -2683,7 +2819,7 @@ set_output_file(const char *fname, int is_bin)
   else
    rawdatastream = NULL;
  }
- 
+
  /* binary output */
  if (is_bin)
  {
@@ -2699,7 +2835,7 @@ set_output_file(const char *fname, int is_bin)
    return 0;
   }
  }
- 
+
  return -1;
 }
 
@@ -3044,7 +3180,7 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
 /*-------------------------------------------------------------------------
  * Function:    handle_links
  *
- * Purpose:     Handle the links from the command.
+ * Purpose:     Handle soft or UD links from the command.
  *
  * Return:      void
  *
@@ -3059,18 +3195,24 @@ static void
 handle_links(hid_t fid, char *links, void UNUSED * data)
 {
     H5G_stat_t  statbuf;
+    H5L_linkinfo_t linfo;
+    char * elink_file;
+    char * elink_path;
 
     if (H5Gget_objinfo(fid, links, FALSE, &statbuf) < 0) {
         error_msg(progname, "unable to get obj info from \"%s\"\n", links);
         d_status = EXIT_FAILURE;
-    } else if (statbuf.type == H5G_LINK) {
+    } else if (H5Lget_linkinfo(fid, links, &linfo, H5P_DEFAULT) < 0) {
+        error_msg(progname, "unable to get link info from \"%s\"\n", links);
+        d_status = EXIT_FAILURE;
+    } else if (statbuf.type == H5G_LINK) {    /* Soft link */
         char *buf = HDmalloc(statbuf.linklen);
 
         begin_obj(dump_header_format->softlinkbegin, links,
                   dump_header_format->softlinkblockbegin);
         indentation(COL);
 
-        if (H5Gget_linkval(fid, links, statbuf.linklen, buf) >= 0) {
+        if (H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
             printf("LINKTARGET \"%s\"\n", buf);
         } else {
             error_msg(progname, "h5dump error: unable to get link value for \"%s\"\n",
@@ -3080,7 +3222,45 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
 
         end_obj(dump_header_format->softlinkend,
                 dump_header_format->softlinkblockend);
-
+        HDfree(buf);
+    } else if (statbuf.type == H5G_UDLINK) {    /* User-defined link */
+        char *buf = HDmalloc(statbuf.linklen);
+        begin_obj(dump_header_format->udlinkbegin, links,
+                  dump_header_format->udlinkblockbegin);
+        indentation(COL);
+        switch(linfo.linkclass) {
+          case H5L_LINK_EXTERNAL:
+              begin_obj(dump_header_format->extlinkbegin, links,
+                        dump_header_format->extlinkblockbegin);
+              if (H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
+                  if(H5Lunpack_elink_val(buf, &elink_file, &elink_path)>=0) {
+                      indentation(COL);
+                      printf("LINKCLASS %d\n", linfo.linkclass);
+                      indentation(COL);
+                      printf("TARGETFILE \"%s\"\n", elink_file);
+                      indentation(COL);
+                      printf("TARGETPATH \"%s\"\n", elink_path);
+                  } else {
+                      error_msg(progname, "h5dump error: unable to unpack external link value for \"%s\"\n",
+                                links);
+                      d_status = EXIT_FAILURE;
+                  }
+              } else {
+                  error_msg(progname, "h5dump error: unable to get external link value for \"%s\"\n",
+                            links);
+                  d_status = EXIT_FAILURE;
+              }
+              end_obj(dump_header_format->extlinkend,
+                dump_header_format->extlinkblockend);
+          break;
+          default:
+              begin_obj(dump_header_format->udlinkbegin, links,
+                        dump_header_format->udlinkblockbegin);
+              indentation(COL);
+              printf("LINKCLASS %d\n", linfo.linkclass);
+              end_obj(dump_header_format->udlinkend,
+                      dump_header_format->udlinkblockend);
+        }
         HDfree(buf);
     } else {
         error_msg(progname, "\"%s\" is not a link\n", links);
@@ -5054,7 +5234,8 @@ xml_dump_group(hid_t gid, const char *name)
                 H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
                 xtype = H5G_LINK;
                 H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-
+                xtype = H5G_UDLINK;
+                H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
             }
             free(t_name);
             free(grpxid);
@@ -5114,7 +5295,8 @@ xml_dump_group(hid_t gid, const char *name)
   	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	xtype = H5G_LINK;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-
+	xtype = H5G_UDLINK;
+	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
     }
 
     indent -= COL;

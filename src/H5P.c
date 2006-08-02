@@ -30,6 +30,7 @@
 #include "H5Fprivate.h"		/* Files		  	        */
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"		/* Links				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
@@ -57,6 +58,7 @@ hid_t H5P_CLS_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_CLS_OBJECT_COPY_g         = FAIL;
 hid_t H5P_CLS_LINK_CREATE_g         = FAIL;
+hid_t H5P_CLS_LINK_ACCESS_g         = FAIL;
 hid_t H5P_CLS_STRING_CREATE_g         = FAIL;
 
 /*
@@ -77,6 +79,7 @@ hid_t H5P_LST_DATATYPE_ACCESS_g     = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_LST_OBJECT_COPY_g         = FAIL;
 hid_t H5P_LST_LINK_CREATE_g         = FAIL;
+hid_t H5P_LST_LINK_ACCESS_g         = FAIL;
 
 /* Track the revision count of a class, to make comparisons faster */
 static unsigned H5P_next_rev=0;
@@ -233,6 +236,13 @@ H5P_init_interface(void)
 {
     H5P_genclass_t  *root_class;    /* Pointer to root property list class created */
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
+    /* Link access property class variables.  In sequence, they are,
+     * - Access property list class to modify
+     * - Default value for "user-supplied data"
+     * - Default value for "max number of soft links to traverse"
+     */
+    H5P_genclass_t  *lacc_class;    /* Pointer to link access property list class created */
+    int nlinks = H5L_NLINKS_DEF;
     /* Group creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
      * - Default value for "group info"
@@ -314,6 +324,28 @@ H5P_init_interface(void)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 
+    /* Create link property classes (which need to be inherited by later classes */
+    /* Allocate the link access class */
+    HDassert(H5P_CLS_LINK_ACCESS_g == (-1));
+    if(NULL == (lacc_class = H5P_create_class(root_class, "link access", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+
+    /* Register the link access class */
+    if((H5P_CLS_LINK_ACCESS_g = H5I_register(H5I_GENPROP_CLS, lacc_class)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
+
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(lacc_class, &nprops, FALSE) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops == 0) {
+        /* Register property for number of links traversed */
+        if(H5P_register(lacc_class, H5L_NLINKS_NAME, H5L_NLINKS_SIZE,
+                 &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    } /* end if */
+
     /* Register the group creation and group access property classes */
     /* (Register the group property classes before file property classes, so
      *  file creation property class can inherit from group creation property
@@ -344,7 +376,7 @@ H5P_init_interface(void)
 
     /* Allocate the group access class */
     HDassert(H5P_CLS_GROUP_ACCESS_g == (-1));
-    if(NULL == (pclass = H5P_create_class(root_class, "group access", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
+    if(NULL == (pclass = H5P_create_class(lacc_class, "group access", 1, NULL, NULL, NULL, NULL, NULL, NULL)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the group access class */
@@ -384,7 +416,7 @@ H5P_init_interface(void)
 
     /* Allocate the dataset access class */
     assert(H5P_CLS_DATASET_ACCESS_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"dataset access",1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (lacc_class,"dataset access",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the dataset access class */
@@ -424,7 +456,7 @@ H5P_init_interface(void)
 
     /* Allocate the datatype access class */
     assert(H5P_CLS_DATATYPE_ACCESS_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"datatype access",1,NULL /*H5T_acs_create*/,NULL,NULL /*H5T_acs_copy*/,NULL,NULL /*H5T_acs_close*/,NULL)))
+    if (NULL==(pclass = H5P_create_class (lacc_class,"datatype access",1,NULL /*H5T_acs_create*/,NULL,NULL /*H5T_acs_copy*/,NULL,NULL /*H5T_acs_close*/,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the datatype access class */
@@ -536,6 +568,7 @@ H5P_term_interface(void)
                         H5P_LST_ATTRIBUTE_CREATE_g =
                         H5P_LST_OBJECT_COPY_g =
                         H5P_LST_LINK_CREATE_g =
+                        H5P_LST_LINK_ACCESS_g =
                         H5P_LST_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */
@@ -561,6 +594,7 @@ H5P_term_interface(void)
                         H5P_CLS_ATTRIBUTE_CREATE_g =
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
+                        H5P_CLS_LINK_ACCESS_g =
                         H5P_CLS_MOUNT_g = (-1);
                 } /* end if */
             } /* end if */

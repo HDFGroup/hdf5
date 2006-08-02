@@ -269,6 +269,8 @@ get_type(int type)
   return("H5G_TYPE");
  case H5G_LINK:
   return("H5G_LINK");
+ case H5G_UDLINK:
+  return("H5G_UDLINK");
  default:
   return("user defined type");
  }

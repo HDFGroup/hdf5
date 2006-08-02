@@ -124,7 +124,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
     /* Get the type of the link */
     lnk->type = *p++;
-    if(lnk->type < H5L_LINK_HARD || lnk->type > H5L_LINK_SOFT)
+    if(lnk->type < H5L_LINK_HARD || lnk->type > H5L_LINK_MAX)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
 
     /* Get the link creation time from the file */
@@ -165,9 +165,21 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
             p += len;
             break;
 
+        /* User-defined linkes */
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown link type")
-            break;
+            if(lnk->type < H5L_LINK_UD_MIN || lnk->type > H5L_LINK_MAX)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown link type")
+
+            /* A UD link.  Get the user-supplied data */
+            UINT16DECODE(p, len)
+            lnk->u.ud.size = len;
+            if(len > 0)
+            {
+                if(NULL == (lnk->u.ud.udata = H5MM_malloc((size_t)len)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                HDmemcpy(lnk->u.ud.udata, p, len);
+                p += len;
+            }
     } /* end switch */
 
     /* Set return value */
@@ -252,8 +264,18 @@ H5O_link_encode(H5F_t *f, uint8_t *p, const void *_mesg)
             p += len;
             break;
 
+        /* User-defined links */
         default:
-            HDassert((lnk->type == H5L_LINK_HARD) || (lnk->type == H5L_LINK_SOFT));
+            HDassert(lnk->type >= H5L_LINK_UD_MIN && lnk->type <= H5L_LINK_MAX);
+
+            /* Store the user-supplied data, however long it is */
+            len = (uint16_t)lnk->u.ud.size;
+            UINT16ENCODE(p, len)
+            if(len > 0)
+            {
+                HDmemcpy(p, lnk->u.ud.udata, len);
+                p+=len;
+            }
             break;
     } /* end switch */
 
@@ -300,6 +322,14 @@ H5O_link_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     dest->name = H5MM_xstrdup(lnk->name);
     if(lnk->type == H5L_LINK_SOFT)
         dest->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
+    else if(lnk->type >= H5L_LINK_UD_MIN) {
+        if(lnk->u.ud.size != 0)
+        {
+            if(NULL == (dest->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HDmemcpy(dest->u.ud.udata, lnk->u.ud.udata, lnk->u.ud.size);
+        }
+    }/* end if */
 
     /* Set return value */
     ret_value=dest;
@@ -354,8 +384,10 @@ H5O_link_size(const H5F_t *f, const void *_mesg)
                         HDstrlen(lnk->u.soft.name);     /* Link value */
             break;
 
-        default:
-            HDassert((lnk->type == H5L_LINK_HARD) || (lnk->type == H5L_LINK_SOFT));
+        default: /* Default is user-defined link type */
+            HDassert(lnk->type >= H5L_LINK_UD_MIN);
+            ret_value += 2 +                            /* User-defined data size */
+                         lnk->u.ud.size;                /* User-defined data */
             break;
     } /* end switch */
 
@@ -387,6 +419,12 @@ H5O_link_reset(void *_mesg)
         /* Free information for link (but don't free link pointer) */
         if(lnk->type == H5L_LINK_SOFT)
             lnk->u.soft.name = H5MM_xfree(lnk->u.soft.name);
+        else if (lnk->type >= H5L_LINK_UD_MIN) {
+            if(lnk->u.ud.size > 0)
+            {
+              lnk->u.ud.udata = H5MM_xfree(lnk->u.ud.udata);
+            }
+        } /* end if */
         lnk->name = H5MM_xfree(lnk->name);
     } /* end if */
 
@@ -561,6 +599,17 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
             break;
 
         default:
+          if(link_src->type >= H5L_LINK_UD_MIN)
+          {
+            /* Copy the user-defined link's user data */
+            if(link_src->u.ud.size != 0)
+            {
+                if(NULL == (link_dst->u.ud.udata = H5MM_malloc(link_src->u.ud.size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                HDmemcpy(link_dst->u.ud.udata, link_src->u.ud.udata, link_src->u.ud.size);
+            }
+          }
+          else
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "unrecognized link type")
     } /* end switch */
 
@@ -610,7 +659,7 @@ H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
     HDassert(cpy_info->max_depth < 0 || cpy_info->curr_depth < cpy_info->max_depth);
 
     /* Expand soft link */
-    if(H5G_LINK_SOFT == link_src->type && cpy_info->expand_soft_link) {
+    if(H5L_LINK_SOFT == link_src->type && cpy_info->expand_soft_link) {
         H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
         H5G_loc_t   grp_loc;        /* Group location for parent of soft link */
         H5G_name_t  grp_path;       /* Path for parent of soft link */
@@ -635,10 +684,10 @@ H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
 #else
             link_src->u.hard.addr = statbuf.objno[0];
 #endif
-            link_src->type = H5G_LINK_HARD;
+            link_src->type = H5L_LINK_HARD;
 
             /* Convert destination link to hard link */
-            link_dst->type = H5G_LINK_HARD;
+            link_dst->type = H5L_LINK_HARD;
             link_dst->u.soft.name = H5MM_xfree(link_dst->u.soft.name);
         } /* end if */
     } /* if ((H5G_CACHED_SLINK == src_ent->type)... */
@@ -674,6 +723,7 @@ H5O_link_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
             break;
 
         case H5L_LINK_SOFT:
+        case H5L_LINK_EXTERNAL:
             HGOTO_DONE(SUCCEED)
             break;
 
@@ -720,7 +770,9 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Link Type:", (lnk->type == H5L_LINK_HARD ? "Hard" :
-                  (lnk->type == H5L_LINK_SOFT ? "Soft" : "Unknown")));
+                  (lnk->type == H5L_LINK_SOFT ? "Soft" :
+                  (lnk->type == H5L_LINK_EXTERNAL ? "External" :
+                  (lnk->type >= H5L_LINK_UD_MIN ? "User-defined" : "Unknown")))));
 
     tm = HDlocaltime(&(lnk->ctime));
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
@@ -743,6 +795,15 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                       "Link Value:", lnk->u.soft.name);
             break;
+
+        case H5L_LINK_EXTERNAL:
+        {
+            char * objname = (char *) lnk->u.ud.udata + (HDstrlen(lnk->u.ud.udata) + 1);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                      "Link File Name:", lnk->u.ud.udata);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                      "Link Object Name:", objname);
+        }
 
         default:
             break;

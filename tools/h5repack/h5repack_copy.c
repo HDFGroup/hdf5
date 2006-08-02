@@ -264,17 +264,17 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in;       /* group ID */
- hid_t     grp_out;      /* group ID */
- hid_t     dset_in;      /* read dataset ID */
- hid_t     dset_out;     /* write dataset ID */
- hid_t     type_in;      /* named type ID */
- hid_t     type_out;     /* named type ID */
- hid_t     dcpl_id;      /* dataset creation property list ID */
- hid_t     dcpl_out;     /* dataset creation property list ID */
- hid_t     space_id;     /* space ID */
- hid_t     ftype_id;     /* file data type ID */
- hid_t     mtype_id;     /* memory data type ID */
+ hid_t     grp_in=-1;       /* group ID */
+ hid_t     grp_out=-1;      /* group ID */
+ hid_t     dset_in=-1;      /* read dataset ID */
+ hid_t     dset_out=-1;     /* write dataset ID */
+ hid_t     type_in=-1;      /* named type ID */
+ hid_t     type_out=-1;     /* named type ID */
+ hid_t     dcpl_id=-1;      /* dataset creation property list ID */
+ hid_t     dcpl_out=-1;     /* dataset creation property list ID */
+ hid_t     space_id=-1;     /* space ID */
+ hid_t     ftype_id=-1;     /* file data type ID */
+ hid_t     mtype_id=-1;     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  void      *buf=NULL;    /* data buffer */
  hsize_t   nelmts;       /* number of elements in dataset */
@@ -561,36 +561,32 @@ int do_copy_objects(hid_t fidin,
 
 /*-------------------------------------------------------------------------
  * H5G_LINK
+ * H5G_UDLINK
+ *
+ * Only handles external links; H5Lcopy will fail for other UD link types
+ * since we don't have creation or copy callbacks for them.
  *-------------------------------------------------------------------------
  */
 
   case H5G_LINK:
+  case H5G_UDLINK:
    {
-    H5G_stat_t  statbuf;
-    char        *targbuf=NULL;
-
-    if (H5Gget_objinfo(fidin,travt->objs[i].name,FALSE,&statbuf)<0)
-     goto error;
-
-    targbuf = malloc(statbuf.linklen);
-
-    if (H5Gget_linkval(fidin,travt->objs[i].name,statbuf.linklen,targbuf)<0)
-     goto error;
-
-    if (H5Glink(fidout,
-     H5G_LINK_SOFT,
-     targbuf,        /* current name of object */
-     travt->objs[i].name   /* new name of object */
-     )<0)
-     goto error;
-
-    free(targbuf);
+    if(H5Lcopy(fidin, travt->objs[i].name,fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
 
     if (options->verbose)
      printf(FORMAT_OBJ,"link",travt->objs[i].name );
 
    }
    break;
+
+/*-------------------------------------------------------------------------
+ *-------------------------------------------------------------------------
+ */
+  {
+
+  }
+  break;
 
   default:
    goto error;

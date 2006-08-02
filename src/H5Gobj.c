@@ -35,6 +35,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links			  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"         /* Property Lists			*/
 
 /* Private typedefs */
 
@@ -424,7 +425,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
 
         /* Increment reference count for object */
         if(H5O_link(&obj_oloc, 1, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count")
+            HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "unable to increment hard link count")
     } /* end if */
 
 done:
@@ -779,6 +780,10 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                     H5MM_xfree(lnk_table[u].name);
                     if(lnk_table[u].type == H5L_LINK_SOFT)
                         H5MM_xfree(lnk_table[u].u.soft.name);
+                    else if(lnk_table[u].type >= H5L_LINK_UD_MIN) {
+                        if(lnk_table[u].u.ud.size > 0)
+                           H5MM_xfree(lnk_table[u].u.ud.udata);
+                    } /* end if */
                 } /* end for */
 
                 /* Release memory for link table */
@@ -897,7 +902,7 @@ done:
  */
 static herr_t
 H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
 {
     H5G_obj_ud2_t *udata = (H5G_obj_ud2_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -918,7 +923,7 @@ H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
         *udata->lnk = *lnk;
         HDassert(lnk->name);
         udata->lnk->name = H5MM_xstrdup(lnk->name);
-        if(lnk->type == H5G_LINK_SOFT)
+        if(lnk->type == H5L_LINK_SOFT)
             udata->lnk->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
 #endif /* H5_GROUP_REVISION */
     } /* end if */
@@ -933,12 +938,9 @@ H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
     } /* end if */
 
 done:
-    /* Release the group location for the object */
-    /* (Group traversal callbacks are responsible for either taking ownership
-     *  of the group location for the object, or freeing it. - QAK)
-     */
-    if(obj_loc)
-        H5G_loc_free(obj_loc);
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_obj_loc = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_find_cb() */
@@ -959,10 +961,10 @@ done:
  */
 herr_t
 H5G_obj_find(H5G_loc_t *loc, const char *name, unsigned traverse_flags,
-    H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t dxpl_id)
+    H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5G_obj_ud2_t udata;                /* User data for traversal callback */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5G_obj_ud2_t    udata;                 /* User data for traversal callback */
+    herr_t           ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_find, FAIL)
 
@@ -970,13 +972,14 @@ H5G_obj_find(H5G_loc_t *loc, const char *name, unsigned traverse_flags,
     HDassert(loc && loc->oloc->file);
     HDassert(name && *name);
     HDassert(obj_oloc);
+    HDassert(H5P_CLS_LINK_ACCESS_g != -1);
 
     /* Set up user data for locating object */
     udata.lnk = lnk;
     udata.oloc = obj_oloc;
 
     /* Traverse group hierarchy to locate object */
-    if(H5G_traverse(loc, name, traverse_flags, H5G_obj_find_cb, &udata, dxpl_id) < 0)
+    if(H5G_traverse(loc, name, traverse_flags, H5G_obj_find_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
 
 done:

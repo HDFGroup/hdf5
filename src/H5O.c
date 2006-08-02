@@ -33,6 +33,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
@@ -175,6 +176,8 @@ H5FL_EXTERN(H5O_cont_t);
 H5FL_DEFINE_STATIC(H5O_addr_map_t);
 
 /* PRIVATE PROTOTYPES */
+static hid_t H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id);
+static H5O_loc_t * H5O_get_oloc(hid_t id);
 static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, size_t size_hint,
     H5O_loc_t *loc/*out*/, haddr_t header);
 static herr_t H5O_reset_real(const H5O_msg_class_t *type, void *native);
@@ -226,6 +229,401 @@ static void * H5O_copy_mesg_file(const H5O_msg_class_t *type, H5F_t *file_src, v
 static herr_t H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_copy_free_addrmap_cb(void *item, void *key, void *op_data);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen
+ *
+ * Purpose:	Opens an object within an HDF5 file.
+ *
+ *              This function opens an object in the same way that H5Gopen,
+ *              H5Topen, and H5Dopen do. However, H5Oopen doesn't require
+ *              the type of object to be known beforehand. This can be
+ *              useful in user-defined links, for instance, when only a
+ *              path is known.
+ *
+ *              The opened object should be closed again with H5Oclose
+ *              or H5Gclose, H5Tclose, or H5Dclose.
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
+{
+    H5G_loc_t	loc;
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(H5Oopen, FAIL)
+    H5TRACE3("i","isi",loc_id,name,lapl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location */
+    if(H5G_loc_find(&loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    ent_found = TRUE;
+
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+done:
+    if(ret_value < 0) {
+        if(ent_found)
+            H5G_name_free(&obj_path);
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen_by_addr
+ *
+ * Purpose:	Warning! This function is EXTREMELY DANGEROUS!
+ *              Improper use can lead to FILE CORRUPTION, INACCESSIBLE DATA,
+ *              and other VERY BAD THINGS!
+ *
+ *              This function opens an object using its address within the
+ *              HDF5 file, similar to an HDF5 hard link. The open object
+ *              is identical to an object opened with H5Oopen() and should
+ *              be closed with H5Oclose() or a type-specific closing
+ *              function (such as H5Gclose() ).
+ *
+ *              This function is very dangerous if called on an invalid
+ *              address. For this reason, H5Oincr_refcount() should be
+ *              used to prevent HDF5 from deleting any object that is
+ *              referenced by address (e.g. by a user-defined link).
+ *              H5Odecr_refcount() should be used when the object is
+ *              no longer being referenced by address (e.g. when the UD link
+ *              is deleted).
+ *         
+ *              The address of the HDF5 file on disk has no effect on
+ *              H5Oopen_by_addr(), nor does the use of any unusual file
+ *              drivers. The "address" is really the offset within the
+ *              HDF5 file, and HDF5's file drivers will transparently
+ *              map this to an address on disk for the filesystem.
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
+{
+    H5G_loc_t	loc;
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(H5Oopen_by_addr, FAIL)
+    H5TRACE2("i","ia",loc_id,addr);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(addr == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no address supplied")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+    obj_loc.oloc->addr = addr;
+    obj_loc.oloc->file = loc.oloc->file;
+    H5G_name_reset(obj_loc.path);
+
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+done:
+    if(ret_value < 0) {
+        if(ent_found)
+            H5G_name_free(&obj_path);
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oclose
+ *
+ * Purpose:	Close an open file object.
+ *
+ *              This is the companion to H5Oopen. It is used to close any
+ *              open object in an HDF5 file (but not IDs are that not file
+ *              objects, such as property lists and dataspaces). It has
+ *              the same effect as calling H5Gclose, H5Dclose, or H5Tclose.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oclose(hid_t object_id)
+{
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_API(H5Oclose, FAIL)
+    H5TRACE1("e","i",object_id);
+
+    /* Get the type of the object and open it in the correct way */
+    switch(H5I_get_type(object_id))
+    {
+      case(H5I_GROUP):
+      case(H5I_DATATYPE):
+      case(H5I_DATASET):
+        if( H5I_object(object_id) == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object");
+        if (H5I_dec_ref(object_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
+      break;
+
+      default:
+	    HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)");
+      break;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oincr_refcount
+ *
+ * Purpose:	Warning! This function is EXTREMELY DANGEROUS!
+ *              Improper use can lead to FILE CORRUPTION, INACCESSIBLE DATA,
+ *              and other VERY BAD THINGS!
+ *
+ *              This function increments the "hard link" reference count
+ *              for an object. It should be used a user-defined link
+ *              that references an object by address is deleted. When the
+ *              link is deleted, H5Odecr_refcount should be used.
+ *
+ * Return:	Success:	The object's new refcount
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Oincr_refcount(hid_t object_id)
+{
+    H5O_loc_t  *oloc;
+    int         ret_value;
+    FUNC_ENTER_API(H5Oincr_refcount, FAIL)
+    H5TRACE1("Is","i",object_id);
+
+    /* Get the object's oloc so we can adjust its link count */
+    if((oloc = H5O_get_oloc(object_id)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+    ret_value = H5O_link(oloc, 1, H5AC_dxpl_id);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Odecr_refcount
+ *
+ * Purpose:	Warning! This function is EXTREMELY DANGEROUS!
+ *              Improper use can lead to FILE CORRUPTION, INACCESSIBLE DATA,
+ *              and other VERY BAD THINGS!
+ *
+ *              This function decrements the "hard link" reference count
+ *              for an object. It should be used when user-defined links
+ *              that reference an object by address are deleted, and only
+ *              after H5Oincr_refcount has already been used.
+ *
+ * Return:	Success:	The object's new refcount
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int H5Odecr_refcount(hid_t object_id)
+{
+    H5O_loc_t  *oloc;
+    int         ret_value;
+
+    FUNC_ENTER_API(H5Odecr_refcount, FAIL)
+
+    /* Get the object's oloc so we can adjust its link count */
+    if((oloc = H5O_get_oloc(object_id)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+    ret_value = H5O_link(oloc, -1, H5AC_dxpl_id);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_open_by_loc
+ *
+ * Purpose:	Opens an object and returns an ID given its group loction.
+ *
+ *              This functions simply invokes H5G_open, H5T_open, or
+ *              H5D_open depending on the object type.
+ *
+ * Return:	Success:	Open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		July 25 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
+    H5G_t       *grp = NULL;
+    H5D_t       *dset = NULL;
+    H5T_t       *type = NULL;
+    hid_t      ret_value;
+
+    FUNC_ENTER_NOAPI(H5O_open_by_loc, FAIL)
+
+    HDassert(obj_loc);
+
+    /* Get the type of the object and open it in the correct way */
+    switch(H5O_obj_type(obj_loc->oloc, dxpl_id))
+    {
+      case(H5G_GROUP):
+        /* Open the group */
+        if((grp = H5G_open(obj_loc, dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+        /* Register an atom for the group */
+        if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+      break;
+
+      case(H5G_DATASET):
+        /* Open the group */
+        if((dset = H5D_open(obj_loc, dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+        /* Register an atom for the group */
+        if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
+      break;
+
+      case(H5G_TYPE):
+        /* Open the group */
+        if((type = H5T_open(obj_loc, dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
+        /* Register an atom for the group */
+        if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+      break;
+
+      default:
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "invalid object type")
+    }
+ 
+done:
+    if(ret_value < 0) {
+        if(grp != NULL)
+            H5G_close(grp);
+        else if(dset != NULL)
+            H5D_close(dset);
+        else if(type != NULL)
+            H5T_close(type);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_oloc
+ *
+ * Purpose:	Gets the oloc for an object given its ID.
+ *
+ * Return:	Success:	Pointer to H5O_loc_t
+ *		Failure:	NULL
+ *
+ * Programmer:	James Laird
+ *		July 25 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5O_loc_t *
+H5O_get_oloc(hid_t object_id)
+{
+    H5G_t       *grp = NULL;
+    H5D_t       *dset = NULL;
+    H5T_t       *type = NULL;
+    H5O_loc_t   *ret_value;
+
+    FUNC_ENTER_NOAPI(H5O_get_oloc, NULL)
+
+    switch(H5I_get_type(object_id))
+    {
+      case(H5I_GROUP):
+        if((grp = H5I_object(object_id)) == NULL)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get group from ID")
+        if((ret_value = H5G_oloc(grp)) == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from group ID")
+      break;
+
+      case(H5I_DATASET):
+        if((dset = H5I_object(object_id)) == NULL)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get dataset from ID")
+        if((ret_value = H5D_oloc(dset)) == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from dataset ID")
+      break;
+
+      case(H5I_DATATYPE):
+        if((type = H5I_object(object_id)) == NULL)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get type from ID")
+        if((ret_value = H5T_oloc(type)) == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from datatype ID")
+      break;
+
+      default:
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, NULL, "invalid object type")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1604,7 +2002,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
 
     /* Increment any links in message */
     if((*new_type)->link && ((*new_type)->link)(f,dxpl_id,(*new_mesg)) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_LINK, UFAIL, "unable to adjust shared object link count");
+        HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, UFAIL, "unable to adjust shared object link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

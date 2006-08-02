@@ -155,9 +155,9 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared, int adj
      * object header.
      */
     if(shared->oloc.file->shared != f->shared)
-        HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "interfile hard links are not allowed")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")
     if((ret_value = H5O_link(&(shared->oloc), adjust, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count")
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -370,7 +370,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     /* Decrement the reference count on the shared object, if requested */
     if(adj_link)
         if(H5O_shared_link_adj(f, dxpl_id, shared, -1)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count")
+            HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -406,7 +406,7 @@ H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 
     /* Decrement the reference count on the shared object */
     if(H5O_shared_link_adj(f,dxpl_id,shared,1)<0)
-        HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
+        HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

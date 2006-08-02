@@ -530,6 +530,7 @@
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
 ./src/H5L.c
+./src/H5Lexternal.c
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
 ./src/H5Lpublic.h
@@ -571,6 +572,7 @@
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
 ./src/H5Pgcpl.c
+./src/H5Plapl.c
 ./src/H5Plcpl.c
 ./src/H5Pocpl.c
 ./src/H5Ppkg.h
@@ -646,6 +648,8 @@
 ./test/Makefile.am
 ./test/Makefile.in
 ./test/be_data.h5
+./test/be_extlink1.h5
+./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
 ./test/btree2.c
@@ -689,6 +693,7 @@
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_udlinks.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -697,6 +702,8 @@
 ./test/hyperslab.c
 ./test/istore.c
 ./test/le_data.h5
+./test/le_extlink1.h5
+./test/le_extlink2.h5
 ./test/lheap.c
 ./test/links.c
 ./test/mergemsg.h5
@@ -724,6 +731,7 @@
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
+./test/th5o.c
 ./test/th5s.c
 ./test/th5s.h5
 ./test/theap.c
@@ -983,6 +991,8 @@
 ./tools/testfiles/tempty.ls
 ./tools/testfiles/tenum.h5
 ./tools/testfiles/tenum.ddl
+./tools/testfiles/textlink.h5
+./tools/testfiles/textlink.h5.xml
 ./tools/testfiles/tfamily.ddl
 ./tools/testfiles/tfamily00000.h5
 ./tools/testfiles/tfamily00001.h5
@@ -1057,6 +1067,11 @@
 ./tools/testfiles/tvldtypes5.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
+./tools/testfiles/tudlink.h5
+./tools/testfiles/tudlink.h5.xml
+./tools/testfiles/tudlink-1.ddl
+./tools/testfiles/tudlink-2.ddl
+./tools/testfiles/tudlink-1.ls
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
 ./tools/testfiles/tall-2B.ddl

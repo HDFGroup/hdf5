@@ -497,6 +497,7 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
 
 /* Operations defined on all datatypes */
 H5_DLL hid_t H5Topen(hid_t loc_id, const char *name);
+H5_DLL hid_t H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id);
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 H5_DLL herr_t H5Tclose(hid_t type_id);

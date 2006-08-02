@@ -161,7 +161,7 @@ H5_DLL ssize_t H5G_get_name(hid_t id, char *name/*out*/, size_t size);
  */
 H5_DLL herr_t H5G_loc(hid_t loc_id, H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_find(H5G_loc_t *loc, const char *name,
-    H5G_loc_t *obj_loc/*out*/, hid_t dxpl_id);
+    H5G_loc_t *obj_loc/*out*/, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_free(H5G_loc_t *loc);
 

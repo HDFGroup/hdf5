@@ -1710,7 +1710,7 @@ datatype_list2(hid_t type, const char UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function: link_open
+ * Function: slink_open
  *
  * Purpose: This gets called to open a symbolic link.  Since symbolic
  *  links don't correspond to actual objects we simply print the
@@ -1729,17 +1729,70 @@ datatype_list2(hid_t type, const char UNUSED *name)
  *-------------------------------------------------------------------------
  */
 static hid_t
-link_open(hid_t location, const char *name)
+slink_open(hid_t location, const char *name)
 {
     char buf[64];
 
-    if (H5Gget_linkval (location, name, sizeof(buf), buf)<0) return -1;
+    if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) return -1;
     if (NULL==HDmemchr(buf, 0, sizeof(buf))) {
  strcpy(buf+sizeof(buf)-4, "...");
     }
     fputs(buf, stdout);
 
     return 0;
+}
+/*-------------------------------------------------------------------------
+ * Function: udlink_open
+ *
+ * Purpose: This gets called to open a user-defined link.  Since these
+ *  links don't correspond to actual objects we simply print a message
+ *  and return failure.
+ *
+ * Return: Success: 0 - an invalid object but successful return
+ *    of this function.
+ *
+ *  Failure: -1
+ *
+ * Programmer: James Laird
+ *              Tuesday, June 6, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+udlink_open(hid_t location, const char *name)
+{
+    H5L_linkinfo_t linfo;
+    char * buf = NULL;
+    char * filename = NULL;
+    char * path = NULL;
+
+    if(H5Lget_linkinfo(location, name, &linfo, H5P_DEFAULT) < 0) return -1;
+
+    switch(linfo.linkclass)
+    {
+      /* For external links, try to display info for the object it points to */
+      case H5L_LINK_EXTERNAL:
+        if ((buf = HDmalloc(linfo.u.link_size))==NULL) goto error;
+        if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) goto error;
+
+        if(H5Lunpack_elink_val(buf, &filename, &path) < 0) goto error;
+        fputs("file: ", stdout);
+        fputs(filename, stdout);
+        fputs("    path: ", stdout);
+        fputs(path, stdout);
+        break;
+
+      default:
+        fputs("cannot follow UD links", stdout);
+    }
+    return 0;
+
+error:
+    if(buf)
+      HDfree(buf);
+    return -1;
 }
 
 
@@ -1828,7 +1881,7 @@ list (hid_t group, const char *name, void *_iter)
 
     /* Show detailed information about the object, beginning with information
      * which is common to all objects. */
-    if (verbose_g>0 && H5G_LINK!=sb.type) {
+    if (verbose_g>0 && H5G_LINK!=sb.type && H5G_UDLINK!=sb.type) {
         if (sb.type>=0)
             H5Aiterate(obj, NULL, list_attr, NULL);
         printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno[0], objno);
@@ -2063,7 +2116,9 @@ main (int argc, const char *argv[])
       NULL, group_list2);
     DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose,
       NULL, datatype_list2);
-    DISPATCH(H5G_LINK, "-> ", link_open, NULL,
+    DISPATCH(H5G_LINK, "-> ", slink_open, NULL,
+      NULL, NULL);
+    DISPATCH(H5G_UDLINK, "-> ", udlink_open, NULL,
       NULL, NULL);
 
 #if 0

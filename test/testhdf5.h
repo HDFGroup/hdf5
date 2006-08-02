@@ -127,6 +127,7 @@ void                    test_tst(void);
 void                    test_heap(void);
 void                    test_refstr(void);
 void                    test_file(void);
+void                    test_h5o(void);
 void                    test_h5t(void);
 void                    test_h5s(void);
 void                    test_h5d(void);
@@ -148,6 +149,7 @@ void			test_unicode(void);
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
 void                    cleanup_file(void);
+void                    cleanup_h5o(void);
 void                    cleanup_h5s(void);
 void                    cleanup_attr(void);
 void                    cleanup_select(void);

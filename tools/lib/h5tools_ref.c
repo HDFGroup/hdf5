@@ -171,6 +171,12 @@ ref_path_table_lookup(const char *thepath)
         if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
             /*  fatal error ? */
             return HADDR_UNDEF;
+    } else if(sb.type == H5G_UDLINK)
+    {
+        /* UD links can't be followed, so they always "dangle" like
+         * soft links.
+         */
+        return HADDR_UNDEF;
     } /* end if */
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 

@@ -42,6 +42,26 @@
 #define FILE8    "file8.h5"
 
 
+#define MY_LINKCLASS 187
+/* A UD link traversal function.  Shouldn't actually be called. */
+static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
+    UNUSED void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
+{
+return -1;
+}
+const H5L_link_class_t UD_link_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,    /* H5L_link_class_t version       */
+    MY_LINKCLASS,             /* Link type id number            */
+    "UD link class",          /* name for debugging             */
+    NULL,                     /* Creation callback              */
+    NULL,                     /* Move/rename callback           */
+    NULL,                     /* Copy callback                  */
+    UD_traverse,              /* The actual traversal function  */
+    NULL,                     /* Deletion callback              */
+    NULL                      /* Query callback                 */
+}};
+
+
 /*-------------------------------------------------------------------------
  * Function: write_attr
  *
@@ -2153,7 +2173,7 @@ int test_basic(const char *file1,
  * Function: test_basic
  *
  * Purpose: Compare different HDF5 types (H5G_obj_t):
- * H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
+ * H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK, H5G_UDLINK
  *
  *-------------------------------------------------------------------------
  */
@@ -2222,8 +2242,16 @@ int test_types(const char *file1,
  *-------------------------------------------------------------------------
  */
 
- status = H5Glink(fid1, H5G_LINK_SOFT, "g1", "l1");
- status = H5Glink(fid1, H5G_LINK_SOFT, "g2", "l2");
+ status = H5Glink(fid1, H5L_LINK_SOFT, "g1", "l1");
+ status = H5Glink(fid1, H5L_LINK_SOFT, "g2", "l2");
+
+/*-------------------------------------------------------------------------
+ * H5G_UDLINK
+ *-------------------------------------------------------------------------
+ */
+ H5Lcreate_external("filename", "objname", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
+ H5Lregister(UD_link_class);
+ H5Lcreate_ud(fid1, "ud_link", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
 /*-------------------------------------------------------------------------
  * Close

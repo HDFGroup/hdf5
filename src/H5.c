@@ -22,6 +22,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Ipkg.h"		/* IDs			  		*/
+#include "H5Lprivate.h"		/* Links		  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Rpublic.h"		/* References				*/
@@ -135,6 +136,8 @@ H5_init_library(void)
      * initialized.  The property interface must be initialized before the file
      * & dataset interfaces though, in order to provide them with the proper
      * property classes.
+     * The link interface needs to be initialized so that link property lists
+     * have their properties registered.
      */
     if (H5E_init()<0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
@@ -148,6 +151,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
     if (H5AC_init()<0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
+    if (H5L_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
 
     /* Debugging? */
     H5_debug_mask("-all");
@@ -1903,7 +1908,10 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf (out, "H5G_UNKNOWN");
 			break;
 		    case H5G_LINK:
-			fprintf (out, "H5L_LINK");
+			fprintf (out, "H5G_LINK");
+			break;
+		    case H5G_UDLINK:
+			fprintf (out, "H5G_UDLINK");
 			break;
 		    case H5G_GROUP:
 			fprintf (out, "H5G_GROUP");
@@ -1914,7 +1922,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    case H5G_TYPE:
 			fprintf (out, "H5G_TYPE");
 			break;
-		    case H5G_RESERVED_4:
 		    case H5G_RESERVED_5:
 		    case H5G_RESERVED_6:
 		    case H5G_RESERVED_7:

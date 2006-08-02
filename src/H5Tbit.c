@@ -265,7 +265,8 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
             break;
 
         default:
-            HDabort ();
+            /* Unknown endianness. Bail out. */
+            return -1;
     }
 
     /* Set return value */

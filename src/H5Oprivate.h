@@ -153,6 +153,11 @@ typedef struct H5O_link_soft_t {
     char	*name;			/* Destination name */
 } H5O_link_soft_t;
 
+typedef struct H5O_link_ud_t {
+    void	*udata;			/* Opaque data supplied by the user */
+    size_t       size;                  /* Size of udata */
+} H5O_link_ud_t;
+
 typedef struct H5O_link_t {
     H5L_link_t  type;                   /* Type of link */
     time_t      ctime;                  /* Time link was createed */
@@ -161,6 +166,7 @@ typedef struct H5O_link_t {
     union {
         H5O_link_hard_t hard;           /* Information for hard links */
         H5O_link_soft_t soft;           /* Information for soft links */
+        H5O_link_ud_t ud;               /* Information for user-defined links */
     } u;
 } H5O_link_t;
 

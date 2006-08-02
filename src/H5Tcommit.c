@@ -108,13 +108,13 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     if(H5G_loc(type_id, &type_loc) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get committed datatype's location")
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get committed datatype's location")
 
     /* Link the type into the group hierarchy */
-    if( H5L_link(&loc, name, &type_loc, H5AC_dxpl_id, H5P_DEFAULT) < 0)
+    if( H5L_link(&loc, name, &type_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
     {
         uncommit = TRUE;    /* Linking failed, and we need to undo H5T_commit. */
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to create link to type")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to type")
     }
 
 done:
@@ -182,14 +182,12 @@ H5Tcommit_expand(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype create property list")
 
-#ifdef LATER
     /* Get correct property list */
     if(H5P_DEFAULT == tapl_id)
         tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
     else
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
-#endif /* LATER */
 
     /* Commit the type */
     if(H5T_commit(loc.oloc->file, type, H5AC_dxpl_id, tcpl_id, tapl_id) < 0)
@@ -384,7 +382,7 @@ H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
 
     /* Adjust the link count on the named datatype */
     if((ret_value = H5O_link(&(type->oloc), adjust, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_LINK, FAIL, "unable to adjust named datatype link count")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_LINKCOUNT, FAIL, "unable to adjust named datatype link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -435,7 +433,7 @@ H5Topen(hid_t loc_id, const char *name)
      * Find the named datatype object header and read the datatype message
      * from it.
      */
-    if(H5G_loc_find(&loc, name, &type_loc/*out*/, dxpl_id) < 0)
+    if(H5G_loc_find(&loc, name, &type_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
     obj_found = TRUE;
 
@@ -463,6 +461,87 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Topen_expand
+ *
+ * Purpose:	Opens a named datatype using a Datatype Access Property
+ *              List.
+ *
+ * Return:	Success:	Object ID of the named datatype.
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *              Thursday July 27, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id)
+{
+    H5T_t       *type = NULL;
+    H5G_loc_t	 loc;
+    H5G_name_t   path;            	/* Datatype group hier. path */
+    H5O_loc_t    oloc;            	/* Datatype object location */
+    H5G_loc_t    type_loc;              /* Group object for datatype */
+    hbool_t      obj_found = FALSE;     /* Object at 'name' found */
+    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        ret_value = FAIL;
+
+    FUNC_ENTER_API(H5Topen_expand, FAIL)
+    H5TRACE3("i","isi",loc_id,name,tapl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
+    /* Set up datatype location to fill in */
+    type_loc.oloc = &oloc;
+    type_loc.path = &path;
+    H5G_loc_reset(&type_loc);
+
+    /*
+     * Find the named datatype object header and read the datatype message
+     * from it.
+     */
+    if(H5G_loc_find(&loc, name, &type_loc/*out*/, tapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
+    obj_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&oloc, dxpl_id) != H5G_TYPE)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
+
+    /* Open it */
+    if((type = H5T_open(&type_loc, dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
+
+    /* Register the type and return the ID */
+    if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named datatype")
+
+done:
+    if(ret_value < 0) {
+        if(type != NULL)
+            H5T_close(type);
+        else {
+            if(obj_found && H5F_addr_defined(type_loc.oloc->addr))
+                H5G_name_free(type_loc.path);
+        } /* end else */
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------

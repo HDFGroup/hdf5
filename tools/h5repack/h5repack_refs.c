@@ -93,7 +93,7 @@ int do_copy_refobjs(hid_t fidin,
     for ( j=0; j<travt->objs[i].nlinks; j++)
     {
       H5Glink(fidout,
-      H5G_LINK_HARD,
+      H5L_LINK_HARD,
       travt->objs[i].name,
       travt->objs[i].links[j].new_name);
     }
@@ -339,7 +339,7 @@ int do_copy_refobjs(hid_t fidin,
    {
     for ( j=0; j<travt->objs[i].nlinks; j++){
      H5Glink(fidout,
-      H5G_LINK_HARD,
+      H5L_LINK_HARD,
       travt->objs[i].name,
       travt->objs[i].links[j].new_name);
     }
@@ -384,10 +384,12 @@ int do_copy_refobjs(hid_t fidin,
 
   /*-------------------------------------------------------------------------
    * H5G_LINK
+   * H5G_UDLINK
    *-------------------------------------------------------------------------
    */
 
   case H5G_LINK:
+  case H5G_UDLINK:
 
    /*nothing to do */
    break;

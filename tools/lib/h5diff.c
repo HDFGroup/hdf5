@@ -870,6 +870,7 @@ hsize_t diff_compare (hid_t file1_id,
  *  H5G_DATASET  Object is a dataset
  *  H5G_TYPE     Object is a named data type
  *  H5G_LINK     Object is a symbolic link
+ *  H5G_UDLINK   Object is a user-defined link
  *
  * Return: Number of differences found
  *
@@ -1057,6 +1058,90 @@ hsize_t diff (hid_t file1_id,
 
    if (print_objname (options, nfound))
     parallel_print("Soft Link:        <%s> and <%s>\n", path1, path2);
+
+   /* always print the number of differences found in verbose mode */
+   if (options->m_verbose)
+    print_found(nfound);
+
+   HDfree (buf1);
+   HDfree (buf2);
+  }
+  break;
+
+ /*-------------------------------------------------------------------------
+  * H5G_UDLINK
+  *-------------------------------------------------------------------------
+  */
+ case H5G_UDLINK:
+  {
+   char *buf1 = NULL;
+   char *buf2 = NULL;
+   H5L_linkinfo_t li1;
+   H5L_linkinfo_t li2;
+
+   if (H5Lget_linkinfo (file1_id, path1, &li1, H5P_DEFAULT) < 0)
+    goto out;
+   if (H5Lget_linkinfo (file1_id, path1, &li2, H5P_DEFAULT) < 0)
+    goto out;
+
+   /* Only external links will have a query function registered */
+   if(li1.linkclass == H5L_LINK_EXTERNAL && li2.linkclass == H5L_LINK_EXTERNAL)
+   {
+      buf1 = HDmalloc (li1.u.link_size);
+      buf2 = HDmalloc (li2.u.link_size);
+
+      if (H5Lget_linkval (file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
+      {
+        HDfree (buf1); HDfree (buf2);
+        goto out;
+      }
+      if (H5Lget_linkval (file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
+      {
+        HDfree (buf1); HDfree (buf2);
+        goto out;
+      }
+
+      /* If the buffers are the same size, compare them */
+      if(li1.u.link_size == li2.u.link_size)
+      {
+        if (H5Lget_linkval (file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
+        {
+          HDfree (buf1); HDfree (buf2);
+          goto out;
+        }
+        if (H5Lget_linkval (file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
+        {
+          HDfree (buf1); HDfree (buf2);
+          goto out;
+        }
+        ret = HDmemcmp (buf1, buf2, li1.u.link_size);
+      }
+      else
+        ret = 1;
+
+      /* if "buf1" != "buf2" then the links are "different" */
+      nfound = (ret != 0) ? 1 : 0;
+
+      if (print_objname (options, nfound))
+        parallel_print("External Link:        <%s> and <%s>\n", path1, path2);
+   }
+   else
+   {
+      /* If one or both of these links isn't an external link, we can only
+       * compare information from H5Lget_linkinfo since we don't have a query
+       * function registered for them. */
+
+      /* If the link classes or the buffer length are not the
+       * same, the links are "different"
+       */
+      if((li1.linkclass != li2.linkclass) || (li1.u.link_size != li2.u.link_size))
+        nfound = 1;
+      else
+        nfound = 0;
+
+      if (print_objname (options, nfound))
+        parallel_print("User-defined Link:        <%s> and <%s>\n", path1, path2);
+   }
 
    /* always print the number of differences found in verbose mode */
    if (options->m_verbose)

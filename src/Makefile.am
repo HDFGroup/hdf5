@@ -55,12 +55,12 @@ libhdf5_la_SOURCES= H5.c H5dbg.c H5A.c H5AC.c H5B.c H5Bcache.c \
         H5HFhdr.c H5HFiblock.c H5HFint.c H5HFiter.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c \
         H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
-        H5MP.c H5MPtest.c H5L.c H5O.c H5Oattr.c H5Obogus.c H5Ocache.c \
+        H5MP.c H5MPtest.c H5L.c H5Lexternal.c H5O.c H5Oattr.c H5Obogus.c H5Ocache.c \
         H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pacpl.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pgcpl.c     \
-        H5Plcpl.c H5Pocpl.c H5Pstrcpl.c H5Ptest.c H5R.c H5RC.c  \
+        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pstrcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
         H5Sselect.c H5Stest.c \
         H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \

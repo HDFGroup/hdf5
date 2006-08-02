@@ -589,7 +589,7 @@ H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_l
         /* Decrement the reference count on the shared datatype, if requested */
         if(adj_link)
             if(H5T_link(attr->dt, -1, dxpl_id)<0)
-                HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared datatype link count")
+                HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -628,7 +628,7 @@ H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
         if(H5T_link(attr->dt,1,dxpl_id)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared datatype link count");
+            HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count");
     } /* end if */
 
 done:

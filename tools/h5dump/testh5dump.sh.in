@@ -125,10 +125,12 @@ TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
 # test for displaying attributes in shared datatype (also in group and dataset)
 TOOLTEST tnamed_dtype_attr.ddl tnamed_dtype_attr.h5
 
-# test for displaying soft links
+# test for displaying soft links and user-defined links
 TOOLTEST tslink-1.ddl tslink.h5
+TOOLTEST tudlink-1.ddl tudlink.h5
 # test for displaying the selected link
 TOOLTEST tslink-2.ddl -l slink2 tslink.h5
+TOOLTEST tudlink-2.ddl -l udlink2 tudlink.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ddl thlink.h5

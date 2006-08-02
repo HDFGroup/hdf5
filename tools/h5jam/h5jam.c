@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif

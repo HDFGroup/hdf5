@@ -854,10 +854,10 @@ static void test_links(void)
     CHECK(gid1, FAIL, "H5Gcreate");
 
     /* create soft and hard links to the group "/g1". */
-    ret = H5Glink (gid, H5G_LINK_SOFT, "something", "softlink");
+    ret = H5Glink (gid, H5L_LINK_SOFT, "something", "softlink");
     CHECK(ret, FAIL, "H5Glink");
 
-    ret = H5Glink (gid, H5G_LINK_HARD, "/g1", "hardlink");
+    ret = H5Glink (gid, H5L_LINK_HARD, "/g1", "hardlink");
     CHECK(ret, FAIL, "H5Glink");
 
     ret = H5Gget_num_objs(gid, &nobjs);

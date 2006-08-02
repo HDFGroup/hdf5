@@ -156,7 +156,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
     H5G_loc_reset(&obj_loc);
 
     /* Find the object */
-    if(H5G_loc_find(loc, name, &obj_loc, dxpl_id) < 0)
+    if(H5G_loc_find(loc, name, &obj_loc, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "object not found")
     obj_found = TRUE;
 

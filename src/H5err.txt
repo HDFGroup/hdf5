@@ -52,6 +52,7 @@ MAJOR, H5E_IO, Low-level I/O
 MAJOR, H5E_FUNC, Function entry/exit
 MAJOR, H5E_ATOM, Object atom
 MAJOR, H5E_CACHE, Object cache
+MAJOR, H5E_LINK, Links
 MAJOR, H5E_BTREE, B-Tree node
 MAJOR, H5E_SYM, Symbol table
 MAJOR, H5E_HEAP, Heap
@@ -81,6 +82,7 @@ SECTION, FILE, Generic low-level file I/O errors
 SECTION, FUNC, Function entry/exit interface errors
 SECTION, ATOM, Object atom related errors
 SECTION, CACHE, Cache related errors
+SECTION, LINK, Link related errors
 SECTION, BTREE, B-tree related errors
 SECTION, OHDR, Object header related errors
 SECTION, GROUP, Group related errors
@@ -190,8 +192,6 @@ MINOR, OHDR, H5E_CANTPACK, Can't pack messages
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object
 MINOR, GROUP, H5E_CANTCLOSEOBJ, Can't close object
 MINOR, GROUP, H5E_COMPLEN, Name component is too long
-MINOR, GROUP, H5E_LINK, Link failure
-MINOR, GROUP, H5E_SLINK, Symbolic link error
 MINOR, GROUP, H5E_PATH, Problem with path to object
 
 # Datatype conversion errors
@@ -210,6 +210,13 @@ MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
 MINOR, PLIST, H5E_CANTGET, Can't get value
 MINOR, PLIST, H5E_CANTSET, Can't set value
 MINOR, PLIST, H5E_DUPCLASS, Duplicate class name in parent class
+
+# Link errors
+MINOR, LINK, H5E_TRAVERSE, Link traversal failure
+MINOR, LINK, H5E_NLINKS, Too many soft links in path
+MINOR, LINK, H5E_NOTREGISTERED, Link class not registered
+MINOR, LINK, H5E_CANTMOVE, Move callback returned error
+
 
 # Parallel MPI errors
 MINOR, MPI, H5E_MPI, Some MPI function failed

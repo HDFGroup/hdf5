@@ -936,6 +936,13 @@ H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
                     search_datatype = 1;
                 break;
 
+            case H5G_UDLINK:
+              /* User-defined links automatically wipe out names (because it
+               * would be too much work to track them), so there's no point
+               * in searching them.
+               */
+              break;
+
             default:
                 HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type")
         } /* end switch */

@@ -283,16 +283,23 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:",
         (unsigned)key->offset);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
+    if(udata->heap_addr != 0)
+    {
+        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
 
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
+        if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
 
-    s = H5HL_offset_into(f, heap, key->offset);
-    HDfprintf (stream, "%s\n", s);
+        s = H5HL_offset_into(f, heap, key->offset);
+        HDfprintf (stream, "%s\n", s);
 
-    if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
+        if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
+    }
+    else
+    {
+        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cannot get name; heap address not specified\n");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1242,7 +1249,10 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         if(cmp)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found")
 
-        if(H5G_CACHED_SLINK == sn->entry[idx].type) {
+        switch(sn->entry[idx].type)
+        {
+          case H5G_CACHED_SLINK:
+          {
             /* Set the type of the link removed */
             *(udata->obj_type) = H5G_LINK;
 
@@ -1266,7 +1276,42 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
                 H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.slink.lval_offset, len);
 
             H5E_clear_stack(NULL); /* no big deal */
-        } else {
+          }
+          break;
+
+          case H5G_CACHED_ULINK:
+          {
+            size_t ud_data_size = 0;       /* User link data size */
+            hbool_t ud_data_found;           /* Indicate that the link user data was found */
+
+            /* Set the type of the link removed */
+            *(udata->obj_type) = H5G_UDLINK;
+
+            /* Remove the link user data from the heap */
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
+
+            s = H5HL_offset_into(f, heap, sn->entry[idx].cache.ulink.udata_offset);
+            if(s)
+            {
+                ud_data_found = 1;
+                ud_data_size = sn->entry[idx].cache.ulink.udata_size;
+            }
+            else
+                ud_data_found = 0;
+            if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+            heap = NULL; s = NULL;
+
+            if(ud_data_found)
+                H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.ulink.udata_offset, ud_data_size);
+
+            H5E_clear_stack(NULL); /* no big deal */
+          }
+          break;
+
+          default:
+          {
             H5O_loc_t tmp_oloc;             /* Temporary object location */
 
             /* Build temporary object location */
@@ -1283,7 +1328,8 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
                 if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count")
             } /* end if */
-        } /* end else */
+          }
+        } /* end switch */
 
         /* Remove the name from the local heap */
         if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
@@ -1372,7 +1418,8 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         /* Reduce the link count for all entries in this node */
         for(idx = 0; idx < sn->nsyms; idx++) {
-            if(H5G_CACHED_SLINK != sn->entry[idx].type) {
+            if(!(H5G_CACHED_SLINK == sn->entry[idx].type ||
+                    H5G_CACHED_ULINK == sn->entry[idx].type)) {
                 /* Decrement the reference count, if requested */
                 if(udata->adj_link) {
                     HDassert(H5F_addr_defined(sn->entry[idx].header));
@@ -1670,17 +1717,24 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         loc_idx = udata->idx - udata->num_objs;
 
         /* Check for a soft link */
-        if(sn->entry[loc_idx].type == H5G_CACHED_SLINK)
+        switch(sn->entry[loc_idx].type)
+        {
+        case H5G_CACHED_SLINK:
             udata->type = H5G_LINK;
-        /* Must be a hard link */
-        else {
+            break;
+        case H5G_CACHED_ULINK:
+            udata->type = H5G_UDLINK;
+            break;
+
+        default:
             /* Build temporary object location */
             tmp_oloc.file = f;
             HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
             tmp_oloc.addr = sn->entry[loc_idx].header;
 
             udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
-        } /* end else */
+            break;
+        }
         ret_value = H5B_ITER_STOP;
     } else {
         udata->num_objs += sn->nsyms;
@@ -1996,6 +2050,14 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             /* Construct link information for eventual insertion */
             lnk.type = H5L_LINK_SOFT;
             lnk.u.soft.name = H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
+        } /* else if */
+        else if(H5G_CACHED_ULINK == src_ent->type) {
+            /* user-defined link */
+
+            /* Construct link information for eventual insertion */
+            lnk.type = src_ent->cache.ulink.link_type;
+            lnk.u.ud.size = src_ent->cache.ulink.udata_size;
+            lnk.u.ud.udata = H5HL_offset_into(f, heap, src_ent->cache.ulink.udata_offset);
         } /* else if */
         else
             HDassert(0 && "Unknown entry type");

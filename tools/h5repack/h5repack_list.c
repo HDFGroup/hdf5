@@ -198,6 +198,9 @@ void print_objlist(const char *filename,
   case H5G_LINK:
    printf(" %-10s %s\n", "link", info[i].name );
    break;
+  case H5G_UDLINK:
+   printf(" %-10s %s\n", "User defined link", info[i].name );
+   break;
   default:
    printf(" %-10s %s\n", "User defined object", info[i].name );
    break;

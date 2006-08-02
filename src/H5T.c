@@ -733,6 +733,7 @@ H5T_init_interface(void)
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
     H5P_genclass_t  *crt_pclass;        /* Property list class for datatype creation properties */
+    H5P_genclass_t  *acc_pclass;        /* Property list class for datatype access properties */
     herr_t	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface);
@@ -1322,6 +1323,20 @@ H5T_init_interface(void)
     if(H5P_LST_DATATYPE_CREATE_g==(-1)) {
         /* Register the default datatype creation property list */
         if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
+    } /* end if */
+
+    /* ========== Datatype Access Property Class Initialization ============*/
+    assert(H5P_CLS_DATATYPE_ACCESS_g!=-1);
+
+    /* Get the pointer to dataset access class */
+    if(NULL == (acc_pclass = H5I_object(H5P_CLS_DATATYPE_ACCESS_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_DATATYPE_ACCESS_g == (-1)) {
+        /* Register the default dataset access property list */
+        if((H5P_LST_DATATYPE_ACCESS_g = H5P_create_id(acc_pclass))<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 

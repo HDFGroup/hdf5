@@ -25,6 +25,7 @@
 const char *FILENAME[] = {
     "objcopy_src",
     "objcopy_dst",
+    "objcopy_ext",
     NULL
 };
 
@@ -63,6 +64,7 @@ const char *FILENAME[] = {
 #define NAME_LINK_HARD		"/g_links/hard_link_to_dataset_simple"
 #define NAME_LINK_SOFT		"/g_links/soft_link_to_dataset_simple"
 #define NAME_LINK_SOFT2		"/g_links2/soft_link_to_dataset_simple"
+#define NAME_LINK_EXTERN	"/g_links/external_link_to_dataset_simple"
 #define NAME_LINK_SOFT_DANGLE	"/g_links/soft_link_to_nowhere"
 #define NAME_LINK_SOFT_DANGLE2	"/g_links2/soft_link_to_nowhere"
 
@@ -817,6 +819,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
         H5G_obj_t objtype2;                     /* Type of object in group */
         H5G_stat_t objstat;                     /* Object info */
         H5G_stat_t objstat2;                    /* Object info */
+        H5L_linkinfo_t linfo;                   /* Link information */
+        H5L_linkinfo_t linfo2;                  /* Link information */
         hid_t oid, oid2;                        /* IDs of objects within group */
 
         /* Loop over contents of groups */
@@ -835,11 +839,15 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
             if(H5Gget_objinfo(gid, objname, FALSE, &objstat) < 0) TEST_ERROR;
             if(H5Gget_objinfo(gid2, objname2, FALSE, &objstat2) < 0) TEST_ERROR;
             if(objstat.type != objstat2.type) TEST_ERROR;
-            if(objstat.type != H5G_LINK) {
+            if(objstat.type != H5G_LINK && objstat.type != H5G_UDLINK) {
                 if(objstat.nlink != objstat2.nlink) TEST_ERROR;
                 if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs) TEST_ERROR;
                 if(objstat.ohdr.nchunks != objstat2.ohdr.nchunks) TEST_ERROR;
             } /* end if */
+
+            /* Get link info */
+            if(H5Lget_linkinfo(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR;
+            if(H5Lget_linkinfo(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR;
 
             /* Check for object already having been compared */
             if(addr_lookup(&objstat))
@@ -855,8 +863,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                         char linkname2[NAME_BUF_SIZE];           /* Link value */
 
                         /* Check link values */
-                        if(H5Gget_linkval(gid, objname, NAME_BUF_SIZE, linkname) < 0) TEST_ERROR;
-                        if(H5Gget_linkval(gid2, objname2, NAME_BUF_SIZE, linkname2) < 0) TEST_ERROR;
+                        if(H5Lget_linkval(gid, objname, NAME_BUF_SIZE, linkname, H5P_DEFAULT) < 0) TEST_ERROR;
+                        if(H5Lget_linkval(gid2, objname2, NAME_BUF_SIZE, linkname2, H5P_DEFAULT) < 0) TEST_ERROR;
                         if(HDstrcmp(linkname, linkname2)) TEST_ERROR;
                     }
                     break;
@@ -899,6 +907,24 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                     if(H5Tclose(oid) < 0) TEST_ERROR;
                     if(H5Tclose(oid2) < 0) TEST_ERROR;
                     break;
+
+                case H5G_UDLINK:
+                  {
+                      char linkval[NAME_BUF_SIZE];            /* Link value */
+                      char linkval2[NAME_BUF_SIZE];           /* Link value */
+
+                      /* Check that both links are the same type and the same size */
+                      if(linfo.linkclass != linfo2.linkclass) TEST_ERROR;
+                      if(linfo.u.link_size != linfo2.u.link_size) TEST_ERROR;
+
+                      /* Get link udata */
+                      if(H5Lget_linkval(gid, objname, NAME_BUF_SIZE, linkval, H5P_DEFAULT) < 0) TEST_ERROR;
+                      if(H5Lget_linkval(gid2, objname2, NAME_BUF_SIZE, linkval2, H5P_DEFAULT) < 0) TEST_ERROR;
+
+                      /* Compare link udata */
+                      if(HDmemcmp(linkval, linkval2, objstat.linklen)) TEST_ERROR;
+                  }
+                  break;
 
                 default:
 HDassert(0 && "Unknown type of object");
@@ -4102,7 +4128,7 @@ test_copy_group_loop(hid_t fapl)
     if ( (gid_sub2 = H5Gcreate(gid, NAME_GROUP_SUB_SUB, (size_t)0)) < 0) TEST_ERROR;
 
     /* Create link to top group */
-    if ( H5Glink2(gid, ".", H5G_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR;
+    if ( H5Glink2(gid, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR;
 
     /* close sub sub group */
     if( H5Gclose(gid_sub2) < 0) TEST_ERROR;
@@ -4223,13 +4249,13 @@ test_copy_group_wide_loop(hid_t fapl)
             if ( (gid_sub2 = H5Gcreate(gid_sub, objname, (size_t)0)) < 0) TEST_ERROR;
 
             /* Create link to top group */
-            if ( H5Glink2(gid, ".", H5G_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR;
+            if ( H5Glink2(gid, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR;
 
             /* Create link to sub-group */
-            if ( H5Glink2(gid_sub, ".", H5G_LINK_HARD, gid_sub2, NAME_GROUP_LOOP2) < 0) TEST_ERROR;
+            if ( H5Glink2(gid_sub, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP2) < 0) TEST_ERROR;
 
             /* Create link to self :-) */
-            if ( H5Glink2(gid_sub2, ".", H5G_LINK_HARD, gid_sub2, NAME_GROUP_LOOP3) < 0) TEST_ERROR;
+            if ( H5Glink2(gid_sub2, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP3) < 0) TEST_ERROR;
 
             /* close sub sub group */
             if( H5Gclose(gid_sub2) < 0) TEST_ERROR;
@@ -4364,13 +4390,16 @@ test_copy_group_links(hid_t fapl)
     if (H5Dclose(did) < 0) TEST_ERROR;
 
     /* make a hard link to the dataset */
-    if (H5Glink(fid_src, H5G_LINK_HARD, NAME_LINK_DATASET, NAME_LINK_HARD) < 0) TEST_ERROR;
+    if (H5Glink(fid_src, H5L_LINK_HARD, NAME_LINK_DATASET, NAME_LINK_HARD) < 0) TEST_ERROR;
 
     /* make a soft link to the dataset */
-    if (H5Glink(fid_src, H5G_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR;
+    if (H5Glink(fid_src, H5L_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR;
 
     /* make a soft link to nowhere */
-    if (H5Glink(fid_src, H5G_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR;
+    if (H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR;
+
+    /* make a dangling external link */
+    if (H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* close the group */
     if ( H5Gclose(gid) < 0) TEST_ERROR;
@@ -4496,7 +4525,7 @@ test_copy_soft_link(hid_t fapl)
     if (H5Dclose(did) < 0) TEST_ERROR;
 
     /* make a soft link to the dataset */
-    if (H5Glink(fid_src, H5G_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR;
+    if (H5Glink(fid_src, H5L_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR;
 
     /* close the group */
     if ( H5Gclose(gid) < 0) TEST_ERROR;
@@ -4552,6 +4581,141 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_soft_link */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_ext_link
+ *
+ * Purpose:     Create an external link in SRC file and copy it to DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  James Laird
+ *              Friday, June 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_ext_link(hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t gid = -1;                             /* Group ID */
+    hsize_t dim2d[2];
+    int buf[DIM_SIZE_1][DIM_SIZE_2];
+    int i, j;
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+    char ext_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Gcopy(): object through external link");
+
+    /* set initial data values */
+    for (i=0; i<DIM_SIZE_1; i++)
+        for (j=0; j<DIM_SIZE_2; j++)
+            buf[i][j] = 10000 + 100*i+j;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+    h5_fixname(FILENAME[2], fapl, ext_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+
+    /* create group at the SRC file */
+    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR;
+
+    /* attach attributes to the group */
+    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR;
+
+    /* Set dataspace dimensions */
+    dim2d[0]=DIM_SIZE_1;
+    dim2d[1]=DIM_SIZE_2;
+
+    /* create dataspace */
+    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR;
+
+    /* add a dataset to the group */
+    if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR;
+    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
+
+    /* close dataspace */
+    if ( H5Sclose(sid) < 0) TEST_ERROR;
+    /* close the dataset */
+    if (H5Dclose(did) < 0) TEST_ERROR;
+    /* close the group */
+    if ( H5Gclose(gid) < 0) TEST_ERROR;
+
+
+    /* create file to hold external links to the src file */
+    if ( (fid_ext = H5Fcreate(ext_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+
+    /* create group in the external file */
+    if ( (gid = H5Gcreate(fid_ext, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR;
+
+    /* Create an external link to the dataset */
+    if ( H5Lcreate_external(src_filename, NAME_LINK_DATASET, fid_ext, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
+
+    /* close the group and file */
+    if ( H5Gclose(gid) < 0) TEST_ERROR;
+    if (H5Fclose(fid_ext) < 0) TEST_ERROR;
+
+    /* open the "extern" file with read-only */
+    if ( (fid_ext = H5Fopen(ext_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
+
+    /* create destination file */
+    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR;
+
+    /* copy the dataset from SRC to DST */
+    if ( H5Gcopy(fid_ext, NAME_LINK_EXTERN, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
+
+    /* open the dataset through the external link */
+    if ( (did = H5Dopen(fid_ext, NAME_LINK_EXTERN)) < 0) TEST_ERROR;
+
+    /* open the destination dataset */
+    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR;
+
+    /* Check if the datasets are equal */
+    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR;
+
+    /* close the destination dataset */
+    if ( H5Dclose(did2) < 0) TEST_ERROR;
+
+    /* close the source dataset */
+    if ( H5Dclose(did) < 0) TEST_ERROR;
+
+    /* close the SRC file */
+    if ( H5Fclose(fid_src) < 0) TEST_ERROR;
+
+    /* close the EXT file */
+    if ( H5Fclose(fid_ext) < 0) TEST_ERROR;
+
+    /* close the DST file */
+    if ( H5Fclose(fid_dst) < 0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Sclose(sid);
+    	H5Dclose(did2);
+    	H5Dclose(did);
+    	H5Gclose(gid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_ext_link */
 
 
 /*-------------------------------------------------------------------------
@@ -6197,14 +6361,14 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
     if ((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
         /* Create group to copy */
         if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR;
-        if (H5Glink(fid_src, H5G_LINK_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR;
-        if (H5Glink(fid_src, H5G_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5L_LINK_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR;
         if ( H5Gclose(gid) < 0) TEST_ERROR;
 
         /* Create group to compare with */
         if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK2, (size_t)0)) < 0) TEST_ERROR;
-        if (H5Glink(fid_src, H5G_LINK_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR;
-        if (H5Glink(fid_src, H5G_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5L_LINK_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR;
+        if (H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR;
         if ( H5Gclose(gid) < 0) TEST_ERROR;
     }
 
@@ -6396,6 +6560,7 @@ main(void)
 	nerrors += test_copy_group_wide_loop(fapl);
 	nerrors += test_copy_group_links(fapl);
 	nerrors += test_copy_soft_link(fapl);
+        nerrors += test_copy_ext_link(fapl);
 	nerrors += test_copy_exist(fapl);
 	nerrors += test_copy_path(fapl);
 	nerrors += test_copy_same_file_named_datatype(fapl);

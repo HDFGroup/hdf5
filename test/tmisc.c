@@ -2850,6 +2850,7 @@ test_misc18(void)
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
 
     /* Create second dataset */
     did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
@@ -2866,6 +2867,7 @@ test_misc18(void)
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
 
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u=0; u<10; u++) {
@@ -2905,6 +2907,7 @@ test_misc18(void)
     VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
 
     /* Get object information for dataset #2 now */
     ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
@@ -2920,6 +2923,7 @@ test_misc18(void)
     VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
 #endif /* H5_HAVE_LARGE_HSIZET */
+    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
 
     /* Close second dataset */
     ret = H5Dclose(did2);
@@ -3844,7 +3848,7 @@ test_misc23(void)
     tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
-    status = H5Llink(file_id, "/A/B01/grp", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B01/grp", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     /* Query that the name of the new group is correct */
@@ -3870,7 +3874,7 @@ test_misc23(void)
     tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
-    status = H5Llink(file_id, "/A/B02/C02/grp", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B02/C02/grp", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
@@ -3880,7 +3884,7 @@ test_misc23(void)
     tmp_id = H5Gcreate_expand(group_id, H5P_DEFAULT, access_id);
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
-    status = H5Llink(group_id, "B03/grp/", tmp_id, create_id);
+    status = H5Llink(group_id, "B03/grp/", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
@@ -3890,7 +3894,7 @@ test_misc23(void)
     if ( (tmp_id = H5Gcreate_expand(group_id, H5P_DEFAULT, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
-    status = H5Llink(group_id, "/A/B04/grp/", tmp_id, create_id);
+    status = H5Llink(group_id, "/A/B04/grp/", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
@@ -3900,7 +3904,7 @@ test_misc23(void)
     if ( (tmp_id = H5Gcreate_expand(file_id, H5P_DEFAULT, access_id)) < 0)
     CHECK(tmp_id, FAIL, "H5Gcreate_expand");
 
-    status = H5Llink(file_id, "/A/B05/C05/A", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B05/C05/A", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Gclose(tmp_id);
@@ -3924,50 +3928,50 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
 
-    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Llink(file_id, "/A/B06/dset", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B06/dset", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
     
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Llink(file_id, "/A/B07/B07/dset", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B07/B07/dset", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT);
+    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Llink(group_id, "B08/dset", tmp_id, create_id);
+    status = H5Llink(group_id, "B08/dset", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT);
+    tmp_id = H5Dcreate_expand(group_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Llink(group_id, "/A/B09/dset", tmp_id, create_id);
+    status = H5Llink(group_id, "/A/B09/dset", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
     CHECK(status, FAIL, "H5Dclose");
 
 
-    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT);
+    tmp_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Dcreate");
 
-    status = H5Llink(file_id, "/A/B10/C10/A/dset", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B10/C10/A/dset", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Dclose(tmp_id);
@@ -4002,7 +4006,7 @@ test_misc23(void)
     status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
 
-    status = H5Llink(file_id, "/A/B11/dtype", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B11/dtype", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
@@ -4015,7 +4019,7 @@ test_misc23(void)
     status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
 
-    status = H5Llink(file_id, "/A/B12/C12/dtype", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B12/C12/dtype", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
@@ -4028,7 +4032,7 @@ test_misc23(void)
     status = H5Tcommit_expand(group_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
  
-    status = H5Llink(group_id, "B13/C12/dtype", tmp_id, create_id);
+    status = H5Llink(group_id, "B13/C12/dtype", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
@@ -4041,7 +4045,7 @@ test_misc23(void)
     status = H5Tcommit_expand(group_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
 
-    status = H5Llink(group_id, "/A/B14/dtype", tmp_id, create_id);
+    status = H5Llink(group_id, "/A/B14/dtype", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
@@ -4054,7 +4058,7 @@ test_misc23(void)
     status = H5Tcommit_expand(file_id, tmp_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit_expand");
 
-    status = H5Llink(file_id, "/A/B15/C15/A/dtype", tmp_id, create_id);
+    status = H5Llink(file_id, "/A/B15/C15/A/dtype", tmp_id, create_id, H5P_DEFAULT);
     CHECK(status, FAIL, "H5Llink");
 
     status = H5Tclose(tmp_id);
@@ -4110,13 +4114,13 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Tcommit");
 
     /* Create soft links to the objects created */
-    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5G_LINK_SOFT, file_id, MISC24_GROUP_LINK);
+    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5L_LINK_SOFT, file_id, MISC24_GROUP_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
-    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5G_LINK_SOFT, file_id, MISC24_DATASET_LINK);
+    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5L_LINK_SOFT, file_id, MISC24_DATASET_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
-    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5G_LINK_SOFT, file_id, MISC24_DATATYPE_LINK);
+    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5L_LINK_SOFT, file_id, MISC24_DATATYPE_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
     /* Close IDs for objects */

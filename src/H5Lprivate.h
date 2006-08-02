@@ -31,13 +31,27 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
 #define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
 
+/* Definitions for accessing links */
+#define H5L_NLINKS_NAME        "max soft links"
+#define H5L_NLINKS_SIZE        sizeof(size_t)
+#define H5L_NLINKS_DEF         16 /*max symlinks to follow per lookup  */
 
 /* Functions that understand link messages */
 /* forward reference for later use */
 struct H5HL_t; /* defined in H5HLprivate.h */
 
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
-    H5G_loc_t *obj_loc, hid_t dxpl, hid_t lcpl_id);
+    H5G_loc_t *obj_loc, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL hid_t H5L_get_default_lcpl(void);
+H5_DLL herr_t H5L_get_linkinfo(const H5G_loc_t *loc, const char *name,
+    H5L_linkinfo_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_init(void);
+H5_DLL herr_t H5L_register_external(void);
+
+/* User-defined link functions */
+H5_DLL herr_t H5L_register (const H5L_link_class_t *cls);
+H5_DLL herr_t H5L_unregister (H5L_link_t id);
+H5_DLL const H5L_link_class_t *H5L_find_class(H5L_link_t id);
+
 
 #endif /* _H5Lprivate_H */

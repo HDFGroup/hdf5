@@ -292,5 +292,7 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_est_link_info() */
+
+
 #endif /* H5_GROUP_REVISION */
 

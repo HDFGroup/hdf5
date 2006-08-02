@@ -79,7 +79,8 @@
 #define FILE50  "taindices.h5"
 #define FILE51  "tlonglinks.h5"
 #define FILE52  "tldouble.h5"
-
+#define FILE53  "textlink.h5"
+#define FILE54  "tudlink.h5"
 
 
 
@@ -119,6 +120,27 @@ const H5Z_class_t H5Z_MYFILTER[1] = {{
     myfilter,            /* The actual filter function */
 }};
 
+
+/* A UD link traversal function.  Shouldn't actually be called. */
+static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
+     UNUSED void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
+{
+return -1;
+}
+
+#define MY_LINKCLASS 187
+
+const H5L_link_class_t UD_link_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,    /* H5L_link_class_t version       */
+    MY_LINKCLASS,             /* Link type id number            */
+    "UD link class",          /* name for debugging             */
+    NULL,                     /* Creation callback              */
+    NULL,                     /* Move/rename callback           */
+    NULL,                     /* Copy callback                  */
+    UD_traverse,              /* The actual traversal function  */
+    NULL,                     /* Deletion callback              */
+    NULL                      /* Query callback                 */
+}};
 
 
 #define LENSTR  50
@@ -403,8 +425,8 @@ static void gent_softlink(void)
 
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     root = H5Gopen (fid, "/");
-    H5Glink (root, H5G_LINK_SOFT, "somevalue", "slink1");
-    H5Glink (root, H5G_LINK_SOFT, "linkvalue", "slink2");
+    H5Glink (root, H5L_LINK_SOFT, "somevalue", "slink1");
+    H5Glink (root, H5L_LINK_SOFT, "linkvalue", "slink2");
 
     H5Gclose(root);
     H5Fclose(fid);
@@ -441,18 +463,47 @@ static void gent_hardlink(void)
     H5Dclose(dataset);
 
     group = H5Gcreate (fid, "/g1", 0);
-    H5Glink (group, H5G_LINK_HARD, "/dset1", "dset2");
+    H5Glink (group, H5L_LINK_HARD, "/dset1", "dset2");
     H5Gclose(group);
 
     group = H5Gcreate (fid, "/g2", 0);
-    H5Glink (group, H5G_LINK_HARD, "/dset1", "dset3");
+    H5Glink (group, H5L_LINK_HARD, "/dset1", "dset3");
     H5Gclose(group);
 
     group = H5Gopen(fid, "/g1");
-    H5Glink (group, H5G_LINK_HARD, "/g2", "g1.1");
+    H5Glink (group, H5L_LINK_HARD, "/g2", "g1.1");
     H5Gclose(group);
     H5Fclose(fid);
 }
+
+static void gent_extlink(void)
+{
+    hid_t fid;
+
+    /* This external link will dangle, but that's okay */
+    fid = H5Fcreate(FILE53, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_external("filename", "objname", fid, "extlink1", H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_external("anotherfile", "anotherobj", fid, "extlink2", H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Fclose(fid);
+}
+
+static void gent_udlink(void)
+{
+    hid_t fid;
+    char buf[4];
+
+    H5Lregister(UD_link_class);
+
+    /* This ud link will dangle, but that's okay */
+    fid = H5Fcreate(FILE54, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid, "udlink1", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+    strcpy(buf, "foo");
+    H5Lcreate_ud(fid, "udlink2", MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Fclose(fid);
+}
+
 
 /*
                /
@@ -830,9 +881,9 @@ static void gent_compound_dt2(void) {       /* test compound data type */
 / : g1  g2  attr1  attr2
 g1 : g1.1  g1.2
 g1.1 : dset1.1.1(attr1, attr2)   dset1.1.2
-g1.2 : g1.2.1
+g1.2 : g1.2.1 extlink
 g1.2.1 : slink
-g2 : dset2.1  dset2.2
+g2 : dset2.1  dset2.2 udlink
 
 */
 
@@ -926,9 +977,12 @@ float dset2_1[10], dset2_2[3][5];
 
   H5Gclose(group);
 
+  /* external link */
+  H5Lcreate_external("somefile", "somepath", fid, "/g1/g1.2/extlink", H5P_DEFAULT, H5P_DEFAULT);
+
   /* soft link */
   group = H5Gopen (fid, "/g1/g1.2/g1.2.1");
-  H5Glink (group, H5G_LINK_SOFT, "somevalue", "slink");
+  H5Glink (group, H5L_LINK_SOFT, "somevalue", "slink");
   H5Gclose(group);
 
   group = H5Gopen (fid, "/g2");
@@ -956,6 +1010,10 @@ float dset2_1[10], dset2_2[3][5];
 
   H5Gclose(group);
 
+  /* user-defined link */
+  H5Lregister(UD_link_class);
+  H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+
   H5Fclose(fid);
 
 }
@@ -981,8 +1039,8 @@ hid_t fid, group;
   group = H5Gcreate (fid, "/g2", 0);
   H5Gclose(group);
 
-  H5Glink(fid, H5G_LINK_HARD, "/g2", "/g1/g1.1");
-  H5Glink(fid, H5G_LINK_HARD, "/g1", "/g2/g2.1");
+  H5Glink(fid, H5L_LINK_HARD, "/g2", "/g1/g1.1");
+  H5Glink(fid, H5L_LINK_HARD, "/g1", "/g2/g2.1");
 
   H5Fclose(fid);
 }
@@ -1001,10 +1059,10 @@ hid_t fid, group;
   H5Gclose(group);
 
   /* create path from object at /g1 to object at /g2 and name it g1.1 */
-  H5Glink (fid, H5G_LINK_HARD, "/g2", "/g1/g1.1");
+  H5Glink (fid, H5L_LINK_HARD, "/g2", "/g1/g1.1");
 
   /* create path from object at /g2 to object at /g1 and name it g2.1 */
-  H5Glink (fid, H5G_LINK_SOFT, "/g1", "/g2/g2.1");
+  H5Glink (fid, H5L_LINK_SOFT, "/g1", "/g2/g2.1");
 
   H5Fclose(fid);
 
@@ -1012,13 +1070,13 @@ hid_t fid, group;
 
 /*
                   /
-     |       |       |   \    \    \
-     g1     g2      g3   g4   g5    g6
-    / \      |       |    \     \    \
- g1.1 g1.2 slink2  link3 dset2 slink4 dset3
-  |    |    (g1)  (dset2)      (dset3)
- dset1 link1
-      (dset1)
+     |       |       |   \    \    \     \      \
+     g1     g2      g3   g4   g5    g6    g7     g8
+    / \      |       |    \     \    \      \      \
+ g1.1 g1.2 slink2  link3 dset2 slink4 dset3 slink5   elink
+  |    |    (g1)  (dset2)      (dset3)      (elink)  udlink
+ dset1 link1                                slink6
+      (dset1)                               (udlink)
 */
 
 static void gent_many(void) {
@@ -1043,6 +1101,7 @@ static void gent_many(void) {
     hsize_t dim[4];
     int idx[4] = {0,1,2,3};  /* normal indicies */
     const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
+    herr_t ret;
 
   fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -1150,11 +1209,11 @@ static void gent_many(void) {
   H5Gclose(group);
 
   group = H5Gcreate (fid, "/g1/g1.2", 0);
-  H5Glink (group, H5G_LINK_HARD, "/g1/g1.1/dset1", "link1");
+  H5Glink (group, H5L_LINK_HARD, "/g1/g1.1/dset1", "link1");
   H5Gclose(group);
 
   group = H5Gcreate (fid, "/g2", 0);
-  H5Glink (group, H5G_LINK_SOFT, "/g1", "slink2");
+  H5Glink (group, H5L_LINK_SOFT, "/g1", "slink2");
   H5Gclose(group);
 
   group = H5Gcreate (fid, "/g3", 0);
@@ -1178,7 +1237,7 @@ static void gent_many(void) {
   H5Gclose(group);
 
   group = H5Gopen(fid, "/g3");
-  H5Glink (group, H5G_LINK_HARD, "/g4/dset2", "link3");
+  H5Glink (group, H5L_LINK_HARD, "/g4/dset2", "link3");
   H5Gclose(group);
 
   group = H5Gcreate (fid, "/g5", 0);
@@ -1201,9 +1260,25 @@ static void gent_many(void) {
   H5Gclose(group);
 
   group = H5Gopen(fid, "/g5");
-  H5Glink (group, H5G_LINK_SOFT, "/g6/dset3", "slink4");
+  H5Glink (group, H5L_LINK_SOFT, "/g6/dset3", "slink4");
   H5Gclose(group);
   H5Pclose(create_plist);
+
+  group = H5Gcreate (fid, "/g7", 0);
+  H5Gclose(group);
+  group = H5Gcreate (fid, "/g8", 0);
+  H5Gclose(group);
+
+  /* Create dangling external and UD links */
+  H5Lcreate_external("somefile", "somepath", fid, "/g8/elink", H5P_DEFAULT, H5P_DEFAULT);
+  H5Lregister(UD_link_class);
+  H5Lcreate_ud(fid, "/g8/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+
+  /* Create links to external and UD links */
+  ret= H5Glink (fid, H5L_LINK_SOFT, "/g8/elink", "/g7/slink5");
+  HDassert(ret >= 0);
+  ret= H5Glink (fid, H5L_LINK_SOFT, "/g8/udlink", "/g7/slink6");
+  HDassert(ret >= 0);
 
   H5Fclose(fid);
 
@@ -4927,42 +5002,48 @@ static void gent_fcontents(void)
 
  /* hard link to "dset" */
  gid1 = H5Gcreate (fid, "/g1", 0);
- H5Glink (gid1, H5G_LINK_HARD, "/dset", "dset1");
+ H5Glink (gid1, H5L_LINK_HARD, "/dset", "dset1");
  H5Gclose(gid1);
 
 
  /* hard link to "dset" */
  gid1 = H5Gcreate (fid, "/g2", 0);
- H5Glink (gid1, H5G_LINK_HARD, "/dset", "dset2");
+ H5Glink (gid1, H5L_LINK_HARD, "/dset", "dset2");
  H5Gclose(gid1);
 
 
  /* hard link to "g2" */
  gid1 = H5Gopen(fid, "/g1");
- H5Glink (gid1, H5G_LINK_HARD, "/g2", "g1.1");
+ H5Glink (gid1, H5L_LINK_HARD, "/g2", "g1.1");
  H5Gclose(gid1);
 
 
  /* hard link to "dset" */
- ret=H5Glink (fid, H5G_LINK_HARD, "/dset", "dset3");
+ ret=H5Glink (fid, H5L_LINK_HARD, "/dset", "dset3");
  assert(ret>=0);
 
 
  /* hard link to "dset" */
- ret=H5Glink (fid, H5G_LINK_HARD, "/dset", "dset4");
+ ret=H5Glink (fid, H5L_LINK_HARD, "/dset", "dset4");
  assert(ret>=0);
 
 
  /* soft link to itself */
- ret=H5Glink (fid, H5G_LINK_SOFT, "mylink", "mylink");
+ ret=H5Glink (fid, H5L_LINK_SOFT, "mylink", "mylink");
  assert(ret>=0);
 
 
  /* soft link to "dset" */
- ret=H5Glink (fid, H5G_LINK_SOFT, "/dset", "softlink");
+ ret=H5Glink (fid, H5L_LINK_SOFT, "/dset", "softlink");
  assert(ret>=0);
 
+ /* dangling external link */
+ ret=H5Lcreate_external("fname", "oname", fid, "extlink", H5P_DEFAULT, H5P_DEFAULT);
+ assert(ret>=0);
 
+ /* dangling udlink */
+ ret=H5Lcreate_ud(fid, "udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+ assert(ret>=0);
 
 /*-------------------------------------------------------------------------
  * datatypes
@@ -5397,11 +5478,11 @@ static void gent_longlinks(void)
     objname[F51_MAX_NAME_LEN] = '\0';
 
     /* Create hard link to existing object */
-    assert(H5Glink2(fid, "grp1", H5G_LINK_HARD, fid, objname) >= 0);
+    assert(H5Lcreate_hard(fid, "grp1", fid, objname, H5P_DEFAULT) >= 0);
 
     /* Create soft link to existing object */
     objname[0] = 'b';
-    assert(H5Glink2(fid, "grp1", H5G_LINK_SOFT, fid, objname) >= 0);
+    assert(H5Lcreate_soft("grp1", fid, objname, H5P_DEFAULT) >= 0);
 
     /* Create group with long name in existing group */
     gid2=H5Gcreate(gid, objname, (size_t)0);
@@ -5444,7 +5525,7 @@ static int gent_ldouble(void)
  if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE))<0)
   goto error;
 
- if ((size = H5Tget_size(tid))<0)
+ if ((size = H5Tget_size(tid))==0)
   goto error;
 
  if ((did = H5Dcreate(fid, "dset", tid, sid, H5P_DEFAULT))<0)
@@ -5483,6 +5564,8 @@ int main(void)
     gent_softlink();
     gent_dataset();
     gent_hardlink();
+    gent_extlink();
+    gent_udlink();
     gent_compound_dt();
     gent_all();
     gent_loop();

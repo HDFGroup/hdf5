@@ -19,8 +19,14 @@
  * Purpose:	Test H5Gunlink().
  */
 
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5G_TESTING
+
 #include <time.h>
 #include "h5test.h"
+#include "H5Gpkg.h"		/* Groups				*/
 
 const char *FILENAME[] = {
     "unlink",
@@ -33,6 +39,7 @@ const char *FILENAME[] = {
     "resurrect_type",
     "resurrect_group",
     "unlink_chunked",
+    "full_group",
     NULL
 };
 
@@ -68,6 +75,9 @@ const char *FILENAME[] = {
 #define SLASHES_SOFTLINK_NAME   "Soft///"
 #define SLASHES_SOFTLINK2_NAME  "Soft2///"
 #define SLASHES_ROOTLINK_NAME   "Root///"
+#define FULL_GROUP_NUM_KEEP     2
+#define FULL_GROUP_NUM_DELETE_COMPACT   2
+#define FULL_GROUP_NUM_DELETE_DENSE   16
 
 
 /*-------------------------------------------------------------------------
@@ -170,7 +180,7 @@ test_many(hid_t file)
     TESTING("forward unlink");
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5G_LINK_HARD, "/test_many_foo", name)<0) goto error;
+	if (H5Glink(work, H5L_LINK_HARD, "/test_many_foo", name)<0) goto error;
     }
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
@@ -182,7 +192,7 @@ test_many(hid_t file)
     TESTING("backward unlink");
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5G_LINK_HARD, "/test_many_foo", name)<0) goto error;
+	if (H5Glink(work, H5L_LINK_HARD, "/test_many_foo", name)<0) goto error;
     }
     for (i=how_many-1; i>=0; --i) {
 	sprintf(name, "obj_%05d", i);
@@ -194,7 +204,7 @@ test_many(hid_t file)
     TESTING("inward unlink");
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5G_LINK_HARD, "/test_many_foo", name)<0) goto error;
+	if (H5Glink(work, H5L_LINK_HARD, "/test_many_foo", name)<0) goto error;
     }
     for (i=0; i<how_many; i++) {
 	if (i%2) {
@@ -210,7 +220,7 @@ test_many(hid_t file)
     TESTING("outward unlink");
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5G_LINK_HARD, "/test_many_foo", name)<0) goto error;
+	if (H5Glink(work, H5L_LINK_HARD, "/test_many_foo", name)<0) goto error;
     }
     for (i=how_many-1; i>=0; --i) {
 	if (i%2) {
@@ -259,7 +269,7 @@ test_symlink(hid_t file)
 
     /* Create a test group and symlink */
     if ((work=H5Gcreate(file, "/test_symlink", 0))<0) TEST_ERROR;
-    if (H5Glink(work, H5G_LINK_SOFT, "link_value", "link")<0) TEST_ERROR;
+    if (H5Glink(work, H5L_LINK_SOFT, "link_value", "link")<0) TEST_ERROR;
     if (H5Gunlink(work, "link")<0) TEST_ERROR;
 
     /* Cleanup */
@@ -310,7 +320,7 @@ test_rename(hid_t file)
 
     /* Try renaming a symlink */
     TESTING("symlink renaming");
-    if (H5Glink(work, H5G_LINK_SOFT, "link_value", "link_one")<0) goto error;
+    if (H5Glink(work, H5L_LINK_SOFT, "link_value", "link_one")<0) goto error;
     if (H5Gmove(work, "link_one", "link_two")<0) goto error;
     PASSED();
 
@@ -368,9 +378,9 @@ test_new_move(void)
     if((grp_move=H5Gcreate(grp_1, "group_move", 0))<0) goto error;
 
     /* Create hard and soft links. */
-    if(H5Glink2(grp_1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0)
+    if(H5Glink2(grp_1, "group_move", H5L_LINK_HARD, H5G_SAME_LOC, "hard")<0)
 	goto error;
-    if(H5Glink2(grp_1, "/group1/group_move", H5G_LINK_SOFT, grp_2, "soft")<0)
+    if(H5Glink2(grp_1, "/group1/group_move", H5L_LINK_SOFT, grp_2, "soft")<0)
 	goto error;
 
     /* Move a group within the file.  Both of source and destination use
@@ -1357,22 +1367,22 @@ test_link_slashes(void)
     if(H5Gclose(gid2)<0) TEST_ERROR;
 
     /* Create a hard link to the nested group */
-    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5G_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5L_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
 
     /* Create a soft link with a relative path to the nested group */
-    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK_NAME)<0) TEST_ERROR;
+    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5L_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK_NAME)<0) TEST_ERROR;
 
     /* Create a soft link with the full path to the nested group */
-    if(H5Glink2(gid, "////"SLASHES_GROUP_NAME""SLASHES_GROUP_NAME, H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK2_NAME)<0) TEST_ERROR;
+    if(H5Glink2(gid, "////"SLASHES_GROUP_NAME""SLASHES_GROUP_NAME, H5L_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK2_NAME)<0) TEST_ERROR;
 
     /* Create a soft link to the root group */
-    if(H5Glink2(gid, "////", H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_ROOTLINK_NAME)<0) TEST_ERROR;
+    if(H5Glink2(gid, "////", H5L_LINK_SOFT, H5G_SAME_LOC, SLASHES_ROOTLINK_NAME)<0) TEST_ERROR;
 
     /* Close the group */
     if(H5Gclose(gid)<0) TEST_ERROR;
 
     /* Create a hard link to the existing group */
-    if(H5Glink2(fid, SLASHES_GROUP_NAME, H5G_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+    if(H5Glink2(fid, SLASHES_GROUP_NAME, H5L_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid)<0) TEST_ERROR;
@@ -1861,7 +1871,7 @@ test_resurrect_dataset(void)
     if(H5Iget_name(d, NULL, 0) != 0) TEST_ERROR;
 
     /* Re-link the dataset to the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(d, ".", H5G_LINK_HARD, f, DATASET2NAME)<0) TEST_ERROR;
+    if(H5Glink2(d, ".", H5L_LINK_HARD, f, DATASET2NAME)<0) TEST_ERROR;
 
     /* Close things */
     if(H5Dclose(d)<0) TEST_ERROR;
@@ -1934,7 +1944,7 @@ test_resurrect_datatype(void)
     if(H5Iget_name(type, NULL, 0) != 0) TEST_ERROR;
 
     /* Re-link the datatype to the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(type, ".", H5G_LINK_HARD, file, TYPE2NAME) < 0) TEST_ERROR;
+    if(H5Glink2(type, ".", H5L_LINK_HARD, file, TYPE2NAME) < 0) TEST_ERROR;
 
     /* Close things */
     if(H5Tclose(type)<0) TEST_ERROR;
@@ -2003,7 +2013,7 @@ test_resurrect_group(void)
     if(H5Iget_name(group, NULL, 0) != 0) TEST_ERROR;
 
     /* Re-link the group into the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(group, ".", H5G_LINK_HARD, file, GROUP2NAME)<0) TEST_ERROR;
+    if(H5Glink2(group, ".", H5L_LINK_HARD, file, GROUP2NAME)<0) TEST_ERROR;
 
     /* Close things */
     if(H5Gclose(group)<0) TEST_ERROR;
@@ -2121,6 +2131,269 @@ error:
     return 1;
 } /* end test_unlink_chunked_dataset() */
 
+#ifdef H5_GROUP_REVISION
+
+/*-------------------------------------------------------------------------
+ * Function:    test_full_group_compact
+ *
+ * Purpose:     Test deleting a compact group which still has valid objects in it
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, January 18, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_full_group_compact(void)
+{
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    hid_t gid = -1, gid2 = -1;  /* Group IDs */
+    H5G_stat_t	sb;             /* Stat buffer for object */
+    char objname[128];          /* Buffer for name of objects to create */
+    char objname2[128];         /* Buffer for name of objects to create */
+    char filename[1024];        /* Buffer for filename */
+    off_t       keep_size;      /* Size of the file with objects to keep */
+    off_t       file_size;      /* Size of each file created */
+    unsigned u;                 /* Local index variable */
+
+    TESTING("unlinking non-empty compact group");
+
+    /* Create file */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[10], fapl_id, filename, sizeof filename);
+
+    /* Create the file */
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))<0) TEST_ERROR
+
+    /* Create group to link objects to */
+    if((gid = H5Gcreate(file_id, "/keep", (size_t)0)) < 0) TEST_ERROR
+
+    /* Create several objects to link to */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "keep %u\n", u);
+        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Close group with objects to keep */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    /* Get the size of the file with only the objects to keep */
+    if((keep_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
+
+    /* Create group to delete */
+    if((gid = H5Gcreate(file_id, "/delete", (size_t)0)) < 0) goto error;
+
+    /* Create external link (doesn't matter if it dangles) */
+    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create soft link (doesn't matter if it dangles) */
+    if(H5Glink2(file_id, "/foo", H5L_LINK_SOFT, gid, "soft") < 0) TEST_ERROR
+
+    /* Create hard links to objects in group to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        sprintf(objname2, "keep %u\n", u);
+        if(H5Glink2(file_id, objname, H5L_LINK_HARD, gid, objname2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Create several objects to delete */
+    for(u = 0; u < FULL_GROUP_NUM_DELETE_COMPACT; u++) {
+        sprintf(objname, "delete %u\n", u);
+        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Check on group's status */
+    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR;
+    if(H5G_has_links_test(gid, NULL) != TRUE) TEST_ERROR;
+    if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR;
+
+    /* Close group with objects to delete */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Check reference count on objects to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(sb.nlink != 2) TEST_ERROR
+    } /* end for */
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
+
+    /* Delete the full group */
+    if(H5Gunlink(file_id, "/delete") < 0) TEST_ERROR
+
+    /* Check reference count on objects to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(sb.nlink != 1) TEST_ERROR
+    } /* end for */
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != keep_size) TEST_ERROR
+
+    /* Close the file access property list */
+    if(H5Pclose(fapl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gid2);
+	H5Gclose(gid);
+	H5Fclose(file_id);
+	H5Pclose(fapl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_full_group_compact() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_full_group_dense
+ *
+ * Purpose:     Test deleting a dense group which still has valid objects in it
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, January 18, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_full_group_dense(void)
+{
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    hid_t gid = -1, gid2 = -1;  /* Group IDs */
+    H5G_stat_t	sb;             /* Stat buffer for object */
+    char objname[128];          /* Buffer for name of objects to create */
+    char objname2[128];         /* Buffer for name of objects to create */
+    char filename[1024];        /* Buffer for filename */
+    unsigned u;                 /* Local index variable */
+
+    TESTING("unlinking non-empty dense group");
+
+    /* Create file */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[10], fapl_id, filename, sizeof filename);
+
+    /* Create the file */
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))<0) TEST_ERROR
+
+    /* Create group to link objects to */
+    if((gid = H5Gcreate(file_id, "/keep", (size_t)0)) < 0) TEST_ERROR
+
+    /* Create several objects to link to */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "keep %u\n", u);
+        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Close group with objects to keep */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Create group to delete */
+    if((gid = H5Gcreate(file_id, "/delete", (size_t)0)) < 0) goto error;
+
+    /* Create external link (doesn't matter if it dangles) */
+    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create soft link (doesn't matter if it dangles) */
+    if(H5Glink2(file_id, "/foo", H5L_LINK_SOFT, gid, "soft") < 0) TEST_ERROR
+
+    /* Create hard links to objects in group to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        sprintf(objname2, "keep %u\n", u);
+        if(H5Glink2(file_id, objname, H5L_LINK_HARD, gid, objname2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Create several objects to delete */
+    for(u = 0; u < FULL_GROUP_NUM_DELETE_DENSE; u++) {
+        sprintf(objname, "delete %u\n", u);
+        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Check on group's status */
+    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR;
+    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR;
+    if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR;
+
+    /* Close group with objects to delete */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Check reference count on objects to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(sb.nlink != 2) TEST_ERROR
+    } /* end for */
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
+
+    /* Delete the full group */
+    if(H5Gunlink(file_id, "/delete") < 0) TEST_ERROR
+
+    /* Check reference count on objects to keep */
+    for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
+        sprintf(objname, "/keep/keep %u\n", u);
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(sb.nlink != 1) TEST_ERROR
+    } /* end for */
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    /* Close the file access property list */
+    if(H5Pclose(fapl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(gid2);
+	H5Gclose(gid);
+	H5Fclose(file_id);
+	H5Pclose(fapl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_full_group_dense() */
+#endif /* H5_GROUP_REVISION */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -2209,13 +2482,20 @@ main(void)
 	/* Test unlinking chunked datasets */
 	nerrors += test_unlink_chunked_dataset();
 
-	/* Close */
-	if (H5Pclose(fapl2)<0) TEST_ERROR;
-	if (H5Fclose(file)<0) TEST_ERROR;
-	if (nerrors) {
-	    printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
+#ifdef H5_GROUP_REVISION
+        /* Test unlinked groups which still have objects in them */
+        nerrors += test_full_group_compact();
+        nerrors += test_full_group_dense();
+#endif /* H5_GROUP_REVISION */
+
+        /* Close */
+        if (H5Pclose(fapl2)<0) TEST_ERROR;
+        if (H5Fclose(file)<0) TEST_ERROR;
+        if (nerrors) {
+            printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
 	    exit(1);
 	}
+
 	puts("All unlink tests passed.");
 	h5_cleanup(FILENAME, fapl);
     }

@@ -608,8 +608,11 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
         udata->lnk->ctime = 0;
         udata->lnk->name = H5MM_xstrdup(udata->name);
 
-        /* Object is a symbolic link */
-        if(H5G_CACHED_SLINK == ent->type) {
+        /* Object is a symbolic or user-defined link */
+        switch(ent->type)
+        {
+          case H5G_CACHED_SLINK:
+          {
             const char *s;          /* Pointer to link value */
             const H5HL_t *heap;     /* Pointer to local heap for group */
 
@@ -628,14 +631,47 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
 
             /* Set link type */
             udata->lnk->type = H5L_LINK_SOFT;
-        } /* end if */
-        else {
+          }
+          break;
+
+          case H5G_CACHED_ULINK:
+          {
+            void * s;               /* Pointer to heap value */
+            const H5HL_t *heap;     /* Pointer to local heap for group */
+            size_t data_size;       /* Size of user link data */
+
+            /* Lock the local heap */
+            if(NULL == (heap = H5HL_protect(udata->file, udata->dxpl_id, udata->heap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
+
+            data_size =ent->cache.ulink.udata_size;
+
+            if(data_size > 0)
+            {
+                s = H5HL_offset_into(udata->file, heap, ent->cache.ulink.udata_offset);
+
+            /* Allocate space for the user data and copy it from the heap */
+            udata->lnk->u.ud.udata = H5MM_malloc(data_size);
+            HDmemcpy(udata->lnk->u.ud.udata, s, data_size);
+            } /* end if */
+
+            /* Release the local heap */
+            if(H5HL_unprotect(udata->file, udata->dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
+
+            /* Set link size and type */
+            udata->lnk->u.ud.size = data_size;
+            udata->lnk->type = ent->cache.ulink.link_type;
+          }
+          break;
+
+          default:
             /* Set address of object */
             udata->lnk->u.hard.addr = ent->header;
 
             /* Set link type */
             udata->lnk->type = H5L_LINK_HARD;
-        } /* end else */
+        } /* end switch */
     } /* end if */
 
 done:
@@ -696,4 +732,5 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_lookup() */
+
 

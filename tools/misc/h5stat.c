@@ -608,7 +608,8 @@ printf("walk: fullname = %s\n", fullname);
                 break;
 
             case H5G_LINK:
-                /* Gather statistics about this type of object */
+            case H5G_UDLINK:
+                /* Gather statistics about links and UD links */
                 iter->uniq_links++;
                 break;
 

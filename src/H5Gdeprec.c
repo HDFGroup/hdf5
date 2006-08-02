@@ -52,12 +52,12 @@ H5Glink(hid_t cur_loc_id, H5L_link_t type, const char *cur_name, const char *new
 
     if(type == H5L_LINK_HARD)
     {
-      if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, H5L_SAME_LOC, new_name, H5P_DEFAULT)) < 0)
+      if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, H5L_SAME_LOC, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else if(type == H5L_LINK_SOFT)
     {
-      if((ret_value = H5Lcreate_soft(cur_name, cur_loc_id, new_name, H5P_DEFAULT)) < 0)
+      if((ret_value = H5Lcreate_soft(cur_name, cur_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else
@@ -86,7 +86,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
     H5TRACE5("e","isLlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
     if(type == H5L_LINK_HARD) {
-        if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)
+        if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else if(type == H5L_LINK_SOFT) {
@@ -95,7 +95,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
         if(new_loc_id == H5L_SAME_LOC)
             new_loc_id = cur_loc_id;
 
-        if((ret_value = H5Lcreate_soft(cur_name, new_loc_id, new_name, H5P_DEFAULT)) < 0)
+        if((ret_value = H5Lcreate_soft(cur_name, new_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else
@@ -121,7 +121,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
     FUNC_ENTER_API(H5Gmove, FAIL)
     H5TRACE3("e","iss",src_loc_id,src_name,dst_name);
 
-    if((ret_value=H5Lmove(src_loc_id, src_name, H5L_SAME_LOC, dst_name, H5P_DEFAULT)) < 0)
+    if((ret_value=H5Lmove(src_loc_id, src_name, H5L_SAME_LOC, dst_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't move link")
 
 done:
@@ -143,8 +143,8 @@ herr_t H5Gmove2(hid_t src_loc_id, const char *src_name,
 
     FUNC_ENTER_API(H5Gmove2, FAIL)
 
-    if((ret_value=H5Lmove(src_loc_id, src_name, dst_loc_id, dst_name, H5P_DEFAULT)) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't move link")
+    if((ret_value=H5Lmove(src_loc_id, src_name, dst_loc_id, dst_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -166,7 +166,7 @@ H5Gunlink(hid_t loc_id, const char *name)
     FUNC_ENTER_API(H5Gunlink, FAIL)
     H5TRACE2("e","is",loc_id,name);
 
-    if((ret_value=H5Lunlink(loc_id, name)) < 0)
+    if((ret_value=H5Lunlink(loc_id, name, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "Couldn't delete link")
 
 done:
@@ -189,8 +189,8 @@ herr_t H5Gget_linkval(hid_t loc_id, const char *name,
 
     FUNC_ENTER_API(H5Gget_linkval, FAIL)
 
-    if((ret_value=H5Lget_linkval(loc_id, name, size, buf)) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "Couldn't get link info")
+    if((ret_value=H5Lget_linkval(loc_id, name, size, buf, H5P_DEFAULT)) < 0)
+      HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)

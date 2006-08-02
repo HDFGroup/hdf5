@@ -330,7 +330,7 @@ lifecycle(hid_t fapl)
 
     /* Create group for testing lifecycle */
     if((gid = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((H5Llink(fid, LIFECYCLE_TOP_GROUP, gid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((H5Llink(fid, LIFECYCLE_TOP_GROUP, gid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Query group creation property settings */
     if(H5Pget_local_heap_size_hint(gcpl, &lheap_size_hint) < 0) TEST_ERROR;
@@ -789,7 +789,7 @@ no_compact(hid_t fapl)
 
     /* Create group for testing lifecycle */
     if((gid = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((H5Llink(fid, NO_COMPACT_TOP_GROUP, gid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((H5Llink(fid, NO_COMPACT_TOP_GROUP, gid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close GCPL */
     if(H5Pclose(gcpl) < 0) TEST_ERROR;
@@ -920,7 +920,7 @@ gcpl_on_root(hid_t fapl)
 
     /* Create a group and intermediate groups, to check if root group settings are inherited */
     if((gid2 = H5Gcreate_expand(gid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((H5Llink(fid, GCPL_ON_ROOT_BOTTOM_GROUP, gid, lcpl)) < 0) TEST_ERROR
+    if((H5Llink(fid, GCPL_ON_ROOT_BOTTOM_GROUP, gid2, lcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close LCPL */
     if(H5Pclose(lcpl) < 0) TEST_ERROR;

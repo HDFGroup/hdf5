@@ -462,7 +462,7 @@ static int traverse( hid_t loc_id,
    */
 
   case H5G_LINK:
-   {
+  {
     /* increment */
     inserted_objs++;
 
@@ -489,9 +489,60 @@ static int traverse( hid_t loc_id,
 
    break;
 
+  /*-------------------------------------------------------------------------
+   * H5G_UDLINK
+   *-------------------------------------------------------------------------
+   */
+
+  case H5G_UDLINK:
+  {
+    H5L_linkinfo_t linkbuf;
+
+    /* increment */
+    inserted_objs++;
+
+    /* add object to table */
+    trav_table_add(HADDR_UNDEF, path, H5G_UDLINK, table );
+
+    /* Get type of link */
+    H5E_BEGIN_TRY {
+
+    /* get link class info */
+    H5Lget_linkinfo( loc_id, path, &linkbuf, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    if(linkbuf.linkclass == H5L_LINK_EXTERNAL)
+    {
+      if (statbuf.linklen>0)
+      {
+      char *targbuf;
+      char *objname;
+
+      targbuf = HDmalloc(statbuf.linklen);
+      assert(targbuf);
+      H5Gget_linkval(loc_id,path,statbuf.linklen,targbuf);
+      H5Lunpack_elink_val(targbuf, NULL, &objname);
+      if (print)
+        printf(" %-10s %s -> %s %s\n", "ext link", path, targbuf, objname);
+      free(targbuf);
+      }
+      else
+      {
+      if (print)
+        printf(" %-10s %s ->\n", "udlink", path);
+      }
+    }
+    else  /* Unknown user-defined type */
+    {
+      if (print)
+        printf(" %-10s %s ->\n", "UD link type", path);
+    }
+  }
+  break;
+
 
   default:
-    HDfprintf(stderr, "traverse: Unknown object!\n");
+    HDfprintf(stderr, "traverse: Unknown object %d!\n", type); /* JAMES */
     return (-1);
    break;
 
@@ -547,6 +598,9 @@ void h5trav_printinfo(int nobjs, trav_info_t *travi)
    break;
   case H5G_LINK:
    printf(" %-10s %s\n", "link", travi[i].name );
+   break;
+  case H5G_UDLINK:
+   printf(" %-10s %s\n", "User defined link", travi[i].name );
    break;
   default:
    printf(" %-10s %s\n", "User defined object", travi[i].name );
