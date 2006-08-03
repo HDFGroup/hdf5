@@ -516,7 +516,7 @@ toomany(hid_t fapl)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5G_NLINKS == 16);
+    HDassert(H5L_NLINKS_DEF == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);

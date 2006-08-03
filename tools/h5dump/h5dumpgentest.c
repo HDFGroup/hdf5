@@ -5478,11 +5478,11 @@ static void gent_longlinks(void)
     objname[F51_MAX_NAME_LEN] = '\0';
 
     /* Create hard link to existing object */
-    assert(H5Lcreate_hard(fid, "grp1", fid, objname, H5P_DEFAULT) >= 0);
+    assert(H5Lcreate_hard(fid, "grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
 
     /* Create soft link to existing object */
     objname[0] = 'b';
-    assert(H5Lcreate_soft("grp1", fid, objname, H5P_DEFAULT) >= 0);
+    assert(H5Lcreate_soft("grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
 
     /* Create group with long name in existing group */
     gid2=H5Gcreate(gid, objname, (size_t)0);
