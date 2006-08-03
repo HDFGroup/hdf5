@@ -242,7 +242,7 @@ H5P_init_interface(void)
      * - Default value for "max number of soft links to traverse"
      */
     H5P_genclass_t  *lacc_class;    /* Pointer to link access property list class created */
-    int nlinks = H5L_NLINKS_DEF;
+    size_t nlinks = H5L_NLINKS_DEF;
     /* Group creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
      * - Default value for "group info"

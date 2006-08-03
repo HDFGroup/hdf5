@@ -56,17 +56,17 @@ static herr_t H5G_traverse_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     hbool_t *own_obj_loc/*out*/);
 static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t lapl_id,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5G_traverse_elink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t lapl_id,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t lapl_id,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5G_traverse_mount(H5G_loc_t *loc/*in,out*/);
 static herr_t H5G_traverse_real(const H5G_loc_t *loc, const char *name,
-    unsigned target, int *nlinks, H5G_traverse_t op, void *op_data,
+    unsigned target, size_t *nlinks, H5G_traverse_t op, void *op_data,
     hid_t lapl_id, hid_t dxpl_id);
 
 
@@ -150,7 +150,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t lapl_id,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id)
 {
     const H5L_link_class_t   *link_class;       /* User-defined link class */
@@ -290,7 +290,7 @@ done:
  */
 static herr_t
 H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, int *nlinks/*in,out*/, hid_t lapl_id,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id)
 {
     H5G_trav_ud1_t      udata;                  /* User data to pass to link traversal callback */
@@ -438,7 +438,7 @@ done:
  */
 static herr_t
 H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
-    int *nlinks, H5G_traverse_t op, void *op_data, hid_t lapl_id, hid_t dxpl_id)
+    size_t *nlinks, H5G_traverse_t op, void *op_data, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t           loc;            /* Location of start object     */
     H5O_loc_t           grp_oloc;	/* Object loc. for current group */
@@ -771,7 +771,7 @@ herr_t
 H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traverse_t op,
     void *op_data, hid_t lapl_id, hid_t dxpl_id)
 {
-    int		    nlinks;                 /* Link countdown value */
+    size_t	    nlinks;                 /* Link countdown value */
     H5P_genplist_t *lapl;                   /* Property list with value for nlinks */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
