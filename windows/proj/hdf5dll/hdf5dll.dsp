@@ -942,6 +942,21 @@ SOURCE=..\..\..\src\H5Fsfile.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5FSsection.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Fsuper.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
@@ -1463,6 +1478,21 @@ SOURCE=..\..\..\src\H5I.c
 # Begin Source File
 
 SOURCE=..\..\..\src\H5L.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Lexternal.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
 
@@ -2001,6 +2031,21 @@ SOURCE=..\..\..\src\H5Pfcpl.c
 # Begin Source File
 
 SOURCE=..\..\..\src\H5Pgcpl.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Plapl.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
 

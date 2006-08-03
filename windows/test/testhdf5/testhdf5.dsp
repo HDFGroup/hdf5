@@ -258,6 +258,21 @@ SOURCE=..\..\..\test\tgenprop.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\test\th5o.c
+
+!IF  "$(CFG)" == "testhdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\test\th5s.c
 
 !IF  "$(CFG)" == "testhdf5 - Win32 Release"

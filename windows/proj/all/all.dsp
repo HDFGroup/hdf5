@@ -65,9 +65,5 @@ F90=df.exe
 
 # Name "all - Win32 Release"
 # Name "all - Win32 Debug"
-# Begin Source File
-
-SOURCE=..\..\..\hl\src\H5LT.h
-# End Source File
 # End Target
 # End Project
