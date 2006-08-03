@@ -243,6 +243,7 @@ H5P_init_interface(void)
      */
     H5P_genclass_t  *lacc_class;    /* Pointer to link access property list class created */
     size_t nlinks = H5L_NLINKS_DEF;
+    char * elink_prefix = H5L_ELINK_PREFIX_DEF;
     /* Group creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
      * - Default value for "group info"
@@ -343,6 +344,10 @@ H5P_init_interface(void)
         /* Register property for number of links traversed */
         if(H5P_register(lacc_class, H5L_NLINKS_NAME, H5L_NLINKS_SIZE,
                  &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        /* Register property for external link prefix */
+        if(H5P_register(lacc_class, H5L_ELINK_PREFIX_NAME, H5L_ELINK_PREFIX_SIZE,
+                 &elink_prefix, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 

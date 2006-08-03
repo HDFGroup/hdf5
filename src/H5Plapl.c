@@ -75,8 +75,6 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_nlinks
  *
- * Purpose:     Get the number of soft or UD traversals allowed when using
- *              this property list.
  * Purpose:	Gets the number of soft or user-defined links that can be
  *              traversed before a failure occurs.
  *
@@ -115,3 +113,83 @@ done:
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_elink_prefix
+ *
+ * Purpose:     Set a prefix to be applied to the path of any external links
+ *              traversed.  The prefix is appended to the filename stored
+ *              in the external link.
+ * 
+ *              The prefix is supplied by giving a pointer to a user-
+ *              allocated buffer.  This buffer should not be freed
+ *              until this property list has been closed.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Thursday, August 3, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pset_elink_prefix, FAIL)
+    H5TRACE2("e","iz",plist_id,nlinks);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set prefix */
+    if(H5P_set(plist, H5L_ELINK_PREFIX_NAME, &prefix) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_elink_prefix() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_elink_prefix
+ *
+ * Purpose:	Gets the prefix to be applied to any external link
+ *              traversals made using this property list.
+ *
+ *              If the pointer is not NULL, it points to a user-allocated
+ *              buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Thursday, August 3, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_elink_prefix(hid_t plist_id, char **prefix)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pget_elink_prefix, FAIL)
+    H5TRACE2("e","i*z",plist_id,nlinks);
+
+    if(!prefix)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer passed in");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get the current prefix */
+    if(H5P_get(plist, H5L_ELINK_PREFIX_NAME, prefix) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+

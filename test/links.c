@@ -3187,11 +3187,9 @@ ext_link_endian(hid_t fapl)
 
     /* Create a link access property list with the path to the srcdir */
     if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR;
-    if(H5Pinsert(lapl_id, H5L_ELINK_PREFIX_PROP, strlen(pathbuf) + 1, pathbuf,
-                 NULL, NULL, NULL, NULL, NULL, NULL) < 0) TEST_ERROR;
+    if(H5Pset_elink_prefix(lapl_id, pathbuf) < 0) TEST_ERROR;
 
     if(HDstrlen(pathbuf) + HDstrlen(LE_FILENAME) >= sizeof(namebuf)) TEST_ERROR;
-
     HDstrcpy(namebuf, pathbuf);
     HDstrcat(namebuf, LE_FILENAME);
 
@@ -3208,7 +3206,6 @@ ext_link_endian(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR;
 
     if(HDstrlen(pathbuf) + HDstrlen(BE_FILENAME) >= sizeof(namebuf)) TEST_ERROR;
-
     HDstrcpy(namebuf, pathbuf);
     HDstrcat(namebuf, BE_FILENAME);
 

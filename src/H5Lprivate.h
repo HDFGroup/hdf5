@@ -36,6 +36,10 @@
 #define H5L_NLINKS_SIZE        sizeof(size_t)
 #define H5L_NLINKS_DEF         16 /*max symlinks to follow per lookup  */
 
+#define H5L_ELINK_PREFIX_NAME        "external link prefix"
+#define H5L_ELINK_PREFIX_SIZE        sizeof(char *)
+#define H5L_ELINK_PREFIX_DEF         NULL /*default is no prefix */
+
 /* Functions that understand link messages */
 /* forward reference for later use */
 struct H5HL_t; /* defined in H5HLprivate.h */
