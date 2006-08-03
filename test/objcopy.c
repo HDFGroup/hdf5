@@ -4652,14 +4652,13 @@ test_copy_ext_link(hid_t fapl)
     /* close the group */
     if ( H5Gclose(gid) < 0) TEST_ERROR;
 
-
     /* create file to hold external links to the src file */
     if ( (fid_ext = H5Fcreate(ext_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
 
-    /* create group in the external file */
+    /* create group in the file that will hold the external link */
     if ( (gid = H5Gcreate(fid_ext, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR;
 
-    /* Create an external link to the dataset */
+    /* Create an external link to the dataset in the source file */
     if ( H5Lcreate_external(src_filename, NAME_LINK_DATASET, fid_ext, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR;
 
     /* close the group and file */
@@ -6517,7 +6516,8 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
+
+    if (HDstrcmp(envval, "stdio") && HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 	/* Setup */
 	h5_reset();
 	fapl = h5_fileaccess();
