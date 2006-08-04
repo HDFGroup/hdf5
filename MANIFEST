@@ -1704,6 +1704,7 @@
 
 
 # Expected output from h5ls tests
+./tools/testfiles/nosuchfile.ls
 ./tools/testfiles/help-1.ls
 ./tools/testfiles/help-2.ls
 ./tools/testfiles/help-3.ls
