@@ -153,6 +153,10 @@ TOOLTEST tempty.ls -w80 -d tempty.h5
 # enable -S for avoiding printing NATIVE types
 TOOLTEST tattr2.ls -w80 -v -S tattr2.h5
 
+# tests for error handling.
+# test for non-existing file
+TOOLTEST nosuchfile.ls nosuchfile.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."
 fi
