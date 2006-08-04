@@ -366,6 +366,8 @@ H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
 
 H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
 H5_DLL herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks);
+H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
+H5_DLL herr_t H5Pget_elink_prefix(hid_t plist_id, char **prefix);
 
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);

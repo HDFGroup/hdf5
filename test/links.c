@@ -19,9 +19,17 @@
  * Purpose:	Tests hard, soft (symbolic) & external links.
  */
 
+#include "h5test.h"
+
 #include "H5Lprivate.h"
 
-#include "h5test.h"
+/*
+ * This file needs to access private information from the H5G package.
+ * This file also needs to access the group testing code.
+ */
+#define H5G_PACKAGE
+#define H5G_TESTING
+#include "H5Gpkg.h"		/* Groups 				*/
 
 const char *FILENAME[] = {
     "links0",
@@ -777,7 +785,6 @@ error:
 static int
 test_lcpl(hid_t fapl)
 {
-    hid_t fapl_id=-1;
     hid_t file_id=-1;
     hid_t group_id=-1;
     hid_t space_id=-1;
@@ -793,10 +800,9 @@ test_lcpl(hid_t fapl)
      * Here we only need to test the character encoding property */
 
     /* Create file */
-    fapl_id = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))<0) TEST_ERROR;
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
 
     /* Create and link a group with the default LCPL */
     if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -913,19 +919,18 @@ test_lcpl(hid_t fapl)
     if(H5Pclose(lcpl_id)<0) TEST_ERROR;
     if(H5Sclose(space_id)<0) TEST_ERROR;
     if(H5Fclose(file_id)<0) TEST_ERROR;
-    if(H5Pclose(fapl_id)<0) TEST_ERROR;
+
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-    H5Gclose(group_id);
-    H5Dclose(dset_id);
-    H5Tclose(type_id);
-    H5Pclose(lcpl_id);
-    H5Sclose(space_id);
-    H5Fclose(file_id);
-    H5Pclose(fapl_id);
+        H5Gclose(group_id);
+        H5Dclose(dset_id);
+        H5Tclose(type_id);
+        H5Pclose(lcpl_id);
+        H5Sclose(space_id);
+        H5Fclose(file_id);
     } H5E_END_TRY;
     return 1;
 } /* end test_lcpl() */
@@ -2189,7 +2194,7 @@ external_link_toomany(hid_t fapl)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5G_NLINKS == 16);
+    HDassert(H5L_NLINKS_DEF == 16);
 
     /* Set up filenames */
     h5_fixname(FILENAME[3], fapl, filename1, sizeof filename1);
@@ -3709,7 +3714,8 @@ ud_link_reregister(hid_t fapl)
  */
 /* Callback functions for UD "callback" links. */
 /* Creation callback.  Called during move as well. */
-herr_t UD_cb_create(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id)
+static herr_t
+UD_cb_create(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id)
 {
     if(!link_name) TEST_ERROR;
     if(loc_group < 0) TEST_ERROR;
@@ -3725,7 +3731,9 @@ herr_t UD_cb_create(const char * link_name, hid_t loc_group, void * udata, size_
 error:
     return -1;
 }
-static hid_t UD_cb_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+
+static hid_t
+UD_cb_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
 {
     const char *target = (char *) udata;
     hid_t ret_value;
@@ -3746,11 +3754,11 @@ static hid_t UD_cb_traverse(const char * link_name, hid_t cur_group, void * udat
 error:
     return -1;
 }
-/* Callback for when the link is moved or renamed */
-herr_t UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size)
-{
-    const char *target = (char *) udata;
 
+/* Callback for when the link is moved or renamed */
+static herr_t
+UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size)
+{
     if(!new_name) TEST_ERROR;
     if(new_loc < 0) TEST_ERROR;
     if(udata_size > 0 && !udata) TEST_ERROR;
@@ -3764,8 +3772,10 @@ herr_t UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t uda
 error:
     return -1;
 }
+
 /* Callback for when the link is deleted.  Also called during move */
-herr_t UD_cb_delete(const char * link_name, hid_t loc_group, void * udata, size_t udata_size)
+static herr_t
+UD_cb_delete(const char * link_name, hid_t loc_group, void * udata, size_t udata_size)
 {
     if(!link_name) TEST_ERROR;
     if(loc_group < 0) TEST_ERROR;
@@ -3781,7 +3791,8 @@ error:
     return -1;
 }
 /* Callback for when the link is queried */
-ssize_t UD_cb_query(const char * link_name, void * udata, size_t udata_size, void* buf, size_t buf_size)
+static ssize_t
+UD_cb_query(const char * link_name, void * udata, size_t udata_size, void* buf, size_t buf_size)
 {
     if(!link_name) TEST_ERROR;
     if(udata_size > 0 && !udata) TEST_ERROR;
@@ -3816,7 +3827,7 @@ const H5L_link_class_t UD_cb_class[1] = {{
 }};
 
 static int
-ud_callbacks(fapl)
+ud_callbacks(hid_t fapl)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1);	                /* Group ID */
@@ -4088,7 +4099,9 @@ lapl_udata(hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-herr_t UD_cbsucc_create(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id)
+static herr_t
+UD_cbsucc_create(const char UNUSED * link_name, hid_t UNUSED loc_group,
+    void * udata, size_t udata_size, hid_t UNUSED lcpl_id)
 {
     /* Check to make sure that this "soft link" has a target */
     if(udata_size < 1 || !udata)
@@ -4096,7 +4109,10 @@ herr_t UD_cbsucc_create(const char * link_name, hid_t loc_group, void * udata, s
 
     return 0;
 }
-static hid_t UD_cbsucc_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+
+static hid_t
+UD_cbsucc_traverse(const char UNUSED * link_name, hid_t cur_group,
+    void * udata, size_t UNUSED udata_size, hid_t lapl_id)
 {
     const char *target = (char *) udata;
     hid_t ret_value;
@@ -4110,39 +4126,57 @@ static hid_t UD_cbsucc_traverse(const char * link_name, hid_t cur_group, void * 
 error:
     return -1;
 }
+
 /* Failure callback for when the link is moved or renamed */
-herr_t UD_cbfail_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size)
+static herr_t
+UD_cbfail_move(const char UNUSED * new_name, hid_t UNUSED new_loc,
+    void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     return -1;
 }
+
 /* SuccessCallback for when the link is moved or renamed */
-herr_t UD_cbsucc_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size)
+static herr_t
+UD_cbsucc_move(const char UNUSED * new_name, hid_t UNUSED new_loc,
+    void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always succeed. */
     return 0;
 }
+
 /* Callback for when the link is deleted.  Also called during move */
-herr_t UD_cbsucc_delete(const char * link_name, hid_t loc_group, void * udata, size_t udata_size)
+static herr_t
+UD_cbsucc_delete(const char UNUSED * link_name, hid_t UNUSED loc_group,
+    void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This callback will always succeed */
     return 0;
 }
+
 /* Callback for when the link is deleted.  Also called during move */
-herr_t UD_cbfail_delete(const char * link_name, hid_t loc_group, void * udata, size_t udata_size)
+static herr_t
+UD_cbfail_delete(const char UNUSED * link_name, hid_t UNUSED loc_group,
+    void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     /* Note: un-deletable links are in general a very bad idea! */
     return -1;
 }
+
 /* Callback for when the link is queried */
-ssize_t UD_cbfail_query(const char * link_name, void * udata, size_t udata_size, void *buf, size_t buf_size)
+static ssize_t
+UD_cbfail_query(const char UNUSED * link_name, void UNUSED * udata,
+    size_t UNUSED udata_size, void UNUSED *buf, size_t UNUSED buf_size)
 {
     /* This traversal function will always fail. */
     return -1;
 }
+
 /* Callback for when the link is queried */
-ssize_t UD_cbfail_on_write_query(const char * link_name, void * udata, size_t udata_size, void *buf, size_t buf_size)
+static ssize_t
+UD_cbfail_on_write_query(const char UNUSED * link_name, void UNUSED * udata,
+    size_t UNUSED udata_size, void *buf, size_t UNUSED buf_size)
 {
     /* This traversal function will return a buffer size,
      * but will fail when a buffer is passed in ("writing to the buffer"
@@ -4154,8 +4188,10 @@ ssize_t UD_cbfail_on_write_query(const char * link_name, void * udata, size_t ud
 
     return 0;
 }
+
 /* Callback for when the link is queried */
-ssize_t UD_cbsucc_query(const char * link_name, void * udata, size_t udata_size, void *buf, size_t buf_size)
+static ssize_t
+UD_cbsucc_query(const char UNUSED * link_name, void UNUSED * udata, size_t UNUSED udata_size, void *buf, size_t buf_size)
 {
     /* This traversal function will return a buffer size,
      * but will fail when a buffer is passed in ("writing to the buffer"
