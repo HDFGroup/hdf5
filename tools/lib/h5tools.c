@@ -111,10 +111,10 @@ void
 h5tools_init(void)
 {
     if (!h5tools_init_g) {
- if (!rawdatastream)
-     rawdatastream = stdout;
+	if (!rawdatastream)
+	    rawdatastream = stdout;
 
- h5tools_init_g++;
+	h5tools_init_g++;
     }
 }
 
@@ -138,12 +138,12 @@ void
 h5tools_close(void)
 {
     if (h5tools_init_g) {
- if (rawdatastream && rawdatastream != stdout) {
-     if (fclose(rawdatastream))
-  perror("closing rawdatastream");
-     else
-  rawdatastream = NULL;
- }
+	if (rawdatastream && rawdatastream != stdout) {
+	    if (fclose(rawdatastream))
+		perror("closing rawdatastream");
+	    else
+		rawdatastream = NULL;
+	}
 
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
@@ -151,15 +151,7 @@ h5tools_close(void)
         /* Shut down the library */
         H5close();
 
-#ifdef H5_HAVE_PARALLEL
-        /* Check if we need to shut down MPI */
-        if(h5tools_mpi_init_g) {
-            MPI_Finalize();
-            h5tools_mpi_init_g=0;
-        } /* end if */
-#endif
-
- h5tools_init_g = 0;
+	h5tools_init_g = 0;
     }
 }
 
@@ -201,7 +193,7 @@ int UNUSED argc, const char UNUSED *argv[]
              * is the member size.
              */
             if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = FAMILY_IDX;
@@ -211,7 +203,7 @@ int UNUSED argc, const char UNUSED *argv[]
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
             
             if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = SPLIT_IDX;
@@ -221,7 +213,7 @@ int UNUSED argc, const char UNUSED *argv[]
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
             
             if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = MULTI_IDX;
@@ -232,7 +224,7 @@ int UNUSED argc, const char UNUSED *argv[]
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
             
             if (H5Pset_fapl_stream(fapl, NULL)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = STREAM_IDX;
@@ -241,34 +233,24 @@ int UNUSED argc, const char UNUSED *argv[]
 #ifdef H5_HAVE_PARALLEL
     } else if (!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-       
-           /* Initialize the MPI library, if it wasn't already */
-            if(!h5tools_mpi_init_g) {
-                MPI_Init(&argc, (char ***)&argv);
-
-                h5tools_mpi_init_g=1;
-            } /* end if */
-
+	/* check if MPI has been initialized. */
+	if (!h5tools_mpi_init_g)
+	    MPI_Initialized(&h5tools_mpi_init_g);
+        if (h5tools_mpi_init_g && ((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0)) {
             if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-           
-            /* Initialize the MPI library, if it wasn't already */
-            if(!h5tools_mpi_init_g) {
-                MPI_Init(&argc, (char ***)&argv);
-
-                h5tools_mpi_init_g=1;
-            } /* end if */
-
+	/* check if MPI has been initialized. */
+	if (!h5tools_mpi_init_g)
+	    MPI_Initialized(&h5tools_mpi_init_g);
+        if (h5tools_mpi_init_g && ((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0)) {
             if (H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE)<0)
-             goto error;
+		goto error;
 
             if(drivernum)
                 *drivernum = MPIPOSIX_IDX;
