@@ -131,10 +131,8 @@ void DataType::copy( const DataType& like_type )
 DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
-    {
 	copy(rhs);
-	return(*this);
-    }
+    return(*this);
 }
 
 //--------------------------------------------------------------------------

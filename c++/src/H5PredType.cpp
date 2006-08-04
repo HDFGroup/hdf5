@@ -258,10 +258,8 @@ const PredType PredType::NATIVE_UINT_FAST64( H5T_NATIVE_UINT_FAST64 );
 PredType& PredType::operator=( const PredType& rhs )
 {
     if (this != &rhs)
-    {
 	copy(rhs);
-	return(*this);
-    }
+    return(*this);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
