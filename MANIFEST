@@ -1359,6 +1359,7 @@
 ./test/h5test.h
 ./test/hyperslab.c
 ./test/istore.c
+./test/le_extlink1.h5
 ./test/lheap.c
 ./test/links.c
 ./test/mergemsg.h5
