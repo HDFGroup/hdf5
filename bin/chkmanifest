@@ -60,9 +60,22 @@ test "$verbose" && echo "   Checking MANIFEST..." 1>&2
 # clean up $MANIFEST file when exits
 trap "rm -f $MANIFEST" 0
 
-if [ ! -f MANIFEST ]; then
-    echo MANIFEST file not found. Abort.
-    exit 1
+# First make sure i am in the directory in which there is an MANIFEST file
+# and then do the checking from there.  Will try the following,
+# current directory, parent directory, the directory this command resides.
+if [ -f MANIFEST ]; then
+    continue
+elif [ -f ../MANIFEST ]; then
+    cd ..
+else
+    commanddir=`dirname $0`
+    if [ -d "$commanddir" -a -f $commanddir/MANIFEST ]; then
+	cd $commanddir
+	continue
+    else
+	echo MANIFEST file not found. Abort.
+	exit 1
+    fi
 fi
 
 # Copy the manifest file to get a list of file names.
