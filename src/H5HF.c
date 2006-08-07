@@ -354,7 +354,7 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     hdr = fh->hdr;
 
     /* Check if object is large enough to be standalone */
-    if(size > hdr->standalone_size) {
+    if(size > hdr->max_man_size) {
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
     } /* end if */
     else {

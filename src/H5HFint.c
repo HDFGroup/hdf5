@@ -282,6 +282,7 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to modify */
     haddr_t dblock_addr = HADDR_UNDEF;  /* Direct block address */
+    size_t blk_off;                     /* Offset of object within block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_insert)
@@ -340,36 +341,30 @@ HDfprintf(stderr, "%s: sec_node->u.single.dblock_size = %Zu\n", FUNC, sec_node->
 
     /* Insert object into block */
 
-    /* Check for address mapping type */
-    if(hdr->addrmap == H5HF_ABSOLUTE) {
-        uint8_t *p;                     /* Temporary pointer to obj info in block */
-        size_t blk_off;                 /* Offset of object within block */
+    /* Get the offset of the object within the block */
+    blk_off = sec_node->sect_info.addr - dblock->block_off;
+#ifdef QAK
+HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
+#endif /* QAK */
 
-        /* Set the offset of the object within the block */
-        blk_off = sec_node->sect_info.addr - dblock->block_off;
-
-        /* Sanity checks */
+    /* Sanity checks */
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
-        HDassert(sec_node->sect_info.size >= obj_size);
+    HDassert(sec_node->sect_info.size >= obj_size);
 
-#ifdef QAK
-HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
-#endif /* QAK */
-        /* Reduce (& possibly re-add) single section */
-        if(H5HF_sect_single_reduce(hdr, dxpl_id, sec_node, obj_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce single section node")
+    /* Reduce (& possibly re-add) single section */
+    if(H5HF_sect_single_reduce(hdr, dxpl_id, sec_node, obj_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't reduce single section node")
 
-#ifdef QAK
-HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
-#endif /* QAK */
-        /* Reduce space available in heap */
-        if(H5HF_hdr_adj_free(hdr, -(ssize_t)obj_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
+    /* Reduce space available in heap */
+    if(H5HF_hdr_adj_free(hdr, -(ssize_t)obj_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
-        /* Encode the object in the block */
+    /* Encode the object in the block */
+    {
+        uint8_t *p;                         /* Temporary pointer to obj info in block */
 
         /* Point to location for object */
         p = dblock->blk + blk_off;
@@ -380,19 +375,16 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 
         /* Sanity check */
         HDassert((size_t)(p - (dblock->blk + blk_off)) == obj_size);
+    } /* end block */
 
-        /* Set the heap ID for the new object (heap offset & obj length) */
+    /* Set the heap ID for the new object (heap offset & obj length) */
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
-        H5HF_MAN_ID_ENCODE(id, hdr, (dblock->block_off + blk_off), obj_size);
+    H5HF_MAN_ID_ENCODE(id, hdr, (dblock->block_off + blk_off), obj_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, (dblock->block_off + blk_off), obj_size);
 #endif /* QAK */
-    } /* end if */
-    else {
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "inserting within mapped managed blocks not supported yet")
-    } /* end else */
 
     /* Update statistics about heap */
     hdr->nobjs++;
@@ -544,7 +536,7 @@ HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
     if(obj_len > hdr->man_dtable.cparam.max_direct_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
-    if(obj_len > hdr->standalone_size)
+    if(obj_len > hdr->max_man_size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object should be standalone")
 
     /* Check for root direct block */

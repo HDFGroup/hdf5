@@ -257,6 +257,7 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     uint8_t		*buf = NULL;    /* Temporary buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            metadata_chksum;        /* Metadata checksum value */
+    uint8_t             heap_flags;     /* Status flags for heap */
     H5HF_hdr_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_hdr_load)
@@ -308,21 +309,19 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     if(metadata_chksum != 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap header")
 
-    /* Heap address mapping */
-    hdr->addrmap = *p++;
-    HDassert(H5HF_ABSOLUTE == 0);
-    if(hdr->addrmap > H5HF_MAPPED)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect fractal heap address mapping")
+    /* Heap status flags */
+    /* (bit 0: "huge" object IDs have wrapped) */
+    heap_flags = *p++;
+    hdr->huge_ids_wrapped = heap_flags & H5HF_HDR_FLAGS_HUGE_ID_WRAPPED;
 
-    /* Min. size of standalone objects */
-    UINT32DECODE(p, hdr->standalone_size);
+    /* "Huge" object information */
+    UINT32DECODE(p, hdr->max_man_size);         /* Max. size of "managed" objects */
+    H5F_DECODE_LENGTH(f, p, hdr->huge_next_id); /* Next ID to use for "huge" object */
+    H5F_addr_decode(f, &p, &hdr->huge_bt_addr); /* Address of "huge" object tracker B-tree */
 
-    /* Internal management information */
-    H5F_DECODE_LENGTH(f, p, hdr->total_man_free);
-    H5F_DECODE_LENGTH(f, p, hdr->total_std_free);
-
-    /* Address of free section header */
-    H5F_addr_decode(f, &p, &(hdr->fs_addr));
+    /* "Managed" object free space information */
+    H5F_DECODE_LENGTH(f, p, hdr->total_man_free); /* Internal free space in managed direct blocks */
+    H5F_addr_decode(f, &p, &hdr->fs_addr);      /* Address of free section header */
 
     /* Statistics information */
     H5F_DECODE_LENGTH(f, p, hdr->total_size);
@@ -387,9 +386,10 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
     HDassert(hdr);
 
     if(hdr->cache_info.is_dirty) {
-        uint8_t	*buf = NULL;        /* Temporary raw data buffer */
-        uint8_t *p;                 /* Pointer into raw data buffer */
-        size_t	size;               /* Header size on disk */
+        uint8_t	*buf;           /* Temporary raw data buffer */
+        uint8_t *p;             /* Pointer into raw data buffer */
+        size_t	size;           /* Header size on disk */
+        uint8_t heap_flags;     /* Status flags for heap */
 
         /* Sanity check */
         HDassert(hdr->dirty);
@@ -419,18 +419,20 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         HDmemset(p, 0, 4);
         p += 4;
 
-        /* Heap address mapping */
-        *p++ = hdr->addrmap;
+        /* Heap status flags */
+        /* (bit 0: "huge" object IDs have wrapped) */
+        heap_flags = 0;
+        heap_flags |= (hdr->huge_ids_wrapped ?  H5HF_HDR_FLAGS_HUGE_ID_WRAPPED : 0);
+        *p++ = heap_flags;
 
-        /* Min. size of standalone objects */
-        UINT32ENCODE(p, hdr->standalone_size);
+        /* "Huge" object information */
+        UINT32ENCODE(p, hdr->max_man_size);             /* Max. size of "managed" objects */
+        H5F_ENCODE_LENGTH(f, p, hdr->huge_next_id);     /* Next ID to use for "huge" object */
+        H5F_addr_encode(f, &p, hdr->huge_bt_addr);      /* Address of "huge" object tracker B-tree */
 
-        /* Internal management information */
-        H5F_ENCODE_LENGTH(f, p, hdr->total_man_free);
-        H5F_ENCODE_LENGTH(f, p, hdr->total_std_free);
-
-        /* Address of free section header */
-        H5F_addr_encode(f, &p, hdr->fs_addr);
+        /* "Managed" object free space information */
+        H5F_ENCODE_LENGTH(f, p, hdr->total_man_free);   /* Internal free space in managed direct blocks */
+        H5F_addr_encode(f, &p, hdr->fs_addr);           /* Address of free section header */
 
         /* Statistics information */
         H5F_ENCODE_LENGTH(f, p, hdr->total_size);
@@ -730,10 +732,6 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
         /* Offset of block in heap */
         UINT64ENCODE_VAR(p, dblock->block_off, hdr->heap_off_size);
-
-        /* Check for (currently) unsupported address mapping */
-        if(hdr->addrmap != H5HF_ABSOLUTE)
-            HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "encoding mapped direct blocks not supported currently")
 
         /* Sanity check */
         HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));

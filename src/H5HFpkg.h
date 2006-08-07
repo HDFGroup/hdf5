@@ -67,23 +67,37 @@
     + 2 /* Current # of rows in root indirect block */                        \
     )
 
+/* Flags for status byte */
+#define H5HF_HDR_FLAGS_HUGE_ID_WRAPPED 0x01
+
 /* Size of the fractal heap header on disk */
 #define H5HF_HEADER_SIZE(h)     (                                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
                                                                               \
-    /* Fractal heap header specific fields */                                 \
-    + 1 /* Address mapping mode */                                            \
-    + 4 /* Min. size of standalone object */                                  \
+    /* Fractal Heap Header specific fields */                                 \
+                                                                              \
+    /* General heap information */                                            \
+    + 1 /* Status flags */                                                    \
+                                                                              \
+    /* "Huge" object fields */                                                \
+    + 4 /* Max. size of "managed" object */                                   \
+    + (h)->sizeof_size /* Next ID for "huge" object */                        \
+    + (h)->sizeof_addr /* File address of "huge" object tracker B-tree  */    \
+                                                                              \
+    /* "Managed" object free space fields */                                  \
     + (h)->sizeof_size /* Total man. free space */                            \
-    + (h)->sizeof_size /* Total std. free entries */                          \
     + (h)->sizeof_addr /* File address of free section header */              \
+                                                                              \
+    /* Statistics fields */                                                   \
     + (h)->sizeof_size /* Total size of heap */                               \
     + (h)->sizeof_size /* Size of man. space in heap */                       \
     + (h)->sizeof_size /* Size of man. space iterator offset in heap */       \
     + (h)->sizeof_size /* Size of alloacted man. space in heap */             \
     + (h)->sizeof_size /* Size of std. space in heap */                       \
     + (h)->sizeof_size /* Number of objects in heap */                        \
+                                                                              \
+    /* "Managed" object doubling table info */                                \
     + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
     )
 
@@ -279,7 +293,6 @@ typedef struct H5HF_hdr_t {
 
     /* Shared internal information (varies during lifetime of heap) */
     hsize_t     total_man_free; /* Total amount of free space in managed blocks */
-    hsize_t     total_std_free; /* Total # of free standalone ID entries */
     haddr_t     fs_addr;        /* Address of free space header on disk */
 
     /* Statistics for heap */
@@ -306,9 +319,10 @@ typedef struct H5HF_hdr_t {
     /* (Partially set by user, partially derived/updated internally) */
     H5HF_dtable_t man_dtable;   /* Doubling-table info for managed objects */
 
-    /* Information set by user */
-    H5HF_addrmap_t addrmap;     /* Type of address mapping */
-    uint32_t standalone_size;   /* Size of object to store standalone */
+    /* "Huge" object support (stored in header) */
+    uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
+    hsize_t  huge_next_id;      /* Next ID to use for "huge" object */
+    haddr_t  huge_bt_addr;      /* Address of B-tree for storing "huge" object info */
 
     /* Information derived from user parameters (not stored in header) */
     unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
@@ -316,6 +330,7 @@ typedef struct H5HF_hdr_t {
     hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
     hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
     hbool_t     write_once;     /* Is heap being written in "write once" mode? */
+    hbool_t     huge_ids_wrapped;       /* Have "huge" object IDs wrapped around? */
 } H5HF_hdr_t;
 
 /* Indirect block entry */

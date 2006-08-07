@@ -212,20 +212,12 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Heap address mapping method:",
-	      ((hdr->addrmap) == H5HF_ABSOLUTE ? "Absolute" :
-	      ((hdr->addrmap) == H5HF_MAPPED ? "Mapped" :
-              "Unknown!")));
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	      "Min. size of standalone object:",
-	      (unsigned long)hdr->standalone_size);
+	      "Max. size of managed object:",
+	      (unsigned long)hdr->max_man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total free space in managed blocks:",
 	      hdr->total_man_free);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total # of free entries for standalone blocks:",
-	      hdr->total_std_free);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total data block size:",
 	      hdr->total_size);

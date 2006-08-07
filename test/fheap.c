@@ -39,7 +39,6 @@
 #define NUM_FILL_OBJS           11
 
 /* "Small" heap creation parameters */
-#define SMALL_ADDRMAP     H5HF_ABSOLUTE         /* Heap address mapping */
 #define SMALL_DBLOCK_OVERHEAD 22                /* Overhead for direct blocks */
 #define SMALL_MAN_WIDTH   4                     /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512          /* Managed obj. starting block size */
@@ -158,8 +157,7 @@ init_small_cparam(H5HF_create_t *cparam)
     HDmemset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
-    cparam->addrmap = SMALL_ADDRMAP;
-    cparam->standalone_size = SMALL_STAND_SIZE;
+    cparam->max_man_size = SMALL_STAND_SIZE;
 
     /* Managed object doubling-table parameters */
     cparam->managed.width = SMALL_MAN_WIDTH;
@@ -10978,8 +10976,8 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     total_obj_added = 0;
     while(total_obj_added < size_limit) {
         /* Choose a random size of object (from 1 up to stand alone block size) */
-        obj_size = (HDrandom() % (cparam->standalone_size - 1)) + 1;
-        obj_loc = cparam->standalone_size - obj_size;
+        obj_size = (HDrandom() % (cparam->max_man_size - 1)) + 1;
+        obj_loc = cparam->max_man_size - obj_size;
 
         /* Insert object */
         if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
@@ -11155,14 +11153,14 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
          *      25% of the objects will be twice as large, 12.5% will be
          *      four times larger, etc.)
          */
-        while(HDrandom() < (RAND_MAX / 2) && size_range < cparam->standalone_size)
+        while(HDrandom() < (RAND_MAX / 2) && size_range < cparam->max_man_size)
             size_range *= 2;
-        if(size_range > cparam->standalone_size)
-            size_range = cparam->standalone_size;
+        if(size_range > cparam->max_man_size)
+            size_range = cparam->max_man_size;
 
         /* Choose a random size of object (from 1 up to stand alone block size) */
         obj_size = (HDrandom() % (size_range - 1)) + 1;
-        obj_loc = cparam->standalone_size - obj_size;
+        obj_loc = cparam->max_man_size - obj_size;
 
         /* Insert object */
         if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
@@ -11312,7 +11310,7 @@ main(void)
     init_small_cparam(&cparam);
 
     /* Allocate space for the shared objects */
-    shared_obj_size_g = cparam.standalone_size + 256;
+    shared_obj_size_g = cparam.max_man_size + 256;
     shared_wobj_g = H5MM_malloc(shared_obj_size_g);
     shared_robj_g = H5MM_malloc(shared_obj_size_g);
 

@@ -224,7 +224,7 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
-            ((H5V_log2_gen((hsize_t)hdr->standalone_size) + 7) / 8));
+            ((H5V_log2_gen((hsize_t)hdr->max_man_size) + 7) / 8));
     hdr->id_len = H5HF_ID_SIZE(hdr);
 
     /* Set the free space in direct blocks */
@@ -299,7 +299,7 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size too large")
     if(!POWER_OF_TWO(cparam->managed.max_direct_size))
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
-    if(cparam->managed.max_direct_size < cparam->standalone_size)
+    if(cparam->managed.max_direct_size < cparam->max_man_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
     if(cparam->managed.max_index == 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size must be greater than zero")
@@ -309,8 +309,7 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
 
     /* Set the creation parameters for the heap */
     hdr->heap_addr = fh_addr;
-    hdr->addrmap = cparam->addrmap;
-    hdr->standalone_size = cparam->standalone_size;
+    hdr->max_man_size = cparam->max_man_size;
     HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
     /* Set root table address to indicate that the heap is empty currently */
@@ -318,6 +317,9 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
 
     /* Set free list header address to indicate that the heap is empty currently */
     hdr->fs_addr = HADDR_UNDEF;
+
+    /* Set "huge" object tracker B-tree address to indicate that there aren't any yet */
+    hdr->huge_bt_addr = HADDR_UNDEF;
 
     /* Note that the shared info is dirty (it's not written to the file yet) */
     hdr->dirty = TRUE;
@@ -327,9 +329,9 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared fractal heap header")
 
     /* Extra checking for possible gap between max. direct block size minus
-     * overhead and standalone object size */
+     * overhead and "huge" object size */
     dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
-    if((cparam->managed.max_direct_size - dblock_overhead) < cparam->standalone_size)
+    if((cparam->managed.max_direct_size - dblock_overhead) < cparam->max_man_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
 
 done:

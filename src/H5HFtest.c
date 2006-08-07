@@ -93,8 +93,7 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
     HDassert(cparam);
 
     /* Get fractal heap creation parameters */
-    cparam->addrmap = fh->hdr->addrmap;
-    cparam->standalone_size = fh->hdr->standalone_size;
+    cparam->max_man_size = fh->hdr->max_man_size;
     HDmemcpy(&(cparam->managed), &(fh->hdr->man_dtable.cparam), sizeof(H5HF_dtable_cparam_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)

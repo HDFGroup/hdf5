@@ -41,12 +41,6 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Types of heaps */
-typedef enum {
-    H5HF_ABSOLUTE,      /* The heap uses absolute internal addressing */
-    H5HF_MAPPED         /* The heap maps internal addresses to allow compaction */
-} H5HF_addrmap_t;
-
 /* Creation parameters for doubling-tables */
 typedef struct H5HF_dtable_cparam_t {
     unsigned    width;          /* Number of columns in the table (must be power of 2) */
@@ -62,9 +56,8 @@ typedef struct H5HF_dtable_cparam_t {
 /* Fractal heap creation parameters */
 typedef struct H5HF_create_t {
     H5HF_dtable_cparam_t managed;/* Mapped object doubling-table creation parameters */
-    H5HF_addrmap_t addrmap;     /* Type of address mapping for objects in heap */
-    uint32_t standalone_size;   /* Size of object to store standalone */
-                                /* (i.e. max. size of object to manage) */
+    uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
+                                /* (i.e.  min. size of object to store standalone) */
 } H5HF_create_t;
 
 /* Fractal heap metadata statistics info */
