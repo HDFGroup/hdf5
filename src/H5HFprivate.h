@@ -89,7 +89,7 @@ typedef struct H5HF_t H5HF_t;
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-H5_DLL H5HF_t *H5HF_create(H5F_t *f, hid_t dxpl_id, H5HF_create_t *cparam);
+H5_DLL H5HF_t *H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
 H5_DLL H5HF_t *H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
 H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p/*out*/);
 H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr);
@@ -100,6 +100,7 @@ H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
 H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
+H5_DLL herr_t H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
 
 /* Statistics routines */
 H5_DLL herr_t H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats);

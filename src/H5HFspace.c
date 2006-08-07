@@ -326,6 +326,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_space_delete
+ *
+ * Purpose:	Delete the free space manager for the heap
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Aug  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_delete)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Delete the free space manager */
+    if(H5FS_delete(hdr->f, dxpl_id, hdr->fs_addr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't delete to free space manager")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_delete() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_space_change_sect_class
  *
  * Purpose:	Change a section's class

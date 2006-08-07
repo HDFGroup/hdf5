@@ -268,7 +268,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam)
+H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
 {
     size_t dblock_overhead;             /* Direct block's overhead */
     herr_t ret_value = SUCCEED;           /* Return value */

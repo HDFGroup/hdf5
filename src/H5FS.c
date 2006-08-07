@@ -283,12 +283,38 @@ HDfprintf(stderr, "%s: Deleting free space manager\n", FUNC);
 
     /* Delete serialized section storage, if there are any */
 #ifdef QAK
-HDfprintf(stderr, "%s: fs_hdr->sect_addr = %a\n", FUNC, fs_hdr->sect_addr);
+HDfprintf(stderr, "%s: fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
 #endif /* QAK */
     if(fspace->serial_sect_count > 0) {
+        unsigned sinfo_status = 0;      /* Free space section info's status in the metadata cache */
+
+        /* Sanity check */
         HDassert(H5F_addr_defined(fspace->sect_addr));
         HDassert(fspace->sect_size > 0);
-        if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_addr, fspace->alloc_sect_size)<0)
+
+        /* Check the free space section info's status in the metadata cache */
+        if(H5AC_get_entry_status(f, fspace->sect_addr, &sinfo_status) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for free space section info")
+
+        /* If the free space section info is in the cache, expunge it now */
+        if(sinfo_status & H5AC_ES__IN_CACHE) {
+            /* Sanity checks on direct block */
+            HDassert(!(sinfo_status & H5AC_ES__IS_PINNED));
+            HDassert(!(sinfo_status & H5AC_ES__IS_PROTECTED));
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Expunging free space section info from cache\n", FUNC);
+#endif /* QAK */
+            /* Evict the free space section info from the metadata cache */
+            if(H5AC_expunge_entry(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove free space section info from cache")
+#ifdef QAK
+HDfprintf(stderr, "%s: Done expunging free space section info from cache\n", FUNC);
+#endif /* QAK */
+        } /* end if */
+
+        /* Release the space in the file */
+        if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_addr, fspace->alloc_sect_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections")
     } /* end if */
 

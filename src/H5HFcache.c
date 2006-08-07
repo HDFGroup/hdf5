@@ -779,6 +779,9 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
      * Check arguments.
      */
     HDassert(dblock);
+#ifdef QAK
+HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
+#endif /* QAK */
 
     /* Decrement reference count on shared fractal heap info */
     HDassert(dblock->hdr);

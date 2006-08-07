@@ -302,7 +302,7 @@ HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
 #ifdef QAK
 HDfprintf(stderr, "%s: Before releasing direct block's space, dblock_addr = %a\n", FUNC, dblock_addr);
 #endif /* QAK */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, (hsize_t)dblock->size)<0)
+    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, (hsize_t)dblock->size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
     /* Remove direct block from metadata cache */
@@ -488,4 +488,70 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_dblock_protect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_dblock_delete
+ *
+ * Purpose:	Delete a managed direct block
+ *
+ * Note:	This routine does _not_ modify any indirect block that points
+ *              to this direct block, it is assumed that the whole heap is
+ *              being deleted.  (H5HF_man_dblock_destroy modifies the indirect
+ *              block)
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
+    hsize_t dblock_size)
+{
+    unsigned dblock_status = 0;         /* Direct block's status in the metadata cache */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_delete)
+#ifdef QAK
+HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Hu\n", FUNC, dblock_addr, dblock_size);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(dblock_addr));
+
+    /* Check the direct block's status in the metadata cache */
+    if(H5AC_get_entry_status(f, dblock_addr, &dblock_status) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for direct block")
+
+    /* If the direct block is in the cache, expunge it now */
+    if(dblock_status & H5AC_ES__IN_CACHE) {
+        /* Sanity checks on direct block */
+        HDassert(!(dblock_status & H5AC_ES__IS_PINNED));
+        HDassert(!(dblock_status & H5AC_ES__IS_PROTECTED));
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Expunging direct block from cache\n", FUNC);
+#endif /* QAK */
+        /* Evict the direct block from the metadata cache */
+        if(H5AC_expunge_entry(f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove direct block from cache")
+#ifdef QAK
+HDfprintf(stderr, "%s: Done expunging direct block from cache\n", FUNC);
+#endif /* QAK */
+    } /* end if */
+
+    /* Release direct block's disk space */
+    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_dblock_delete() */
 

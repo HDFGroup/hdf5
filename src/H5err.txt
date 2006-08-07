@@ -115,6 +115,7 @@ MINOR, RESOURCE, H5E_CANTLOCK, Unable to lock object
 MINOR, RESOURCE, H5E_CANTUNLOCK, Unable to unlock object
 MINOR, RESOURCE, H5E_CANTGC, Unable to garbage collect
 MINOR, RESOURCE, H5E_CANTGETSIZE, Unable to compute size
+MINOR, RESOURCE, H5E_OBJOPEN, Object is already open
 
 # File accessability errors
 MINOR, FILEACC, H5E_FILEEXISTS, File already exists

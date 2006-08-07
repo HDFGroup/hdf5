@@ -408,7 +408,7 @@ H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 
 /* Routines for managing shared fractal heap header */
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
-H5_DLL herr_t H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, H5HF_create_t *cparam);
+H5_DLL herr_t H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 
 /* Doubling table routines */
@@ -460,6 +460,9 @@ H5_DLL herr_t H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry,
 H5_DLL herr_t H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry);
 H5_DLL herr_t H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry,
     haddr_t *child_addr);
+H5_DLL herr_t H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    haddr_t iblock_addr, unsigned iblock_nrows, H5HF_indirect_t *par_iblock,
+    unsigned par_entry);
 
 /* Direct block routines */
 H5_DLL herr_t H5HF_man_dblock_new(H5HF_hdr_t *fh, hid_t dxpl_id, size_t request,
@@ -473,6 +476,8 @@ H5_DLL H5HF_direct_t *H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr, size_t dblock_size,
     H5HF_indirect_t *par_iblock, unsigned par_entry,
     H5AC_protect_t rw);
+H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
+    hsize_t dblock_size);
 
 /* Routines for internal operations */
 H5_DLL herr_t H5HF_man_locate_block(H5HF_hdr_t *hdr, hid_t dxpl_id,
