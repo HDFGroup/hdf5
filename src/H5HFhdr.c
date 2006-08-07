@@ -225,7 +225,7 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
             ((H5V_log2_gen((hsize_t)hdr->standalone_size) + 7) / 8));
-    hdr->id_len = hdr->heap_off_size + hdr->heap_len_size;
+    hdr->id_len = H5HF_ID_SIZE(hdr);
 
     /* Set the free space in direct blocks */
     for(u = 0; u < hdr->man_dtable.max_root_rows; u++) {

@@ -385,7 +385,7 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
-        H5HF_ID_ENCODE(id, hdr, (dblock->block_off + blk_off), obj_size);
+        H5HF_MAN_ID_ENCODE(id, hdr, (dblock->block_off + blk_off), obj_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, (dblock->block_off + blk_off), obj_size);
 #endif /* QAK */

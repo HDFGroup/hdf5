@@ -52,7 +52,7 @@
 /* #define ALL_INSERT_TESTS */
 
 /* Heap metadata macros */
-#define HEAP_ID_LEN             6               /* # of bytes to use for heap ID */
+#define HEAP_ID_LEN             7               /* # of bytes to use for heap ID */
 #define HEAP_MAX_ROOT_ROWS(fh) H5HF_get_max_root_rows(fh)       /* Max. # of rows in root indirect block */
 #define DTABLE_WIDTH(fh) H5HF_get_dtable_width_test(fh) /* Width of doubling table for heap */
 #define DTABLE_MAX_DROWS(fh) H5HF_get_dtable_max_drows_test(fh) /* Max. # of direct block rows in any indirect block */

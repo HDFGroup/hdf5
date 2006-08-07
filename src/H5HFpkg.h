@@ -114,15 +114,36 @@
 #define H5HF_SIZEOF_OFFSET_BITS(b)   (((b) + 7) / 8)
 #define H5HF_SIZEOF_OFFSET_LEN(l)   H5HF_SIZEOF_OFFSET_BITS(H5V_log2_of2((unsigned)(l)))
 
-/* Encode a heap ID */
-#define H5HF_ID_ENCODE(i, h, o, l)                                            \
+/* Heap ID bit flags */
+/* Heap ID version (2 bits: 6-7) */
+#define H5HF_ID_VERS_CURR       0x00    /* Current version of ID format */
+#define H5HF_ID_VERS_MASK       0xC0    /* Mask for getting the ID version from flags */
+/* Heap ID type (2 bits: 4-5) */
+#define H5HF_ID_TYPE_MAN        0x00    /* "Managed" object - stored in fractal heap blocks */
+#define H5HF_ID_TYPE_HUGE       0x10    /* "Huge" object - stored in file directly */
+#define H5HF_ID_TYPE_TINY       0x20    /* "Tiny" object - stored in heap ID directly */
+#define H5HF_ID_TYPE_RESERVED   0x30    /* "?" object - reserved for future use */
+#define H5HF_ID_TYPE_MASK       0x30    /* Mask for getting the ID type from flags */
+/* Heap ID bits 0-3 reserved for future use */
+
+/* Encode a "managed" heap ID */
+#define H5HF_MAN_ID_ENCODE(i, h, o, l)                                        \
+    *(uint8_t *)i++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;                   \
     UINT64ENCODE_VAR((i), (o), (h)->heap_off_size);                           \
     UINT64ENCODE_VAR((i), (l), (h)->heap_len_size)
 
-/* Decode a heap ID */
-#define H5HF_ID_DECODE(i, h, o, l)                                            \
+/* Decode a "managed" heap ID */
+#define H5HF_MAN_ID_DECODE(i, h, f, o, l)                                     \
+    f = *(uint8_t *)i++;                                                      \
     UINT64DECODE_VAR((i), (o), (h)->heap_off_size);                           \
     UINT64DECODE_VAR((i), (l), (h)->heap_len_size)
+
+/* Size of ID for heap */
+#define H5HF_ID_SIZE(h) (                                                     \
+    1                           /* ID flag byte                         */    \
+    + (h)->heap_off_size        /* Space for managed object offset      */    \
+    + (h)->heap_len_size        /* Space for managed object length      */    \
+    )
 
 /* Free space section types for fractal heap */
 /* (values stored in free space data structures in file) */

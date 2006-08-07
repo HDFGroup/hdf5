@@ -400,8 +400,10 @@ herr_t
 H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
 {
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5HF_get_obj_len)
+    FUNC_ENTER_NOAPI(H5HF_get_obj_len, FAIL)
 
     /*
      * Check arguments.
@@ -410,13 +412,28 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     HDassert(id);
     HDassert(obj_len_p);
 
-    /* Skip over object offset */
-    id += fh->hdr->heap_off_size;
+    /* Get the ID flags */
+    id_flags = *id++;
 
-    /* Retrieve the entry length */
-    UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->heap_len_size);
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* Check for managed object */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        /* Skip over object offset */
+        id += fh->hdr->heap_off_size;
+
+        /* Retrieve the entry length */
+        UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->heap_len_size);
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_get_obj_len() */
 
 
@@ -436,11 +453,9 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
 herr_t
 H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
 {
-    H5HF_hdr_t *hdr = NULL;                  /* The fractal heap header information */
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
-    hsize_t obj_off;                    /* Object's offset in heap */
-    size_t obj_len;                     /* Object's length in heap */
-    herr_t ret_value = SUCCEED;
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_read, FAIL)
 
@@ -451,23 +466,32 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
     HDassert(id);
     HDassert(obj);
 
-    /* Get the fractal heap header */
-    hdr = fh->hdr;
+    /* Get the ID flags */
+    id_flags = *id++;
 
-    /* Decode the object offset within the heap & it's length */
-    H5HF_ID_DECODE(id, hdr, obj_off, obj_len);
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Check for managed object */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        hsize_t obj_off;                    /* Object's offset in heap */
+        size_t obj_len;                     /* Object's length in heap */
+
+        /* Decode the object offset within the heap & it's length */
+        UINT64DECODE_VAR(id, obj_off, fh->hdr->heap_off_size);
+        UINT64DECODE_VAR(id, obj_len, fh->hdr->heap_len_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
 #endif /* QAK */
 
-    /* Check for standalone object */
-    if(obj_off & 0) {
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
+        /* Read object from managed heap blocks */
+        if(H5HF_man_read(fh->hdr, dxpl_id, obj_off, obj_len, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap")
     } /* end if */
     else {
-        /* Read object from managed heap blocks */
-        if(H5HF_man_read(hdr, dxpl_id, obj_off, obj_len, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap")
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
 done:
@@ -492,9 +516,8 @@ herr_t
 H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
 {
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
-    hsize_t obj_off;                    /* Object's offset in heap */
-    size_t obj_len;                     /* Object's length in heap */
-    herr_t ret_value = SUCCEED;
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_remove, FAIL)
 
@@ -505,27 +528,39 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
     HDassert(fh->hdr);
     HDassert(id);
 
-    /* Decode the object offset within the heap & it's length */
+    /* Get the ID flags */
+    id_flags = *id++;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Check for managed object */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        hsize_t obj_off;                    /* Object's offset in heap */
+        size_t obj_len;                     /* Object's length in heap */
+
+        /* Decode the object offset within the heap & it's length */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh->hdr->heap_off_size = %u, fh->hdr->heap_len_size = %u\n", FUNC, (unsigned)fh->hdr->heap_off_size, (unsigned)fh->hdr->heap_len_size);
 #endif /* QAK */
-    H5HF_ID_DECODE(id, fh->hdr, obj_off, obj_len);
+        UINT64DECODE_VAR(id, obj_off, fh->hdr->heap_off_size);
+        UINT64DECODE_VAR(id, obj_len, fh->hdr->heap_len_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
 #endif /* QAK */
 
-    /* Sanity check parameters */
-    HDassert(obj_off);
-    HDassert(obj_len);
+        /* Sanity check parameters */
+        HDassert(obj_off);
+        HDassert(obj_len);
 
-    /* Check for standalone object */
-    if(obj_off & 0) {
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
-    } /* end if */
-    else {
         /* Remove object from managed heap blocks */
         if(H5HF_man_remove(fh->hdr, dxpl_id, obj_off, obj_len) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from fractal heap")
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
 done:
