@@ -34,7 +34,7 @@
 
 #ifdef NDEBUG
 #define H5MM_malloc(Z)	HDmalloc(Z)
-#define H5MM_calloc(Z)	HDcalloc(1,Z)
+#define H5MM_calloc(Z)	HDcalloc((size_t)1,Z)
 #endif /* NDEBUG */
 #define H5MM_free(Z)	HDfree(Z)
 

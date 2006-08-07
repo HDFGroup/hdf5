@@ -803,7 +803,7 @@ done:
  */
 static H5FS_section_info_t *
 H5HF_sect_single_deserialize(const H5FS_section_class_t UNUSED *cls,
-    hid_t UNUSED dxpl_id, const uint8_t *buf, haddr_t sect_addr,
+    hid_t UNUSED dxpl_id, const uint8_t UNUSED *buf, haddr_t sect_addr,
     hsize_t sect_size, unsigned UNUSED *des_flags)
 {
     H5HF_free_section_t *new_sect;      /* New section */
@@ -812,7 +812,6 @@ H5HF_sect_single_deserialize(const H5FS_section_class_t UNUSED *cls,
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_deserialize)
 
     /* Check arguments. */
-    HDassert(buf);
     HDassert(H5F_addr_defined(sect_addr));
     HDassert(sect_size);
 
@@ -1102,6 +1101,7 @@ H5HF_sect_single_free(H5FS_section_info_t *_sect)
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_free)
 
+    /* Check arguments. */
     HDassert(sect);
 
     /* Check for live reference to an indirect block */
@@ -1134,13 +1134,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *_sect)
+H5HF_sect_single_valid(const H5FS_section_class_t UNUSED *cls, const H5FS_section_info_t *_sect)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Pointer to section to check */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_valid)
 
-    HDassert(cls);
+    /* Check arguments. */
     HDassert(sect);
 
 #ifdef QAK

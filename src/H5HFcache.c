@@ -290,7 +290,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_HDR_MAGIC, H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap header signature")
     p += H5HF_SIZEOF_MAGIC;
 
@@ -323,13 +323,13 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(f, p, hdr->total_man_free); /* Internal free space in managed direct blocks */
     H5F_addr_decode(f, &p, &hdr->fs_addr);      /* Address of free section header */
 
-    /* Statistics information */
-    H5F_DECODE_LENGTH(f, p, hdr->total_size);
+    /* Heap statistics */
     H5F_DECODE_LENGTH(f, p, hdr->man_size);
     H5F_DECODE_LENGTH(f, p, hdr->man_alloc_size);
     H5F_DECODE_LENGTH(f, p, hdr->man_iter_off);
-    H5F_DECODE_LENGTH(f, p, hdr->std_size);
-    H5F_DECODE_LENGTH(f, p, hdr->nobjs);
+    H5F_DECODE_LENGTH(f, p, hdr->man_nobjs);
+    H5F_DECODE_LENGTH(f, p, hdr->huge_size);
+    H5F_DECODE_LENGTH(f, p, hdr->huge_nobjs);
 
     /* Managed objects' doubling-table info */
     if(H5HF_dtable_decode(hdr->f, &p, &(hdr->man_dtable)) < 0)
@@ -404,7 +404,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_HDR_MAGIC, H5HF_SIZEOF_MAGIC);
+        HDmemcpy(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
         p += H5HF_SIZEOF_MAGIC;
 
         /* Version # */
@@ -416,7 +416,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 
         /* Metadata checksum */
 /* XXX: Set this!  (After all the metadata is in the buffer) */
-        HDmemset(p, 0, 4);
+        HDmemset(p, 0, (size_t)4);
         p += 4;
 
         /* Heap status flags */
@@ -434,13 +434,13 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         H5F_ENCODE_LENGTH(f, p, hdr->total_man_free);   /* Internal free space in managed direct blocks */
         H5F_addr_encode(f, &p, hdr->fs_addr);           /* Address of free section header */
 
-        /* Statistics information */
-        H5F_ENCODE_LENGTH(f, p, hdr->total_size);
+        /* Heap statistics */
         H5F_ENCODE_LENGTH(f, p, hdr->man_size);
         H5F_ENCODE_LENGTH(f, p, hdr->man_alloc_size);
         H5F_ENCODE_LENGTH(f, p, hdr->man_iter_off);
-        H5F_ENCODE_LENGTH(f, p, hdr->std_size);
-        H5F_ENCODE_LENGTH(f, p, hdr->nobjs);
+        H5F_ENCODE_LENGTH(f, p, hdr->man_nobjs);
+        H5F_ENCODE_LENGTH(f, p, hdr->huge_size);
+        H5F_ENCODE_LENGTH(f, p, hdr->huge_nobjs);
 
         /* Managed objects' doubling-table info */
         if(H5HF_dtable_encode(hdr->f, &p, &(hdr->man_dtable)) < 0)
@@ -629,7 +629,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     p = dblock->blk;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_DBLOCK_MAGIC, H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_DBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap direct block signature")
     p += H5HF_SIZEOF_MAGIC;
 
@@ -712,7 +712,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         p = dblock->blk;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_DBLOCK_MAGIC, H5HF_SIZEOF_MAGIC);
+        HDmemcpy(p, H5HF_DBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
         p += H5HF_SIZEOF_MAGIC;
 
         /* Version # */
@@ -724,7 +724,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
         /* Metadata checksum */
 /* XXX: Set this!  (After all the metadata is in the buffer) */
-        HDmemset(p, 0, 4);
+        HDmemset(p, 0, (size_t)4);
         p += 4;
 
         /* Address of heap header for heap which owns this block */
@@ -937,7 +937,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap indirect block signature")
     p += H5HF_SIZEOF_MAGIC;
 
@@ -982,7 +982,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
 
     /* Allocate & decode indirect block entry tables */
     HDassert(iblock->nrows > 0);
-    if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (iblock->nrows * iblock->hdr->man_dtable.cparam.width))))
+    if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (size_t)(iblock->nrows * iblock->hdr->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for direct entries")
     for(u = 0; u < (iblock->nrows * iblock->hdr->man_dtable.cparam.width); u++) {
         /* Decode child block address */
@@ -1078,7 +1078,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_IBLOCK_MAGIC, H5HF_SIZEOF_MAGIC);
+        HDmemcpy(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
         p += H5HF_SIZEOF_MAGIC;
 
         /* Version # */
@@ -1090,7 +1090,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
 
         /* Metadata checksum */
 /* XXX: Set this!  (After all the metadata is in the buffer) */
-        HDmemset(p, 0, 4);
+        HDmemset(p, 0, (size_t)4);
         p += 4;
 
         /* Address of heap header for heap which owns this block */

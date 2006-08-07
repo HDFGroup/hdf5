@@ -98,7 +98,7 @@ H5HF_man_locate_block(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     H5HF_indirect_t *iblock;        /* Pointer to indirect block */
     unsigned bot_row, top_row;      /* Bottom & top acceptable rows */
     unsigned row, col;              /* Row & column for object's block */
-    size_t entry;                   /* Entry of block */
+    unsigned entry;                 /* Entry of block */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_locate_block)
@@ -278,10 +278,11 @@ done:
  */
 herr_t
 H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
-    size_t obj_size, const void *obj, void *id)
+    size_t obj_size, const void *obj, void *_id)
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to modify */
     haddr_t dblock_addr = HADDR_UNDEF;  /* Direct block address */
+    uint8_t *id = (uint8_t *)_id;       /* Pointer to ID buffer */
     size_t blk_off;                     /* Offset of object within block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -387,7 +388,7 @@ HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, (dblock->block_off
 #endif /* QAK */
 
     /* Update statistics about heap */
-    hdr->nobjs++;
+    hdr->man_nobjs++;
 
     /* Mark heap header as modified */
     if(H5HF_hdr_dirty(hdr) < 0)
@@ -601,7 +602,7 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
     dblock = NULL;
 
     /* Update statistics about heap */
-    hdr->nobjs--;
+    hdr->man_nobjs--;
 
     /* Reduce space available in heap */
     if(H5HF_hdr_adj_free(hdr, (ssize_t)obj_len) < 0)

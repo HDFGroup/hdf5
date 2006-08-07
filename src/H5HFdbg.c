@@ -212,17 +212,23 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	      "Max. size of managed object:",
-	      (unsigned long)hdr->max_man_size);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Objects stored in 'debugging' format:",
+	      hdr->debug_objs);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "I/O filters present:",
+	      hdr->have_io_filter);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "'Write once' flag:",
+	      hdr->write_once);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "'Huge' object IDs have wrapped:",
+	      hdr->huge_ids_wrapped);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total free space in managed blocks:",
+	      "Free space in managed blocks:",
 	      hdr->total_man_free);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total data block size:",
-	      hdr->total_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total managed space data block size:",
+	      "Managed space data block size:",
 	      hdr->man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total managed space allocated:",
@@ -231,14 +237,26 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Offset of managed space iterator:",
 	      hdr->man_iter_off);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Total standalone space data block size:",
-	      hdr->std_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-	      "Number of objects in heap:",
-	      hdr->nobjs);
+	      "Number of managed objects in heap:",
+	      hdr->man_nobjs);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-	      "Address of free space manager for heap:",
+	      "Address of free space manager for managed blocks:",
 	      hdr->fs_addr);
+    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	      "Max. size of managed object:",
+	      (unsigned long)hdr->max_man_size);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "'Huge' object space used:",
+	      hdr->huge_size);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Number of 'huge' objects in heap:",
+	      hdr->huge_nobjs);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "ID of next 'huge' object:",
+	      hdr->huge_next_id);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Address of v2 B-tree for 'huge' objects:",
+	      hdr->huge_bt_addr);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
     H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth -3));
@@ -448,7 +466,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     /*
      * Print the data in a VMS-style octal dump.
      */
-    H5_buffer_dump(stream, indent, dblock->blk, marker, 0, dblock->size);
+    H5_buffer_dump(stream, indent, dblock->blk, marker, (size_t)0, dblock->size);
 
 done:
     if(dblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -554,7 +572,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
         unsigned    first_row_bits;         /* Number of bits used bit addresses in first row */
         unsigned    num_indirect_rows;      /* Number of rows of blocks in each indirect block */
 
-        first_row_bits = H5V_log2_of2(hdr->man_dtable.cparam.start_block_size) +
+        first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
                             H5V_log2_of2(hdr->man_dtable.cparam.width);
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
             num_indirect_rows = (H5V_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;

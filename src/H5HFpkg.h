@@ -90,12 +90,12 @@
     + (h)->sizeof_addr /* File address of free section header */              \
                                                                               \
     /* Statistics fields */                                                   \
-    + (h)->sizeof_size /* Total size of heap */                               \
     + (h)->sizeof_size /* Size of man. space in heap */                       \
     + (h)->sizeof_size /* Size of man. space iterator offset in heap */       \
     + (h)->sizeof_size /* Size of alloacted man. space in heap */             \
-    + (h)->sizeof_size /* Size of std. space in heap */                       \
-    + (h)->sizeof_size /* Number of objects in heap */                        \
+    + (h)->sizeof_size /* Number of man. objects in heap */                   \
+    + (h)->sizeof_size /* Size of huge space in heap */                       \
+    + (h)->sizeof_size /* Number of huge objects in heap */                   \
                                                                               \
     /* "Managed" object doubling table info */                                \
     + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
@@ -142,7 +142,8 @@
 
 /* Encode a "managed" heap ID */
 #define H5HF_MAN_ID_ENCODE(i, h, o, l)                                        \
-    *(uint8_t *)i++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;                   \
+    *(i) = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;                              \
+    (i)++;                                                                    \
     UINT64ENCODE_VAR((i), (o), (h)->heap_off_size);                           \
     UINT64ENCODE_VAR((i), (l), (h)->heap_len_size)
 
@@ -291,20 +292,35 @@ typedef struct H5HF_hdr_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
-    /* Shared internal information (varies during lifetime of heap) */
+    /* Flags for heap settings (stored in status byte in header) */
+    hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
+    hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
+    hbool_t     write_once;     /* Is heap being written in "write once" mode? */
+    hbool_t     huge_ids_wrapped;       /* Have "huge" object IDs wrapped around? */
+
+    /* Doubling table information (partially stored in header) */
+    /* (Partially set by user, partially derived/updated internally) */
+    H5HF_dtable_t man_dtable;   /* Doubling-table info for managed objects */
+
+    /* Free space information for managed objects (stored in header) */
     hsize_t     total_man_free; /* Total amount of free space in managed blocks */
     haddr_t     fs_addr;        /* Address of free space header on disk */
 
-    /* Statistics for heap */
-    hsize_t     total_size;     /* Total amount of space used by heap (managed & standalone) */
+    /* "Huge" object support (stored in header) */
+    uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
+    hsize_t  huge_next_id;      /* Next ID to use for "huge" object */
+    haddr_t  huge_bt_addr;      /* Address of B-tree for storing "huge" object info */
+
+    /* Statistics for heap (stored in header) */
     hsize_t     man_size;       /* Total amount of managed space in heap */
     hsize_t     man_alloc_size; /* Total amount of allocated managed space in heap */
     hsize_t     man_iter_off;   /* Offset of iterator in managed heap space */
-    hsize_t     std_size;       /* Total amount of standalone space in heap */
-    hsize_t     nobjs;          /* Number of objects in heap */
+    hsize_t     man_nobjs;      /* Number of "managed" objects in heap */
+    hsize_t     huge_size;      /* Total size of "huge" objects in heap */
+    hsize_t     huge_nobjs;     /* Number of "huge" objects in heap */
 
     /* Cached/computed values (not stored in header) */
-    size_t      rc;             /* Reference count of child blocks */
+    size_t      rc;             /* Reference count of objects using heap header */
     hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     H5AC_protect_t mode;        /* Access mode for heap */
@@ -314,23 +330,8 @@ typedef struct H5HF_hdr_t {
     size_t      id_len;         /* Size of heap IDs (in bytes) */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
-
-    /* Doubling table information */
-    /* (Partially set by user, partially derived/updated internally) */
-    H5HF_dtable_t man_dtable;   /* Doubling-table info for managed objects */
-
-    /* "Huge" object support (stored in header) */
-    uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
-    hsize_t  huge_next_id;      /* Next ID to use for "huge" object */
-    haddr_t  huge_bt_addr;      /* Address of B-tree for storing "huge" object info */
-
-    /* Information derived from user parameters (not stored in header) */
     unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
     unsigned char heap_len_size; /* Size of heap ID lengths (in bytes) */
-    hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
-    hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
-    hbool_t     write_once;     /* Is heap being written in "write once" mode? */
-    hbool_t     huge_ids_wrapped;       /* Have "huge" object IDs wrapped around? */
 } H5HF_hdr_t;
 
 /* Indirect block entry */

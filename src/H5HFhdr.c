@@ -529,8 +529,7 @@ HDfprintf(stderr, "%s; hdr->man_size = %Hu\n", FUNC, hdr->man_size);
 HDfprintf(stderr, "%s; hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
 #endif /* QAK */
 
-    /* Set the total space in heap */
-    hdr->total_size = new_size;
+    /* Set the total managed space in heap */
     hdr->man_size = new_size;
 
     /* Adjust the free space in direct blocks */
@@ -906,7 +905,7 @@ HDfprintf(stderr, "%s: child_nrows = %u\n", FUNC, child_nrows);
 HDfprintf(stderr, "%s: Skipping indirect block row that is too small\n", FUNC);
 #endif /* QAK */
                     /* Compute # of rows needed in child indirect block */
-                    child_rows_needed = (H5V_log2_of2(min_dblock_size) - H5V_log2_of2(hdr->man_dtable.cparam.start_block_size)) + 2;
+                    child_rows_needed = (H5V_log2_of2((uint32_t)min_dblock_size) - H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size)) + 2;
                     HDassert(child_rows_needed > child_nrows);
                     child_entry = (next_row + (child_rows_needed - child_nrows)) * hdr->man_dtable.cparam.width;
                     if(child_entry > (iblock->nrows * hdr->man_dtable.cparam.width))
@@ -1237,8 +1236,7 @@ HDfprintf(stderr, "%s: 'next block' iterator is ready\n", FUNC);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
     } /* end if */
 
-    /* Shrink heap size */
-    hdr->total_size = hdr->std_size;
+    /* Shrink managed heap size */
     hdr->man_size = 0;
     hdr->man_alloc_size = 0;
 

@@ -103,11 +103,12 @@ typedef struct fheap_test_param_t {
 
 /* Heap state information */
 typedef struct fheap_heap_state_t {
-    hsize_t     heap_size;              /* Total size of heap (managed & standalone objects) */
-    size_t      nobjs;                  /* # of objects within heap */
+    size_t      man_nobjs;              /* # of managed objects within heap */
     hsize_t     man_size;               /* Size of managed object heap */
     hsize_t     man_alloc_size;         /* Size of managed object heap allocated */
     hsize_t     man_free_space;         /* Managed object free space within heap */
+    size_t      huge_nobjs;             /* # of 'huge' objects within heap */
+    hsize_t     huge_size;              /* Size of 'huge' object heap */
 } fheap_heap_state_t;
 
 /* Heap IDs to retain */
@@ -192,12 +193,8 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     /* Get statistics for heap and verify they are correct */
     if(H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR
-    if(heap_stats.total_size != state->heap_size) {
-        HDfprintf(stdout, "heap_stats.total_size = %Hu, state->heap_size = %Hu\n", heap_stats.total_size, state->heap_size);
-        FAIL_STACK_ERROR
-    } /* end if */
-    if(heap_stats.nobjs != state->nobjs) {
-        HDfprintf(stdout, "heap_stats.nobjs = %Hu, state->nobjs = %Hu\n", heap_stats.nobjs, state->nobjs);
+    if(heap_stats.man_nobjs != state->man_nobjs) {
+        HDfprintf(stdout, "heap_stats.man_nobjs = %Hu, state->man_nobjs = %Hu\n", heap_stats.man_nobjs, state->man_nobjs);
         FAIL_STACK_ERROR
     } /* end if */
     if(heap_stats.man_size != state->man_size) {
@@ -210,6 +207,14 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     } /* end if */
     if(heap_stats.man_free_space != state->man_free_space) {
         HDfprintf(stdout, "heap_stats.man_free_space = %Hu, state->man_free_space = %Hu\n", heap_stats.man_free_space, state->man_free_space);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.huge_nobjs != state->huge_nobjs) {
+        HDfprintf(stdout, "heap_stats.huge_nobjs = %Hu, state->huge_nobjs = %Hu\n", heap_stats.huge_nobjs, state->huge_nobjs);
+        FAIL_STACK_ERROR
+    } /* end if */
+    if(heap_stats.huge_size != state->huge_size) {
+        HDfprintf(stdout, "heap_stats.huge_size = %Hu, state->huge_size = %Hu\n", heap_stats.huge_size, state->huge_size);
         FAIL_STACK_ERROR
     } /* end if */
 
@@ -228,7 +233,6 @@ error:
  *
  * Note:        The following fields in the 'state' structure are set to
  *              the values expected _after_ any block created for the object:
- *                      heap_size
  *                      man_size
  *                      man_alloc_size
  *                      man_free_space
@@ -267,7 +271,7 @@ add_obj(H5HF_t *fh, hid_t dxpl, unsigned obj_off,
     /* Check for tracking the heap's state */
     if(state) {
         /* Adjust state of heap */
-        state->nobjs++;
+        state->man_nobjs++;
         state->man_free_space -= obj_size;
 
         /* Check free space left in heap */
@@ -295,7 +299,7 @@ add_obj(H5HF_t *fh, hid_t dxpl, unsigned obj_off,
         } /* end if */
 
         /* Append the object info onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * HEAP_ID_LEN], heap_id, HEAP_ID_LEN);
+        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * HEAP_ID_LEN], heap_id, (size_t)HEAP_ID_LEN);
         keep_ids->lens[keep_ids->num_ids] = obj_size;
         keep_ids->offs[keep_ids->num_ids] = obj_off;
 
@@ -805,7 +809,6 @@ error:
  *
  * Note:        The following fields in the 'state' structure are set to
  *              the values expected _after_ the block has been created:
- *                      heap_size
  *                      man_size
  *                      man_alloc_size
  *                      man_free_space
@@ -882,7 +885,7 @@ fill_heap(H5HF_t *fh, hid_t dxpl, unsigned block_row, size_t obj_size,
         *curr_off_ptr = obj_off;
 
         /* Adjust state of heap */
-        state->nobjs++;
+        state->man_nobjs++;
         state->man_free_space -= obj_size;
 
         /* Check stats for heap */
@@ -933,7 +936,7 @@ fill_heap(H5HF_t *fh, hid_t dxpl, unsigned block_row, size_t obj_size,
         *curr_off_ptr = obj_off;
 
         /* Adjust state of heap */
-        state->nobjs++;
+        state->man_nobjs++;
         state->man_free_space -= last_obj_len;
 
         /* Verify that the heap is full */
@@ -1042,21 +1045,21 @@ fill_root_row(H5HF_t *fh, hid_t dxpl, unsigned row, size_t obj_size,
         expand_rows = 0;
 
     /* Compute first block & all blocks heap size & free space */
-    if(state->heap_size == 0) {
+    if(state->man_size == 0) {
         first_heap_size = block_size;
         first_free_space = block_free;
         all_heap_size = width * block_size;
         all_free_space = (width - 1) * block_free;
     } /* end if */
     else if(expand_rows == 0) {
-        all_heap_size = state->heap_size;
+        all_heap_size = state->man_size;
         all_free_space = state->man_free_space;
         first_heap_size = all_heap_size;
         first_free_space = all_free_space;
         all_free_space -= block_free;      /* Account for shift from first free space */
     } /* end if */
     else {
-        all_heap_size = state->heap_size;
+        all_heap_size = state->man_size;
         all_free_space = 0;
         for(u = 0; u < expand_rows; u++) {
             all_heap_size += width * DBLOCK_SIZE(fh, row + u);
@@ -1068,13 +1071,11 @@ fill_root_row(H5HF_t *fh, hid_t dxpl, unsigned row, size_t obj_size,
     } /* end else */
 
     /* Loop over filling direct blocks, until root indirect row is full */
-    state->heap_size = first_heap_size;
     state->man_size = first_heap_size;
     state->man_free_space = first_free_space;
     for(u = 0; u < width; u++) {
         /* Set heap's size & free space correctly */
         if(u == 1) {
-            state->heap_size = all_heap_size;
             state->man_size = all_heap_size;
             state->man_free_space = all_free_space;
         } /* end if */
@@ -1586,7 +1587,6 @@ fill_all_4th_indirect_rows(H5HF_t *fh, hid_t dxpl, size_t obj_size,
 
             /* Increase heap size & free space */
             for(row = 16; row < max_root_rows; row++) {
-                state->heap_size += width * DBLOCK_SIZE(fh, row);
                 state->man_size += width * DBLOCK_SIZE(fh, row);
                 state->man_free_space += width * DBLOCK_FREE(fh, row);
             } /* end for */
@@ -1871,7 +1871,6 @@ test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
      * Test inserting first (small) object into absolute heap
      */
     TESTING("inserting first (small) object into absolute heap");
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -1963,7 +1962,6 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
      * Test inserting first (small) object into absolute heap
      */
     TESTING("inserting two (small) objects into absolute heap");
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -2062,7 +2060,6 @@ test_abs_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     fill_size = get_fill_size(tparam);
 
     /* Fill the heap up */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -2158,7 +2155,6 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     fill_size = get_fill_size(tparam);
 
     /* Fill the heap up */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -2170,7 +2166,6 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         TEST_ERROR
 
     /* Insert one more object, to force root indirect block creation */
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space = (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
@@ -2262,7 +2257,6 @@ test_abs_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     fill_size = get_fill_size(tparam);
 
     /* Fill the first direct block heap up */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -2274,7 +2268,6 @@ test_abs_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         TEST_ERROR
 
     /* Fill the second direct block heap up (also creates initial root indirect block) */
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space = (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
@@ -2367,7 +2360,6 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     fill_size = get_fill_size(tparam);
 
     /* Fill the first direct block up */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -2375,7 +2367,6 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Fill the second direct block heap up (also creates initial root indirect block) */
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space = (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
@@ -2576,7 +2567,6 @@ test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* Insert one more object, to force expanding root indirect block to two rows */
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_alloc_size += DBLOCK_SIZE(fh, 1);
     state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 1);
@@ -2778,8 +2768,6 @@ test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
 
     /* Insert one more object, to force expanding root indirect block to four rows */
     /* (Goes to four rows because it's doubling) */
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
     state.man_alloc_size += DBLOCK_SIZE(fh, 2);
@@ -4876,7 +4864,8 @@ test_abs_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     fill_size = get_fill_size(tparam);
 
     /* Set heap ID to random (non-null) value */
-    for(u = 0; u < HEAP_ID_LEN; u++)
+    heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
+    for(u = 1; u < HEAP_ID_LEN; u++)
         heap_id[u] = HDrandom() + 1;
 
     /* Try removing bogus heap ID from empty heap */
@@ -4895,9 +4884,10 @@ test_abs_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Make certain we can't accidentally use a valid heap ID */
-    while(obj_off < state.heap_size) {
+    while(obj_off < state.man_size) {
         /* Set heap ID to random (non-null) value */
-        for(u = 0; u < HEAP_ID_LEN; u++)
+        heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
+        for(u = 1; u < HEAP_ID_LEN; u++)
             heap_id[u] = HDrandom() + 1;
 
         /* Get offset of random heap ID */
@@ -5035,11 +5025,10 @@ test_abs_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0) - sizeof(obj);
-    state.nobjs = 1;
+    state.man_nobjs = 1;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5052,11 +5041,10 @@ test_abs_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = 0;
     state.man_size = 0;
     state.man_alloc_size = 0;
     state.man_free_space = 0;
-    state.nobjs = 0;
+    state.man_nobjs = 0;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5192,11 +5180,10 @@ test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0) - sizeof(obj);
-    state.nobjs = 1;
+    state.man_nobjs = 1;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5210,7 +5197,7 @@ test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
 
     /* Check up on heap... */
     state.man_free_space -= sizeof(obj);
-    state.nobjs++;
+    state.man_nobjs++;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5224,7 +5211,7 @@ test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
 
     /* Check up on heap... */
     state.man_free_space += sizeof(obj);
-    state.nobjs--;
+    state.man_nobjs--;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5237,11 +5224,10 @@ test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = 0;
     state.man_size = 0;
     state.man_alloc_size = 0;
     state.man_free_space = 0;
-    state.nobjs = 0;
+    state.man_nobjs = 0;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5379,13 +5365,12 @@ test_abs_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
 
     /* Check up on heap... */
     for(u = 0; u < 4; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size = DBLOCK_SIZE(fh, 3);
     state.man_free_space -= obj_len;
-    state.nobjs = 1;
+    state.man_nobjs = 1;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5398,11 +5383,10 @@ test_abs_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = 0;
     state.man_size = 0;
     state.man_alloc_size = 0;
     state.man_free_space = 0;
-    state.nobjs = 0;
+    state.man_nobjs = 0;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5544,13 +5528,12 @@ test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
 
     /* Check up on heap... */
     for(u = 0; u < 4; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size = DBLOCK_SIZE(fh, 3);
     state.man_free_space -= obj_len;
-    state.nobjs = 1;
+    state.man_nobjs = 1;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5569,13 +5552,12 @@ test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     /* Check up on heap... */
     /* (Goes to 8 rows because of doubling) */
     for(u = 4; u < 8; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size += DBLOCK_SIZE(fh, 5);
     state.man_free_space -= obj_len;
-    state.nobjs = 2;
+    state.man_nobjs = 2;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5592,7 +5574,7 @@ test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         /* Check up on heap... */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 3);
         state.man_free_space += DBLOCK_SIZE(fh, 2) + 1;
-        state.nobjs = 1;
+        state.man_nobjs = 1;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5612,13 +5594,12 @@ test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         /* Check up on heap... */
         /* (Goes to 4 rows because of halving) */
         for(u = 4; u < 8; u++) {
-            state.heap_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_free_space -= DBLOCK_FREE(fh, u) * cparam->managed.width;
         } /* end for */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 5);
         state.man_free_space += DBLOCK_SIZE(fh, 4) + 1;
-        state.nobjs = 1;
+        state.man_nobjs = 1;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5632,11 +5613,10 @@ test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = 0;
     state.man_size = 0;
     state.man_alloc_size = 0;
     state.man_free_space = 0;
-    state.nobjs = 0;
+    state.man_nobjs = 0;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5783,13 +5763,12 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
 
     /* Check up on heap... */
     for(u = 0; u < 4; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size = DBLOCK_SIZE(fh, 3);
     state.man_free_space -= obj_len;
-    state.nobjs = 1;
+    state.man_nobjs = 1;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5808,13 +5787,12 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     /* Check up on heap... */
     /* (Goes to 8 rows because of doubling) */
     for(u = 4; u < 8; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size += DBLOCK_SIZE(fh, 5);
     state.man_free_space -= obj_len;
-    state.nobjs = 2;
+    state.man_nobjs = 2;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5833,13 +5811,12 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     /* Check up on heap... */
     /* (Goes to 16 rows because of doubling) */
     for(u = 8; u < 16; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u) * cparam->managed.width;
     } /* end for */
     state.man_alloc_size += DBLOCK_SIZE(fh, 8);
     state.man_free_space -= obj_len;
-    state.nobjs = 3;
+    state.man_nobjs = 3;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -5856,7 +5833,7 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         /* Check up on heap... */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 3);
         state.man_free_space += DBLOCK_SIZE(fh, 2) + 1;
-        state.nobjs = 2;
+        state.man_nobjs = 2;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5871,7 +5848,7 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         /* Check up on heap... */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 5);
         state.man_free_space += DBLOCK_SIZE(fh, 4) + 1;
-        state.nobjs = 1;
+        state.man_nobjs = 1;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5891,13 +5868,12 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         /* Check up on heap... */
         /* (Goes to 8 rows because of halving) */
         for(u = 8; u < 16; u++) {
-            state.heap_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_free_space -= DBLOCK_FREE(fh, u) * cparam->managed.width;
         } /* end for */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 8);
         state.man_free_space += DBLOCK_SIZE(fh, 7) + 1;
-        state.nobjs = 2;
+        state.man_nobjs = 2;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5912,13 +5888,12 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         /* Check up on heap... */
         /* (Goes to 4 rows because of halving) */
         for(u = 4; u < 8; u++) {
-            state.heap_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_size -= DBLOCK_SIZE(fh, u) * cparam->managed.width;
             state.man_free_space -= DBLOCK_FREE(fh, u) * cparam->managed.width;
         } /* end for */
         state.man_alloc_size -= DBLOCK_SIZE(fh, 5);
         state.man_free_space += DBLOCK_SIZE(fh, 4) + 1;
-        state.nobjs = 1;
+        state.man_nobjs = 1;
         if(check_stats(fh, &state))
             FAIL_STACK_ERROR
 
@@ -5932,11 +5907,10 @@ test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Check up on heap... */
-    state.heap_size = 0;
     state.man_size = 0;
     state.man_alloc_size = 0;
     state.man_free_space = 0;
-    state.nobjs = 0;
+    state.man_nobjs = 0;
     if(check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -6017,7 +5991,6 @@ test_abs_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
 
     /* Fill the heap up */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -6092,7 +6065,6 @@ test_abs_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
 
 
     /* Fill the first block in heap */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -6108,7 +6080,6 @@ test_abs_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Fill the second block in heap */
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space = (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
@@ -6633,9 +6604,6 @@ test_abs_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -6716,9 +6684,6 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
     /* Insert object too large for starting block size */
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -6819,9 +6784,6 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
 
     /* Insert object too large for starting block size */
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
-    state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -6930,7 +6892,6 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
 
 
     /* Insert small object, to create root direct block */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -6945,9 +6906,6 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
      * range of skipped blocks that are too small to hold the second object
      */
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
-    state.heap_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -7033,7 +6991,6 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
 
 
     /* Insert small object, to create root direct block */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -7048,9 +7005,6 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
      * range of skipped blocks that are too small to hold the second object
      */
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
-    state.heap_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -7182,7 +7136,6 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
 
 
     /* Fill initial direct block */
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
@@ -7194,7 +7147,6 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
         TEST_ERROR
 
     /* Insert small object, to create root indirect block */
-    state.heap_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
@@ -7209,9 +7161,6 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
      * range of skipped blocks that are too small to hold the large object
      */
     obj_size = DBLOCK_SIZE(fh, 2) + 1;
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
@@ -7363,9 +7312,6 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
      * range of skipped blocks that are too small to hold the large object
      */
     obj_size = DBLOCK_SIZE(fh, 2) + 1;
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
-    state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
@@ -7489,7 +7435,6 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     /* Compute heap size & free space when half direct blocks allocated */
     row = 0;
     do {
-        state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         row++;
@@ -7504,7 +7449,6 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
     /* Compute heap size & free space when all direct blocks allocated */
     do {
-        state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         row++;
@@ -7527,7 +7471,6 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
     /* Compute heap size & free space when root indirect block doubles again */
     do {
-        state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
         state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         row++;
@@ -9813,7 +9756,6 @@ test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
 
         /* Increase heap size & free space */
         for(row = 16; row < max_root_rows; row++) {
-            state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         } /* end for */
@@ -10276,7 +10218,6 @@ test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
 
         /* Increase heap size & free space */
         for(row = 16; row < max_root_rows; row++) {
-            state.heap_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         } /* end for */
@@ -10415,7 +10356,6 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
      * block size is reached.
      */
     obj_size = DBLOCK_SIZE(fh, 0) / 2;
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
     for(u = 0; u < cparam->managed.width; u++) {
@@ -10423,12 +10363,10 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
             TEST_ERROR
         if(u == 0) {
-            state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
         } /* end if */
     } /* end for */
-    state.heap_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_free_space += DBLOCK_FREE(fh, 1) * cparam->managed.width;
     for(u = 0; u < cparam->managed.width; u++) {
@@ -10443,7 +10381,6 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* (Account for doubling root indirect block for rows 3-4 */
     for(u = 0; u < 2; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u + 2) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u + 2) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u + 2) * cparam->managed.width;
     } /* end for */
@@ -10554,7 +10491,6 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
      * share them with other objects of the same size.
      */
     obj_size = DBLOCK_SIZE(fh, 0) / 2;
-    state.heap_size = DBLOCK_SIZE(fh, 0);
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
     /* First row */
@@ -10563,12 +10499,10 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
             TEST_ERROR
         if(u == 0) {
-            state.heap_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
         } /* end if */
     } /* end for */
-    state.heap_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_free_space += DBLOCK_FREE(fh, 1) * cparam->managed.width;
     /* Second row */
@@ -10584,7 +10518,6 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* (Account for doubling root indirect block for rows 3-4 */
     for(u = 0; u < 2; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u + 2) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u + 2) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u + 2) * cparam->managed.width;
     } /* end for */
@@ -10605,7 +10538,6 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* (Account for doubling root indirect block for rows 5-8 */
     for(u = 0; u < 4; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u + 4) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u + 4) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u + 4) * cparam->managed.width;
     } /* end for */
@@ -10626,7 +10558,6 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* (Account for doubling root indirect block for rows 9-16 */
     for(u = 0; u < 8; u++) {
-        state.heap_size += DBLOCK_SIZE(fh, u + 8) * cparam->managed.width;
         state.man_size += DBLOCK_SIZE(fh, u + 8) * cparam->managed.width;
         state.man_free_space += DBLOCK_FREE(fh, u + 8) * cparam->managed.width;
     } /* end for */

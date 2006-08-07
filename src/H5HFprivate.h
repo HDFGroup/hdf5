@@ -62,13 +62,16 @@ typedef struct H5HF_create_t {
 
 /* Fractal heap metadata statistics info */
 typedef struct H5HF_stat_t {
-    hsize_t total_size;         /* Total size of heap allocated (man & std)   */
-    hsize_t nobjs;              /* Number of objects in heap                  */
-    hsize_t man_size;           /* Total size of managed space in heap        */
-    hsize_t man_alloc_size;     /* Total size of managed space allocated in heap */
+    /* "Managed" object info */
+    hsize_t man_size;           /* Size of managed space in heap              */
+    hsize_t man_alloc_size;     /* Size of managed space allocated in heap    */
     hsize_t man_iter_off;       /* Offset of "new block" iterator in managed heap space */
-    hsize_t man_free_space;     /* Free space within managed heap             */
-    hsize_t std_size;           /* Total size of standalone space in heap     */
+    hsize_t man_free_space;     /* Free space within managed heap blocks      */
+    hsize_t man_nobjs;          /* Number of "managed" objects in heap        */
+
+    /* "Huge" object info */
+    hsize_t huge_size;          /* Size of "huge" objects in heap             */
+    hsize_t huge_nobjs;         /* Number of "huge" objects in heap           */
 } H5HF_stat_t;
 
 /* Fractal heap info (forward decl - defined in H5HFpkg.h) */

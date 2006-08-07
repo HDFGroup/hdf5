@@ -92,13 +92,13 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
     HDassert(stats);
 
     /* Report statistics for fractal heap */
-    stats->total_size = fh->hdr->total_size;
     stats->man_size = fh->hdr->man_size;
     stats->man_alloc_size = fh->hdr->man_alloc_size;
     stats->man_iter_off = fh->hdr->man_iter_off;
-    stats->std_size = fh->hdr->std_size;
+    stats->man_nobjs = fh->hdr->man_nobjs;
     stats->man_free_space = fh->hdr->total_man_free;
-    stats->nobjs = fh->hdr->nobjs;
+    stats->huge_size = fh->hdr->huge_size;
+    stats->huge_nobjs = fh->hdr->huge_nobjs;
 /* XXX: Add more metadata statistics for the heap */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

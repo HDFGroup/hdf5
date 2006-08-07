@@ -154,7 +154,7 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
 
     /* Mark block as evictable again when no child blocks depend on it */
     if(iblock->rc == 0) {
-        H5HF_indirect_t *tmp_iblock;    /* Temporary pointer to indirect block */
+        H5HF_indirect_t *tmp_iblock = NULL;     /* Temporary pointer to indirect block */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: indirect block ref. count at zero, iblock->addr = %a\n", FUNC, iblock->addr);
@@ -286,7 +286,7 @@ HDfprintf(stderr, "%s: Creating root indirect block\n", FUNC);
 
         nrows = hdr->man_dtable.cparam.start_root_rows;
 
-        block_row_off = H5V_log2_of2(min_dblock_size) - H5V_log2_of2(hdr->man_dtable.cparam.start_block_size);
+        block_row_off = H5V_log2_of2((uint32_t)min_dblock_size) - H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size);
         if(block_row_off > 0)
             block_row_off++;        /* Account for the pair of initial rows of the initial block size */
         rows_needed = 1 + block_row_off;
@@ -399,7 +399,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     hsize_t next_size;          /* The previous value of the "next size" for the new block iterator */
     unsigned next_row;          /* The next row to allocate block in */
     unsigned next_entry;        /* The previous value of the "next entry" for the new block iterator */
-    unsigned new_next_entry;    /* The new value of the "next entry" for the new block iterator */
+    unsigned new_next_entry = 0;/* The new value of the "next entry" for the new block iterator */
     unsigned min_nrows = 0;     /* Min. # of direct rows */
     unsigned old_nrows;         /* Old # of rows */
     unsigned new_nrows;         /* New # of rows */
@@ -482,7 +482,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
 #endif /* QAK */
 
     /* Re-allocate direct block entry table */
-    if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (iblock->nrows * hdr->man_dtable.cparam.width))))
+    if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
 
     /* Check for skipping over rows and add free section for skipped rows */
@@ -728,7 +728,7 @@ done:
 herr_t
 H5HF_man_iblock_alloc_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t **sec_node)
 {
-    H5HF_indirect_t *iblock;            /* Pointer to indirect block */
+    H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
     H5HF_free_section_t *old_sec_node = *sec_node; /* Pointer to old indirect section node */
     unsigned dblock_entry;                          /* Entry for direct block */
     hbool_t iblock_held = FALSE;        /* Flag to indicate that indirect block is held */
@@ -843,7 +843,7 @@ HDfprintf(stderr, "%s: nrows = %u, max_rows = %u\n", FUNC, nrows, max_rows);
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Allocate indirect block entry tables */
-    if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (iblock->nrows * hdr->man_dtable.cparam.width))))
+    if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for block entries")
 
     /* Initialize indirect block entry tables */
