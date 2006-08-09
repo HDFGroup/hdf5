@@ -4516,214 +4516,243 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="ReservedMessage_0006">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Header Message Type:</b> 0x0006<BR>
-    <b>Length:</b> N/A<BR>
-    <b>Status:</b> N/A<BR>
-    <b>Format of Data:</b> N/A<BR>
+    <P class=item><B>Header Message Type:</B> 0x0006</P>
+    <P class=item><B>Length:</B> N/A</P>
+    <P class=item><B>Status:</B> N/A</P>
+    <P class=item><B>Format of Data:</B> N/A</P>
 
-    <p><b>Purpose and Description:</b> This message type was skipped during
+    <P class=item><B>Purpose and Description:</B> This message type was skipped during
       the initial specification of the file format and may be used in a
-      future expansion to the format.
+      future expansion to the format.</P>
 
     <hr>
     <h4><a name="ExternalFileListMessage">Name: Data Storage -
 	External Data Files</a></h4>
-    <b>Header Message Type:</b> 0x0007<BR>
-    <b>Length:</b> varies<BR>
-    <b>Status:</b> Optional, may not be repeated.<BR>
+    <P class=item><B>Header Message Type:</B> 0x0007 </P>
+    <P class=item><B>Length:</B> varies</P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.</P>
 
-    <p><b>Purpose and Description:</b> The external object message
+    <P class=item><B>Purpose and Description:</B> The external object message
       indicates that the data for an object is stored outside the HDF5
       file.  The filename of the object is stored as a Universal
       Resource Location (URL) of the actual filename containing the
       data. An external file list record also contains the byte offset
       of the start of the data within the file and the amount of space
-      reserved in the file for that data.
+      reserved in the file for that data.</P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>External File List Message</b>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  External File List Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td colspan=3>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Allocated Slots</td>
 	  <td colspan=2>Used Slots</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Heap Address<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Slot Definitions...<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>	
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
-	</tr>
+    <br>
+    <div align=center>
+	<table class=desc>
+	  <tr>
+	    <th width="30%">Field Name</th>
+	    <th>Description</th>
+	  </tr>
+	
+	  <tr>
+	    <td>Version</td>
+	    <td>
+	      <P>The version number information is used for changes in the format of External File
+ 		 List Message and is described here:
+		 <table class=list>
+		     <tr>
+			<th width="30%">Version</th>
+			<th align=left>Description</th>
+		     </tr>
+		     <tr>
+			<td align=center><code>0</code></td>
+			<td>Never used.
+		     </tr>
+		     <tr>
+			<td align=center><code>1</code></td>
+			<td>The current version used by the library.
+		     </tr>
+		  </table>		
+	      </P>	
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Version </td>
-	  <td>This value is used to determine the format of the
-	    External File List Message.  When the format of the
-	    information in the message is changed, the version number
-	    is incremented and can be used to determine how the
-	    information in the object header is formatted.</td>
-	</tr>
+	  <tr>
+	    <td>Reserved</td>
+	    <td>
+	      <P>This field is reserved for future use.</P>
+	    </td>	
+	  </tr>
 
-	<tr valign=top>
-	  <td>Reserved</td>
-	  <td>This field is reserved for future use.</td>
-	</tr>
+	  <tr>
+	    <td>Allocated Slots</td>
+	    <td>
+	      <P>The total number of slots allocated in the message.  Its value must be at least as
+		 large as the value contained in the Used Slots field. (The current library simply
+		 uses the number of Used Slots for this message)</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Allocated Slots</td>
-	  <td>The total number of slots allocated in the message.  Its
-	    value must be at least as large as the value contained in
-	    the Used Slots field.</td>
-	</tr>
+	  <tr>
+	    <td>Used Slots</td>
+	    <td>
+	      <P>The number of initial slots which contains valid information.</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Used Slots</td>
-	  <td>The number of initial slots which contain valid
-	    information.  The remaining slots are zero filled.</td>
-	</tr>
+	  <tr>
+	    <td>Heap Address</td>
+	    <td>
+	      <P>This is the address of a local heap which contains the names for the external 
+		 files (The local heap information can be found in Disk Format Level 1D in this
+		 document).  The name at offset zero in the heap is always the empty string.</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Heap Address</td>
-	  <td>This is the address of a local name heap which contains
-	    the names for the external files. The name at offset zero
-	    in the heap is always the empty string.</td>
-	</tr>
+	  <tr>
+	    <td>Slot Definitions</td>
+	    <td>
+	      <P>The slot definitions are stored in order according to the array addresses they 
+		 represent.</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Slot Definitions</td>
-	  <td>The slot definitions are stored in order according to
-	    the array addresses they represent. If more slots have
-	    been allocated than what has been used then the defined
-	    slots are all at the beginning of the list.</td>
-	</tr>
-      </table>
-    </center>
+	</table>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>External File List Slot</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  External File List Slot 
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br>Name Offset (&lt;size&gt; bytes)<br><br></td>
+	<tr>
+	  <td colspan=4><br>Name Offset(&lt;size&gt; bytes)<br><br></td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4><br>File Offset (&lt;size&gt; bytes)<br><br></td>
+	<tr>
+	  <td colspan=4><br>File Offset(&lt;size&gt; bytes)<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Size<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>	
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
-	</tr>
+    <br>
+    <div align=center>
+	<table class=desc>
+	  <tr>
+	    <th width="30%">Field Name</th>
+	    <th>Description</th>
+	  </tr>
+	
+	  <tr>
+	    <td>Name Offset(&lt;size&gt; bytes)</td>
+	    <td>
+		<P>The byte offset within the local name heap for the name
+	    	of the file.  File names are stored as a URL which has a
+	    	protocol name, a host name, a port number, and a file
+	    	name:
+		<code><em>protocol</em>:<em>port</em>//<em>host</em>/<em>file</em></code>.
+		If the protocol is omitted then "file:" is assumed.  If
+		the port number is omitted then a default port for that
+		protocol is used.  If both the protocol and the port
+		number are omitted then the colon can also be omitted. If
+		the double slash and host name are omitted then
+		"localhost" is assumed.  The file name is the only
+		mandatory part, and if the leading slash is missing then
+		it is relative to the application's current working
+		directory (the use of relative names is not
+		recommended).</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>Name Offset (&lt;size&gt; bytes)</td>
-	  <td>The byte offset within the local name heap for the name
-	    of the file.  File names are stored as a URL which has a
-	    protocol name, a host name, a port number, and a file
-	    name:
-	    <code><em>protocol</em>:<em>port</em>//<em>host</em>/<em>file</em></code>.
-	    If the protocol is omitted then "file:" is assumed.  If
-	    the port number is omitted then a default port for that
-	    protocol is used.  If both the protocol and the port
-	    number are omitted then the colon can also be omitted. If
-	    the double slash and host name are omitted then
-	    "localhost" is assumed.  The file name is the only
-	    mandatory part, and if the leading slash is missing then
-	    it is relative to the application's current working
-	    directory (the use of relative names is not
-	    recommended).</td>
-	</tr>
+	  <tr>
+	    <td>File Offset(&lt;size&gt; bytes)</td>
+	    <td>
+	  	<P>This is the byte offset to the start of the data in the
+	        specified file. For files that contain data for a single
+	        dataset this will usually be zero.</P>
+	    </td>
+	  </tr>
 
-	<tr valign=top>
-	  <td>File Offset (&lt;size&gt; bytes)</td>
-	  <td>This is the byte offset to the start of the data in the
-	    specified file. For files that contain data for a single
-	    dataset this will usually be zero.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td>Size</td>
-	  <td>This is the total number of bytes reserved in the
-	    specified file for raw data storage.  For a file that
-	    contains exactly one complete dataset which is not
-	    extendable, the size will usually be the exact size of the
-	    dataset.  However, by making the size larger one allows
-	    HDF5 to extend the dataset. The size can be set to a value
-	    larger than the entire file since HDF5 will read zeros
-	    past the end of the file without failing.</td>
-	</tr>
-      </table>
-    </center>
+	  <tr>
+	    <td>Size</td>
+	    <td>
+		<P>This is the total number of bytes reserved in the
+		specified file for raw data storage.  For a file that
+		contains exactly one complete dataset which is not
+		extendable, the size will usually be the exact size of the
+		dataset.  However, by making the size larger one allows
+		HDF5 to extend the dataset. The size can be set to a value
+		larger than the entire file since HDF5 will read zeros
+		past the end of the file without failing.</P>
+	    </td>
+	  </tr>
+	</table>
+    </div>
 
 
     <hr>
     <h4><a name="LayoutMessage">Name: Data Storage - Layout</a></h4>
 
-    <b>Header Message Type:</b> 0x0008<BR>
-    <b>Length:</b> varies<BR>
-    <b>Status:</b> Required for datasets, may not be repeated.
+    <P class=item><B>Header Message Type:</B> 0x0008</P>
+    <P class=item><B>Length:</B> varies</P>
+    <P class=item><B>Status:</B> Required for datasets, may not be repeated.</P>
 
-    <p><b>Purpose and Description:</b> Data layout describes how the
+    <P class=item><B>Purpose and Description:</B> Data layout describes how the
       elements of a multi-dimensional array are arranged in the linear
       address space of the file. Three types of data layout are
       supported:
 
     <ol>
-      <li>The array can be stored in one contiguous area of the file.
+      <li>Contiguous: The array can be stored in one contiguous area of the file.
 	The layout requires that the size of the array be constant and
 	does not permit chunking, compression, checksums, encryption,
 	etc.  The message stores the total size of the array and the
 	offset of an element from the beginning of the storage area is
 	computed as in C.
 
-      <li>The array domain can be regularly decomposed into chunks and
+      <li>Chunked: The array domain can be regularly decomposed into chunks and
 	each chunk is allocated separately.  This layout supports
 	arbitrary element traversals, compression, encryption, and
 	checksums, and the chunks can be distributed across external
@@ -4733,380 +4762,404 @@ TABLE.list TD { border:none; }
 	be calculated by traversing the B-tree that stores the chunk
 	addresses.
 
-      <li>The array can be stored in one contiguous block, as part of
+      <li>Compact: The array can be stored in one contiguous block, as part of
         this object header message (this is called "compact" storage below).
     </ol>
     
-    <P>Version 3 of this message re-structured the format into specific
-        properties that are required for each layout class.
-
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Data Layout Message, Versions 1 and 2</B>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Data Layout Message (Versions 1 and 2)
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Dimensionality</td>
 	  <td>Layout Class</td>
 	  <td>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Address<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Dimension 0 (4-bytes)</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Dimension 1 (4-bytes)</td>
 	</tr>
 	
-	<tr align=center>
+	<tr>
 	  <td colspan=4>...</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Compact Data Size (4-bytes)</td>
 	</tr>
 	
-	<tr align=center>
-	  <td colspan=4>Compact Data</td>
-	</tr>
-	
-	<tr align=center>
-	  <td colspan=4>...</td>
+	<tr>
+	  <td colspan=4><br>Compact Data...<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>A version number for the layout message. This value can be
-            either 1 or 2.</td>
+	  <td>
+	    <P>The version number information is used for changes in the format of the data 
+	    layout message and is described here:</P>
+	      <table class=list>
+		<tr>
+		  <th width="30%">Version</th>
+		  <th align=left>Description</th>
+		</tr>
+
+		<tr>
+		  <td align=center><code>0</code></td>
+		  <td>Never used.</td>
+		</tr>
+
+		<tr>
+		  <td align=center><code>1</code></td>
+		  <td>Used by version 1.4 and before of the library to encode layout information.
+		      Data space is always allocated when the data set is created.</td>
+		</tr>
+
+		<tr>
+		  <td align=center><code>2</code></td>
+		  <td>Used by version 1.6.x of the library to encode layout information.
+		      Data space is allocated only when it is necessary.</td>
+		</tr>
+	      </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Dimensionality</td>
-	  <td>An array has a fixed dimensionality.  This field
+	  <td><P>An array has a fixed dimensionality.  This field
 	    specifies the number of dimension size fields later in the
-	    message.</td>
+	    message.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Layout Class</td>
-	  <td>The layout class specifies how the other fields of the
+	  <td><P>The layout class specifies how the other fields of the
 	    layout message are to be interpreted.  A value of one
-	    indicates contiguous storage, a value of two
-	    indicates chunked storage,
-	    while a value of zero
-	    indicates compact storage.  Other values will be defined
-	    in the future.</td>
+	    indicates contiguous storage, a value of two indicates chunked storage,
+	    while a value of zero indicates compact storage.  Other values will be defined
+	    in the future.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Address</td>
-	  <td>For contiguous storage, this is the address of the first
+	  <td><P>For contiguous storage, this is the address of the first
 	    byte of storage.  For chunked storage this is the address
 	    of the B-tree that is used to look up the addresses of the
 	    chunks.  This field is not present for compact storage.
             If the version for this message is set to 2, the address
             may have the "undefined address" value, to indicate that
-            storage has not yet been allocated for this array.</td>
+            storage has not yet been allocated for this array.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Dimensions</td>
-	  <td>For contiguous storage the dimensions define the entire
-	    size of the array while for chunked storage they define
-	    the size of a single chunk.</td>
+	  <td><P>For contiguous and compact storage the dimensions define the entire
+	    size of the array while for chunked storage they define the size of a single 
+	    chunk.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Compact Data Size</td>
-	  <td>This field is only present for compact data storage.
-            It contains the size of the raw data for the dataset array.</td>
+	  <td><P>This field is only present for compact data storage.
+            It contains the size of the raw data for the dataset array.</P></td>
 
-	<tr valign=top>
+	<tr>
 	  <td>Compact Data</td>
-	  <td>This field is only present for compact data storage.
-            It contains the raw data for the dataset array.</td>
+	  <td><P>This field is only present for compact data storage.
+            It contains the raw data for the dataset array.</P></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Data Layout Message, Version 3</B>
+    <br>
+    <P>Version 3 of this message re-structured the format into specific
+        properties that are required for each layout class.
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  <B>Data Layout Message (Version 3)</B>
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Layout Class</td>
+	  <td colspan=2 bgcolor=#DDDDDD>&nbsp;</td>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=4>Properties</td>
+	<tr>
+	  <td colspan=4><br>Properties<br><br></td>
 	</tr>
-
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>A version number for the layout message. This value can be
-            either 1, 2 or 3.</td>
+	  <td>
+	    <P>The version number information is used for changes in the format of layout message
+	       and is described here:</P>
+	      <table class=list>	
+		<tr>
+		  <th width="30%">Version</th>
+		  <th align=left>Description</th>
+		</tr>
+
+		<tr>
+		  <td align=center><code>3</code></td>
+		  <td>Used by the version 1.6.3 and later of the library to store properties 
+		      for each layout class.</td>
+		</tr>
+	      </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Layout Class</td>
-	  <td>The layout class specifies how the other fields of the
-	    layout message are to be interpreted.  A value of one
-	    indicates contiguous storage, a value of two
-	    indicates chunked storage,
-	    while a value of three
-	    indicates compact storage.</td>
+	  <td><P>The layout class specifies how the other fields of the layout message are to be 
+	      interpreted.  A value of one indicates contiguous storage, a value of two
+	      indicates chunked storage, while a value of zero indicates compact storage.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Properties</td>
-	  <td>This variable-sized field encodes information specific to each
+	  <td><P>This variable-sized field encodes information specific to each
             layout class and is described below.  If there is no property
             information specified for a layout class, the size of this field
-            is zero bytes.</td>
+            is zero bytes.</P></td>
 	</tr>
-
       </table>
-    </center>
+    </div>
 
-    <P>Class-specific information for contiguous layout (Class 0):
+    <br>
+    <P>Class-specific information for compact layout (Class 0.  The dimensionality information
+       is in Dataspace message):
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Property Descriptions</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
+	  <td colspan=2>Size</td>
+	  <td colspan=2 bgcolor=#DDDDDD>&nbsp;</td>
+	</tr>
+	
+	<tr>
+	  <td colspan=4><br>Raw Data...<br><br></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Size</td>
+	  <td><P>This field contains the size of the raw data for the dataset array.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Raw Data</td>
+	  <td><P>This field contains the raw data for the dataset array.</P></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <P>Class-specific information for contiguous layout (Class 1.  The dimensionality information
+       is in Dataspace message):
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
+	</caption>
+
+	<tr>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr>
 	  <td colspan=4><br>Address<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Size<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Address</td>
-	  <td>This is the address of the first byte of raw data storage.
+	  <td><P>This is the address of the first byte of raw data storage.
             The address may have the "undefined address" value, to indicate
-            that storage has not yet been allocated for this array.</td>
+            that storage has not yet been allocated for this array.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Size</td>
-	  <td>This field contains the size allocated to store the raw data.</td>
+	  <td><P>This field contains the size allocated to store the raw data.</P></td>
+	</tr>
       </table>
-    </center>
+    </div>
 
-    <P>Class-specific information for chunked layout (Class 1):
+    <br>
+    <P>Class-specific information for chunked layout (Class 2):
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Property Descriptions</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Property Descriptions
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Dimensionality</td>
+	  <td colspan=3 bgcolor=#DDDDDD>&nbsp;</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Address<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Dimension 0 (4-bytes)</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Dimension 1 (4-bytes)</td>
 	</tr>
 	
-	<tr align=center>
+	<tr>
 	  <td colspan=4>...</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Dimensionality</td>
-	  <td>A chunk has a fixed dimensionality.  This field
-	    specifies the number of dimension size fields later in the
-	    message.</td>
+	  <td><P>A chunk has a fixed dimensionality.  This field specifies 
+	    the number of dimension size fields later in the message.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Address</td>
-	  <td>This is the address
-	    of the B-tree that is used to look up the addresses of the
-	    chunks.
-            The address
-            may have the "undefined address" value, to indicate that
-            storage has not yet been allocated for this array.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td>Dimensions</td>
-	  <td>The dimension sizes define the size of a single chunk.</td>
+	  <td><P>This is the address of the B-tree that is used to look up the addresses of the
+	    chunks.  The address may have the "undefined address" value, to indicate that
+            storage has not yet been allocated for this array.</P></td>
 	</tr>
       </table>
-    </center>
-
-    <P>Class-specific information for compact layout (Class 2):
-
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Property Descriptions</B>
-	</caption>
-
-	<tr align=center>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	</tr>
-
-	<tr align=center>
-	  <td colspan=2>Size</td>
-	</tr>
-	
-	<tr align=center>
-	  <td colspan=4>Raw Data</td>
-	</tr>
-	
-	<tr align=center>
-	  <td colspan=4>...</td>
-	</tr>
-      </table>
-    </center>
-
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
-	</tr>
-
-	<tr valign=top>
-	  <td>Size</td>
-	  <td>This field contains the size of the raw data for the dataset array.</td>
-
-	<tr valign=top>
-	  <td>Raw Data</td>
-	  <td>This field contains the raw data for the dataset array.</td>
-	</tr>
-      </table>
-    </center>
-
+    </div>
 
     <hr>
     <h4><a name="ReservedMessage_0009">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Header Message Type:</b> 0x0009<BR>
-    <b>Length:</b> N/A<BR>
-    <b>Status:</b> N/A<BR>
-    <b>Format of Data:</b> N/A<BR>
+    <P class=item><B>Header Message Type:</B> 0x0009</P>
+    <P class=item><B>Length:</B> N/A</P>
+    <P class=item><B>Status:</B> N/A</P>
+    <P class=item><B>Format of Data:</B> N/A</P>
 
-    <p><b>Purpose and Description:</b> This message type was skipped during
-      the initial specification of the file format and may be used in a
-      future expansion to the format.
+    <P class=item><B>Purpose and Description:</B> This message type was skipped during the initial 
+	specification of the file format and may be used in a future expansion to the format.
 
     <hr>
     <h4><a name="ReservedMessage_000A">Name: Reserved - Not Assigned Yet</a></h4>
-    <b>Header Message Type:</b> 0x000A<BR>
-    <b>Length:</b> N/A<BR>
-    <b>Status:</b> N/A<BR>
-    <b>Format of Data:</b> N/A<BR>
+    <P class=item><B>Header Message Type:</B> 0x0009</P>
+    <P class=item><B>Length:</B> N/A</P>
+    <P class=item><B>Status:</B> N/A</P>
+    <P class=item><B>Format of Data:</B> N/A</P>
 
-    <p><b>Purpose and Description:</b> This message type was skipped during
-      the initial specification of the file format and may be used in a
-      future expansion to the format.
+    <P class=item><B>Purpose and Description:</B> This message type was skipped during the initial 
+	specification of the file format and may be used in a future expansion to the format.
 
     <hr>
     <h4><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h4>
