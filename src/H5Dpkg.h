@@ -107,6 +107,7 @@ typedef struct H5D_io_info_t {
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm comm;              /* MPI communicator for file */
     hbool_t xfer_mode_changed;  /* Whether the transfer mode was changed */
+    hbool_t xfer_opt_mode_changed;
 #endif /* H5_HAVE_PARALLEL */
     const H5D_storage_t *store; /* Dataset storage info */
     H5D_io_ops_t ops;           /* I/O operation function pointers */

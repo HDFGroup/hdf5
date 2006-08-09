@@ -141,7 +141,16 @@
 #define H5D_XFER_IO_XFER_MODE_NAME       "io_xfer_mode"
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
+
+/* Definitions for I/O optimization transfer mode property(using MPI-IO independent IO with file set view) */
+#define H5D_XFER_IO_XFER_OPT_MODE_NAME    "io_xfer_opt_mode"
+#define H5D_XFER_IO_XFER_OPT_MODE_SIZE    sizeof(H5FD_mpio_collective_opt_t)
+#define H5D_XFER_IO_XFER_OPT_MODE_DEF         H5FD_MPIO_COLLECTIVE_IO
 /* Definitions for optimization of MPI-IO transfer mode property */
+#define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME      "mpio_collective_opt"
+#define H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE       sizeof(H5FD_mpio_collective_opt_t)
+#define H5D_XFER_MPIO_COLLECTIVE_OPT_DEF        H5FD_MPIO_COLLECTIVE_IO
+
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME      "mpio_chunk_opt_hard"
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE       sizeof(H5FD_mpio_chunk_opt_t)
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_CHUNK_DEFAULT
@@ -220,6 +229,7 @@ typedef struct H5D_dxpl_cache_t {
     size_t vec_size;            /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
+    H5FD_mpio_collective_opt_t xfer_opt_mode; /* Parallel transfer with independent IO or collective IO with this mode */
 #endif /*H5_HAVE_PARALLEL*/
     H5Z_cb_t filter_cb;         /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     H5Z_data_xform_t *data_xform_prop; /* Data transform prop (H5D_XFER_XFORM_NAME) */

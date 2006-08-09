@@ -358,8 +358,10 @@ H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 
 #ifdef H5_HAVE_PARALLEL
     /* Collect Parallel I/O information for possible later use */
-    if(H5P_get(dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &cache->xfer_mode)<0)
+     if(H5P_get(dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &cache->xfer_mode)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
+     if(H5P_get(dx_plist, H5D_XFER_IO_XFER_OPT_MODE_NAME, &cache->xfer_opt_mode)<0)
+       HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Get error detection properties */
