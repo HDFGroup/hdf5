@@ -1472,6 +1472,7 @@
 ./vms/tools/h5diff/make.com
 ./vms/tools/h5import/check_h5import.com
 ./vms/tools/h5import/make.com
+./vms/tools/h5jam/check_h5jam.com
 ./vms/tools/h5jam/make.com
 ./vms/tools/h5repack/check_h5repack.com
 ./vms/tools/h5repack/make.com

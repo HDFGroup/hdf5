@@ -42,11 +42,11 @@ $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5HFdblock, H5HFdtable, H5HFhdr, H5HFiblock,"+-
         "H5HFiter, H5HFsection, H5HFspace,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
-        "H5MP, H5MPtest,H5L, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
+        "H5MP, H5MPtest,H5L, H5Lexternal, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omtime,"+-
         "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab,"+-
-        "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pgcpl, "+-
+        "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pgcpl, H5Plapl, "+-
         "H5Pocpl, H5Ptest"
 $ cobj1= "H5R, H5RC,"+-
         "H5RS, H5S, H5Sall, H5Shyper, H5Smpio, H5Snone, H5Spoint,"+-
