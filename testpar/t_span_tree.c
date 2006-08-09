@@ -45,7 +45,7 @@ static void coll_read_test(int chunk_factor);
 /*-------------------------------------------------------------------------
  * Function:	coll_irregular_cont_write
  *
- * Purpose:	Wrapper to test the collectively irregular hyperslab write in
+ * Purpose:	Wrapper to test the collectively irregular hyperslab write in 
                 contiguous storage
  *
  * Return:	Success:	0
@@ -72,7 +72,7 @@ coll_irregular_cont_write(void)
 /*-------------------------------------------------------------------------
  * Function:	coll_irregular_cont_read
  *
- * Purpose:	Wrapper to test the collectively irregular hyperslab read in
+ * Purpose:	Wrapper to test the collectively irregular hyperslab read in 
                 contiguous storage
  *
  * Return:	Success:	0
@@ -98,7 +98,7 @@ coll_irregular_cont_read(void)
 /*-------------------------------------------------------------------------
  * Function:	coll_irregular_simple_chunk_write
  *
- * Purpose:	Wrapper to test the collectively irregular hyperslab write in
+ * Purpose:	Wrapper to test the collectively irregular hyperslab write in 
                 chunk storage(1 chunk)
  *
  * Return:	Success:	0
@@ -206,7 +206,7 @@ coll_irregular_complex_chunk_read(void)
  * Purpose:	To test the collectively irregular hyperslab write in chunk
                 storage
  *  Input:      number of chunks on each dimension
-                if number is equal to 0, contiguous storage
+                if number is equal to 0, contiguous storage  
  * Return:	Success:	0
  *
  *		Failure:	-1
@@ -282,7 +282,7 @@ void coll_write_test(int chunk_factor)
   mdim[1]  = MSPACE_DIM2*mpi_size;
   fsdim[0] = FSPACE_DIM1;
   fsdim[1] = FSPACE_DIM2*mpi_size;
-
+  
   vector = (int*)HDmalloc(sizeof(int)*mdim1[0]*mpi_size);
   matrix_out  = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
   matrix_out1 = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
@@ -341,7 +341,7 @@ void coll_write_test(int chunk_factor)
   /* The First selection for FILE
    *
    *  block (3,2)
-   *  stride(4,3)
+   *  stride(4,3) 
    *  count (1,768/mpi_size)
    *  start (0,1+768*3*mpi_rank/mpi_size)
    *
@@ -360,10 +360,10 @@ void coll_write_test(int chunk_factor)
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
   /* The Second selection for FILE
-   *
+   *  
    *  block  (3,768)
    *  stride (1,1)
-   *  count  (1,1)
+   *  count  (1,1) 
    *  start  (4,768*mpi_rank/mpi_size)
    *
    */
@@ -414,6 +414,11 @@ void coll_write_test(int chunk_factor)
 
   ret = H5Pset_dxpl_mpio(dxfer_plist, H5FD_MPIO_COLLECTIVE);
   VRFY((ret >= 0),"MPIO data transfer property list succeed");
+  if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(dxfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+  }
+
 
   /* collective write */
   ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, dxfer_plist, vector);
@@ -454,11 +459,11 @@ void coll_write_test(int chunk_factor)
    * Open the file.
    */
 
-  /***
-
-       For testing collective hyperslab selection write
+  /*** 
+       
+       For testing collective hyperslab selection write 
        In this test, we are using independent read to check
-       the correctedness of collective write compared with
+       the correctedness of collective write compared with 
        independent write,
 
        In order to throughly test this feature, we choose
@@ -496,7 +501,7 @@ void coll_write_test(int chunk_factor)
   /* The First selection for FILE to read
    *
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,768/mpi_size)
    *  start (1,2+768*mpi_rank/mpi_size)
    *
@@ -522,7 +527,7 @@ void coll_write_test(int chunk_factor)
   /* The Second selection for FILE to read
    *
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,1536/mpi_size)
    *  start (2,4+1536*mpi_rank/mpi_size)
    *
@@ -560,7 +565,7 @@ void coll_write_test(int chunk_factor)
    * Only the starting point is different.
    * The first selection
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,768/mpi_size)
    *  start (0,768*mpi_rank/mpi_size)
    *
@@ -585,7 +590,7 @@ void coll_write_test(int chunk_factor)
    * Only the starting point is different.
    * The second selection
    *  block (1,1)
-   *  stride(1,1)
+   *  stride(1,1) 
    *  count (3,1536/mpi_size)
    *  start (1,2+1536*mpi_rank/mpi_size)
    *
@@ -616,7 +621,7 @@ void coll_write_test(int chunk_factor)
 		H5P_DEFAULT, matrix_out);
   VRFY((ret >= 0),"H5D independent read succeed");
 
-
+  
   ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid,
 		H5P_DEFAULT, matrix_out1);
   VRFY((ret >= 0),"H5D independent read succeed");
@@ -627,7 +632,7 @@ void coll_write_test(int chunk_factor)
          if(matrix_out[i]!=matrix_out1[i]) ret = -1;
       if(ret < 0) break;
     }
-
+  
   VRFY((ret >= 0),"H5D irregular collective write succeed");
 
   /*
@@ -670,7 +675,7 @@ void coll_write_test(int chunk_factor)
  * Purpose:	To test the collectively irregular hyperslab read in chunk
                 storage
  * Input:       number of chunks on each dimension
-                if number is equal to 0, contiguous storage
+                if number is equal to 0, contiguous storage  
  * Return:	Success:	0
  *
  *		Failure:	-1
@@ -679,8 +684,8 @@ void coll_write_test(int chunk_factor)
  *		Dec 2nd, 2004
  *
  * Modifications: Oct 18th, 2005
- * Note:        This test must be used with the correpsonding
-                coll_write_test.
+ * Note:        This test must be used with the correpsonding 
+                coll_write_test.        
  *-------------------------------------------------------------------------
  */
 void coll_read_test(int chunk_factor)
@@ -700,7 +705,7 @@ void coll_read_test(int chunk_factor)
 						  dataset on the disk */
 
 #endif
-  hsize_t mdim[2];
+  hsize_t mdim[2];  
   hsize_t  start[2];  /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
@@ -733,7 +738,7 @@ void coll_read_test(int chunk_factor)
 
 
   /* Initialize the buffer */
-
+   
   mdim[0] = MSPACE_DIM1;
   mdim[1] = MSPACE_DIM2*mpi_size;
   matrix_out =(int*)HDmalloc(sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
@@ -766,7 +771,7 @@ void coll_read_test(int chunk_factor)
   /* The First selection for FILE to read
    *
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,768/mpi_size)
    *  start (1,2+768*mpi_rank/mpi_size)
    *
@@ -786,7 +791,7 @@ void coll_read_test(int chunk_factor)
   /* The Second selection for FILE to read
    *
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,1536/mpi_size)
    *  start (2,4+1536*mpi_rank/mpi_size)
    *
@@ -815,7 +820,7 @@ void coll_read_test(int chunk_factor)
    * Only the starting point is different.
    * The first selection
    *  block (1,1)
-   *  stride(1.1)
+   *  stride(1.1) 
    *  count (3,768/mpi_size)
    *  start (0,768*mpi_rank/mpi_size)
    *
@@ -838,7 +843,7 @@ void coll_read_test(int chunk_factor)
    * Only the starting point is different.
    * The second selection
    *  block (1,1)
-   *  stride(1,1)
+   *  stride(1,1) 
    *  count (3,1536/mpi_size)
    *  start (1,2+1536*mpi_rank/mpi_size)
    *
@@ -871,6 +876,11 @@ void coll_read_test(int chunk_factor)
 
   ret = H5Pset_dxpl_mpio(dxfer_plist, H5FD_MPIO_COLLECTIVE);
   VRFY((ret >= 0),"MPIO data transfer property list succeed");
+  if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(dxfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+  }
+
 
   /* Collective read */
   ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid1,

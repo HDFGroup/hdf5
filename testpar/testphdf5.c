@@ -32,6 +32,7 @@ int ndatasets = 300;			/* number of datasets to create*/
 int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
 int facc_type = FACC_MPIO;		/*Test file access type */
+int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
 H5E_auto_t old_func;		        /* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
@@ -168,6 +169,9 @@ parse_options(int argc, char **argv)
 			    break;
 		case 'p':   /* Use the MPI-POSIX driver access */
 			    facc_type = FACC_MPIPOSIX;
+			    break;
+		case 'i':   /* Collective MPI-IO access with independent IO  */
+			    dxfer_coll_type = DXFER_INDEPENDENT_IO;
 			    break;
 		case '2':   /* Use the split-file driver with MPIO access */
 			    /* Can use $HDF5_METAPREFIX to define the */
@@ -412,10 +416,10 @@ int main(int argc, char **argv)
 	    "independent group and dataset read", &collngroups_params);
  /* By default, do not run big dataset on WIN32. */
 #ifdef WIN32
-    AddTest("-bigdset", big_dataset, NULL,
+    AddTest("-bigdset", big_dataset, NULL, 
             "big dataset test", PARATESTFILE);
 #else
-				 AddTest("bigdset", big_dataset, NULL,
+				 AddTest("bigdset", big_dataset, NULL, 
             "big dataset test", PARATESTFILE);
 #endif
     AddTest("fill", dataset_fillvalue, NULL,
@@ -453,8 +457,8 @@ int main(int argc, char **argv)
     AddTest((mpi_size < 3)? "-cchunk10" : "cchunk10",
 	coll_chunk10,NULL,
 	"multiple chunk collective IO transferring to independent IO",PARATESTFILE);
-
-
+          
+         
 
 /* irregular collective IO tests*/
     AddTest("ccontw",
@@ -531,6 +535,13 @@ int main(int argc, char **argv)
 	       "   Using MPIPOSIX driver\n"
 	       "===================================\n");
     }
+
+    if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
+	printf("===================================\n"
+	       "   Using Independent I/O with file set view to replace collective I/O \n"
+	       "===================================\n");
+    }
+
 
     /* Perform requested testing */
     PerformTests();

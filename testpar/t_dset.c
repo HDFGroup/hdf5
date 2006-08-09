@@ -616,6 +616,11 @@ dataset_writeAll(void)
     VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* write data collectively */
     MESG("writeAll by Row");
@@ -680,6 +685,11 @@ dataset_writeAll(void)
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+      VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -746,6 +756,11 @@ dataset_writeAll(void)
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* write data collectively */
     MESG("writeAll with none");
@@ -806,6 +821,12 @@ dataset_writeAll(void)
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+      VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
+  
 
     /* write data collectively */
     MESG("writeAll with scalar dataspace");
@@ -947,6 +968,11 @@ dataset_readAll(void)
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+      VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -1010,6 +1036,11 @@ dataset_readAll(void)
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -1794,6 +1825,11 @@ extend_writeAll(void)
     VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* write data collectively */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -1829,6 +1865,11 @@ extend_writeAll(void)
     VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
     /* Temporary turn off auto error reporting */
@@ -1999,6 +2040,11 @@ extend_readAll(void)
     VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -2041,6 +2087,11 @@ extend_readAll(void)
     VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+     VRFY((ret>= 0),"set independent IO collectively succeeded");
+    }
+
 
     /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -2195,6 +2246,11 @@ compress_readAll(void)
 
         ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+        if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
+          ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+          VRFY((ret>= 0),"set independent IO collectively succeeded");
+        }
+
 
         /* Try reading the data */
         ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);

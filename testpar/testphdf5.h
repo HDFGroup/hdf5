@@ -54,6 +54,8 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define FACC_MULTI      0x4     /* Multi File */
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
+#define DXFER_COLLECTIVE_IO 0x1  /* Collective IO*/
+#define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
 /*Constants for collective chunk definitions */
 #define SPACE_DIM1 24
 #define SPACE_DIM2 4
@@ -188,6 +190,7 @@ extern int nerrors;				/*errors count */
 extern H5E_auto_t old_func;			/* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
+extern int dxfer_coll_type;
 
 /* Test program prototypes */
 void multiple_dset_write(void);
