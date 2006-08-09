@@ -81,10 +81,10 @@ void tts_error(void)
     int ret;
 
     /* Must initialize these at runtime */
-    expected[0].maj_num = H5E_ATOM;
-    expected[0].min_num = H5E_CANTREGISTER;
+    expected[0].maj_num = H5E_LINK;
+    expected[0].min_num = H5E_CANTINIT;
 
-    expected[1].maj_num = H5E_SYM;
+    expected[1].maj_num = H5E_LINK;
     expected[1].min_num = H5E_CANTINIT;
 
     expected[2].maj_num = H5E_SYM;
@@ -168,7 +168,7 @@ void *tts_error_thread(void UNUSED *arg)
     H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL); 
+    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL);
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -194,7 +194,7 @@ void *tts_error_thread(void UNUSED *arg)
     assert(ret>=0);
 
     /* turn our error stack handler off */
-    H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data); 
 
     return NULL;
 }
