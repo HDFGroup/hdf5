@@ -2211,7 +2211,7 @@ installed with HDF5.
       <p>
 If <code>out_file.h5</code> is not specified, the&nbsp;<code>user_block</code> is added to<code> in_file.h5</code>. &nbsp;</dd>
     <p>
-    If in_file.h5 already has a user block, the contents of <code>user_block</code> will be added to the end of the existing user block, and hte file shifted to the next boundary. If <code>-clobber</code> is set, any existing user block will be overwritten.  
+    If in_file.h5 already has a user block, the contents of <code>user_block</code> will be added to the end of the existing user block, and the file shifted to the next boundary. If <code>-clobber</code> is set, any existing user block will be overwritten.  
 
 
 <p><code>h5unjam</code><code></code> splits an HDF5 file, writing the
@@ -2234,7 +2234,7 @@ Overwrite the user block (if any) in <code>file.h5</code> with the contents of <
   
 <!-- NEW PAGE -->
 For an HDF5 file, <code>with_ub.h5</code>,&nbsp; with a user block, extract the user block to <code>user_block.txt</code> and the HDF5 file to <code>wo_ub.h5</code>.
-  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5unjam -i with_ub.h5 -u user_block.txt -i wo_ub.h5</pre>
+  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5unjam -i with_ub.h5 -u user_block.txt -o wo_ub.h5</pre>
 
 
 <dt><strong></strong></dt><dt><strong>Return Value</strong></dt>
