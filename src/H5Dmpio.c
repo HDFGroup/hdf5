@@ -1238,13 +1238,39 @@ printf("inside independent IO mpi_rank = %d, chunk index = %d\n",mpi_rank,i);
 #endif
 
       {
-#ifdef KENT
-printf("coming into independent IO with file set view\n");
-           /* if(H5Pset_dxpl_mpio_collective_opt(io_info->dxpl_id,H5FD_MPIO_INDIVIDUAL_IO)<0)
-               HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,"couldn't set individual MPI-IO with the file setview");
-printf("after setting the property list\n");
-*/
-#endif
+#if !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
+
+        if(!select_chunk) continue; /* this process has nothing to do with this chunk, continue! */
+	  if(last_io_mode_coll)
+	  /* Switch to independent I/O */
+            if(H5D_ioinfo_make_ind(io_info) < 0)
+               HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
+
+	  if(do_write) {
+ 	    ret_value = (io_info->ops.write)(io_info,
+			 chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
+			 chunk_info->fspace,chunk_info->mspace,0,
+			 buf);
+	      /* Check return value of the write */
+	    if (ret_value<0) 
+	      HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+	  }
+	  else {
+	     ret_value = (io_info->ops.read)(io_info,
+			  chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
+			  chunk_info->fspace,chunk_info->mspace,0,
+	        	  buf);			   
+	      /* Check return value from optimized write */
+	      if (ret_value<0) 
+		HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+	  }
+
+	last_io_mode_coll = FALSE;
+	}
+      }
+      }
+
+#else
 	  if(!last_io_mode_coll)
 	  /* using independent I/O with file setview.*/
             if(H5D_ioinfo_make_coll_opt(io_info) < 0)
@@ -1272,6 +1298,7 @@ printf("after inter collective IO\n");
           }
         }
       }
+#endif
       if(!last_io_mode_coll)
 	  /* Switch back to collective I/O */
               if(H5D_ioinfo_make_coll(io_info) < 0)
@@ -1348,7 +1375,7 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const voi
 
            /* Set dataset storage for I/O info */
           io_info->store=&store;
-`
+
            /* Pass in chunk's coordinates in a union. */
            store.chunk.offset = chunk_info->coords;
            store.chunk.index = chunk_info->index;
