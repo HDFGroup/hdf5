@@ -249,7 +249,7 @@ typedef struct H5FL_arr_head_t {
  */
 #define H5FL_ARR_NAME(t)        H5_##t##_arr_free_list
 #ifndef H5_NO_ARR_FREE_LISTS
-/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+/* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC (and H5FL_BARR variants) */
 #define H5FL_ARR_DEFINE_COMMON(b,t,m) H5FL_arr_head_t H5FL_ARR_NAME(t)={0,0,0,#t"_arr",m+1,b,sizeof(t),NULL}
 
 /* Declare a free list to manage arrays of type 't' */
@@ -280,7 +280,7 @@ typedef struct H5FL_arr_head_t {
 #define H5FL_ARR_REALLOC(t,obj,new_elem) H5FL_arr_realloc(&(H5FL_ARR_NAME(t)),obj,new_elem)
 
 #else /* H5_NO_ARR_FREE_LISTS */
-/* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC */
+/* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC (and H5FL_BARR variants) */
 #define H5FL_ARR_DEFINE_COMMON(t,m) size_t H5FL_ARR_NAME(t)
 
 #define H5FL_ARR_DEFINE(t,m)    H5_DLL H5FL_ARR_DEFINE_COMMON(t,m) = 0
@@ -333,7 +333,7 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem H5FL_TRACK_INFO)
 
 #else /* H5_NO_SEQ_FREE_LISTS */
-/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+/* Common macro for H5FL_SEQ_DEFINE & H5FL_SEQ_DEFINE_STATIC */
 #define H5FL_SEQ_DEFINE_COMMON(t) int H5FL_SEQ_NAME(t)
 
 #define H5FL_SEQ_DEFINE(t)      H5_DLL H5FL_SEQ_DEFINE_COMMON(t)
