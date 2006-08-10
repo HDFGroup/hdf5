@@ -52,7 +52,8 @@
 /* B-tree IDs for various internal things. */
 typedef enum H5B2_subid_t {
     H5B2_TEST_ID	 = 0,	/* B-tree is for testing (do not use for actual data) */
-    H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)   */
+    H5B2_FHEAP_ID, 		/* B-tree is for fractal heap           */
+    H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
 
 /* Define the operator callback function pointer for H5B2_iterate() */
@@ -64,6 +65,9 @@ typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
 /* Define the 'modify' callback function pointer for H5B2_modify() */
 typedef herr_t (*H5B2_modify_t)(void *record, void *op_data, hbool_t *changed);
 
+/* Define the 'remove' callback function pointer for H5B2_remove() & H5B2_delete() */
+typedef herr_t (*H5B2_remove_t)(const void *record, void *op_data);
+
 /* Comparisons for H5B2_neighbor() call */
 typedef enum H5B2_compare_t {
     H5B2_COMPARE_LESS,            /* Records with keys less than query value */
@@ -71,29 +75,31 @@ typedef enum H5B2_compare_t {
 } H5B2_compare_t;
 
 /*
- * Each class of object that can be pointed to by a B-link tree has a
+ * Each class of object that can be pointed to by a B-tree has a
  * variable of this type that contains class variables and methods.
  */
-typedef struct H5B2_class_t {
-    H5B2_subid_t id;				/*id as found in file*/
-    size_t	nrec_size;			/*size of native (memory) record*/
+typedef struct H5B2_class_t H5B2_class_t;
+struct H5B2_class_t {
+    H5B2_subid_t id;		/* ID of B-tree class, as found in file */
+    size_t nrec_size;           /* Size of native (memory) record */
+    void *cls_private;          /* Pointer to class-private information */
 
     /* Store & retrieve record from application to B-tree 'native' form */
-    herr_t (*store)(void *nrecord, const void *udata);                  /*  Store record in native record table */
-    herr_t (*retrieve)(void *udata, const void *nrecord);               /*  Retrieve record in native record table */
+    herr_t (*store)(const H5B2_class_t *cls, void *nrecord, const void *udata);                  /*  Store record in native record table */
+    herr_t (*retrieve)(const H5B2_class_t *cls, void *udata, const void *nrecord);               /*  Retrieve record in native record table */
 
     /* Compare records, according to a key */
-    herr_t (*compare)(const void *rec1, const void *rec2);              /*  Compare two native records */
+    herr_t (*compare)(const H5B2_class_t *cls, const void *rec1, const void *rec2);              /*  Compare two native records */
 
     /* Encode & decode record values */
-    herr_t (*encode)(const H5F_t *f, uint8_t *raw, const void *record); /*  Encode record from native form to disk storage form */
-    herr_t (*decode)(const H5F_t *f, const uint8_t *raw, void *record); /*  Decode record from disk storage form to native form */
+    herr_t (*encode)(const H5F_t *f, const H5B2_class_t *cls, uint8_t *raw, const void *record); /*  Encode record from native form to disk storage form */
+    herr_t (*decode)(const H5F_t *f, const H5B2_class_t *cls, const uint8_t *raw, void *record); /*  Decode record from disk storage form to native form */
 
     /* Debug record values */
-    herr_t (*debug) (FILE *stream, const H5F_t *f, hid_t dxpl_id,       /* Print a record for debugging */
-        int indent, int fwidth, const void *record, const void *udata);
-
-} H5B2_class_t;
+    herr_t (*debug)(FILE *stream, const H5F_t *f, hid_t dxpl_id,        /* Print a record for debugging */
+        int indent, int fwidth, const H5B2_class_t *cls, const void *record,
+        const void *udata);
+};
 
 /* v2 B-tree metadata statistics info */
 typedef struct H5B2_stat_t {
@@ -125,11 +131,11 @@ H5_DLL herr_t H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 H5_DLL herr_t H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_modify_t op, void *op_data);
 H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr, void *udata);
+    haddr_t addr, void *udata, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t *nrec);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr);
+    haddr_t addr, H5B2_remove_t op, void *op_data);
 
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,

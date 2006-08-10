@@ -215,13 +215,16 @@ H5_DLL herr_t H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 /* Routines for removing records */
 H5_DLL herr_t H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
-    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata);
+    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata,
+    H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    H5B2_node_ptr_t *curr_node_ptr, void *udata);
+    H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
+    void *op_data);
 
 /* Routines for deleting nodes */
 H5_DLL herr_t H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    unsigned depth, const H5B2_node_ptr_t *curr_node);
+    unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_remove_t op,
+    void *op_data);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *b);

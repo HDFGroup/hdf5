@@ -301,9 +301,9 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_locate_record)
 
     hi = nrec;
-    while (lo < hi && cmp) {
+    while(lo < hi && cmp) {
 	my_idx = (lo + hi) / 2;
-	if ((cmp = (type->compare)(udata, native+rec_off[my_idx])) < 0)
+	if((cmp = (type->compare)(type, udata, native + rec_off[my_idx])) < 0)
 	    hi = my_idx;
 	else
 	    lo = my_idx + 1;
@@ -2239,7 +2239,7 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     } /* end else */
 
     /* Make callback to store record in native form */
-    if((shared->type->store)(H5B2_LEAF_NREC(leaf,shared,idx),udata)<0)
+    if((shared->type->store)(shared->type, H5B2_LEAF_NREC(leaf,shared,idx), udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
 
     /* Update record count for node pointer to current node */
@@ -2251,7 +2251,7 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node (marked as dirty) */
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__DIRTIED_FLAG) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__DIRTIED_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2617,16 +2617,16 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         native = leaf->leaf_native;
     } /* end else */
 
-    /* Iterate through records */
-    for(u=0; u<curr_node->node_nrec && !ret_value; u++) {
+    /* Iterate through records, in order */
+    for(u = 0; u < curr_node->node_nrec && !ret_value; u++) {
         /* Descend into child node, if current node is an internal node */
-        if(depth>0) {
-            if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
+        if(depth > 0) {
+            if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, depth-1, &(node_ptrs[u]), op, op_data)) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
         } /* end if */
 
         /* Make callback for current record */
-        if ((ret_value = (op)(H5B2_NAT_NREC(native,shared,u), op_data)) <0)
+        if((ret_value = (op)(H5B2_NAT_NREC(native, shared, u), op_data)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
     } /* end for */
 
@@ -2661,7 +2661,8 @@ done:
  */
 herr_t
 H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    H5B2_node_ptr_t *curr_node_ptr, void *udata)
+    H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
+    void *op_data)
 {
     H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
     haddr_t     leaf_addr=HADDR_UNDEF;  /* Leaf address on disk */
@@ -2695,9 +2696,10 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     if(H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
 
-    /* Make callback to retrieve record in native form */
-    if((shared->type->retrieve)(udata,H5B2_LEAF_NREC(leaf,shared,idx))<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record into leaf node")
+    /* Make 'remove' callback if there is one */
+    if(op)
+        if((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record into leaf node")
 
     /* Update number of records in node */
     leaf->nrec--;
@@ -2751,7 +2753,8 @@ herr_t
 H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     hbool_t *depth_decreased, void *swap_loc, unsigned depth,
     H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
-    H5B2_node_ptr_t *curr_node_ptr, void *udata)
+    H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
+    void *op_data)
 {
     H5AC_info_t *new_cache_info;        /* Pointer to new cache info */
     unsigned *new_cache_info_flags_ptr = NULL;
@@ -2802,7 +2805,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
         /* Release space for root B-tree node on disk */
-        if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size)<0)
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
 
         /* Let the cache know that the object is deleted */
@@ -2914,12 +2917,12 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Attempt to remove node */
     if(depth>1) {
-        if(H5B2_remove_internal(f,dxpl_id,bt2_shared,depth_decreased, swap_loc, depth-1,
-                                new_cache_info,new_cache_info_flags_ptr,new_node_ptr,udata)<0)
+        if(H5B2_remove_internal(f, dxpl_id, bt2_shared, depth_decreased, swap_loc, depth-1,
+                new_cache_info, new_cache_info_flags_ptr, new_node_ptr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
     else {
-        if(H5B2_remove_leaf(f,dxpl_id,bt2_shared,new_node_ptr,udata)<0)
+        if(H5B2_remove_leaf(f, dxpl_id, bt2_shared, new_node_ptr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
     } /* end else */
 
@@ -3143,11 +3146,12 @@ done:
  */
 herr_t
 H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
-    const H5B2_node_ptr_t *curr_node)
+    const H5B2_node_ptr_t *curr_node, H5B2_remove_t op, void *op_data)
 {
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     const H5AC_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
     void *node=NULL;                    /* Pointers to current node */
+    uint8_t *native;                    /* Pointers to node's native records */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_delete_node)
@@ -3172,10 +3176,11 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Set up information about current node */
         curr_node_class = H5AC_BT2_INT;
         node = internal;
+        native = internal->int_native;
 
         /* Descend into children */
         for(u=0; u<internal->nrec+1; u++)
-            if(H5B2_delete_node(f, dxpl_id, bt2_shared, depth-1, &(internal->node_ptrs[u]))<0)
+            if(H5B2_delete_node(f, dxpl_id, bt2_shared, depth-1, &(internal->node_ptrs[u]), op, op_data)<0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node descent failed")
     } /* end if */
     else {
@@ -3188,16 +3193,29 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Set up information about current node */
         curr_node_class = H5AC_BT2_LEAF;
         node = leaf;
+        native = leaf->leaf_native;
     } /* end else */
 
+    /* If there's a callback defined, iterate over the records in this node */
+    if(op) {
+        unsigned u;             /* Local index */
+
+        /* Iterate through records in this node */
+        for(u = 0; u < curr_node->node_nrec; u++) {
+            /* Make callback for each record */
+            if((op)(H5B2_NAT_NREC(native, shared, u), op_data) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
+        } /* end for */
+    } /* end if */
+
     /* Release space for current B-tree node on disk */
-    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, curr_node->addr, (hsize_t)shared->node_size)<0)
+    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, curr_node->addr, (hsize_t)shared->node_size)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
 
 done:
     /* Unlock & delete current node */
     if(node)
-        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG) < 0)
+        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)

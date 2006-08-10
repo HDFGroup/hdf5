@@ -51,28 +51,29 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5B2_test_store(void *nrecord, const void *udata);
-static herr_t H5B2_test_retrieve(void *udata, const void *nrecord);
-static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
-static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
+static herr_t H5B2_test_store(const H5B2_class_t *cls, void *nrecord, const void *udata);
+static herr_t H5B2_test_retrieve(const H5B2_class_t *cls, void *udata, const void *nrecord);
+static herr_t H5B2_test_compare(const H5B2_class_t *cls, const void *rec1, const void *rec2);
+static herr_t H5B2_test_encode(const H5F_t *f, const H5B2_class_t *cls, uint8_t *raw,
     const void *nrecord);
-static herr_t H5B2_test_decode(const H5F_t *f, const uint8_t *raw,
+static herr_t H5B2_test_decode(const H5F_t *f, const H5B2_class_t *cls, const uint8_t *raw,
     void *nrecord);
 static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
+    int indent, int fwidth, const H5B2_class_t *cls, const void *record, const void *_udata);
 
 /*********************/
 /* Package Variables */
 /*********************/
 const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
-    H5B2_TEST_ID,                   /* Type of B-tree */
-    sizeof(hsize_t),                /* Size of native key */
-    H5B2_test_store,                /* Record storage callback */
-    H5B2_test_retrieve,             /* Record retrieval callback */
-    H5B2_test_compare,              /* Record comparison callback */
-    H5B2_test_encode,               /* Record encoding callback */
-    H5B2_test_decode,               /* Record decoding callback */
-    H5B2_test_debug                 /* Record debugging callback */
+    H5B2_TEST_ID,               /* Type of B-tree */
+    sizeof(hsize_t),            /* Size of native record */
+    NULL,                       /* Class private information */
+    H5B2_test_store,            /* Record storage callback */
+    H5B2_test_retrieve,         /* Record retrieval callback */
+    H5B2_test_compare,          /* Record comparison callback */
+    H5B2_test_encode,           /* Record encoding callback */
+    H5B2_test_decode,           /* Record decoding callback */
+    H5B2_test_debug             /* Record debugging callback */
 }};
 
 /*****************************/
@@ -100,7 +101,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_store(void *nrecord, const void *udata)
+H5B2_test_store(const H5B2_class_t UNUSED *cls, void *nrecord, const void *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_store)
 
@@ -125,7 +126,7 @@ H5B2_test_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_retrieve(void *udata, const void *nrecord)
+H5B2_test_retrieve(const H5B2_class_t UNUSED *cls, void *udata, const void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_retrieve)
 
@@ -150,7 +151,7 @@ H5B2_test_retrieve(void *udata, const void *nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_compare(const void *rec1, const void *rec2)
+H5B2_test_compare(const H5B2_class_t UNUSED *cls, const void *rec1, const void *rec2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_compare)
 
@@ -173,7 +174,7 @@ H5B2_test_compare(const void *rec1, const void *rec2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
+H5B2_test_encode(const H5F_t *f, const H5B2_class_t UNUSED *cls, uint8_t *raw, const void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_encode)
 
@@ -198,7 +199,7 @@ H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
+H5B2_test_decode(const H5F_t *f, const H5B2_class_t UNUSED *cls, const uint8_t *raw, void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_decode)
 
@@ -223,8 +224,9 @@ H5B2_test_decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
-		      const void *record, const void UNUSED *_udata)
+H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+    int indent, int fwidth, const H5B2_class_t UNUSED *cls, const void *record,
+    const void UNUSED *_udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_debug)
 

@@ -151,6 +151,32 @@ modify_cb(void *_record, void *_op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	remove_cb
+ *
+ * Purpose:	v2 B-tree remove callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 8, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+remove_cb(const void *_record, void *_op_data)
+{
+    const hsize_t *record = (const hsize_t *)_record;
+    hsize_t *rrecord = (hsize_t *)_op_data;
+
+    *rrecord = *record;
+
+    return(0);
+} /* end remove_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_insert_basic
  *
  * Purpose:	Basic tests for the B-tree v2 code
@@ -1930,6 +1956,7 @@ test_remove_basic(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -1969,7 +1996,7 @@ test_remove_basic(hid_t fapl)
     TESTING("B-tree remove: record from empty B-tree");
     record = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
+	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL) TEST_ERROR
@@ -2008,7 +2035,7 @@ test_remove_basic(hid_t fapl)
     TESTING("B-tree remove: non-existant record from 1 record B-tree");
     record = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
+	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL) TEST_ERROR
@@ -2018,14 +2045,15 @@ test_remove_basic(hid_t fapl)
     /* Attempt to remove a record from a B-tree with 1 record */
     TESTING("B-tree remove: existant record from 1 record B-tree");
     record = 42;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR
+    if(rrecord != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2093,7 +2121,7 @@ test_remove_basic(hid_t fapl)
     TESTING("B-tree remove: non-existant record from level-0 B-tree");
     record = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
+	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL) TEST_ERROR
@@ -2103,14 +2131,15 @@ test_remove_basic(hid_t fapl)
     /* Attempt to remove a record from a level-0 B-tree with mult. record */
     TESTING("B-tree remove: mult. existant records from level-0 B-tree");
     record = 42;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR
+    if(rrecord != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2133,14 +2162,15 @@ test_remove_basic(hid_t fapl)
     if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 34;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 34) TEST_ERROR
+    if(rrecord != 34) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2163,14 +2193,15 @@ test_remove_basic(hid_t fapl)
     if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 56;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 56) TEST_ERROR
+    if(rrecord != 56) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2193,14 +2224,15 @@ test_remove_basic(hid_t fapl)
     if(!H5F_addr_defined(root_addr)) TEST_ERROR
 
     record = 38;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 38) TEST_ERROR
+    if(rrecord != 38) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2257,6 +2289,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -2317,7 +2350,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     TESTING("B-tree remove: non-existant record from level-1 B-tree");
     record = (INSERT_SPLIT_ROOT_NREC*2)+1;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
+	ret = H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL) TEST_ERROR
@@ -2337,14 +2370,15 @@ test_remove_level1_noredistrib(hid_t fapl)
     /* Attempt to remove a record from right leaf of a level-1 B-tree with noredistribution */
     TESTING("B-tree remove: record from right leaf of level-1 B-tree");
     record = (INSERT_SPLIT_ROOT_NREC*2)-2;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR
+    if(rrecord != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2361,14 +2395,15 @@ test_remove_level1_noredistrib(hid_t fapl)
     /* Attempt to remove a record from left leaf of a level-1 B-tree with noredistribution */
     TESTING("B-tree remove: record from left leaf of level-1 B-tree");
     record = 0;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 1;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 0) TEST_ERROR
+    if(rrecord != 0) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2385,14 +2420,15 @@ test_remove_level1_noredistrib(hid_t fapl)
     /* Attempt to remove a record from middle leaf of a level-1 B-tree with noredistribution */
     TESTING("B-tree remove: record from middle leaf of level-1 B-tree");
     record = INSERT_SPLIT_ROOT_NREC;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != INSERT_SPLIT_ROOT_NREC) TEST_ERROR
+    if(rrecord != INSERT_SPLIT_ROOT_NREC) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2439,6 +2475,7 @@ test_remove_level1_redistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -2498,14 +2535,15 @@ test_remove_level1_redistrib(hid_t fapl)
     TESTING("B-tree remove: redistribute 2 leaves in level-1 B-tree (r->l)");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC/2); u++) {
         record = (INSERT_SPLIT_ROOT_NREC*2)-(u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2524,14 +2562,15 @@ test_remove_level1_redistrib(hid_t fapl)
     TESTING("B-tree remove: redistribute 2 leaves in level-1 B-tree (l->r)");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC/4); u++) {
         record = u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR
+        if(rrecord != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2550,14 +2589,15 @@ test_remove_level1_redistrib(hid_t fapl)
     TESTING("B-tree remove: redistribute 3 leaves in level-1 B-tree");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC/8); u++) {
         record = ((INSERT_SPLIT_ROOT_NREC/4)*3) + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (((INSERT_SPLIT_ROOT_NREC/4)*3) + u)) TEST_ERROR
+        if(rrecord != (((INSERT_SPLIT_ROOT_NREC/4)*3) + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2605,6 +2645,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -2664,14 +2705,15 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     TESTING("B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)");
     for(u=0; u < INSERT_SPLIT_ROOT_NREC; u++) {
         record = (INSERT_SPLIT_ROOT_NREC*2)-(u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2702,14 +2744,15 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     /* Remove records */
     for(u=0; u < INSERT_SPLIT_ROOT_NREC; u++) {
         record = u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR
+        if(rrecord != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2757,6 +2800,7 @@ test_remove_level1_3leaf_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -2816,14 +2860,15 @@ test_remove_level1_3leaf_merge(hid_t fapl)
     TESTING("B-tree remove: merge 3 leaves to 2 in level-1 B-tree");
     for(u=0; u < INSERT_SPLIT_ROOT_NREC+2; u++) {
         record = (INSERT_SPLIT_ROOT_NREC/2)+3+u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC/2)+3+u)) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC/2)+3+u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2871,6 +2916,7 @@ test_remove_level1_promote(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -2929,14 +2975,15 @@ test_remove_level1_promote(hid_t fapl)
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from right leaf */
     TESTING("B-tree remove: promote from right leaf of level-1 B-tree");
     record = 181;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 181) TEST_ERROR
+    if(rrecord != 181) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2953,14 +3000,15 @@ test_remove_level1_promote(hid_t fapl)
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from left leaf */
     TESTING("B-tree remove: promote from left leaf of level-1 B-tree");
     record = 42;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR
+    if(rrecord != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -2977,14 +3025,15 @@ test_remove_level1_promote(hid_t fapl)
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from middle leaf */
     TESTING("B-tree remove: promote from middle leaf of level-1 B-tree");
     record = 85;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 85) TEST_ERROR
+    if(rrecord != 85) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3031,6 +3080,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3092,14 +3142,15 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     /* Remove records from right leaf until its ready to redistribute */
     for(u=0; u < 33; u++) {
         record = (INSERT_SPLIT_ROOT_NREC*2)-(u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3113,14 +3164,15 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     } /* end for */
 
     record = 101;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 101) TEST_ERROR
+    if(rrecord != 101) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3167,6 +3219,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3228,14 +3281,15 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     /* Remove records from right leaf until its ready to redistribute */
     for(u=0; u < 33; u++) {
         record = 43 + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR
+        if(rrecord != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3249,14 +3303,15 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     } /* end for */
 
     record = 42;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR
+    if(rrecord != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3303,6 +3358,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3364,14 +3420,15 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     /* Remove records from right leaf until its ready to redistribute */
     for(u=0; u < 66; u++) {
         record = (INSERT_SPLIT_ROOT_NREC*2)-(u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*2)-(u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3385,14 +3442,15 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     } /* end for */
 
     record = 68;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 68) TEST_ERROR
+    if(rrecord != 68) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3439,6 +3497,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3500,14 +3559,15 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     /* Remove records from right leaf until its ready to redistribute */
     for(u=0; u < 81; u++) {
         record = 43 + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR
+        if(rrecord != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3521,14 +3581,15 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     } /* end for */
 
     record = 26;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 26) TEST_ERROR
+    if(rrecord != 26) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3575,6 +3636,7 @@ test_remove_level1_collapse(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3634,14 +3696,15 @@ test_remove_level1_collapse(hid_t fapl)
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0");
     for(u=0; u < 30; u++) {
         record = INSERT_SPLIT_ROOT_NREC - (u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (INSERT_SPLIT_ROOT_NREC - (u+1))) TEST_ERROR
+        if(rrecord != (INSERT_SPLIT_ROOT_NREC - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3689,6 +3752,7 @@ test_remove_level2_promote(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3747,14 +3811,15 @@ test_remove_level2_promote(hid_t fapl)
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion */
     TESTING("B-tree remove: promote from right internal of level-2 B-tree");
     record = 1632;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1632) TEST_ERROR
+    if(rrecord != 1632) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3771,14 +3836,15 @@ test_remove_level2_promote(hid_t fapl)
     /* Attempt to remove record from left internal node of a level-2 B-tree to force promotion */
     TESTING("B-tree remove: promote from left internal of level-2 B-tree");
     record = 1117;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1117) TEST_ERROR
+    if(rrecord != 1117) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3795,14 +3861,15 @@ test_remove_level2_promote(hid_t fapl)
     /* Attempt to remove record from middle internal node of a level-2 B-tree to force promotion */
     TESTING("B-tree remove: promote from middle internal of level-2 B-tree");
     record = 1246;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1246) TEST_ERROR
+    if(rrecord != 1246) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3819,14 +3886,15 @@ test_remove_level2_promote(hid_t fapl)
     /* Attempt to remove record from root node of a level-2 B-tree to force promotion */
     TESTING("B-tree remove: promote from root of level-2 B-tree");
     record = 1074;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1074) TEST_ERROR
+    if(rrecord != 1074) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3839,14 +3907,15 @@ test_remove_level2_promote(hid_t fapl)
     if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-4) TEST_ERROR
 
     record = 558;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 558) TEST_ERROR
+    if(rrecord != 558) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3893,6 +3962,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -3952,14 +4022,15 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
     for(u=0; u < 22; u++) {
         record = (INSERT_SPLIT_ROOT_NREC*21) - (u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -3973,14 +4044,15 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     } /* end for */
 
     record = 1632;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 1632) TEST_ERROR
+    if(rrecord != 1632) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4027,6 +4099,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4086,14 +4159,15 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
     for(u=0; u < 17; u++) {
         record = 43 + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR
+        if(rrecord != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4107,14 +4181,15 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     } /* end for */
 
     record = 42;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 42) TEST_ERROR
+    if(rrecord != 42) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4161,6 +4236,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4220,14 +4296,15 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
     for(u=0; u < 38; u++) {
         record = (INSERT_SPLIT_ROOT_NREC*21) - (u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*21) - (u+1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4241,7 +4318,8 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     } /* end for */
 
     record = 1616;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
@@ -4295,6 +4373,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4354,14 +4433,15 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
     for(u=0; u < 49; u++) {
         record = 43 + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (43 + u)) TEST_ERROR
+        if(rrecord != (43 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4375,14 +4455,15 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     } /* end for */
 
     record = 26;
-    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+    rrecord = HSIZET_MAX;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     } /* end if */
 
     /* Make certain that the record value is correct */
-    if(record != 26) TEST_ERROR
+    if(rrecord != 26) TEST_ERROR
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4429,6 +4510,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4488,14 +4570,15 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r)");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC*5); u++) {
         record = u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != u) TEST_ERROR
+        if(rrecord != u) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4543,6 +4626,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4602,14 +4686,15 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l)");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC*6); u++) {
         record = (INSERT_SPLIT_ROOT_NREC*21) - (u + 1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != ((INSERT_SPLIT_ROOT_NREC*21) - (u + 1))) TEST_ERROR
+        if(rrecord != ((INSERT_SPLIT_ROOT_NREC*21) - (u + 1))) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4657,6 +4742,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4716,14 +4802,15 @@ test_remove_level2_3internal_merge(hid_t fapl)
     TESTING("B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC*8); u++) {
         record = 559 + u;
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != (559 + u)) TEST_ERROR
+        if(rrecord != (559 + u)) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -4771,6 +4858,7 @@ test_remove_level2_collapse_right(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     hsize_t     nrec;                   /* Number of records in B-tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     haddr_t     root_addr;              /* Address of root of B-tree created */
@@ -4830,7 +4918,8 @@ test_remove_level2_collapse_right(hid_t fapl)
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0 (r->l)");
     for(u=0; u < (INSERT_SPLIT_ROOT_NREC*12); u++) {
         record = (INSERT_SPLIT_ROOT_NREC*21)-(u+1);
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
@@ -4887,6 +4976,7 @@ test_remove_lots(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     rrecord;                /* Record to remove from tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     time_t      curr_time;              /* Current time, for seeding random number generator */
     hsize_t     *records;               /* Record #'s for random insertion */
@@ -4964,7 +5054,8 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Remove all records */
     for(u=0; u<INSERT_MANY; u++) {
         record=records[u];
-        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord)<0) {
 #ifdef QAK
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif /* QAK */
@@ -4974,7 +5065,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         } /* end if */
 
         /* Make certain that the record value is correct */
-        if(record != records[u]) TEST_ERROR
+        if(rrecord != records[u]) TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
@@ -5238,7 +5329,7 @@ test_delete(hid_t fapl)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -5288,7 +5379,7 @@ test_delete(hid_t fapl)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -5338,7 +5429,7 @@ test_delete(hid_t fapl)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -5388,7 +5479,7 @@ test_delete(hid_t fapl)
     /*
      * Delete v2 B-tree
      */
-    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;

@@ -175,7 +175,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header signature")
     p += H5B2_SIZEOF_MAGIC;
 
@@ -251,10 +251,10 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
     HDassert(bt2);
 
     if (bt2->cache_info.is_dirty) {
-        H5B2_shared_t *shared;      /* Shared B-tree information */
-        uint8_t	*buf = NULL;        /* Temporary raw data buffer */
-        uint8_t *p;                 /* Pointer into raw data buffer */
-        size_t	size;               /* Header size on disk */
+        H5B2_shared_t *shared;  /* Shared B-tree information */
+        uint8_t	*buf;           /* Temporary raw data buffer */
+        uint8_t *p;             /* Pointer into raw data buffer */
+        size_t	size;           /* Header size on disk */
 
         /* Get the pointer to the shared B-tree info */
         shared = H5RC_GET_OBJ(bt2->shared);
@@ -270,7 +270,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC);
+        HDmemcpy(p, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
         p += H5B2_SIZEOF_MAGIC;
 
         /* Version # */
@@ -472,7 +472,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     p = shared->page;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_LEAF_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node signature")
     p += H5B2_SIZEOF_MAGIC;
 
@@ -497,7 +497,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     native = leaf->leaf_native;
     for(u = 0; u < leaf->nrec; u++) {
         /* Decode record */
-        if((shared->type->decode)(f, p, native) < 0)
+        if((shared->type->decode)(f, shared->type, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
@@ -556,7 +556,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         p = shared->page;
 
         /* magic number */
-        HDmemcpy(p, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC);
+        HDmemcpy(p, H5B2_LEAF_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
         p += H5B2_SIZEOF_MAGIC;
 
         /* version # */
@@ -569,7 +569,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         native = leaf->leaf_native;
         for(u = 0; u < leaf->nrec; u++) {
             /* Encode record */
-            if((shared->type->encode)(f, p, native) < 0)
+            if((shared->type->encode)(f, shared->type, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
@@ -767,7 +767,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     p = shared->page;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
     p += H5B2_SIZEOF_MAGIC;
 
@@ -796,7 +796,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     native = internal->int_native;
     for(u = 0; u < internal->nrec; u++) {
         /* Decode record */
-        if((shared->type->decode)(f, p, native) < 0)
+        if((shared->type->decode)(f, shared->type, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
@@ -868,7 +868,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         p = shared->page;
 
         /* Magic number */
-        HDmemcpy(p, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC);
+        HDmemcpy(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
         p += H5B2_SIZEOF_MAGIC;
 
         /* Version # */
@@ -881,7 +881,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         native = internal->int_native;
         for(u = 0; u < internal->nrec; u++) {
             /* Encode record */
-            if((shared->type->encode)(f, p, native) < 0)
+            if((shared->type->encode)(f, shared->type, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
