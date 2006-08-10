@@ -251,11 +251,12 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-add_obj(H5HF_t *fh, hid_t dxpl, unsigned obj_off,
+add_obj(H5HF_t *fh, hid_t dxpl, size_t obj_off,
     size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
     unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object inserted */
     unsigned char *obj;                 /* Buffer for object to insert */
+    size_t robj_size;                   /* Object size read in */
 
     /* Sanity check */
     HDassert(fh);
@@ -280,6 +281,10 @@ add_obj(H5HF_t *fh, hid_t dxpl, unsigned obj_off,
     } /* end if */
 
     /* Read in object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
     if(H5HF_read(fh, dxpl, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
     if(HDmemcmp(obj, shared_robj_g, obj_size))
@@ -449,7 +454,7 @@ open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
     size_t      id_len;                 /* Size of fractal heap IDs */
 
     /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, FHEAP_FILENAME_LEN);
+    h5_fixname(FILENAME[0], fapl, filename, (size_t)FHEAP_FILENAME_LEN);
 
     /* Create the file to work on */
     if((*file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1653,9 +1658,9 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /*
-     * Test fractal heap creation (w/absolute address mapping)
+     * Test fractal heap creation
      */
-    TESTING("fractal heap creation (w/absolute address mapping)");
+    TESTING("fractal heap creation");
     if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
@@ -1752,10 +1757,10 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         STACK_ERROR
 
     /*
-     * Test fractal heap creation (w/absolute address mapping)
+     * Test fractal heap creation
      */
 
-    TESTING("reopening existing fractal heap (w/absolute address mapping)");
+    TESTING("reopening existing fractal heap");
 
     /* Create heap */
     if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
@@ -1812,7 +1817,7 @@ error:
 #ifdef ALL_INSERT_TESTS
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_first
+ * Function:	test_man_insert_first
  *
  * Purpose:	Test inserting first object into absolute heap
  *
@@ -1826,7 +1831,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -1874,7 +1879,7 @@ test_abs_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -1905,11 +1910,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_first() */
+} /* test_man_insert_first() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_second
+ * Function:	test_man_insert_second
  *
  * Purpose:	Test inserting two objects into absolute heap
  *
@@ -1923,7 +1928,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -1965,7 +1970,7 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -1973,7 +1978,7 @@ test_abs_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         TEST_ERROR
 
     /* Insert second object */
-    if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)20, SMALL_OBJ_SIZE2, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -1996,11 +2001,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_second() */
+} /* test_man_insert_second() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_root_mult
+ * Function:	test_man_insert_root_mult
  *
  * Purpose:	Test inserting mult. objects into absolute heap, up to the
  *              limit of a root direct block
@@ -2015,7 +2020,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2090,11 +2095,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_root_mult() */
+} /* test_man_insert_root_mult() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_force_indirect
+ * Function:	test_man_insert_force_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, filling the
  *              root direct block and forcing the root block to be converted
@@ -2110,7 +2115,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2169,7 +2174,7 @@ test_abs_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space = (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -2192,11 +2197,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_force_indirect() */
+} /* test_man_insert_force_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_fill_second
+ * Function:	test_man_insert_fill_second
  *
  * Purpose:	Test inserting mult. objects into absolute heap, filling the
  *              root direct block, forcing the root block to be converted
@@ -2212,7 +2217,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2294,11 +2299,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_fill_second() */
+} /* test_man_insert_fill_second() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_insert_third_direct
+ * Function:	test_man_insert_third_direct
  *
  * Purpose:	Test inserting mult. objects into absolute heap, filling the
  *              root direct block, forcing the root block to be converted
@@ -2315,7 +2320,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2379,7 +2384,7 @@ test_abs_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
 
     /* Insert one more object, to force creation of third direct block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -2402,11 +2407,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_insert_third_direct() */
+} /* test_man_insert_third_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_first_row
+ * Function:	test_man_fill_first_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill first row of root indirect
@@ -2422,7 +2427,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2494,11 +2499,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_first_row() */
+} /* test_man_fill_first_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_second_row
+ * Function:	test_man_start_second_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill first row of root indirect
@@ -2514,7 +2519,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2570,7 +2575,7 @@ test_abs_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_alloc_size += DBLOCK_SIZE(fh, 1);
     state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 1);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -2593,11 +2598,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_second_row() */
+} /* test_man_start_second_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_second_row
+ * Function:	test_man_fill_second_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill first row of root indirect
@@ -2613,7 +2618,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2689,11 +2694,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_second_row() */
+} /* test_man_fill_second_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_third_row
+ * Function:	test_man_start_third_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill first row of root indirect
@@ -2710,7 +2715,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2773,7 +2778,7 @@ test_abs_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     state.man_alloc_size += DBLOCK_SIZE(fh, 2);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 3);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -2796,11 +2801,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_third_row() */
+} /* test_man_start_third_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_fourth_row
+ * Function:	test_man_fill_fourth_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill first four rows of root indirect
@@ -2816,7 +2821,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2890,11 +2895,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_fourth_row() */
+} /* test_man_fill_fourth_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_all_root_direct
+ * Function:	test_man_fill_all_root_direct
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -2910,7 +2915,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -2982,11 +2987,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_all_root_direct() */
+} /* test_man_fill_all_root_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_first_recursive_indirect
+ * Function:	test_man_first_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3002,7 +3007,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3056,7 +3061,7 @@ test_abs_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
 
     /* Insert one more object, to force creation of first recursive indirect block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -3079,11 +3084,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_first_recursive_indirect() */
+} /* test_man_first_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_second_direct_recursive_indirect
+ * Function:	test_man_second_direct_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3100,7 +3105,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3162,7 +3167,7 @@ test_abs_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
      * first recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -3185,11 +3190,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_second_direct_recursive_indirect() */
+} /* test_man_second_direct_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_first_recursive_indirect
+ * Function:	test_man_fill_first_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3206,7 +3211,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3283,11 +3288,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_first_recursive_indirect() */
+} /* test_man_fill_first_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_second_recursive_indirect
+ * Function:	test_man_second_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3305,7 +3310,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3366,7 +3371,7 @@ test_abs_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -3389,11 +3394,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_second_recursive_indirect() */
+} /* test_man_second_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_second_recursive_indirect
+ * Function:	test_man_fill_second_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3412,7 +3417,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3493,11 +3498,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_second_recursive_indirect() */
+} /* test_man_fill_second_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_recursive_indirect_row
+ * Function:	test_man_fill_recursive_indirect_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3516,7 +3521,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3593,11 +3598,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_recursive_indirect_row() */
+} /* test_man_fill_recursive_indirect_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_2nd_recursive_indirect
+ * Function:	test_man_start_2nd_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3614,7 +3619,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3675,7 +3680,7 @@ test_abs_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -3698,11 +3703,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_2nd_recursive_indirect() */
+} /* test_man_start_2nd_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_recursive_indirect_two_deep
+ * Function:	test_man_recursive_indirect_two_deep
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3719,7 +3724,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3796,11 +3801,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_recursive_indirect_two_deep() */
+} /* test_man_recursive_indirect_two_deep() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_3rd_recursive_indirect
+ * Function:	test_man_start_3rd_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3818,7 +3823,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -3879,7 +3884,7 @@ test_abs_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -3902,11 +3907,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_3rd_recursive_indirect() */
+} /* test_man_start_3rd_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_first_3rd_recursive_indirect
+ * Function:	test_man_fill_first_3rd_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -3924,7 +3929,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4009,11 +4014,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_first_3rd_recursive_indirect() */
+} /* test_man_fill_first_3rd_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_recursive_indirect_row
+ * Function:	test_man_fill_3rd_recursive_indirect_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4031,7 +4036,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4112,11 +4117,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_recursive_indirect_row() */
+} /* test_man_fill_3rd_recursive_indirect_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_all_3rd_recursive_indirect
+ * Function:	test_man_fill_all_3rd_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4134,7 +4139,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4215,11 +4220,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_all_3rd_recursive_indirect() */
+} /* test_man_fill_all_3rd_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_4th_recursive_indirect
+ * Function:	test_man_start_4th_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4238,7 +4243,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4303,7 +4308,7 @@ test_abs_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -4326,11 +4331,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_4th_recursive_indirect() */
+} /* test_man_start_4th_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_first_4th_recursive_indirect
+ * Function:	test_man_fill_first_4th_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4349,7 +4354,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4442,11 +4447,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_first_4th_recursive_indirect() */
+} /* test_man_fill_first_4th_recursive_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_4th_recursive_indirect_row
+ * Function:	test_man_fill_4th_recursive_indirect_row
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4465,7 +4470,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4550,11 +4555,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_4th_recursive_indirect_row() */
+} /* test_man_fill_4th_recursive_indirect_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_all_4th_recursive_indirect
+ * Function:	test_man_fill_all_4th_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4573,7 +4578,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4658,13 +4663,14 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_all_4th_recursive_indirect() */
+} /* test_man_fill_all_4th_recursive_indirect() */
 #endif /* ALL_INSERT_TESTS */
 
+#ifndef QAK2
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_start_5th_recursive_indirect
+ * Function:	test_man_start_5th_recursive_indirect
  *
  * Purpose:	Test inserting mult. objects into absolute heap, creating
  *              enough direct blocks to fill all direct rows of root indirect
@@ -4684,7 +4690,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4766,7 +4772,7 @@ test_abs_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
      * recursive indirect block
      */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, NULL))
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
@@ -4789,13 +4795,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_start_5th_recursive_indirect() */
+} /* test_man_start_5th_recursive_indirect() */
 #endif /* QAK */
 
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_bogus
+ * Function:	test_man_remove_bogus
  *
  * Purpose:	Test removing bogus heap IDs
  *
@@ -4809,7 +4815,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -4922,11 +4928,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_bogus() */
+} /* test_man_remove_bogus() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_one
+ * Function:	test_man_remove_one
  *
  * Purpose:	Test removing single object from heap
  *
@@ -4940,7 +4946,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -5076,11 +5082,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_one() */
+} /* test_man_remove_one() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_two
+ * Function:	test_man_remove_two
  *
  * Purpose:	Test removing two objects from heap
  *
@@ -5094,7 +5100,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -5259,11 +5265,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_two() */
+} /* test_man_remove_two() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_one_larger
+ * Function:	test_man_remove_one_larger
  *
  * Purpose:	Test removing single larger (but < standalone size) object
  *              from heap
@@ -5278,7 +5284,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -5418,11 +5424,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_one_larger() */
+} /* test_man_remove_one_larger() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_two_larger
+ * Function:	test_man_remove_two_larger
  *
  * Purpose:	Test removing two larger (but < standalone size) objects
  *              from heap
@@ -5437,7 +5443,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -5652,11 +5658,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_two_larger() */
+} /* test_man_remove_two_larger() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_three_larger
+ * Function:	test_man_remove_three_larger
  *
  * Purpose:	Test removing three larger (but < standalone size) objects
  *              from heap
@@ -5671,7 +5677,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -5946,13 +5952,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_three_larger() */
+} /* test_man_remove_three_larger() */
 #endif /* QAK */
 
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_root_direct
+ * Function:	test_man_remove_root_direct
  *
  * Purpose:	Test filling and removing all objects from root direct block in
  *              heap
@@ -5967,7 +5973,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6022,11 +6028,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_root_direct() */
+} /* test_man_remove_root_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_two_direct
+ * Function:	test_man_remove_two_direct
  *
  * Purpose:	Test filling and removing all objects from (first) two direct
  *              blocks in heap
@@ -6041,7 +6047,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6111,11 +6117,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_two_direct() */
+} /* test_man_remove_two_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_first_row
+ * Function:	test_man_remove_first_row
  *
  * Purpose:	Test filling and removing all objects from first row of direct
  *              blocks in heap
@@ -6130,7 +6136,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6182,11 +6188,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_first_row() */
+} /* test_man_remove_first_row() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_first_two_rows
+ * Function:	test_man_remove_first_two_rows
  *
  * Purpose:	Test filling and removing all objects from first two rows of
  *              direct blocks in heap
@@ -6201,7 +6207,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6255,11 +6261,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_first_two_rows() */
+} /* test_man_remove_first_two_rows() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_first_four_rows
+ * Function:	test_man_remove_first_four_rows
  *
  * Purpose:	Test filling and removing all objects from first four rows of
  *              direct blocks in heap
@@ -6274,7 +6280,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6332,11 +6338,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_first_four_rows() */
+} /* test_man_remove_first_four_rows() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_all_root_direct
+ * Function:	test_man_remove_all_root_direct
  *
  * Purpose:	Test filling and removing all objects from all direct blocks
  *              in root indirect block of heap
@@ -6351,7 +6357,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6403,11 +6409,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_all_root_direct() */
+} /* test_man_remove_all_root_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_2nd_indirect
+ * Function:	test_man_remove_2nd_indirect
  *
  * Purpose:	Test filling and removing all objects up to 2nd level indirect
  *              blocks of heap
@@ -6422,7 +6428,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6478,11 +6484,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_2nd_indirect() */
+} /* test_man_remove_2nd_indirect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_remove_3rd_indirect
+ * Function:	test_man_remove_3rd_indirect
  *
  * Purpose:	Test filling and removing all objects up to 3rd level indirect
  *              blocks of heap
@@ -6497,7 +6503,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6557,13 +6563,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_remove_3rd_indirect() */
+} /* test_man_remove_3rd_indirect() */
 #endif /* QAK */
 
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_start_block
+ * Function:	test_man_skip_start_block
  *
  * Purpose:	Test inserting object into absolute heap which is too large
  *              for starting block size, which forces root indirect block
@@ -6581,7 +6587,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6611,7 +6617,7 @@ test_abs_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 0);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -6639,11 +6645,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_start_block() */
+} /* test_man_skip_start_block() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_start_block_add_back
+ * Function:	test_man_skip_start_block_add_back
  *
  * Purpose:	Test inserting object into absolute heap which is too large
  *              for starting block size, which forces root indirect block
@@ -6659,7 +6665,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6691,7 +6697,7 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 0);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -6700,7 +6706,7 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
     /* Insert an object to fill up the heap block just created */
     obj_size = DBLOCK_FREE(fh, 2) - obj_size;
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -6709,7 +6715,7 @@ test_abs_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
     /* Insert second "real" object, which should go in earlier direct block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-    if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, (size_t)SMALL_OBJ_SIZE2, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -6737,11 +6743,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_start_block_add_back() */
+} /* test_man_skip_start_block_add_back() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_start_block_add_skipped
+ * Function:	test_man_skip_start_block_add_skipped
  *
  * Purpose:	Test inserting object into absolute heap which is too large
  *              for starting block size, which forces root indirect block
@@ -6758,7 +6764,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6791,7 +6797,7 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 0);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -6800,7 +6806,7 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
 
     /* Insert an object to fill up the heap block just created */
     obj_size = DBLOCK_FREE(fh, 2) - obj_size;
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -6819,7 +6825,7 @@ test_abs_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
 
     /* Insert another object, which should extend direct blocks, instead of backfill */
     state.man_alloc_size += DBLOCK_SIZE(fh, 2);
-    if(add_obj(fh, dxpl, 20, SMALL_OBJ_SIZE2, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, (size_t)SMALL_OBJ_SIZE2, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -6847,11 +6853,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_start_block_add_skipped() */
+} /* test_man_skip_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_2nd_block
+ * Function:	test_man_skip_2nd_block
  *
  * Purpose:	Test inserting object into absolute heap which is small
  *              enough for starting block size, then add object too large
@@ -6868,7 +6874,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6895,7 +6901,7 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -6913,7 +6919,7 @@ test_abs_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     state.man_free_space += (cparam->managed.width - 1 )* DBLOCK_FREE(fh, 0);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -6941,11 +6947,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_2nd_block() */
+} /* test_man_skip_2nd_block() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_2nd_block_add_skipped
+ * Function:	test_man_skip_2nd_block_add_skipped
  *
  * Purpose:	Test inserting object into absolute heap which is small
  *              enough for starting block size, then add object too large
@@ -6965,7 +6971,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -6994,7 +7000,7 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_alloc_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7012,7 +7018,7 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     state.man_free_space += (cparam->managed.width - 1 )* DBLOCK_FREE(fh, 0);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7021,7 +7027,7 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
 
     /* Insert an object to fill up the (smaller) heap block just created */
     obj_size = DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7030,7 +7036,7 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
 
     /* Fill remainder of 2 * start size block */
     obj_size = DBLOCK_FREE(fh, 2) - (DBLOCK_SIZE(fh, 0) + 1);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7056,7 +7062,7 @@ test_abs_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
 
     /* Insert one more object, to create new 2 * start size direct block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 2);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7084,11 +7090,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_2nd_block_add_skipped() */
+} /* test_man_skip_2nd_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_one_partial_skip_2nd_block_add_skipped
+ * Function:	test_man_fill_one_partial_skip_2nd_block_add_skipped
  *
  * Purpose:	Test filling initial direct block, then add object small enough
  *              for initial block size (to create root indirect block), then
@@ -7110,7 +7116,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7150,7 +7156,7 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_alloc_size += DBLOCK_SIZE(fh, 0);
     state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7168,7 +7174,7 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7177,7 +7183,7 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
 
     /* Insert an object to fill up the (smaller) heap block just created */
     obj_size = DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7186,7 +7192,7 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
 
     /* Insert object to fill remainder of 4 * start size block */
     obj_size = DBLOCK_FREE(fh, 3) - (DBLOCK_SIZE(fh, 2) + 1);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7223,7 +7229,7 @@ test_abs_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
 
     /* Insert one more object, to create new 4 * start size direct block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, SMALL_OBJ_SIZE1, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)SMALL_OBJ_SIZE1, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7251,11 +7257,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_one_partial_skip_2nd_block_add_skipped() */
+} /* test_man_fill_one_partial_skip_2nd_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_row_skip_add_skipped
+ * Function:	test_man_fill_row_skip_add_skipped
  *
  * Purpose:	Test filling first row of direct blocks, then
  *              add object too large for any blocks in first three rows of
@@ -7276,7 +7282,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7319,7 +7325,7 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 2);
     state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 3);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7328,7 +7334,7 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
     /* Insert object to fill remainder of 4 * start size block */
     obj_size = DBLOCK_FREE(fh, 3) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7353,7 +7359,7 @@ test_abs_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
     /* Insert one more object, to create new 4 * start size direct block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7381,11 +7387,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_row_skip_add_skipped() */
+} /* test_man_fill_row_skip_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_skip_direct_skip_indirect_two_rows_add_skipped
+ * Function:	test_man_skip_direct_skip_indirect_two_rows_add_skipped
  *
  * Purpose:	Test adding object too large for all but the last row in the
  *              direct blocks in root indirect block, then
@@ -7403,7 +7409,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7444,7 +7450,7 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
      */
     obj_size = DBLOCK_SIZE(fh, row - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, row - 1);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Compute heap size & free space when all direct blocks allocated */
@@ -7461,7 +7467,7 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     obj_size = DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
     for(v = 0; v < cparam->managed.width; v++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, num_direct_rows - 1);
-        if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
             TEST_ERROR
     } /* end for */
 
@@ -7481,7 +7487,7 @@ test_abs_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
      */
     obj_size = DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_direct_rows - 1);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7509,11 +7515,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_skip_direct_skip_indirect_two_rows_add_skipped() */
+} /* test_man_skip_direct_skip_indirect_two_rows_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_direct_skip_indirect_start_block_add_skipped
+ * Function:	test_man_fill_direct_skip_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              add object too large for initial block in first row of direct
@@ -7530,7 +7536,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7567,7 +7573,7 @@ test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
      */
     obj_size = DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7586,7 +7592,7 @@ test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
 
     /* Insert an object to fill up the (biggest) heap block created */
     obj_size = DBLOCK_FREE(fh, 3) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7604,7 +7610,7 @@ test_abs_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     /* Insert one more object, to create new 4 * start size direct block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7632,11 +7638,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_direct_skip_indirect_start_block_add_skipped() */
+} /* test_man_fill_direct_skip_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped
+ * Function:	test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              add object too large for all direct blocks in first row of
@@ -7654,7 +7660,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7698,7 +7704,7 @@ test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
      */
     obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7707,7 +7713,7 @@ test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7733,7 +7739,7 @@ test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Perform common file & heap close operations */
@@ -7760,11 +7766,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped() */
+} /* test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped
+ * Function:	test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, except the last
@@ -7783,7 +7789,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7839,7 +7845,7 @@ test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7848,7 +7854,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7875,7 +7881,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -7903,11 +7909,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
+} /* test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped
+ * Function:	test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              add object too large for all direct blocks in first row of
@@ -7929,7 +7935,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -7976,7 +7982,7 @@ test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7985,7 +7991,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -7998,7 +8004,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, 4);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8010,7 +8016,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8021,7 +8027,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     obj_size = DBLOCK_FREE(fh, 4);
     for(u = 1; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 4);
-        if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
             TEST_ERROR
     } /* end for */
 
@@ -8050,7 +8056,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8078,11 +8084,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped() */
+} /* test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_direct_skip_indirect_two_rows_add_skipped
+ * Function:	test_man_fill_direct_skip_indirect_two_rows_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              add object too large for initial block in first two rows of
@@ -8099,7 +8105,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8143,7 +8149,7 @@ test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
      */
     obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8152,7 +8158,7 @@ test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
     /* Insert an object to fill up the (biggest) heap block created */
     obj_size = DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8202,7 +8208,7 @@ test_abs_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8230,11 +8236,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_direct_skip_indirect_two_rows_add_skipped() */
+} /* test_man_fill_direct_skip_indirect_two_rows_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped
+ * Function:	test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              add object too large for initial block in first two rows of
@@ -8253,7 +8259,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8297,7 +8303,7 @@ test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
      */
     obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8306,7 +8312,7 @@ test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
 
     /* Insert an object to fill up the (biggest) heap block created */
     obj_size = DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8319,7 +8325,7 @@ test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
      */
     obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 3) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 2);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8328,7 +8334,7 @@ test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
 
     /* Insert an object to fill up the (2nd biggest) heap block created */
     obj_size = DBLOCK_FREE(fh, max_dblock_rows - 2) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8383,7 +8389,7 @@ test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8411,11 +8417,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped() */
+} /* test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_2nd_direct_skip_start_block_add_skipped
+ * Function:	test_man_fill_2nd_direct_skip_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, the insert object
@@ -8433,7 +8439,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8479,7 +8485,7 @@ test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
      */
     obj_size = DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8488,7 +8494,7 @@ test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, 3) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8510,7 +8516,7 @@ test_abs_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8538,11 +8544,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_2nd_direct_skip_start_block_add_skipped() */
+} /* test_man_fill_2nd_direct_skip_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped
+ * Function:	test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -8562,7 +8568,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8616,7 +8622,7 @@ test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
      */
     obj_size = DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8625,7 +8631,7 @@ test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, 3) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8649,7 +8655,7 @@ test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8677,11 +8683,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped() */
+} /* test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped
+ * Function:	test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -8700,7 +8706,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8762,7 +8768,7 @@ test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8771,7 +8777,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8800,7 +8806,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8828,11 +8834,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
+} /* test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped
+ * Function:	test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -8852,7 +8858,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -8917,7 +8923,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows + 1);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8929,7 +8935,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -8962,7 +8968,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows + 1);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -8990,11 +8996,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped() */
+} /* test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped
+ * Function:	test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, all 3rd level
@@ -9015,7 +9021,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -9087,7 +9093,7 @@ test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9096,7 +9102,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9124,7 +9130,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -9152,11 +9158,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped() */
+} /* test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped
+ * Function:	test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, all 3rd level
@@ -9178,7 +9184,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -9257,7 +9263,7 @@ test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9266,7 +9272,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9293,7 +9299,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -9321,11 +9327,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
+} /* test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped
+ * Function:	test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -9345,7 +9351,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -9415,7 +9421,7 @@ test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9424,7 +9430,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9453,7 +9459,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -9481,11 +9487,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped() */
+} /* test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped
+ * Function:	test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -9507,7 +9513,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -9593,7 +9599,7 @@ test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9602,7 +9608,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9631,7 +9637,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -9659,11 +9665,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
+} /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped
+ * Function:	test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -9687,7 +9693,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -9806,7 +9812,7 @@ test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9815,7 +9821,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -9844,7 +9850,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -9872,11 +9878,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped() */
+} /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped
+ * Function:	test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -9902,7 +9908,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10003,7 +10009,7 @@ test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10012,7 +10018,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10041,7 +10047,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -10069,11 +10075,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
+} /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped
+ * Function:	test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped
  *
  * Purpose:	Test filling all direct blocks in root indirect block and all
  *              direct blocks in 2nd level indirect blocks, fill all direct
@@ -10099,7 +10105,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10236,7 +10242,7 @@ test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10245,7 +10251,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
     /* Insert object to fill space in (large) block created */
     obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10274,7 +10280,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Add one more object, to create another "large" block */
     obj_size = SMALL_OBJ_SIZE1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -10302,13 +10308,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
+} /* test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
 #endif /* QAK */
 
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_frag_simple
+ * Function:	test_man_frag_simple
  *
  * Purpose:	Test inserting objects small enough to fit into first row of
  *              direct blocks, but not to share a block with another object,
@@ -10327,7 +10333,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10360,7 +10366,7 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     state.man_free_space = DBLOCK_FREE(fh, 0);
     for(u = 0; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-        if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
             TEST_ERROR
         if(u == 0) {
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
@@ -10371,7 +10377,7 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     state.man_free_space += DBLOCK_FREE(fh, 1) * cparam->managed.width;
     for(u = 0; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 1);
-        if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
             TEST_ERROR
     } /* end for */
 
@@ -10387,7 +10393,7 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* Add one more object, to create a 2 * start_block_size block */
     state.man_alloc_size += DBLOCK_SIZE(fh, 2);
-    if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10397,10 +10403,10 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Go back and fill in direct blocks of initial block size (which have large free space in them) */
     obj_size = DBLOCK_FREE(fh, 0) - obj_size;
     for(u = 0; u < cparam->managed.width; u++)
-        if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
             TEST_ERROR
     for(u = 0; u < cparam->managed.width; u++)
-        if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
             TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -10409,7 +10415,7 @@ test_abs_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* Fill in 2 * start_block_size block */
     obj_size = DBLOCK_FREE(fh, 2) - (DBLOCK_SIZE(fh, 0) / 2);
-    if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+    if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
 
@@ -10437,11 +10443,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_frag_simple() */
+} /* test_man_frag_simple() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_frag_direct
+ * Function:	test_man_frag_direct
  *
  * Purpose:	Test inserting small object to fit into each direct block
  *              in root block, but not to share a block with another object,
@@ -10459,7 +10465,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10496,7 +10502,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* First row */
     for(u = 0; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 0);
-        if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
             TEST_ERROR
         if(u == 0) {
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
@@ -10508,7 +10514,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Second row */
     for(u = 0; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 1);
-        if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
             TEST_ERROR
     } /* end for */
 
@@ -10527,7 +10533,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         obj_size = DBLOCK_SIZE(fh, u + 2) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u + 2);
-            if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR
         } /* end for */
     } /* end for */
@@ -10547,7 +10553,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         obj_size = DBLOCK_SIZE(fh, u + 4) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u + 4);
-            if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR
         } /* end for */
     } /* end for */
@@ -10566,7 +10572,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_SIZE(fh, 8) / 2;
     for(v = 0; v < cparam->managed.width; v++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 8);
-        if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+        if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
             TEST_ERROR
     } /* end for */
 
@@ -10578,7 +10584,7 @@ test_abs_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     for(u = 0; u < root_direct_rows; u++) {
         obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
-            if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
     } /* end for */
 
@@ -10607,11 +10613,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_frag_direct() */
+} /* test_man_frag_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_frag_2nd_direct
+ * Function:	test_man_frag_2nd_direct
  *
  * Purpose:	Test filling all direct blocks in root indirect block, then
  *              inserting small object to fit into each direct block
@@ -10631,7 +10637,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10678,7 +10684,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
         obj_size = DBLOCK_SIZE(fh, u) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u);
-            if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR
         } /* end for */
     } /* end for */
@@ -10691,7 +10697,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
     for(u = 0; u < num_first_indirect_rows; u++) {
         obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
-            if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
     } /* end for */
 
@@ -10720,11 +10726,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_frag_2nd_direct() */
+} /* test_man_frag_2nd_direct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_frag_3rd_direct
+ * Function:	test_man_frag_3rd_direct
  *
  * Purpose:	Test filling all direct blocks in root indirect block and
  *              all 2nd level indirect blocks, then
@@ -10745,7 +10751,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10797,7 +10803,7 @@ test_abs_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         obj_size = DBLOCK_SIZE(fh, u) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u);
-            if(add_obj(fh, dxpl, 10, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR
         } /* end for */
     } /* end for */
@@ -10810,7 +10816,7 @@ test_abs_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     for(u = 0; u < root_direct_rows; u++) {
         obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
-            if(add_obj(fh, dxpl, 20, obj_size, &state, &keep_ids))
+            if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
     } /* end for */
 
@@ -10839,13 +10845,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_frag_3rd_direct() */
+} /* test_man_frag_3rd_direct() */
 #endif /* QAK */
 
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_random_managed
+ * Function:	test_man_random
  *
  * Purpose:	Test inserting random sized objects (that are smaller than
  *              the standalone size) into a heap, and read them back.
@@ -10862,7 +10868,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_random_managed(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -10939,9 +10945,9 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * HEAP_ID_LEN], HEAP_ID_LEN);
-            HDmemcpy(&keep_ids.ids[u * HEAP_ID_LEN], &keep_ids.ids[(u + pos) * HEAP_ID_LEN], HEAP_ID_LEN);
-            HDmemcpy(&keep_ids.ids[(u + pos) * HEAP_ID_LEN], temp_id, HEAP_ID_LEN);
+            HDmemcpy(temp_id, &keep_ids.ids[u * HEAP_ID_LEN], (size_t)HEAP_ID_LEN);
+            HDmemcpy(&keep_ids.ids[u * HEAP_ID_LEN], &keep_ids.ids[(u + pos) * HEAP_ID_LEN], (size_t)HEAP_ID_LEN);
+            HDmemcpy(&keep_ids.ids[(u + pos) * HEAP_ID_LEN], temp_id, (size_t)HEAP_ID_LEN);
         } /* end if */
     } /* end for */
 
@@ -11011,11 +11017,11 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_random_managed() */
+} /* test_man_random() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_abs_random_pow2_managed
+ * Function:	test_man_random_pow2
  *
  * Purpose:	Test inserting random sized objects (that are smaller than the
  *              standalone size) with a "power of 2 distribution" into a heap,
@@ -11033,7 +11039,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_abs_random_pow2_managed(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+test_man_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
@@ -11122,9 +11128,9 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * HEAP_ID_LEN], HEAP_ID_LEN);
-            HDmemcpy(&keep_ids.ids[u * HEAP_ID_LEN], &keep_ids.ids[(u + pos) * HEAP_ID_LEN], HEAP_ID_LEN);
-            HDmemcpy(&keep_ids.ids[(u + pos) * HEAP_ID_LEN], temp_id, HEAP_ID_LEN);
+            HDmemcpy(temp_id, &keep_ids.ids[u * HEAP_ID_LEN], (size_t)HEAP_ID_LEN);
+            HDmemcpy(&keep_ids.ids[u * HEAP_ID_LEN], &keep_ids.ids[(u + pos) * HEAP_ID_LEN], (size_t)HEAP_ID_LEN);
+            HDmemcpy(&keep_ids.ids[(u + pos) * HEAP_ID_LEN], temp_id, (size_t)HEAP_ID_LEN);
         } /* end if */
     } /* end for */
 
@@ -11194,8 +11200,153 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
-} /* test_abs_random_pow2_managed() */
+} /* test_man_random_pow2() */
 #endif /* QAK */
+#endif /* QAK2 */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_huge_insert_one
+ *
+ * Purpose:	Test inserting one huge object in the heap
+ *
+ *              Then, remove all the objects, in various ways
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, August  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    off_t       empty_size;             /* Size of a file with an empty heap */
+    off_t       file_size;              /* Size of file currently */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
+    unsigned char *obj = NULL;          /* Buffer for object to insert */
+    unsigned char *robj = NULL;         /* Buffer for object read */
+    size_t      obj_size;               /* Size of object */
+    size_t      robj_size;              /* Size of object read */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    const char *base_desc = "insert one huge object, then remove %s";       /* Test description */
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Perform common test initialization operations */
+    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
+        TEST_ERROR
+
+    /* Allocate space for the object */
+    obj_size = SMALL_STAND_SIZE + 1;
+    obj = H5MM_malloc(obj_size);
+    robj = H5MM_malloc(obj_size);
+
+    /* Insert object too large for managed heap blocks */
+    if(H5HF_insert(fh, dxpl, obj_size, obj, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size = obj_size;
+    state.huge_nobjs = 1;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    if(H5HF_read(fh, dxpl, heap_id, robj) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(obj, robj, obj_size))
+        TEST_ERROR
+
+    /* Delete individual objects, if we won't be deleting the entire heap later */
+    if(tparam->del_dir != FHEAP_DEL_HEAP) {
+        /* Remove object from heap */
+        if(H5HF_remove(fh, dxpl, heap_id) < 0)
+            FAIL_STACK_ERROR
+
+        /* Check for closing & re-opening the heap */
+        if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+            TEST_ERROR
+
+        /* Check up on heap... */
+        state.huge_size = 0;
+        state.huge_nobjs = 0;
+        if(check_stats(fh, &state))
+            TEST_ERROR
+    } /* end if */
+
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Check for deleting the entire heap */
+    if(tparam->del_dir == FHEAP_DEL_HEAP) {
+        /* Delete heap */
+        if(H5HF_delete(f, dxpl, fh_addr) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0)
+        TEST_ERROR
+#ifdef QAK
+HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
+#endif /* QAK */
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+    H5MM_xfree(obj);
+    H5MM_xfree(robj);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        H5MM_xfree(obj);
+        H5MM_xfree(robj);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_huge_insert_one() */
 
 
 /*-------------------------------------------------------------------------
@@ -11282,6 +11433,7 @@ curr_test = FHEAP_TEST_REOPEN;
         nerrors += test_create(fapl, &cparam, &tparam);
         nerrors += test_reopen(fapl, &cparam, &tparam);
 
+#ifndef QAK2
 #ifndef QAK
         {
         fheap_test_fill_t fill;        /* Size of objects to fill heap blocks with */
@@ -11314,47 +11466,47 @@ fill = FHEAP_TEST_FILL_LARGE;
             } /* end switch */
 
             /*
-             * Test fractal heap object insertion
+             * Test fractal heap managed object insertion
              */
 #ifdef ALL_INSERT_TESTS
             /* Simple insertion */
-            nerrors += test_abs_insert_first(fapl, &cparam, &tparam);
-            nerrors += test_abs_insert_second(fapl, &cparam, &tparam);
-            nerrors += test_abs_insert_root_mult(fapl, &cparam, &tparam);
-            nerrors += test_abs_insert_force_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_insert_fill_second(fapl, &cparam, &tparam);
-            nerrors += test_abs_insert_third_direct(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_first_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_start_second_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_second_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_start_third_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_fourth_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_all_root_direct(fapl, &cparam, &tparam);
-            nerrors += test_abs_first_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_second_direct_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_first_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_second_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_second_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_recursive_indirect_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_start_2nd_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_recursive_indirect_two_deep(fapl, &cparam, &tparam);
-            nerrors += test_abs_start_3rd_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_first_3rd_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_3rd_recursive_indirect_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_all_3rd_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_start_4th_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_first_4th_recursive_indirect(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_4th_recursive_indirect_row(fapl, &cparam, &tparam);
-            nerrors += test_abs_fill_all_4th_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_first(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_second(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_root_mult(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_force_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_fill_second(fapl, &cparam, &tparam);
+            nerrors += test_man_insert_third_direct(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_first_row(fapl, &cparam, &tparam);
+            nerrors += test_man_start_second_row(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_second_row(fapl, &cparam, &tparam);
+            nerrors += test_man_start_third_row(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_fourth_row(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_all_root_direct(fapl, &cparam, &tparam);
+            nerrors += test_man_first_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_second_direct_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_first_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_second_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_second_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_recursive_indirect_row(fapl, &cparam, &tparam);
+            nerrors += test_man_start_2nd_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_recursive_indirect_two_deep(fapl, &cparam, &tparam);
+            nerrors += test_man_start_3rd_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_first_3rd_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_3rd_recursive_indirect_row(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_all_3rd_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_start_4th_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_first_4th_recursive_indirect(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_4th_recursive_indirect_row(fapl, &cparam, &tparam);
+            nerrors += test_man_fill_all_4th_recursive_indirect(fapl, &cparam, &tparam);
 #endif /* ALL_INSERT_TESTS */
             /* If this test fails, uncomment the tests above, which build up to this
              * level of complexity gradually. -QAK
              */
 #ifndef QAK
             if (ExpressMode > 1)
-                printf("***Express test mode on.  test_abs_start_5th_recursive_indirect is skipped\n");
+                printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
             else
-                nerrors += test_abs_start_5th_recursive_indirect(fapl, &cparam, &tparam);
+                nerrors += test_man_start_5th_recursive_indirect(fapl, &cparam, &tparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
@@ -11364,18 +11516,18 @@ HDfprintf(stderr, "Uncomment tests!\n");
              */
             /* Simple removal */
 #ifndef QAK
-            nerrors += test_abs_remove_bogus(fapl, &cparam, &tparam);
-            nerrors += test_abs_remove_one(fapl, &cparam, &tparam);
-            nerrors += test_abs_remove_two(fapl, &cparam, &tparam);
-            nerrors += test_abs_remove_one_larger(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_bogus(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_one(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_two(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_one_larger(fapl, &cparam, &tparam);
             tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_abs_remove_two_larger(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_two_larger(fapl, &cparam, &tparam);
             tparam.del_dir = FHEAP_DEL_REVERSE;
-            nerrors += test_abs_remove_two_larger(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_two_larger(fapl, &cparam, &tparam);
             tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_abs_remove_three_larger(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_three_larger(fapl, &cparam, &tparam);
             tparam.del_dir = FHEAP_DEL_REVERSE;
-            nerrors += test_abs_remove_three_larger(fapl, &cparam, &tparam);
+            nerrors += test_man_remove_three_larger(fapl, &cparam, &tparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
@@ -11405,51 +11557,51 @@ tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
 
 #ifndef QAK
                     /* Simple insertion patterns */
-                    nerrors += test_abs_remove_root_direct(fapl, &cparam, &tparam);
-                    nerrors += test_abs_remove_two_direct(fapl, &cparam, &tparam);
-                    nerrors += test_abs_remove_first_row(fapl, &cparam, &tparam);
-                    nerrors += test_abs_remove_first_two_rows(fapl, &cparam, &tparam);
-                    nerrors += test_abs_remove_first_four_rows(fapl, &cparam, &tparam);
+                    nerrors += test_man_remove_root_direct(fapl, &cparam, &tparam);
+                    nerrors += test_man_remove_two_direct(fapl, &cparam, &tparam);
+                    nerrors += test_man_remove_first_row(fapl, &cparam, &tparam);
+                    nerrors += test_man_remove_first_two_rows(fapl, &cparam, &tparam);
+                    nerrors += test_man_remove_first_four_rows(fapl, &cparam, &tparam);
                     if (ExpressMode > 1)
                         printf("***Express test mode on.  Some tests skipped\n");
                     else {
-                        nerrors += test_abs_remove_all_root_direct(fapl, &cparam, &tparam);
-                        nerrors += test_abs_remove_2nd_indirect(fapl, &cparam, &tparam);
-                        nerrors += test_abs_remove_3rd_indirect(fapl, &cparam, &tparam);
+                        nerrors += test_man_remove_all_root_direct(fapl, &cparam, &tparam);
+                        nerrors += test_man_remove_2nd_indirect(fapl, &cparam, &tparam);
+                        nerrors += test_man_remove_3rd_indirect(fapl, &cparam, &tparam);
                     } /* end else */
 #endif /* QAK */
 
 #ifndef QAK
                     /* Skip blocks insertion */
                     /* (covers insertion & deletion of skipped blocks) */
-                    nerrors += test_abs_skip_start_block(fapl, &cparam, &tparam);
-                    nerrors += test_abs_skip_start_block_add_back(fapl, &cparam, &tparam);
-                    nerrors += test_abs_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_skip_2nd_block(fapl, &cparam, &tparam);
-                    nerrors += test_abs_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_one_partial_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_row_skip_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_direct_skip_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-                    nerrors += test_abs_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_start_block(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_start_block_add_back(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_2nd_block(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_one_partial_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_row_skip_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_direct_skip_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_2nd_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+                    nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
                     if (ExpressMode > 1)
                         printf("***Express test mode on.  Some tests skipped\n");
                     else {
-                        nerrors += test_abs_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
-                        nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
-                        nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &cparam, &tparam);
-                        nerrors += test_abs_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
-                        nerrors += test_abs_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+                        nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &cparam, &tparam);
+                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &cparam, &tparam);
+                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &cparam, &tparam);
+                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
+                        nerrors += test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &cparam, &tparam);
                     } /* end else */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
@@ -11458,10 +11610,10 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #ifndef QAK
                     /* Fragmented insertion patterns */
                     /* (covers insertion & deletion of fragmented blocks) */
-                    nerrors += test_abs_frag_simple(fapl, &cparam, &tparam);
-                    nerrors += test_abs_frag_direct(fapl, &cparam, &tparam);
-                    nerrors += test_abs_frag_2nd_direct(fapl, &cparam, &tparam);
-                    nerrors += test_abs_frag_3rd_direct(fapl, &cparam, &tparam);
+                    nerrors += test_man_frag_simple(fapl, &cparam, &tparam);
+                    nerrors += test_man_frag_direct(fapl, &cparam, &tparam);
+                    nerrors += test_man_frag_2nd_direct(fapl, &cparam, &tparam);
+                    nerrors += test_man_frag_3rd_direct(fapl, &cparam, &tparam);
 #else /* QAK */
     HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
@@ -11489,16 +11641,28 @@ HDfprintf(stderr, "Uncomment tests!\n");
             /* (reduce size of tests when re-opening each time) */
 /* XXX: Try to speed things up enough that these tests don't have to be reduced */
             tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_abs_random_managed((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &cparam, &tparam);
-            nerrors += test_abs_random_pow2_managed((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &cparam, &tparam);
+            nerrors += test_man_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &cparam, &tparam);
+            nerrors += test_man_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &cparam, &tparam);
 
             tparam.del_dir = FHEAP_DEL_HEAP;
-            nerrors += test_abs_random_managed((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &cparam, &tparam);
-            nerrors += test_abs_random_pow2_managed((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &cparam, &tparam);
+            nerrors += test_man_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &cparam, &tparam);
+            nerrors += test_man_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &cparam, &tparam);
         } /* end else */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
+#else /* QAK2 */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK2 */
+
+        /*
+         * Test fractal heap huge object insertion
+         */
+        tparam.del_dir = FHEAP_DEL_FORWARD;
+        nerrors += test_huge_insert_one(fapl, &cparam, &tparam);
+
+        tparam.del_dir = FHEAP_DEL_HEAP;
+        nerrors += test_huge_insert_one(fapl, &cparam, &tparam);
 
 #ifndef QAK
     } /* end for */

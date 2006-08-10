@@ -758,7 +758,7 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
      */
     if(!(*flags & H5FS_ADD_DESERIALIZING)) {
         H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-        H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+        H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
         H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
         hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
 
@@ -899,7 +899,7 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 {
     H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -962,7 +962,7 @@ static htri_t
 H5HF_sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -1026,7 +1026,7 @@ static herr_t
 H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     H5HF_direct_t *dblock;          /* Pointer to direct block for section */
@@ -1768,7 +1768,7 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 {
     H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1847,7 +1847,7 @@ static htri_t
 H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void UNUSED *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -1893,7 +1893,7 @@ H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
     H5HF_free_section_t *top_indir_sect; /* Top indirect section for row */
-    H5HF_add_ud1_t *udata = (H5HF_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */

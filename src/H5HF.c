@@ -355,7 +355,9 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 
     /* Check if object is large enough to be standalone */
     if(size > hdr->max_man_size) {
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported yet")
+        /* Store 'huge' object in heap */
+        if(H5HF_huge_insert(hdr, dxpl_id, size, obj, id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for 'managed' object in fractal heap")
     } /* end if */
     else {
         /* Check if we are in "append only" mode, or if there's enough room for the object */
@@ -363,15 +365,9 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "standalone blocks not supported ye
 HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not supported yet")
         } /* end if */
         else {
-            H5HF_free_section_t *sec_node;         /* Pointer to free space section */
-
-            /* Find free space in heap */
-            if(H5HF_man_find(hdr, dxpl_id, size, &sec_node) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space in fractal heap")
-
-            /* Use free space for allocating object */
-            if(H5HF_man_insert(hdr, dxpl_id, sec_node, size, obj, id) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for object in fractal heap")
+            /* Allocate space for object in 'managed' heap */
+            if(H5HF_man_insert(hdr, dxpl_id, size, obj, id) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for 'managed' object in fractal heap")
         } /* end else */
     } /* end else */
 
@@ -397,7 +393,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
+H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
 {
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
     uint8_t id_flags;                   /* Heap ID flag bits */
@@ -419,13 +415,17 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
-    /* Check for managed object */
+    /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Skip over object offset */
         id += fh->hdr->heap_off_size;
 
         /* Retrieve the entry length */
         UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->heap_len_size);
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        if(H5HF_huge_get_obj_len(fh->hdr, dxpl_id, id, obj_len_p) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's length")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -473,21 +473,16 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
-    /* Check for managed object */
+    /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
-        hsize_t obj_off;                    /* Object's offset in heap */
-        size_t obj_len;                     /* Object's length in heap */
-
-        /* Decode the object offset within the heap & it's length */
-        UINT64DECODE_VAR(id, obj_off, fh->hdr->heap_off_size);
-        UINT64DECODE_VAR(id, obj_len, fh->hdr->heap_len_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
-#endif /* QAK */
-
         /* Read object from managed heap blocks */
-        if(H5HF_man_read(fh->hdr, dxpl_id, obj_off, obj_len, obj) < 0)
+        if(H5HF_man_read(fh->hdr, dxpl_id, id, obj) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Read 'huge' object from file */
+        if(H5HF_huge_read(fh->hdr, dxpl_id, id, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'huge' object from fractal heap")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -535,28 +530,16 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
-    /* Check for managed object */
+    /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
-        hsize_t obj_off;                    /* Object's offset in heap */
-        size_t obj_len;                     /* Object's length in heap */
-
-        /* Decode the object offset within the heap & it's length */
-#ifdef QAK
-HDfprintf(stderr, "%s: fh->hdr->heap_off_size = %u, fh->hdr->heap_len_size = %u\n", FUNC, (unsigned)fh->hdr->heap_off_size, (unsigned)fh->hdr->heap_len_size);
-#endif /* QAK */
-        UINT64DECODE_VAR(id, obj_off, fh->hdr->heap_off_size);
-        UINT64DECODE_VAR(id, obj_len, fh->hdr->heap_len_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
-#endif /* QAK */
-
-        /* Sanity check parameters */
-        HDassert(obj_off);
-        HDassert(obj_len);
-
         /* Remove object from managed heap blocks */
-        if(H5HF_man_remove(fh->hdr, dxpl_id, obj_off, obj_len) < 0)
+        if(H5HF_man_remove(fh->hdr, dxpl_id, id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Remove 'huge' object from file & v2 B-tree tracker */
+        if(H5HF_huge_remove(fh->hdr, dxpl_id, id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'huge' object from fractal heap")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -611,7 +594,7 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
         if(H5HF_space_close(fh->hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
 
-        /* Reset the block iterator */
+        /* Reset the block iterator, if necessary */
         /* (Can't put this in header "destroy" routine, because it has
          *      pointers to indirect blocks in the heap, which would create
          *      a reference loop and the objects couldn't be removed from
@@ -622,14 +605,20 @@ HDfprintf(stderr, "%s; fh->hdr->man_iter_off = %Hu\n", FUNC, fh->hdr->man_iter_o
 HDfprintf(stderr, "%s; fh->hdr->man_size = %Hu\n", FUNC, fh->hdr->man_size);
 HDfprintf(stderr, "%s; fh->hdr->rc = %Zu\n", FUNC, fh->hdr->rc);
 #endif /* QAK */
-        /* Reset block iterator, if necessary */
-        if(H5HF_man_iter_ready(&fh->hdr->next_block)) {
+        if(H5HF_man_iter_ready(&fh->hdr->next_block))
             if(H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
-        } /* end if */
 #ifdef QAK
 HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr->rc);
 #endif /* QAK */
+
+        /* Shut down the huge object information */
+        /* (Can't put this in header "destroy" routine, because it has
+         *      has the address of an object in the file, which might be
+         *      by the shutdown routine - QAK)
+         */
+        if(H5HF_huge_term(fh->hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info")
 
         /* Decrement the reference count on the heap header */
         if(H5HF_hdr_decr(fh->hdr) < 0)
@@ -710,6 +699,16 @@ HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable
             if(H5HF_man_iblock_delete(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root indirect block")
         } /* end else */
+    } /* end if */
+
+    /* Check for 'huge' objects in heap */
+    if(H5F_addr_defined(hdr->huge_bt2_addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
+#endif /* QAK */
+        /* Delete huge objects in heap and their tracker */
+        if(H5HF_huge_delete(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
     } /* end if */
 
     /* Release header's disk space */

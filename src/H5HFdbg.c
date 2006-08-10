@@ -256,7 +256,7 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      hdr->huge_next_id);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Address of v2 B-tree for 'huge' objects:",
-	      hdr->huge_bt_addr);
+	      hdr->huge_bt2_addr);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
     H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth -3));

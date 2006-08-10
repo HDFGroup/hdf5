@@ -14,7 +14,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HFint.c
+ * Created:		H5HFman.c
  *			Feb 24 2006
  *			Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
@@ -206,64 +206,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_find
- *
- * Purpose:	Find space for an object in a managed obj. heap
- *
- * Return:	Non-negative on success (with direct block info
- *              filled in), negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 13 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HF_man_find(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t request,
-    H5HF_free_section_t **sec_node/*out*/)
-{
-    htri_t node_found;                  /* Whether an existing free list node was found */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_find)
-#ifdef QAK
-HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(hdr);
-    HDassert(request > 0);
-    HDassert(sec_node);
-
-    /* Look for free space */
-    if((node_found = H5HF_space_find(hdr, dxpl_id, (hsize_t)request, sec_node)) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
-#ifdef QAK
-HDfprintf(stderr, "%s: After H5HF_space_find(), node_found = %t\n", FUNC, node_found);
-#endif /* QAK */
-
-    /* If we didn't find a node, go create a direct block big enough to hold the requested block */
-    if(!node_found)
-        /* Allocate direct block big enough to hold requested size */
-        if(H5HF_man_dblock_new(hdr, dxpl_id, request, sec_node) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create fractal heap direct block")
-
-    HDassert(*sec_node);
-#ifdef QAK
-HDfprintf(stderr, "%s: (*sec_node)->sect_info.addr = %a\n", FUNC, (*sec_node)->sect_info.addr);
-HDfprintf(stderr, "%s: (*sec_node)->sect_info.size = %Hu\n", FUNC, (*sec_node)->sect_info.size);
-HDfprintf(stderr, "%s: (*sec_node)->sect_info.type = %u\n", FUNC, (*sec_node)->sect_info.type);
-#endif /* QAK */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_man_find() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5HF_man_insert
  *
  * Purpose:	Insert an object in a managed direct block
@@ -277,13 +219,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sec_node,
-    size_t obj_size, const void *obj, void *_id)
+H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, const void *obj,
+    void *_id)
 {
+    H5HF_free_section_t *sec_node;      /* Pointer to free space section */
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to modify */
     haddr_t dblock_addr = HADDR_UNDEF;  /* Direct block address */
     uint8_t *id = (uint8_t *)_id;       /* Pointer to ID buffer */
     size_t blk_off;                     /* Offset of object within block */
+    htri_t node_found;                  /* Whether an existing free list node was found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_insert)
@@ -298,6 +242,19 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
     HDassert(obj_size > 0);
     HDassert(obj);
     HDassert(id);
+
+    /* Look for free space */
+    if((node_found = H5HF_space_find(hdr, dxpl_id, (hsize_t)obj_size, &sec_node)) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
+#ifdef QAK
+HDfprintf(stderr, "%s: After H5HF_space_find(), node_found = %t\n", FUNC, node_found);
+#endif /* QAK */
+
+    /* If we didn't find a node, go create a direct block big enough to hold the requested block */
+    if(!node_found)
+        /* Allocate direct block big enough to hold requested size */
+        if(H5HF_man_dblock_new(hdr, dxpl_id, obj_size, &sec_node) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create fractal heap direct block")
 
     /* Check for row section */
     if(sec_node->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
@@ -318,7 +275,7 @@ HDfprintf(stderr, "%s: sec_node->u.row.num_entries = %u\n", FUNC, sec_node->u.ro
     } /* end if */
     HDassert(sec_node->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
 
-    /* Check for serialized 'single' section */
+    /* Check for 'single' section being serialized */
     if(sec_node->sect_info.state == H5FS_SECT_SERIALIZED) {
         if(H5HF_sect_single_revive(hdr, dxpl_id, sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
@@ -417,9 +374,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off, size_t obj_len, void *obj)
+H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
 {
     H5HF_direct_t *dblock;              /* Pointer to direct block to query */
+    hsize_t obj_off;                    /* Object's offset in heap */
+    size_t obj_len;                     /* Object's length in heap */
     size_t blk_off;                     /* Offset of object in block */
     uint8_t *p;                         /* Temporary pointer to obj info in block */
     haddr_t dblock_addr;                /* Direct block address */
@@ -427,17 +386,22 @@ H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off, size_t obj_len, v
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_read)
-#ifdef QAK
-HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
-#endif /* QAK */
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Decode the object offset within the heap & it's length */
+    UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
+    UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
+#endif /* QAK */
     HDassert(obj_off > 0);
     HDassert(obj_len > 0);
-    HDassert(obj);
 
     /* Check for root direct block */
     if(hdr->man_dtable.curr_root_rows == 0) {
@@ -511,24 +475,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off, size_t obj_len)
+H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
     H5HF_free_section_t *sec_node;      /* Pointer to free space section for block */
     H5HF_direct_t *dblock;              /* Pointer to direct block to query */
+    hsize_t obj_off;                    /* Object's offset in heap */
+    size_t obj_len;                     /* Object's length in heap */
     haddr_t dblock_addr;                /* Direct block address */
     size_t dblock_size;                 /* Direct block size */
     size_t blk_off;                     /* Offset of object in block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_remove)
-#ifdef QAK
-HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
-#endif /* QAK */
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
+    HDassert(id);
+
+    /* Decode the object offset within the heap & it's length */
+#ifdef QAK
+HDfprintf(stderr, "%s: fh->hdr->heap_off_size = %u, fh->hdr->heap_len_size = %u\n", FUNC, (unsigned)fh->hdr->heap_off_size, (unsigned)fh->hdr->heap_len_size);
+#endif /* QAK */
+    UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
+    UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
+#ifdef QAK
+HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
+#endif /* QAK */
     HDassert(obj_off > 0);
     HDassert(obj_len > 0);
 

@@ -498,11 +498,13 @@
 ./src/H5Gtest.c
 ./src/H5Gtraverse.c
 ./src/H5HF.c
+./src/H5HFbtree2.c
 ./src/H5HFcache.c
 ./src/H5HFdbg.c
 ./src/H5HFdblock.c
 ./src/H5HFdtable.c
 ./src/H5HFhdr.c
+./src/H5HFhuge.c
 ./src/H5HFiblock.c
 ./src/H5HFint.c
 ./src/H5HFiter.c

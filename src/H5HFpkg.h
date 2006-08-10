@@ -32,6 +32,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FSprivate.h"	/* File free space                      */
 #include "H5SLprivate.h"	/* Skip lists				*/
@@ -296,7 +297,7 @@ typedef struct H5HF_hdr_t {
     hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
     hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
     hbool_t     write_once;     /* Is heap being written in "write once" mode? */
-    hbool_t     huge_ids_wrapped;       /* Have "huge" object IDs wrapped around? */
+    hbool_t     huge_ids_wrapped;   /* Have "huge" object IDs wrapped around? */
 
     /* Doubling table information (partially stored in header) */
     /* (Partially set by user, partially derived/updated internally) */
@@ -308,8 +309,8 @@ typedef struct H5HF_hdr_t {
 
     /* "Huge" object support (stored in header) */
     uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
-    hsize_t  huge_next_id;      /* Next ID to use for "huge" object */
-    haddr_t  huge_bt_addr;      /* Address of B-tree for storing "huge" object info */
+    hsize_t  huge_next_id;      /* Next ID to use for indirectly tracked 'huge' object */
+    haddr_t  huge_bt2_addr;     /* Address of v2 B-tree for tracking "huge" object info */
 
     /* Statistics for heap (stored in header) */
     hsize_t     man_size;       /* Total amount of managed space in heap */
@@ -330,6 +331,10 @@ typedef struct H5HF_hdr_t {
     size_t      id_len;         /* Size of heap IDs (in bytes) */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
+    H5B2_class_t huge_bt2_class; /* v2 B-tree class information for "huge" object tracking */
+    hsize_t     huge_max_id;    /* Max. 'huge' heap ID before rolling 'huge' heap IDs over */
+    hbool_t     huge_ids_direct; /* Flag to indicate that 'huge' object's offset & length are stored directly in heap ID */
+    unsigned char huge_id_size;   /* Size of 'huge' heap IDs (in bytes) */
     unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
     unsigned char heap_len_size; /* Size of heap ID lengths (in bytes) */
 } H5HF_hdr_t;
@@ -396,7 +401,21 @@ typedef struct H5HF_parent_t {
 typedef struct {
     H5HF_hdr_t *hdr;            /* Fractal heap header */
     hid_t dxpl_id;              /* DXPL ID for operation */
-} H5HF_add_ud1_t;
+} H5HF_sect_add_ud1_t;
+
+/* User data for v2 B-tree 'remove' callback on 'huge' objects */
+typedef struct {
+    H5HF_hdr_t *hdr;            /* Fractal heap header (in) */
+    hid_t dxpl_id;              /* DXPL ID for operation (in) */
+    hsize_t obj_len;            /* Length of object removed (out) */
+} H5HF_huge_remove_ud1_t;
+
+/* Typedef for 'huge' object's records in the v2 B-tree */
+typedef struct H5HF_huge_bt2_rec_t {
+    haddr_t addr;       /* Address of the object in the file */
+    hsize_t len;        /* Length of the object in the file */
+    hsize_t id;         /* ID used for object (not used for 'huge' objects directly accessed) */
+} H5HF_huge_bt2_rec_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -516,19 +535,27 @@ H5_DLL H5HF_direct_t *H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     hsize_t dblock_size);
 
-/* Routines for internal operations */
+/* Managed object routines */
 H5_DLL herr_t H5HF_man_locate_block(H5HF_hdr_t *hdr, hid_t dxpl_id,
     hsize_t obj_off, hbool_t locate_indirect, H5HF_indirect_t **par_iblock,
     unsigned *par_entry, H5AC_protect_t rw);
-H5_DLL herr_t H5HF_man_find(H5HF_hdr_t *fh, hid_t dxpl_id, size_t request,
-    H5HF_free_section_t **sec_node/*out*/);
-H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id,
-    H5HF_free_section_t *sec_node, size_t obj_size, const void *obj,
-    void *id);
-H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, hsize_t obj_off,
-    size_t obj_len, void *obj);
-H5_DLL herr_t H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
-    size_t obj_len);
+H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
+    const void *obj, void *id);
+H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
+    void *obj);
+H5_DLL herr_t H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id);
+
+/* "Huge" object routines */
+H5_DLL herr_t H5HF_huge_init(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_huge_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size,
+    const void *obj, void *id);
+H5_DLL herr_t H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    const uint8_t *id, size_t *obj_len_p);
+H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
+    void *obj);
+H5_DLL herr_t H5HF_huge_remove(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id);
+H5_DLL herr_t H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr);

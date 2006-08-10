@@ -317,7 +317,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     /* "Huge" object information */
     UINT32DECODE(p, hdr->max_man_size);         /* Max. size of "managed" objects */
     H5F_DECODE_LENGTH(f, p, hdr->huge_next_id); /* Next ID to use for "huge" object */
-    H5F_addr_decode(f, &p, &hdr->huge_bt_addr); /* Address of "huge" object tracker B-tree */
+    H5F_addr_decode(f, &p, &hdr->huge_bt2_addr); /* Address of "huge" object tracker B-tree */
 
     /* "Managed" object free space information */
     H5F_DECODE_LENGTH(f, p, hdr->total_man_free); /* Internal free space in managed direct blocks */
@@ -428,7 +428,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         /* "Huge" object information */
         UINT32ENCODE(p, hdr->max_man_size);             /* Max. size of "managed" objects */
         H5F_ENCODE_LENGTH(f, p, hdr->huge_next_id);     /* Next ID to use for "huge" object */
-        H5F_addr_encode(f, &p, hdr->huge_bt_addr);      /* Address of "huge" object tracker B-tree */
+        H5F_addr_encode(f, &p, hdr->huge_bt2_addr);     /* Address of "huge" object tracker B-tree */
 
         /* "Managed" object free space information */
         H5F_ENCODE_LENGTH(f, p, hdr->total_man_free);   /* Internal free space in managed direct blocks */

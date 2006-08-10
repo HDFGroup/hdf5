@@ -91,7 +91,8 @@ H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p/*out*/);
 H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr);
 H5_DLL herr_t H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size,
     const void *obj, void *id/*out*/);
-H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, const void *id, size_t *obj_len_p/*out*/);
+H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *id,
+    size_t *obj_len_p/*out*/);
 H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
 H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);

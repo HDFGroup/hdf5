@@ -249,6 +249,10 @@ HDfprintf(stderr, "%s: row_max_dblock_free[%Zu] = %Zu\n", FUNC, u, hdr->man_dtab
     if(H5HF_man_iter_init(&hdr->next_block) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize space search block iterator")
 
+    /* Initialize the information for tracking 'huge' objects */
+    if(H5HF_huge_init(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't informan for tracking huge objects")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_finish_init() */
@@ -318,8 +322,8 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
     /* Set free list header address to indicate that the heap is empty currently */
     hdr->fs_addr = HADDR_UNDEF;
 
-    /* Set "huge" object tracker B-tree address to indicate that there aren't any yet */
-    hdr->huge_bt_addr = HADDR_UNDEF;
+    /* Set "huge" object tracker v2 B-tree address to indicate that there aren't any yet */
+    hdr->huge_bt2_addr = HADDR_UNDEF;
 
     /* Note that the shared info is dirty (it's not written to the file yet) */
     hdr->dirty = TRUE;

@@ -156,7 +156,7 @@ herr_t
 H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
     unsigned flags)
 {
-    H5HF_add_ud1_t udata;               /* User data for free space manager 'add' */
+    H5HF_sect_add_ud1_t udata;          /* User data for free space manager 'add' */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)

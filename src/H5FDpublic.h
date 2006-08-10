@@ -53,11 +53,15 @@ typedef enum H5FD_mem_t {
  * Map "fractal heap" direct blocks to 'lheap' type file memory, since they
  * will be replacing local heaps.
  *
+ * Map "fractal heap" 'huge' objects to 'draw' type file memory, since they
+ * represent large objects that are directly stored in the file.
+ *
  *      -QAK
  */
 #define H5FD_MEM_FHEAP_HDR      H5FD_MEM_OHDR
 #define H5FD_MEM_FHEAP_IBLOCK   H5FD_MEM_OHDR
 #define H5FD_MEM_FHEAP_DBLOCK   H5FD_MEM_LHEAP
+#define H5FD_MEM_FHEAP_HUGE_OBJ H5FD_MEM_DRAW
 
 /* Map "free space" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
