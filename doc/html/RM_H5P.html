@@ -108,7 +108,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CopyProp">H5Pcopy_prop</a> 
     <li><a href="#Property-Remove">H5Premove</a> 
     <li><a href="#Property-Unregister">H5Punregister</a> 
-    <li><a href="#Property-CloseList">H5Pclose_list</a> 
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
   </ul>
 </td>
@@ -306,7 +305,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CopyProp">H5Pcopy_prop</a> 
     <li><a href="#Property-Remove">H5Premove</a> 
     <li><a href="#Property-Unregister">H5Punregister</a> 
-    <li><a href="#Property-CloseList">H5Pclose_list</a> 
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
     </ul>
 
@@ -483,7 +481,6 @@ See further notes in the description of each function.
       <li><a href="#Property-AllFiltersAvail">H5Pall_filters_avail</a>
       <li><a href="#Property-Close">H5Pclose</a>
       <li><a href="#Property-CloseClass">H5Pclose_class</a>
-      <li><a href="#Property-CloseList">H5Pclose_list</a>
       <li><a href="#Property-Copy">H5Pcopy</a>
       <li><a href="#Property-CopyProp">H5Pcopy_prop</a>
       <li><a href="#Property-Create">H5Pcreate</a>
@@ -951,59 +948,6 @@ END SUBROUTINE h5pclose_class_f
         -->
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pclose_list" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-CloseList">H5Pclose_list</a>
-
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pclose_list</code>(
-                  <em>hid_t</em> <code>plist</code>
-	)
-
-  <dt><strong>Purpose:</strong>
-    <dd>Closes a property list.
-
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pclose_list</code> closes a property list.  
-    
-    <p>
-    If a <code>close</code> callback exists for the property list class, 
-    it is called before the property list is destroyed.  
-    If <code>close</code> callbacks exist for any individual properties 
-    in the property list, they are called after the class 
-    <code>close</code> callback.
-
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-    <tr>
-        <td><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code><td>
-        <td>IN: Property list to close</td></tr>
-    </table></ul>
-    
-  <dt><strong>Returns:</strong>
-    <dd>Success: a non-negative value
-    <dd>Failure: a negative value
-
-  <dt><strong>Fortran90 Interface:</strong> h5pclose_list_f
-    <dd>
-	<pre>
-SUBROUTINE h5pclose_list_f(plist, hdferr)
-  IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: plist  ! Property list identifier to close
-  INTEGER, INTENT(OUT) :: hdferr       ! Error code
-                                       ! 0 on success and -1 on failure
-END SUBROUTINE h5pclose_list_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pcopy" -->
@@ -1608,7 +1552,7 @@ END SUBROUTINE h5pequal_f
 
   <dt><strong>Signature:</strong>
     <dd><em>htri_t</em> <code>H5Pexist</code>(
-                  <em>hid_t</em> <code>id</code>;
+                  <em>hid_t</em> <code>id</code>,
                   <em>const char *</em><code>name</code>
 	)
 
@@ -10825,7 +10769,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 15 June 2006");
+document.writeln("Last modified: 9 August 2006");
 -->
 </SCRIPT>
  
