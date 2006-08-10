@@ -2816,11 +2816,11 @@ END SUBROUTINE h5pget_external_count_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>hsize_t&nbsp;*</em><code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Offset in bytes within the HDF5 file.</td></tr>
+            <td valign="top"><em>hsize_t&nbsp;*</em><code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Offset in bytes within the HDF5 file.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2833,7 +2833,7 @@ SUBROUTINE
 	</pre>		
 -->
 
-		<!--<dt><strong>Non-C API(s):</strong>
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -2842,14 +2842,14 @@ SUBROUTINE
 <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>C</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.0</td>
+          <td valign="top">1.6.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+            Function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
@@ -3240,24 +3240,30 @@ END SUBROUTINE h5pget_fapl_mpiposix_f
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list 
+                identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">OUT: Maps memory usage types to other memory usage types.</td></tr>
+            <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Maps memory usage types to other 
+                memory usage types.</td></tr>
         <tr>
-		    <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
-            <td valign="top">OUT: Property list for each memory usage type.</td></tr>
+            <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
+            <td valign="top">OUT: Property list for each memory usage 
+                 type.</td></tr>
         <tr>
-		    <td valign="top"><em>const char **</em><code>memb_name</code></td>
-            <td valign="top">OUT: Name generator for names of member files.</td></tr>
+            <td valign="top"><em>const char **</em><code>memb_name</code></td>
+            <td valign="top">OUT: Name generator for names of member 
+                 files.</td></tr>
         <tr>
-		    <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
-            <td valign="top">OUT:</td></tr>
+            <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
+            <td valign="top">OUT: The offsets within the virtual address space, 
+                from 0 (zero) to <code>HADDR_MAX</code>, 
+                at which each type of data storage begins.</td></tr>
         <tr>
-		    <td valign="top"><em>hbool_t *</em><code>relax</code></td>
-            <td valign="top">OUT: Allows read-only access to incomplete file sets 
-                when <code>TRUE</code>.</td></tr>
+            <td valign="top"><em>hbool_t *</em><code>relax</code></td>
+            <td valign="top">OUT: Allows read-only access to incomplete 
+                file sets when <code>TRUE</code>.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -3657,7 +3663,7 @@ END SUBROUTINE h5pget_fill_value_f
   <dt><strong>Name:</strong> <a name="Property-GetFilter">H5Pget_filter</a>
   <dt><strong>Signature:</strong>
     <dd><em>H5Z_filter_t</em> <code>H5Pget_filter</code>(<em>hid_t</em> <code>plist</code>,
-        <em>int</em> <code>filter_number</code>,
+        <em>unsigned int</em> <code>filter_number</code>,
         <em>unsigned int *</em><code>flags</code>,
         <em>size_t *</em><code>cd_nelmts</code>,
         <em>unsigned int *</em><code>cd_values</code>,
@@ -10769,7 +10775,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 9 August 2006");
+document.writeln("Last modified: 10 August 2006");
 -->
 </SCRIPT>
  
