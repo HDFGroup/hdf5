@@ -11075,7 +11075,7 @@ test_man_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fhea
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
 #ifdef QAK
-seed = (unsigned long)1154963939;
+seed = (unsigned long)1155181717;
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
     HDsrandom(seed);

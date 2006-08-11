@@ -478,8 +478,15 @@ HDfprintf(stderr, "%s: new_next_entry = %u\n", FUNC, new_next_entry);
     if(HADDR_UNDEF == (new_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
 #ifdef QAK
-HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
+HDfprintf(stderr, "%s: Check 1.0 - iblock->addr = %a, new_addr = %a\n", FUNC, iblock->addr, new_addr);
 #endif /* QAK */
+
+    /* Move object in cache, if it actually was relocated */
+    if(H5F_addr_ne(iblock->addr, new_addr)) {
+        if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move fractal heap root indirect block")
+        iblock->addr = new_addr;
+    } /* end if */
 
     /* Re-allocate direct block entry table */
     if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
@@ -505,13 +512,6 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
     /* Mark indirect block as dirty */
     if(H5HF_iblock_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark indirect block as dirty")
-
-    /* Move object in cache, if it actually was relocated */
-    if(H5F_addr_ne(iblock->addr, new_addr)) {
-        if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move fractal heap root indirect block")
-        iblock->addr = new_addr;
-    } /* end if */
 
     /* Update other shared header info */
     hdr->man_dtable.curr_root_rows = new_nrows;
@@ -605,16 +605,16 @@ HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
 HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
 #endif /* QAK */
 
-    /* Re-allocate direct block entry table */
-    if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (iblock->nrows * hdr->man_dtable.cparam.width))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
-
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
         if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */
+
+    /* Re-allocate direct block entry table */
+    if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (iblock->nrows * hdr->man_dtable.cparam.width))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
 
     /* Mark indirect block as dirty */
     if(H5HF_iblock_dirty(iblock) < 0)
