@@ -216,7 +216,10 @@ H5_DLL herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *hdr);
 H5_DLL herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
+#ifdef H5FS_DEBUG
+H5_DLL herr_t H5FS_assert(const H5FS_t *fspace);
 H5_DLL herr_t H5FS_sect_assert(const H5FS_t *fspace);
+#endif /* H5FS_DEBUG */
 
 #endif /* _H5FSpkg_H */
 

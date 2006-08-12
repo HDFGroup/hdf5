@@ -54,9 +54,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-#ifdef H5FS_DEBUG
-herr_t H5FS_assert(const H5FS_t *fspace);
-#endif /* H5FS_DEBUG */
 
 
 /*********************/

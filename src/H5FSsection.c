@@ -1774,7 +1774,7 @@ HDfprintf(stderr, "%s: fspace->hdr->tot_sect_count = %Hu\n", "H5FS_sect_assert",
     separate_obj = 0;
 
     /* Check for bins to work on */
-    if(fspace->bins) {
+    if(fspace->sinfo->bins) {
         hsize_t acc_tot_sect_count;     /* Accumulated total section count from bins */
         hsize_t acc_serial_sect_count;  /* Accumulated serializable section count from bins */
         hsize_t acc_ghost_sect_count;   /* Accumulated ghost section count from bins */
@@ -1790,19 +1790,19 @@ HDfprintf(stderr, "%s: fspace->hdr->tot_sect_count = %Hu\n", "H5FS_sect_assert",
         acc_tot_size_count = 0;
         acc_serial_size_count = 0;
         acc_ghost_size_count = 0;
-        for(u = 0; u < fspace->nbins; u++) {
-            acc_tot_sect_count += fspace->bins[u].tot_sect_count;
-            acc_serial_sect_count += fspace->bins[u].serial_sect_count;
-            acc_ghost_sect_count += fspace->bins[u].ghost_sect_count;
-            if(fspace->bins[u].bin_list) {
+        for(u = 0; u < fspace->sinfo->nbins; u++) {
+            acc_tot_sect_count += fspace->sinfo->bins[u].tot_sect_count;
+            acc_serial_sect_count += fspace->sinfo->bins[u].serial_sect_count;
+            acc_ghost_sect_count += fspace->sinfo->bins[u].ghost_sect_count;
+            if(fspace->sinfo->bins[u].bin_list) {
                 H5SL_node_t *curr_size_node;    /* Current section size node in skip list */
                 size_t bin_serial_count;        /* # of serializable sections in this bin */
                 size_t bin_ghost_count;         /* # of ghost sections in this bin */
 
-                acc_tot_size_count += H5SL_count(fspace->bins[u].bin_list);
+                acc_tot_size_count += H5SL_count(fspace->sinfo->bins[u].bin_list);
 
                 /* Walk through the sections in this bin */
-                curr_size_node = H5SL_first(fspace->bins[u].bin_list);
+                curr_size_node = H5SL_first(fspace->sinfo->bins[u].bin_list);
                 bin_serial_count = 0;
                 bin_ghost_count = 0;
                 while(curr_size_node != NULL) {
@@ -1868,30 +1868,30 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
                 } /* end while */
 
                 /* Check the number of serializable & ghost sections in this bin */
-                HDassert(fspace->bins[u].tot_sect_count == (bin_serial_count + bin_ghost_count));
-                HDassert(fspace->bins[u].serial_sect_count == bin_serial_count);
-                HDassert(fspace->bins[u].ghost_sect_count == bin_ghost_count);
+                HDassert(fspace->sinfo->bins[u].tot_sect_count == (bin_serial_count + bin_ghost_count));
+                HDassert(fspace->sinfo->bins[u].serial_sect_count == bin_serial_count);
+                HDassert(fspace->sinfo->bins[u].ghost_sect_count == bin_ghost_count);
             } /* end if */
         } /* end for */
 
         /* Check counts from bins vs. global counts */
-        HDassert(fspace->tot_size_count == acc_tot_size_count);
-        HDassert(fspace->serial_size_count == acc_serial_size_count);
-        HDassert(fspace->ghost_size_count == acc_ghost_size_count);
-        HDassert(fspace->hdr->tot_sect_count == acc_tot_sect_count);
-        HDassert(fspace->hdr->serial_sect_count == acc_serial_sect_count);
-        HDassert(fspace->hdr->ghost_sect_count == acc_ghost_sect_count);
+        HDassert(fspace->sinfo->tot_size_count == acc_tot_size_count);
+        HDassert(fspace->sinfo->serial_size_count == acc_serial_size_count);
+        HDassert(fspace->sinfo->ghost_size_count == acc_ghost_size_count);
+        HDassert(fspace->tot_sect_count == acc_tot_sect_count);
+        HDassert(fspace->serial_sect_count == acc_serial_sect_count);
+        HDassert(fspace->ghost_sect_count == acc_ghost_sect_count);
     } /* end if */
     else {
         /* Check counts are zero */
-        HDassert(fspace->hdr->tot_sect_count == 0);
-        HDassert(fspace->hdr->serial_sect_count == 0);
-        HDassert(fspace->hdr->ghost_sect_count == 0);
+        HDassert(fspace->tot_sect_count == 0);
+        HDassert(fspace->serial_sect_count == 0);
+        HDassert(fspace->ghost_sect_count == 0);
     } /* end else */
 
     /* Make certain that the number of sections on the address list is correct */
-    if(fspace->merge_list)
-        HDassert(fspace->hdr->tot_sect_count == (separate_obj + H5SL_count(fspace->merge_list)));
+    if(fspace->sinfo->merge_list)
+        HDassert(fspace->tot_sect_count == (separate_obj + H5SL_count(fspace->sinfo->merge_list)));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_sect_assert() */
