@@ -48105,7 +48105,7 @@ if test "${enable_debug+set}" = set; then
 fi;
 
 
-all_packages="ac,b,b2,d,e,f,fs,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
+all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
