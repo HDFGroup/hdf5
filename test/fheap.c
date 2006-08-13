@@ -4824,6 +4824,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
+    unsigned long seed = 0;             /* Random # seed */
     size_t      id_len;                 /* Size of fractal heap IDs */
     hsize_t     obj_off;                /* Offset of object in heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
@@ -4868,6 +4869,14 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 
     /* Retrieve "bulk" filling object size */
     fill_size = get_fill_size(tparam);
+
+    /* Choose random # seed */
+    seed = (unsigned long)HDtime(NULL);
+#ifdef QAK
+/* seed = (unsigned long)1155438845; */
+HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+#endif /* QAK */
+    HDsrandom(seed);
 
     /* Set heap ID to random (non-null) value */
     heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
@@ -4922,6 +4931,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     return(0);
 
 error:
+    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh, dxpl);
@@ -10851,10 +10861,985 @@ error:
 #ifndef QAK
 
 /*-------------------------------------------------------------------------
+ * Function:	test_huge_insert_one
+ *
+ * Purpose:	Test inserting one huge object in the heap
+ *
+ *              Then, remove all the objects, in various ways
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, August  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    off_t       empty_size;             /* Size of a file with an empty heap */
+    off_t       file_size;              /* Size of file currently */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
+    size_t      obj_size;               /* Size of object */
+    size_t      robj_size;              /* Size of object read */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    const char *base_desc = "insert one huge object, then remove %s";       /* Test description */
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Perform common test initialization operations */
+    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
+        TEST_ERROR
+
+    /* Insert object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size = obj_size;
+    state.huge_nobjs = 1;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Delete individual objects, if we won't be deleting the entire heap later */
+    if(tparam->del_dir != FHEAP_DEL_HEAP) {
+        /* Remove object from heap */
+        if(H5HF_remove(fh, dxpl, heap_id) < 0)
+            FAIL_STACK_ERROR
+
+        /* Check for closing & re-opening the heap */
+        if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+            TEST_ERROR
+
+        /* Check up on heap... */
+        state.huge_size = 0;
+        state.huge_nobjs = 0;
+        if(check_stats(fh, &state))
+            TEST_ERROR
+    } /* end if */
+
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Check for deleting the entire heap */
+    if(tparam->del_dir == FHEAP_DEL_HEAP) {
+        /* Delete heap */
+        if(H5HF_delete(f, dxpl, fh_addr) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0)
+        TEST_ERROR
+#ifdef QAK
+HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
+#endif /* QAK */
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_huge_insert_one() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_huge_insert_two
+ *
+ * Purpose:	Test inserting two huge objects in the heap
+ *
+ *              Then, remove all the objects, in various ways
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    off_t       empty_size;             /* Size of a file with an empty heap */
+    off_t       file_size;              /* Size of file currently */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for first object */
+    unsigned char heap_id2[HEAP_ID_LEN]; /* Heap ID for second object */
+    size_t      obj_size;               /* Size of object */
+    size_t      robj_size;              /* Size of object read */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    const char *base_desc = "insert two huge objects, then remove %s";       /* Test description */
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Perform common test initialization operations */
+    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
+        TEST_ERROR
+
+    /* Insert object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size = obj_size;
+    state.huge_nobjs = 1;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert second object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size ;
+    state.huge_nobjs = 2;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in second huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id2, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Delete individual objects, if we won't be deleting the entire heap later */
+    if(tparam->del_dir != FHEAP_DEL_HEAP) {
+        if(tparam->del_dir == FHEAP_DEL_FORWARD) {
+            /* Remove first object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size = obj_size;
+            state.huge_nobjs = 1;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove second object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size = 0;
+            state.huge_nobjs = 0;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+        } /* end if */
+        else {
+            /* Remove second object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size = obj_size;
+            state.huge_nobjs = 1;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove first object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size = 0;
+            state.huge_nobjs = 0;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+        } /* end else */
+    } /* end if */
+
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Check for deleting the entire heap */
+    if(tparam->del_dir == FHEAP_DEL_HEAP) {
+        /* Delete heap */
+        if(H5HF_delete(f, dxpl, fh_addr) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0)
+        TEST_ERROR
+#ifdef QAK
+HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
+#endif /* QAK */
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_huge_insert_two() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_huge_insert_three
+ *
+ * Purpose:	Test inserting three huge objects in the heap
+ *
+ *              Then, remove all the objects, in various ways
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    off_t       empty_size;             /* Size of a file with an empty heap */
+    off_t       file_size;              /* Size of file currently */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for first object */
+    unsigned char heap_id2[HEAP_ID_LEN]; /* Heap ID for second object */
+    unsigned char heap_id3[HEAP_ID_LEN]; /* Heap ID for third object */
+    size_t      obj_size;               /* Size of object */
+    size_t      robj_size;              /* Size of object read */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    const char *base_desc = "insert three huge objects, then remove %s";       /* Test description */
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Perform common test initialization operations */
+    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
+        TEST_ERROR
+
+    /* Insert first object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size = obj_size;
+    state.huge_nobjs = 1;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in first huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert second object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 2;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size;
+    state.huge_nobjs = 2;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in second huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id2, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert third object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 3;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id3) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size;
+    state.huge_nobjs = 3;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in third huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id3, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id3, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Delete individual objects, if we won't be deleting the entire heap later */
+    if(tparam->del_dir != FHEAP_DEL_HEAP) {
+        if(tparam->del_dir == FHEAP_DEL_FORWARD) {
+            /* Remove first object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove second object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove third object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id3, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id3) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+        } /* end if */
+        else {
+            /* Remove third object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id3, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id3) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove second object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove first object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+        } /* end else */
+    } /* end if */
+
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Check for deleting the entire heap */
+    if(tparam->del_dir == FHEAP_DEL_HEAP) {
+        /* Delete heap */
+        if(H5HF_delete(f, dxpl, fh_addr) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0)
+        TEST_ERROR
+#ifdef QAK
+HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
+#endif /* QAK */
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_huge_insert_three() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_huge_insert_mix
+ *
+ * Purpose:	Test inserting a mix of 'normal' & 'huge' objects in the heap
+ *
+ *              Then, remove all the objects, in various ways
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    off_t       empty_size;             /* Size of a file with an empty heap */
+    off_t       file_size;              /* Size of file currently */
+    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for first object */
+    unsigned char heap_id2[HEAP_ID_LEN]; /* Heap ID for second object */
+    unsigned char heap_id3[HEAP_ID_LEN]; /* Heap ID for third object */
+    unsigned char heap_id4[HEAP_ID_LEN]; /* Heap ID for fourth object */
+    unsigned char heap_id5[HEAP_ID_LEN]; /* Heap ID for fifth object */
+    size_t      obj_size;               /* Size of object */
+    size_t      robj_size;              /* Size of object read */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    const char *base_desc = "insert mix of normal & huge objects, then remove %s";       /* Test description */
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Perform common test initialization operations */
+    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
+        TEST_ERROR
+
+    /* Insert first object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size;
+    state.huge_nobjs++;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in first huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert second object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 2;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size;
+    state.huge_nobjs++;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in second huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id2, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert third object too large for managed heap blocks */
+    obj_size = SMALL_STAND_SIZE + 3;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id3) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.huge_size += obj_size;
+    state.huge_nobjs++;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in third huge object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id3, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id3, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert fourth object small enough to fit into 'normal' heap blocks */
+    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id4) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
+    state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
+    state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
+    state.man_alloc_size = DBLOCK_SIZE(fh, 2);
+    state.man_free_space = cparam->managed.width * DBLOCK_FREE(fh, 0);
+    state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 1);
+    state.man_free_space += DBLOCK_FREE(fh, 2) - obj_size;
+    state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 2);
+    state.man_nobjs++;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in fourth ('normal') object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id4, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id4, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Insert fifth object small enough to fit into 'normal' heap blocks */
+    obj_size = DBLOCK_SIZE(fh, 3) + 1;
+    if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, &heap_id5) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the heap */
+    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Check up on heap... */
+    /* (account for doubling of root indirect block) */
+    state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
+    state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 4);
+    state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 5);
+    state.man_alloc_size += DBLOCK_SIZE(fh, 4);
+    state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 3);
+    state.man_free_space += DBLOCK_FREE(fh, 4) - obj_size;
+    state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 4);
+    state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, 5);
+    state.man_nobjs++;
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Read in fifth ('normal') object */
+    if(H5HF_get_obj_len(fh, dxpl, heap_id5, &robj_size) < 0)
+        FAIL_STACK_ERROR
+    if(obj_size != robj_size)
+        TEST_ERROR
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_read(fh, dxpl, heap_id5, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Delete individual objects, if we won't be deleting the entire heap later */
+    if(tparam->del_dir != FHEAP_DEL_HEAP) {
+        if(tparam->del_dir == FHEAP_DEL_FORWARD) {
+            /* Remove first object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove second object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id2, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove third object from heap */
+            if(H5HF_get_obj_len(fh, dxpl, heap_id3, &robj_size) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_remove(fh, dxpl, heap_id3) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            state.huge_size -= robj_size;
+            state.huge_nobjs--;
+            if(check_stats(fh, &state))
+                TEST_ERROR
+
+            /* Remove fourth ('normal') object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id4) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Remove fifth ('normal') object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id5) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+        } /* end if */
+        else {
+            /* Remove fifth ('normal') object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id5) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Remove fourth ('normal') object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id4) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Remove third object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id3) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Remove second object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id2) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Remove first object from heap */
+            if(H5HF_remove(fh, dxpl, heap_id) < 0)
+                FAIL_STACK_ERROR
+
+            /* Check for closing & re-opening the heap */
+            if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+                TEST_ERROR
+
+            /* Check up on heap... */
+            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            if(check_stats(fh, &state))
+                TEST_ERROR
+        } /* end else */
+    } /* end if */
+
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Check for deleting the entire heap */
+    if(tparam->del_dir == FHEAP_DEL_HEAP) {
+        /* Delete heap */
+        if(H5HF_delete(f, dxpl, fh_addr) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) == 0)
+        TEST_ERROR
+#ifdef QAK
+HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
+#endif /* QAK */
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_huge_insert_mix() */
+#endif /* QAK */
+#endif /* QAK2 */
+
+#ifndef QAK
+
+/*-------------------------------------------------------------------------
  * Function:	test_man_random
  *
- * Purpose:	Test inserting random sized objects (that are smaller than
- *              the standalone size) into a heap, and read them back.
+ * Purpose:	Test inserting random sized objects into a heap, and read
+ *              them back.
  *
  *              Then, go back and remove all objects
  *
@@ -10894,9 +11879,9 @@ test_man_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_tes
      * Display testing message
      */
     if(tparam->del_dir == FHEAP_DEL_HEAP)
-        TESTING("inserting random-sized objects (smaller than standalone size), then remove all objects (all - deleting heap)")
+        TESTING("inserting random-sized objects, then remove all objects (all - deleting heap)")
     else
-        TESTING("inserting random-sized objects (smaller than standalone size), then remove all objects (all - random)")
+        TESTING("inserting random-sized objects, then remove all objects (all - random)")
 
     /* Initialize the heap ID structure */
     HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
@@ -10904,7 +11889,7 @@ test_man_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_tes
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
 #ifdef QAK
-/* seed = (unsigned long)1153176468; */
+/* seed = (unsigned long)1155360766; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
     HDsrandom(seed);
@@ -10912,9 +11897,9 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
     while(total_obj_added < size_limit) {
-        /* Choose a random size of object (from 1 up to stand alone block size) */
-        obj_size = (HDrandom() % (cparam->max_man_size - 1)) + 1;
-        obj_loc = cparam->max_man_size - obj_size;
+        /* Choose a random size of object (from 1 up to above standalone block size limit) */
+        obj_size = (HDrandom() % (cparam->max_man_size + 255)) + 1;
+        obj_loc = (cparam->max_man_size + 255) - obj_size;
 
         /* Insert object */
         if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
@@ -11023,8 +12008,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_man_random_pow2
  *
- * Purpose:	Test inserting random sized objects (that are smaller than the
- *              standalone size) with a "power of 2 distribution" into a heap,
+ * Purpose:	Test inserting random sized objects with a "power of 2
+ *              distribution" (which favors small objects) into a heap,
  *              and read them back.
  *
  *              Then, go back and remove all objects
@@ -11065,9 +12050,9 @@ test_man_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fhea
      * Display testing message
      */
     if(tparam->del_dir == FHEAP_DEL_HEAP)
-        TESTING("inserting random-sized objects with power of 2 distribution (smaller than standalone size), then remove all objects (all - deleting heap)")
+        TESTING("inserting random-sized objects with power of 2 distribution, then remove all objects (all - deleting heap)")
     else
-        TESTING("inserting random-sized objects with power of 2 distribution (smaller than standalone size), then remove all objects (all - random)")
+        TESTING("inserting random-sized objects with power of 2 distribution, then remove all objects (all - random)")
 
     /* Initialize the heap ID structure */
     HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
@@ -11092,12 +12077,12 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
          */
         while(HDrandom() < (RAND_MAX / 2) && size_range < cparam->max_man_size)
             size_range *= 2;
-        if(size_range > cparam->max_man_size)
-            size_range = cparam->max_man_size;
+        if(size_range > (cparam->max_man_size + 255))
+            size_range = cparam->max_man_size + 255;
 
         /* Choose a random size of object (from 1 up to stand alone block size) */
         obj_size = (HDrandom() % (size_range - 1)) + 1;
-        obj_loc = cparam->max_man_size - obj_size;
+        obj_loc = (cparam->max_man_size + 255) - obj_size;
 
         /* Insert object */
         if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
@@ -11202,151 +12187,6 @@ error:
     return(1);
 } /* test_man_random_pow2() */
 #endif /* QAK */
-#endif /* QAK2 */
-
-
-/*-------------------------------------------------------------------------
- * Function:	test_huge_insert_one
- *
- * Purpose:	Test inserting one huge object in the heap
- *
- *              Then, remove all the objects, in various ways
- *
- * Return:	Success:	0
- *		Failure:	1
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
-{
-    hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
-    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
-    haddr_t     fh_addr;                /* Address of fractal heap */
-    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
-    unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
-    unsigned char *obj = NULL;          /* Buffer for object to insert */
-    unsigned char *robj = NULL;         /* Buffer for object read */
-    size_t      obj_size;               /* Size of object */
-    size_t      robj_size;              /* Size of object read */
-    fheap_heap_state_t state;           /* State of fractal heap */
-    const char *base_desc = "insert one huge object, then remove %s";       /* Test description */
-
-    /* Perform common file & heap open operations */
-    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
-        TEST_ERROR
-
-    /* Perform common test initialization operations */
-    if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
-        TEST_ERROR
-
-    /* Allocate space for the object */
-    obj_size = SMALL_STAND_SIZE + 1;
-    obj = H5MM_malloc(obj_size);
-    robj = H5MM_malloc(obj_size);
-
-    /* Insert object too large for managed heap blocks */
-    if(H5HF_insert(fh, dxpl, obj_size, obj, &heap_id) < 0)
-        FAIL_STACK_ERROR
-
-    /* Check for closing & re-opening the heap */
-    if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
-        TEST_ERROR
-
-    /* Check up on heap... */
-    state.huge_size = obj_size;
-    state.huge_nobjs = 1;
-    if(check_stats(fh, &state))
-        TEST_ERROR
-
-    /* Read in huge object */
-    if(H5HF_get_obj_len(fh, dxpl, heap_id, &robj_size) < 0)
-        FAIL_STACK_ERROR
-    if(obj_size != robj_size)
-        TEST_ERROR
-    if(H5HF_read(fh, dxpl, heap_id, robj) < 0)
-        FAIL_STACK_ERROR
-    if(HDmemcmp(obj, robj, obj_size))
-        TEST_ERROR
-
-    /* Delete individual objects, if we won't be deleting the entire heap later */
-    if(tparam->del_dir != FHEAP_DEL_HEAP) {
-        /* Remove object from heap */
-        if(H5HF_remove(fh, dxpl, heap_id) < 0)
-            FAIL_STACK_ERROR
-
-        /* Check for closing & re-opening the heap */
-        if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
-            TEST_ERROR
-
-        /* Check up on heap... */
-        state.huge_size = 0;
-        state.huge_nobjs = 0;
-        if(check_stats(fh, &state))
-            TEST_ERROR
-    } /* end if */
-
-
-    /* Close the fractal heap */
-    if(H5HF_close(fh, dxpl) < 0)
-        FAIL_STACK_ERROR
-    fh = NULL;
-
-    /* Check for deleting the entire heap */
-    if(tparam->del_dir == FHEAP_DEL_HEAP) {
-        /* Delete heap */
-        if(H5HF_delete(f, dxpl, fh_addr) < 0)
-            FAIL_STACK_ERROR
-    } /* end if */
-
-    /* Close the file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
-        TEST_ERROR
-#ifdef QAK
-HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
-#endif /* QAK */
-
-    /* Verify the file is correct size */
-    if(file_size != empty_size)
-        TEST_ERROR
-
-    /* Free resources */
-    H5MM_xfree(keep_ids.ids);
-    H5MM_xfree(keep_ids.lens);
-    H5MM_xfree(keep_ids.offs);
-    H5MM_xfree(obj);
-    H5MM_xfree(robj);
-
-    /* All tests passed */
-    PASSED()
-
-    return(0);
-
-error:
-    H5E_BEGIN_TRY {
-        H5MM_xfree(keep_ids.ids);
-        H5MM_xfree(keep_ids.lens);
-        H5MM_xfree(keep_ids.offs);
-        H5MM_xfree(obj);
-        H5MM_xfree(robj);
-        if(fh)
-            H5HF_close(fh, dxpl);
-	H5Fclose(file);
-    } H5E_END_TRY;
-    return(1);
-} /* test_huge_insert_one() */
 
 
 /*-------------------------------------------------------------------------
@@ -11633,6 +12473,31 @@ HDfprintf(stderr, "Uncomment tests!\n");
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
+        /*
+         * Test fractal heap huge object insertion & deletion
+         */
+#ifndef QAK
+        {
+        fheap_test_del_dir_t del_dir;        /* Deletion direction */
+
+        /* More complex removal patterns */
+        tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
+        for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
+            tparam.del_dir = del_dir;
+
+            nerrors += test_huge_insert_one(fapl, &cparam, &tparam);
+            nerrors += test_huge_insert_two(fapl, &cparam, &tparam);
+            nerrors += test_huge_insert_three(fapl, &cparam, &tparam);
+            nerrors += test_huge_insert_mix(fapl, &cparam, &tparam);
+        } /* end for */
+        } /* end block */
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK */
+#else /* QAK2 */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK2 */
+
 #ifndef QAK
         /* Random object insertion & deletion */
         if (ExpressMode > 1)
@@ -11651,18 +12516,6 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
-#else /* QAK2 */
-HDfprintf(stderr, "Uncomment tests!\n");
-#endif /* QAK2 */
-
-        /*
-         * Test fractal heap huge object insertion
-         */
-        tparam.del_dir = FHEAP_DEL_FORWARD;
-        nerrors += test_huge_insert_one(fapl, &cparam, &tparam);
-
-        tparam.del_dir = FHEAP_DEL_HEAP;
-        nerrors += test_huge_insert_one(fapl, &cparam, &tparam);
 
 #ifndef QAK
     } /* end for */

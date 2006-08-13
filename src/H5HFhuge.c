@@ -121,7 +121,7 @@ H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
         rrec_size = hdr->sizeof_addr + hdr->sizeof_size + hdr->huge_id_size;
 
     /* Create v2 B-tree for tracking 'huge' objects */
-    if(H5B2_create(hdr->f, dxpl_id, &hdr->huge_bt2_class, H5HF_HUGE_BT2_NODE_SIZE, rrec_size,
+    if(H5B2_create(hdr->f, dxpl_id, &hdr->huge_bt2_class, (size_t)H5HF_HUGE_BT2_NODE_SIZE, rrec_size,
             H5HF_HUGE_BT2_SPLIT_PERC, H5HF_HUGE_BT2_MERGE_PERC, &hdr->huge_bt2_addr/*out*/) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking 'huge' heap objects")
 
@@ -373,7 +373,7 @@ herr_t
 H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
 {
     haddr_t obj_addr;                   /* Object's address in the file */
-    hsize_t obj_size;                   /* Object's size in the file */
+    hsize_t obj_size = 0;               /* Object's size in the file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_read)
