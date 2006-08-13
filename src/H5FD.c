@@ -55,11 +55,11 @@ static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
     void *pl);
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
 static haddr_t H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
-                                         H5FD_mem_t mapped_type, hsize_t size);
+    hsize_t size);
 static haddr_t H5FD_alloc_metadata(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
-                                   hsize_t size);
+    hsize_t size);
 static haddr_t H5FD_alloc_raw(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
-                              hsize_t size);
+    hsize_t size);
 static haddr_t H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static haddr_t H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 
@@ -1505,7 +1505,6 @@ done:
 haddr_t
 H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    H5FD_mem_t  mapped_type;
     haddr_t     ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI(H5FD_alloc, HADDR_UNDEF)
@@ -1522,15 +1521,8 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
                   FUNC, file->alignment, file->threshold, size);
 #endif  /* H5F_DEBUG */
 
-    /* Map the allocation request to a free list */
-    if (H5FD_MEM_DEFAULT == file->cls->fl_map[type])
-        mapped_type = type;
-    else
-        mapped_type = file->cls->fl_map[type];
-
     /* Try to allocate from the free list first */
-    if ((ret_value = H5FD_alloc_from_free_list(file, type,
-                                               mapped_type, size)) != HADDR_UNDEF)
+    if ((ret_value = H5FD_alloc_from_free_list(file, type, size)) != HADDR_UNDEF)
         HGOTO_DONE(ret_value)
 
 #ifdef H5F_DEBUG
@@ -1567,9 +1559,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
-                          H5FD_mem_t mapped_type, hsize_t size)
+H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 {
+    H5FD_mem_t mapped_type;
     haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI(H5FD_alloc_from_free_list, HADDR_UNDEF)
@@ -1577,6 +1569,12 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
     assert(file);
     assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
+
+    /* Map the allocation request to a free list */
+    if (H5FD_MEM_DEFAULT == file->cls->fl_map[type])
+        mapped_type = type;
+    else
+        mapped_type = file->cls->fl_map[type];
 
     /*
      * Try to satisfy the request from the free list. Only perform the
@@ -1893,7 +1891,7 @@ H5FD_alloc_metadata(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_alloc_metadata() */
 
 
 /*-------------------------------------------------------------------------
@@ -2003,7 +2001,7 @@ H5FD_alloc_raw(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_alloc_raw() */
 
 
 /*-------------------------------------------------------------------------
@@ -2137,7 +2135,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_update_eoa() */
 
 
 /*-------------------------------------------------------------------------
