@@ -478,7 +478,7 @@ herr_t
 H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
     H5HF_free_section_t *sec_node;      /* Pointer to free space section for block */
-    H5HF_direct_t *dblock;              /* Pointer to direct block to query */
+    H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
     hsize_t obj_off;                    /* Object's offset in heap */
     size_t obj_len;                     /* Object's length in heap */
     haddr_t dblock_addr;                /* Direct block address */
@@ -545,9 +545,23 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
         dblock_addr =  iblock->ents[entry].addr;
         dblock_size =  hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width];
 
+        /* Check for offset of invalid direct block */
+        if(!H5F_addr_defined(dblock_addr)) {
+            /* Unlock indirect block */
+            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
+        } /* end if */
+
         /* Lock direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, H5AC_WRITE)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, H5AC_WRITE))) {
+            /* Unlock indirect block */
+            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
+        } /* end if */
 
         /* Unlock indirect block */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
@@ -564,6 +578,14 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
 #ifdef QAK
 HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 #endif /* QAK */
+
+    /* Check for object's offset in the direct block prefix information */
+    if(blk_off < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object located in prefix of direct block")
+
+    /* Check for object's length overrunning the end of the direct block */
+    if((blk_off + obj_len) > dblock_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object overruns end of direct block")
 
     /* Create free space section node */
     if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len,
@@ -587,6 +609,12 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
 
 done:
+    if(ret_value < 0) {
+        /* Unlock direct block */
+        if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_remove() */
 

@@ -320,7 +320,8 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
     HDassert(id);
     HDassert(obj_off);
 
-    /* Get the offset for a heap ID */
+    /* Get the offset for a 'normal' heap ID */
+    id++;
     UINT64DECODE_VAR(id, *obj_off, fh->hdr->heap_off_size);                           \
 
     FUNC_LEAVE_NOAPI(SUCCEED)
