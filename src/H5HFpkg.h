@@ -464,7 +464,7 @@ H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 
 /* Routines for managing shared fractal heap header */
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
-H5_DLL herr_t H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam);
+H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 
 /* Doubling table routines */

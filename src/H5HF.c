@@ -100,7 +100,7 @@ H5HF_t *
 H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
-    H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
+    H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
     haddr_t hdr_addr;           /* Heap header address */
     H5HF_t *ret_value;          /* Return value */
 
@@ -112,26 +112,10 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     HDassert(f);
     HDassert(cparam);
 
-    /* Allocate & basic initialization for the shared header */
-    if(NULL == (hdr = H5HF_hdr_alloc(f)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for shared heap info")
-
-    /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(hdr))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for fractal heap header")
-
     /* Initialize shared fractal heap header */
     /* (This routine is only called for newly created heaps) */
-    if(H5HF_hdr_init(hdr, hdr_addr, cparam) < 0)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't initialize shared fractal heap header")
-
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
-#endif /* QAK */
-
-    /* Cache the new fractal heap header */
-    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't add fractal heap header to cache")
+    if(HADDR_UNDEF == (hdr_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Create fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
@@ -165,8 +149,6 @@ done:
     if(!ret_value) {
         if(fh)
             (void)H5HF_close(fh, dxpl_id);
-	else if(hdr)
-            (void)H5HF_cache_hdr_dest(f, hdr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

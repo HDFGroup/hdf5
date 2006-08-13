@@ -35,6 +35,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
@@ -259,9 +260,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_init
+ * Function:	H5HF_hdr_create
  *
- * Purpose:	Initialize shared fractal heap header for new heap
+ * Purpose:	Create new fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -271,48 +272,61 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
+haddr_t
+H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
-    size_t dblock_overhead;             /* Direct block's overhead */
-    herr_t ret_value = SUCCEED;           /* Return value */
+    H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
+    haddr_t hdr_addr;           /* Heap header address */
+    size_t dblock_overhead;     /* Direct block's overhead */
+    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_init)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_create)
 
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    HDassert(f);
     HDassert(cparam);
 
 #ifndef NDEBUG
     /* Check for valid parameters */
     if(cparam->managed.width == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width must be greater than zero")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width must be greater than zero")
     if(cparam->managed.width > H5HF_WIDTH_LIMIT)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width too large")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width too large")
     if(!POWER_OF_TWO(cparam->managed.width))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "width not power of two")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width not power of two")
     if(cparam->managed.start_block_size == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size must be greater than zero")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size must be greater than zero")
     if(!POWER_OF_TWO(cparam->managed.start_block_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "starting block size not power of two")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size not power of two")
     if(cparam->managed.max_direct_size == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size must be greater than zero")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size must be greater than zero")
     if(cparam->managed.max_direct_size > H5HF_MAX_DIRECT_SIZE_LIMIT)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size too large")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size too large")
     if(!POWER_OF_TWO(cparam->managed.max_direct_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not power of two")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not power of two")
     if(cparam->managed.max_direct_size < cparam->max_man_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
     if(cparam->managed.max_index == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size must be greater than zero")
-    if(cparam->managed.max_index > (8 * hdr->sizeof_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. heap size too large for file")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size must be greater than zero")
 #endif /* NDEBUG */
 
+    /* Allocate & basic initialization for the shared header */
+    if(NULL == (hdr = H5HF_hdr_alloc(f)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info")
+
+#ifndef NDEBUG
+    if(cparam->managed.max_index > (8 * hdr->sizeof_size))
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file")
+#endif /* NDEBUG */
+
+    /* Allocate space for the header on disk */
+    if(HADDR_UNDEF == (hdr_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(hdr))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
+
     /* Set the creation parameters for the heap */
-    hdr->heap_addr = fh_addr;
+    hdr->heap_addr = hdr_addr;
     hdr->max_man_size = cparam->max_man_size;
     HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
@@ -328,23 +342,34 @@ H5HF_hdr_init(H5HF_hdr_t *hdr, haddr_t fh_addr, const H5HF_create_t *cparam)
     /* Note that the shared info is dirty (it's not written to the file yet) */
     hdr->dirty = TRUE;
 
-    /* Make shared heap info reference counted */
+    /* Finish fractal heap header initialization */
     if(H5HF_hdr_finish_init(hdr) < 0)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared fractal heap header")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't create ref-count wrapper for shared fractal heap header")
+
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
+#endif /* QAK */
 
     /* Extra checking for possible gap between max. direct block size minus
      * overhead and "huge" object size */
     dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
     if((cparam->managed.max_direct_size - dblock_overhead) < cparam->max_man_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "max. direct block size not large enough to hold all managed blocks")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
+
+    /* Cache the new fractal heap header */
+    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't add fractal heap header to cache")
+
+    /* Set address of heap header to return */
+    ret_value = hdr_addr;
 
 done:
-    if(ret_value < 0)
+    if(!H5F_addr_defined(ret_value))
         if(hdr)
             (void)H5HF_cache_hdr_dest(NULL, hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_init() */
+} /* end H5HF_hdr_create() */
 
 
 /*-------------------------------------------------------------------------
