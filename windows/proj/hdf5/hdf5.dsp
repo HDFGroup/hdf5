@@ -1097,6 +1097,21 @@ SOURCE=..\..\..\src\H5HF.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5HFbtree2.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5HFcache.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1172,6 +1187,21 @@ SOURCE=..\..\..\src\H5HFhdr.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5HFhuge.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5HFiblock.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1187,7 +1217,7 @@ SOURCE=..\..\..\src\H5HFiblock.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5HFint.c
+SOURCE=..\..\..\src\H5HFiter.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
@@ -1202,7 +1232,7 @@ SOURCE=..\..\..\src\H5HFint.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5HFiter.c
+SOURCE=..\..\..\src\H5HFman.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 
