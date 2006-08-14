@@ -23,9 +23,9 @@ $ ! h5jam and h5unjam tests
 $ !
 $
 $ CALL H5JAMTEST "-u u10.txt -i" tall.h5 ta2.h5
-$! CALL H5JAMTEST "-u u511.txt -i" tall.h5 ta3.h5
-$! CALL H5JAMTEST "-u u512.txt -i" tall.h5 ta4.h5
-$! CALL H5JAMTEST "-u u513.txt -i" tall.h5 ta5.h5
+$ CALL H5JAMTEST "-u u511.txt -i" tall.h5 ta3.h5
+$ CALL H5JAMTEST "-u u512.txt -i" tall.h5 ta4.h5
+$ CALL H5JAMTEST "-u u513.txt -i" tall.h5 ta5.h5
 $
 $ 
 $H5JAMTEST: SUBROUTINE
