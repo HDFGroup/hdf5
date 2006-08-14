@@ -193,25 +193,24 @@ H5HF_hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_finish_init
+ * Function:	H5HF_hdr_finish_init_phase1
  *
- * Purpose:	Finish initializing info in shared heap header
+ * Purpose:	First phase to finish initializing info in shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 21 2006
+ *		koziol@hdfgroup.org
+ *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
+H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 {
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_finish_init)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_finish_init_phase1)
 
     /*
      * Check arguments.
@@ -226,7 +225,37 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
             ((H5V_log2_gen((hsize_t)hdr->max_man_size) + 7) / 8));
-    hdr->id_len = H5HF_ID_SIZE(hdr);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_finish_init_phase1() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_finish_init_pahse2
+ *
+ * Purpose:	Second phase to finish initializing info in shared heap header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 12 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_finish_init_phase2)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
 
     /* Set the free space in direct blocks */
     for(u = 0; u < hdr->man_dtable.max_root_rows; u++) {
@@ -253,6 +282,44 @@ HDfprintf(stderr, "%s: row_max_dblock_free[%Zu] = %Zu\n", FUNC, u, hdr->man_dtab
     /* Initialize the information for tracking 'huge' objects */
     if(H5HF_huge_init(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't informan for tracking huge objects")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_finish_init_phase2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_finish_init
+ *
+ * Purpose:	Finish initializing info in shared heap header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 21 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_finish_init)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* First phase of header final initialization */
+    if(H5HF_hdr_finish_init_phase1(hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #1 of header final initialization")
+
+    /* Second phase of header final initialization */
+    if(H5HF_hdr_finish_init_phase2(hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #2 of header final initialization")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -342,9 +409,36 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Note that the shared info is dirty (it's not written to the file yet) */
     hdr->dirty = TRUE;
 
-    /* Finish fractal heap header initialization */
-    if(H5HF_hdr_finish_init(hdr) < 0)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't create ref-count wrapper for shared fractal heap header")
+    /* First phase of header final initialization */
+    if(H5HF_hdr_finish_init_phase1(hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
+
+    /* Set the length of IDs in the heap */
+    /* (This code is not in the "finish init phase" routines because those 
+     *  routines are also called from the cache 'load' callback, and the ID
+     *  length is already set in that case (its stored in the header on disk))
+     */
+    switch(cparam->id_len) {
+        case 0: /* Set the length of heap IDs to just enough to hold the offset & length of 'normal' objects in the heap */
+            hdr->id_len = 1 + hdr->heap_off_size + hdr->heap_len_size;
+            break;
+
+        case 1: /* Set the length of heap IDs to just enough to hold the file offset & length of 'huge' objects in the heap */
+            hdr->id_len = 1 + hdr->sizeof_size + hdr->sizeof_addr;
+            break;
+
+        default:    /* Use the requested size for the heap ID */
+/* XXX: Limit heap ID length to 4096 + 1, due to # of bits required to store
+ *      length of 'tiny' objects (12 bits)
+ */
+HDfprintf(stderr, "%s: Varying size of heap IDs not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, HADDR_UNDEF, "varying size of heap IDs not supported yet")
+            break;
+    } /* end switch */
+
+    /* Second phase of header final initialization */
+    if(H5HF_hdr_finish_init_phase2(hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
 
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);

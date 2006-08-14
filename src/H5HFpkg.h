@@ -79,6 +79,7 @@
     /* Fractal Heap Header specific fields */                                 \
                                                                               \
     /* General heap information */                                            \
+    + 2 /* Heap ID len */                                                     \
     + 1 /* Status flags */                                                    \
                                                                               \
     /* "Huge" object fields */                                                \
@@ -153,13 +154,6 @@
     f = *(uint8_t *)i++;                                                      \
     UINT64DECODE_VAR((i), (o), (h)->heap_off_size);                           \
     UINT64DECODE_VAR((i), (l), (h)->heap_len_size)
-
-/* Size of ID for heap */
-#define H5HF_ID_SIZE(h) (                                                     \
-    1                           /* ID flag byte                         */    \
-    + (h)->heap_off_size        /* Space for managed object offset      */    \
-    + (h)->heap_len_size        /* Space for managed object length      */    \
-    )
 
 /* Free space section types for fractal heap */
 /* (values stored in free space data structures in file) */
@@ -293,6 +287,9 @@ typedef struct H5HF_hdr_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
+    /* General header information (stored in header) */
+    unsigned    id_len;         /* Size of heap IDs (in bytes) */
+
     /* Flags for heap settings (stored in status byte in header) */
     hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
     hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
@@ -328,7 +325,6 @@ typedef struct H5HF_hdr_t {
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
-    size_t      id_len;         /* Size of heap IDs (in bytes) */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
     H5B2_class_t huge_bt2_class; /* v2 B-tree class information for "huge" object tracking */
@@ -465,6 +461,8 @@ H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 /* Routines for managing shared fractal heap header */
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
+H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 
 /* Doubling table routines */

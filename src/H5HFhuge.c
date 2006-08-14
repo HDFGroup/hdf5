@@ -158,6 +158,9 @@ H5HF_huge_init(H5HF_hdr_t *hdr)
     /* Check if we can completely hold the 'huge' object's offset & length in
      *  the file in the heap ID (which will speed up accessing it)
      */
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->id_len = %u\n", "H5HF_huge_init", (unsigned)hdr->id_len);
+#endif /* QAK */
     if((hdr->sizeof_addr + hdr->sizeof_size) <= (hdr->id_len - 1)) {
         /* Indicate that v2 B-tree doesn't have to be used to locate object */
         hdr->huge_ids_direct = TRUE;

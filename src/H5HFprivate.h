@@ -58,6 +58,10 @@ typedef struct H5HF_create_t {
     H5HF_dtable_cparam_t managed;/* Mapped object doubling-table creation parameters */
     uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
                                 /* (i.e.  min. size of object to store standalone) */
+    uint16_t id_len;            /* Length of IDs to use for heap objects */
+                                /* (0 - make ID just large enough to hold length & offset of object in the heap) */
+                                /* (1 - make ID just large enough to allow 'huge' objects to hold the file address & length of the 'huge' object) */
+                                /* (n - make ID 'n' bytes in size) */
 } H5HF_create_t;
 
 /* Fractal heap metadata statistics info */

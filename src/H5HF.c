@@ -112,12 +112,11 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     HDassert(f);
     HDassert(cparam);
 
-    /* Initialize shared fractal heap header */
-    /* (This routine is only called for newly created heaps) */
+    /* Create shared fractal heap header */
     if(HADDR_UNDEF == (hdr_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
-    /* Create fractal heap wrapper */
+    /* Allocate fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 

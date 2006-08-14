@@ -309,6 +309,9 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     if(metadata_chksum != 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap header")
 
+    /* Heap ID length */
+    UINT16DECODE(p, hdr->id_len);
+
     /* Heap status flags */
     /* (bit 0: "huge" object IDs have wrapped) */
     heap_flags = *p++;
@@ -418,6 +421,9 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 /* XXX: Set this!  (After all the metadata is in the buffer) */
         HDmemset(p, 0, (size_t)4);
         p += 4;
+
+        /* Heap ID length */
+        UINT16ENCODE(p, hdr->id_len);
 
         /* Heap status flags */
         /* (bit 0: "huge" object IDs have wrapped) */
