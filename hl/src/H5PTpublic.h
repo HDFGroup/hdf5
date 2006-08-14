@@ -97,6 +97,9 @@ H5_HLDLL herr_t  H5PTcreate_index( hid_t table_id );
 H5_HLDLL herr_t  H5PTset_index( hid_t table_id,
                              hsize_t pt_index );
 
+H5_HLDLL herr_t  H5PTget_index( hid_t table_id,
+                             hsize_t *pt_index );
+
 /*-------------------------------------------------------------------------
  *
  * Memory Management functions

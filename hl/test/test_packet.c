@@ -789,6 +789,10 @@ static int test_error(hid_t fid)
     goto out;
   if(H5PTcreate_index(id) >= 0)
     goto out;
+  if(H5PTset_index(id, 1) >= 0)
+    goto out;
+  if(H5PTget_index(id, NULL) >= 0)
+    goto out;
   H5E_END_TRY
 
   /* Open a high-level non-packet (H5TB) table and try to */
@@ -809,6 +813,10 @@ static int test_error(hid_t fid)
   if(H5PTread_packets(id, (hsize_t)0, (hsize_t)1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
+    goto out;
+  if(H5PTset_index(id, 1) >= 0)
+    goto out;
+  if(H5PTget_index(id, NULL) >= 0)
     goto out;
   H5E_END_TRY
 
@@ -835,6 +843,10 @@ static int test_error(hid_t fid)
   if(H5PTread_packets(id, (hsize_t)0, (hsize_t)1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
+    goto out;
+  if(H5PTset_index(id, 1) >= 0)
+    goto out;
+  if(H5PTget_index(id, NULL) >= 0)
     goto out;
   H5E_END_TRY
 

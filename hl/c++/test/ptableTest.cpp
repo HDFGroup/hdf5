@@ -210,7 +210,10 @@ int TestGetNext()
           goto out;
     }
 
+    /* Reset the index and check that it worked */
     wrapper.ResetIndex();
+    if(wrapper.GetIndex(error) != 0) goto out;
+    if(error < 0) goto out;
 
     /* Ensure that we can interate through the records and get the right ones */
     for(i = 1; i < 6; i++)
@@ -221,6 +224,8 @@ int TestGetNext()
     }
 
     wrapper.SetIndex(1);
+    if(wrapper.GetIndex(error) != 1) goto out;
+    if(error < 0) goto out;
 
     /* Ensure we can get multiple records with our index pointer */
     wrapper.GetNextPackets(2, records);
@@ -342,11 +347,15 @@ int TestErrors()
     error = wrapper.SetIndex(-1);
     if(error >= 0)
       goto out;
+    if(wrapper.GetIndex(error) != 0) goto out;
+    if(error < 0) goto out;
     error = wrapper.GetNextPacket(&record);
     if(error < 0)
       goto out;
     if(record != 1)
       goto out;
+    if(wrapper.GetIndex(error) != 1) goto out;
+    if(error < 0) goto out;
     error = wrapper.SetIndex(20);
     if(error >= 0)
       goto out;
@@ -361,6 +370,8 @@ int TestErrors()
       goto out;
     if(record != 4)
       goto out;
+    if(wrapper.GetIndex(error) != 4) goto out;
+    if(error < 0) goto out;
     error = wrapper.GetNextPacket(&record);
     if(error >= 0)
       goto out;
@@ -387,6 +398,7 @@ int SystemTest()
 
     hid_t dtypeID1, dtypeID2;
     unsigned int count;
+    int error;
 
     /* Creating two inter-related datatypes.  Create two datasets and put
      * one datatype in each. */
@@ -452,6 +464,10 @@ int SystemTest()
     wrapper1.ResetIndex();
     wrapper1.GetNextPacket(&ct1[1]);
     wrapper2.GetPacket(1, &ct2[2]);
+    if(wrapper1.GetIndex(error) != 1) goto out;
+    if(error < 0) goto out;
+    if(wrapper2.GetIndex(error) != 0) goto out;
+    if(error < 0) goto out;
 
     if(ct1[1].b != ct2[2].g.b)
       goto out;

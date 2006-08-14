@@ -35,6 +35,7 @@ static H5I_type_t H5PT_ptable_id_type = H5I_UNINIT;
 herr_t H5PT_close( htbl_t* table );
 herr_t H5PT_create_index(htbl_t *table_id);
 herr_t H5PT_set_index(htbl_t *table_id, hsize_t pt_index);
+herr_t H5PT_get_index(htbl_t *table_id, hsize_t *pt_index);
 
 /*-------------------------------------------------------------------------
  *
@@ -528,9 +529,9 @@ out:
  */
 
 /*-------------------------------------------------------------------------
- * Function: H5PT_create_index, H5PT_set_index
+ * Function: H5PT_create_index, H5PT_set_index, H5PT_get_index
  *
- * Purpose: Resets and sets the current record index for a packet table
+ * Purpose: Resets, sets, and gets the current record index for a packet table
  *
  * Return: Success: 0, Failure: -1
  *
@@ -569,10 +570,22 @@ herr_t H5PT_set_index(htbl_t *table, hsize_t index)
   return -1;
 }
 
+herr_t H5PT_get_index(htbl_t *table, hsize_t *index)
+{
+  /* Ensure index is valid */
+  if( table != NULL )
+  {
+    if(index)
+      *index = table->current_index;
+    return 0;
+  }
+  return -1;
+}
+
 /*-------------------------------------------------------------------------
- * Function: H5PTcreate_index, H5PTset_index
+ * Function: H5PTcreate_index, H5PTset_index, H5PTget_index
  *
- * Purpose: Resets and sets the current record index for a packet table
+ * Purpose: Resets, sets, and gets the current record index for a packet table
  *
  * Return: Success: 0, Failure: -1
  *
@@ -608,6 +621,18 @@ herr_t H5PTset_index(hid_t table_id, hsize_t pt_index)
 
   return H5PT_set_index(table, pt_index);
 }
+
+herr_t H5PTget_index(hid_t table_id, hsize_t *pt_index)
+{
+  htbl_t * table;
+
+  /* find the table struct from its ID */
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+    return -1;
+
+  return H5PT_get_index(table, pt_index);
+}
+
 /*-------------------------------------------------------------------------
  *
  * Inquiry functions
@@ -642,7 +667,8 @@ herr_t H5PTget_num_packets( hid_t table_id, hsize_t *nrecords)
   if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
-  *nrecords = table->size;
+  if(nrecords)
+    *nrecords = table->size;
 
   return 0;
 out:

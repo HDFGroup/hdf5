@@ -74,6 +74,12 @@ public:
      */
     int SetIndex(unsigned int index);
 
+    /* GetIndex
+     * Returns the position of the current packet.
+     * On failure, returns 0 and error is set to negative.
+     */
+    int GetIndex(int& error);
+
     /* GetPacketCount
      * Returns the number of packets in the packet table.  Error
      * is set to 0 on success.  On failure, returns 0 and

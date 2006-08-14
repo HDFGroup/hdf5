@@ -86,6 +86,21 @@
         return H5PTset_index(table_id, index);
     }
 
+    /* SetIndex
+     * Sets the index to point to the packet specified by index.
+     * Returns 0 on success, negative on failure (if index is out of bounds)
+     */
+    int PacketTable::GetIndex(int &error)
+    {
+        hsize_t index;
+
+        error = H5PTget_index(table_id, &index);
+        if(error < 0)
+           return 0;
+        else
+           return index;
+    }
+
     /* GetPacketCount
      * Returns the number of packets in the packet table.  Error
      * is set to 0 on success.  On failure, returns 0 and
