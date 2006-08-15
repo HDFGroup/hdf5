@@ -71,7 +71,11 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # Production
     # -Wl,-s to remove all symbols for smaller file
-    PROD_CFLAGS="-O3 -Wl,-s"
+    # O3 optimization causes compilation failures on many platforms;
+    # the problem exists in all versions of the icc compiler up to the latest 9.1
+    # I changed optimization flag to default -O2. EIP, 2006-08-15
+    #PROD_CFLAGS="-O3 -Wl,-s"
+    PROD_CFLAGS="-O2 -Wl,-s"
     PROD_CPPFLAGS=
 
     # Debug
