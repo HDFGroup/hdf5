@@ -5163,193 +5163,233 @@ TABLE.list TD { border:none; }
 
     <hr>
     <h4><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h4>
-    <b>Header Message Type:</b> 0x000B<BR>
-    <b>Length:</b> varies<BR>
-    <b>Status:</b> Optional, may not be repeated.
+    <P class=item><B>Header Message Type:</B> 0x000B</P>
+    <P class=item><B>Length:</B> varies</P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.</P>
 
-    <p><b>Purpose and Description:</b> This message describes the
+    <P class=item><B>Description:</B> This message describes the
       filter pipeline which should be applied to the data stream by
       providing filter identification numbers, flags, a name, an
-      client data.
+      client data.</P>
 
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Filter Pipeline Message</b>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Filter Pipeline Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>  
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Number of Filters</td>
 	  <td colspan=2>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Filter List<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>The version number for this message.  This document
-	    describes version one.</td>
+	  <td><P>The version number for this message.  This document
+	    describes version 1.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Number of Filters</td>
-	  <td>The total number of filters described by this
+	  <td><P>The total number of filters described by this
 	    message. The maximum possible number of filters in a
-	    message is 32.</td>
+	    message is 32.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Filter List</td>
-	  <td>A description of each filter.  A filter description
-	    appears in the next table.</td>
+	  <td><P>A description of each filter.  A filter description
+	    appears in the next table.</P></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Filter Pipeline Message</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Filter Pipeline Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>  
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Filter Identification</td>
 	  <td colspan=2>Name Length</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Flags</td>
-	  <td colspan=2>Client Data Number of Values</td>
+	  <td colspan=2>Number of Values for Client Data</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Name<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Client Data<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Padding</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Filter Identification</td>
-	  <td>This is a unique (except in the case of testing)
+	  <td><P>This is a unique (except in the case of testing)
 	    identifier for the filter.  Values from zero through 255
 	    are reserved for filters defined by the NCSA HDF5
 	    library. Values 256 through 511 have been set aside for
 	    use when developing/testing new filters.  The remaining
 	    values are allocated to specific filters by contacting the 
 	    <a href="mailto:hdf5dev@ncsa.uiuc.edu">HDF5 Development
-	    Team</a>.</td>
+	    Team</a>. The filter currently in library version 1.6.5 are 
+	    listed below:
+	    <table class=list>
+	      <tr>
+		<th width="30%">Identification</th>
+		<th align=left>Name</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>1</code></td>
+		<td>deflate</td>
+		<td>Deflation</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>2</code></td>
+		<td>shuffle</td>
+		<td>Data shuffling</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>3</code></td>
+		<td>flecther32</td>
+		<td>Flecther32 checksum</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>4</code></td>
+		<td>szip</td>
+		<td>SZIP compression</td>
+	      </tr>
+	    </table>
+	  </P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Name Length</td>
-	  <td>Each filter has an optional null-terminated ASCII name
+	  <td><P>Each filter has an optional null-terminated ASCII name
 	    and this field holds the length of the name including the
 	    null termination padded with nulls to be a multiple of
 	    eight. If the filter has no name then a value of zero is
-	    stored in this field.</td>
+	    stored in this field.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Flags</td>
-	  <td>The flags indicate certain properties for a filter.  The 
-	    bit values defined so far are:
+	  <td><P>The flags indicate certain properties for a filter.  The 
+	    bit values defined so far are:</P>
+	    <table class=list>
+	      <tr>
+		<th width="30%">Value</th>
+		<th align=left>Description</th>
+	      </tr>
 
-	    <dl>
-	      <dt><code>bit 1</code>
-	      <dd>If set then the filter is an optional filter.
+	      <tr>
+		<td align=center><code>bit 1</code></td>
+	        <td>If set then the filter is an optional filter.
 		During output, if an optional filter fails it will be
-		silently removed from the pipeline.
-	    </dl>
+		silently removed from the pipeline.</td>
+	      </tr>
+	    </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Client Data Number of Values</td>
-	  <td>Each filter can store a few integer values to control
+	  <td><P>Each filter can store a few integer values to control
 	    how the filter operates.  The number of entries in the
-	    Client Data array is stored in this field.</td>
+	    Client Data array is stored in this field.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Name</td>
-	  <td>If the Name Length field is non-zero then it will
+	  <td><P>If the Name Length field is non-zero then it will
 	    contain the size of this field, a multiple of eight.  This 
 	    field contains a null-terminated, ASCII character
-	    string to serve as a comment/name for the filter.</td>
+	    string to serve as a comment/name for the filter.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Client Data</td>
-	  <td>This is an array of four-byte integers which will be
+	  <td><P>This is an array of four-byte integers which will be
 	    passed to the filter function.  The Client Data Number of
-	    Values determines the number of elements in the
-	    array.</td>
+	    Values determines the number of elements in the array.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Padding</td>
-	  <td>Four bytes of zeros are added to the message at this
+	  <td><P>Four bytes of zeros are added to the message at this
 	    point if the Client Data Number of Values field contains
-	    an odd number.</td>
+	    an odd number.</P></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
     <hr>
     <h4><a name="AttributeMessage">Name: Attribute</a></h4>
-    <b>Header Message Type:</b> 0x000C<BR>
-    <b>Length:</b> varies<BR>
-    <b>Status:</b> Optional, may be repeated.<BR>
+    <P class=item><B>Header Message Type:</B> 0x000C
+    <P class=item><B>Length:</B> varies
+    <P class=item><B>Status:</B> Optional, may be repeated.
     
-    <p><b>Purpose and Description:</b>  The <em>Attribute</em>
+    <P class=item><B>Description:</B>  The <em>Attribute</em>
       message is used to list objects in the HDF file which are used
       as attributes, or "metadata" about the current object.  An
       attribute is a small dataset; it has a name, a datatype, a data
@@ -5360,14 +5400,15 @@ TABLE.list TD { border:none; }
 
     <p>Note: Attributes on an object must have unique names.  (The HDF5 library
       currently enforces this by causing the creation of an attribute with
-      a duplicate name to fail)
-      Attributes on different objects may have the same name, however.
+      a duplicate name to fail).  Attributes on different objects may have the 
+      same name, however.
 
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Attribute Message</b>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Attribute Message (Version 1)
 	</caption>
 
 	<tr align=center>
@@ -5377,127 +5418,132 @@ TABLE.list TD { border:none; }
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Reserved</td>
 	  <td colspan=2>Name Size</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Type Size</td>
 	  <td colspan=2>Space Size</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Name<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Type<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Space<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Data<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>Version number for the message.  This document describes 
-	    version 1 of attribute messages.</td>
+	  <td><P>The version number information is used for changes in the format of the 
+	    attribute message and is described here:</P>
+	    <table class=list>
+	      <tr>
+		<th width="30%">Version</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>0</code></td>
+		<td>Never used.</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>1</code></td>
+		<td>Used by the library before version 1.6 to encode attribute message.
+		    This version does not support shared data type.</td>
+	      </tr>
+	    </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Reserved</td>
-	  <td>This field is reserved for later use and is set to
-	    zero.</td>
+	  <td><P>This field is reserved for later use and is set to
+	    zero.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Name Size</td>
-	  <td>The length of the attribute name in bytes including the
+	  <td><P>The length of the attribute name in bytes including the
 	    null terminator.  Note that the Name field below may
 	    contain additional padding not represented by this
-	    field.</td>
+	    field.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Type Size</td>
-	  <td>The length of the datatype description in the Type
+	  <td><P>The length of the datatype description in the Type
 	    field below.  Note that the Type field may contain
-	    additional padding not represented by this field.</td>
+	    additional padding not represented by this field.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Space Size</td>
-	  <td>The length of the dataspace description in the Space
+	  <td><P>The length of the dataspace description in the Space
 	    field below.  Note that the Space field may contain
-	    additional padding not represented by this field.</td>
+	    additional padding not represented by this field.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Name</td>
-	  <td>The null-terminated attribute name.  This field is
+	  <td><P>The null-terminated attribute name.  This field is
 	    padded with additional null characters to make it a
-	    multiple of eight bytes.</td>
+	    multiple of eight bytes.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Type</td>
-	  <td>The datatype description follows the same format as
+	  <td><P>The datatype description follows the same format as
 	    described for the datatype object header message.  This
 	    field is padded with additional zero bytes to make it a
-	    multiple of eight bytes.</td>
+	    multiple of eight bytes.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Space</td>
-	  <td>The dataspace description follows the same format as
+	  <td><P>The dataspace description follows the same format as
 	    described for the dataspace object header message.  This
 	    field is padded with additional zero bytes to make it a
-	    multiple of eight bytes.</td>
+	    multiple of eight bytes.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Data</td>
-	  <td>The raw data for the attribute.  The size is determined
+	  <td><P>The raw data for the attribute.  The size is determined
 	    from the datatype and dataspace descriptions.  This
-	    field is <em>not</em> padded with additional zero
-	    bytes.</td>
+	    field is <em>not</em> padded with additional bytes.</P></td>
 	</tr>
       </table>
-    </center>
-    
-    <hr>
-    <h4><a name="CommentMessage">Name: Object Comment</a></h4>
+    </div>
 
-    <p><b>Header Message Type:</b> 0x000D<br>
-      <b>Length:</b> varies<br>
-      <b>Status:</b> Optional, may not be repeated.
-
-    <p><b>Purpose and Description:</b> The object comment is
-      designed to be a short description of an object.  An object comment
-      is a sequence of non-zero (<code>\0</code>) ASCII characters with no other
-      formatting included by the library.
-
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Name Message</b>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Attribute Message (Version 2)
 	</caption>
 
 	<tr align=center>
@@ -5507,230 +5553,485 @@ TABLE.list TD { border:none; }
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
+	  <td>Version</td>
+	  <td>Flag</td>
+	  <td colspan=2>Name Size</td>
+	</tr>
+
+	<tr>
+	  <td colspan=2>Type Size</td>
+	  <td colspan=2>Space Size</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Name<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Type<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Space<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Data<br><br></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Version</td>
+	  <td><P>The version number information is used for changes in the format of the 
+	    attribute message and is described here:</P>
+	    <table class=list width="90%">
+	      <tr>
+		<th width="30%">Version</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>2</code></td>
+		<td>Used by the library of version 1.6.x and after to encode attribute message.
+		    This version supports shared data type.  The fields of name, type, and space
+		    are not padded with additional bytes of zero.</td>
+	      </tr>
+	    </table>
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Flag</td>
+	  <td><P>This field indicates whether the data type of this attribute is shared:</P>
+	    <table class=list width="90%">
+	      <tr>
+		<th width="30%">Value</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>0</code></td>
+		<td>Data type is <em>not</em> shared.</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>1</code></td>
+		<td>Data type is shared.</td>
+	      </tr>
+	    </table>
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Name Size</td>
+	  <td><P>The length of the attribute name in bytes including the
+	    null terminator.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Type Size</td>
+	  <td><P>The length of the datatype description in the Type
+	    field below.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Space Size</td>
+	  <td><P>The length of the dataspace description in the Space
+	    field below.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Name</td>
+	  <td><P>The null-terminated attribute name.  This field is <em>not</em>
+	    padded with additional bytes.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Type</td>
+	  <td><P>The datatype description follows the same format as
+	    described for the datatype object header message.  This
+	    field is <em>not</em> padded with additional bytes.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Space</td>
+	  <td><P>The dataspace description follows the same format as
+	    described for the dataspace object header message.  This
+	    field is <em>not</em> padded with additional bytes.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Data</td>
+	  <td><P>The raw data for the attribute.  The size is determined
+	    from the datatype and dataspace descriptions.  This
+	    field is <em>not</em> padded with additional zero
+	    bytes.</P></td>
+	</tr>
+      </table>
+    </div>
+    
+    <hr>
+    <h4><a name="CommentMessage">Name: Object Comment</a></h4>
+
+    <P class=item><B>Header Message Type:</B> 0x000D</P>
+    <P class=item><B>Length:</B> varies</P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.</P>
+
+    <P class=item><B>Description:</B> The object comment is
+      designed to be a short description of an object.  An object comment
+      is a sequence of non-zero (<code>\0</code>) ASCII characters with no other
+      formatting included by the library.</P>
+
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Name Message
+	</caption>
+
+	<tr>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr>
 	  <td colspan=4><br>Comment<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Name</td>
 	  <td>A null terminated ASCII character string.</td>
 	</tr>
       </table>
-    </center>
+    </div>
     
     <hr>
     <h4><a name="OldModifiedMessage">Name: Object Modification Date &amp; Time (Old)</a></h4>
 
-    <p><b>Header Message Type:</b> 0x000E<br>
-      <b>Length:</b> fixed<br>
-      <b>Status:</b> Optional, may not be repeated.
+    <P class=item><B>Header Message Type:</B> 0x000E</P>
+    <P class=item><B>Length:</B> fixed</P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.</P>
 
-    <p><b>Purpose and Description:</b>  The object modification date
+    <P class=item><B>Description:</B>  The object modification date
       and time is a timestamp which indicates (using ISO-8601 date and
       time format) the last modification of an object.  The time is
       updated when any object header message changes according to the
       system clock where the change was posted.
 
-    <p>This modification time message is deprecated in favor of the "new"
-        modification time message (Message Type 0x0012) and is no longer written
-        to the file in versions of the HDF5 library after the 1.6.0 version.
-    </p>
+      <br><br>This modification time message is deprecated in favor of the "new"
+      modification time message (Message Type 0x0012) and is no longer written
+      to the file in versions of the HDF5 library after the 1.6.0 version.
+    </P>
 
-
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Modification Time Message</b>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Modification Time Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Year</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Month</td>
 	  <td colspan=2>Day of Month</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Hour</td>
 	  <td colspan=2>Minute</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Second</td>
 	  <td colspan=2>Reserved</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Year</td>
-	  <td>The four-digit year as an ASCII string. For example,
+	  <td><P>The four-digit year as an ASCII string. For example,
 	    <code>1998</code>.  All fields of this message should be interpreted
-	    as coordinated universal time (UTC)</td>
+	    as coordinated universal time (UTC)</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Month</td>
-	  <td>The month number as a two digit ASCII string where
-	    January is <code>01</code> and December is <code>12</code>.</td>
+	  <td><P>The month number as a two digit ASCII string where
+	    January is <code>01</code> and December is <code>12</code>.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Day of Month</td>
-	  <td>The day number within the month as a two digit ASCII
-	    string. The first day of the month is <code>01</code>.</td>
+	  <td><P>The day number within the month as a two digit ASCII
+	    string. The first day of the month is <code>01</code>.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Hour</td>
-	  <td>The hour of the day as a two digit ASCII string where
-	    midnight is <code>00</code> and 11:00pm is <code>23</code>.</td>
+	  <td><P>The hour of the day as a two digit ASCII string where
+	    midnight is <code>00</code> and 11:00pm is <code>23</code>.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Minute</td>
-	  <td>The minute of the hour as a two digit ASCII string where
+	  <td><P>The minute of the hour as a two digit ASCII string where
 	    the first minute of the hour is <code>00</code> and 
-	    the last is <code>59</code>.</td>
+	    the last is <code>59</code>.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Second</td>
-	  <td>The second of the minute as a two digit ASCII string
+	  <td><P>The second of the minute as a two digit ASCII string
 	    where the first second of the minute is <code>00</code> 
-	    and the last is <code>59</code>.</td>
+	    and the last is <code>59</code>.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Reserved</td>
-	  <td>This field is reserved and should always be zero.</td>
+	  <td><P>This field is reserved and should always be zero.</P></td>
 	</tr>
       </table>
-    </center>
+    </div>
     
     <hr>
     <h4><a name="SharedMessage">Name: Shared Object Message</a></h4>
-    <b>Header Message Type:</b> 0x000F<br>
-    <b>Length:</b> 4 Bytes<br>
-    <b>Status:</b> Optional, may be repeated.
+    <P class=item><B>Header Message Type:</B> 0x000F</P>
+    <P class=item><B>Length:</B> Fixed</P>
+    <P class=item><B>Status:</B> Optional, may be repeated.</P>
 
-    <p>A constant message can be shared among several object headers
-      by writing that message in the global heap and having the object
-      headers all point to it.  The pointing is accomplished with a
+    <P class=item><B>Description:</B>  A constant message can be shared among 
+      several object headers by writing that message in the global heap and 
+      having the object headers all point to it.  The pointing is accomplished with a
       Shared Object message which is understood directly by the object
       header layer of the library. It is also possible to have a
       message of one object header point to a message in some other
       object header, but care must be exercised to prevent cycles.
 
-    <p>If a message is shared, then the message appears in the global
+      <br><br>If a message is shared, then the message appears in the global
       heap and its message ID appears in the Header Message Type
       field of the object header.  Also, the Flags field in the object
-      header for that message will have bit two set (the
-      <code>H5O_FLAG_SHARED</code> bit).  The message body in the
+      header for that message will have bit 0 set.  The message body in the
       object header will be that of a Shared Object message defined
       here and not that of the pointed-to message.
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Shared Message Message</b>
+      <br><br>Starting from Version 2 of the Shared Object Message, the header message to 
+      be shared are no longer stored in global heap.  Instead, the Pointer field in the 
+      Shared Object Message directly contains the address of the header message to be shared.
+      The Flags field becomes unused.
+    </P>
+
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Shared Object Message (Version 1)
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</td>
 	  <th width="25%">byte</td>
 	  <th width="25%">byte</td>
 	  <th width="25%">byte</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version</td>
 	  <td>Flags</td>
 	  <td colspan=2>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>Pointer<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>The version number for the message.  This document
-	    describes version one of shared messages.</td>
+	  <td><P>The version number is used the changes in the format of shared 
+	    object message and is described here:</P>
+	    <table class=list>
+	      <tr>
+		<th width="30%">Version</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>0</code></td>
+		<td>Never used.</td>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>1</code></td>
+		<td>Used by the library before version 1.6.1.  In this version, 
+		  the Flags field is used to indicate whether the actual message is
+		  stored in the global heap.  The Pointer field either contains the
+		  the header message address in the global heap or the address of the
+		  shared object header.</td>
+	      </tr>
+	    </table>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Flags</td>
-	  <td>The Shared Message message points to a message which is
+	  <td><P>The Shared Message message points to a message which is
 	    shared among multiple object headers.  The Flags field
-	    describes the type of sharing:
+	    describes the type of sharing:</P>
+	    <table class=list>
+	      <tr>
+		<th width="30%">Bit</th>
+		<th align=left>Description</th>
+	      </tr>
 
-	    <dl>
-	      <dt><code>Bit 0</code>
-	      <dd>If this bit is clear then the actual message is the
-		first message in some other object header; otherwise
-		the actual message is stored in the global heap.
+	      <tr>
+		<td align=center><code>0</code></td>
+		<td>If this bit is clear then the actual message is the
+                  first message in some other object header; otherwise
+                  the actual message is stored in the global heap.</td>
+	      </tr>
 
-	      <dt><code>Bits 2-7</code>
-	      <dd>Reserved (always zero)
-	    </dl>
+	      <tr>
+		<td align=center><code>2-7</code></td>
+		<td>Reserved (always zero)</td>
+	      </tr>
+	    </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Pointer</td>
-	  <td>This field points to the actual message.  The format of
+	  <td><P>This field points to the actual message.  The format of
 	    the pointer depends on the value of the Flags field.  If
 	    the actual message is in the global heap then the pointer
 	    is the file address of the global heap collection that
 	    holds the message, and a four-byte index into that
 	    collection.  Otherwise the pointer is a group entry 
-	    that points to some other object header.</td>
+	    that points to some other object header.</P></td>
 	</tr>
       </table>
-    </center>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Shared Object Message (Version 2)
+	</caption>
+
+	<tr>
+	  <th width="25%">byte</td>
+	  <th width="25%">byte</td>
+	  <th width="25%">byte</td>
+	  <th width="25%">byte</td>
+	</tr>
+
+	<tr>
+	  <td>Version</td>
+	  <td>Flags</td>
+	  <td colspan=2 bgcolor=#DDDDDD>&nbsp;</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Pointer<br><br></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Version</td>
+	  <td><P>The version number is used the changes in the format of shared 
+	    object message and is described here:</P>
+	    <table class=list>
+	      <tr>
+		<th width="30%">Version</th>
+		<th align=left>Description</th>
+	      </tr>
+
+	      <tr>
+		<td align=center><code>2</code></td>
+		<td>Used by the library of version 1.6.1 and after.  In this version, 
+		  The Flags field is not used and the Pointer field contains the address
+		  of object header to be shared. </td>
+	      </tr>
+	    </table>
+	</tr>
+
+	<tr>
+	  <td>Flags</td>
+	  <td><P>Unused.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Pointer</td>
+	  <td><P>This field points to the actual message.  It contains the address
+	    of the header message to be shared.</P></td>
+	</tr>
+      </table>
+    </div>
 
 
 <hr>
