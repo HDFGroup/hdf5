@@ -341,6 +341,269 @@ fix_name(const char *path, const char *base)
     s[len] = '\0';
     return s;
 }
+
+/*-------------------------------------------------------------------------
+ * Function: group_stats
+ *
+ * Purpose: Gather statistics about the group
+ *
+ * Return: Success: 0
+ *
+ *  Failure: -1
+ *
+ * Programmer: Quincey Koziol
+ *              Tuesday, August 16, 2005
+ *
+ * Modifications: Refactored code from the walk_function 
+ *                EIP, Wednesday, August 16, 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+group_stats (hid_t group, const char *name, const char * fullname, H5G_stat_t * _sb, H5G_iterate_t _walk, iter_t *_iter)
+
+
+{
+    hid_t gid;                      /* Group ID */
+    const char *last_container;
+    hsize_t num_objs;
+    unsigned bin;                   /* "bin" the number of objects falls in */
+    iter_t *iter = (iter_t*)_iter;
+    H5G_stat_t *sb = _sb;
+    H5G_iterate_t walk = _walk;
+    herr_t ret;
+
+    /* Gather statistics about this type of object */
+    iter->uniq_groups++;
+    if(iter->curr_depth > iter->max_depth)
+    iter->max_depth = iter->curr_depth;
+
+    /* Get object header information */
+    iter->group_ohdr_info.total_size += sb->ohdr.size;
+    iter->group_ohdr_info.free_size += sb->ohdr.free;
+
+    gid = H5Gopen(group, name);
+    assert(gid > 0);
+
+    H5Gget_num_objs(gid, &num_objs);
+    if(num_objs < SIZE_SMALL_GROUPS)
+        (iter->num_small_groups[num_objs])++;
+    if(num_objs > iter->max_fanout)
+        iter->max_fanout = num_objs;
+
+    /* Add group count to proper bin */
+     bin = ceil_log10((unsigned long)num_objs);
+     if((bin + 1) > iter->group_nbins) {
+     /* Allocate more storage for info about dataset's datatype */
+        iter->group_bins = realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
+        assert(iter->group_bins);
+
+    /* Initialize counts for intermediate bins */
+        while(iter->group_nbins < bin)
+            iter->group_bins[iter->group_nbins++] = 0;
+        iter->group_nbins++;
+
+        /* Initialize count for new bin */
+        iter->group_bins[bin] = 1;
+     } /* end if */
+     else {
+         (iter->group_bins[bin])++;
+     } /* end else */
+
+     ret = H5Gclose(gid);
+     assert(ret >= 0);
+
+     last_container = iter->container;
+     iter->container = fullname;
+     iter->curr_depth++;
+
+     H5Giterate(group, name, NULL, walk, iter);
+
+     iter->container = last_container;
+     iter->curr_depth--;
+     
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: dataset_stats
+ *
+ * Purpose: Gather statistics about the datset
+ *
+ * Return:  Success: 0
+ *
+ *          Failure: -1
+ *
+ * Programmer:    Quincey Koziol
+ *                Tuesday, August 16, 2005
+ *
+ * Modifications: Refactored code from the walk_function 
+ *                EIP, Wednesday, August 16, 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+dataset_stats (hid_t group, const char *name, H5G_stat_t * _sb,  iter_t *_iter)
+
+
+{
+    unsigned bin;                   /* "bin" the number of objects falls in */
+    iter_t *iter = (iter_t*)_iter;
+    H5G_stat_t *sb = _sb;
+    herr_t ret;
+
+    hid_t did;                      /* Dataset ID */
+    hid_t sid;                      /* Dataspace ID */
+    hid_t tid;                      /* Datatype ID */
+    hid_t dcpl;                     /* Dataset creation property list ID */
+    hsize_t dims[H5S_MAX_RANK];     /* Dimensions of dataset */
+    H5D_layout_t lout;              /* Layout of dataset */
+    unsigned type_found;            /* Whether the dataset's datatype was */
+                                    /* already found */
+    int ndims;                      /* Number of dimensions of dataset */
+    hsize_t storage;                /* Size of dataset storage */
+    unsigned u;                     /* Local index variable */
+    int num_ext;                    /* Number of external files for a dataset */
+    int nfltr;                      /* Number of filters for a dataset */
+    H5Z_filter_t fltr;              /* Filter identifier */
+
+    /* Gather statistics about this type of object */
+    iter->uniq_dsets++;
+
+    /* Get object header information */
+    iter->dset_ohdr_info.total_size += sb->ohdr.size;
+    iter->dset_ohdr_info.free_size += sb->ohdr.free;
+
+    did = H5Dopen(group, name);
+    assert(did > 0);
+
+    /* Get storage info */
+    storage = H5Dget_storage_size(did);
+    iter->dset_storage_size += storage;
+
+    /* Gather dataspace statistics */
+    sid = H5Dget_space(did);
+    assert(sid > 0);
+
+    ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
+    assert(ndims >= 0);
+
+    /* Check for larger rank of dataset */
+    if((unsigned)ndims > iter->max_dset_rank)
+        iter->max_dset_rank = ndims;
+
+    /* Track the number of datasets with each rank */
+    (iter->dset_rank_count[ndims])++;
+
+    /* Only gather dim size statistics on 1-D datasets */
+    if(ndims == 1) {
+
+       if(dims[0] > iter->max_dset_dims)
+           iter->max_dset_dims = dims[0];
+       if(dims[0] < SIZE_SMALL_DSETS)
+           (iter->small_dset_dims[dims[0]])++;
+
+       /* Add dim count to proper bin */
+       bin = ceil_log10((unsigned long)dims[0]);
+       if((bin + 1) > iter->dset_dim_nbins) {
+          /* Allocate more storage for info about dataset's datatype */
+          iter->dset_dim_bins = realloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
+          assert(iter->dset_dim_bins);
+
+          /* Initialize counts for intermediate bins */
+          while(iter->dset_dim_nbins < bin)
+              iter->dset_dim_bins[iter->dset_dim_nbins++] = 0;
+          iter->dset_dim_nbins++;
+
+          /* Initialize count for this bin */
+          iter->dset_dim_bins[bin] = 1;
+        } /* end if */
+        else {
+            (iter->dset_dim_bins[bin])++;
+        } /* end else */
+    } /* end if */
+
+    ret = H5Sclose(sid);
+    assert(ret >= 0);
+
+    /* Gather datatype statistics */
+    tid = H5Dget_type(did);
+    assert(tid > 0);
+
+    type_found = FALSE;
+    for(u = 0; u < iter->dset_ntypes; u++)
+        if(H5Tequal(iter->dset_type_info[u].tid, tid) > 0) {
+            type_found = TRUE;
+            break;
+        } /* end for */
+    if(type_found) {
+         (iter->dset_type_info[u].count)++;
+    } /* end if */
+    else {
+        unsigned curr_ntype = iter->dset_ntypes;
+
+        /* Increment # of datatypes seen for datasets */
+        iter->dset_ntypes++;
+
+        /* Allocate more storage for info about dataset's datatype */
+        iter->dset_type_info = realloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t));
+        assert(iter->dset_type_info);
+
+        /* Initialize information about datatype */
+        iter->dset_type_info[curr_ntype].tid = H5Tcopy(tid);
+        assert(iter->dset_type_info[curr_ntype].tid > 0);
+        iter->dset_type_info[curr_ntype].count = 1;
+        iter->dset_type_info[curr_ntype].named = 0;
+
+        /* Set index for later */
+        u = curr_ntype;
+     } /* end else */
+
+     /* Check if the datatype is a named datatype */
+     if(H5Tcommitted(tid) > 0)
+         (iter->dset_type_info[u].named)++;
+
+     ret = H5Tclose(tid);
+     assert(ret >= 0);
+
+     /* Gather layout statistics */
+     dcpl = H5Dget_create_plist(did);
+     assert(dcpl > 0);
+
+     lout = H5Pget_layout(dcpl);
+     assert(lout >= 0);
+
+     /* Track the layout type for dataset */
+     (iter->dset_layouts[lout])++;
+
+     num_ext = H5Pget_external_count(dcpl);
+     assert (num_ext >= 0);
+
+    if(num_ext) iter->nexternal = iter->nexternal + num_ext;
+
+    /* Track different filters */
+
+    if ((nfltr=H5Pget_nfilters(dcpl)) >= 0) {
+
+       if (nfltr == 0) iter->dset_comptype[0]++;
+          for (u=0; u < (unsigned) nfltr; u++) {
+               fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0, NULL);
+               if (fltr < (H5_NFILTERS_IMPL-1))
+                 iter->dset_comptype[fltr]++;
+               else
+                 iter->dset_comptype[H5_NFILTERS_IMPL-1]++; /*other filters*/
+          }
+
+        } /*endif nfltr */
+
+     ret = H5Pclose(dcpl);
+     assert(ret >= 0);
+
+     ret = H5Dclose(did);
+     assert(ret >= 0);
+
+     return 0;
+} 
 
 
 /*-------------------------------------------------------------------------
@@ -390,215 +653,11 @@ printf("walk: fullname = %s\n", fullname);
 
         switch(sb.type) {
             case H5G_GROUP:
-            {
-                hid_t gid;                      /* Group ID */
-                const char *last_container;
-                hsize_t num_objs;
-                unsigned bin;                   /* "bin" the number of objects falls in */
-
-                /* Gather statistics about this type of object */
-                iter->uniq_groups++;
-                if(iter->curr_depth > iter->max_depth)
-                    iter->max_depth = iter->curr_depth;
-
-                /* Get object header information */
-                iter->group_ohdr_info.total_size += sb.ohdr.size;
-                iter->group_ohdr_info.free_size += sb.ohdr.free;
-
-                gid = H5Gopen(group, name);
-                assert(gid > 0);
-
-                H5Gget_num_objs(gid, &num_objs);
-                if(num_objs < SIZE_SMALL_GROUPS)
-                    (iter->num_small_groups[num_objs])++;
-                if(num_objs > iter->max_fanout)
-                    iter->max_fanout = num_objs;
-
-                /* Add group count to proper bin */
-                bin = ceil_log10((unsigned long)num_objs);
-                if((bin + 1) > iter->group_nbins) {
-                    /* Allocate more storage for info about dataset's datatype */
-                    iter->group_bins = realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
-                    assert(iter->group_bins);
-
-                    /* Initialize counts for intermediate bins */
-                    while(iter->group_nbins < bin)
-                        iter->group_bins[iter->group_nbins++] = 0;
-                    iter->group_nbins++;
-
-                    /* Initialize count for new bin */
-                    iter->group_bins[bin] = 1;
-                } /* end if */
-                else {
-                    (iter->group_bins[bin])++;
-                } /* end else */
-
-                ret = H5Gclose(gid);
-                assert(ret >= 0);
-
-                last_container = iter->container;
-                iter->container = fullname;
-                iter->curr_depth++;
-
-                H5Giterate(group, name, NULL, walk, iter);
-
-                iter->container = last_container;
-                iter->curr_depth--;
-            } /* end case */
+                group_stats(group, name, fullname, &sb, walk, iter);     
                 break;
 
             case H5G_DATASET:
-            {
-                hid_t did;                      /* Dataset ID */
-                hid_t sid;                      /* Dataspace ID */
-                hid_t tid;                      /* Datatype ID */
-                hid_t dcpl;                     /* Dataset creation property list ID */
-                hsize_t dims[H5S_MAX_RANK];     /* Dimensions of dataset */
-                H5D_layout_t lout;              /* Layout of dataset */
-                unsigned type_found;            /* Whether the dataset's datatype was already found */
-                int ndims;                      /* Number of dimensions of dataset */
-                hsize_t storage;                /* Size of dataset storage */
-                unsigned u;                     /* Local index variable */
-                int num_ext;                    /* Number of external files for a dataset */
-                int nfltr;                      /* Number of filters for a dataset */
-                H5Z_filter_t fltr;              /* Filter identifier */
-
-                /* Gather statistics about this type of object */
-                iter->uniq_dsets++;
-
-                /* Get object header information */
-                iter->dset_ohdr_info.total_size += sb.ohdr.size;
-                iter->dset_ohdr_info.free_size += sb.ohdr.free;
-
-                did = H5Dopen(group, name);
-                assert(did > 0);
-
-                /* Get storage info */
-                storage = H5Dget_storage_size(did);
-                iter->dset_storage_size += storage;
-
-                /* Gather dataspace statistics */
-                sid = H5Dget_space(did);
-                assert(sid > 0);
-
-                ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
-                assert(ndims >= 0);
-
-                /* Check for larger rank of dataset */
-                if((unsigned)ndims > iter->max_dset_rank)
-                    iter->max_dset_rank = ndims;
-
-                /* Track the number of datasets with each rank */
-                (iter->dset_rank_count[ndims])++;
-
-                /* Only gather dim size statistics on 1-D datasets */
-                if(ndims == 1) {
-                    unsigned bin;                   /* "bin" the number of objects falls in */
-
-                    if(dims[0] > iter->max_dset_dims)
-                        iter->max_dset_dims = dims[0];
-                    if(dims[0] < SIZE_SMALL_DSETS)
-                        (iter->small_dset_dims[dims[0]])++;
-
-                    /* Add group count to proper bin */
-                    bin = ceil_log10((unsigned long)dims[0]);
-                    if((bin + 1) > iter->dset_dim_nbins) {
-                        /* Allocate more storage for info about dataset's datatype */
-                        iter->dset_dim_bins = realloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
-                        assert(iter->dset_dim_bins);
-
-                        /* Initialize counts for intermediate bins */
-                        while(iter->dset_dim_nbins < bin)
-                            iter->dset_dim_bins[iter->dset_dim_nbins++] = 0;
-                        iter->dset_dim_nbins++;
-
-                        /* Initialize count for this bin */
-                        iter->dset_dim_bins[bin] = 1;
-                    } /* end if */
-                    else {
-                        (iter->dset_dim_bins[bin])++;
-                    } /* end else */
-                } /* end if */
-
-                ret = H5Sclose(sid);
-                assert(ret >= 0);
-
-                /* Gather datatype statistics */
-                tid = H5Dget_type(did);
-                assert(tid > 0);
-
-                type_found = FALSE;
-                for(u = 0; u < iter->dset_ntypes; u++)
-                    if(H5Tequal(iter->dset_type_info[u].tid, tid) > 0) {
-                        type_found = TRUE;
-                        break;
-                    } /* end for */
-                if(type_found) {
-                    (iter->dset_type_info[u].count)++;
-                } /* end if */
-                else {
-                    unsigned curr_ntype = iter->dset_ntypes;
-
-                    /* Increment # of datatypes seen for datasets */
-                    iter->dset_ntypes++;
-
-                    /* Allocate more storage for info about dataset's datatype */
-                    iter->dset_type_info = realloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t));
-                    assert(iter->dset_type_info);
-
-                    /* Initialize information about datatype */
-                    iter->dset_type_info[curr_ntype].tid = H5Tcopy(tid);
-                    assert(iter->dset_type_info[curr_ntype].tid > 0);
-                    iter->dset_type_info[curr_ntype].count = 1;
-                    iter->dset_type_info[curr_ntype].named = 0;
-
-                    /* Set index for later */
-                    u = curr_ntype;
-                } /* end else */
-
-                /* Check if the datatype is a named datatype */
-                if(H5Tcommitted(tid) > 0)
-                    (iter->dset_type_info[u].named)++;
-
-                ret = H5Tclose(tid);
-                assert(ret >= 0);
-
-                /* Gather layout statistics */
-                dcpl = H5Dget_create_plist(did);
-                assert(dcpl > 0);
-
-                lout = H5Pget_layout(dcpl);
-                assert(lout >= 0);
-
-                /* Track the layout type for dataset */
-                (iter->dset_layouts[lout])++;
-
-                num_ext = H5Pget_external_count(dcpl);
-                assert (num_ext >= 0);
-
-                if(num_ext) iter->nexternal = iter->nexternal + num_ext;
-
-                /* Track different filters */
-
-                if ((nfltr=H5Pget_nfilters(dcpl)) >= 0) {
-
-                if (nfltr == 0) iter->dset_comptype[0]++;
-                   for (u=0; u < nfltr; u++) {
-                     fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0, NULL);
-                     if (fltr < (H5_NFILTERS_IMPL-1))
-                        iter->dset_comptype[fltr]++;
-                     else
-                        iter->dset_comptype[H5_NFILTERS_IMPL-1]++; /*other filters*/
-                   }
-
-                } /*endif nfltr */
-
-                ret = H5Pclose(dcpl);
-                assert(ret >= 0);
-
-                ret = H5Dclose(did);
-                assert(ret >= 0);
-            } /* end case */
+                dataset_stats(group, name, &sb, iter);
                 break;
 
             case H5G_TYPE:
@@ -607,7 +666,6 @@ printf("walk: fullname = %s\n", fullname);
                 break;
 
             case H5G_LINK:
-            case H5G_UDLINK:
                 /* Gather statistics about links and UD links */
                 iter->uniq_links++;
                 break;
@@ -650,7 +708,6 @@ parse_command_line(int argc, const char *argv[])
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-parse_start:
         switch ((char)opt) {
         case 'F':
             display_all = FALSE;
@@ -694,13 +751,13 @@ parse_start:
         }
     }
 
-parse_end:
     /* check for file name to be processed */
     if (argc <= opt_ind) {
         error_msg(progname, "missing file name\n");
         usage(progname);
         leave(EXIT_FAILURE);
     }
+    return 0;
 }
 
 
@@ -1023,9 +1080,9 @@ print_dataset_info(iter_t * _iter)
  *-------------------------------------------------------------------------
  */
 static herr_t
-print_statistics(iter_t ** _iter)
+print_statistics(iter_t * _iter)
 {
-        iter_t *iter = (iter_t**)_iter;
+        iter_t *iter = (iter_t*)_iter;
         herr_t ret =0;                     /* Generic return value */
 
         if(display_all) {
@@ -1051,7 +1108,7 @@ main(int argc, const char *argv[])
     iter_t          iter;
     const char     *fname = NULL;
     hid_t           fid;
-    herr_t          status;            /* Return value for parse_command_line function */
+    herr_t          status;        /* Return value for parse_command_line function */
 
     /* Disable error reporting */
     H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
@@ -1059,6 +1116,11 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     status = parse_command_line (argc, argv);
+    if (status < 0) {
+        error_msg(progname, "unable to parse command line arguments \n");
+        leave(EXIT_FAILURE);
+    }
+
     fname = argv[opt_ind];
 
     printf("Filename: %s\n", fname);
