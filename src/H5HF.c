@@ -334,11 +334,18 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     /* Get the fractal heap header */
     hdr = fh->hdr;
 
-    /* Check if object is large enough to be standalone */
+    /* Check for 'huge' object */
     if(size > hdr->max_man_size) {
         /* Store 'huge' object in heap */
-        if(H5HF_huge_insert(hdr, dxpl_id, size, obj, id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for 'managed' object in fractal heap")
+        /* (Casting away const OK - QAK) */
+        if(H5HF_huge_insert(hdr, dxpl_id, size, (void *)obj, id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'huge' object in fractal heap")
+    } /* end if */
+    /* Check for 'tiny' object */
+    else if(size <= hdr->tiny_max_len) {
+        /* Store 'tiny' object in heap */
+        if(H5HF_tiny_insert(hdr, size, obj, id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'tiny' object in fractal heap")
     } /* end if */
     else {
         /* Check if we are in "append only" mode, or if there's enough room for the object */
@@ -348,7 +355,7 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "'write once' managed blocks not su
         else {
             /* Allocate space for object in 'managed' heap */
             if(H5HF_man_insert(hdr, dxpl_id, size, obj, id) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate space for 'managed' object in fractal heap")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'managed' object in fractal heap")
         } /* end else */
     } /* end else */
 
@@ -390,7 +397,7 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
     HDassert(obj_len_p);
 
     /* Get the ID flags */
-    id_flags = *id++;
+    id_flags = *id;
 
     /* Check for correct heap ID version */
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
@@ -398,6 +405,9 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
 
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        /* Skip over the flag byte */
+        id++;
+
         /* Skip over object offset */
         id += fh->hdr->heap_off_size;
 
@@ -407,6 +417,10 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
     else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         if(H5HF_huge_get_obj_len(fh->hdr, dxpl_id, id, obj_len_p) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's length")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        if(H5HF_tiny_get_obj_len(fh->hdr, id, obj_len_p) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -448,7 +462,7 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
     HDassert(obj);
 
     /* Get the ID flags */
-    id_flags = *id++;
+    id_flags = *id;
 
     /* Check for correct heap ID version */
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
@@ -464,6 +478,11 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
         /* Read 'huge' object from file */
         if(H5HF_huge_read(fh->hdr, dxpl_id, id, obj) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'huge' object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Read 'tiny' object from file */
+        if(H5HF_tiny_read(fh->hdr, id, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'tiny' object from fractal heap")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -505,7 +524,7 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
     HDassert(id);
 
     /* Get the ID flags */
-    id_flags = *id++;
+    id_flags = *id;
 
     /* Check for correct heap ID version */
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
@@ -521,6 +540,11 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
         /* Remove 'huge' object from file & v2 B-tree tracker */
         if(H5HF_huge_remove(fh->hdr, dxpl_id, id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'huge' object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Remove 'tiny' object from heap statistics */
+        if(H5HF_tiny_remove(fh->hdr, id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'tiny' object from fractal heap")
     } /* end if */
     else {
 HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
@@ -596,7 +620,7 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
         /* Shut down the huge object information */
         /* (Can't put this in header "destroy" routine, because it has
          *      has the address of an object in the file, which might be
-         *      by the shutdown routine - QAK)
+         *      modified by the shutdown routine - QAK)
          */
         if(H5HF_huge_term(fh->hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info")
@@ -693,7 +717,7 @@ HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
     } /* end if */
 
     /* Release header's disk space */
-    if(H5MF_xfree(f, H5FD_MEM_FHEAP_HDR, dxpl_id, fh_addr, (hsize_t)H5HF_HEADER_SIZE(hdr)) < 0)
+    if(H5MF_xfree(f, H5FD_MEM_FHEAP_HDR, dxpl_id, fh_addr, (hsize_t)hdr->heap_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
 
     /* Finished deleting header */

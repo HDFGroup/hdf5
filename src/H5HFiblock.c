@@ -70,6 +70,9 @@ H5FL_DEFINE(H5HF_indirect_t);
 /* Declare a free list to manage the H5HF_indirect_ent_t sequence information */
 H5FL_SEQ_DEFINE(H5HF_indirect_ent_t);
 
+/* Declare a free list to manage the H5HF_indirect_filt_ent_t sequence information */
+H5FL_SEQ_DEFINE(H5HF_indirect_filt_ent_t);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -154,24 +157,12 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
 
     /* Mark block as evictable again when no child blocks depend on it */
     if(iblock->rc == 0) {
-        H5HF_indirect_t *tmp_iblock = NULL;     /* Temporary pointer to indirect block */
-
 #ifdef QAK
 HDfprintf(stderr, "%s: indirect block ref. count at zero, iblock->addr = %a\n", FUNC, iblock->addr);
 #endif /* QAK */
-        /* Lock indirect block */
-        if(iblock->nchildren == 0) {
-            if(NULL == (tmp_iblock = H5HF_man_iblock_protect(iblock->hdr, H5AC_dxpl_id, iblock->addr, iblock->nrows, NULL, 0, H5AC_WRITE)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
-            HDassert(tmp_iblock == iblock);
-        } /* end if */
-
         if(H5AC_unpin_entry(iblock->hdr->f, iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap indirect block")
 
-/* XXX: If the indirect block has no children, delete indirect block's entry
- *      from cache.
- */
         if(iblock->nchildren == 0) {
 #ifdef QAK
 HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n", FUNC, iblock->addr);
@@ -200,10 +191,9 @@ HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n",
             if(H5MF_xfree(iblock->hdr->f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block disk space")
 
-            /* Unlock indirect block with delete flag */
-            if(H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, tmp_iblock, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
-            tmp_iblock = NULL;
+            /* Evict the indirect block from the metadata cache */
+            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove indirect block from cache")
         } /* end if */
     } /* end if */
 
@@ -488,15 +478,14 @@ HDfprintf(stderr, "%s: Check 1.0 - iblock->addr = %a, new_addr = %a\n", FUNC, ib
         iblock->addr = new_addr;
     } /* end if */
 
-    /* Re-allocate direct block entry table */
+    /* Re-allocate child block entry array */
     if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
+        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
 
     /* Check for skipping over rows and add free section for skipped rows */
     if(skip_direct_rows) {
         /* Add skipped blocks to heap's free space */
-        if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry,
-                (new_next_entry - next_entry)) < 0)
+        if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, (new_next_entry - next_entry)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
     } /* end if */
 
@@ -508,6 +497,26 @@ HDfprintf(stderr, "%s: Check 1.0 - iblock->addr = %a, new_addr = %a\n", FUNC, ib
         iblock->ents[u].addr = HADDR_UNDEF;
         acc_dblock_free += hdr->man_dtable.row_tot_dblock_free[row];
     } /* end for */
+
+    /* Check for needing to re-allocate filtered entry array */
+    if(hdr->filter_len > 0 && old_nrows < hdr->man_dtable.max_direct_rows) {
+        unsigned dir_rows;      /* Number of direct rows in this indirect block */
+
+        /* Compute the number of direct rows for this indirect block */
+        dir_rows = MIN(iblock->nrows, hdr->man_dtable.max_direct_rows);
+HDfprintf(stderr, "%s: dir_rows = %u\n", FUNC, dir_rows);
+        HDassert(dir_rows > old_nrows);
+
+        /* Re-allocate filtered direct block entry array */
+        if(NULL == (iblock->filt_ents = H5FL_SEQ_REALLOC(H5HF_indirect_filt_ent_t, iblock->filt_ents, (size_t)(dir_rows * hdr->man_dtable.cparam.width))))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for filtered direct entries")
+
+        /* Initialize new entries allocated */
+        for(u = (old_nrows * hdr->man_dtable.cparam.width); u < (dir_rows * hdr->man_dtable.cparam.width); u++) {
+            iblock->filt_ents[u].size = 0;
+            iblock->filt_ents[u].filter_mask = 0;
+        } /* end for */
+    } /* end if */
 
     /* Mark indirect block as dirty */
     if(H5HF_iblock_dirty(iblock) < 0)
@@ -612,9 +621,16 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
         iblock->addr = new_addr;
     } /* end if */
 
-    /* Re-allocate direct block entry table */
+    /* Re-allocate child block entry array */
     if(NULL == (iblock->ents = H5FL_SEQ_REALLOC(H5HF_indirect_ent_t, iblock->ents, (iblock->nrows * hdr->man_dtable.cparam.width))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for direct entries")
+
+    /* Check for needing to re-allocate filtered entry array */
+    if(hdr->filter_len > 0 && new_nrows < hdr->man_dtable.max_direct_rows) {
+        /* Re-allocate filtered direct block entry array */
+        if(NULL == (iblock->filt_ents = H5FL_SEQ_REALLOC(H5HF_indirect_filt_ent_t, iblock->filt_ents, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for filtered direct entries")
+    } /* end if */
 
     /* Mark indirect block as dirty */
     if(H5HF_iblock_dirty(iblock) < 0)
@@ -842,13 +858,30 @@ HDfprintf(stderr, "%s: nrows = %u, max_rows = %u\n", FUNC, nrows, max_rows);
     /* Compute size of buffer needed for indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
-    /* Allocate indirect block entry tables */
+    /* Allocate child block entry array */
     if(NULL == (iblock->ents = H5FL_SEQ_MALLOC(H5HF_indirect_ent_t, (size_t)(iblock->nrows * hdr->man_dtable.cparam.width))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for block entries")
 
     /* Initialize indirect block entry tables */
     for(u = 0; u < (iblock->nrows * hdr->man_dtable.cparam.width); u++)
         iblock->ents[u].addr = HADDR_UNDEF;
+
+    /* Check for I/O filters to apply to this heap */
+    if(hdr->filter_len > 0) {
+        unsigned dir_rows;      /* Number of direct rows in this indirect block */
+
+        /* Compute the number of direct rows for this indirect block */
+        dir_rows = MIN(iblock->nrows, hdr->man_dtable.max_direct_rows);
+#ifdef QAK
+HDfprintf(stderr, "%s: dir_rows = %u\n", FUNC, dir_rows);
+#endif /* QAK */
+
+        /* Allocate & initialize indirect block filtered entry array */
+        if(NULL == (iblock->filt_ents = H5FL_SEQ_CALLOC(H5HF_indirect_filt_ent_t, (size_t)(dir_rows * hdr->man_dtable.cparam.width))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for block entries")
+    } /* end if */
+    else
+        iblock->filt_ents = NULL;
 
     /* Allocate space for the indirect block on disk */
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
@@ -979,6 +1012,21 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC,
     /* Point at the direct block */
     iblock->ents[entry].addr = child_addr;
 
+    /* Check for I/O filters on this heap */
+    if(iblock->hdr->filter_len > 0) {
+        unsigned row;           /* Row for entry */
+
+        /* Sanity check */
+        HDassert(iblock->filt_ents);
+
+        /* Compute row for entry */
+        row = entry / iblock->hdr->man_dtable.cparam.width;
+
+        /* If this is a direct block, set its initial size */
+        if(row < iblock->hdr->man_dtable.max_direct_rows)
+            iblock->filt_ents[entry].size = iblock->hdr->man_dtable.row_block_size[row];
+    } /* end if */
+
     /* Check for max. entry used */
     if(entry > iblock->max_child)
         iblock->max_child = entry;
@@ -1028,9 +1076,26 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC,
     /* Reset address of entry */
     iblock->ents[entry].addr = HADDR_UNDEF;
 
+    /* Check for I/O filters on this heap */
+    if(iblock->hdr->filter_len > 0) {
+        unsigned row;           /* Row for entry */
+
+        /* Sanity check */
+        HDassert(iblock->filt_ents);
+
+        /* Compute row for entry */
+        row = entry / iblock->hdr->man_dtable.cparam.width;
+
+        /* If this is a direct block, set its initial size */
+        if(row < iblock->hdr->man_dtable.max_direct_rows) {
+            iblock->filt_ents[entry].size = 0;
+            iblock->filt_ents[entry].filter_mask = 0;
+        } /* end if */
+    } /* end if */
+
     /* Decrement the # of child blocks */
     /* (If the number of children drop to 0, the indirect block will be
-     *  removed from the heap when it's ref. count drops to zero and the
+     *  removed from the heap when its ref. count drops to zero and the
      *  metadata cache calls the indirect block destructor)
      */
     iblock->nchildren--;
@@ -1113,7 +1178,7 @@ H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *chi
     HDassert(iblock);
     HDassert(child_addr);
 
-    /* Reset address of entry */
+    /* Retrieve address of entry */
     *child_addr = iblock->ents[entry].addr;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

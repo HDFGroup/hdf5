@@ -515,6 +515,7 @@
 ./src/H5HFspace.c
 ./src/H5HFstat.c
 ./src/H5HFtest.c
+./src/H5HFtiny.c
 ./src/H5HG.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h

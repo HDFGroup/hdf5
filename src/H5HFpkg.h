@@ -72,6 +72,9 @@
 #define H5HF_HDR_FLAGS_HUGE_ID_WRAPPED 0x01
 
 /* Size of the fractal heap header on disk */
+/* (this is the fixed-len portion, the variable-len I/O filter information
+ *      follows this information, if there are I/O filters for the heap)
+ */
 #define H5HF_HEADER_SIZE(h)     (                                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
@@ -80,6 +83,7 @@
                                                                               \
     /* General heap information */                                            \
     + 2 /* Heap ID len */                                                     \
+    + 2 /* I/O filters' encoded len */                                        \
     + 1 /* Status flags */                                                    \
                                                                               \
     /* "Huge" object fields */                                                \
@@ -98,6 +102,8 @@
     + (h)->sizeof_size /* Number of man. objects in heap */                   \
     + (h)->sizeof_size /* Size of huge space in heap */                       \
     + (h)->sizeof_size /* Number of huge objects in heap */                   \
+    + (h)->sizeof_size /* Size of tiny space in heap */                       \
+    + (h)->sizeof_size /* Number of tiny objects in heap */                   \
                                                                               \
     /* "Managed" object doubling table info */                                \
     + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
@@ -113,7 +119,14 @@
     + (h)->heap_off_size        /* Offset of the block in the heap */         \
     )
 
-/* Size of managed indirect block (absolute & mapped) */
+/* Size of managed indirect block entry for a child direct block */
+#define H5HF_MAN_INDIRECT_CHILD_DIR_ENTRY_SIZE(h) (                           \
+    ((h)->filter_len > 0 ?                                                    \
+        ((h)->sizeof_addr + (h)->sizeof_size + 4) : /* Size of entries for filtered direct blocks */ \
+        (h)->sizeof_addr)             /* Size of entries for un-filtered direct blocks */ \
+    )
+
+/* Size of managed indirect block */
 #define H5HF_MAN_INDIRECT_SIZE(h, i) (                                        \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE                                                 \
@@ -121,7 +134,7 @@
     /* Fractal heap managed, absolutely mapped indirect block specific fields */ \
     + (h)->sizeof_addr          /* File address of heap owning the block */   \
     + (h)->heap_off_size        /* Offset of the block in the heap */         \
-    + (MIN((i)->nrows, (h)->man_dtable.max_direct_rows) * (h)->man_dtable.cparam.width * (h)->sizeof_addr) /* Size of entries for direct blocks */ \
+    + (MIN((i)->nrows, (h)->man_dtable.max_direct_rows) * (h)->man_dtable.cparam.width * H5HF_MAN_INDIRECT_CHILD_DIR_ENTRY_SIZE(h)) /* Size of entries for direct blocks */ \
     + ((((i)->nrows > (h)->man_dtable.max_direct_rows) ? ((i)->nrows - (h)->man_dtable.max_direct_rows) : 0)  * (h)->man_dtable.cparam.width * (h)->sizeof_addr) /* Size of entries for indirect blocks */ \
     )
 
@@ -289,12 +302,12 @@ typedef struct H5HF_hdr_t {
 
     /* General header information (stored in header) */
     unsigned    id_len;         /* Size of heap IDs (in bytes) */
+    unsigned    filter_len;     /* Size of I/O filter information (in bytes) */
 
     /* Flags for heap settings (stored in status byte in header) */
     hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
-    hbool_t     have_io_filter; /* Does the heap have I/O filters for the direct blocks? */
     hbool_t     write_once;     /* Is heap being written in "write once" mode? */
-    hbool_t     huge_ids_wrapped;   /* Have "huge" object IDs wrapped around? */
+    hbool_t     huge_ids_wrapped; /* Have "huge" object IDs wrapped around? */
 
     /* Doubling table information (partially stored in header) */
     /* (Partially set by user, partially derived/updated internally) */
@@ -309,37 +322,53 @@ typedef struct H5HF_hdr_t {
     hsize_t  huge_next_id;      /* Next ID to use for indirectly tracked 'huge' object */
     haddr_t  huge_bt2_addr;     /* Address of v2 B-tree for tracking "huge" object info */
 
+    /* I/O filter support (stored in header, if any are used) */
+    H5O_pline_t pline;          /* I/O filter pipeline for heap objects */
+    size_t pline_root_direct_size;    /* Size of filtered root direct block */
+    unsigned pline_root_direct_filter_mask; /* I/O filter mask for filtered root direct block */
+
     /* Statistics for heap (stored in header) */
-    hsize_t     man_size;       /* Total amount of managed space in heap */
-    hsize_t     man_alloc_size; /* Total amount of allocated managed space in heap */
-    hsize_t     man_iter_off;   /* Offset of iterator in managed heap space */
-    hsize_t     man_nobjs;      /* Number of "managed" objects in heap */
-    hsize_t     huge_size;      /* Total size of "huge" objects in heap */
-    hsize_t     huge_nobjs;     /* Number of "huge" objects in heap */
+    hsize_t     man_size;       /* Total amount of 'managed' space in heap */
+    hsize_t     man_alloc_size; /* Total amount of allocated 'managed' space in heap */
+    hsize_t     man_iter_off;   /* Offset of iterator in 'managed' heap space */
+    hsize_t     man_nobjs;      /* Number of 'managed' objects in heap */
+    hsize_t     huge_size;      /* Total size of 'huge' objects in heap */
+    hsize_t     huge_nobjs;     /* Number of 'huge' objects in heap */
+    hsize_t     tiny_size;      /* Total size of 'tiny' objects in heap */
+    hsize_t     tiny_nobjs;     /* Number of 'tiny' objects in heap */
 
     /* Cached/computed values (not stored in header) */
     size_t      rc;             /* Reference count of objects using heap header */
     hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
+    size_t      heap_size;      /* Size of heap header in the file */
     H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
-    H5B2_class_t huge_bt2_class; /* v2 B-tree class information for "huge" object tracking */
     hsize_t     huge_max_id;    /* Max. 'huge' heap ID before rolling 'huge' heap IDs over */
     hbool_t     huge_ids_direct; /* Flag to indicate that 'huge' object's offset & length are stored directly in heap ID */
-    unsigned char huge_id_size;   /* Size of 'huge' heap IDs (in bytes) */
+    size_t      tiny_max_len;   /* Max. size of tiny objects for this heap */
+    hbool_t     tiny_len_extended; /* Flag to indicate that 'tiny' object's length is stored in extended form (i.e. w/extra byte) */
+    unsigned char huge_id_size; /* Size of 'huge' heap IDs (in bytes) */
     unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
     unsigned char heap_len_size; /* Size of heap ID lengths (in bytes) */
 } H5HF_hdr_t;
 
-/* Indirect block entry */
+/* Common indirect block doubling table entry */
+/* (common between entries pointing to direct & indirect child blocks) */
 typedef struct H5HF_indirect_ent_t {
     haddr_t     addr;           /* Direct block's address                     */
-/* XXX: Will need space for block size, for blocks with I/O filters */
 } H5HF_indirect_ent_t;
+
+/* Extern indirect block doubling table entry for compressed direct blocks */
+/* (only exists for indirect blocks in heaps that have I/O filters) */
+typedef struct H5HF_indirect_filt_ent_t {
+    size_t     size;            /* Size of child direct block, after passing though I/O filters */
+    unsigned	filter_mask;	/* Excluded filters for child direct block */
+} H5HF_indirect_filt_ent_t;
 
 /* Fractal heap indirect block */
 struct H5HF_indirect_t {
@@ -361,6 +390,7 @@ struct H5HF_indirect_t {
     /* Stored values */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */
     H5HF_indirect_ent_t *ents;  /* Pointer to block entry table               */
+    H5HF_indirect_filt_ent_t *filt_ents;    /* Pointer to filtered information for direct blocks */
 };
 
 /* A fractal heap direct block */
@@ -393,6 +423,36 @@ typedef struct H5HF_parent_t {
     unsigned entry;             /* Location of block in parent's entry table */
 } H5HF_parent_t;
 
+/* Typedef for indirectly accessed 'huge' object's records in the v2 B-tree */
+typedef struct H5HF_huge_bt2_indir_rec_t {
+    haddr_t addr;       /* Address of the object in the file */
+    hsize_t len;        /* Length of the object in the file */
+    hsize_t id;         /* ID used for object (not used for 'huge' objects directly accessed) */
+} H5HF_huge_bt2_indir_rec_t;
+
+/* Typedef for indirectly accessed, filtered 'huge' object's records in the v2 B-tree */
+typedef struct H5HF_huge_bt2_filt_indir_rec_t {
+    haddr_t addr;       /* Address of the filtered object in the file */
+    hsize_t len;        /* Length of the filtered object in the file */
+    unsigned filter_mask;   /* I/O pipeline filter mask for filtered object in the file */
+    hsize_t obj_size;   /* Size of the de-filtered object in memory */
+    hsize_t id;         /* ID used for object (not used for 'huge' objects directly accessed) */
+} H5HF_huge_bt2_filt_indir_rec_t;
+
+/* Typedef for directly accessed 'huge' object's records in the v2 B-tree */
+typedef struct H5HF_huge_bt2_dir_rec_t {
+    haddr_t addr;       /* Address of the object in the file */
+    hsize_t len;        /* Length of the object in the file */
+} H5HF_huge_bt2_dir_rec_t;
+
+/* Typedef for directly accessed, filtered 'huge' object's records in the v2 B-tree */
+typedef struct H5HF_huge_bt2_filt_dir_rec_t {
+    haddr_t addr;       /* Address of the filtered object in the file */
+    hsize_t len;        /* Length of the filtered object in the file */
+    unsigned filter_mask;   /* I/O pipeline filter mask for filtered object in the file */
+    hsize_t obj_size;   /* Size of the de-filtered object in memory */
+} H5HF_huge_bt2_filt_dir_rec_t;
+
 /* User data for free space section 'add' callback */
 typedef struct {
     H5HF_hdr_t *hdr;            /* Fractal heap header */
@@ -406,13 +466,6 @@ typedef struct {
     hsize_t obj_len;            /* Length of object removed (out) */
 } H5HF_huge_remove_ud1_t;
 
-/* Typedef for 'huge' object's records in the v2 B-tree */
-typedef struct H5HF_huge_bt2_rec_t {
-    haddr_t addr;       /* Address of the object in the file */
-    hsize_t len;        /* Length of the object in the file */
-    hsize_t id;         /* ID used for object (not used for 'huge' objects directly accessed) */
-} H5HF_huge_bt2_rec_t;
-
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -425,6 +478,18 @@ H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
 
 /* H5HF indirect block inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
+
+/* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
+H5_DLLVAR const H5B2_class_t H5HF_BT2_INDIR[1];
+
+/* The v2 B-tree class for tracking indirectly accessed filtered 'huge' objects */
+H5_DLLVAR const H5B2_class_t H5HF_BT2_FILT_INDIR[1];
+
+/* The v2 B-tree class for tracking directly accessed 'huge' objects */
+H5_DLLVAR const H5B2_class_t H5HF_BT2_DIR[1];
+
+/* The v2 B-tree class for tracking directly accessed filtered 'huge' objects */
+H5_DLLVAR const H5B2_class_t H5HF_BT2_FILT_DIR[1];
 
 /* H5HF single section inherits serializable properties from H5FS_section_class_t */
 H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_SINGLE[1];
@@ -452,6 +517,9 @@ H5FL_EXTERN(H5HF_indirect_t);
 
 /* Declare a free list to manage the H5HF_indirect_ent_t sequence information */
 H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
+
+/* Declare a free list to manage the H5HF_indirect_filt_ent_t sequence information */
+H5FL_SEQ_EXTERN(H5HF_indirect_filt_ent_t);
 
 
 /******************************/
@@ -543,10 +611,10 @@ H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
 H5_DLL herr_t H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id);
 
-/* "Huge" object routines */
+/* 'Huge' object routines */
 H5_DLL herr_t H5HF_huge_init(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_huge_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size,
-    const void *obj, void *id);
+    void *obj, void *id);
 H5_DLL herr_t H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id,
     const uint8_t *id, size_t *obj_len_p);
 H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
@@ -554,6 +622,15 @@ H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
 H5_DLL herr_t H5HF_huge_remove(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id);
 H5_DLL herr_t H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
+
+/* 'Tiny' object routines */
+H5_DLL herr_t H5HF_tiny_init(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj,
+    void *id);
+H5_DLL herr_t H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id,
+    size_t *obj_len_p);
+H5_DLL herr_t H5HF_tiny_read(H5HF_hdr_t *fh, const uint8_t *id, void *obj);
+H5_DLL herr_t H5HF_tiny_remove(H5HF_hdr_t *fh, const uint8_t *id);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr);
@@ -619,6 +696,7 @@ H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
 /* Testing routines */
 #ifdef H5HF_TESTING
 H5_DLL herr_t H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam);
+H5_DLL int H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2);
 H5_DLL unsigned H5HF_get_max_root_rows(const H5HF_t *fh);
 H5_DLL unsigned H5HF_get_dtable_width_test(const H5HF_t *fh);
 H5_DLL unsigned H5HF_get_dtable_max_drows_test(const H5HF_t *fh);
@@ -626,6 +704,12 @@ H5_DLL unsigned H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos);
 H5_DLL hsize_t H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row);
 H5_DLL hsize_t H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row);
 H5_DLL herr_t H5HF_get_id_off_test(const H5HF_t *fh, const void *id, hsize_t *obj_off);
+H5_DLL herr_t H5HF_get_id_type_test(const H5HF_t *fh, const void *id,
+    unsigned char *obj_type);
+H5_DLL herr_t H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len,
+    hbool_t *len_extended);
+H5_DLL herr_t H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id,
+    hbool_t *ids_direct);
 #endif /* H5HF_TESTING */
 
 #endif /* _H5HFpkg_H */

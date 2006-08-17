@@ -232,7 +232,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_finish_init_pahse2
+ * Function:	H5HF_hdr_finish_init_phase2
  *
  * Purpose:	Second phase to finish initializing info in shared heap header
  *
@@ -281,7 +281,11 @@ HDfprintf(stderr, "%s: row_max_dblock_free[%Zu] = %Zu\n", FUNC, u, hdr->man_dtab
 
     /* Initialize the information for tracking 'huge' objects */
     if(H5HF_huge_init(hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't informan for tracking huge objects")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize info for tracking huge objects")
+
+    /* Initialize the information for tracking 'tiny' objects */
+    if(H5HF_tiny_init(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize info for tracking tiny objects")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -343,7 +347,6 @@ haddr_t
 H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
     H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
-    haddr_t hdr_addr;           /* Heap header address */
     size_t dblock_overhead;     /* Direct block's overhead */
     haddr_t ret_value;          /* Return value */
 
@@ -388,12 +391,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file")
 #endif /* NDEBUG */
 
-    /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)H5HF_HEADER_SIZE(hdr))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
-
     /* Set the creation parameters for the heap */
-    hdr->heap_addr = hdr_addr;
     hdr->max_man_size = cparam->max_man_size;
     HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
@@ -410,8 +408,36 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     hdr->dirty = TRUE;
 
     /* First phase of header final initialization */
+    /* (doesn't need ID length set up) */
     if(H5HF_hdr_finish_init_phase1(hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
+
+    /* Copy any I/O filter pipeline */
+    /* (This code is not in the "finish init phase" routines because those 
+     *  routines are also called from the cache 'load' callback, and the filter
+     *  length is already set in that case (its stored in the header on disk))
+     */
+    if(cparam->pline.nused > 0) {
+        /* Copy the I/O filter pipeline from the creation parameters to the header */
+        if(NULL == H5O_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
+
+        /* Compute the I/O filters' encoded size */
+        if(0 == (hdr->filter_len = H5O_raw_size(H5O_PLINE_ID, hdr->f, &(hdr->pline))))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, HADDR_UNDEF, "can't get I/O filter pipeline size")
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
+#endif /* QAK */
+
+        /* Compute size of header on disk */
+        hdr->heap_size = H5HF_HEADER_SIZE(hdr)  /* Base header size */
+            + hdr->sizeof_size                  /* Size of size for filtered root direct block */
+            + 4                                 /* Size of filter mask for filtered root direct block */
+            + hdr->filter_len;                  /* Size of encoded I/O filter info */
+    } /* end if */
+    else
+        /* Set size of header on disk */
+        hdr->heap_size = H5HF_HEADER_SIZE(hdr);
 
     /* Set the length of IDs in the heap */
     /* (This code is not in the "finish init phase" routines because those 
@@ -423,26 +449,38 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
             hdr->id_len = 1 + hdr->heap_off_size + hdr->heap_len_size;
             break;
 
-        case 1: /* Set the length of heap IDs to just enough to hold the file offset & length of 'huge' objects in the heap */
-            hdr->id_len = 1 + hdr->sizeof_size + hdr->sizeof_addr;
+        case 1: /* Set the length of heap IDs to just enough to hold the information needed to directly access 'huge' objects in the heap */
+            if(hdr->filter_len > 0)
+                hdr->id_len = 1         /* ID flags */
+                    + hdr->sizeof_addr  /* Address of filtered object */
+                    + hdr->sizeof_size  /* Length of filtered object */
+                    + 4                 /* Filter mask for filtered object */
+                    + hdr->sizeof_size; /* Size of de-filtered object in memory */
+            else
+                hdr->id_len = 1         /* ID flags */
+                    + hdr->sizeof_addr  /* Address of object */
+                    + hdr->sizeof_size; /* Length of object */
             break;
 
         default:    /* Use the requested size for the heap ID */
-/* XXX: Limit heap ID length to 4096 + 1, due to # of bits required to store
- *      length of 'tiny' objects (12 bits)
- */
-HDfprintf(stderr, "%s: Varying size of heap IDs not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, HADDR_UNDEF, "varying size of heap IDs not supported yet")
+            /* Check boundaries */
+            if(cparam->id_len < (1 + hdr->heap_off_size + hdr->heap_len_size))
+                HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, HADDR_UNDEF, "ID length not large enough to hold object IDs")
+            else if(cparam->id_len > H5HF_MAX_ID_LEN)
+                HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, HADDR_UNDEF, "ID length too large to store tiny object lengths")
+
+            /* Use the requested size for the heap ID */
+            hdr->id_len = cparam->id_len;
             break;
     } /* end switch */
-
-    /* Second phase of header final initialization */
-    if(H5HF_hdr_finish_init_phase2(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
-
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 #endif /* QAK */
+
+    /* Second phase of header final initialization */
+    /* (needs ID and filter lengths set up) */
+    if(H5HF_hdr_finish_init_phase2(hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
 
     /* Extra checking for possible gap between max. direct block size minus
      * overhead and "huge" object size */
@@ -450,12 +488,16 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
     if((cparam->managed.max_direct_size - dblock_overhead) < cparam->max_man_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
 
+    /* Allocate space for the header on disk */
+    if(HADDR_UNDEF == (hdr->heap_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)hdr->heap_size)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
+
     /* Cache the new fractal heap header */
-    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
-    ret_value = hdr_addr;
+    ret_value = hdr->heap_addr;
 
 done:
     if(!H5F_addr_defined(ret_value))

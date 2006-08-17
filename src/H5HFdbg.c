@@ -216,9 +216,6 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Objects stored in 'debugging' format:",
 	      hdr->debug_objs);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-	      "I/O filters present:",
-	      hdr->have_io_filter);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	      "'Write once' flag:",
 	      hdr->write_once);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
@@ -257,9 +254,22 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Address of v2 B-tree for 'huge' objects:",
 	      hdr->huge_bt2_addr);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "'Tiny' object space used:",
+	      hdr->tiny_size);
+    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+	      "Number of 'tiny' objects in heap:",
+	      hdr->tiny_nobjs);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
-    H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth -3));
+    H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth - 3));
+
+    /* Print information about I/O filters */
+    if(hdr->filter_len > 0) {
+        HDfprintf(stream, "%*sI/O filter Info...\n", indent, "");
+        H5O_debug_id(H5O_PLINE_ID, f, dxpl_id, &(hdr->pline), stream,
+                             indent + 3, MAX(0, fwidth - 3));
+    } /* end if */
 
 done:
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)

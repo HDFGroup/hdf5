@@ -99,6 +99,8 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
     stats->man_free_space = fh->hdr->total_man_free;
     stats->huge_size = fh->hdr->huge_size;
     stats->huge_nobjs = fh->hdr->huge_nobjs;
+    stats->tiny_size = fh->hdr->tiny_size;
+    stats->tiny_nobjs = fh->hdr->tiny_nobjs;
 /* XXX: Add more metadata statistics for the heap */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

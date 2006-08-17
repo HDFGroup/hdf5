@@ -18,7 +18,7 @@
  *			Feb 24 2006
  *			Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
- * Purpose:		"Internal" routines for fractal heaps.
+ * Purpose:		"Managed" object routines for fractal heaps.
  *
  *-------------------------------------------------------------------------
  */
@@ -394,6 +394,9 @@ H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     HDassert(id);
     HDassert(obj);
 
+    /* Skip over the flag byte */
+    id++;
+
     /* Decode the object offset within the heap & it's length */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
@@ -493,6 +496,9 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
      */
     HDassert(hdr);
     HDassert(id);
+
+    /* Skip over the flag byte */
+    id++;
 
     /* Decode the object offset within the heap & it's length */
 #ifdef QAK

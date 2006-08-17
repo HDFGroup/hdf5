@@ -31,10 +31,16 @@
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /**************************/
 /* Library Private Macros */
 /**************************/
+
+/* Limit heap ID length to 4096 + 1, due to # of bits required to store
+ *      length of 'tiny' objects (12 bits)
+ */
+#define H5HF_MAX_ID_LEN         (4096 + 1)
 
 
 /****************************/
@@ -60,22 +66,27 @@ typedef struct H5HF_create_t {
                                 /* (i.e.  min. size of object to store standalone) */
     uint16_t id_len;            /* Length of IDs to use for heap objects */
                                 /* (0 - make ID just large enough to hold length & offset of object in the heap) */
-                                /* (1 - make ID just large enough to allow 'huge' objects to hold the file address & length of the 'huge' object) */
+                                /* (1 - make ID just large enough to allow 'huge' objects to be accessed directly) */
                                 /* (n - make ID 'n' bytes in size) */
+    H5O_pline_t pline;          /* I/O filter pipeline to apply to direct blocks & 'huge' objects */
 } H5HF_create_t;
 
 /* Fractal heap metadata statistics info */
 typedef struct H5HF_stat_t {
-    /* "Managed" object info */
-    hsize_t man_size;           /* Size of managed space in heap              */
-    hsize_t man_alloc_size;     /* Size of managed space allocated in heap    */
-    hsize_t man_iter_off;       /* Offset of "new block" iterator in managed heap space */
-    hsize_t man_free_space;     /* Free space within managed heap blocks      */
-    hsize_t man_nobjs;          /* Number of "managed" objects in heap        */
+    /* 'Managed' object info */
+    hsize_t man_size;           /* Size of 'managed' space in heap            */
+    hsize_t man_alloc_size;     /* Size of 'managed' space allocated in heap  */
+    hsize_t man_iter_off;       /* Offset of "new block" iterator in 'managed' heap space */
+    hsize_t man_free_space;     /* Free space within 'managed' heap blocks    */
+    hsize_t man_nobjs;          /* Number of 'managed' objects in heap        */
 
-    /* "Huge" object info */
-    hsize_t huge_size;          /* Size of "huge" objects in heap             */
-    hsize_t huge_nobjs;         /* Number of "huge" objects in heap           */
+    /* 'Huge' object info */
+    hsize_t huge_size;          /* Size of 'huge' objects in heap             */
+    hsize_t huge_nobjs;         /* Number of 'huge' objects in heap           */
+
+    /* 'Tiny' object info */
+    hsize_t tiny_size;          /* Size of 'tiny' objects in heap             */
+    hsize_t tiny_nobjs;         /* Number of 'tiny' objects in heap           */
 } H5HF_stat_t;
 
 /* Fractal heap info (forward decl - defined in H5HFpkg.h) */

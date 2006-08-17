@@ -214,6 +214,22 @@ main(int argc, char *argv[])
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST);
                 break;
 
+            case H5B2_FHEAP_HUGE_INDIR_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR);
+                break;
+
+            case H5B2_FHEAP_HUGE_DIR_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR);
+                break;
+
             default:
                 fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
@@ -240,6 +256,22 @@ main(int argc, char *argv[])
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
                 break;
 
+            case H5B2_FHEAP_HUGE_INDIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_DIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
+                break;
+
             default:
                 fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
@@ -264,6 +296,22 @@ main(int argc, char *argv[])
         switch(subtype) {
             case H5B2_TEST_ID:
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_INDIR_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_DIR_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
                 break;
 
             default:
