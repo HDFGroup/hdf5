@@ -2233,7 +2233,10 @@ expunge_entry(H5C_t * cache_ptr,
  *
  * Modifications:
  *
- *              None.
+ *              JRM -- 8/11/06
+ *              Updated code to reflect the fact that entries can now be
+ *              inserted pinned.  Note that since all inserts are dirty,
+ *              any pins must be global pins.
  *
  *****************************************************************************/
 
@@ -2244,6 +2247,7 @@ insert_entry(H5C_t * cache_ptr,
              unsigned int flags)
 {
     const char * fcn_name = "insert_entry()";
+    hbool_t insert_pinned;
     herr_t result;
     struct datum * entry_ptr;
 
@@ -2255,6 +2259,8 @@ insert_entry(H5C_t * cache_ptr,
     entry_ptr = &(data[idx]);
 
     HDassert( !(entry_ptr->locked) );
+
+    insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
     if ( nerrors == 0 ) {
 
@@ -2299,6 +2305,19 @@ insert_entry(H5C_t * cache_ptr,
                               (int)(data[idx].header.is_dirty));
 		}
             }
+        }
+
+        if ( insert_pinned ) {
+
+            HDassert( entry_ptr->header.is_pinned );
+            entry_ptr->global_pinned = TRUE;
+	    global_pins++;
+
+        } else {
+
+            HDassert( ! ( entry_ptr->header.is_pinned ) );
+            entry_ptr->global_pinned = FALSE;
+
         }
 
         /* HDassert( entry_ptr->header.is_dirty ); */
@@ -3670,6 +3689,9 @@ unlock_entry(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ * 		JRM -- 8/15/06
+ * 		Added assertion that entry is pinned on entry.
+ *
  *****************************************************************************/
 
 void
@@ -3694,6 +3716,7 @@ unpin_entry(H5C_t * cache_ptr,
 
         entry_ptr = &(data[idx]);
 
+	HDassert( (entry_ptr->header).is_pinned );
 	HDassert ( ! ( entry_ptr->global_pinned && entry_ptr->local_pinned) );
 	HDassert ( ( global && entry_ptr->global_pinned ) ||
 		   ( ! global && entry_ptr->local_pinned ) );
@@ -4700,6 +4723,10 @@ smoke_check_3(void)
  *		numbers of processors.
  *							JRM - 1/31/06
  *
+ *		Added code testing pinned insertion of entries.
+ *
+ *							JRM - 8/15/06
+ *
  *****************************************************************************/
 
 hbool_t
@@ -4775,7 +4802,20 @@ smoke_check_4(void)
 	      i < (virt_num_data_entries / 2);
 	      i++ )
         {
-            insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+	    if ( i % 2 == 0 ) {
+
+                insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+
+	    } else {
+
+		/* Insert some entries pinned, and then unpin them
+		 * immediately.  We have tested pinned entries elsewhere,
+		 * so it should be sufficient to verify that the 
+		 * entries are in fact pinned (which unpin_entry() should do).
+		 */
+                insert_entry(cache_ptr, file_ptr, i, H5C__PIN_ENTRY_FLAG);
+                unpin_entry(cache_ptr, file_ptr, i, TRUE, FALSE, FALSE);
+	    }
 
             if ( i % 59 == 0 ) {
 
@@ -5241,27 +5281,27 @@ trace_file_check(void)
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
-      "H5AC_set 0x0 12 0x0 2 0\n",
-      "H5AC_set 0x2 12 0x0 2 0\n",
-      "H5AC_set 0x4 12 0x0 4 0\n",
-      "H5AC_set 0x8 12 0x0 6 0\n",
-      "H5AC_protect 0 12 2 1\n",
+      "H5AC_set 0x0 13 0x0 2 0\n",
+      "H5AC_set 0x2 13 0x0 2 0\n",
+      "H5AC_set 0x4 13 0x0 4 0\n",
+      "H5AC_set 0x8 13 0x0 6 0\n",
+      "H5AC_protect 0 13 2 1\n",
       "H5AC_mark_pinned_or_protected_entry_dirty 0 0\n",
-      "H5AC_protect 0 12 0 0 0\n",
-      "H5AC_protect 2 12 2 1\n",
+      "H5AC_protect 0 13 0 0 0\n",
+      "H5AC_protect 2 13 2 1\n",
       "H5AC_pin_protected_entry 2 0\n",
-      "H5AC_protect 2 12 0 0 0\n",
+      "H5AC_protect 2 13 0 0 0\n",
       "H5AC_unpin_entry 2 0\n",
-      "H5AC_expunge_entry 2 12 0\n",
-      "H5AC_protect 4 12 4 1\n",
+      "H5AC_expunge_entry 2 13 0\n",
+      "H5AC_protect 4 13 4 1\n",
       "H5AC_pin_protected_entry 4 0\n",
-      "H5AC_protect 4 12 0 0 0\n",
+      "H5AC_protect 4 13 0 0 0\n",
       "H5AC_mark_pinned_entry_dirty 0x4 0 0 0\n",
       "H5AC_resize_pinned_entry 0x4 2 0 0\n",
       "H5AC_resize_pinned_entry 0x4 4 0 0\n",
       "H5AC_unpin_entry 4 0\n",
-      "H5AC_rename 0 8a65 12 0\n",
-      "H5AC_rename 8a65 0 12 0\n",
+      "H5AC_rename 0 8a65 13 0\n",
+      "H5AC_rename 8a65 0 13 0\n",
       "H5AC_flush 0x0 0\n",
       NULL
     };
