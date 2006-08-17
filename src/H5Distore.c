@@ -2458,7 +2458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunks,haddr_t chunk_addr[],hsize_t down_chunks[])
+H5D_istore_chunkmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[],hsize_t down_chunks[])
 {
     H5D_t *dset=io_info->dset;       /* Local pointer to dataset info */
 #if 0

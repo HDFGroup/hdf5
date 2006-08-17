@@ -298,7 +298,7 @@ H5_DLL herr_t H5D_istore_initialize_by_extent(H5D_io_info_t *io_info);
 H5_DLL herr_t H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
         haddr_t addr);
-H5_DLL herr_t H5D_istore_chunkmap(const H5D_io_info_t *io_info, hsize_t total_chunk, haddr_t chunk_addr[],hsize_t down_chunks[] );
+H5_DLL herr_t H5D_istore_chunkmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[],hsize_t down_chunks[] );
 #ifdef H5D_ISTORE_DEBUG
 H5_DLL herr_t H5D_istore_stats (H5D_t *dset, hbool_t headers);
 #endif /* H5D_ISTORE_DEBUG */
@@ -354,7 +354,9 @@ H5D_chunk_collective_io(H5D_io_info_t * io_info,fm_map *fm, const void*buf,
 H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *mem_space,
     const H5S_t *file_space, const H5T_path_t *tpath);
 
+#ifndef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
 H5_DLL herr_t  H5D_mpio_chunk_adjust_iomode(H5D_io_info_t *io_info,const fm_map *fm);
+#endif /* H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS */
 
 #endif /* H5_HAVE_PARALLEL */
 

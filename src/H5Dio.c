@@ -1505,16 +1505,18 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 || dataset->shared->layout.type==H5D_COMPACT);
 
 #ifdef H5_HAVE_PARALLEL
+        /* Check whether the collective mode can be turned off globally*/
+#ifndef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-          if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
-          HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
+            if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
+                HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
         }
+#endif /* H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS */
 	/* Temporarily shut down collective IO for chunking */
 	if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-	  if(H5D_chunk_collective_io(io_info,&fm,buf,FALSE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked read failed in collective mode");
+            if(H5D_chunk_collective_io(io_info,&fm,buf,FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked read failed in collective mode");
 	}
-
 	else {/* sequential or independent read */
 #endif
             /* Get first node in chunk skip list */
@@ -1827,14 +1829,16 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
 #ifdef H5_HAVE_PARALLEL
         /* Check whether the collective mode can be turned off globally*/
-
+#ifndef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-          if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
-          HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
+            if(H5D_mpio_chunk_adjust_iomode(io_info,&fm))
+                HGOTO_ERROR(H5E_DATASET,H5E_CANTGET,FAIL,"can't adjust collective I/O")
         }
+#endif /* H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS */
+	/* Temporarily shut down collective IO for chunking */
         if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-	  if(H5D_chunk_collective_io(io_info,&fm,buf,TRUE)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked write failed in collective mode");
+            if(H5D_chunk_collective_io(io_info,&fm,buf,TRUE) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunked write failed in collective mode");
 	}
 	else {/* sequential or independent write */
 #endif /* H5_HAVE_PARALLEL */
