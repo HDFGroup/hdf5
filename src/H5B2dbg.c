@@ -123,8 +123,12 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id) == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-              "Unknown!"));
+	      (shared->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+              "Unknown!"))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
@@ -246,8 +250,12 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
-              "Unknown!"));
+	      (shared->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+              "Unknown!"))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
@@ -277,7 +285,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                   temp_str);
         HDassert(H5B2_INT_NREC(internal, shared, u));
         (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
-            shared->type, H5B2_INT_NREC(internal,shared,u), NULL);
+            H5B2_INT_NREC(internal,shared,u), NULL);
     } /* end for */
 
     /* Print final node pointer */
@@ -363,8 +371,12 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
-              "Unknown!"));
+	      (shared->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+              "Unknown!"))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
@@ -386,7 +398,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
                   temp_str);
         HDassert(H5B2_LEAF_NREC(leaf, shared, u));
         (void)(type->debug)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
-            shared->type, H5B2_LEAF_NREC(leaf,shared,u), NULL);
+            H5B2_LEAF_NREC(leaf,shared,u), NULL);
     } /* end for */
 
 done:

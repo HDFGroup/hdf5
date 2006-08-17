@@ -303,7 +303,7 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
     hi = nrec;
     while(lo < hi && cmp) {
 	my_idx = (lo + hi) / 2;
-	if((cmp = (type->compare)(type, udata, native + rec_off[my_idx])) < 0)
+	if((cmp = (type->compare)(udata, native + rec_off[my_idx])) < 0)
 	    hi = my_idx;
 	else
 	    lo = my_idx + 1;
@@ -2239,7 +2239,7 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     } /* end else */
 
     /* Make callback to store record in native form */
-    if((shared->type->store)(shared->type, H5B2_LEAF_NREC(leaf,shared,idx), udata) < 0)
+    if((shared->type->store)(H5B2_LEAF_NREC(leaf,shared,idx), udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
 
     /* Update record count for node pointer to current node */
