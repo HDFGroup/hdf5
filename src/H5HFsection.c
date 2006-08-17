@@ -2598,7 +2598,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
 
                     /* If the child indirect block's address is defined, protect it */
                     if(H5F_addr_defined(child_iblock_addr)) {
-                        if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, child_iblock_addr, child_nrows, NULL, 0, H5AC_WRITE)))
+                        if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, child_iblock_addr, child_nrows, sect->u.indirect.u.iblock, curr_entry, H5AC_WRITE)))
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
                     } /* end if */
                     else
