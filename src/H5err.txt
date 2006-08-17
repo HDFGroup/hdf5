@@ -242,6 +242,7 @@ MINOR, PIPELINE, H5E_CALLBACK, Callback failed
 MINOR, PIPELINE, H5E_CANAPPLY, Error from filter 'can apply' callback
 MINOR, PIPELINE, H5E_SETLOCAL, Error from filter 'set local' callback
 MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled
+MINOR, PIPELINE, H5E_CANTFILTER, Filter operation failed
 
 # System level errors
 MINOR, SYSTEM, H5E_SYSERRSTR, System error message
