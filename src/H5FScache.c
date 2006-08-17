@@ -165,6 +165,9 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     if(NULL == (fspace = H5FS_new(fs_prot->nclasses, fs_prot->classes, fs_prot->cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* Set free space manager's internal information */
+    fspace->addr = addr;
+
     /* Compute the size of the free space header on disk */
     size = H5FS_HEADER_SIZE(f);
 
@@ -569,6 +572,9 @@ HDfprintf(stderr, "%s: fspace->sect_size = %Hu\n", FUNC, fspace->sect_size);
 
     /* Address of free space header for these sections */
     H5F_addr_decode(f, &p, &fs_addr);
+#ifdef QAK
+HDfprintf(stderr, "%s: fspace->addr = %a, fs_addr = %a\n", FUNC, fspace->addr, fs_addr);
+#endif /* QAK */
     if(H5F_addr_ne(fs_addr, fspace->addr))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
 
@@ -856,6 +862,9 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         p += 4;
 
         /* Address of free space header for these sections */
+#ifdef QAK
+HDfprintf(stderr, "%s: sinfo->fspace->addr = %a\n", FUNC, sinfo->fspace->addr);
+#endif /* QAK */
         H5F_addr_encode(f, &p, sinfo->fspace->addr);
 
         /* Set up user data for iterator */
