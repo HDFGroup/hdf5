@@ -545,6 +545,11 @@
  *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
+ * pinned_insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
+ * 		The cells are used to record the number of times an entry 
+ * 		with type id equal to the array index has been inserted 
+ * 		pinned into the cache in the current epoch.
+ *
  * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
  *		are used to record the number of times an entry with type
  *		id equal to the array index has been cleared in the current
@@ -788,6 +793,7 @@ struct H5C_t
     int64_t                     hits[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     misses[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     insertions[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     pinned_insertions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS + 1];

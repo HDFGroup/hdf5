@@ -1600,6 +1600,10 @@ flush_cache(H5C_t * cache_ptr,
  *		Added code to initialize the new cache_ptr field of the
  *		test_entry_t structure.
  *
+ *		JRM -- 8/10/06
+ *		Updated to reflect the fact that entries can now be
+ *		inserted pinned.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1611,6 +1615,7 @@ insert_entry(H5C_t * cache_ptr,
              unsigned int flags)
 {
     herr_t result;
+    hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -1627,6 +1632,8 @@ insert_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
+
+	insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
 	entry_ptr->is_dirty = TRUE;
 
@@ -1663,6 +1670,17 @@ insert_entry(H5C_t * cache_ptr,
 
         entry_ptr->cache_ptr = cache_ptr;
 
+	if ( insert_pinned ) {
+
+	    HDassert( entry_ptr->header.is_pinned );
+	    entry_ptr->is_pinned = TRUE;
+
+	} else {
+
+	    HDassert( ! ( entry_ptr->header.is_pinned ) );
+	    entry_ptr->is_pinned = FALSE;
+
+	}
         HDassert( entry_ptr->header.is_dirty );
         HDassert( ((entry_ptr->header).type)->id == type );
     }

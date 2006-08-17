@@ -533,6 +533,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	JRM -- 3/21/06
  * 	Added / updated macros for pinned entry related stats.
  *
+ * 	JRM -- 8/9/06
+ * 	More pinned entry stats related updates.
+ *
  ***********************************************************************/
 
 #define H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit) \
@@ -545,22 +548,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) \
 	(((cache_ptr)->dirty_pins)[(entry_ptr)->type->id])++;
-
-#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)        \
-	(((cache_ptr)->insertions)[(entry_ptr)->type->id])++;        \
-        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )   \
-	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;     \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size ) \
-	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;   \
-        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
-	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;     \
-        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size ) \
-	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;   \
-        if ( (entry_ptr)->size >                                     \
-             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {      \
-            ((cache_ptr)->max_size)[(entry_ptr)->type->id]           \
-                 = (entry_ptr)->size;                                \
-        }
 
 #define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)                   \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
@@ -661,6 +648,31 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                  = (entry_ptr)->pins;                               \
         }
 
+#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)            \
+	(((cache_ptr)->insertions)[(entry_ptr)->type->id])++;            \
+	if ( (entry_ptr)->is_pinned ) {                                  \
+	    (((cache_ptr)->pinned_insertions)[(entry_ptr)->type->id])++; \
+	    ((cache_ptr)->pins)[(entry_ptr)->type->id]++;                \
+            (entry_ptr)->pins++;                                         \
+	    if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )       \
+	        (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;         \
+	    if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size )     \
+	        (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;       \
+	}                                                                \
+        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )       \
+	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
+        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
+	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
+        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
+	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
+        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
+	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;       \
+        if ( (entry_ptr)->size >                                         \
+             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {          \
+            ((cache_ptr)->max_size)[(entry_ptr)->type->id]               \
+                 = (entry_ptr)->size;                                    \
+        }
+
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
 	if ( hit )                                                   \
             ((cache_ptr)->hits)[(entry_ptr)->type->id]++;            \
@@ -707,6 +719,25 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr) \
 	(((cache_ptr)->evictions)[(entry_ptr)->type->id])++;
+
+#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)            \
+	(((cache_ptr)->insertions)[(entry_ptr)->type->id])++;            \
+	if ( (entry_ptr)->is_pinned ) {                                  \
+	    (((cache_ptr)->pinned_insertions)[(entry_ptr)->type->id])++; \
+	    ((cache_ptr)->pins)[(entry_ptr)->type->id]++;                \
+	    if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )       \
+	        (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;         \
+	    if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size )     \
+	        (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;       \
+	}                                                                \
+        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )       \
+	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
+        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
+	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
+        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
+	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
+        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
+	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
 	if ( hit )                                                   \
@@ -1572,6 +1603,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		This macro should never be called on a pinned entry.
  *		Inserted an assert to verify this.
  *
+ *		JRM - 8/9/06
+ *		Not any more.  We must now allow insertion of pinned 
+ *		entries.  Updated macro to support this.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1583,35 +1618,44 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_pinned) );                                 \
     HDassert( (entry_ptr)->size > 0 );                                     \
                                                                            \
-    /* modified LRU specific code */                                       \
+    if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-    /* insert the entry at the head of the LRU list. */                    \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+                         (cache_ptr)->pel_tail_ptr,                        \
+                         (cache_ptr)->pel_len,                             \
+                         (cache_ptr)->pel_size, (fail_val))                \
                                                                            \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
-                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
-                     (cache_ptr)->LRU_list_size, (fail_val))               \
-                                                                           \
-    /* insert the entry at the head of the clean or dirty LRU list as      \
-     * appropriate.                                                        \
-     */                                                                    \
-                                                                           \
-    if ( entry_ptr->is_dirty ) {                                           \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,      \
-                             (cache_ptr)->dLRU_tail_ptr,                   \
-                             (cache_ptr)->dLRU_list_len,                   \
-                             (cache_ptr)->dLRU_list_size, (fail_val))      \
     } else {                                                               \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
-                             (cache_ptr)->cLRU_tail_ptr,                   \
-                             (cache_ptr)->cLRU_list_len,                   \
-                             (cache_ptr)->cLRU_list_size, (fail_val))      \
+                                                                           \
+        /* modified LRU specific code */                                   \
+                                                                           \
+        /* insert the entry at the head of the LRU list. */                \
+                                                                           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+			 (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
+                                                                           \
+        /* insert the entry at the head of the clean or dirty LRU list as  \
+         * appropriate.                                                    \
+         */                                                                \
+                                                                           \
+        if ( entry_ptr->is_dirty ) {                                       \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
+                                 (cache_ptr)->dLRU_tail_ptr,               \
+                                 (cache_ptr)->dLRU_list_len,               \
+                                 (cache_ptr)->dLRU_list_size, (fail_val))  \
+        } else {                                                           \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
+                                 (cache_ptr)->cLRU_tail_ptr,               \
+                                 (cache_ptr)->cLRU_list_len,               \
+                                 (cache_ptr)->cLRU_list_size, (fail_val))  \
+        }                                                                  \
+                                                                           \
+        /* End modified LRU specific code. */                              \
     }                                                                      \
-                                                                           \
-    /* End modified LRU specific code. */                                  \
-                                                                           \
 }
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -1622,19 +1666,28 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_pinned) );                                 \
     HDassert( (entry_ptr)->size > 0 );                                     \
                                                                            \
-    /* modified LRU specific code */                                       \
+    if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-    /* insert the entry at the head of the LRU list. */                    \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+                         (cache_ptr)->pel_tail_ptr,                        \
+                         (cache_ptr)->pel_len,                             \
+                         (cache_ptr)->pel_size, (fail_val))                \
                                                                            \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
-                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
-                     (cache_ptr)->LRU_list_size, (fail_val))               \
+    } else {                                                               \
                                                                            \
-    /* End modified LRU specific code. */                                  \
+        /* modified LRU specific code */                                   \
                                                                            \
+        /* insert the entry at the head of the LRU list. */                \
+                                                                           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+			 (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
+                                                                           \
+        /* End modified LRU specific code. */                              \
+    }                                                                      \
 }
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3908,6 +3961,9 @@ done:
  *		Added initialization for the new dirtied field of the
  *		H5C_cache_entry_t structure.
  *
+ *		JRM -- 8/9/06
+ *		Added code supporting insertion of pinned entries.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3924,6 +3980,7 @@ H5C_insert_entry(H5F_t * 	     f,
     herr_t		result;
     herr_t		ret_value = SUCCEED;    /* Return value */
     hbool_t		first_flush = TRUE;
+    hbool_t		insert_pinned;
     hbool_t             set_flush_marker;
     hbool_t		write_permitted = TRUE;
     H5C_cache_entry_t *	entry_ptr;
@@ -3956,6 +4013,7 @@ H5C_insert_entry(H5F_t * 	     f,
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
+    insert_pinned    = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -4092,7 +4150,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     entry_ptr->is_protected = FALSE;
 
-    entry_ptr->is_pinned = FALSE;
+    entry_ptr->is_pinned = insert_pinned;
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
@@ -5712,6 +5770,9 @@ done:
  *		JRM -- 3/21/06
  *		Added code supporting the pinned entry related stats.
  *
+ *		JRM -- 8/9/06
+ *		More code supporting pinned entry related stats.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -5731,6 +5792,7 @@ H5C_stats(H5C_t * cache_ptr,
     int64_t     total_hits = 0;
     int64_t     total_misses = 0;
     int64_t     total_insertions = 0;
+    int64_t     total_pinned_insertions = 0;
     int64_t     total_clears = 0;
     int64_t     total_flushes = 0;
     int64_t     total_evictions = 0;
@@ -5769,20 +5831,21 @@ H5C_stats(H5C_t * cache_ptr,
 
     for ( i = 0; i <= cache_ptr->max_type_id; i++ ) {
 
-        total_hits           += cache_ptr->hits[i];
-        total_misses         += cache_ptr->misses[i];
-        total_insertions     += cache_ptr->insertions[i];
-        total_clears         += cache_ptr->clears[i];
-        total_flushes        += cache_ptr->flushes[i];
-        total_evictions      += cache_ptr->evictions[i];
-        total_renames        += cache_ptr->renames[i];
-        total_size_increases += cache_ptr->size_increases[i];
-        total_size_decreases += cache_ptr->size_decreases[i];
-	total_pins           += cache_ptr->pins[i];
-	total_unpins         += cache_ptr->unpins[i];
-	total_dirty_pins     += cache_ptr->dirty_pins[i];
-	total_pinned_flushes += cache_ptr->pinned_flushes[i];
-	total_pinned_clears  += cache_ptr->pinned_clears[i];
+        total_hits              += cache_ptr->hits[i];
+        total_misses            += cache_ptr->misses[i];
+        total_insertions        += cache_ptr->insertions[i];
+        total_pinned_insertions += cache_ptr->pinned_insertions[i];
+        total_clears            += cache_ptr->clears[i];
+        total_flushes           += cache_ptr->flushes[i];
+        total_evictions         += cache_ptr->evictions[i];
+        total_renames           += cache_ptr->renames[i];
+        total_size_increases    += cache_ptr->size_increases[i];
+        total_size_decreases    += cache_ptr->size_decreases[i];
+	total_pins              += cache_ptr->pins[i];
+	total_unpins            += cache_ptr->unpins[i];
+	total_dirty_pins        += cache_ptr->dirty_pins[i];
+	total_pinned_flushes    += cache_ptr->pinned_flushes[i];
+	total_pinned_clears     += cache_ptr->pinned_clears[i];
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if ( aggregate_max_accesses < cache_ptr->max_accesses[i] )
         aggregate_max_accesses = cache_ptr->max_accesses[i];
@@ -5911,9 +5974,11 @@ H5C_stats(H5C_t * cache_ptr,
               (long)total_flushes,
               (long)total_evictions);
 
-    HDfprintf(stdout, "%s  Total insertions / renames         = %ld / %ld\n",
+    HDfprintf(stdout, 
+	      "%s  Total insertions(pinned) / renames = %ld(%ld) / %ld\n",
               cache_ptr->prefix,
               (long)total_insertions,
+              (long)total_pinned_insertions,
               (long)total_renames);
 
     HDfprintf(stdout, "%s  Total entry size incrs / decrs     = %ld / %ld\n",
@@ -5986,9 +6051,10 @@ H5C_stats(H5C_t * cache_ptr,
                       (long)(cache_ptr->evictions[i]));
 
             HDfprintf(stdout,
-                      "%s    insertions / renames           = %ld / %ld\n",
+                      "%s    insertions(pinned) / renames   = %ld(%ld) / %ld\n",
                       cache_ptr->prefix,
                       (long)(cache_ptr->insertions[i]),
+                      (long)(cache_ptr->pinned_insertions[i]),
                       (long)(cache_ptr->renames[i]));
 
             HDfprintf(stdout,
@@ -6066,6 +6132,9 @@ done:
  *		JRM - 3/20/06
  *		Updated for pin / unpin related statistics.
  *
+ *		JRM - 8/9/06 
+ *		Further updates for pin related statistics.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -6085,6 +6154,7 @@ H5C_stats__reset(H5C_t * cache_ptr)
         cache_ptr->hits[i]			= 0;
         cache_ptr->misses[i]			= 0;
         cache_ptr->insertions[i]		= 0;
+        cache_ptr->pinned_insertions[i]		= 0;
         cache_ptr->clears[i]			= 0;
         cache_ptr->flushes[i]			= 0;
         cache_ptr->evictions[i]	 		= 0;

@@ -34,6 +34,7 @@ static void smoke_check_6(void);
 static void smoke_check_7(void);
 static void smoke_check_8(void);
 static void write_permitted_check(void);
+static void check_insert_entry(void);
 static void check_flush_cache(void);
 static void check_flush_cache__empty_cache(H5C_t * cache_ptr);
 static void check_flush_cache__multi_entry(H5C_t * cache_ptr);
@@ -1997,6 +1998,308 @@ write_permitted_check(void)
     return;
 
 } /* write_permitted_check() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_insert_entry()
+ *
+ * Purpose:	Verify that H5C_insert_entry behaves as expected.
+ *		Test the behaviour with different flags.
+ *
+ *		This test was added primarily to test basic insert
+ *		pinned entry functionallity, but I through in explicit
+ *		tests for other functionallity that is tested implicitly
+ *		elsewhere.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              8/10/06
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_insert_entry(void)
+{
+    const char *               fcn_name = "check_insert_entry";
+    int                        entry_type = PICO_ENTRY_TYPE;
+    int                        i;
+    herr_t                     result;
+    hbool_t                    in_cache;
+    hbool_t                    is_dirty;
+    hbool_t                    is_protected;
+    hbool_t                    is_pinned;
+    size_t                     entry_size;
+    H5C_t *                    cache_ptr = NULL;
+    test_entry_t *             base_addr;
+    test_entry_t *             entry_ptr;
+    struct H5C_cache_entry_t * search_ptr;
+
+
+    TESTING("H5C_insert_entry() functionality");
+
+    pass = TRUE;
+
+    /* Allocate a cache, and insert entries into it using all 
+     * combinations of flags.  Verify that the entries are inserted,
+     * and that the flags have the desired effects.
+     *
+     * Note that the dirty parameter in insert_entry is no longer
+     * used, as we have decided that all inserted entries are 
+     * dirty by definition. (Which sounds very reasonable, but didn't
+     * used to be the case.)
+     */
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024 * 1024),
+                                (size_t)(1 * 1024 * 1024));
+    }
+
+    if ( pass ) {
+
+        insert_entry(cache_ptr, entry_type, 0, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(cache_ptr, entry_type, 1, TRUE, 
+                     H5C__SET_FLUSH_MARKER_FLAG);
+        insert_entry(cache_ptr, entry_type, 2, TRUE, H5C__PIN_ENTRY_FLAG);
+        insert_entry(cache_ptr, entry_type, 3, TRUE, 
+		     (H5C__SET_FLUSH_MARKER_FLAG | H5C__PIN_ENTRY_FLAG));
+    }
+
+
+    /* Verify that the entries are inserted as desired. */
+
+    i = 0;
+    base_addr = entries[0];
+    while ( ( pass ) && ( i < 4 ) )
+    {
+	entry_ptr = &(base_addr[i]);
+
+	/* Start by checking everything we can via H5C_get_entry_status() */
+
+	result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
+			              &in_cache, &is_dirty, &is_protected, 
+				      &is_pinned);
+
+        if ( result < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5AC_get_entry_status() reports failure.";
+        }
+
+	if ( pass ) { 
+
+	    /* check the universals */
+	    if ( ( ! in_cache ) || ( ! is_dirty ) || ( is_protected ) || 
+                 ( entry_size != entry_sizes[entry_type] ) ) {
+
+                pass = FALSE;
+                failure_mssg = "Unexpected insert results 1.";
+            }
+	}
+
+	if ( pass ) {
+
+            /* verify that the pinned flag got set correctly */
+	    if ( ( i == 2 ) || ( i == 3 ) ) {
+
+		if ( ! is_pinned ) {
+
+                    pass = FALSE;
+                    failure_mssg = "Unexpected insert results 2.";
+		}
+	    } else if ( is_pinned ) {
+
+                pass = FALSE;
+                failure_mssg = "Unexpected insert results 3.";
+
+	    } else if ( is_pinned != ((entry_ptr->header).is_pinned) ) {
+
+                pass = FALSE;
+                failure_mssg = "Unexpected insert results 4.";
+            }
+	}
+
+	/* Thats all we can get from H5AC_get_entry_status().
+	 * Now start looking at the cache data structures directly.
+	 */
+
+	if ( pass ) {
+
+            /* Verify that the flush marker got set correctly */
+	    if ( ( i == 1 ) || ( i == 3 ) ) {
+
+		if ( ! ((entry_ptr->header).flush_marker) ) {
+
+                    pass = FALSE;
+                    failure_mssg = "Unexpected insert results 5.";
+		}
+	    } else if ( (entry_ptr->header).flush_marker ) {
+
+                pass = FALSE;
+                failure_mssg = "Unexpected insert results 6.";
+	    }
+	}
+
+	if ( pass ) {
+
+	    /* Verify that pinned entries are in the pinned entry list */
+	    if ( (entry_ptr->header).is_pinned ) {
+
+		search_ptr = cache_ptr->pel_head_ptr;
+
+		while ( ( search_ptr != NULL ) &&
+			( search_ptr != 
+			  (struct H5C_cache_entry_t *)entry_ptr ) )
+		{
+		    search_ptr = search_ptr->next;
+		}
+
+		if ( search_ptr == NULL ) {
+
+                    pass = FALSE;
+                    failure_mssg = "Unexpected insert results 7.";
+		}
+	    }
+	}
+
+	if ( pass ) {
+
+	    /* Verify that unpinned entries are in the LRU list */
+	    if ( ! ((entry_ptr->header).is_pinned) ) {
+
+		search_ptr = cache_ptr->LRU_head_ptr;
+
+		while ( ( search_ptr != NULL ) &&
+			( search_ptr != 
+			  (struct H5C_cache_entry_t *)entry_ptr ) )
+		{
+		    search_ptr = search_ptr->next;
+		}
+
+		if ( search_ptr == NULL ) {
+
+                    pass = FALSE;
+                    failure_mssg = "Unexpected insert results 8.";
+		}
+	    }
+	}
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+	if ( pass ) {
+
+	    /* Verify that unpinned entries are in the dirty LRU list */
+	    if ( ! ((entry_ptr->header).is_pinned) ) {
+
+		search_ptr = cache_ptr->dLRU_head_ptr;
+
+		while ( ( search_ptr != NULL ) &&
+			( search_ptr != 
+			  (struct H5C_cache_entry_t *)entry_ptr ) )
+		{
+		    search_ptr = search_ptr->aux_next;
+		}
+
+		if ( search_ptr == NULL ) {
+
+                    pass = FALSE;
+                    failure_mssg = "Unexpected insert results 9.";
+		}
+	    }
+	}
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+	i++;
+
+    } /* while */
+
+
+    /* So much for looking at the individual entries.  Now verify 
+     * that the various counts and sized in the cache header are 
+     * as expected.
+     */
+
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 4 ) ||
+	     ( cache_ptr->index_size != 4 * entry_sizes[entry_type] ) ||
+	     ( cache_ptr->slist_len != 4 ) ||
+	     ( cache_ptr->slist_size != 4 * entry_sizes[entry_type] ) ||
+	     ( cache_ptr->pl_len != 0 ) ||
+	     ( cache_ptr->pl_size != (size_t)0 ) ||
+	     ( cache_ptr->pel_len != 2 ) ||
+	     ( cache_ptr->pel_size != 2 * entry_sizes[entry_type] ) ||
+	     ( cache_ptr->LRU_list_len != 2 ) ||
+	     ( cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type] ) ||
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+	     ( cache_ptr->dLRU_list_len != 2 ) ||
+	     ( cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type] ) ||
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+	     ( cache_ptr->cLRU_list_len != 0 ) ||
+	     ( cache_ptr->cLRU_list_size != (size_t)0 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected insert results 10.";
+	}
+    }
+
+
+    /* Finally, if stats collection is enabled, verify that the expected
+     * stats are collected.
+     */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+	if ( ( cache_ptr->insertions[entry_type] != 4 ) ||
+	     ( cache_ptr->pinned_insertions[entry_type] != 2 ) ||
+	     ( cache_ptr->pins[entry_type] != 2 ) ||
+	     ( cache_ptr->unpins[entry_type] != 0 ) ||
+             ( cache_ptr->dirty_pins[entry_type] != 0 ) ||
+	     ( cache_ptr->max_index_len != 4 ) ||
+	     ( cache_ptr->max_index_size != 4 * entry_sizes[entry_type] ) ||
+	     ( cache_ptr->max_slist_len != 4 ) ||
+	     ( cache_ptr->max_slist_size != 4 * entry_sizes[entry_type] ) ||
+	     ( cache_ptr->max_pl_len != 0 ) ||
+	     ( cache_ptr->max_pl_size != (size_t)0 ) ||
+	     ( cache_ptr->max_pel_len != 2 ) ||
+	     ( cache_ptr->max_pel_size != 2 * entry_sizes[entry_type] ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected insert results 11.";
+	}
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+
+    /* Unpin the pinned entries so we can take down the cache cleanly. */
+
+    if ( pass ) {
+
+        unpin_entry(cache_ptr, entry_type, 2);
+	unpin_entry(cache_ptr, entry_type, 3);
+    }
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_insert_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -5689,6 +5992,7 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_destroyed   */ TRUE
         );
     }
+
 
     /* Now run single entry tests for pinned entries.  Test all combinations
      * of:
@@ -18448,6 +18752,7 @@ main(void)
 #endif
 #if 1
     write_permitted_check();
+    check_insert_entry();
     check_flush_cache();
     check_get_entry_status();
     check_expunge_entry();

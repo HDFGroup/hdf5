@@ -60,7 +60,7 @@
  */
 #if H5C_COLLECT_CACHE_STATS
 
-#define H5C_COLLECT_CACHE_ENTRY_STATS	1
+#define H5C_COLLECT_CACHE_ENTRY_STATS	0
 
 #else
 
@@ -749,29 +749,52 @@ typedef struct H5C_auto_size_ctl_t
  * following function calls.  Note that not all flags are applicable
  * to all function calls.  Flags that don't apply to a particular
  * function are ignored in that function.
+ *
+ * These flags apply to all function calls:
+ *
+ * 	H5C__NO_FLAGS_SET (generic "no flags set" for all fcn calls)
+ *
+ *
+ * These flags apply to H5C_insert_entry():
+ *
+ * 	H5C__SET_FLUSH_MARKER_FLAG
+ * 	H5C__PIN_ENTRY_FLAG
+ *
+ * These flags apply to H5C_unprotect():
+ *
+ * 	H5C__SET_FLUSH_MARKER_FLAG
+ * 	H5C__DELETED_FLAG
+ * 	H5C__DIRTIED_FLAG
+ * 	H5C__SIZE_CHANGED_FLAG
+ * 	H5C__PIN_ENTRY_FLAG
+ * 	H5C__UNPIN_ENTRY_FLAG
+ *
+ *
+ * These flags apply to H5C_flush_cache():
+ *
+ * 	H5C__FLUSH_INVALIDATE_FLAG
+ * 	H5C__FLUSH_CLEAR_ONLY_FLAG
+ * 	H5C__FLUSH_MARKED_ENTRIES_FLAG
+ *	H5C__FLUSH_IGNORE_PROTECTED_FLAG (can't use this flag in combination
+ *					  with H5C__FLUSH_INVALIDATE_FLAG)
+ *
+ * These flags apply to H5C_flush_single_entry():
+ *
+ * 	H5C__FLUSH_INVALIDATE_FLAG
+ * 	H5C__FLUSH_CLEAR_ONLY_FLAG
+ * 	H5C__FLUSH_MARKED_ENTRIES_FLAG
  */
 
-/* Generic "no flags set" value for all function calls */
 #define H5C__NO_FLAGS_SET			0x0000
-
-/* These flags apply to H5C_insert_entry() & H5C_unprotect() */
 #define H5C__SET_FLUSH_MARKER_FLAG		0x0001
 #define H5C__DELETED_FLAG			0x0002
-
-/* These flags applies only to H5C_unprotect() */
 #define H5C__DIRTIED_FLAG			0x0004
 #define H5C__SIZE_CHANGED_FLAG			0x0008
 #define H5C__PIN_ENTRY_FLAG			0x0010
 #define H5C__UNPIN_ENTRY_FLAG			0x0020
-
-/* These flags apply to H5C_flush_cache() & H5C_flush_single_entry() */
 #define H5C__FLUSH_INVALIDATE_FLAG		0x0040
 #define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0080
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0100
-
-/* This flag applies to H5C_flush_cache() only.  It is an error to use
- * it in combination with the H5C__FLUSH_INVALIDATE_FLAG
- */
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
 
 
