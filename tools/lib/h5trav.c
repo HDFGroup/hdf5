@@ -542,7 +542,7 @@ static int traverse( hid_t loc_id,
 
 
   default:
-    HDfprintf(stderr, "traverse: Unknown object %d!\n", type); /* JAMES */
+    HDfprintf(stderr, "traverse: Unknown object %d!\n", type);
     return (-1);
    break;
 

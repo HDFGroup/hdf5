@@ -93,26 +93,27 @@ am_libhdf5_la_OBJECTS = H5.lo H5dbg.lo H5A.lo H5AC.lo H5B.lo \
 	H5FDstream.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
 	H5FSsection.lo H5G.lo H5Gdeprec.lo H5Gent.lo H5Glink.lo \
 	H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo \
-	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo \
-	H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo H5HFiblock.lo \
-        H5HFiter.lo H5HFman.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo \
-	H5HFtest.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo \
-	H5I.lo H5MF.lo H5MM.lo H5MP.lo H5MPtest.lo H5L.lo \
-	H5Lexternal.lo H5O.lo H5Oattr.lo H5Obogus.lo H5Ocache.lo \
-	H5Ocont.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oginfo.lo \
-	H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omtime.lo H5Oname.lo \
-	H5Onull.lo H5Opline.lo H5Osdspace.lo H5Oshared.lo H5Ostab.lo \
-	H5P.lo H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
-	H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pstrcpl.lo \
-	H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo \
-	H5Smpio.lo H5Snone.lo H5Spoint.lo H5Sselect.lo H5Stest.lo \
-	H5SL.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo \
-	H5Tcompound.lo H5Tconv.lo H5Tcset.lo H5Tenum.lo H5Tfields.lo \
-	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
-	H5Toh.lo H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo \
-	H5Tstrpad.lo H5Tvlen.lo H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo \
-	H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo H5Zszip.lo \
-	H5Zscaleoffset.lo H5Ztrans.lo
+	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
+	H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
+	H5HFiblock.lo H5HFiter.lo H5HFman.lo H5HFsection.lo \
+	H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HG.lo H5HGdbg.lo \
+	H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo H5MM.lo H5MP.lo \
+	H5MPtest.lo H5L.lo H5Lexternal.lo H5O.lo H5Oattr.lo \
+	H5Obogus.lo H5Ocache.lo H5Ocont.lo H5Odtype.lo H5Oefl.lo \
+	H5Ofill.lo H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo \
+	H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo \
+	H5Oshared.lo H5Ostab.lo H5P.lo H5Pacpl.lo H5Pdcpl.lo \
+	H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo H5Pgcpl.lo H5Plapl.lo \
+	H5Plcpl.lo H5Pocpl.lo H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo \
+	H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo \
+	H5Spoint.lo H5Sselect.lo H5Stest.lo H5SL.lo H5ST.lo H5T.lo \
+	H5Tarray.lo H5Tbit.lo H5Tcommit.lo H5Tcompound.lo H5Tconv.lo \
+	H5Tcset.lo H5Tenum.lo H5Tfields.lo H5Tfixed.lo H5Tfloat.lo \
+	H5Tinit.lo H5Tnative.lo H5Toffset.lo H5Toh.lo H5Topaque.lo \
+	H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo H5Tvlen.lo \
+	H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo \
+	H5Znbit.lo H5Zshuffle.lo H5Zszip.lo H5Zscaleoffset.lo \
+	H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 H5detect_SOURCES = H5detect.c
@@ -1107,14 +1108,14 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   else \
 	      echo "============================" > $${log}; \
 	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      elif test "X$(HDF_CXX)" = "Xyes"; then \
-	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
 	      else \
-	         echo "Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      fi; \
 	      echo "============================" >> $${log}; \
 	      srcdir="$(srcdir)" \
@@ -1128,7 +1129,6 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
 	      cat $${log}; \
 	   fi; \
-	   echo "============================"; \
 	fi
 
 # The dummysh.chkexe here prevents the target from being

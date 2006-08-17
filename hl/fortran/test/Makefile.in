@@ -704,14 +704,14 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   else \
 	      echo "============================" > $${log}; \
 	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
-	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      elif test "X$(HDF_CXX)" = "Xyes"; then \
-	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
 	      else \
-	         echo "Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      fi; \
 	      echo "============================" >> $${log}; \
 	      srcdir="$(srcdir)" \
@@ -725,7 +725,6 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
 	      cat $${log}; \
 	   fi; \
-	   echo "============================"; \
 	fi
 
 # The dummysh.chkexe here prevents the target from being
