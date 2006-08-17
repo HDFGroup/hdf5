@@ -196,7 +196,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
             } /* end if */
 
             /* Zero the heap ID out, may leak heap space if user is re-using reference and doesn't have garbage collection on */
-            HDmemset(ref, H5R_DSET_REG_REF_BUF_SIZE, 0);
+            HDmemset(ref, 0, H5R_DSET_REG_REF_BUF_SIZE);
 
             /* Get the amount of space required to serialize the selection */
             if((buf_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
