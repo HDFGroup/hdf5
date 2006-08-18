@@ -90,7 +90,7 @@ typedef struct {
 /* Private prototypes */
 static herr_t H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_create_real(H5G_loc_t *link_loc, const char *link_name,
     H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id);
@@ -101,12 +101,12 @@ static herr_t H5L_create_soft(const char *target_path, H5G_loc_t *cur_loc,
     const char *cur_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_linkval_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_linkval(H5G_loc_t *loc, const char *name, size_t size,
     char *buf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_unlink(H5G_loc_t *loc, const char *name, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,
@@ -114,13 +114,13 @@ static herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static int H5L_find_class_idx(H5L_link_t id);
 
 
@@ -1050,11 +1050,10 @@ H5L_link(H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
     HDassert(obj_loc);
     HDassert(new_name && *new_name);
 
-    /* Check that the object is not being hard linked into a different file */
-    if(NULL == (file = H5G_insertion_file(new_loc, new_name, dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to identify insertion file")
-    if(obj_loc->oloc->file != file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot link an object from another file")
+    /* The link callback will check that the object isn't being hard linked
+     * into a different file, so we don't need to do it here (there could be
+     * external links along the path).
+     */
 
     /* Construct link information for eventual insertion */
     lnk.type = H5L_LINK_HARD;
@@ -1083,7 +1082,7 @@ done:
  */
 static herr_t
 H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud3_t *udata = (H5L_trav_ud3_t *)_udata;   /* User data passed in */
     H5G_t *grp=NULL;                /* H5G_t for this group, opened to pass to user callback */
@@ -1173,7 +1172,7 @@ done:
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_link_cb() */
@@ -1307,7 +1306,10 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     char *norm_cur_name = NULL;	        /* Pointer to normalized current name */
     H5F_t *link_file = NULL;            /* Pointer to file to link to */
     H5O_link_t lnk;                     /* Link to insert */
-    H5O_loc_t obj_oloc;                 /* Location of object to link to */
+    H5G_loc_t obj_loc;                  /* Location of object to link to */
+    H5G_name_t path;                    /* obj_loc's path*/
+    H5O_loc_t oloc;                     /* obj_loc's oloc */
+    hbool_t loc_valid = FALSE;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_create_hard)
@@ -1326,14 +1328,18 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     lnk.type = H5L_LINK_HARD;
 
     /* Get object location for object pointed to */
-    if(H5G_obj_find(cur_loc, norm_cur_name, H5G_TARGET_NORMAL, NULL, &obj_oloc, lapl_id, dxpl_id) < 0)
+    obj_loc.path = &path;
+    obj_loc.oloc = &oloc;
+    H5G_loc_reset(&obj_loc);
+    if(H5G_loc_find(cur_loc, norm_cur_name, &obj_loc, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
+    loc_valid = TRUE;
 
     /* Construct link information for eventual insertion */
-    lnk.u.hard.addr = obj_oloc.addr;
+    lnk.u.hard.addr = obj_loc.oloc->addr;
 
     /* Set destination's file information */
-    link_file = obj_oloc.file;
+    link_file = obj_loc.oloc->file;
 
     /* Create actual link to the object.  Pass in NULL for the path, since this
      * function shouldn't change an object's user path. */
@@ -1342,6 +1348,12 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
+    /* Free the object header location */
+    if(loc_valid)    {
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
+
     /* Free the normalized path name */
     if(norm_cur_name)
         H5MM_xfree(norm_cur_name);
@@ -1469,7 +1481,7 @@ done:
  */
 static herr_t
 H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud5_t *udata = (H5L_trav_ud5_t *)_udata;   /* User data passed in */
     const H5L_link_class_t *link_class;             /* User-defined link class */
@@ -1509,7 +1521,7 @@ H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H
 done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_linkval_cb() */
@@ -1570,7 +1582,7 @@ done:
  */
 static herr_t
 H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_t *grp=NULL;                /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;            /* Id for this group (passed to user callback */
@@ -1637,7 +1649,7 @@ done:
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_unlink_cb() */
@@ -1703,7 +1715,7 @@ done:
  */
 static herr_t
 H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud10_t *udata = (H5L_trav_ud10_t *)_udata;   /* User data passed in */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
@@ -1794,7 +1806,7 @@ done:
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
     if(dst_name_r)
         H5RS_decr(dst_name_r);
 
@@ -1818,7 +1830,7 @@ done:
  */
 static herr_t
 H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud4_t *udata = (H5L_trav_ud4_t *)_udata;   /* User data passed in */
     H5L_trav_ud10_t udata_out;    /* User data for H5L_move_dest_cb traversal */
@@ -1890,7 +1902,7 @@ done:
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_move_cb() */
@@ -2002,7 +2014,7 @@ done:
  */
 static herr_t
 H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud1_t *udata = (H5L_trav_ud1_t *)_udata;   /* User data passed in */
     H5L_linkinfo_t *linfo = udata->linfo;
@@ -2059,7 +2071,7 @@ H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const
 done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_get_linfo_cb() */

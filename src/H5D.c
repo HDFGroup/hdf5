@@ -1195,9 +1195,13 @@ hid_t
 H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    H5G_loc_t	   loc;                 /* Object location to insert dataset into */
-    H5G_loc_t	   dset_loc;            /* Object location of the dataset */
-    H5F_t*         file;                /* File in which dataset is being created */
+    H5G_loc_t	    loc;                /* Object location to insert dataset into */
+    H5G_loc_t	    dset_loc;           /* Object location of the dataset */
+    H5G_loc_t       insertion_loc;      /* Loc of group in which to create object */
+    H5G_name_t      insert_path;        /* Path of group in which to create object */
+    H5O_loc_t       insert_oloc;        /* oloc of group in which to create object */
+    hbool_t         insert_loc_valid = FALSE;  /* Is insertion_loc valid? */
+    H5F_t*          file;               /* File in which dataset is being created */
     H5D_t	   *new_dset = NULL;    /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t	    dset_id = -1;       /* New dataset's id */
@@ -1222,8 +1226,13 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
     /* What file is the dataset being added to? */
-    if(NULL == (file = H5G_insertion_file(&loc, name, H5AC_dxpl_id)))
+    insertion_loc.path = &insert_path;
+    insertion_loc.oloc = &insert_oloc;
+    H5G_loc_reset(&insertion_loc);
+    if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+    insert_loc_valid=TRUE;
+    file = insertion_loc.oloc->file;
 
     /* build and open the new dataset */
     if(NULL == (new_dset = H5D_create(file, type_id, space, dcpl_id, H5AC_dxpl_id)))
@@ -1243,6 +1252,10 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     ret_value = dset_id;
 
 done:
+    if(insert_loc_valid) {
+        if(H5G_loc_free(&insertion_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
     if(ret_value < 0) {
         if(dset_id >= 0)
         {
@@ -1372,7 +1385,7 @@ H5Dopen(hid_t loc_id, const char *name)
     H5G_loc_t	 dset_loc;		/* Object location of dataset */
     H5G_name_t   path;            	/* Dataset group hier. path */
     H5O_loc_t    oloc;            	/* Dataset object location */
-    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
+    hbool_t      loc_found = FALSE;     /* Location at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
@@ -1393,7 +1406,7 @@ H5Dopen(hid_t loc_id, const char *name)
     /* Find the dataset object */
     if(H5G_loc_find(&loc, name, &dset_loc, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     /* Check that the object found is the correct type */
     if(H5O_obj_type(&oloc, dxpl_id) != H5G_DATASET)
@@ -1401,7 +1414,6 @@ H5Dopen(hid_t loc_id, const char *name)
 
     /* Open the dataset */
     if((dset = H5D_open(&dset_loc, dxpl_id)) == NULL) {
-        ent_found = FALSE;      /* Reset this, since H5D_open 'owns' it and then free's it on failure */
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
     } /* end if */
 
@@ -1416,8 +1428,10 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
         } /* end if */
         else {
-            if(ent_found)
-                H5G_name_free(&path);
+            if(loc_found) {
+                if(H5G_loc_free(&dset_loc) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            }
         } /* end else */
     } /* end if */
 
@@ -1450,7 +1464,7 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
     H5G_loc_t	 dset_loc;		/* Object location of dataset */
     H5G_name_t   path;            	/* Dataset group hier. path */
     H5O_loc_t    oloc;            	/* Dataset object location */
-    hbool_t      ent_found = FALSE;     /* Entry at 'name' found */
+    hbool_t      loc_found = FALSE;     /* Location at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
@@ -1478,7 +1492,7 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
     /* Find the dataset object */
     if(H5G_loc_find(&loc, name, &dset_loc, dapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     /* Check that the object found is the correct type */
     if(H5O_obj_type(&oloc, dxpl_id) != H5G_DATASET)
@@ -1486,7 +1500,6 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
 
     /* Open the dataset */
     if((dset = H5D_open(&dset_loc, dxpl_id)) == NULL) {
-        ent_found = FALSE;      /* Reset this, since H5D_open 'owns' it and then free's it on failure */
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
     } /* end if */
 
@@ -1501,8 +1514,10 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
         } /* end if */
         else {
-            if(ent_found)
-                H5G_name_free(&path);
+            if(loc_found) {
+                if(H5G_loc_free(&dset_loc) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            }
         } /* end else */
     } /* end if */
 
@@ -2647,12 +2662,14 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
 
 done:
     if(ret_value == NULL) {
+        /* Free the location--casting away const*/
         if(dataset) {
-            /* Free the dataset's group hier. path */
-            H5G_name_free(&dataset->path);
-
             if(shared_fo == NULL)   /* Need to free shared fo */
                 H5FL_FREE(H5D_shared_t, dataset->shared);
+
+            H5O_loc_free(&(dataset->oloc));
+            H5O_loc_free(&(dataset->path));
+
             H5FL_FREE(H5D_t, dataset);
         }
         if(shared_fo)

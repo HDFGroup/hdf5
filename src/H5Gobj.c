@@ -190,6 +190,7 @@ H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp, H5O_loc_t *oloc)
 
     /* Set file pointer for root object location */
     oloc->file = f;
+    oloc->holding_file = FALSE;
 
     /* decode header */
     *pp += H5F_SIZEOF_SIZE(f);          /* Skip over local heap address */
@@ -418,6 +419,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     /* Increment link count on object, if appropriate */
     if(inc_link) {
         H5O_loc_t obj_oloc;             /* Object location */
+        H5O_loc_reset(&obj_oloc);
 
         /* Convert to object location */
         obj_oloc.file = grp_oloc->file;
@@ -888,101 +890,4 @@ done:
 } /* end H5G_obj_lookup() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_find_cb
- *
- * Purpose:	Callback for retrieving object location for an object in a group
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 20, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_obj_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
-{
-    H5G_obj_ud2_t *udata = (H5G_obj_ud2_t *)_udata;   /* User data passed in */
-    herr_t ret_value = SUCCEED;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_obj_find_cb)
-
-    /* Copy link for object */
-    if(udata->lnk) {
-        /* Check if the name in this group resolved to a valid link */
-        if(lnk == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
-
-        /* Copy link information */
-#ifdef H5_GROUP_REVISION
-        if(H5O_copy(H5O_LINK_ID, lnk, udata->lnk) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
-#else /* H5_GROUP_REVISION */
-        *udata->lnk = *lnk;
-        HDassert(lnk->name);
-        udata->lnk->name = H5MM_xstrdup(lnk->name);
-        if(lnk->type == H5L_LINK_SOFT)
-            udata->lnk->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
-#endif /* H5_GROUP_REVISION */
-    } /* end if */
-
-    /* Copy object location for object */
-    if(udata->oloc) {
-        /* Check if the name in this group resolved to a valid object */
-        if(obj_loc == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
-
-        H5O_loc_copy(udata->oloc, obj_loc->oloc, H5_COPY_DEEP);
-    } /* end if */
-
-done:
-    /* Indicate that this callback didn't take ownership of the group *
-     * location for the object */
-    *own_obj_loc = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_find_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_find
- *
- * Purpose:	Look up an object relative to a group.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Sep 20 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_obj_find(H5G_loc_t *loc, const char *name, unsigned traverse_flags,
-    H5O_link_t *lnk, H5O_loc_t *obj_oloc, hid_t lapl_id, hid_t dxpl_id)
-{
-    H5G_obj_ud2_t    udata;                 /* User data for traversal callback */
-    herr_t           ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_obj_find, FAIL)
-
-    /* check arguments */
-    HDassert(loc && loc->oloc->file);
-    HDassert(name && *name);
-    HDassert(obj_oloc);
-    HDassert(H5P_CLS_LINK_ACCESS_g != -1);
-
-    /* Set up user data for locating object */
-    udata.lnk = lnk;
-    udata.oloc = obj_oloc;
-
-    /* Traverse group hierarchy to locate object */
-    if(H5G_traverse(loc, name, traverse_flags, H5G_obj_find_cb, &udata, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_find() */
 

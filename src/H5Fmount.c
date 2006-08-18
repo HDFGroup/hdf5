@@ -141,6 +141,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 
     /*
      * Check that the child isn't mounted, that the mount point exists, that
+     * the mount point wasn't reached via external link, that
      * the parent & child files have the same file close degree, and
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
@@ -148,6 +149,14 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
     if(H5G_loc_find(loc, name, &mp_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    /* If the mount location is holding its file open, that file will close
+     * and remove the mount as soon as we exit this function.  Prevent the
+     * user from doing this.
+     */
+    if(mp_loc.oloc->holding_file != FALSE)
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files")    
+
+    /* Open the mount point group */
     if(NULL == (mount_point = H5G_open(&mp_loc, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
 
@@ -229,9 +238,16 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
 
 done:
-    if(ret_value < 0 && mount_point)
-	if(H5G_close(mount_point) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
+    if(ret_value < 0) {
+        if(mount_point) {
+            if(H5G_close(mount_point) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
+        }
+        else {
+            if(H5G_loc_free(&mp_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location")
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mount() */

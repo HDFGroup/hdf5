@@ -65,6 +65,8 @@ typedef struct H5O_t H5O_t;
 typedef struct H5O_loc_t {
     H5F_t       *file;          /* File that object header is located within */
     haddr_t     addr;           /* File address of object header */
+    hbool_t     holding_file;   /* True if this object header has incremented
+                                 * its file's count of open objects. */
 } H5O_loc_t;
 
 /* Settings/flags for copying an object */
@@ -383,6 +385,8 @@ H5_DLL void *H5O_link_copy(const void *_mesg, void *_dest, unsigned update_flags
  */
 H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth);
+H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
+H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
 
 /* Layout operators */
 H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);

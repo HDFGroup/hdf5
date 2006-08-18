@@ -87,6 +87,14 @@ typedef enum {
     H5G_NAME_UNMOUNT            /* H5Funmount call */
 } H5G_names_op_t;
 
+/* Status returned from traversal callbacks; whether the object location
+ * or group location need to be closed */
+#define H5G_OWN_NONE 0
+#define H5G_OWN_OBJ_LOC 1
+#define H5G_OWN_GRP_LOC 2
+#define H5G_OWN_BOTH 3
+typedef int H5G_own_loc_t;
+
 /* Structure to store information about the name an object was opened with */
 typedef struct {
     H5RS_str_t  *full_path_r;           /* Path to object, as seen from root of current file mounting hierarchy */
@@ -124,7 +132,8 @@ H5_DLL H5G_t *H5G_open(H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
-H5_DLL H5F_t *H5G_insertion_file(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
+H5_DLL herr_t H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
+    H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);

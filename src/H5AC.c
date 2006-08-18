@@ -1893,6 +1893,7 @@ H5AC_protect(H5F_t *f,
 
     /* check args */
     HDassert(f);
+    HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
     HDassert(type->flush);

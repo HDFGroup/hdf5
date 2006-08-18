@@ -1570,22 +1570,31 @@ external_link_root(hid_t fapl)
     /* Close external object (lets first file close) */
     if(H5Gclose(gid) < 0) TEST_ERROR;
 
-    /* Close second file */
+    /* Create a new object using H5Gcreate through the external link 
+     * directly
+     */
+    if((gid = H5Gcreate(fid, "ext_link/newer_group", (size_t)0)) < 0) TEST_ERROR
+
+    /* Close file and group */
+    if(H5Gclose(gid) < 0) TEST_ERROR;
     if(H5Fclose(fid)<0) TEST_ERROR;
-
-
-    /* Open first file again and check on object created */
+    
+    /* Open first file again and check on objects created */
     if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* Open object created through external link */
+    /* Open objects created through external link */
     if((gid = H5Gopen(fid, "new_group")) < 0) TEST_ERROR;
+    if((gid2 = H5Gopen(fid, "newer_group")) < 0) TEST_ERROR;
 
-    /* Check name */
+    /* Check names */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
     if(HDstrcmp(objname, "/new_group")) TEST_ERROR
+    if((name_len = H5Iget_name( gid2, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if(HDstrcmp(objname, "/newer_group")) TEST_ERROR
 
-    /* Close opened object */
-    if(H5Gclose(gid) < 0) TEST_ERROR;
+    /* Close opened objects */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Close first file */
     if(H5Fclose(fid)<0) TEST_ERROR;
@@ -3152,6 +3161,234 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    external_link_closing
+ *
+ * Purpose:     Test that files are closed correctly when traversing
+ *              external links.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  James Laird
+ *              Wednesday, August 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_closing(hid_t fapl)
+{
+    hid_t       fid1 = (-1), fid2 = (-1), fid3 = (-1), fid4=(-1);
+    hid_t       gid=(-1), tid=(-1), tid2=(-1), sid=(-1), did=(-1);
+    hid_t       lcpl_id=(-1);
+    hsize_t      dims[2];
+    char	filename1[NAME_BUF_SIZE],
+                filename2[NAME_BUF_SIZE],
+    		filename3[NAME_BUF_SIZE],
+    		filename4[NAME_BUF_SIZE],       /* Names of files to externally link across */
+    		buf[NAME_BUF_SIZE];             /* misc. buffer */
+    H5L_linkinfo_t li;
+    H5G_stat_t  sb;
+    hobj_ref_t  obj_ref;
+
+    TESTING("that external files are closed during traversal");
+
+    /* In this test, external links will go from file1 to file2 and from
+     * file2 to file3.
+     * Test that all functions that can traverse external files close
+     * the files they open.
+     * Test that providing unusual paths containing external links can't
+     * make HDF5 forget to close a file it opened.
+     */
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[3], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[4], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[5], fapl, filename3, sizeof filename3);
+    h5_fixname(FILENAME[6], fapl, filename4, sizeof filename4);
+
+    /* Create four files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create a dataspace and a datatype so we can create/commit a dataset/datatype in the files */
+    dims[0] = 2;
+    dims[1] = 2;
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid2 = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+
+    /* Create external links from each file to the next */
+    if(H5Lcreate_external(filename2, "/", fid1, "elink", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external(filename3, "/", fid2, "elink", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external(filename4, "/", fid3, "elink", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close all files but the first */
+    if(H5Fclose(fid4) < 0) TEST_ERROR
+    if(H5Fclose(fid3) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+    /* Test creating each kind of object */
+    if((gid = H5Gcreate(fid1, "elink/elink/elink/group1", 0)) < 0) TEST_ERROR
+    if(H5Tcommit(fid1, "elink/elink/elink/type1", tid) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    /* Close objects */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Test that getting info works */
+    if(H5Lget_linkinfo(fid1, "elink/elink/elink/type1", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_linkinfo(fid1, "elink/elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gget_objinfo(fid1, "elink/elink/elink/type1", TRUE, &sb) < 0) TEST_ERROR 
+    if(H5Gget_objinfo(fid1, "elink/elink/elink", TRUE, &sb) < 0) TEST_ERROR 
+    if(H5Gget_objinfo(fid1, "elink/elink/elink", FALSE, &sb) < 0) TEST_ERROR 
+
+    /* Test move */
+    if(H5Lmove(fid1, "elink/elink/elink/group1", fid1,
+      "elink/elink/elink/group1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    /* Open file 4 so we can do some fancy things */
+    if((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if(H5Lmove(fid1, "elink/elink/elink/type1", fid4,
+      "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lmove(fid4, "dataset1", fid1,
+      "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    /* Close file 4 again */
+    if(H5Fclose(fid4) < 0) TEST_ERROR
+
+    /* Test copy (as of this test, it uses the same code as move) */
+    if(H5Lcopy(fid1, "elink/elink/elink", fid1,
+      "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcopy(fid1, "elink/elink/elink", fid1,
+      "elink/elink/elink/elink_copied2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Test H5Gset and get comment */
+    if(H5Gset_comment(fid1, "elink/elink/elink/group1_moved", "comment") < 0) TEST_ERROR
+    if(H5Gget_comment(fid1, "elink/elink/elink/group1_moved", sizeof(buf), buf) < 0) TEST_ERROR
+
+    /* Test H5*open */
+    if((gid = H5Gopen(fid1, "elink/elink/elink/group1_moved")) < 0) TEST_ERROR
+    if((tid = H5Topen(fid1, "elink/elink/elink/type1_moved")) < 0) TEST_ERROR
+    if((did = H5Dopen(fid1, "elink/elink/elink/dataset1_moved")) < 0) TEST_ERROR
+    /* Close objects */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Test H5*open_expand */
+    if((gid = H5Gopen_expand(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Topen_expand(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dopen_expand(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    /* Close objects */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Test H5Oopen */
+    if((did = H5Oopen(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Test H5Fmount */
+    if((gid = H5Gcreate(fid1, "elink/elink/elink/mnt", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    H5E_BEGIN_TRY {
+        if(H5Fmount(fid1, "elink/elink/elink/mnt", fid1, H5P_DEFAULT) >= 0) TEST_ERROR
+        if(H5Funmount(fid1, "elink/elink/elink/mnt") >= 0) TEST_ERROR
+    } H5E_END_TRY
+
+    /* Test H5Rcreate */
+    if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (-1)) < 0) TEST_ERROR
+
+    /* Test unlink */
+    if(H5Lunlink(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lunlink(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lunlink(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lunlink(fid1, "elink/elink/elink_copied", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lunlink(fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* We've tested that the various functions above don't leave files open.
+     * Now test that we can't confuse HDF5 by giving unusual paths with external links
+     */
+    /* Create an external link that points to another external link */
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if(H5Lcreate_external(filename3, "/elink", fid2, "elink2",
+          H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+    /* Do an external link traversal that recursively calls another external link. */
+    if((gid = H5Gcreate(fid1, "elink/elink2/group2", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Create two more groups so that the last three elements in the path are
+     * all within the same external file
+     */
+    if((gid = H5Gcreate(fid1, "elink/elink2/group2/group3", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid1, "elink/elink2/group2/group3/group4", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gget_objinfo(fid1, "elink/elink2/group2/group3/group4", TRUE, &sb) < 0) TEST_ERROR
+
+#ifdef H5_GROUP_REVISION
+    /* Add a few regular groups and a soft link in file2 using intermediate group creation */
+    if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) TEST_ERROR
+    if(H5Lcreate_soft("/elink2", fid1, "elink/file2group1/file2group2/slink",
+              lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Try to traverse this path.  There are three soft traversals in a row;
+     * slink points to (file2)/elink2, which points to (file3)/elink, which
+     * points to file 4.
+     */
+    if((gid = H5Gcreate(fid1, "elink/file2group1/file2group2/slink/group3", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Lget_linkinfo(fid1, "elink/file2group1/file2group2/slink/group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Some simpler tests */
+    if((gid = H5Gcreate(fid1, "elink/file2group3", 0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Lget_linkinfo(fid1, "elink/file2group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_linkinfo(fid1, "elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
+
+#endif /* H5_GROUP_REVISION */
+
+    /* Close file1, the only file that should still be open */
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Re-create each file. If they are hanging open, these creates will fail */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Cleanup */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Fclose(fid4) < 0) TEST_ERROR
+    if(H5Fclose(fid3) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Tclose(tid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(tid2);
+        H5Fclose(fid4);
+        H5Fclose(fid3);
+        H5Fclose(fid2);
+        H5Fclose(fid1);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    ext_link_endian
  *
  * Purpose:     Check that external links work properly when they are
@@ -3167,7 +3404,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-ext_link_endian(hid_t fapl)
+external_link_endian(hid_t fapl)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
@@ -4720,6 +4957,56 @@ linkinfo(hid_t fapl)
 } /* end ud_hard_links() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    check_all_closed
+ *
+ * Purpose:     External links and some UD links open files.  To make sure
+ *              that all such files got closed correctly, try to create
+ *              each of them.
+ *
+ *              If the files are still open, this will fail (indicating that
+ *              some other test made a mistake).
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  James Laird
+ *              Thursday, August 17, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+check_all_closed(hid_t fapl)
+{
+    hid_t fid=-1;
+    char filename[NAME_BUF_SIZE];
+    int x;
+
+    TESTING("that all files were closed correctly")
+
+    /* Some of the external or UD link tests may have failed to close
+     * an external file properly.
+     * To check this, try to create every file used in this test.  If
+     * a file is already open, creating it will fail.
+     */
+    for(x=0; FILENAME[x] != NULL; x++)
+    {
+        h5_fixname(FILENAME[x], fapl, filename, sizeof filename);
+
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+        if(H5Fclose(fid) < 0) TEST_ERROR
+    }
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -4789,7 +5076,8 @@ main(void)
 #ifdef H5_GROUP_REVISION
         nerrors += external_link_ride(fapl) < 0 ? 1 : 0;
 #endif /* H5_GROUP_REVISION */
-        nerrors += ext_link_endian(fapl) < 0 ? 1 : 0;
+        nerrors += external_link_closing(fapl) < 0 ? 1 : 0;
+        nerrors += external_link_endian(fapl) < 0 ? 1 : 0;
 
         /* These tests assume that external links are a form of UD links,
          * so assume that everything that passed for external links
@@ -4802,6 +5090,8 @@ main(void)
         nerrors += lapl_udata(fapl) < 0 ? 1 : 0;
         nerrors += lapl_nlinks(fapl) < 0 ? 1 : 0;
         nerrors += linkinfo(fapl) < 0 ? 1 : 0;
+
+        nerrors += check_all_closed(fapl) < 0 ? 1 : 0;
 
 	/* Results */
 	if (nerrors) {

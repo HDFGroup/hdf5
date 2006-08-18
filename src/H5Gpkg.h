@@ -246,12 +246,13 @@ typedef struct H5G_bt_it_ud5_t {
  * lnk is the link between the group and the object
  * obj_loc is the target of the traversal (or NULL if the object doesn't exist)
  * operator_data is whatever udata was supplied when H5G_traverse was called
- * own_obj_loc should be set to TRUE if this callback takes ownership of obj_loc,
- *     and FALSE if obj_loc needs to be deleted.
+ * own_loc should be set to H5G_OWN_OBJ_LOC if this callback takes ownership of obj_loc,
+ * H5G_OWN_GRP_LOC if it takes ownership of grp_loc, and H5G_OWN_NONE if obj_loc and
+ * grp_loc need to be deleted.
  */
 typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk/*in*/, H5G_loc_t *obj_loc/*out*/, void *operator_data/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 
 /*
  * During name lookups (see H5G_traverse()) we sometimes want information about

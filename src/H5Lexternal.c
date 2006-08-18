@@ -52,7 +52,6 @@ static hid_t H5L_extern_traverse(const char * link_name, hid_t cur_group, void *
     char         *obj_name;
     char         *prefix;
     size_t        fname_len;
-    htri_t        result;
     hbool_t       fname_alloc = FALSE;
     hid_t         ret_value = -1;
 

@@ -47,7 +47,7 @@ typedef struct {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_loc_find_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 
 
 /*-------------------------------------------------------------------------
@@ -88,7 +88,10 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                  */
                 /* (but only for non-mounted files) */
                 if(!H5F_is_mount(f))
+                {
                     loc->oloc->file = f;
+                    loc->oloc->holding_file = FALSE;
+                }
             } /* end case */
             break;
 
@@ -263,7 +266,9 @@ H5G_loc_free(H5G_loc_t *loc)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to free entry")
 #endif /* NOT_YET */
     if(H5G_name_free(loc->path) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to free path")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free path")
+    if(H5O_loc_free(loc->oloc) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free object header location")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -284,7 +289,7 @@ done:
  */
 static herr_t
 H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_ud1_t *udata = (H5G_loc_ud1_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -300,7 +305,7 @@ H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
      *  of the group location for the object, or freeing it. - QAK)
      */
     H5G_loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
-    *own_obj_loc = TRUE;
+    *own_loc = H5G_OWN_OBJ_LOC;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

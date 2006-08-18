@@ -79,6 +79,10 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_loc_t	loc;
     H5G_loc_t	type_loc;
+    H5G_loc_t   insertion_loc;             /* Loc of group in which to create object */
+    H5G_name_t  insert_path;               /* Path of group in which to create object */
+    H5O_loc_t   insert_oloc;               /* oloc of group in which to create object */
+    hbool_t     insert_loc_valid = FALSE;  /* Is insertion_loc valid? */
     H5F_t       *file;
     H5T_t	*type = NULL;
     hbool_t     uncommit = FALSE;          /* TRUE if H5T_commit needs to be undone */
@@ -96,9 +100,14 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-    /* Find the insertion file */
-    if(NULL == (file = H5G_insertion_file(&loc, name, H5AC_dxpl_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point")
+    /* What file is the datatype being added to? */
+    insertion_loc.path = &insert_path;
+    insertion_loc.oloc = &insert_oloc;
+    H5G_loc_reset(&insertion_loc);
+    if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+    insert_loc_valid=TRUE;
+    file = insertion_loc.oloc->file;
 
     /* Record the type's state so that we can revert to it if linking fails */
     old_state = type->shared->state;
@@ -118,6 +127,10 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     }
 
 done:
+    if(insert_loc_valid) {
+        if(H5G_loc_free(&insertion_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
     /* If the datatype was committed but couldn't be linked, we need to return it to the state it was in
      * before it was committed. */
     if(TRUE == uncommit)
@@ -455,7 +468,7 @@ done:
             H5T_close(type);
         else {
             if(obj_found && H5F_addr_defined(type_loc.oloc->addr))
-                H5G_name_free(type_loc.path);
+                H5G_loc_free(&type_loc);
         } /* end else */
     } /* end if */
 
@@ -536,7 +549,7 @@ done:
             H5T_close(type);
         else {
             if(obj_found && H5F_addr_defined(type_loc.oloc->addr))
-                H5G_name_free(type_loc.path);
+                H5G_loc_free(&type_loc);
         } /* end else */
     } /* end if */
 
@@ -637,6 +650,10 @@ done:
         if(dt) {
             if(shared_fo == NULL)   /* Need to free shared fo */
                 H5FL_FREE(H5T_shared_t, dt->shared);
+
+            H5O_loc_free(&(dt->oloc));
+            H5G_name_free(&(dt->path));
+
             H5FL_FREE(H5T_t, dt);
         } /* end if */
 

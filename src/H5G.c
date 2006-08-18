@@ -100,7 +100,7 @@
 
 /* User data for path traversal routine for "insertion file" routine */
 typedef struct {
-    H5F_t *file;                                /* Pointer to the file for insertion */
+    H5G_loc_t *loc;         /* Pointer to the location for insertion */
 } H5G_trav_ud1_t;
 
 /* User data for path traversal routine for getting object info */
@@ -138,14 +138,14 @@ static H5G_t *H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_i
 static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
 static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5G_set_comment(H5G_loc_t *loc, const char *name,
     const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_loc_t *loc, const char *name,
     size_t bufsize, char *buf, hid_t dxpl_id);
-static herr_t H5G_insertion_file_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    hbool_t *own_obj_loc/*out*/);
+    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
                        hid_t ocpypl_id, hid_t lcpl_id);
 
@@ -183,6 +183,10 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     H5G_loc_t	    loc;
     H5G_loc_t	    grp_loc;
     H5G_t	   *grp = NULL;
+    H5G_loc_t       insertion_loc;      /* Loc of group in which to create object */
+    H5G_name_t      insert_path;        /* Path of group in which to create object */
+    H5O_loc_t       insert_oloc;        /* oloc of group in which to create object */
+    hbool_t         insert_loc_valid = FALSE;  /* Is insertion_loc valid? */
     H5F_t          *file;               /* File the group will be inserted into */
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
     hid_t	    grp_id = (-1);      /* ID of group being created */
@@ -230,8 +234,13 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 
     /* What file is the group being added to?  This may not be the same file
      * that loc_id is in if mounting is being used. */
-    if(NULL == (file = H5G_insertion_file(&loc, name, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+    insertion_loc.path = &insert_path;
+    insertion_loc.oloc = &insert_oloc;
+    H5G_loc_reset(&insertion_loc);
+    if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+    insert_loc_valid=TRUE;
+    file = insertion_loc.oloc->file;
 
     /* Create the group */
     if(NULL == (grp = H5G_create(file, H5AC_dxpl_id, tmp_gcpl, H5P_DEFAULT)))
@@ -254,6 +263,10 @@ done:
         if(H5I_dec_ref(tmp_gcpl) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
 
+    if(insert_loc_valid) {
+        if(H5G_loc_free(&insertion_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
     if(ret_value < 0) {
         if(grp_id >= 0)
             H5I_dec_ref(grp_id);
@@ -373,7 +386,7 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_loc_t   grp_loc;                /* Location used to open group */
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Gopen, FAIL)
@@ -393,7 +406,7 @@ H5Gopen(hid_t loc_id, const char *name)
     /* Find the group object */
     if(H5G_loc_find(&loc, name, &grp_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     /* Check that the object found is the correct type */
     if(H5O_obj_type(&grp_oloc, H5AC_dxpl_id) != H5G_GROUP)
@@ -412,8 +425,10 @@ done:
         if(grp != NULL)
             H5G_close(grp);
         else {
-            if(ent_found)
-                H5G_name_free(&grp_path);
+            if(loc_found) {
+                if(H5G_loc_free(&grp_loc) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            }
         } /* end else */
     } /* end if */
 
@@ -446,7 +461,7 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     H5G_loc_t   grp_loc;                /* Location used to open group */
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hid_t      ret_value=FAIL;       /* Return value */
 
     FUNC_ENTER_API(H5Gopen_expand, FAIL);
@@ -473,7 +488,7 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     /* Find the group object using the gapl passed in */
     if(H5G_loc_find(&loc, name, &grp_loc/*out*/, gapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     /* Check that the object found is the correct type */
     if(H5O_obj_type(&grp_oloc, H5AC_dxpl_id) != H5G_GROUP)
@@ -492,8 +507,10 @@ done:
         if(grp != NULL)
             H5G_close(grp);
         else {
-            if(ent_found)
-                H5G_name_free(&grp_path);
+            if(loc_found) {
+                if(H5G_loc_free(&grp_loc) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            }
         } /* end else */
     } /* end if */
 
@@ -984,7 +1001,7 @@ H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* for opening the destination object */
     H5G_name_t  src_path;               /* Opened source object hier. path */
     H5O_loc_t   src_oloc;               /* Opened source object object location */
-    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
 
     herr_t      ret_value = SUCCEED;        /* Return value */
@@ -1011,7 +1028,7 @@ H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Find the source object to copy */
     if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     if(H5O_open(&src_oloc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
@@ -1036,8 +1053,10 @@ H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
-    if(ent_found)
-        H5G_name_free(&src_path);
+    if(loc_found) {
+        if(H5G_loc_free(&src_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+    }
     if (obj_open)
         H5O_close(&src_oloc);
 
@@ -1561,7 +1580,11 @@ H5G_open(H5G_loc_t *loc, hid_t dxpl_id)
 
 done:
     if (!ret_value && grp)
+    {
+        H5O_loc_free(&(grp->oloc));
+        H5G_name_free(&(grp->path));
         H5FL_FREE(H5G_t,grp);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_open() */
@@ -1839,7 +1862,7 @@ H5G_fileof(H5G_t *grp)
  */
 static herr_t
 H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_trav_ud4_t *udata = (H5G_trav_ud4_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1899,7 +1922,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
 done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
-    *own_obj_loc = FALSE;
+    *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_objinfo_cb() */
@@ -1996,29 +2019,42 @@ done:
 static herr_t
 H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id)
 {
-    H5O_loc_t	obj_oloc;                  /* Object's location */
+    H5G_loc_t   obj_loc;                  /* Object's location */
+    H5G_name_t	path;
+    H5O_loc_t	oloc;
+    hbool_t     loc_valid = FALSE;
     H5O_name_t	comment;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_set_comment)
 
     /* Get the symbol table entry for the object */
-    if(H5G_obj_find(loc, name, H5G_TARGET_NORMAL, NULL, &obj_oloc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
+    obj_loc.path = &path;
+    obj_loc.oloc = &oloc;
+    H5G_loc_reset(&obj_loc);
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    loc_valid = TRUE;
 
     /* Remove the previous comment message if any */
-    if(H5O_remove(&obj_oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
+    if(H5O_remove(obj_loc.oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
         H5E_clear_stack(NULL);
 
     /* Add the new message */
     if(buf && *buf) {
         /* Casting away const OK -QAK */
 	comment.s = (char *)buf;
-	if(H5O_modify(&obj_oloc, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
+	if(H5O_modify(obj_loc.oloc, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message")
     } /* end if */
 
 done:
+    /* Release obj_loc */
+    if(loc_valid)    {
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_set_comment() */
 
@@ -2043,18 +2079,25 @@ static int
 H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid_t dxpl_id)
 {
     H5O_name_t	comment;
-    H5O_loc_t	obj_oloc;               /* Object's location */
-    int	ret_value;                      /* Return value */
+    H5G_loc_t	obj_loc;               /* Object's location */
+    H5G_name_t	path;
+    H5O_loc_t	oloc;
+    hbool_t     loc_valid = FALSE;
+    int	ret_value;                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_comment)
 
     /* Get the symbol table entry for the object */
-    if(H5G_obj_find(loc, name, H5G_TARGET_NORMAL, NULL, &obj_oloc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
+    obj_loc.path = &path;
+    obj_loc.oloc = &oloc;
+    H5G_loc_reset(&obj_loc);
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    loc_valid = TRUE;
 
     /* Get the message */
     comment.s = NULL;
-    if(NULL == H5O_read(&obj_oloc, H5O_NAME_ID, 0, &comment, dxpl_id)) {
+    if(NULL == H5O_read(obj_loc.oloc, H5O_NAME_ID, 0, &comment, dxpl_id)) {
 	if(buf && bufsize > 0)
             buf[0] = '\0';
 	ret_value = 0;
@@ -2066,98 +2109,94 @@ H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid
     } /* end else */
 
 done:
+    /* Release obj_loc */
+    if(loc_valid)    {
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_comment() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_insertion_file_cb
+ * Function:	H5G_insertion_loc_cb
  *
- * Purpose:	Callback for finding insertion file.  This routine sets the
- *              correct information for the file pointer to return.
+ * Purpose:	Callback for finding insertion location.  This routine sets the
+ *              correct information in the location passed in through the udata.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
+ * Programmer:	James Laird
+ *              Wednesday, August 16, 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_insertion_file_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, hbool_t *own_obj_loc/*out*/)
+H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_trav_ud1_t *udata = (H5G_trav_ud1_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_insertion_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_insertion_loc_cb)
 
     /* Check if the name in this group resolves to a valid location */
     /* (which is not what we want) */
     if(obj_loc != NULL)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name already exists")
 
-    /* Get file pointer for location */
-    udata->file = grp_loc->oloc->file;
-
-    *own_obj_loc = FALSE;
+    /* Take ownership of the grp_loc */
+    if(H5G_loc_copy(udata->loc, grp_loc, H5_COPY_SHALLOW) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "couldn't take ownership of group location")
+    *own_loc = H5G_OWN_GRP_LOC;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_insertion_file_cb() */
+} /* end H5G_insertion_loc_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_insertion_file
+ * Function:	H5G_insertion_loc
  *
  * Purpose:	Given a location and name that specifies a not-yet-existing
- *		object return the file into which the object is about to be
- *		inserted.
+ *		object return the location of the group into which the object
+ *              is about to be inserted.
  *
- * Return:	Success:	File pointer
+ * Return:	Success:	H5G_loc_t pointer
+ *                              (should be released with H5G_loc_free)
  *
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *              Wednesday, October 14, 1998
+ * Programmer:	James Laird
+ *              Wednesday, August 16, 2006
  *
  *-------------------------------------------------------------------------
  */
-H5F_t *
-H5G_insertion_file(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
+herr_t
+H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
+    H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id)
 {
-    H5F_t      *ret_value;       /* Return value */
+    H5G_trav_ud1_t udata;           /* User data for traversal */
+    herr_t         ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_insertion_file, NULL)
+    FUNC_ENTER_NOAPI(H5G_insertion_loc, FAIL)
 
-    HDassert(loc);
+    HDassert(src_loc);
+    HDassert(insertion_loc);
     HDassert(name && *name);
 
-    /* Check if the location the object will be inserted into is part of a
-     * file mounting chain (either a parent or a child) and perform a more
-     * rigorous determination of the location's file (which traverses into
-     * mounted files, etc.).
+    /*
+     * Look up the name to get the containing group's location and to make
+     * sure the name doesn't already exist.
      */
-    if(H5F_has_mount(loc->oloc->file) || H5F_is_mount(loc->oloc->file)) {
-        H5G_trav_ud1_t udata;           /* User data for traversal */
-
-        /*
-         * Look up the name to get the containing group and to make sure the name
-         * doesn't already exist.
-         */
-        if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G_insertion_file_cb, &udata, H5P_DEFAULT, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists")
-
-        /* Set return value */
-        ret_value = udata.file;
-    } /* end if */
-    else
-        /* Use the location's file */
-        ret_value = loc->oloc->file;
+    udata.loc = insertion_loc;
+    if(H5G_traverse(src_loc, name, H5G_TARGET_NORMAL, H5G_insertion_loc_cb, &udata, H5P_DEFAULT, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name already exists")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_insertion_file() */
+} /* end H5G_insertion_loc() */
 
 
 /*-------------------------------------------------------------------------

@@ -259,7 +259,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen, FAIL)
@@ -279,15 +279,17 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     /* Find the object's location */
     if(H5G_loc_find(&loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    ent_found = TRUE;
+    loc_found = TRUE;
 
     if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
     if(ret_value < 0) {
-        if(ent_found)
-            H5G_name_free(&obj_path);
+        if(loc_found) {
+            if(H5G_loc_free(&obj_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        }
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -337,7 +339,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     ent_found = FALSE;      /* Entry at 'name' found */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen_by_addr, FAIL)
@@ -362,8 +364,10 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
 done:
     if(ret_value < 0) {
-        if(ent_found)
-            H5G_name_free(&obj_path);
+        if(loc_found) {
+            if(H5G_loc_free(&obj_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        }
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -845,6 +849,9 @@ H5O_close(H5O_loc_t *loc)
         if(H5F_try_close(loc->file) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
     } /* end if */
+
+    if(H5O_loc_free(loc) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4404,7 +4411,11 @@ H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth)
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
-        /* Nothing currently */
+        /* If the original entry has holding open the file, this one should
+         * hold it open, too.
+         */
+        if(src->holding_file)
+            dst->file->nopen_objs++;
         ;
     } else if(depth == H5_COPY_SHALLOW) {
         /* Discarding 'const' qualifier OK - QAK */
@@ -4413,6 +4424,81 @@ H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_loc_hold_file
+ *
+ * Purpose:	Have this object header hold a file open until it is
+ *              released.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *              Wednesday, August 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_loc_hold_file(H5O_loc_t *loc)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_loc_hold_file)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(loc->file);
+
+    /* If this location is not already holding its file open, do so. */
+    if(!loc->holding_file)
+    {
+        loc->file->nopen_objs++;
+        loc->holding_file = TRUE;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_loc_hold_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_loc_free
+ *
+ * Purpose:	Release resources used by this object header location.
+ *              Not to be confused with H5O_close; this is used on
+ *              locations that don't correspond to open objects.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *              Wednesday, August 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_loc_free(H5O_loc_t *loc)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_loc_free)
+
+    /* Check arguments */
+    HDassert(loc);
+
+    /* If this location is holding its file open try to close the file. */
+    if(loc->holding_file)
+    {
+        loc->file->nopen_objs--;
+        loc->holding_file = FALSE;
+        if(loc->file->nopen_objs <= 0) {
+          if(H5F_try_close(loc->file) < 0)
+              HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file");
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_loc_free() */
 
 
 /*-------------------------------------------------------------------------
