@@ -208,27 +208,27 @@ H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
         if(HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->alloc_sect_size)))
             HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, NULL, "file allocation failed for free space sections")
 
-        /* Cache the new free space section info */
-        if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__NO_FLAGS_SET) < 0)
+        /* Cache the new free space section info (pinned) */
+        if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__PIN_ENTRY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space sections to cache")
-        sinfo = NULL;
 
         /* Mark free space header as dirty */
         if(H5AC_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, NULL, "unable to mark free space header as dirty")
     } /* end if */
+    else {
+        /* Protect the free space sections */
+        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
 
-    /* Protect the free space sections */
-    if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
+        /* Pin them in the cache */
+        if(H5AC_pin_protected_entry(f, sinfo) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space sections")
 
-    /* Pin them in the cache */
-    if(H5AC_pin_protected_entry(f, sinfo) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space sections")
-
-    /* Unlock free space sections, now pinned */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space sections")
+        /* Unlock free space sections, now pinned */
+        if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space sections")
+    } /* end else */
 
     /* Update pointer to free space header for section info */
     sinfo->fspace = fspace;

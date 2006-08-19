@@ -79,69 +79,6 @@ H5FL_DEFINE(H5FS_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_pin
- *
- * Purpose:	Pin a free space manager header in memory
- *
- * Return:	Success:	Pointer to free space structure
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 31, 2006
- *
- *-------------------------------------------------------------------------
- */
-static H5FS_t *
-H5FS_pin(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses,
-    const H5FS_section_class_t *classes[], void *cls_init_udata)
-{
-    H5FS_t *fspace = NULL;      /* New free space structure */
-    H5FS_prot_t fs_prot;        /* Information for protecting free space manager */
-    unsigned fspace_status = 0; /* Free space header's status in the metadata cache */
-    H5FS_t *ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_pin)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fs_addr));
-    HDassert(nclasses > 0);
-    HDassert(classes);
-
-    /* Initialize user data for protecting the free space manager */
-    fs_prot.nclasses = nclasses;
-    fs_prot.classes = classes;
-    fs_prot.cls_init_udata = cls_init_udata;
-
-    /* Protect the free space header */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
-
-    /* Check the free space header's status in the metadata cache */
-    if(H5AC_get_entry_status(f, fs_addr, &fspace_status) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, NULL, "unable to check metadata cache status for free space header")
-
-    /* If the free space header isn't already pinned, pin it now */
-    /* (could still be pinned from it's section info still hanging around in the cache) */
-    if(!(fspace_status & H5AC_ES__IS_PINNED)) {
-        /* Pin free space header in the cache */
-        if(H5AC_pin_protected_entry(f, fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space header")
-    } /* end if */
-
-    /* Unlock free space header, now pinned */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space header")
-
-    /* Set return value */
-    ret_value = fspace;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FS_pin() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5FS_create
  *
  * Purpose:	Allocate & initialize file free space info
@@ -189,14 +126,12 @@ H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_c
     fspace->max_sect_addr = fs_create->max_sect_addr;
     fspace->max_sect_size = fs_create->max_sect_size;
 
-    /* Cache the new free space header */
-    if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+    /* Cache the new free space header (pinned) */
+    if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache")
-    fspace = NULL;
 
-    /* Pin the free space header into memory */
-    if(NULL == (ret_value = H5FS_pin(f, dxpl_id, *fs_addr, nclasses, classes, cls_init_udata)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
+    /* Set the return value */
+    ret_value = fspace;
 
 done:
     if(!ret_value && fspace)
@@ -224,6 +159,9 @@ H5FS_t *
 H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses,
     const H5FS_section_class_t *classes[], void *cls_init_udata)
 {
+    H5FS_t *fspace = NULL;      /* New free space structure */
+    H5FS_prot_t fs_prot;        /* Information for protecting free space manager */
+    unsigned fspace_status = 0; /* Free space header's status in the metadata cache */
     H5FS_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_open, NULL)
@@ -236,9 +174,33 @@ HDfprintf(stderr, "%s: Opening free space manager\n", FUNC);
     HDassert(nclasses);
     HDassert(classes);
 
-    /* Pin the free space header (does all the work for opening) */
-    if(NULL == (ret_value = H5FS_pin(f, dxpl_id, fs_addr, nclasses, classes, cls_init_udata)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to protect free space header")
+    /* Initialize user data for protecting the free space manager */
+    fs_prot.nclasses = nclasses;
+    fs_prot.classes = classes;
+    fs_prot.cls_init_udata = cls_init_udata;
+
+    /* Protect the free space header */
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
+
+    /* Check the free space header's status in the metadata cache */
+    if(H5AC_get_entry_status(f, fs_addr, &fspace_status) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, NULL, "unable to check metadata cache status for free space header")
+
+    /* If the free space header isn't already pinned, pin it now */
+    /* (could still be pinned from it's section info still hanging around in the cache) */
+    if(!(fspace_status & H5AC_ES__IS_PINNED)) {
+        /* Pin free space header in the cache */
+        if(H5AC_pin_protected_entry(f, fspace) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space header")
+    } /* end if */
+
+    /* Unlock free space header, now pinned */
+    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space header")
+
+    /* Set return value */
+    ret_value = fspace;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
