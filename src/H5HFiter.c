@@ -169,6 +169,8 @@ HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
 
 */
     do {
+        hbool_t did_protect;            /* Whether we protected the indirect block or not */
+
         /* Walk down the rows in the doubling table until we've found the correct row for the next block */
         for(row = 0; row < hdr->man_dtable.max_root_rows; row++)
             if((offset >= hdr->man_dtable.row_block_off[row]) &&
@@ -224,7 +226,7 @@ HDfprintf(stderr, "%s: biter->curr->entry = %u\n", FUNC, biter->curr->entry);
         } /* end else */
 
         /* Load indirect block for this context location */
-        if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, iblock_nrows, iblock_parent, iblock_par_entry, H5AC_WRITE)))
+        if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, iblock_nrows, iblock_parent, iblock_par_entry, FALSE, H5AC_WRITE, &did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
         /* Make indirect block the context for the current location */
@@ -235,7 +237,7 @@ HDfprintf(stderr, "%s: biter->curr->entry = %u\n", FUNC, biter->curr->entry);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
 
         /* Release the current indirect block */
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+        if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
         iblock = NULL;
 

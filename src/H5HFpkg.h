@@ -346,6 +346,7 @@ typedef struct H5HF_hdr_t {
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
+    struct H5HF_indirect_t *root_iblock;    /* Pointer to pinned root indirect block */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
     hsize_t     huge_max_id;    /* Max. 'huge' heap ID before rolling 'huge' heap IDs over */
@@ -376,16 +377,17 @@ struct H5HF_indirect_t {
     H5AC_info_t cache_info;
 
     /* Internal heap information (not stored) */
-    size_t      rc;             /* Reference count of child blocks            */
+    size_t      rc;             /* Reference count of objects using this block */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     struct H5HF_indirect_t *parent;	/* Shared parent indirect block info  */
     unsigned    par_entry;      /* Entry in parent's table                    */
     haddr_t     addr;           /* Address of this indirect block on disk     */
+    size_t      size;           /* Size of indirect block on disk             */
     unsigned    nrows;          /* Total # of rows in indirect block          */
     unsigned    max_rows;       /* Max. # of rows in indirect block           */
     unsigned    nchildren;      /* Number of child blocks                     */
     unsigned    max_child;      /* Max. offset used in child entries          */
-    size_t      size;           /* Size of indirect block on disk             */
+    struct H5HF_indirect_t **child_iblocks; /* Array of pointers to pinned child indirect blocks */
 
     /* Stored values */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */
@@ -521,6 +523,10 @@ H5FL_SEQ_EXTERN(H5HF_indirect_ent_t);
 /* Declare a free list to manage the H5HF_indirect_filt_ent_t sequence information */
 H5FL_SEQ_EXTERN(H5HF_indirect_filt_ent_t);
 
+/* Declare a free list to manage the H5HF_indirect_t * sequence information */
+typedef H5HF_indirect_t *H5HF_indirect_ptr_t;
+H5FL_SEQ_EXTERN(H5HF_indirect_ptr_t);
+
 
 /******************************/
 /* Package Private Prototypes */
@@ -575,8 +581,10 @@ H5_DLL herr_t H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned max_rows, haddr_t *addr_p);
 H5_DLL H5HF_indirect_t *H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t iblock_addr, unsigned iblock_nrows,
-    H5HF_indirect_t *par_iblock, unsigned par_entry,
-    H5AC_protect_t rw);
+    H5HF_indirect_t *par_iblock, unsigned par_entry, hbool_t must_protect,
+    H5AC_protect_t rw, hbool_t *did_protect);
+H5_DLL herr_t H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
+    unsigned cache_flags, hbool_t did_protect);
 H5_DLL herr_t H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry,
     haddr_t dblock_addr);
 H5_DLL herr_t H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry);
@@ -598,13 +606,13 @@ H5_DLL H5HF_direct_t *H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr, size_t dblock_size,
     H5HF_indirect_t *par_iblock, unsigned par_entry,
     H5AC_protect_t rw);
+H5_DLL herr_t H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    hsize_t obj_off, H5HF_indirect_t **par_iblock,
+    unsigned *par_entry, hbool_t *par_did_protect, H5AC_protect_t rw);
 H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     hsize_t dblock_size);
 
 /* Managed object routines */
-H5_DLL herr_t H5HF_man_locate_block(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    hsize_t obj_off, hbool_t locate_indirect, H5HF_indirect_t **par_iblock,
-    unsigned *par_entry, H5AC_protect_t rw);
 H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
     const void *obj, void *id);
 H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,

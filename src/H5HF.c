@@ -680,6 +680,9 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /* Check for free space manager for heap */
+    /* (must occur before attempting to delete the heap, so indirect blocks
+     *  will get unpinned)
+     */
     if(H5F_addr_defined(hdr->fs_addr)) {
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);

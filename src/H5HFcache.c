@@ -1164,6 +1164,20 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
 #endif /* QAK */
     } /* end for */
 
+    /* Check if we have any indirect block children */
+    if(iblock->nrows > hdr->man_dtable.max_direct_rows) {
+        unsigned indir_rows;      /* Number of indirect rows in this indirect block */
+
+        /* Compute the number of indirect rows for this indirect block */
+        indir_rows = iblock->nrows - hdr->man_dtable.max_direct_rows;
+
+        /* Allocate & initialize child indirect block pointer array */
+        if(NULL == (iblock->child_iblocks = H5FL_SEQ_CALLOC(H5HF_indirect_ptr_t, (size_t)(indir_rows * hdr->man_dtable.cparam.width))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block entries")
+    } /* end if */
+    else
+        iblock->child_iblocks = NULL;
+
     /* Sanity checks */
     HDassert((size_t)(p - buf) == iblock->size);
     HDassert(iblock->nchildren);        /* indirect blocks w/no children should have been deleted */
@@ -1372,6 +1386,8 @@ HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
         H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
     if(iblock->filt_ents)
         H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
+    if(iblock->child_iblocks)
+        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
     H5FL_FREE(H5HF_indirect_t, iblock);

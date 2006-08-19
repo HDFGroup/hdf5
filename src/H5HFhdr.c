@@ -1086,6 +1086,7 @@ HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
                 } /* end if */
                 else {
                     H5HF_indirect_t *new_iblock;    /* Pointer to new indirect block */
+                    hbool_t did_protect;            /* Whether we protected the indirect block or not */
                     haddr_t new_iblock_addr;        /* New indirect block's address */
 
 #ifdef QAK
@@ -1096,10 +1097,10 @@ HDfprintf(stderr, "%s: Allocating new child indirect block\n", FUNC);
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
 
                     /* Lock new indirect block */
-                    if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, child_nrows, iblock, next_entry, H5AC_WRITE)))
+                    if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, child_nrows, iblock, next_entry, FALSE, H5AC_WRITE, &did_protect)))
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
-                    /* Move iterator down one level */
+                    /* Move iterator down one level (pins indirect block) */
                     if(H5HF_man_iter_down(&hdr->next_block, new_iblock) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL, "unable to advance current block iterator location")
 
@@ -1119,7 +1120,7 @@ HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %
                     } /* end if */
 
                     /* Unprotect child indirect block */
-                    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, new_iblock->addr, new_iblock, H5AC__NO_FLAGS_SET) < 0)
+                    if(H5HF_man_iblock_unprotect(new_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
                 } /* end else */
 
@@ -1321,8 +1322,9 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
 #endif /* QAK */
             } /* end if */
             else {
-                H5HF_indirect_t *child_iblock;      /* Pointer to child indirect block */
-                unsigned child_nrows;               /* # of rows in child block */
+                H5HF_indirect_t *child_iblock;  /* Pointer to child indirect block */
+                hbool_t did_protect;            /* Whether we protected the indirect block or not */
+                unsigned child_nrows;           /* # of rows in child block */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Walking down into child block\n", FUNC);
@@ -1331,7 +1333,7 @@ HDfprintf(stderr, "%s: Walking down into child block\n", FUNC);
                 child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
 
                 /* Lock child indirect block */
-                if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, H5AC_WRITE)))
+                if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, FALSE, H5AC_WRITE, &did_protect)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
                 /* Set the current location of the iterator */
@@ -1352,7 +1354,7 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
 #endif /* QAK */
 
                 /* Unprotect child indirect block */
-                if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, child_iblock->addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
+                if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
                 /* Note that we walked down */

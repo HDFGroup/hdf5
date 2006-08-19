@@ -508,6 +508,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
+    hbool_t did_protect;                /* Whether we protected the indirect block or not */
     char temp_str[64];                  /* Temporary string, for formatting */
     size_t	u, v;                   /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -532,9 +533,9 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /*
-     * Load the heap direct block
+     * Load the heap indirect block
      */
-    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, addr, nrows, NULL, 0, H5AC_READ)))
+    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, addr, nrows, NULL, 0, FALSE, H5AC_READ, &did_protect)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
 
     /* Print opening message */
@@ -604,7 +605,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
                   "<none>");
 
 done:
-    if(iblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_IBLOCK, addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+    if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")

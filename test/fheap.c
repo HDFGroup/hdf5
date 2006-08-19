@@ -12488,7 +12488,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     unsigned char obj_type;             /* Type of storage for object */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    deflate_level;          /* Deflation level */
-    unsigned    old_actual_id_len;      /* Old actual ID length */
+    unsigned    old_actual_id_len = 0;  /* Old actual ID length */
     hbool_t     huge_ids_direct;        /* Are 'huge' objects directly acccessed? */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";       /* Test description */
 
