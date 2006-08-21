@@ -2668,7 +2668,7 @@ done:
                 H5FL_FREE(H5D_shared_t, dataset->shared);
 
             H5O_loc_free(&(dataset->oloc));
-            H5O_loc_free(&(dataset->path));
+            H5G_name_free(&(dataset->path));
 
             H5FL_FREE(H5D_t, dataset);
         }
