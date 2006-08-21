@@ -196,7 +196,7 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
         if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load fractal heap header")
 #ifdef QAK
-HDfprintf(stderr, "%s: hdr->rc = %u\n", FUNC, hdr->rc);
+HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fspace);
 #endif /* QAK */
 
         /* Create fractal heap info */
@@ -323,13 +323,14 @@ H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size, const void *obj,
 HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 #endif /* QAK */
 
-    /*
-     * Check arguments.
-     */
+    /* Sanity check */
     HDassert(fh);
-    HDassert(size > 0);
     HDassert(obj);
     HDassert(id);
+
+    /* Check arguments */
+    if(size == 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "can't insert 0-sized objects")
 
     /* Get the fractal heap header */
     hdr = fh->hdr;

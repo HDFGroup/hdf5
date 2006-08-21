@@ -173,6 +173,7 @@ HDfprintf(stderr, "%s: sec_node->u.single.dblock_size = %Zu\n", FUNC, sec_node->
     blk_off = sec_node->sect_info.addr - dblock->block_off;
 #ifdef QAK
 HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
+HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
 
     /* Sanity checks */
@@ -264,13 +265,26 @@ H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     id++;
 
     /* Decode the object offset within the heap & it's length */
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->heap_off_size = %u, hdr->heap_len_size = %u\n", FUNC, (unsigned)hdr->heap_off_size, (unsigned)hdr->heap_len_size);
+#endif /* QAK */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
+HDfprintf(stderr, "%s: hdr->man_size = %Hu, hdr->max_man_size = %u\n", FUNC, hdr->man_size, (unsigned)hdr->max_man_size);
+HDfprintf(stderr, "%s: hdr->man_dtable.cparam.max_direct_size = %Zu\n", FUNC, hdr->man_dtable.cparam.max_direct_size);
 #endif /* QAK */
     HDassert(obj_off > 0);
     HDassert(obj_len > 0);
+
+    /* Check for bad offset or length */
+    if(obj_off > hdr->man_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object offset too large")
+    if(obj_len > hdr->man_dtable.cparam.max_direct_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object size too large for direct block")
+    if(obj_len > hdr->max_man_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap object should be standalone")
 
     /* Check for root direct block */
     if(hdr->man_dtable.curr_root_rows == 0) {
@@ -298,9 +312,23 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
         dblock_addr =  iblock->ents[entry].addr;
         dblock_size =  hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width];
 
+        /* Check for offset of invalid direct block */
+        if(!H5F_addr_defined(dblock_addr)) {
+            /* Unlock indirect block */
+            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
+        } /* end if */
+
         /* Lock direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, H5AC_READ)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, H5AC_READ))) {
+            /* Unlock indirect block */
+            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
+        } /* end if */
 
         /* Unlock indirect block */
         if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
@@ -314,6 +342,14 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
     /* Compute offset of object within block */
     HDassert((obj_off - dblock->block_off) < (hsize_t)dblock_size);
     blk_off = (size_t)(obj_off - dblock->block_off);
+
+    /* Check for object's offset in the direct block prefix information */
+    if(blk_off < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object located in prefix of direct block")
+
+    /* Check for object's length overrunning the end of the direct block */
+    if((blk_off + obj_len) > dblock_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object overruns end of direct block")
 
     /* Point to location for object */
     p = dblock->blk + blk_off;
@@ -369,12 +405,14 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 
     /* Decode the object offset within the heap & it's length */
 #ifdef QAK
-HDfprintf(stderr, "%s: fh->hdr->heap_off_size = %u, fh->hdr->heap_len_size = %u\n", FUNC, (unsigned)fh->hdr->heap_off_size, (unsigned)fh->hdr->heap_len_size);
+HDfprintf(stderr, "%s: hdr->heap_off_size = %u, hdr->heap_len_size = %u\n", FUNC, (unsigned)hdr->heap_off_size, (unsigned)hdr->heap_len_size);
 #endif /* QAK */
     UINT64DECODE_VAR(id, obj_off, hdr->heap_off_size);
     UINT64DECODE_VAR(id, obj_len, hdr->heap_len_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: obj_off = %Hu, obj_len = %Zu\n", FUNC, obj_off, obj_len);
+HDfprintf(stderr, "%s: hdr->man_size = %Hu, hdr->max_man_size = %u\n", FUNC, hdr->man_size, (unsigned)hdr->max_man_size);
+HDfprintf(stderr, "%s: hdr->man_dtable.cparam.max_direct_size = %Zu\n", FUNC, hdr->man_dtable.cparam.max_direct_size);
 #endif /* QAK */
     HDassert(obj_off > 0);
     HDassert(obj_len > 0);
@@ -465,6 +503,16 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
     if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len,
             dblock->parent, dblock->par_entry, dblock_addr, dblock_size)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for direct block's free space")
+#ifdef QAK
+HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
+HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
+HDfprintf(stderr, "%s: sec_node->u.single.parent = %p\n", FUNC, sec_node->u.single.parent);
+if(sec_node->u.single.parent)
+    HDfprintf(stderr, "%s: sec_node->u.single.parent->addr = %a\n", FUNC, sec_node->u.single.parent->addr);
+HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.single.par_entry);
+HDfprintf(stderr, "%s: sec_node->u.single.dblock_addr = %a\n", FUNC, sec_node->u.single.dblock_addr);
+HDfprintf(stderr, "%s: sec_node->u.single.dblock_size = %Zu\n", FUNC, sec_node->u.single.dblock_size);
+#endif /* QAK */
 
     /* Unlock direct block */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
