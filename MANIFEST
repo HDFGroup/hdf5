@@ -385,6 +385,7 @@
 ./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
 ./src/H5.c
+./src/H5checksum.c
 ./src/H5dbg.c
 ./src/H5api_adpt.h
 ./src/H5err.txt
@@ -392,6 +393,9 @@
 ./src/H5detect.c
 ./src/H5private.h
 ./src/H5public.h
+./src/H5system.c
+./src/H5timer.c
+./src/H5trace.c
 ./src/H5A.c
 ./src/H5Apkg.h
 ./src/H5Aprivate.h
@@ -726,6 +730,7 @@
 ./test/tarrold.h5
 ./test/tattr.c
 ./test/tbogus.h5
+./test/tchecksum.c
 ./test/tconfig.c
 ./test/testframe.c
 ./test/testhdf5.c

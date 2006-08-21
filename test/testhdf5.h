@@ -123,6 +123,7 @@ extern "C" {
 
 /* Prototypes for the test routines */
 void                    test_metadata(void);
+void                    test_checksum(void);
 void                    test_tst(void);
 void                    test_heap(void);
 void                    test_refstr(void);
@@ -148,6 +149,7 @@ void			test_unicode(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
+void                    cleanup_checksum(void);
 void                    cleanup_file(void);
 void                    cleanup_h5o(void);
 void                    cleanup_h5s(void);
@@ -168,3 +170,4 @@ void			cleanup_unicode(void);
 }
 #endif
 #endif /* TESTHDF5_H */
+
