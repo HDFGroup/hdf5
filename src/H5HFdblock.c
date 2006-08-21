@@ -352,7 +352,7 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
     if(request < hdr->man_dtable.cparam.start_block_size)
         min_dblock_size = hdr->man_dtable.cparam.start_block_size;
     else {
-        min_dblock_size = 1 << (1 + H5V_log2_gen((hsize_t)request));
+        min_dblock_size = ((size_t)1) << (1 + H5V_log2_gen((hsize_t)request));
         HDassert(min_dblock_size <= hdr->man_dtable.cparam.max_direct_size);
     } /* end else */
 
@@ -554,6 +554,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a\n", FUNC, iblock_addr);
 
         /* Compute # of rows in child indirect block */
         nrows = (H5V_log2_gen(hdr->man_dtable.row_block_size[row]) - hdr->man_dtable.first_row_bits) + 1;
+        HDassert(nrows < iblock->nrows);        /* child must be smaller than parent */
 
         /* Compute indirect block's entry */
         entry = (row * hdr->man_dtable.cparam.width) + col;
@@ -592,6 +593,7 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
         /* Look up row & column in new indirect block for object */
         if(H5HF_dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
+        HDassert(row < iblock->nrows);        /* child must be smaller than parent */
 #ifdef QAK
 HDfprintf(stderr, "%s: row = %u, col = %u\n", FUNC, row, col);
 #endif /* QAK */

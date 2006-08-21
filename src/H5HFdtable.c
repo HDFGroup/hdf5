@@ -160,6 +160,9 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
     HDassert(dtable);
     HDassert(row);
     HDassert(col);
+#ifdef QAK
+HDfprintf(stderr, "%s: off = %Hu\n", "H5HF_dtable_lookup", off);
+#endif /* QAK */
 
     /* Check for offset in first row */
     if(off < dtable->num_id_first_row) {
@@ -168,8 +171,11 @@ H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsi
     } /* end if */
     else {
         unsigned high_bit = H5V_log2_gen(off);  /* Determine the high bit in the offset */
-        hsize_t off_mask = 1 << high_bit;       /* Compute mask for determining column */
+        hsize_t off_mask = ((hsize_t)1) << high_bit;       /* Compute mask for determining column */
 
+#ifdef QAK
+HDfprintf(stderr, "%s: high_bit = %u, off_mask = %Hu\n", "H5HF_dtable_lookup", high_bit, off_mask);
+#endif /* QAK */
         *row = (high_bit - dtable->first_row_bits) + 1;
         *col = (off - off_mask) / dtable->row_block_size[*row];
     } /* end else */
