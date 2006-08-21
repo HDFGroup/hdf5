@@ -288,7 +288,7 @@ done:
     H5_API_UNLOCK
 #endif
     return;
-}
+} /* end H5_term_library() */
 
 
 /*-------------------------------------------------------------------------
@@ -330,7 +330,7 @@ H5dont_atexit(void)
         H5_dont_atexit_g = TRUE;
 
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5dont_atexit() */
 
 
 /*-------------------------------------------------------------------------
@@ -506,7 +506,7 @@ H5_debug_mask(const char *s)
 	    s++;
 	}
     }
-}
+} /* end H5_debug_mask() */
 
 
 /*-------------------------------------------------------------------------
@@ -547,7 +547,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5get_libversion() */
 
 
 /*-------------------------------------------------------------------------
@@ -673,7 +673,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5check_version() */
 
 
 /*-------------------------------------------------------------------------
@@ -703,7 +703,7 @@ H5open(void)
     /* all work is done by FUNC_ENTER() */
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5open() */
 
 
 /*-------------------------------------------------------------------------
@@ -734,7 +734,7 @@ H5close(void)
     H5_term_library();
 
     FUNC_LEAVE_API_NOFS(SUCCEED)
-}
+} /* end H5close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1054,7 +1054,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     }
     va_end (ap);
     return nout;
-}
+} /* end HDfprintf() */
 
 
 /*-------------------------------------------------------------------------
@@ -1169,7 +1169,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     acc *= sign;
     if (rest) *rest = s;
     return acc;
-}
+} /* end HDstrtoll() */
 
 
 /*-------------------------------------------------------------------------
@@ -1192,7 +1192,7 @@ H5_timer_reset (H5_timer_t *timer)
 {
     assert (timer);
     HDmemset (timer, 0, sizeof *timer);
-}
+} /* end H5_timer_reset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1237,7 +1237,7 @@ H5_timer_begin (H5_timer_t *timer)
 #else
     timer->etime = 0.0;
 #endif
-}
+} /* end H5_timer_begin() */
 
 
 /*-------------------------------------------------------------------------
@@ -1274,7 +1274,7 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
 	sum->stime += timer->stime;
 	sum->etime += timer->etime;
     }
-}
+} /* end H5_timer_end() */
 
 
 /*-------------------------------------------------------------------------
@@ -1342,7 +1342,7 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 	    }
 	}
     }
-}
+} /* end H5_bandwidth() */
 
 
 /*-------------------------------------------------------------------------
@@ -3128,8 +3128,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
     }
     HDfflush (out);
     return event_time.etime;
-}
+} /* end H5_trace() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	HDrand/HDsrand
  *
@@ -3147,7 +3148,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
  * Programmer:	Leon Arber
  *              March 6, 2006.
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_RAND_R
@@ -3163,8 +3163,9 @@ void HDsrand(unsigned int seed)
 {
     g_seed = seed;
 }
-
 #endif
+
+
 /*-------------------------------------------------------------------------
  * Function:	HDremove_all
  *
@@ -3179,25 +3180,24 @@ void HDsrand(unsigned int seed)
  * Programmer:	Elena Pourmal
  *              March 22, 2006
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_VMS
-
-
-int HDremove_all(char *fname)
+int
+HDremove_all(char *fname)
 {
-   int ret_value = -1;
-   char *_fname;
-   _fname = malloc(strlen(fname)+3); /* to accomodate ;* and null */
-   if(_fname) {
-      strcpy(_fname, fname);
-      strcat(_fname,";*");
-      remove(_fname);
-      free(_fname);
-      ret_value = 0;
-   }
-   return ret_value;
+    int ret_value = -1;
+    char *_fname;
+
+    _fname = H5MM_malloc(HDstrlen(fname) + 3); /* to accomodate ;* and null */
+    if(_fname) {
+        HDstrcpy(_fname, fname);
+        HDstrcat(_fname,";*");
+        HDremove(_fname);
+        H5MM_xfree(_fname);
+        ret_value = 0;
+    }
+    return ret_value;
 }
 #endif
 

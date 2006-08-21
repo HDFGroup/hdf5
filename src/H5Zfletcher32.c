@@ -64,13 +64,10 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-
 static uint32_t
 H5Z_filter_fletcher32_compute(void *_src, size_t len)
 {
     unsigned char *src=(unsigned char *)_src;
-    /*To handle unusual platforms like Cray*/
-    unsigned short tmp_src;
     size_t count = len;         /* Number of bytes left to checksum */
     uint32_t s1 = 0, s2 = 0;    /* Temporary partial checksums */
 
@@ -78,8 +75,8 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
 
     /* Compute checksum */
     while(count > 1) {
+        unsigned short tmp_src;     /*To handle unusual platforms like Cray*/
 
-        /*To handle unusual platforms like Cray*/
         tmp_src = (((unsigned short)src[0])<<8) | ((unsigned short)src[1]);
         src +=2;
         s1 += tmp_src;
@@ -96,6 +93,7 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
         count -= 2;
     }
 
+    /* Check for single byte remaining */
     if(count==1) {
         s1 += *(unsigned char*)src;
         if(s1 & 0xFFFF0000) { /*Wrap around carry if occurred*/
