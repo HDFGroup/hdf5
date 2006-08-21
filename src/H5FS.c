@@ -182,6 +182,12 @@ HDfprintf(stderr, "%s: Opening free space manager\n", FUNC);
     /* Protect the free space header */
     if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
+#ifdef QAK
+HDfprintf(stderr, "%s: fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
+HDfprintf(stderr, "%s: fspace->sect_size = %Hu\n", FUNC, fspace->sect_size);
+HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu\n", FUNC, fspace->alloc_sect_size);
+HDfprintf(stderr, "%s: fspace->sinfo = %p\n", FUNC, fspace->sinfo);
+#endif /* QAK */
 
     /* Check the free space header's status in the metadata cache */
     if(H5AC_get_entry_status(f, fs_addr, &fspace_status) < 0)
