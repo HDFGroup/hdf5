@@ -62,6 +62,7 @@ typedef struct H5HF_dtable_cparam_t {
 /* Fractal heap creation parameters */
 typedef struct H5HF_create_t {
     H5HF_dtable_cparam_t managed;/* Mapped object doubling-table creation parameters */
+    hbool_t checksum_dblocks;   /* Whether the direct blocks should be checksummed */
     uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
                                 /* (i.e.  min. size of object to store standalone) */
     uint16_t id_len;            /* Length of IDs to use for heap objects */

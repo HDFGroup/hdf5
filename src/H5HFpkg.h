@@ -49,12 +49,15 @@
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 #define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
 
+/* Size of checksum information (on disk) */
+#define H5HF_SIZEOF_CHKSUM      4
+
 /* "Standard" size of prefix information for fractal heap metadata */
-#define H5HF_METADATA_PREFIX_SIZE (                                           \
+#define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
     4   /* Signature */                                                       \
     + 1 /* Version */                                                         \
     + 1 /* Metadata flags */                                                  \
-    + 4 /* Metadata checksum */                                               \
+    + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
 /* Size of doubling-table information */
@@ -70,6 +73,7 @@
 
 /* Flags for status byte */
 #define H5HF_HDR_FLAGS_HUGE_ID_WRAPPED 0x01
+#define H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS 0x02
 
 /* Size of the fractal heap header on disk */
 /* (this is the fixed-len portion, the variable-len I/O filter information
@@ -77,7 +81,7 @@
  */
 #define H5HF_HEADER_SIZE(h)     (                                             \
     /* General metadata fields */                                             \
-    H5HF_METADATA_PREFIX_SIZE                                                 \
+    H5HF_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Fractal Heap Header specific fields */                                 \
                                                                               \
@@ -112,7 +116,7 @@
 /* Size of overhead for a direct block */
 #define H5HF_MAN_ABS_DIRECT_OVERHEAD(h) (                                     \
     /* General metadata fields */                                             \
-    H5HF_METADATA_PREFIX_SIZE                                                 \
+    H5HF_METADATA_PREFIX_SIZE(h->checksum_dblocks)                            \
                                                                               \
     /* Fractal heap managed, absolutely mapped direct block specific fields */ \
     + (h)->sizeof_addr          /* File address of heap owning the block */   \
@@ -129,7 +133,7 @@
 /* Size of managed indirect block */
 #define H5HF_MAN_INDIRECT_SIZE(h, i) (                                        \
     /* General metadata fields */                                             \
-    H5HF_METADATA_PREFIX_SIZE                                                 \
+    H5HF_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Fractal heap managed, absolutely mapped indirect block specific fields */ \
     + (h)->sizeof_addr          /* File address of heap owning the block */   \
@@ -308,6 +312,7 @@ typedef struct H5HF_hdr_t {
     hbool_t     debug_objs;     /* Is the heap storing objects in 'debug' format */
     hbool_t     write_once;     /* Is heap being written in "write once" mode? */
     hbool_t     huge_ids_wrapped; /* Have "huge" object IDs wrapped around? */
+    hbool_t     checksum_dblocks; /* Should the direct blocks in the heap be checksummed? */
 
     /* Doubling table information (partially stored in header) */
     /* (Partially set by user, partially derived/updated internally) */
@@ -475,11 +480,11 @@ typedef struct {
 /* H5HF header inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
 
-/* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
-
 /* H5HF indirect block inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
+
+/* H5HF direct block inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
 
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
 H5_DLLVAR const H5B2_class_t H5HF_BT2_INDIR[1];
@@ -508,12 +513,6 @@ H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1];
 /* Declare a free list to manage the H5HF_hdr_t struct */
 H5FL_EXTERN(H5HF_hdr_t);
 
-/* Declare a free list to manage the H5HF_direct_t struct */
-H5FL_EXTERN(H5HF_direct_t);
-
-/* Declare a free list to manage heap direct block data to/from disk */
-H5FL_BLK_EXTERN(direct_block);
-
 /* Declare a free list to manage the H5HF_indirect_t struct */
 H5FL_EXTERN(H5HF_indirect_t);
 
@@ -527,17 +526,16 @@ H5FL_SEQ_EXTERN(H5HF_indirect_filt_ent_t);
 typedef H5HF_indirect_t *H5HF_indirect_ptr_t;
 H5FL_SEQ_EXTERN(H5HF_indirect_ptr_t);
 
+/* Declare a free list to manage the H5HF_direct_t struct */
+H5FL_EXTERN(H5HF_direct_t);
+
+/* Declare a free list to manage heap direct block data to/from disk */
+H5FL_BLK_EXTERN(direct_block);
+
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
-/* Routines for managing shared fractal heap header */
-H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
-H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
-H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 
 /* Doubling table routines */
 H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);
@@ -550,6 +548,11 @@ H5_DLL hsize_t H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start
     unsigned start_col, unsigned num_entries);
 
 /* Heap header routines */
+H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
+H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
+H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_incr(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_decr(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_dirty(H5HF_hdr_t *hdr);

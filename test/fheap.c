@@ -40,6 +40,7 @@
 
 /* "Small" heap creation parameters */
 #define SMALL_DBLOCK_OVERHEAD 22                /* Overhead for direct blocks */
+#define SMALL_CHECKSUM_DBLOCKS TRUE             /* Whether to checksum direct blocks */
 #define SMALL_MAN_WIDTH   4                     /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512          /* Managed obj. starting block size */
 #define SMALL_MAN_MAX_DIRECT_SIZE (64 * 1024)   /* Managed obj. max. direct block size */
@@ -49,7 +50,8 @@
 #define SMALL_STAND_SIZE  (SMALL_MAN_MAX_DIRECT_SIZE - SMALL_DBLOCK_OVERHEAD)           /* Standalone obj. min. size */
 
 /* "Large" heap creation parameters */
-#define LARGE_DBLOCK_OVERHEAD 26                /* Overhead for direct blocks */
+#define LARGE_DBLOCK_OVERHEAD 22                /* Overhead for direct blocks */
+#define LARGE_CHECKSUM_DBLOCKS FALSE            /* Whether to checksum direct blocks */
 #define LARGE_MAN_WIDTH  32                     /* Managed obj. table width */
 #define LARGE_MAN_START_BLOCK_SIZE 4096         /* Managed obj. starting block size */
 #define LARGE_MAN_MAX_DIRECT_SIZE (1024 * 1024) /* Managed obj. max. direct block size */
@@ -113,7 +115,7 @@ typedef struct fheap_test_param_t {
     fheap_test_del_dir_t del_dir;       /* Whether to delete objects forward or reverse */
     fheap_test_del_drain_t drain_half;  /* Whether to drain half of the objects & refill, when deleting objects */
     fheap_test_fill_t fill;             /* How to "bulk" fill heap blocks */
-    unsigned actual_id_len;             /* The actual length of heap IDs for a test */
+    size_t actual_id_len;               /* The actual length of heap IDs for a test */
 } fheap_test_param_t;
 
 /* Heap state information */
@@ -178,6 +180,7 @@ init_small_cparam(H5HF_create_t *cparam)
     /* General parameters */
     cparam->id_len = SMALL_ID_LEN;
     cparam->max_man_size = SMALL_STAND_SIZE;
+    cparam->checksum_dblocks = SMALL_CHECKSUM_DBLOCKS;
 
     /* Managed object doubling-table parameters */
     cparam->managed.width = SMALL_MAN_WIDTH;
@@ -214,6 +217,7 @@ init_large_cparam(H5HF_create_t *cparam)
     /* General parameters */
     cparam->id_len = LARGE_ID_LEN;
     cparam->max_man_size = LARGE_STAND_SIZE;
+    cparam->checksum_dblocks = LARGE_CHECKSUM_DBLOCKS;
 
     /* Managed object doubling-table parameters */
     cparam->managed.width = LARGE_MAN_WIDTH;
@@ -2173,7 +2177,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
-    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &deflate_level) < 0)
+    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR
 
     /* Create absolute heap */
@@ -2449,7 +2453,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
-    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &deflate_level) < 0)
+    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR
 
     /* Create absolute heap */
@@ -2587,14 +2591,14 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 
     /* Attempt to insert 0-sized object into heap */
     H5E_BEGIN_TRY {
-        ret = H5HF_insert(fh, dxpl, 0, shared_wobj_g, heap_id);
+        ret = H5HF_insert(fh, dxpl, (size_t)0, shared_wobj_g, heap_id);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
     H5Eclear_stack(H5E_DEFAULT);
 
     /* Insert a 1-sized object into heap (should be a 'tiny' object) */
-    if(add_obj(fh, dxpl, (size_t)10, 1, &state, NULL))
+    if(add_obj(fh, dxpl, (size_t)10, (size_t)1, &state, NULL))
         TEST_ERROR
 
     /* Check for closing & re-opening the heap */
@@ -12851,7 +12855,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
-    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &deflate_level) < 0)
+    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR
 
     /* Adjust actual ID length, if asking for IDs that can directly access 'huge' objects */
@@ -14009,7 +14013,7 @@ test_filtered_man_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
-    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &deflate_level) < 0)
+    if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR
 
     /* Perform common file & heap open operations */

@@ -393,6 +393,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 
     /* Set the creation parameters for the heap */
     hdr->max_man_size = cparam->max_man_size;
+    hdr->checksum_dblocks = cparam->checksum_dblocks;
     HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
     /* Set root table address to indicate that the heap is empty currently */
