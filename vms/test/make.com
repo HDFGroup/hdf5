@@ -22,6 +22,7 @@ $ type sys$input
  	Creating  testhdf5
 $
 $ cobj= "h5test.c, testframe.c, testhdf5.c, tarray.c, tattr.c, tconfig.c, "+-
+        "tchecksum.c,"+- 
         "tfile.c, tgenprop.c, th5o.c, th5s.c, theap.c, tid.c, titerate.c,"+- 
         "tmeta.c, tmisc.c, ttime.c, trefer.c, trefstr.c,"+-
         "tselect.c, tskiplist.c, ttst.c, tunicode.c, tvltypes.c,"+-
@@ -31,7 +32,7 @@ $ ccc 'cobj
 $ library/create/replace []libh5test h5test, testframe, cache_common
 $ type sys$input
        Creating libh5test
-$ link     testhdf5,tarray,tattr,tconfig, -
+$ link     testhdf5,tarray,tattr,tchecksum,tconfig, -
            tfile,tgenprop,th5o,th5s,theap,tid,titerate, -
            tmeta,tmisc,ttime,trefer,trefstr, -
            tselect,tskiplist,ttst,tunicode,tvltypes, -

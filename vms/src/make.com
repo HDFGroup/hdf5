@@ -27,7 +27,8 @@ $
 $ type sys$input
          Creating  HDF5 library
 $!
-$ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
+$ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
+        "H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C, H5CS,"+-  
         "H5D, H5Dcontig, H5Dcompact,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
@@ -38,9 +39,9 @@ $ cobj= "H5, H5A, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5FS, H5FScache, H5FSdbg, H5FSsection,"+-
         "H5G, H5Gdeprec, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
-        "H5HF, H5HFcache, H5HFdbg, H5HFman, H5HFtest, H5HFstat,"+-
-        "H5HFdblock, H5HFdtable, H5HFhdr, H5HFiblock,"+-
-        "H5HFiter, H5HFsection, H5HFspace,"+-
+        "H5HF, H5HFbtree2, H5HFcache, H5HFdbg, H5HFman, H5HFtest, H5HFstat,"+-
+        "H5HFdblock, H5HFdtable, H5HFhuge, H5HFhdr, H5HFiblock,"+-
+        "H5HFiter, H5HFsection, H5HFspace, H5HFtiny,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
         "H5MP, H5MPtest,H5L, H5Lexternal, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
