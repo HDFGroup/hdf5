@@ -145,6 +145,8 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     unsigned split_percent, merge_percent;      /* Split & merge info for B-tree */
     H5B2_t		*bt2 = NULL;    /* B-tree info */
     size_t		size;           /* Header size */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
     uint8_t		*buf = NULL;    /* Temporary buffer */
     uint8_t		*p;             /* Pointer into raw data buffer */
     H5B2_t		*ret_value;     /* Return value */
@@ -183,8 +185,6 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     if(*p++ != H5B2_HDR_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header version")
 
-/* XXX: Add metadata flags & checksum to v2 B-tree metadata (like fractal heap) */
-
     /* B-tree type */
     if(*p++ != (uint8_t)type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
@@ -207,8 +207,20 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     UINT16DECODE(p, bt2->root.node_nrec);
     H5F_DECODE_LENGTH(f, p, bt2->root.all_nrec);
 
-    /* Initialize shared B-tree info */
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
+    /* Sanity check */
     HDassert((size_t)(p - buf) == size);
+
+    /* Compute checksum on entire header */
+    computed_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM));
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
+
+    /* Initialize shared B-tree info */
     if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create shared B-tree info")
 
@@ -255,6 +267,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         uint8_t	*buf;           /* Temporary raw data buffer */
         uint8_t *p;             /* Pointer into raw data buffer */
         size_t	size;           /* Header size on disk */
+        uint32_t metadata_chksum; /* Computed metadata checksum value */
 
         /* Get the pointer to the shared B-tree info */
         shared = H5RC_GET_OBJ(bt2->shared);
@@ -296,6 +309,12 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         H5F_addr_encode(f, &p, bt2->root.addr);
         UINT16ENCODE(p, bt2->root.node_nrec);
         H5F_ENCODE_LENGTH(f, p, bt2->root.all_nrec);
+
+        /* Compute metadata checksum */
+        metadata_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM));
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
 
 	/* Write the B-tree header. */
         HDassert((size_t)(p - buf) == size);
@@ -444,6 +463,8 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
 
@@ -481,8 +502,6 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     if(*p++ != H5B2_INT_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
 
-/* XXX: Add metadata flags & checksum to v2 B-tree metadata (like fractal heap) */
-
     /* B-tree type */
     if (*p++ != (uint8_t)shared->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
@@ -503,7 +522,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     for(u = 0; u < internal->nrec; u++) {
         /* Decode record */
         if((shared->type->decode)(f, p, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
         p += shared->rrec_size;
@@ -522,8 +541,18 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
         int_node_ptr++;
     } /* end for */
 
+    /* Compute checksum on internal node */
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
     /* Sanity check parsing */
     HDassert((size_t)(p - shared->page) <= shared->node_size);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     /* Set return value */
     ret_value = internal;
@@ -565,6 +594,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         uint8_t *p;             /* Pointer into raw data buffer */
         uint8_t *native;        /* Pointer to native record info */
         H5B2_node_ptr_t *int_node_ptr;      /* Pointer to node pointer info */
+        uint32_t metadata_chksum; /* Computed metadata checksum value */
         unsigned u;             /* Local index variable */
 
         /* Get the pointer to the shared B-tree info */
@@ -606,6 +636,12 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
             /* Move to next node pointer */
             int_node_ptr++;
         } /* end for */
+
+        /* Compute metadata checksum */
+        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
 
 	/* Write the B-tree internal node */
         HDassert((size_t)(p - shared->page) <= shared->node_size);
@@ -771,6 +807,8 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
@@ -808,8 +846,6 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     if(*p++ != H5B2_LEAF_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node version")
 
-/* XXX: Add metadata flags & checksum to v2 B-tree metadata (like fractal heap) */
-
     /* B-tree type */
     if(*p++ != (uint8_t)shared->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
@@ -833,8 +869,18 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
         native += shared->type->nrec_size;
     } /* end for */
 
+    /* Compute checksum on internal node */
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
     /* Sanity check parsing */
     HDassert((size_t)(p - shared->page) <= shared->node_size);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     /* Set return value */
     ret_value = leaf;
@@ -875,6 +921,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         H5B2_shared_t *shared;  /* Shared B-tree information */
         uint8_t *p;             /* Pointer into raw data buffer */
         uint8_t *native;        /* Pointer to native keys */
+        uint32_t metadata_chksum; /* Computed metadata checksum value */
         unsigned u;             /* Local index variable */
 
         /* Get the pointer to the shared B-tree info */
@@ -904,6 +951,12 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
             p += shared->rrec_size;
             native += shared->type->nrec_size;
         } /* end for */
+
+        /* Compute metadata checksum */
+        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
 
 	/* Write the B-tree leaf node */
         HDassert((size_t)(p - shared->page) <= shared->node_size);

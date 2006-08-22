@@ -53,17 +53,30 @@
 /* Size of a "node pointer" (on disk) */
 #define H5B2_NODE_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE+H5F_SIZEOF_SIZE(f))
 
+/* Size of checksum information (on disk) */
+#define H5B2_SIZEOF_CHKSUM      4
+
+/* Format overhead for all v2 B-tree metadata in the file */
+#define H5B2_METADATA_PREFIX_SIZE (                                           \
+    H5B2_SIZEOF_MAGIC   /* Signature */                                       \
+    + 1 /* Version */                                                         \
+    + H5B2_SIZEOF_CHKSUM /* Metadata checksum */                              \
+    )
+
 /* Size of the B-tree header on disk */
 #define H5B2_HEADER_SIZE(f)     (                                             \
-    4   /* Signature */                                                       \
-    + 1 /* Version */                                                         \
+    /* General metadata fields */                                             \
+    H5B2_METADATA_PREFIX_SIZE                                                 \
+                                                                              \
+    /* Header specific fields */                                              \
     + 1 /* Tree type */                                                       \
     + 4 /* Node size, in bytes */                                             \
     + 2 /* Key size, in bytes */                                              \
     + 2 /* Depth of tree */                                                   \
     + 2 /* Split % of full (as integer, ie. "98" means 98%) */                \
     + 2 /* Merge % of full (as integer, ie. "98" means 98%) */                \
-    + H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
+    + H5B2_NODE_POINTER_SIZE(f)  /* Node pointer to root node in tree */      \
+    )
 
 /* Macro to retrieve pointer to i'th native record for native record buffer */
 #define H5B2_NAT_NREC(b,shared,idx)  (b+(shared)->nat_off[(idx)])

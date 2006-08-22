@@ -41,14 +41,13 @@
 /* Local Macros */
 /****************/
 
-/* Format overhead for each node (on disk) */
-#define H5B2_OVERHEAD_SIZE              (H5B2_SIZEOF_MAGIC+1)   /* Signature + version # */
-
 /* Number of records that fit into internal node */
-#define H5B2_NUM_INT_REC(f,n,r)         (((n)-(H5B2_OVERHEAD_SIZE+H5B2_NODE_POINTER_SIZE(f)))/((r)+H5B2_NODE_POINTER_SIZE(f)))
+#define H5B2_NUM_INT_REC(f, n, r) \
+    (((n) - (H5B2_METADATA_PREFIX_SIZE + H5B2_NODE_POINTER_SIZE(f))) / ((r) + H5B2_NODE_POINTER_SIZE(f)))
 
 /* Number of records that fit into leaf node */
-#define H5B2_NUM_LEAF_REC(n,r)          (((n)-H5B2_OVERHEAD_SIZE)/(r))
+#define H5B2_NUM_LEAF_REC(n, r) \
+    (((n) - H5B2_METADATA_PREFIX_SIZE) / (r))
 
 /* Uncomment this macro to enable extra sanity checking */
 /* #define H5B2_DEBUG */
