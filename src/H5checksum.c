@@ -80,6 +80,11 @@
  *                  http://en.wikipedia.org/wiki/Fletcher%27s_checksum
  *              for more details, etc.
  *
+ * Note #2:     The algorithm below differs from that given in the Wikipedia
+ *              page by copying the data into 'sum1' in a more portable way
+ *              and also by initializing 'sum1' and 'sum2' to 0 instead of
+ *              0xffff (for backward compatibility reasons, mostly).
+ *
  * Return:	32-bit fletcher checksum of input buffer (can't fail)
  *
  * Programmer:	Quincey Koziol
@@ -92,7 +97,7 @@ H5_fletcher32(const void *_data, size_t _len)
 {
     const uint8_t *data = (const uint8_t *)_data;  /* Pointer to the data to be summed */
     size_t len = _len / 2;      /* Length in 16-bit words */
-    uint32_t sum1 = 0xffff, sum2 = 0xffff;
+    uint32_t sum1 = 0, sum2 = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_fletcher32)
 
@@ -128,6 +133,6 @@ H5_fletcher32(const void *_data, size_t _len)
     sum1 = (sum1 & 0xffff) + (sum1 >> 16);
     sum2 = (sum2 & 0xffff) + (sum2 >> 16);
 
-    FUNC_LEAVE_NOAPI(sum2 << 16 | sum1)
+    FUNC_LEAVE_NOAPI((sum2 << 16) | sum1)
 } /* end H5_fletcher32() */
 

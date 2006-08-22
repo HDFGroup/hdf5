@@ -48,71 +48,6 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_fletcher32_compute
- *
- * Purpose:	Implement an Fletcher32 Checksum using 1's complement.
- *
- * Return:	Success: Fletcher32 value
- *
- *		Failure: Can't fail
- *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
- * Modifications: Pedro Vicente, March 10, 2004
- *   defined *SRC as unsigned char for all cases
- *
- *-------------------------------------------------------------------------
- */
-static uint32_t
-H5Z_filter_fletcher32_compute(void *_src, size_t len)
-{
-    unsigned char *src=(unsigned char *)_src;
-    size_t count = len;         /* Number of bytes left to checksum */
-    uint32_t s1 = 0, s2 = 0;    /* Temporary partial checksums */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_filter_fletcher32_compute)
-
-    /* Compute checksum */
-    while(count > 1) {
-        unsigned short tmp_src;     /*To handle unusual platforms like Cray*/
-
-        tmp_src = (((unsigned short)src[0])<<8) | ((unsigned short)src[1]);
-        src +=2;
-        s1 += tmp_src;
-
-        if(s1 & 0xFFFF0000) { /*Wrap around carry if occurred*/
-            s1 &= 0xFFFF;
-            s1++;
-        }
-        s2 += s1;
-        if(s2 & 0xFFFF0000) { /*Wrap around carry if occurred*/
-            s2 &= 0xFFFF;
-            s2++;
-        }
-        count -= 2;
-    }
-
-    /* Check for single byte remaining */
-    if(count==1) {
-        s1 += *(unsigned char*)src;
-        if(s1 & 0xFFFF0000) { /*Wrap around carry if occurred*/
-            s1 &= 0xFFFF;
-            s1++;
-        }
-        s2 += s1;
-        if(s2 & 0xFFFF0000) { /*Wrap around carry if occurred*/
-            s2 &= 0xFFFF;
-            s2++;
-        }
-    }
-
-    FUNC_LEAVE_NOAPI((s2 << 16) + s1)
-}
-
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Z_filter_fletcher32
  *
  * Purpose:	Implement an I/O filter of Fletcher32 Checksum
@@ -167,7 +102,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             UINT32DECODE(tmp_src, stored_fletcher);
 
             /* Compute checksum (can't fail) */
-            fletcher = H5Z_filter_fletcher32_compute(src,src_nbytes);
+            fletcher = H5_fletcher32(src, src_nbytes);
 
             /* The reversed checksum.  There was a bug in the calculating code of
              * the Fletcher32 checksum in the library before v1.6.3.  The checksum
@@ -201,7 +136,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         unsigned char *dst;     /* Temporary pointer to destination buffer */
 
         /* Compute checksum (can't fail) */
-        fletcher = H5Z_filter_fletcher32_compute(src,nbytes);
+        fletcher = H5_fletcher32(src, nbytes);
 
 	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")

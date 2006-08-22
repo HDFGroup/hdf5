@@ -57,7 +57,7 @@ test_chksum_size_one(void)
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
     chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0xffffffff, "H5_fletcher32");
+    VERIFY(chksum, 0, "H5_fletcher32");
 } /* test_chksum_size_one() */
 
 
@@ -79,7 +79,7 @@ test_chksum_size_two(void)
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
     chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0xffffffff, "H5_fletcher32");
+    VERIFY(chksum, 0, "H5_fletcher32");
 } /* test_chksum_size_two() */
 
 
@@ -101,7 +101,7 @@ test_chksum_size_three(void)
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
     chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0xffffffff, "H5_fletcher32");
+    VERIFY(chksum, 0, "H5_fletcher32");
 } /* test_chksum_size_three() */
 
 
@@ -123,7 +123,7 @@ test_chksum_size_four(void)
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
     chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0xffffffff, "H5_fletcher32");
+    VERIFY(chksum, 0, "H5_fletcher32");
 } /* test_chksum_size_four() */
 
 
@@ -149,7 +149,7 @@ test_chksum_large(void)
     /* Buffer w/zero(s) for data */
     HDmemset(large_buf, 0, sizeof(large_buf));
     chksum = H5_fletcher32(large_buf, sizeof(large_buf));
-    VERIFY(chksum, 0xffffffff, "H5_fletcher32");
+    VERIFY(chksum, 0, "H5_fletcher32");
 } /* test_chksum_large() */
 
 
