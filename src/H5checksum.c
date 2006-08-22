@@ -90,10 +90,9 @@
 uint32_t
 H5_fletcher32(const void *_data, size_t _len)
 {
-    const uint16_t *data = (const uint16_t *)_data;  /* Pointer to the data to be summed */
+    const uint8_t *data = (const uint8_t *)_data;  /* Pointer to the data to be summed */
     size_t len = _len / 2;      /* Length in 16-bit words */
     uint32_t sum1 = 0xffff, sum2 = 0xffff;
-    uint32_t ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_fletcher32)
 
@@ -102,16 +101,15 @@ H5_fletcher32(const void *_data, size_t _len)
     HDassert(_len > 0);
 
     /* Compute checksum for pairs of bytes */
-    /* The magic "360" value is is the largest number of sums that can be
-     *  performed without numeric overflow.  See the Wikipedia page for
-     *  Fletcher's checksum: http://en.wikipedia.org/wiki/Fletcher%27s_checksum
-     *  for more details, etc.
+    /* (the magic "360" value is is the largest number of sums that can be
+     *  performed without numeric overflow)
      */
     while (len) {
         unsigned tlen = len > 360 ? 360 : len;
         len -= tlen;
         do {
-            sum1 += *data++;
+            sum1 += (((uint16_t)data[0]) << 8) | ((uint16_t)data[1]);
+            data += 2;
             sum2 += sum1;
         } while (--tlen);
         sum1 = (sum1 & 0xffff) + (sum1 >> 16);
@@ -120,7 +118,7 @@ H5_fletcher32(const void *_data, size_t _len)
 
     /* Check for odd # of bytes */
     if(_len % 2) {
-        sum1 += *(const uint8_t *)data;
+        sum1 += ((uint16_t)*data) << 8;
         sum2 += sum1;
         sum1 = (sum1 & 0xffff) + (sum1 >> 16);
         sum2 = (sum2 & 0xffff) + (sum2 >> 16);
@@ -130,16 +128,6 @@ H5_fletcher32(const void *_data, size_t _len)
     sum1 = (sum1 & 0xffff) + (sum1 >> 16);
     sum2 = (sum2 & 0xffff) + (sum2 >> 16);
 
-/* Byteswap result on little-endian platforms */
-#ifdef H5_WORDS_BIGENDIAN
-    ret_value = sum2 << 16 | sum1;
-#else /* H5_WORDS_BIGENDIAN */
-    ret_value = (sum2 << 8) & 0x00ff0000;
-    ret_value |= (sum2 << 24) & 0xff000000;
-    ret_value |= (sum1 << 8) & 0x0000ff00;
-    ret_value |= (sum1 >> 8) & 0x000000ff;
-#endif /* H5_WORDS_BIGENDIAN */
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(sum2 << 16 | sum1)
 } /* end H5_fletcher32() */
 
