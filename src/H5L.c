@@ -691,7 +691,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_link_t link_type, void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
+H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_link_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
     H5G_loc_t	link_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */

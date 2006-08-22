@@ -29,13 +29,15 @@ endif
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
 TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
-           h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
+           h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
+           h5_extlink h5_elink_unix2win
 
 # Install files
 # List all file that should be installed in examples directory
 INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
-          h5_reference.c h5_drivers.c ph5example.c
+          h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
+          ph5example.c
 
 # Additional dependencies for each program are listed below.
 $(EXTRA_PROG): $(LIBHDF5)
@@ -48,6 +50,16 @@ endif
 # Two of the examples depend on files created by other examples.
 h5_read.chkexe_: h5_write.chkexe_
 h5_chunk_read.chkexe_: h5_extend_write.chkexe_
+
+# The external link examples demonstrate how to use paths; they need
+# directories to be created to do this.
+EXTLINK_DIRS=red blue u2w
+
+$(EXTLINK_DIRS):
+	echo $(mkdir_p) $@
+	$(mkdir_p) $@
+
+CHECK_CLEANFILES+=$(EXTLINK_DIRS)
 
 # Example directory
 EXAMPLEDIR=$(docdir)/hdf5/examples/c
@@ -71,6 +83,8 @@ h5_reference: $(srcdir)/h5_reference.c
 h5_drivers: $(srcdir)/h5_drivers.c
 ph5example: $(srcdir)/ph5example.c
 h5_dtransform: $(srcdir)/h5_dtransform.c
+h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
+h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

@@ -127,8 +127,8 @@ H5_DLL herr_t H5Lget_linkinfo(hid_t loc_id, const char *name,
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
-        H5L_link_t link_type, void * udata, size_t udata_size, hid_t lcpl_id,
-        hid_t lapl_id);
+        H5L_link_t link_type, const void * udata, size_t udata_size,
+        hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lregister(const H5L_link_class_t *cls);
 H5_DLL herr_t H5Lunregister(H5L_link_t id);
 H5_DLL htri_t H5Lis_registered(H5L_link_t id);
