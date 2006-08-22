@@ -136,3 +136,38 @@ H5_fletcher32(const void *_data, size_t _len)
     FUNC_LEAVE_NOAPI((sum2 << 16) | sum1)
 } /* end H5_fletcher32() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_checksum_metadata
+ *
+ * Purpose:	Provide a more abstract routine for checksumming metadata
+ *              in a file, where the policy of which algorithm to choose
+ *              is centralized.
+ *
+ * Return:	checksum of input buffer (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 22, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t
+H5_checksum_metadata(const void *data, size_t len)
+{
+    uint32_t chksum;            /* Checksum value to return */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_metadata)
+
+    /* Sanity check */
+    HDassert(data);
+    HDassert(len > 0);
+
+    /* Choose the appropriate checksum routine */
+    /* (use fletcher32 for everything right now, but will probably go
+     *  with a CRC algorithm for "shorter" pieces of metadata eventually)
+     */
+    chksum = H5_fletcher32(data, len);
+
+    FUNC_LEAVE_NOAPI(chksum)
+} /* end H5_checksum_metadata() */
+

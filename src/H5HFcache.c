@@ -396,7 +396,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
 
     /* Compute checksum on entire header */
     /* (including the filter information, if present) */
-    computed_chksum = H5_fletcher32(buf, (hdr->heap_size - H5HF_SIZEOF_CHKSUM));
+    computed_chksum = H5_checksum_metadata(buf, (hdr->heap_size - H5HF_SIZEOF_CHKSUM));
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -525,7 +525,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         } /* end if */
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_fletcher32(buf, hdr->heap_size - H5HF_SIZEOF_CHKSUM);
+        metadata_chksum = H5_checksum_metadata(buf, hdr->heap_size - H5HF_SIZEOF_CHKSUM);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -826,7 +826,7 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
     HDassert((size_t)(p - buf) == iblock->size);
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_fletcher32(buf, (iblock->size - H5HF_SIZEOF_CHKSUM));
+    computed_chksum = H5_checksum_metadata(buf, (iblock->size - H5HF_SIZEOF_CHKSUM));
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -973,7 +973,7 @@ HDfprintf(stderr, "%s: iblock->filt_ents[%Zu] = {%Zu, %x}\n", FUNC, u, iblock->f
         } /* end for */
 
         /* Compute checksum */
-        metadata_chksum = H5_fletcher32(buf, iblock->size - H5HF_SIZEOF_CHKSUM);
+        metadata_chksum = H5_checksum_metadata(buf, iblock->size - H5HF_SIZEOF_CHKSUM);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -1235,7 +1235,7 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "I/O filters not supported yet")
         HDmemset((uint8_t *)p - H5HF_SIZEOF_CHKSUM, 0, (size_t)H5HF_SIZEOF_CHKSUM);
 
         /* Compute checksum on entire direct block */
-        computed_chksum = H5_fletcher32(dblock->blk, dblock->size);
+        computed_chksum = H5_checksum_metadata(dblock->blk, dblock->size);
 
         /* Verify checksum */
         if(stored_chksum != computed_chksum)
@@ -1314,7 +1314,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
             HDmemset(p, 0, (size_t)H5HF_SIZEOF_CHKSUM);
 
             /* Compute checksum on entire direct block */
-            metadata_chksum = H5_fletcher32(dblock->blk, dblock->size);
+            metadata_chksum = H5_checksum_metadata(dblock->blk, dblock->size);
 
             /* Metadata checksum */
             UINT32ENCODE(p, metadata_chksum);
