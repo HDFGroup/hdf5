@@ -56,7 +56,6 @@
 #define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
     4   /* Signature */                                                       \
     + 1 /* Version */                                                         \
-    + 1 /* Metadata flags */                                                  \
     + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 

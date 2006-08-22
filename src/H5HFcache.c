@@ -300,11 +300,6 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     if(*p++ != H5HF_HDR_VERSION)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap header version")
 
-    /* Metadata flags (unused, currently) */
-/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
-    if(*p++ != 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unknown metadata flag in fractal heap header")
-
     /* General heap information */
     UINT16DECODE(p, hdr->id_len);               /* Heap ID length */
     UINT16DECODE(p, hdr->filter_len);           /* I/O filters' encoded length */
@@ -480,10 +475,6 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 
         /* Version # */
         *p++ = H5HF_HDR_VERSION;
-
-        /* Metadata status flags */
-/* XXX: Set this? */
-        *p++ = 0;
 
         /* General heap information */
         UINT16ENCODE(p, hdr->id_len);           /* Heap ID length */
@@ -749,11 +740,6 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     if(*p++ != H5HF_IBLOCK_VERSION)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap direct block version")
 
-    /* Metadata flags (unused, currently) */
-/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
-    if(*p++ != 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unknown metadata flag in fractal heap direct block")
-
     /* Address of heap that owns this block */
     H5F_addr_decode(f, &p, &heap_addr);
     if(H5F_addr_ne(heap_addr, hdr->heap_addr))
@@ -936,10 +922,6 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
 
         /* Version # */
         *p++ = H5HF_IBLOCK_VERSION;
-
-        /* Metadata status flags */
-/* XXX: Set this? */
-        *p++ = 0;
 
         /* Address of heap header for heap which owns this block */
         H5F_addr_encode(f, &p, hdr->heap_addr);
@@ -1223,11 +1205,6 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "I/O filters not supported yet")
     if(*p++ != H5HF_DBLOCK_VERSION)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap direct block version")
 
-    /* Metadata flags (unused, currently) */
-/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
-    if(*p++ != 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unknown metadata flag in fractal heap direct block")
-
     /* Address of heap that owns this block (just for file integrity checks) */
     H5F_addr_decode(f, &p, &heap_addr);
     if(H5F_addr_ne(heap_addr, hdr->heap_addr))
@@ -1322,10 +1299,6 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
         /* Version # */
         *p++ = H5HF_DBLOCK_VERSION;
-
-        /* Metadata status flags */
-/* XXX: Set this? */
-        *p++ = 0;
 
         /* Address of heap header for heap which owns this block */
         H5F_addr_encode(f, &p, hdr->heap_addr);

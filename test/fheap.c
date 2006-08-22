@@ -39,7 +39,7 @@
 #define NUM_FILL_OBJS           11
 
 /* "Small" heap creation parameters */
-#define SMALL_DBLOCK_OVERHEAD 22                /* Overhead for direct blocks */
+#define SMALL_DBLOCK_OVERHEAD 21                /* Overhead for direct blocks */
 #define SMALL_CHECKSUM_DBLOCKS TRUE             /* Whether to checksum direct blocks */
 #define SMALL_MAN_WIDTH   4                     /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512          /* Managed obj. starting block size */
@@ -50,7 +50,8 @@
 #define SMALL_STAND_SIZE  (SMALL_MAN_MAX_DIRECT_SIZE - SMALL_DBLOCK_OVERHEAD)           /* Standalone obj. min. size */
 
 /* "Large" heap creation parameters */
-#define LARGE_DBLOCK_OVERHEAD 22                /* Overhead for direct blocks */
+#define LARGE_DBLOCK_OVERHEAD 21                /* Overhead for direct blocks */
+                                                /* (coincidentally the same size as for small direct blocks) */
 #define LARGE_CHECKSUM_DBLOCKS FALSE            /* Whether to checksum direct blocks */
 #define LARGE_MAN_WIDTH  32                     /* Managed obj. table width */
 #define LARGE_MAN_START_BLOCK_SIZE 4096         /* Managed obj. starting block size */
