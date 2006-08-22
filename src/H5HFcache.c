@@ -388,19 +388,19 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         /* Set the heap header's size */
         hdr->heap_size = size;
 
+    /* Compute checksum on entire header */
+    /* (including the filter information, if present) */
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == hdr->heap_size);
 
-    /* Compute checksum on entire header */
-    /* (including the filter information, if present) */
-    computed_chksum = H5_checksum_metadata(buf, (hdr->heap_size - H5HF_SIZEOF_CHKSUM));
-
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap header")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap header")
 
     /* Finish initialization of heap header */
     if(H5HF_hdr_finish_init(hdr) < 0)
@@ -525,7 +525,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         } /* end if */
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_checksum_metadata(buf, hdr->heap_size - H5HF_SIZEOF_CHKSUM);
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -819,18 +819,18 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
     /* Sanity check */
     HDassert(iblock->nchildren);        /* indirect blocks w/no children should have been deleted */
 
+    /* Compute checksum on indirect block */
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == iblock->size);
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(buf, (iblock->size - H5HF_SIZEOF_CHKSUM));
-
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap indirect block")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Check if we have any indirect block children */
     if(iblock->nrows > hdr->man_dtable.max_direct_rows) {
@@ -973,7 +973,7 @@ HDfprintf(stderr, "%s: iblock->filt_ents[%Zu] = {%Zu, %x}\n", FUNC, u, iblock->f
         } /* end for */
 
         /* Compute checksum */
-        metadata_chksum = H5_checksum_metadata(buf, iblock->size - H5HF_SIZEOF_CHKSUM);
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -1239,7 +1239,7 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "I/O filters not supported yet")
 
         /* Verify checksum */
         if(stored_chksum != computed_chksum)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect metadata checksum for fractal heap direct block")
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap direct block")
     } /* end if */
 
     /* Sanity check */

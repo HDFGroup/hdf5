@@ -46,15 +46,15 @@
 
 /* Fractal heap signatures */
 #define H5HF_HDR_MAGIC                  "FRHP"          /* Header */
-#define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 #define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
+#define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 
 /* Size of checksum information (on disk) */
 #define H5HF_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for fractal heap metadata */
 #define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
-    4   /* Signature */                                                       \
+    H5HF_SIZEOF_MAGIC   /* Signature */                                       \
     + 1 /* Version */                                                         \
     + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
