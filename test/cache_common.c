@@ -200,12 +200,12 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 };
 
 static herr_t clear(H5F_t * f, void * thing, hbool_t dest);
-static herr_t destroy(H5F_t UNUSED * f, void * thing);
-static herr_t flush(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest,
+static herr_t destroy(H5F_t * f, void * thing);
+static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                     haddr_t addr, void *thing);
-static void * load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
-                   const void UNUSED *udata1, void UNUSED *udata2);
-static herr_t size(H5F_t UNUSED * f, void * thing, size_t * size_ptr);
+static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+                   const void *udata1, void *udata2);
+static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
 
 
 
