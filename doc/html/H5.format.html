@@ -138,8 +138,7 @@ TABLE.list TD { border:none; }
 	      <li><a href="#SymbolTableMessage">Name: Group Message</a>                                     <!-- 0x0011 -->
 	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x0012 -->
 	    </ol>
-	  <li><a href="#SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a>
-	  <li><a href="#DataStorage">Disk Format: Level 2c - Data Object Data Storage</a>
+	  <li><a href="#DataStorage">Disk Format: Level 2b - Data Object Data Storage</a>
 	</ol>
         </font>
       <LI><A href="#Appendix">Appendix</A>
@@ -493,15 +492,14 @@ TABLE.list TD { border:none; }
 	  <td>Version Number of the Shared Header Message Format</td>
 	  <td>
             <P>This value is used to determine the format of the
-	    information in a shared object header message, which is
-	    stored in the global small-data heap.  Since the format
-	    of the shared header messages differs from the private
+	    information in a shared object header message. Since the format
+	    of the shared header messages differs from the other private
 	    header messages, a version number is used to identify changes
 	    in the format.
             </P>
             <P>The only value currently valid in this field is '0', which
             indicates that shared header messages are formatted as
-            described <A href="#SharedObjectHeader">below</A>.
+            described <A href="#SharedMessage">below</A>.
             </P>
 
             <P><EM>This field is present in version 0+ of the superblock.</EM>
@@ -805,6 +803,114 @@ TABLE.list TD { border:none; }
             invoked from the <code>H5FD_sb_encode</code> and
             <code>H5FD_sb_decode</code> functions.</td>
         </tr>
+      </table>
+    </div>
+
+    <BR>
+    <P>For the Version 1.6.5 of the library, the MULTI driver is the only one that has some 
+    information saved in <em>Driver Information</em> field.  It has the following format:</P>
+
+    <div align=center>
+      <table class=format>
+	<caption>
+	  MULTI Driver Message
+	</caption>
+
+	<tr>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr>
+	  <td>Member Mapping</td>
+	  <td>Member Mapping</td>
+	  <td>Member Mapping</td>
+	  <td>Member Mapping</td>
+	</tr>
+
+	<tr>
+	  <td>Member Mapping</td>
+	  <td>Member Mapping</td>
+	  <td>Reserved</td>
+	  <td>Reserved</td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Address of Member File 1<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>End of Address for Member File 1<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Address of Member File 2<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>End of Address for Member File 2<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>... ...<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Name of Member File 1<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>Name of Member File 2<br><br></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4><br>... ...<br><br></td>
+	</tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th>Description</th>
+	</tr>
+
+	<tr>
+	  <td>Member Mapping</td>
+	  <td><P>MULTI File Driver allows maximal 6 files to be created.
+	    They are for super block, B-tree, raw data, global heap, local heap,
+	    and object header.  More than type of data can be mapped to the same file.  
+	    These <em>Member Mapping</em> fields contains this kind of information.
+	    The default value for these mapping fields is <em>H5FD_MEM_DEFAULT</em>.  
+	    Please see the Reference Manual of <em>H5FDset_fapl_multi</em> for details.
+	  </P></td>
+	</tr>
+
+	<tr>
+	  <td>Reserved</td>
+	  <td><P>These fields are reserved and should always be zero.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Address of Member File</td>
+	  <td><P>Specifies the virtual address, from <em>0</em> (zero) to <em>HADDR_MAX</em>, 
+	    at which the member file starts.</P></td>
+	</tr>
+
+	<tr>
+	  <td>End of Address for Member File</td>
+	  <td><P>The end of allocated address for the member file.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Name of Member File</td>
+	  <td><P>The null-terminated name of member file.  Its length should be multiples of 
+	    8 bytes.  Additional bytes will be padded with <em>0</em>s.</P></td> 
+	</tr>
       </table>
     </div>
 
@@ -5411,7 +5517,7 @@ TABLE.list TD { border:none; }
 	  Attribute Message (Version 1)
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
@@ -5843,24 +5949,11 @@ TABLE.list TD { border:none; }
     <P class=item><B>Status:</B> Optional, may be repeated.</P>
 
     <P class=item><B>Description:</B>  A constant message can be shared among 
-      several object headers by writing that message in the global heap and 
-      having the object headers all point to it.  The pointing is accomplished with a
-      Shared Object message which is understood directly by the object
-      header layer of the library. It is also possible to have a
-      message of one object header point to a message in some other
-      object header, but care must be exercised to prevent cycles.
-
-      <br><br>If a message is shared, then the message appears in the global
-      heap and its message ID appears in the Header Message Type
-      field of the object header.  Also, the Flags field in the object
-      header for that message will have bit 0 set.  The message body in the
-      object header will be that of a Shared Object message defined
-      here and not that of the pointed-to message.
-
-      <br><br>Starting from Version 2 of the Shared Object Message, the header message to 
-      be shared are no longer stored in global heap.  Instead, the Pointer field in the 
-      Shared Object Message directly contains the address of the header message to be shared.
-      The Flags field becomes unused.
+      several object headers.  A <em>Shared Object</em> Message contains the address of
+      the object message to be shared.  Care must be exercised to prevent cycles when a
+      message of one object header points to a message in some other object header.
+      Starting from Version 2 of the Shared Object Message, the <em>Flags</em> 
+      field becomes unused.
     </P>
 
     <P class=item><B>Format of Data:</B>
@@ -5921,9 +6014,9 @@ TABLE.list TD { border:none; }
 		<td align=center><code>1</code></td>
 		<td>Used by the library before version 1.6.1.  In this version, 
 		  the Flags field is used to indicate whether the actual message is
-		  stored in the global heap.  The Pointer field either contains the
-		  the header message address in the global heap or the address of the
-		  shared object header.</td>
+		  stored in the global heap (never implemented).  The Pointer field 
+		  either contains the the header message address in the global heap 
+		  (never implemented) or the address of the shared object header.</td>
 	      </tr>
 	    </table>
 	</tr>
@@ -5943,7 +6036,8 @@ TABLE.list TD { border:none; }
 		<td align=center><code>0</code></td>
 		<td>If this bit is clear then the actual message is the
                   first message in some other object header; otherwise
-                  the actual message is stored in the global heap.</td>
+                  the actual message is stored in the global heap (never 
+		  implemented).</td>
 	      </tr>
 
 	      <tr>
@@ -5956,13 +6050,8 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Pointer</td>
-	  <td><P>This field points to the actual message.  The format of
-	    the pointer depends on the value of the Flags field.  If
-	    the actual message is in the global heap then the pointer
-	    is the file address of the global heap collection that
-	    holds the message, and a four-byte index into that
-	    collection.  Otherwise the pointer is a group entry 
-	    that points to some other object header.</P></td>
+	  <td><P>This field points to the actual object header message to be 
+	    shared.</P></td>
 	</tr>
       </table>
     </div>
@@ -6034,210 +6123,202 @@ TABLE.list TD { border:none; }
     </div>
 
 
-<hr>
-<h4><a name="ContinuationMessage">Name: Object Header Continuation</a></h4>
-<b>Header Message Type:</b> 0x0010<BR>
-<b>Length:</b> fixed<BR>
-<b>Status:</b> Optional, may be repeated.<BR>
-<b>Purpose and Description:</b>  The object header continuation is the location
-in the file of more header messages for the current data object.  This can be
-used when header blocks are large, or likely to change over time.<BR>
-<b>Format of Data:</b><p>
-    The object header continuation is formatted as follows (assuming a 4-byte
-length &amp; offset are being used in the current file):
+    <hr>
+    <h4><a name="ContinuationMessage">Name: Object Header Continuation</a></h4>
+    <P class=item><B>Header Message Type:</B> 0x0010</P>
+    <P class=item><B>Length:</B> fixed</P>
+    <P class=item><B>Status:</B> Optional, may be repeated.</P>
+    <P class=item><B>Description:</B>  The object header continuation is the location
+        in the file of more header messages for the current data object.  This can be
+        used when header blocks are large, or likely to change over time.</P>
 
-<P>
-<center>
-<table border cellpadding=4 width=60%>
-<caption align=bottom>
-<B>HDF5 Object Header Continuation Message Layout</B>
-</caption>
+    <P class=item><B>Format of Data:</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Object Header Continuation Message
+        </caption>
 
-<tr align=center>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
+        <tr>
+          <th width=25%>byte</th>
+          <th width=25%>byte</th>
+          <th width=25%>byte</th>
+          <th width=25%>byte</th>
+        </tr>
 
-<tr align=center>
-<td colspan=4>Header Continuation Offset</td>
-<tr align=center>
-<td colspan=4>Header Continuation Length</td>
-</table>
-</center>
+        <tr>
+          <td colspan=4><br>Offset<br><br></td>
+        </tr>
 
-<P>
-<dl>
-<dt>The elements of the Header Continuation Message are described below:
-<dd>
-<dl>
-<dt>Header Continuation Offset: (&lt;offset&gt; bytes)
-<dd>This value is the offset in bytes from the beginning of the file where the
-header continuation information is located.
-<dt>Header Continuation Length: (&lt;length&gt; bytes)
-<dd>This value is the length in bytes of the header continuation information in
-the file.
-</dl>
-</dl>
+        <tr>
+          <td colspan=4><br>Length<br><br></td>
+        </tr>
+      </table>
+    </div>
 
-<hr>
-<h4><a name="SymbolTableMessage">Name: Group Message</a></h4>
-<b>Header Message Type:</b> 0x0011<BR>
-<b>Length:</b> fixed<BR>
-<b>Status:</b> Required for groups, may not be repeated.<BR>
-<b>Purpose and Description:</b> Each group has a B-tree and a
-name heap which are pointed to by this message.<BR>
-<b>Format of data:</b>
-<p>The group message is formatted as follows:
+    <br>
+    <div align=center>
+      <table class=desc>
+        <tr>
+          <th width=30%>Field Name</th>
+          <th>Description</th>
+        </tr>
 
-<p>
-<center>
-<table border cellpadding=4 width="80%">
-<caption align=bottom>
-<b>HDF5 Object Header Group Message Layout</b>
-</caption>
+        <tr>
+          <td>Offset</td>
+          <td><P>This value is the offset in bytes from the beginning of the file where the
+              header continuation information is located.</P></td>
+        </tr>
 
-<tr align=center>
-<th width="25%">byte</th>
-<th width="25%">byte</th>
-<th width="25%">byte</th>
-<th width="25%">byte</th>
+        <tr>
+          <td>Length</td>
+          <td><P>This value is the length in bytes of the header continuation information in
+              the file.</P></td>
+        </tr>
+      </table>
+    </div>
 
-<tr align=center>
-<td colspan=4>B-tree Address</td>
+    <hr>
+    <h4><a name="SymbolTableMessage">Name: Group Message</a></h4>
+    <P class=item><B>Header Message Type:</B> 0x0011</P>
+    <P class=item><B>Length:</B> fixed</P>
+    <P class=item><B>Status:</B> Required for groups, may not be repeated.</P>
+    <P class=item><B>Description:</B> Each group has a B-tree and a
+        name heap which are pointed to by this message.</P>
+    <P class=item><B>Format of data:</B>
 
-<tr align=center>
-<td colspan=4>Heap Address</td>
-</table>
-</center>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          <B>Group Message</B>
+        </caption>
 
-<P>
-<dl>
-<dt>The elements of the Group Message are described below:
-<dd>
-<dl>
-<dt>B-tree Address (&lt;offset&gt; bytes)
-<dd>This value is the offset in bytes from the beginning of the file
-where the B-tree is located.
-<dt>Heap Address (&lt;offset&gt; bytes)
-<dd>This value is the offset in bytes from the beginning of the file
-where the group name heap is located.
-</dl>
-</dl>
+        <tr>
+          <th width="25%">byte</th>
+          <th width="25%">byte</th>
+          <th width="25%">byte</th>
+          <th width="25%">byte</th>
+        </tr>
+
+        <tr>
+          <td colspan=4><br>B-tree Address<br><br></td>
+        </tr>
+
+        <tr>
+          <td colspan=4><br>Heap Address<br><br></td>
+        </tr>
+      </table>
+    </div>
+
+    <br>
+    <div align=center>
+      <table class=desc>
+        <tr>
+          <th width=30%>Field Name</th>
+          <th>Description</th>
+        </tr>
+
+        <tr>
+          <td>B-tree Address</td>
+          <td><P>This value is the offset in bytes from the beginning of the file
+            where the B-tree is located.</P></td>
+        </tr>
+
+        <tr>
+          <td>Heap Address</td>
+          <td><P>This value is the offset in bytes from the beginning of the file
+            where the group name heap is located.</P></td>
+        </tr>
+      </table>
+    </div>
 
     <hr>
     <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
 
-    <P class=item><B>Header Message Type:</B> 0x0012
-    </P>
-    <P class=item><B>Length:</B> Fixed
-    </P>
-    <P class=item><B>Status:</B> Optional, may not be repeated.
-    </P>
+    <P class=item><B>Header Message Type:</B> 0x0012 </P>
+    <P class=item><B>Length:</B> Fixed </P>
+    <P class=item><B>Status:</B> Optional, may not be repeated. </P>
 
     <P class=item><B>Description:</B> The object modification date
-      and time is a timestamp which indicates
-      the last modification of an object.  The time is
-      updated when any object header message changes according to the
+      and time is a timestamp which indicates the last modification of an object.  
+      The time is updated when any object header message changes according to the
       system clock where the change was posted.
     </P>
 
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <b>Modification Time Message</b>
+    <P class=item><B>Format of Data:</B>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Modification Time Message
 	</caption>
 
-	<tr align=center>
+	<tr>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=1>Version</td>
+	<tr>
+	  <td>Version</td>
 	  <td colspan=3>Reserved</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Seconds After Epoch</td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version</td>
-	  <td>The version number for the message.  This document
-	    describes version one of the new modification time message.</td>
+	  <td><P>The version number is used for changes in the format of Object Modification Time
+	      and is described here:</P>
+	     <table class=list>
+		<tr>
+		  <th width="30%">Version</th>
+		  <th align=left>Description</th>
+		</tr>
+
+		<tr>
+		  <td align=center><code>0</code></td>
+		  <td>Never used.</td>
+		</tr>
+
+		<tr>
+		  <td align=center><code>1</code></td>
+		  <td>Used by Version 1.6.1 and after of the library to encode time.  In
+		    this version, the time is the seconds after Epoch.</td>
+		</tr>
+	      </table>
+	  </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Reserved</td>
-	  <td>This field is reserved and should always be zero.</td>
+	  <td><P>This field is reserved and should always be zero.</P></td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Seconds After Epoch</td>
-	  <td>The number of seconds since 0 hours, 0
-               minutes, 0 seconds, January 1, 1970, Coordinated Universal Time.
+	  <td><P>The number of seconds since 0 hours, 0 minutes, 0 seconds, 
+	    January 1, 1970, Coordinated Universal Time.</P></td>
 	</tr>
       </table>
-    </center>
-    
-<h3><a name="SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a></h3>
-<P>In order to share header messages between several dataset objects, object
-header messages may be placed into the global heap.  Since these
-messages require additional information beyond the basic object header message
-information, the format of the shared message is detailed below.
+    </div>
 
-<BR> <BR>
-<center>
-<table border cellpadding=4 width=60%>
-<caption align=bottom>
-<B>HDF5 Shared Object Header Message</B>
-</caption>
-
-<tr align=center>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
-<th width=25%>byte</th>
-
-<tr align=center>
-<td colspan=4>Reference Count of Shared Header Message</td>
-<tr align=center>
-<td colspan=4><br> Shared Object Header Message<br> <br></td>
-</table>
-</center>
-
-<p>
-<dl>
-<dt> The elements of the shared object header message are described below:
-<dd>
-<dl>
-<dt>Reference Count of Shared Header Message: (32-bit unsigned integer)
-<dd>This value is used to keep a count of the number of dataset objects which
-refer to this message from their dataset headers.  When this count reaches zero,
-the shared message header may be removed from the global heap.
-<dt>Shared Object Header Message: (various lengths)
-<dd>The data stored for the shared object header message is formatted in the
-same way as the private object header messages described in the object header
-description earlier in this document and begins with the header message Type.
-</dl>
-</dl>
-
-
-<h3><a name="DataStorage">Disk Format: Level 2c - Data Object Data Storage</a></h3>
+<hr>
+<h3><a name="DataStorage">Disk Format: Level 2b - Data Object Data Storage</a></h3>
 <P>The data for an object is stored separately from the header
 information in the file and may not actually be located in the HDF5 file
 itself if the header indicates that the data is stored externally.  The
@@ -6269,6 +6350,7 @@ for the last field).
 <P>Data of a compound datatype is stored as a contiguous stream of the items
 in the structure, with each item formatted according to its datatype.</p>
 
+<hr>
 <h3><a name="Appendix">Appendix</a></h3>
 <P>Definitions of various terms used in this document.
 </P>
