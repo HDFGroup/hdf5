@@ -142,7 +142,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
 {
     const H5B2_class_t	*type = (const H5B2_class_t *) _type;   /* Type of B-tree */
     size_t node_size, rrec_size;        /* Size info for B-tree */
-    unsigned split_percent, merge_percent;      /* Split & merge info for B-tree */
+    uint8_t split_percent, merge_percent;      /* Split & merge %s for B-tree */
     H5B2_t		*bt2 = NULL;    /* B-tree info */
     size_t		size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -199,8 +199,8 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     UINT16DECODE(p, bt2->depth);
 
     /* Split & merge %s */
-    UINT16DECODE(p, split_percent);
-    UINT16DECODE(p, merge_percent);
+    split_percent = *p++;
+    merge_percent = *p++;
 
     /* Root node pointer */
     H5F_addr_decode(f, (const uint8_t **)&p, &(bt2->root.addr));
@@ -302,8 +302,8 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         UINT16ENCODE(p, bt2->depth);
 
         /* Split & merge %s */
-        UINT16ENCODE(p, shared->split_percent);
-        UINT16ENCODE(p, shared->merge_percent);
+        *p++ = shared->split_percent;
+        *p++ = shared->merge_percent;
 
         /* Root node pointer */
         H5F_addr_encode(f, &p, bt2->root.addr);

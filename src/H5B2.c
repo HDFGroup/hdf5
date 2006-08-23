@@ -196,7 +196,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         /* Mark B-tree header as dirty, since we updated the address of the root node */
         bt2_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
-    /* Check if we need to split the root node (equiv. to a 1->2 leaf node split) */
+    /* Check if we need to split the root node (equiv. to a 1->2 node split) */
     else if((bt2->depth==0 && bt2->root.node_nrec==shared->split_leaf_nrec) ||
             (bt2->depth>0 && bt2->root.node_nrec==shared->split_int_nrec)) {
         /* Split root node */

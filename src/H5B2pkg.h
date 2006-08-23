@@ -63,7 +63,7 @@
     + H5B2_SIZEOF_CHKSUM /* Metadata checksum */                              \
     )
 
-/* Size of the B-tree header on disk */
+/* Size of the v2 B-tree header on disk */
 #define H5B2_HEADER_SIZE(f)     (                                             \
     /* General metadata fields */                                             \
     H5B2_METADATA_PREFIX_SIZE                                                 \
@@ -71,21 +71,39 @@
     /* Header specific fields */                                              \
     + 1 /* Tree type */                                                       \
     + 4 /* Node size, in bytes */                                             \
-    + 2 /* Key size, in bytes */                                              \
+    + 2 /* Record size, in bytes */                                           \
     + 2 /* Depth of tree */                                                   \
-    + 2 /* Split % of full (as integer, ie. "98" means 98%) */                \
-    + 2 /* Merge % of full (as integer, ie. "98" means 98%) */                \
+    + 1 /* Split % of full (as integer, ie. "98" means 98%) */                \
+    + 1 /* Merge % of full (as integer, ie. "98" means 98%) */                \
     + H5B2_NODE_POINTER_SIZE(f)  /* Node pointer to root node in tree */      \
     )
 
+/* Size of the v2 B-tree internal node prefix */
+#define H5B2_INT_PREFIX_SIZE (                                                \
+    /* General metadata fields */                                             \
+    H5B2_METADATA_PREFIX_SIZE                                                 \
+                                                                              \
+    /* Header specific fields */                                              \
+    + 1 /* Tree type */                                                       \
+    )
+
+/* Size of the v2 B-tree leaf node prefix */
+#define H5B2_LEAF_PREFIX_SIZE (                                               \
+    /* General metadata fields */                                             \
+    H5B2_METADATA_PREFIX_SIZE                                                 \
+                                                                              \
+    /* Header specific fields */                                              \
+    + 1 /* Tree type */                                                       \
+    )
+
 /* Macro to retrieve pointer to i'th native record for native record buffer */
-#define H5B2_NAT_NREC(b,shared,idx)  (b+(shared)->nat_off[(idx)])
+#define H5B2_NAT_NREC(b, shared, idx)  ((b) + (shared)->nat_off[(idx)])
 
 /* Macro to retrieve pointer to i'th native record for internal node */
-#define H5B2_INT_NREC(i,shared,idx)  ((i)->int_native+(shared)->nat_off[(idx)])
+#define H5B2_INT_NREC(i, shared, idx)  H5B2_NAT_NREC((i)->int_native, (shared), (idx))
 
 /* Macro to retrieve pointer to i'th native record for leaf node */
-#define H5B2_LEAF_NREC(l,shared,idx)  ((l)->leaf_native+(shared)->nat_off[(idx)])
+#define H5B2_LEAF_NREC(l, shared, idx)  H5B2_NAT_NREC((l)->leaf_native, (shared), (idx))
 
 
 /****************************/
