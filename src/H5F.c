@@ -2750,7 +2750,7 @@ herr_t
 H5Fget_intent(hid_t file_id, unsigned *intent_flags)
 {
     H5F_t * file = NULL;
-    herr_t ret_value;
+    herr_t ret_value=SUCCEED;
     FUNC_ENTER_API(H5Fget_intent, FAIL)
 
     if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
