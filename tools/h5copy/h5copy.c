@@ -15,16 +15,28 @@
 
 #include "hdf5.h"
 #include "h5tools.h"
-#include "H5private.h"
+#include "h5tools_utils.h"
 #include <string.h>
 #include <stdlib.h>
 
-#if 0
-#define H5COPY_DEBUG
-#endif
-
 const char *progname="h5copy";
 int   d_status;
+
+static void leave(int ret);
+
+/* command-line options: short and long-named parameters */
+static const char *s_opts = "hvf:Vi:o:s:d:";
+static struct long_options l_opts[] = {
+    { "help", no_arg, 'h' },
+    { "verbose", no_arg, 'v' },
+    { "flag", require_arg, 'f' },
+    { "version", no_arg, 'V' },
+    { "input", require_arg, 'i' },
+    { "output", require_arg, 'o' },
+    { "source", require_arg, 's' },
+    { "destination", require_arg, 'd' },
+    { NULL, 0, '\0' }
+};
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -45,24 +57,29 @@ usage (void)
  fprintf(stderr, "\
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
-      A pair of 2 HDF5 files (input and output). Each file name\n\
-      is followed by a slash and an object name within the file\n\
+      -i               input file name\n\
+      -o               output file name\n\
+      -s               source object name\n\
+      -d               destination name\n\
    OPTIONS\n\
       -h               Print a usage message and exit\n\
       -v               Print information about OBJECTS and OPTIONS\n\
+      -V               Print tool version\n\
       -f               Flag type\n\n\
       Flag type is one of the following strings:\n\n\
-      SHALLOW (Copy only immediate members for groups)\n\
-      SOFT (Expand soft links into new objects)\n\
-      EXT (Expand external links into new objects)\n\
-      REF (Copy objects that are pointed by references)\n\
-      ATTR (Copy object without copying attributes)\n\n\
+      shallow     Copy only immediate members for groups\n\
+      soft        Expand soft links into new objects\n\
+      ext         Expand external links into new objects\n\
+      ref         Copy objects that are pointed by references\n\
+      noattr      Copy object without copying attributes\n\
+      allflags    Switches all flags from the default to the non-default setting\n\n\
       These flag types correspond to the following API symbols\n\n\
       H5G_COPY_SHALLOW_HIERARCHY_FLAG\n\
       H5G_COPY_EXPAND_SOFT_LINK_FLAG\n\
       H5G_COPY_EXPAND_EXT_LINK_FLAG\n\
       H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG\n\
-      H5G_COPY_WITHOUT_ATTR_FLAG\n");
+      H5G_COPY_WITHOUT_ATTR_FLAG\n\
+      H5G_COPY_ALL\n");
 }
 
 
@@ -74,11 +91,12 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
  *
  * STRING is one of the following (API symbol and description)
  *
- * SHALLOW  H5G_COPY_SHALLOW_HIERARCHY_FLAG:  Copy only immediate members for groups
- * SOFT     H5G_COPY_EXPAND_SOFT_LINK_FLAG:  Expand soft links into new objects
- * EXT      H5G_COPY_EXPAND_EXT_LINK_FLAG: Expand external links into new objects
- * REF      H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
- * ATTR     H5G_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
+ * shallow  H5G_COPY_SHALLOW_HIERARCHY_FLAG:  Copy only immediate members for groups
+ * soft     H5G_COPY_EXPAND_SOFT_LINK_FLAG:  Expand soft links into new objects
+ * ext      H5G_COPY_EXPAND_EXT_LINK_FLAG: Expand external links into new objects
+ * ref      H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
+ * noattr   H5G_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
+ * allflags Switches all flags from the default to the non-default setting 
  *
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
@@ -95,25 +113,29 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 {
  unsigned fla=0;
 
- if (strcmp(str_flag,"SHALLOW")==0)
+ if (strcmp(str_flag,"shallow")==0)
  {
   fla = H5G_COPY_SHALLOW_HIERARCHY_FLAG;
  } 
- else  if (strcmp(str_flag,"SOFT")==0)
+ else  if (strcmp(str_flag,"soft")==0)
  {
   fla = H5G_COPY_EXPAND_SOFT_LINK_FLAG;
  }
- else  if (strcmp(str_flag,"EXT")==0)
+ else  if (strcmp(str_flag,"ext")==0)
  {
   fla = H5G_COPY_EXPAND_EXT_LINK_FLAG;
  }
- else  if (strcmp(str_flag,"REF")==0)
+ else  if (strcmp(str_flag,"ref")==0)
  {
   fla = H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG;
  }
- else  if (strcmp(str_flag,"ATTR")==0)
+ else  if (strcmp(str_flag,"noattr")==0)
  {
   fla = H5G_COPY_WITHOUT_ATTR_FLAG;
+ }
+ else  if (strcmp(str_flag,"allflags")==0)
+ {
+  fla = H5G_COPY_ALL;
  }
  else
  {
@@ -125,9 +147,6 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 
  return 0;
 }
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -146,152 +165,140 @@ main (int argc, const char *argv[])
 {
  hid_t        fid_src=-1;
  hid_t        fid_dst=-1;
- int          argno;
- static char  root_name[] = "/";
  char         *fname_src=NULL;
  char         *fname_dst=NULL;
  char         *oname_src=NULL;
  char         *oname_dst=NULL;
- char         *x;
  unsigned     flag=0;
  int          verbose=0;
  hid_t        pid; 
  char         str_flag[20];
+ int          opt;
 
  /* initialize h5tools lib */
  h5tools_init();
- 
- /* switches come before non-switch arguments */
- for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) 
+
+ /* parse command line options */
+ while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
  {
-  if (strcmp(argv[argno], "-h") == 0) 
+  switch ((char)opt) 
   {
+  case 'h':
    usage();
-  }
-  else if (strcmp(argv[argno], "-v") == 0) 
-  {
+   leave(EXIT_SUCCESS);
+   break;
+
+  case 'V':
+   print_version(progname);
+   leave(EXIT_SUCCESS);
+   break;
+
+  case 'v':
    verbose = 1;
-  }
-  else if (strcmp(argv[argno], "-f") == 0) 
-  {
-   /* parse flag */
-   if (parse_flag(argv[argno+1],&flag)<0)
+   break;
+
+  case 'f':
+   /* validate flag */
+   if (parse_flag(opt_arg,&flag)<0)
    {
     usage();
-    exit(1);
+    leave(EXIT_FAILURE);
    }
-   strcpy(str_flag,argv[argno+1]);
+   strcpy(str_flag,opt_arg);
+   break;
+
+  case 'i':
+   fname_src = strdup(opt_arg);
+   break;
+
+  case 'o':
+   fname_dst = strdup(opt_arg);
+   break;
+
+  case 's':
+   oname_src = strdup(opt_arg);
+   break;
+
+  case 'd':
+   oname_dst = strdup(opt_arg);
+   break;
    
-   /* jump to next */
-   ++argno;
+  case '?':
+  default:
+   usage();
+   leave(EXIT_FAILURE);
   }
- }
-
-
- /* no more arguments remain */
- if (argno>=argc) 
- {
-  usage();
-  exit(1);
  }
 
 /*-------------------------------------------------------------------------
- * 
- * each remaining argument is an hdf5 file name followed by an optional slash
- * and object name.
- *
- * Example: test1.h5/bar/baz
- *          \______/\______/
- *            file     obj
- *
- * The dichotomy is determined by calling H5Fopen() repeatedly until it
- * succeeds. The first call uses the entire name and each subsequent call
- * chops off the last component. If we reach the beginning of the name
- * then there must have been something wrong with the file (perhaps it
- * doesn't exist). 
- *
+ * check for missing file/object names
  *-------------------------------------------------------------------------*/
 
- fname_src = HDstrdup(argv[argno++]);
-
- while (fname_src && *fname_src) 
+ if (fname_src==NULL) 
  {
-#ifdef H5COPY_DEBUG
- printf("%s\n",fname_src);
-#endif
-  fid_src = h5tools_fopen(fname_src, NULL, NULL, 0, argc, argv);
-  
-  if (fid_src>=0) 
-   break; /*success*/
-  
-  /* shorten the file name; lengthen the object name */
-  x = oname_src;
-  oname_src = strrchr(fname_src, '/');
-  if (x) 
-   *x = '/';
-  if (!oname_src) 
-   break;
-  *oname_src = '\0';
+  printf("Input file name missing\n");
+  usage();
+  leave(EXIT_FAILURE);
  }
- if (oname_src) 
-  oname_src++;
- if (!oname_src || !*oname_src) 
-  oname_src = root_name;
+
+ if (fname_dst==NULL) 
+ {
+  printf("Output file name missing\n");
+  usage();
+  leave(EXIT_FAILURE);
+ }
+
+ if (oname_src==NULL) 
+ {
+  printf("Input object name missing\n");
+  usage();
+  leave(EXIT_FAILURE);
+ }
+
+ if (oname_dst==NULL) 
+ {
+  printf("Destination object name missing\n");
+  usage();
+  leave(EXIT_FAILURE);
+ }
+
+
+/*-------------------------------------------------------------------------
+ * open input file
+ *-------------------------------------------------------------------------*/
+ 
+  fid_src = h5tools_fopen(fname_src, NULL, NULL, 0, argc, argv);
 
 /*-------------------------------------------------------------------------
  * test for error in opening input file
  *-------------------------------------------------------------------------*/
  if (fid_src==-1)
  {
-  printf("Could not open file/object <%s>...Exiting\n",fname_src);
+  printf("Could not open input file <%s>...Exiting\n",fname_src);
   if (fname_src)
    free(fname_src);
-  return 1;
+  leave(EXIT_FAILURE);
  }
 
 /*-------------------------------------------------------------------------
- * last argument, same logic, but the file might not exist, so we attempt to
- * create one instead
+ * open output file
  *-------------------------------------------------------------------------*/
 
- fname_dst = HDstrdup(argv[argno]);
+ fid_dst = H5Fcreate(fname_dst, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
- while (fname_dst && *fname_dst) 
- {
-  H5E_BEGIN_TRY {
-   fid_dst = H5Fcreate(fname_dst, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  } H5E_END_TRY;
-  
-  if (fid_dst>=0) 
-   break; /*success*/
-  
-  /* shorten the file name; lengthen the object name */
-  x = oname_dst;
-  oname_dst = strrchr(fname_dst, '/');
-  if (x) 
-   *x = '/';
-  if (!oname_dst) 
-   break;
-  *oname_dst = '\0';
- }
- if (oname_dst) 
-  oname_dst++;
- if (!oname_dst || !*oname_dst) 
-  oname_dst = NULL;
-
- 
 /*-------------------------------------------------------------------------
- * check destination name
+ * test for error in opening output file
  *-------------------------------------------------------------------------*/
-
- if (oname_dst==NULL) 
+ if (fid_dst==-1)
  {
-  printf("Destination object name missing\n");
-  usage();
-  goto error;
+  printf("Could not open output file <%s>...Exiting\n",fname_dst);
+  if (fname_src)
+   free(fname_src);
+  if (fname_dst)
+   free(fname_dst);
+  leave(EXIT_FAILURE);
  }
-
- 
+  
 /*-------------------------------------------------------------------------
  * print some info
  *-------------------------------------------------------------------------*/
@@ -342,19 +349,23 @@ main (int argc, const char *argv[])
  if (H5Pclose(pid)<0)
   goto error;
 
- if (fid_src>0)
-  H5Fclose(fid_src);
- if (fid_dst>0)
-  H5Fclose(fid_dst);
+ /* close files */
+ if (H5Fclose(fid_src)<0)
+  goto error;
+ if (H5Fclose(fid_dst)<0)
+  goto error;
 
  if (fname_src)
   free(fname_src);
  if (fname_dst)
   free(fname_dst);
+ if (oname_dst)
+  free(oname_dst);
+ if (oname_src)
+  free(oname_src);
 
  h5tools_close();
  
-
  return 0;
 
 error:
@@ -368,10 +379,35 @@ error:
   free(fname_src);
  if (fname_dst)
   free(fname_dst);
+ if (oname_dst)
+  free(oname_dst);
+ if (oname_src)
+  free(oname_src);
 
  h5tools_close();
- 
  
  return 1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    leave
+ *
+ * Purpose:     Shutdown MPI & HDF5 and call exit()
+ *
+ * Return:      Does not return
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, 31. January 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+leave(int ret)
+{
+ h5tools_close();
+ 
+ exit(ret);
+}

@@ -64,9 +64,8 @@ TOOLTEST() {
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-TOOLTEST -v $srcdir/../testfiles/test1.h5/array test1.out.h5/array
-TOOLTEST -v $srcdir/../testfiles/test1.h5/integer test1.out.h5/integer_copy
-TOOLTEST -v $srcdir/../testfiles/test1.h5/g1 test1.out.h5/g1
+TOOLTEST -v -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -s array -d array
+TOOLTEST -v -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -s g1 -d g1
 
 if test $nerrors -eq 0 ; then
     echo "All h5copy tests passed."
