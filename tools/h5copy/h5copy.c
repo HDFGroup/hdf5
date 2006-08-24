@@ -57,15 +57,15 @@ usage (void)
  fprintf(stderr, "\
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
-      -i               input file name\n\
-      -o               output file name\n\
-      -s               source object name\n\
-      -d               destination name\n\
+      -i, --input        input file name\n\
+      -o, --output       output file name\n\
+      -s, --source       source object name\n\
+      -d, --destination  destination object name\n\
    OPTIONS\n\
-      -h               Print a usage message and exit\n\
-      -v               Print information about OBJECTS and OPTIONS\n\
-      -V               Print tool version\n\
-      -f               Flag type\n\n\
+      -h, --help         Print a usage message and exit\n\
+      -v, --verbose      Print information about OBJECTS and OPTIONS\n\
+      -V, --version      Print version number and exit\n\
+      -f, --flag         Flag type\n\n\
       Flag type is one of the following strings:\n\n\
       shallow     Copy only immediate members for groups\n\
       soft        Expand soft links into new objects\n\
@@ -411,3 +411,4 @@ leave(int ret)
  
  exit(ret);
 }
+
