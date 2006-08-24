@@ -175,6 +175,32 @@ New Features
 
     Library:
     --------
+       - Added External and User-defined links.
+            External links are links from one HDF5 file to another; they
+            require both the name of the file and a path within that file.
+            User-defined links allow users to supply callback functions
+            for link traversals, allowing links to exhibit essentially
+            any behavior.
+            External links are a kind of user-defined link, so their default
+            behavior can be overridden by the user.
+            -JML 2006/8/23
+       - Added H5Oopen and H5Oclose for opening objects of unknown type
+            (as link callback functions do).
+            -JML 2006/8/23
+       - Added H5Oopen_by_addr, H5Oincr_refcount, and H5Odecr_refcount for
+            opening objects by address.  Be very careful with these!
+            -JML 2006/8/23
+       - Added H5Fget_intent to get the "intent" of a file (whether it
+            was opened with read-write access or read-only.
+            -JML 2006/8/23
+       - Added Link Access Property Lists. They currently contain two
+            properties, nlinks (H5Pget/set_nlinks) and elink_prefix
+            (H5Pget/set_elink_prefix). nlinks controls how many soft and
+            user-defined traversals are allowed before HDF5 assumes it has
+            found a cycle (previously this defaulted to 16).
+            The elink_prefix is a filesystem path that is prefixed to the
+            names of any external link files opened using this LAPL.
+            -JML 2006/8/23
        - Add H5L link APIs.  Old APIs (H5Glink, H5Gmove, etc.) are still
          supported but deprecated.
          New APIs are:
