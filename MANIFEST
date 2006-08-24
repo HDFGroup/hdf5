@@ -123,7 +123,9 @@
 ./examples/h5_compound.c
 ./examples/h5_drivers.c
 ./examples/h5_dtransform.c
+./examples/h5_elink_unix2win.c
 ./examples/h5_extend_write.c
+./examples/h5_extlink.c
 ./examples/h5_group.c
 ./examples/h5_read.c
 ./examples/h5_write.c
