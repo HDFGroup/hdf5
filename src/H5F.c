@@ -2729,6 +2729,51 @@ done:
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
     FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fget_intent
+ *
+ * Purpose:	Public API to retrieve the file's 'intent' flags passed
+ *              during H5Fopen()
+ *
+ * Return:	Non-negative on success/negative on failure
+ *
+ * Programmer:	James Laird
+ *		August 23, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_intent(hid_t file_id, unsigned *intent_flags)
+{
+    H5F_t * file = NULL;
+    herr_t ret_value;
+    FUNC_ENTER_API(H5Fget_intent, FAIL)
+
+    if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* If no intent flags were passed in, exit quietly */
+    if(!intent_flags)
+	HGOTO_DONE(SUCCEED)
+    
+    *intent_flags = H5F_get_intent(file);
+
+    /* HDF5 uses some flags internally that users don't know about.
+     * Simplify things for them so that they get one of H5F_ACC_RDWR
+     * or H5F_ACC_RDONLY.
+     */
+    if(*intent_flags & H5F_ACC_RDWR)
+        *intent_flags = H5F_ACC_RDWR;
+    else
+        *intent_flags = H5F_ACC_RDONLY;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------

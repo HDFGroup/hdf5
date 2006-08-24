@@ -347,6 +347,7 @@ test_file_open(void)
     size_t		parm2;		/*file-creation parameters	*/
     unsigned		iparm;
     unsigned		iparm2;
+    unsigned		intent;
     herr_t		ret;		/*generic return value		*/
 
     /*
@@ -359,6 +360,11 @@ test_file_open(void)
     /* Open first file */
     fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Get the intent */
+    ret = H5Fget_intent(fid1, &intent);
+    CHECK(ret, FAIL, "H5Fget_intent");
+    VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
 
     /* Get the file-creation template */
     tmpl1 = H5Fget_create_plist(fid1);
@@ -409,9 +415,18 @@ test_file_open(void)
     fid1 = H5Fopen(FILE2, H5F_ACC_RDONLY, fapl_id);
     CHECK(fid1, FAIL, "H5Fopen");
 
+    /* Check the intent */
+    ret = H5Fget_intent(fid1, &intent);
+    CHECK(ret, FAIL, "H5Fget_intent");
+    VERIFY(intent, H5F_ACC_RDONLY, "H5Fget_intent");
+
     /* Open dataset */
     did = H5Dopen(fid1, F2_DSET);
     CHECK(did, FAIL, "H5Dopen");
+
+    /* Check that the intent works even if NULL is passed in */
+    ret = H5Fget_intent(fid1, NULL);
+    CHECK(ret, FAIL, "H5Fget_intent");
 
     /* Close first open */
     ret = H5Fclose(fid1);
@@ -420,6 +435,10 @@ test_file_open(void)
     /* Open file for second time, which should fail. */
     fid2 = H5Fopen(FILE2, H5F_ACC_RDWR, fapl_id);
     VERIFY(fid2, FAIL, "H5Fopen");
+
+    /* Check that the intent fails for an invalid ID */
+    ret = H5Fget_intent(fid1, &intent);
+    VERIFY(ret, FAIL, "H5Fget_intent");
 
     /* Close dataset from first open */
     ret = H5Dclose(did);
@@ -859,11 +878,17 @@ test_get_file_id(void)
     hid_t		datatype_id, dataset_id, dataspace_id, group_id, attr_id;
     hid_t               plist;
     hsize_t             dims[F2_RANK];
+    unsigned            intent;
     herr_t              ret;
 
     /* Create a file */
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check the intent */
+    ret = H5Fget_intent(fid, &intent);
+    CHECK(ret, FAIL, "H5Fget_intent");
+    VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
 
     /* Test H5Iget_file_id() */
     check_file_id(fid, fid);
@@ -1469,6 +1494,7 @@ test_file_open_overlap(void)
     hid_t gid;
     hid_t sid;
     int nobjs;          /* # of open objects */
+    unsigned intent;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1481,6 +1507,11 @@ test_file_open_overlap(void)
     /* Open file also */
     fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Check the intent */
+    ret = H5Fget_intent(fid1, &intent);
+    CHECK(ret, FAIL, "H5Fget_intent");
+    VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
 
     /* Create a group in file */
     gid = H5Gcreate(fid1, GROUP1, (size_t)0);

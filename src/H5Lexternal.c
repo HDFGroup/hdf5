@@ -53,6 +53,7 @@ static hid_t H5L_extern_traverse(const char * link_name, hid_t cur_group, void *
     char         *prefix;
     size_t        fname_len;
     hbool_t       fname_alloc = FALSE;
+    unsigned      intent;
     hid_t         ret_value = -1;
 
     file_name = (char *) udata;
@@ -79,7 +80,15 @@ static hid_t H5L_extern_traverse(const char * link_name, hid_t cur_group, void *
         strcat(file_name, udata);
     }
 
-    if((fid = H5Fopen(file_name, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    /* Figure out if we should open with read-write or read-only */
+    if((fid = H5Iget_file_id(cur_group)) < 0)
+        goto error;
+    if(H5Fget_intent(fid, &intent) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    if((fid = H5Fopen(file_name, intent, H5P_DEFAULT)) < 0)
         goto error;
     ret_value = H5Oopen(fid, obj_name, lapl_id); /* If this fails, our return value will be negative. */
     if(H5Fclose(fid) < 0)

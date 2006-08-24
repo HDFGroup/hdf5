@@ -1579,7 +1579,7 @@ external_link_root(hid_t fapl)
     if(H5Gclose(gid) < 0) TEST_ERROR;
     if(H5Fclose(fid)<0) TEST_ERROR;
     
-    /* Open first file again and check on objects created */
+    /* Open first file again with read-only access and check on objects created */
     if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Open objects created through external link */
@@ -1599,13 +1599,26 @@ external_link_root(hid_t fapl)
     /* Close first file */
     if(H5Fclose(fid)<0) TEST_ERROR;
 
+    /* Verify that new objects can't be created through a read-only external
+     * link.
+     */
+    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    H5E_BEGIN_TRY {
+        gid = H5Gcreate(fid, "ext_link/readonly_group", (size_t)0);
+    } H5E_END_TRY
+    if(gid >= 0) TEST_ERROR
+
+    /* Close second file again */
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
     PASSED();
     return 0;
 
  error:
     H5E_BEGIN_TRY {
-    	H5Fclose (gid2);
-    	H5Fclose (gid);
+    	H5Gclose (gid2);
+    	H5Gclose (gid);
     	H5Fclose (fid);
     } H5E_END_TRY;
     return -1;

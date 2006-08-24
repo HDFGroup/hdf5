@@ -114,6 +114,7 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
 H5_DLL herr_t H5Fclose (hid_t file_id);
 H5_DLL hid_t  H5Fget_create_plist (hid_t file_id);
 H5_DLL hid_t  H5Fget_access_plist (hid_t file_id);
+H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned * intent);
 H5_DLL int H5Fget_obj_count(hid_t file_id, unsigned types);
 H5_DLL int H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *obj_id_list);
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle);
