@@ -5014,6 +5014,7 @@ check_all_closed(hid_t fapl)
     return 0;
 
  error:
+    printf("Error on file %d.\n", x);
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
@@ -5047,7 +5048,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL) 
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) {
 	h5_reset();
 	fapl = h5_fileaccess();
 	/* The tests... */

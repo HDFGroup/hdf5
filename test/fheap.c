@@ -14558,7 +14558,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family"))
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio"))
     {
 
     /* Initialize heap creation parameters */
