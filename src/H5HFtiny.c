@@ -220,7 +220,10 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     if(!hdr->tiny_len_extended)
         enc_obj_size = *id & H5HF_TINY_MASK_SHORT;
     else
-        enc_obj_size = ((*id & H5HF_TINY_MASK_EXT_1) << 8) | (*(id + 1) & H5HF_TINY_MASK_EXT_2);
+	/* (performed in this odd way to avoid compiler bug on tg-login3 with
+	 *  gcc 3.2.2 - QAK)
+	 */
+        enc_obj_size = *(id + 1) | ((*id & H5HF_TINY_MASK_EXT_1) << 8);
 
     /* Set the object's length */
     *obj_len_p = enc_obj_size + 1;
@@ -245,7 +248,7 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 herr_t
 H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
 {
-    size_t enc_obj_size;                /* Encoded object size */
+    size_t enc_obj_size;        /* Encoded object size */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_tiny_read)
 
@@ -266,10 +269,16 @@ H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     } /* end if */
     else {
         /* Retrieve the object's encoded length */
-        enc_obj_size = ((*id & H5HF_TINY_MASK_EXT_1) << 8) | (*(id + 1) & H5HF_TINY_MASK_EXT_2);
+	/* (performed in this odd way to avoid compiler bug on tg-login3 with
+	 *  gcc 3.2.2 - QAK)
+	 */
+        enc_obj_size = *(id + 1) | ((*id & H5HF_TINY_MASK_EXT_1) << 8);
 
         /* Advance past flag byte(s) */
-        id+=2;
+	/* (performed in two steps to avoid compiler bug on tg-login3 with
+	 *  gcc 3.2.2 - QAK)
+	 */
+        id++; id++;
     } /* end else */
 
     /* Retrieve the object's data */
@@ -310,7 +319,10 @@ H5HF_tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     if(!hdr->tiny_len_extended)
         enc_obj_size = *id & H5HF_TINY_MASK_SHORT;
     else
-        enc_obj_size = ((*id & H5HF_TINY_MASK_EXT_1) << 8) | (*(id + 1) & H5HF_TINY_MASK_EXT_2);
+	/* (performed in this odd way to avoid compiler bug on tg-login3 with
+	 *  gcc 3.2.2 - QAK)
+	 */
+        enc_obj_size = *(id + 1) | ((*id & H5HF_TINY_MASK_EXT_1) << 8);
 
     /* Update statistics about heap */
     hdr->tiny_size -= (enc_obj_size + 1);
