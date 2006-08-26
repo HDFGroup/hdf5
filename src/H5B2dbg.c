@@ -151,8 +151,11 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Address of root node:",
 	      bt2->root.addr);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Max. number of records per internal node:",
-	      shared->internal_nrec);
+	      "Max. number of records per internal 'branch' node:",
+	      shared->branch_nrec);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Max. number of records per internal 'twig' node:",
+	      shared->twig_nrec);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Max. number of records per leaf node:",
 	      shared->leaf_nrec);
@@ -163,14 +166,20 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      "Merge percent:",
 	      shared->merge_percent);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal records to split at:",
-	      shared->split_int_nrec);
+	      "Internal 'branch' node records to split at:",
+	      shared->split_brch_nrec);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Internal 'twig' node records to split at:",
+	      shared->split_twig_nrec);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Leaf records to split at:",
 	      shared->split_leaf_nrec);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal records to merge at:",
-	      shared->merge_int_nrec);
+	      "Internal 'branch' node records to merge at:",
+	      shared->merge_brch_nrec);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Internal 'twig' node records to merge at:",
+	      shared->merge_twig_nrec);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Leaf records to merge at:",
 	      shared->merge_leaf_nrec);
@@ -198,7 +207,7 @@ done:
  */
 herr_t
 H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
-    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
+    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth)
 {
     H5B2_t	*bt2 = NULL;
     H5B2_internal_t	*internal = NULL;
@@ -234,7 +243,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree internal node
      */
-    if(NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &nrec, bt2->shared, H5AC_READ)))
+    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2->shared, addr, nrec, depth, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Release the B-tree header */

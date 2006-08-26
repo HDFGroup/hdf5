@@ -235,7 +235,7 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
-    } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B2_BRCH_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is two bytes after the
@@ -245,31 +245,78 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump internal node\n");
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records node in order to dump internal node\n");
             fprintf(stderr, "v2 B-tree internal node usage:\n");
             fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records>\n");
             HDexit(4);
         } /* end if */
 
+        /* Note: a depth of '2' is used here because the actual depth isn't
+         *      important, as long as it's > 1, to indicate a 'branch' internal
+         *      node.
+         */
         switch(subtype) {
             case H5B2_TEST_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)2);
                 break;
 
             case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)2);
                 break;
 
             case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)2);
                 break;
 
             case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)2);
                 break;
 
             case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)2);
+                break;
+
+            default:
+                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
+        } /* end switch */
+
+    } else if(!HDmemcmp(sig, H5B2_TWIG_MAGIC, H5B2_SIZEOF_MAGIC)) {
+        /*
+         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
+         * subclass.  The subclass identifier is two bytes after the
+         * B-tree signature.
+         */
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records node in order to dump internal node\n");
+            fprintf(stderr, "v2 B-tree internal node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records>\n");
+            HDexit(4);
+        } /* end if */
+
+        /* Note: a depth of '1' is used here to indicate a 'twig' internal node */
+        switch(subtype) {
+            case H5B2_TEST_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)1);
+                break;
+
+            case H5B2_FHEAP_HUGE_INDIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)1);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)1);
+                break;
+
+            case H5B2_FHEAP_HUGE_DIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)1);
+                break;
+
+            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)1);
                 break;
 
             default:

@@ -454,10 +454,9 @@ H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t UNUSED *bt2, size_t *size_ptr)
  *-------------------------------------------------------------------------
  */
 static H5B2_internal_t *
-H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_bt2_shared)
+H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata, void UNUSED *udata2)
 {
-    const unsigned      *nrec = (const unsigned *)_nrec;
-    H5RC_t 		*bt2_shared = (H5RC_t *)_bt2_shared;       /* Ref counter for shared B-tree info */
+    const H5B2_int_load_ud1_t *udata = (const H5B2_int_load_ud1_t *)_udata;     /* Pointer to user data */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     H5B2_internal_t	*internal = NULL;       /* Internal node read */
     uint8_t		*p;             /* Pointer into raw data buffer */
@@ -473,14 +472,15 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(bt2_shared);
+    HDassert(udata);
 
+    /* Allocate new internal node and reset cache info */
     if(NULL == (internal = H5FL_MALLOC(H5B2_internal_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&internal->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
-    internal->shared = bt2_shared;
+    internal->shared = udata->bt2_shared;
     H5RC_INC(internal->shared);
 
     /* Get the pointer to the shared B-tree info */
@@ -494,8 +494,14 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     p = shared->page;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
+    if(udata->depth > 1) {
+        if(HDmemcmp(p, H5B2_BRCH_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
+    } /* end if */
+    else {
+        if(HDmemcmp(p, H5B2_TWIG_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
+    } /* end else */
     p += H5B2_SIZEOF_MAGIC;
 
     /* Version */
@@ -506,16 +512,29 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
     if (*p++ != (uint8_t)shared->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
 
-    /* Allocate space for the native keys in memory */
-    if((internal->int_native = H5FL_FAC_MALLOC(shared->int_fac)) == NULL)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal native keys")
+    /* Check which kind of internal node we have */
+    if(udata->depth > 1) {
+        /* Allocate space for the native keys in memory */
+        if((internal->int_native = H5FL_FAC_MALLOC(shared->brch_fac)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal native keys")
 
-    /* Allocate space for the node pointers in memory */
-    if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->node_ptr_fac)) == NULL)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal node pointers")
+        /* Allocate space for the node pointers in memory */
+        if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->brch_node_ptr_fac)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal node pointers")
+    } /* end if */
+    else {
+        /* Allocate space for the native keys in memory */
+        if((internal->int_native = H5FL_FAC_MALLOC(shared->twig_fac)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal native keys")
 
-    /* Set the number of records in the leaf */
-    internal->nrec = *nrec;
+        /* Allocate space for the node pointers in memory */
+        if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->twig_node_ptr_fac)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal node pointers")
+    } /* end else */
+
+    /* Set the number of records in the leaf & it's depth */
+    internal->nrec = udata->nrec;
+    internal->depth = udata->depth;
 
     /* Deserialize records for internal node */
     native = internal->int_native;
@@ -535,7 +554,10 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
         /* Decode node pointer */
         H5F_addr_decode(f, (const uint8_t **)&p, &(int_node_ptr->addr));
         UINT16DECODE(p, int_node_ptr->node_nrec);
-        H5F_DECODE_LENGTH(f, p, int_node_ptr->all_nrec);
+        if(udata->depth > 1)
+            H5F_DECODE_LENGTH(f, p, int_node_ptr->all_nrec)
+        else
+            int_node_ptr->all_nrec = int_node_ptr->node_nrec;
 
         /* Move to next node pointer */
         int_node_ptr++;
@@ -604,7 +626,10 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         p = shared->page;
 
         /* Magic number */
-        HDmemcpy(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
+        if(internal->depth > 1)
+            HDmemcpy(p, H5B2_BRCH_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
+        else
+            HDmemcpy(p, H5B2_TWIG_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
         p += H5B2_SIZEOF_MAGIC;
 
         /* Version # */
@@ -631,7 +656,8 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
             /* Encode node pointer */
             H5F_addr_encode(f, &p, int_node_ptr->addr);
             UINT16ENCODE(p, int_node_ptr->node_nrec);
-            H5F_ENCODE_LENGTH(f, p, int_node_ptr->all_nrec);
+            if(internal->depth > 1)
+                H5F_ENCODE_LENGTH(f, p, int_node_ptr->all_nrec);
 
             /* Move to next node pointer */
             int_node_ptr++;
@@ -690,13 +716,25 @@ H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
     shared = H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
-    /* Release internal node's native key buffer */
-    if(internal->int_native)
-        H5FL_FAC_FREE(shared->int_fac, internal->int_native);
+    /* Check for 'branch' or 'twig' internal node */
+    if(internal->depth == 1) {
+        /* Release internal 'twig' node's native key buffer */
+        if(internal->int_native)
+            H5FL_FAC_FREE(shared->twig_fac, internal->int_native);
 
-    /* Release internal node's node pointer buffer */
-    if(internal->node_ptrs)
-        H5FL_FAC_FREE(shared->node_ptr_fac, internal->node_ptrs);
+        /* Release internal 'twig' node's node pointer buffer */
+        if(internal->node_ptrs)
+            H5FL_FAC_FREE(shared->twig_node_ptr_fac, internal->node_ptrs);
+    } /* end if */
+    else {
+        /* Release internal 'branch' node's native key buffer */
+        if(internal->int_native)
+            H5FL_FAC_FREE(shared->brch_fac, internal->int_native);
+
+        /* Release internal 'branch' node's node pointer buffer */
+        if(internal->node_ptrs)
+            H5FL_FAC_FREE(shared->brch_node_ptr_fac, internal->node_ptrs);
+    } /* end else */
 
     /* Decrement reference count on shared B-tree info */
     if(internal->shared)

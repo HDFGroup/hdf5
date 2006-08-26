@@ -44,14 +44,18 @@
 
 /* B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
-#define H5B2_INT_MAGIC                  "BTND"          /* Internal node */
+#define H5B2_BRCH_MAGIC                 "BTBR"          /* Internal "branch" node */
+#define H5B2_TWIG_MAGIC                 "BTTW"          /* Internal "twig" node */
 #define H5B2_LEAF_MAGIC                 "BTLF"          /* Leaf node */
 
 /* Size of storage for number of records per node (on disk) */
 #define H5B2_SIZEOF_RECORDS_PER_NODE    2
 
-/* Size of a "node pointer" (on disk) */
-#define H5B2_NODE_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE+H5F_SIZEOF_SIZE(f))
+/* Size of a "branch node pointer" (on disk) */
+#define H5B2_BRCH_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE+H5F_SIZEOF_SIZE(f))
+
+/* Size of a "twig node pointer" (on disk) */
+#define H5B2_TWIG_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE)
 
 /* Size of checksum information (on disk) */
 #define H5B2_SIZEOF_CHKSUM      4
@@ -75,7 +79,7 @@
     + 2 /* Depth of tree */                                                   \
     + 1 /* Split % of full (as integer, ie. "98" means 98%) */                \
     + 1 /* Merge % of full (as integer, ie. "98" means 98%) */                \
-    + H5B2_NODE_POINTER_SIZE(f)  /* Node pointer to root node in tree */      \
+    + H5B2_BRCH_POINTER_SIZE(f)  /* Node pointer to root node in tree */      \
     )
 
 /* Size of the v2 B-tree internal node prefix */
@@ -124,9 +128,11 @@ typedef struct H5B2_shared_t {
     /* Shared internal data structures */
     const H5B2_class_t	*type;	 /* Type of tree			     */
     uint8_t	        *page;	 /* Disk page */
-    H5FL_fac_head_t     *int_fac;       /* Factory for internal node native record blocks */
+    H5FL_fac_head_t     *brch_fac;      /* Factory for internal "branch" node native record blocks */
+    H5FL_fac_head_t     *twig_fac;      /* Factory for internal "twig" node native record blocks */
     H5FL_fac_head_t     *leaf_fac;      /* Factory for leaf node native record blocks */
-    H5FL_fac_head_t     *node_ptr_fac;  /* Factory for internal node node pointer blocks */
+    H5FL_fac_head_t     *brch_node_ptr_fac;  /* Factory for internal "branch" node node pointer blocks */
+    H5FL_fac_head_t     *twig_node_ptr_fac;  /* Factory for internal "twig" node node pointer blocks */
     size_t              *nat_off;       /* Array of offsets of native records */
 
     /* Information set by user */
@@ -136,9 +142,12 @@ typedef struct H5B2_shared_t {
     size_t      rrec_size;      /* Size of "raw" (on disk) record, in bytes   */
 
     /* Derived information from user's information */
-    size_t      internal_nrec;  /* Number of records which fit into an internal node */
-    size_t      split_int_nrec; /* Number of records to split an internal node at */
-    size_t      merge_int_nrec; /* Number of records to merge an internal node at */
+    size_t      branch_nrec;    /* Number of records which fit into an internal "branch" node */
+    size_t      split_brch_nrec; /* Number of records to split an internal "branch" node at */
+    size_t      merge_brch_nrec; /* Number of records to merge an internal "branch" node at */
+    size_t      twig_nrec;      /* Number of records which fit into an internal "twig" node */
+    size_t      split_twig_nrec; /* Number of records to split an internal "twig" node at */
+    size_t      merge_twig_nrec; /* Number of records to merge an internal "twig" node at */
     size_t      leaf_nrec;      /* Number of records which fit into a leaf node */
     size_t      split_leaf_nrec; /* Number of records to split a leaf node at */
     size_t      merge_leaf_nrec; /* Number of records to merge a leaf node at */
@@ -176,7 +185,15 @@ typedef struct H5B2_internal_t {
     uint8_t     *int_native;    /* Pointer to native records                  */
     H5B2_node_ptr_t *node_ptrs; /* Pointer to node pointers                   */
     unsigned    nrec;           /* Number of records in node                  */
+    unsigned    depth;          /* Depth of this node in the B-tree           */
 } H5B2_internal_t;
+
+/* User data for metadata cache 'load' callback */
+typedef struct {
+    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
+    unsigned nrec;              /* Number of records in node to load */
+    unsigned depth;             /* Depth of node to load */
+} H5B2_int_load_ud1_t;
 
 
 /*****************************/
@@ -214,6 +231,11 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 /* Routines for managing shared B-tree info */
 H5_DLL herr_t H5B2_shared_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     size_t node_size, size_t rrec_size, unsigned split_percent, unsigned merge_percent);
+
+/* Routines for operating on internal nodes */
+H5_DLL H5B2_internal_t *H5B2_protect_internal(H5F_t *f, hid_t dxpl_id,
+    H5RC_t *bt2_shared, haddr_t addr, unsigned nrec, unsigned depth,
+    H5AC_protect_t rw);
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
@@ -267,7 +289,7 @@ H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type);
 H5_DLL herr_t H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
-    haddr_t hdr_addr, unsigned nrec);
+    haddr_t hdr_addr, unsigned nrec, unsigned depth);
 H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
     haddr_t hdr_addr, unsigned nrec);

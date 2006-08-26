@@ -34,7 +34,7 @@ const char *FILENAME[] = {
 };
 
 #define INSERT_SPLIT_ROOT_NREC  80
-#define INSERT_MANY             (320*1000)
+#define INSERT_MANY             (500*1000)
 #define FIND_MANY               (INSERT_MANY/100)
 #define FIND_NEIGHBOR           1000
 #define DELETE_SMALL            10
