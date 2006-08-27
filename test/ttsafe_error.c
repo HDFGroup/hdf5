@@ -46,7 +46,7 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
-#define NUM_THREAD              16 
+#define NUM_THREAD              16
 #define FILENAME                "ttsafe_error.h5"
 
 /* Having a common dataset name is an error */
@@ -81,20 +81,20 @@ void tts_error(void)
     int ret;
 
     /* Must initialize these at runtime */
-    expected[0].maj_num = H5E_LINK;
+    expected[0].maj_num = H5E_DATASET;
     expected[0].min_num = H5E_CANTINIT;
 
-    expected[1].maj_num = H5E_LINK;
-    expected[1].min_num = H5E_CANTINIT;
+    expected[1].maj_num = H5E_SYM;
+    expected[1].min_num = H5E_EXISTS;
 
     expected[2].maj_num = H5E_SYM;
-    expected[2].min_num = H5E_CANTINSERT;
+    expected[2].min_num = H5E_NOTFOUND;
 
     expected[3].maj_num = H5E_SYM;
-    expected[3].min_num = H5E_NOTFOUND;
+    expected[3].min_num = H5E_CALLBACK;
 
     expected[4].maj_num = H5E_SYM;
-    expected[4].min_num = H5E_CALLBACK;
+    expected[4].min_num = H5E_EXISTS;
 
     expected[5].maj_num = H5E_SYM;
     expected[5].min_num = H5E_EXISTS;
@@ -165,10 +165,10 @@ void *tts_error_thread(void UNUSED *arg)
     int ret;
 
     /* preserve previous error stack handler */
-    H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data); 
 
     /* set each thread's error stack handler */
-    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL);
+    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL); 
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
