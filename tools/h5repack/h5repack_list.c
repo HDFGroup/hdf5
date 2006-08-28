@@ -47,7 +47,7 @@ int check_objects(const char* fname,
  * open the file
  *-------------------------------------------------------------------------
  */
- if ((fid=h5tools_fopen(fname, NULL, NULL, 0, argc, argv))<0){
+ if ((fid=h5tools_fopen(fname, NULL, NULL, 0))<0){
   printf("<%s>: %s\n", fname, H5FOPENERROR );
   return -1;
  }

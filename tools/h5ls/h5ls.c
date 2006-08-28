@@ -2285,7 +2285,7 @@ main (int argc, const char *argv[])
         file = -1;
 
         while (fname && *fname) {
-            file = h5tools_fopen(fname, preferred_driver, drivername, sizeof drivername, argc, argv);
+            file = h5tools_fopen(fname, preferred_driver, drivername, sizeof drivername);
 
             if (file>=0) {
                 if (verbose_g) {

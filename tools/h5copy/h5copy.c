@@ -267,7 +267,7 @@ main (int argc, const char *argv[])
  * open input file
  *-------------------------------------------------------------------------*/
  
-  fid_src = h5tools_fopen(fname_src, NULL, NULL, 0, argc, argv);
+  fid_src = h5tools_fopen(fname_src, NULL, NULL, 0);
 
 /*-------------------------------------------------------------------------
  * test for error in opening input file

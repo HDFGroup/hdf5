@@ -171,13 +171,7 @@ h5tools_close(void)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5tools_get_fapl(const char *driver, unsigned *drivernum,
-#ifdef H5_HAVE_PARALLEL
-int argc, const char *argv[]
-#else /* H5_HAVE_PARALLEL */
-int UNUSED argc, const char UNUSED *argv[]
-#endif /* H5_HAVE_PARALLEL */
-)
+h5tools_get_fapl(const char *driver, unsigned *drivernum)
 {
     hid_t               fapl = H5P_DEFAULT;
 
@@ -325,7 +319,7 @@ error:
  */
 hid_t
 h5tools_fopen(const char *fname, const char *driver, char *drivername,
-              size_t drivername_size, int argc, const char *argv[])
+              size_t drivername_size)
 {
     unsigned    drivernum;
     hid_t       fid = FAIL;
@@ -333,7 +327,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
 
     if (driver && *driver) {
         /* Get the correct FAPL for the given driver */
-        if((fapl=h5tools_get_fapl(driver,&drivernum,argc,argv))<0)
+        if((fapl=h5tools_get_fapl(driver,&drivernum))<0)
             goto done;
 
         H5E_BEGIN_TRY {
@@ -347,7 +341,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
         /* Try to open the file using each of the drivers */
         for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
             /* Get the correct FAPL for the given driver */
-            if((fapl=h5tools_get_fapl(drivernames[drivernum],NULL,argc,argv))<0)
+            if((fapl=h5tools_get_fapl(drivernames[drivernum],NULL))<0)
                 goto done;
 
             H5E_BEGIN_TRY {

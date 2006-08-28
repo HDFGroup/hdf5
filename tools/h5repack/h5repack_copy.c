@@ -177,7 +177,7 @@ int copy_objects(const char* fnamein,
  * open the files
  *-------------------------------------------------------------------------
  */
- if ((fidin=h5tools_fopen(fnamein, NULL, NULL, 0, argc, argv))<0 ){
+ if ((fidin=h5tools_fopen(fnamein, NULL, NULL, 0))<0 ){
   printf("<%s>: %s\n", fnamein, H5FOPENERROR );
   goto out;
  }
