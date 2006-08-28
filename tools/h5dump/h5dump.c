@@ -3436,7 +3436,7 @@ main(int argc, const char *argv[])
     }
     fname = argv[opt_ind];
 
-    fid = h5tools_fopen(fname, driver, NULL, 0, argc, argv);
+    fid = h5tools_fopen(fname, driver, NULL, 0);
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);
