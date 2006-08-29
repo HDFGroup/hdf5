@@ -18,9 +18,20 @@
 # the various compile modes.
 
 # Use Intel C compiler by default (if it's available).
-if test "X$CC" = "X" && which icc > /dev/null; then
-  CC=icc
-  CC_BASENAME=icc
+# Use mpicc for parallel by default.
+if test "X$CC" = "X"; then
+    if test "X-$enable_parallel" = "X-yes"; then
+	CC=mpicc
+	CC_BASENAME=mpicc
+    elif which icc > /dev/null; then
+	CC=icc
+	CC_BASENAME=icc
+    fi
+fi
+
+# Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
+if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpicc; then
+    RUNPARALLEL=${RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"}
 fi
 
 #----------------------------------------------------------------------------
@@ -51,8 +62,12 @@ esac
 # The default Fortran 90 compiler
 
 # Use Intel Fortran compiler by default.
-if test "X-$FC" = "X-"; then
-  FC="ifort"
+if test X-$enable_fortran = X-yes -a "X-$FC" = "X-"; then
+    if test "X-$enable_parallel" = "X-yes"; then
+	FC=mpif90
+    else
+	FC="ifort"
+    fi
 fi
 
 case $FC in
