@@ -30,6 +30,7 @@
 ./configure
 ./configure.in
 
+./bin/COPYING
 ./bin/buildhdf5
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
@@ -59,6 +60,7 @@
 ./bin/trace
 ./bin/yodconfigure
 
+./config/COPYING
 ./config/BlankForm
 ./config/commence.in
 ./config/conclude.in
@@ -810,6 +812,7 @@
 #
 #------------------------------------------------------------------------------
 
+./fortran/COPYING
 ./fortran/Makefile.dist
 ./fortran/Makefile.in
 ./fortran/aclocal.m4
@@ -961,6 +964,7 @@
 #
 #------------------------------------------------------------------------------
 
+./c++/COPYING
 ./c++/Makefile.in
 ./c++/aclocal.m4
 ./c++/configure
@@ -1086,6 +1090,7 @@
 #
 #------------------------------------------------------------------------------
 
+./perform/COPYING
 ./perform/Dependencies
 ./perform/Makefile.in
 ./perform/benchpar.c
@@ -1103,6 +1108,7 @@
 ./perform/pio_timer.h
 ./perform/zip_perf.c
 
+./release_docs/COPYING
 ./release_docs/INSTALL
 ./release_docs/INSTALL_TFLOPS
 ./release_docs/INSTALL_VFL
@@ -1118,6 +1124,7 @@
 ./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
+./src/COPYING
 ./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
@@ -1316,6 +1323,7 @@
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 
+./test/COPYING
 ./test/Dependencies
 ./test/Makefile.in
 ./test/big.c
@@ -1416,6 +1424,7 @@
 ./test/test_filters_le.hdf5
 
 
+./testpar/COPYING
 ./testpar/Dependencies
 ./testpar/Makefile.in
 ./testpar/t_dset.c
@@ -1430,6 +1439,7 @@
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
 
+./tools/COPYING
 ./tools/Dependencies
 ./tools/Makefile.in
 
@@ -1887,6 +1897,7 @@
 ./tools/testfiles/u513.txt
 
 # high level libraries
+./hl/COPYING
 ./hl/Makefile.in
 ./hl/examples/Dependencies
 ./hl/examples/ex_lite1.c
@@ -1910,6 +1921,7 @@
 ./hl/examples/image24pixel.txt
 ./hl/examples/image8.txt
 ./hl/examples/pal_rgb.h
+./hl/src/COPYING
 ./hl/src/Dependencies
 ./hl/src/Makefile.in
 ./hl/src/H5IM.c
@@ -1918,6 +1930,7 @@
 ./hl/src/H5LT.h
 ./hl/src/H5TA.c
 ./hl/src/H5TA.h
+./hl/test/COPYING
 ./hl/test/Dependencies
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
@@ -1926,6 +1939,7 @@
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
+./hl/tools/COPYING
 ./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Dependencies
 ./hl/tools/gif2h5/Makefile.in
@@ -1942,4 +1956,5 @@
 
 
 # windows
+./windows/COPYING
 ./windows/all.zip
