@@ -32,6 +32,7 @@
 ./configure
 ./configure.in
 
+./bin/COPYING
 ./bin/buildhdf5
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
@@ -67,6 +68,7 @@
 ./bin/trace
 ./bin/yodconfigure
 
+./config/COPYING
 ./config/BlankForm
 ./config/commence.am
 ./config/conclude.am
@@ -142,6 +144,7 @@
 #
 #------------------------------------------------------------------------------
 
+./fortran/COPYING
 ./fortran/Makefile.am
 ./fortran/Makefile.in
 
@@ -245,6 +248,7 @@
 #
 #------------------------------------------------------------------------------
 
+./c++/COPYING
 ./c++/Makefile.am
 ./c++/Makefile.in
 
@@ -344,6 +348,7 @@
 #
 #------------------------------------------------------------------------------
 
+./perform/COPYING
 ./perform/Makefile.am
 ./perform/Makefile.in
 ./perform/benchpar.c
@@ -364,6 +369,7 @@
 ./perform/pio_timer.h
 ./perform/zip_perf.c
 
+./release_docs/COPYING
 ./release_docs/HISTORY.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
@@ -386,6 +392,7 @@
 ./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
+./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
 ./src/H5dbg.c
@@ -654,6 +661,7 @@
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 
+./test/COPYING
 ./test/Makefile.am
 ./test/Makefile.in
 ./test/be_data.h5
@@ -779,6 +787,7 @@
 ./test/testfiles/error_test_1
 ./test/testfiles/error_test_2
 
+./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
@@ -796,6 +805,7 @@
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
 
+./tools/COPYING
 ./tools/Makefile.am
 ./tools/Makefile.in
 
@@ -1320,6 +1330,7 @@
 ./tools/testfiles/u513.txt
 
 # high level libraries
+./hl/COPYING
 ./hl/Makefile.am
 ./hl/Makefile.in
 ./hl/examples/Makefile.am
@@ -1347,6 +1358,7 @@
 ./hl/examples/pal_rgb.h
 ./hl/examples/ptExampleFL.c
 ./hl/examples/ptExampleVL.c
+./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DS.c
@@ -1371,6 +1383,7 @@
 ./hl/src/H5TBprivate.h
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
+./hl/test/COPYING
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/dsdata.txt
@@ -1395,6 +1408,7 @@
 ./hl/test/test_table_cray.hdf5
 ./hl/test/usa.wri
 ./hl/test/dtype_file.txt
+./hl/tools/COPYING
 ./hl/tools/Makefile.am
 ./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Makefile.am
@@ -1410,6 +1424,7 @@
 ./hl/tools/gif2h5/writehdf.c
 
 # hl fortran
+./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
 ./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
@@ -1433,6 +1448,7 @@
 ./hl/fortran/test/tsttable.f90
 
 # hl c++
+./hl/c++/COPYING
 ./hl/c++/Makefile.am
 ./hl/c++/Makefile.in
 ./hl/c++/examples/Makefile.am
@@ -1449,6 +1465,8 @@
 ./hl/c++/test/Makefile.in
 
 #vms files
+./vms/COPYING
+
 ./vms/c++/examples/check.com
 ./vms/c++/examples/make.com
 ./vms/c++/src/make.com
@@ -1489,6 +1507,7 @@
 ./vms/tools/lib/make.com
 
 #windows projects
+./windows/COPYING
 
 #windows c++ examples
 ./windows/c++/examples/allcppexamples/allcppexamples.dsp
