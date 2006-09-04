@@ -199,7 +199,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Check if we need to split the root node (equiv. to a 1->2 node split) */
     else if((bt2->depth == 0 && bt2->root.node_nrec == shared->split_leaf_nrec) ||
             (bt2->depth == 1 && bt2->root.node_nrec == shared->split_twig_nrec) ||
-            (bt2->depth > 0 && bt2->root.node_nrec == shared->split_brch_nrec)) {
+            (bt2->depth > 1 && bt2->root.node_nrec == shared->split_brch_nrec)) {
         /* Split root node */
         if(H5B2_split_root(f, dxpl_id, bt2, &bt2_flags, bt2->shared) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
@@ -303,9 +303,8 @@ done:
  * Function:	H5B2_find
  *
  * Purpose:	Locate the specified information in a B-tree and return
- *		that information by filling in fields of the caller-supplied
- *		UDATA pointer depending on the type of leaf node
- *		requested.  The UDATA can point to additional data passed
+ *		that information by calling the provided 'OP' routine with an
+ *		OP_DATA pointer.  The UDATA parameter points to data passed
  *		to the key comparison function.
  *
  *              The 'OP' routine is called with the record found and the

@@ -105,7 +105,11 @@ struct H5B2_class_t {
 
 /* v2 B-tree metadata statistics info */
 typedef struct H5B2_stat_t {
-    int none;         /* No information yet */
+    unsigned depth;             /* Depth of B-tree */
+    unsigned nrecords;          /* Number of records */
+    size_t branch_nrec;         /* Number of records which fit into an internal "branch" node */
+    size_t twig_nrec;           /* Number of records which fit into an internal "twig" node */
+    size_t leaf_nrec;           /* Number of records which fit into a leaf node */
 } H5B2_stat_t;
 
 /*****************************/

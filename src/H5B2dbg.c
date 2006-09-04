@@ -252,7 +252,10 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     bt2 = NULL;
 
     /* Print opening message */
-    HDfprintf(stream, "%*sv2 B-tree Internal Node...\n", indent, "");
+    if(internal->depth == 1)
+        HDfprintf(stream, "%*sv2 B-tree Internal 'Leaf' Node...\n", indent, "");
+    else
+        HDfprintf(stream, "%*sv2 B-tree Internal 'Branch' Node...\n", indent, "");
 
     /*
      * Print the values.

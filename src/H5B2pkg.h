@@ -138,7 +138,7 @@ typedef struct H5B2_shared_t {
     /* Information set by user */
     unsigned    split_percent;  /* Percent full at which to split the node, when inserting */
     unsigned    merge_percent;  /* Percent full at which to merge the node, when deleting */
-    size_t      node_size;      /* Size of all nodes, in bytes                */
+    size_t      node_size;      /* Size of B-tree nodes, in bytes             */
     size_t      rrec_size;      /* Size of "raw" (on disk) record, in bytes   */
 
     /* Derived information from user's information */
@@ -194,6 +194,14 @@ typedef struct {
     unsigned nrec;              /* Number of records in node to load */
     unsigned depth;             /* Depth of node to load */
 } H5B2_int_load_ud1_t;
+
+#ifdef H5B2_TESTING
+/* Node information for testing */
+typedef struct {
+    unsigned depth;             /* Depth of node */
+    unsigned nrec;              /* Number of records in node */
+} H5B2_node_info_test_t;
+#endif /* H5B2_TESTING */
 
 
 /*****************************/
@@ -298,6 +306,11 @@ H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 #ifdef H5B2_TESTING
 H5_DLL herr_t H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id,
     const H5B2_class_t *type, haddr_t addr, haddr_t *root_addr);
+H5_DLL int H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id,
+    const H5B2_class_t *type, haddr_t addr, void *udata);
+H5_DLL herr_t H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id,
+    const H5B2_class_t *type, haddr_t addr, void *udata,
+    H5B2_node_info_test_t *ninfo);
 #endif /* H5B2_TESTING */
 
 #endif /* _H5B2pkg_H */
