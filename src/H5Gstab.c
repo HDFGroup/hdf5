@@ -646,19 +646,24 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
 
             data_size =ent->cache.ulink.udata_size;
 
+            /* If there is user data, allocate space for it and copy it from the heap */
             if(data_size > 0)
             {
                 s = H5HL_offset_into(udata->file, heap, ent->cache.ulink.udata_offset);
 
-            /* Allocate space for the user data and copy it from the heap */
-            udata->lnk->u.ud.udata = H5MM_malloc(data_size);
-            HDmemcpy(udata->lnk->u.ud.udata, s, data_size);
+                udata->lnk->u.ud.udata = H5MM_malloc(data_size);
+                HDmemcpy(udata->lnk->u.ud.udata, s, data_size);
             } /* end if */
+            else
+                udata->lnk->u.ud.udata = NULL;
 
             /* Release the local heap */
             if(H5HL_unprotect(udata->file, udata->dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+            {
+                /* Release allocated memory before exiting */
+                H5MM_free(udata->lnk->u.ud.udata);
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
-
+            }
             /* Set link size and type */
             udata->lnk->u.ud.size = data_size;
             udata->lnk->type = ent->cache.ulink.link_type;

@@ -165,7 +165,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
             p += len;
             break;
 
-        /* User-defined linkes */
+        /* User-defined links */
         default:
             if(lnk->type < H5L_LINK_UD_MIN || lnk->type > H5L_LINK_MAX)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown link type")
@@ -180,6 +180,8 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
                 HDmemcpy(lnk->u.ud.udata, p, len);
                 p += len;
             }
+            else
+                lnk->u.ud.udata = NULL;
     } /* end switch */
 
     /* Set return value */
@@ -192,6 +194,8 @@ done:
                 H5MM_xfree(lnk->name);
             if(lnk->type == H5L_LINK_SOFT && lnk->u.soft.name != NULL)
                 H5MM_xfree(lnk->u.soft.name);
+            if(lnk->type >= H5L_LINK_UD_MIN && lnk->u.ud.size > 0 && lnk->u.ud.udata != NULL)
+                H5MM_xfree(lnk->u.ud.udata);
             H5FL_FREE(H5O_link_t, lnk);
         } /* end if */
 
@@ -323,7 +327,7 @@ H5O_link_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     if(lnk->type == H5L_LINK_SOFT)
         dest->u.soft.name = H5MM_xstrdup(lnk->u.soft.name);
     else if(lnk->type >= H5L_LINK_UD_MIN) {
-        if(lnk->u.ud.size != 0)
+        if(lnk->u.ud.size > 0)
         {
             if(NULL == (dest->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -601,8 +605,8 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
         default:
           if(link_src->type >= H5L_LINK_UD_MIN)
           {
-            /* Copy the user-defined link's user data */
-            if(link_src->u.ud.size != 0)
+            /* Copy the user-defined link's user data if it exists */
+            if(link_src->u.ud.size > 0)
             {
                 if(NULL == (link_dst->u.ud.udata = H5MM_malloc(link_src->u.ud.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")

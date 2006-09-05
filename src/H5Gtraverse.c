@@ -555,6 +555,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             /* Free information for link (but don't free link pointer) */
             if(lnk.type == H5L_LINK_SOFT)
                 lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
+            else if(lnk.type >= H5L_LINK_UD_MIN && lnk.u.ud.size > 0)
+                lnk.u.ud.udata = H5MM_xfree(lnk.u.ud.udata);
             lnk.name = H5MM_xfree(lnk.name);
 #endif /* H5_GROUP_REVISION */
             link_valid = FALSE;
@@ -751,6 +753,8 @@ done:
         /* Free information for link (but don't free link pointer) */
         if(lnk.type == H5L_LINK_SOFT)
             lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
+        else if(lnk.type >= H5L_LINK_UD_MIN && lnk.u.ud.size > 0)
+            lnk.u.ud.udata = H5MM_xfree(lnk.u.ud.udata);
         lnk.name = H5MM_xfree(lnk.name);
 #endif /* H5_GROUP_REVISION */
     } /* end if */

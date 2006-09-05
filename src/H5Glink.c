@@ -334,10 +334,15 @@ H5G_link_convert(H5O_link_t *lnk, const H5G_entry_t *ent, const H5HL_t *heap,
                 s = H5HL_offset_into(ent->file, heap, ent->cache.ulink.udata_offset);
                 HDassert(s);
 
-                /* Read udata from heap */
-                if(NULL== (lnk->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
-                  HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for user link data")
-                HDmemcpy(lnk->u.ud.udata, s, lnk->u.ud.size);
+                /* Read udata from heap if it exists */
+                if(lnk->u.ud.size > 0)
+                {
+                    if(NULL== (lnk->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
+                      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for user link data")
+                    HDmemcpy(lnk->u.ud.udata, s, lnk->u.ud.size);
+                }
+                else
+                    lnk->u.ud.udata = NULL;
             }
             break;
 

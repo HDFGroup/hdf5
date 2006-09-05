@@ -1441,6 +1441,9 @@ H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, void * ud_data,
     HDassert(ud_data_size >= 0);
     HDassert(ud_data_size == 0 || ud_data);
 
+    /* Initialize the link struct's pointer to its udata buffer */
+    lnk.u.ud.udata = NULL;
+
     /* Make sure that this link class is registered */
     if(H5L_find_class_idx(type) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "link class has not been registered with library")
@@ -1463,6 +1466,9 @@ H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, void * ud_data,
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to register new name for object")
 
 done:
+    /* Free the link's udata buffer if it's been allocated */
+    H5MM_xfree(lnk.u.ud.udata);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_create_ud() */
 
@@ -1740,7 +1746,8 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *l
 
     /* Give the object its new name */
     /* Casting away const okay -JML */
-    udata->lnk->name = H5MM_xfree(udata->lnk->name);
+    HDassert(udata->lnk->name == NULL);
+/* JAMES    udata->lnk->name = H5MM_xfree(udata->lnk->name); */
     udata->lnk->name= (char *)name;
 
     /* Insert the link into the group */
@@ -1837,6 +1844,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_obj_t type;               /* Type of object being moved */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     char * orig_name = NULL;            /* The name of the link in this group */
+    hbool_t link_copied = FALSE;        /* Has udata_out.lnk been allocated? */
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_move_cb)
@@ -1869,6 +1877,12 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     /* Set up user data for move_dest_cb */
     if((udata_out.lnk = H5O_link_copy(lnk, NULL, 0)) == NULL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved");
+    /* In this special case, the link's name is going to be replaced at its
+     * destination, so we should free it here.
+     */
+    udata_out.lnk->name = H5MM_xfree(udata_out.lnk->name);
+    link_copied = TRUE;
+
     udata_out.lnk->cset = udata->cset;
     udata_out.file = grp_loc->oloc->file;
     udata_out.copy = udata->copy;
@@ -1893,12 +1907,27 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
         /* Remove the old link */
         if(H5G_obj_remove(grp_loc->oloc, orig_name, &type, udata->dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to remove old name")
+        H5RS_decr(dst_name_r);
     }
 
 done:
         /* Cleanup */
     if(orig_name)
         H5MM_xfree(orig_name);
+
+    /* If udata_out.lnk was copied, free any memory allocated
+     * In this special case, the H5L_move_dest_cb callback frees the name
+     * if it succeeds
+     */
+    if(link_copied)
+    {
+        if(udata_out.lnk->type == H5L_LINK_SOFT)
+            udata_out.lnk->u.soft.name = H5MM_xfree(udata_out.lnk->u.soft.name);
+        else if(udata_out.lnk->type >= H5L_LINK_UD_MIN && udata_out.lnk->u.ud.size > 0)
+            udata_out.lnk->u.ud.udata = H5MM_xfree(udata_out.lnk->u.ud.udata);
+ /* JAMES: the dest_cb already frees the link name.  Hmm. */
+        H5MM_xfree(udata_out.lnk);
+    }
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
