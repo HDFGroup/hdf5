@@ -48,12 +48,14 @@
 #define H5FS_HDR_MAGIC                  "FSHD"          /* Header */
 #define H5FS_SINFO_MAGIC                "FSSE"          /* Serialized sections */
 
+/* Size of checksum information (on disk) */
+#define H5FS_SIZEOF_CHKSUM      4
+
 /* "Standard" size of prefix information for free space metadata */
 #define H5FS_METADATA_PREFIX_SIZE (                                           \
-    4   /* Signature */                                                       \
+    H5FS_SIZEOF_MAGIC   /* Signature */                                       \
     + 1 /* Version */                                                         \
-    + 1 /* Metadata flags */                                                  \
-    + 4 /* Metadata checksum */                                               \
+    + H5FS_SIZEOF_CHKSUM /* Metadata checksum */                              \
     )
 
 /* Size of the fractal heap header on disk */

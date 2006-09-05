@@ -222,7 +222,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int indent, int fwidth,
     haddr_t fs_addr, haddr_t client_addr)
 {
     H5FS_t	*fspace = NULL;         /* Free space header info */

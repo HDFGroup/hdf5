@@ -154,7 +154,7 @@ HDfprintf(stderr, "%s: sinfo->sect_off_size = %u, sinfo->sect_len_size = %u\n", 
 #endif /* QAK */
 
     /* Allocate space for the section size bins */
-    if(NULL == (sinfo->bins = H5FL_SEQ_CALLOC(H5FS_bin_t, sinfo->nbins)))
+    if(NULL == (sinfo->bins = H5FL_SEQ_CALLOC(H5FS_bin_t, (size_t)sinfo->nbins)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space section bin array")
 
     /* Set return value */
@@ -662,7 +662,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
     bin = H5V_log2_gen(sect->size);
     HDassert(bin < sinfo->nbins);
     if(sinfo->bins[bin].bin_list == NULL) {
-        if(NULL == (sinfo->bins[bin].bin_list = H5SL_create(H5SL_TYPE_HSIZE, 0.5, H5FS_DEFAULT_SKIPLIST_HEIGHT)))
+        if(NULL == (sinfo->bins[bin].bin_list = H5SL_create(H5SL_TYPE_HSIZE, 0.5, (size_t)H5FS_DEFAULT_SKIPLIST_HEIGHT)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTCREATE, FAIL, "can't create skip list for free space nodes")
     } /* end if */
     else {
@@ -679,7 +679,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
         /* Initialize the free list size node */
         fspace_node->sect_size = sect->size;
         fspace_node->serial_count = fspace_node->ghost_count = 0;
-        if(NULL == (fspace_node->sect_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, H5FS_DEFAULT_SKIPLIST_HEIGHT)))
+        if(NULL == (fspace_node->sect_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)H5FS_DEFAULT_SKIPLIST_HEIGHT)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTCREATE, FAIL, "can't create skip list for free space nodes")
 
         /* Insert new free space size node into bin's list */
@@ -759,7 +759,7 @@ H5FS_sect_link_rest(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, const H5FS_section_
 HDfprintf(stderr, "%s: inserting object into merge list, sect->type = %u\n", FUNC, (unsigned)sect->type);
 #endif /* QAK */
         if(fspace->sinfo->merge_list == NULL)
-            if(NULL == (fspace->sinfo->merge_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, H5FS_DEFAULT_SKIPLIST_HEIGHT)))
+            if(NULL == (fspace->sinfo->merge_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)H5FS_DEFAULT_SKIPLIST_HEIGHT)))
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTCREATE, FAIL, "can't create skip list for merging free space sections")
         if(H5SL_insert(fspace->sinfo->merge_list, sect, &sect->addr) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space node into merging skip list")
@@ -1366,7 +1366,6 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
     } /* end if */
     else {
         size_t decrease_threshold;      /* Size threshold for decreasing serialized section size */
-        size_t new_size;                /* New size of space for serialized sections */
         haddr_t old_addr;               /* Old address of serialized sections */
 
         /* Compute the threshold for decreasing the sections' serialized size */
@@ -1374,6 +1373,8 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
 
         if(fspace->alloc_sect_size > H5FS_SINFO_SIZE_DEFAULT &&
                 fspace->sect_size < decrease_threshold) {
+            size_t new_size = 0;        /* New size of space for serialized sections */
+
 /* Currently, the old block data is "thrown away" after the space is reallocated,
  * so avoid data copy in H5MF_realloc() call by just free'ing the space and
  * allocating new space.
@@ -1727,7 +1728,7 @@ HDfprintf(stderr, "%s: to_mergable = %u\n", FUNC, to_mergable);
 HDfprintf(stderr, "%s: inserting object into merge list, sect->type = %u\n", FUNC, (unsigned)sect->type);
 #endif /* QAK */
             if(fspace->sinfo->merge_list == NULL)
-                if(NULL == (fspace->sinfo->merge_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, H5FS_DEFAULT_SKIPLIST_HEIGHT)))
+                if(NULL == (fspace->sinfo->merge_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)H5FS_DEFAULT_SKIPLIST_HEIGHT)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTCREATE, FAIL, "can't create skip list for merging free space sections")
             if(H5SL_insert(fspace->sinfo->merge_list, sect, &sect->addr) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space node into merging skip list")

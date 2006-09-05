@@ -147,7 +147,8 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_fs_prot,
     size_t		size;           /* Header size */
     uint8_t		*buf = NULL;    /* Temporary buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
-    uint32_t            metadata_chksum;        /* Metadata checksum value */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
     H5FS_t		*ret_value;     /* Return value */
 
@@ -182,24 +183,13 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5FS_HDR_MAGIC, H5FS_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5FS_HDR_MAGIC, (size_t)H5FS_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     p += H5FS_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5FS_HDR_VERSION)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
-
-    /* Metadata flags (unused, currently) */
-/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
-    if(*p++ != 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown metadata flag in free space header")
-
-    /* Metadata checksum (unused, currently) */
-    UINT32DECODE(p, metadata_chksum);
-/* XXX: Verify checksum */
-    if(metadata_chksum != 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect metadata checksum for free space header")
 
     /* Client ID */
     fspace->client = *p++;
@@ -244,7 +234,17 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     /* Allocated size of serialized free space sections */
     H5F_DECODE_LENGTH(f, p, fspace->alloc_sect_size);
 
+    /* Compute checksum on indirect block */
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
     HDassert((size_t)(p - buf) == size);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Set return value */
     ret_value = fspace;
@@ -290,6 +290,7 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
     if(fspace->cache_info.is_dirty) {
         uint8_t	*buf = NULL;        /* Temporary raw data buffer */
         uint8_t *p;                 /* Pointer into raw data buffer */
+        uint32_t metadata_chksum;       /* Computed metadata checksum value */
         size_t	size;               /* Header size on disk */
 
         /* Compute the size of the free space header on disk */
@@ -302,20 +303,11 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5FS_HDR_MAGIC, H5FS_SIZEOF_MAGIC);
+        HDmemcpy(p, H5FS_HDR_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
         p += H5FS_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5FS_HDR_VERSION;
-
-        /* Metadata status flags */
-/* XXX: Set this? */
-        *p++ = 0;
-
-        /* Metadata checksum */
-/* XXX: Set this!  (After all the metadata is in the buffer) */
-        HDmemset(p, 0, 4);
-        p += 4;
 
         /* Client ID */
         *p++ = fspace->client;
@@ -355,6 +347,12 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
 
         /* Allocated size of serialized free space sections */
         H5F_ENCODE_LENGTH(f, p, fspace->alloc_sect_size);
+
+        /* Compute checksum */
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
 
 	/* Write the free space header. */
         HDassert((size_t)(p - buf) == size);
@@ -474,7 +472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr)
+H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t UNUSED *fspace, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_size)
 
@@ -513,7 +511,8 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *
     size_t              old_sect_size;  /* Old section size */
     uint8_t		*buf = NULL;    /* Temporary buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
-    uint32_t            metadata_chksum;        /* Metadata checksum value */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
     H5FS_sinfo_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_load)
@@ -535,6 +534,10 @@ HDfprintf(stderr, "%s: Load free space sections, addr = %a\n", FUNC, addr);
     HDassert(fspace->sinfo == NULL);
     fspace->sinfo = sinfo;
 
+    /* Sanity check address */
+    if(H5F_addr_ne(addr, fspace->sect_addr))
+	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect address for free space sections")
+
     /* Allocate space for the buffer to serialize the sections into */
     old_sect_size = fspace->sect_size;
 #ifdef QAK
@@ -551,24 +554,13 @@ HDfprintf(stderr, "%s: fspace->sect_size = %Hu\n", FUNC, fspace->sect_size);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5FS_SINFO_MAGIC, H5FS_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5FS_SINFO_MAGIC, (size_t)H5FS_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
     p += H5FS_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5FS_SINFO_VERSION)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version")
-
-    /* Metadata flags (unused, currently) */
-/* XXX: Plan out metadata flags (including "read-only duplicate" feature) */
-    if(*p++ != 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown metadata flag in free space sections")
-
-    /* Metadata checksum (unused, currently) */
-    UINT32DECODE(p, metadata_chksum);
-/* XXX: Verify checksum */
-    if(metadata_chksum != 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect metadata checksum for free space sections")
 
     /* Address of free space header for these sections */
     H5F_addr_decode(f, &p, &fs_addr);
@@ -665,16 +657,29 @@ HDfprintf(stderr, "%s: fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, sect_typ
                     if(H5FS_sect_add(f, dxpl_id, fspace, new_sect, H5FS_ADD_DESERIALIZING, NULL) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL, "can't add section to free space manager")
             } /* end for */
-        } while(p < (buf + old_sect_size));
+        } while(p < ((buf + old_sect_size) - H5FS_SIZEOF_CHKSUM));
 
         /* Sanity check */
-        HDassert((size_t)(p - buf) == old_sect_size);
+        HDassert((size_t)(p - buf) == (old_sect_size - H5FS_SIZEOF_CHKSUM));
         HDassert(old_sect_size == fspace->sect_size);
         HDassert(old_tot_sect_count == fspace->tot_sect_count);
         HDassert(old_serial_sect_count == fspace->serial_sect_count);
         HDassert(old_ghost_sect_count == fspace->ghost_sect_count);
         HDassert(old_tot_space == fspace->tot_space);
     } /* end if */
+
+    /* Compute checksum on indirect block */
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
+    /* Sanity check */
+    HDassert((size_t)(p - buf) == old_sect_size);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Set return value */
     ret_value = sinfo;
@@ -837,7 +842,12 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         H5FS_iter_ud_t udata;       /* User data for callbacks */
         uint8_t	*buf = NULL;        /* Temporary raw data buffer */
         uint8_t *p;                 /* Pointer into raw data buffer */
+        uint32_t metadata_chksum;   /* Computed metadata checksum value */
         unsigned bin;               /* Current bin we are on */
+
+        /* Sanity check address */
+        if(H5F_addr_ne(addr, sinfo->fspace->sect_addr))
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "incorrect address for free space sections")
 
         /* Allocate temporary buffer */
         if((buf = H5FL_BLK_MALLOC(sect_block, (size_t)sinfo->fspace->sect_size)) == NULL)
@@ -846,20 +856,11 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5FS_SINFO_MAGIC, H5FS_SIZEOF_MAGIC);
+        HDmemcpy(p, H5FS_SINFO_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
         p += H5FS_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5FS_SINFO_VERSION;
-
-        /* Metadata status flags */
-/* XXX: Set this? */
-        *p++ = 0;
-
-        /* Metadata checksum */
-/* XXX: Set this!  (After all the metadata is in the buffer) */
-        HDmemset(p, 0, 4);
-        p += 4;
 
         /* Address of free space header for these sections */
 #ifdef QAK
@@ -887,6 +888,12 @@ HDfprintf(stderr, "%s: Serializing section bins\n", FUNC);
                     HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes")
             } /* end if */
         } /* end for */
+
+        /* Compute checksum */
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
 
         /* Sanity check */
         HDassert((size_t)(p - buf) == sinfo->fspace->sect_size);
