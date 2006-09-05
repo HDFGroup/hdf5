@@ -42,16 +42,6 @@
 /* Local Macros */
 /****************/
 
-/* Number of records that fit into internal "branch" node */
-/* (accounts for extra node pointer by counting it in with the prefix bytes) */
-#define H5B2_NUM_BRCH_REC(f, n, r) \
-    (((n) - (H5B2_INT_PREFIX_SIZE + H5B2_BRCH_POINTER_SIZE(f))) / ((r) + H5B2_BRCH_POINTER_SIZE(f)))
-
-/* Number of records that fit into internal "twig" node */
-/* (accounts for extra node pointer by counting it in with the prefix bytes) */
-#define H5B2_NUM_TWIG_REC(f, n, r) \
-    (((n) - (H5B2_INT_PREFIX_SIZE + H5B2_TWIG_POINTER_SIZE(f))) / ((r) + H5B2_TWIG_POINTER_SIZE(f)))
-
 /* Number of records that fit into internal node */
 /* (accounts for extra node pointer by counting it in with the prefix bytes) */
 #define H5B2_NUM_INT_REC(f, s, d) \
@@ -2027,14 +2017,14 @@ H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Allocate space for the native keys in memory */
     if((internal->int_native = H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal 'twig' native keys")
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
 #ifdef H5_USING_PURIFY
 HDmemset(internal->int_native, 0, shared->type->nrec_size * shared->node_info[depth].max_nrec);
 #endif /* H5_USING_PURIFY */
 
     /* Allocate space for the node pointers in memory */
     if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal 'twig' node pointers")
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
 #ifdef H5_USING_PURIFY
 HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (shared->node_info[depth].max_nrec + 1));
 #endif /* H5_USING_PURIFY */
