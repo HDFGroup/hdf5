@@ -92,7 +92,7 @@
     H5B2_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Header specific fields */                                              \
-    + 1 /* Tree type */                                                       \
+    /* <none> */                                                              \
     )
 
 /* Size of the v2 B-tree leaf node prefix */
@@ -101,7 +101,7 @@
     H5B2_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Header specific fields */                                              \
-    + 1 /* Tree type */                                                       \
+    /* <none> */                                                              \
     )
 
 /* Macro to retrieve pointer to i'th native record for native record buffer */
