@@ -51,13 +51,19 @@ test_chksum_size_one(void)
     uint32_t chksum;    /* Checksum value */
 
     /* Buffer w/real data */
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0x17001700, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0x17001700, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xfa2568b7, "H5_checksum_crc");
 
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xfa60fb57, "H5_checksum_crc");
 } /* test_chksum_size_one() */
 
 
@@ -73,13 +79,19 @@ test_chksum_size_two(void)
     uint32_t chksum;                    /* Checksum value */
 
     /* Buffer w/real data */
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0x17bb17bb, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0x17bb17bb, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xfc856608, "H5_checksum_crc");
 
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xfc7e9b20, "H5_checksum_crc");
 } /* test_chksum_size_two() */
 
 
@@ -95,13 +107,19 @@ test_chksum_size_three(void)
     uint32_t chksum;                    /* Checksum value */
 
     /* Buffer w/real data */
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0x917679bb, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0x917679bb, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xfebc5d70, "H5_checksum_crc");
 
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xf9cc4c7a, "H5_checksum_crc");
 } /* test_chksum_size_three() */
 
 
@@ -117,13 +135,19 @@ test_chksum_size_four(void)
     uint32_t chksum;                    /* Checksum value */
 
     /* Buffer w/real data */
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0x924f7a94, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0x924f7a94, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xff398a46, "H5_checksum_crc");
 
     /* Buffer w/zero(s) for data */
     HDmemset(buf, 0, sizeof(buf));
-    chksum = H5_fletcher32(buf, sizeof(buf));
-    VERIFY(chksum, 0, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(buf, sizeof(buf));
+    VERIFY(chksum, 0, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(buf, sizeof(buf));
+    VERIFY(chksum, 0xff117081, "H5_checksum_crc");
 } /* test_chksum_size_four() */
 
 
@@ -143,13 +167,19 @@ test_chksum_large(void)
         large_buf[u] = u * 3;
 
     /* Buffer w/real data */
-    chksum = H5_fletcher32(large_buf, sizeof(large_buf));
-    VERIFY(chksum, 0x85b4e2a, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(large_buf, sizeof(large_buf));
+    VERIFY(chksum, 0x85b4e2a, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
+    VERIFY(chksum, 0xfbd0f7c0, "H5_checksum_crc");
 
     /* Buffer w/zero(s) for data */
     HDmemset(large_buf, 0, sizeof(large_buf));
-    chksum = H5_fletcher32(large_buf, sizeof(large_buf));
-    VERIFY(chksum, 0, "H5_fletcher32");
+    chksum = H5_checksum_fletcher32(large_buf, sizeof(large_buf));
+    VERIFY(chksum, 0, "H5_checksum_fletcher32");
+
+    chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
+    VERIFY(chksum, 0xfac8b4c4, "H5_checksum_crc");
 } /* test_chksum_large() */
 
 
@@ -162,7 +192,7 @@ void
 test_checksum(void)
 {
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing checksum algorithm\n"));
+    MESSAGE(5, ("Testing checksum algorithms\n"));
 
     /* Various checks for fletcher32 checksum algorithm */
     test_chksum_size_one();		/* Test buffer w/only 1 byte */

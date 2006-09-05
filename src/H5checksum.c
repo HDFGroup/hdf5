@@ -38,6 +38,10 @@
 /* Local Macros */
 /****************/
 
+/* Polynomial quotient */
+/* (same as the IEEE 802.3 (Ethernet) quotient) */
+#define H5_CRC_QUOTIENT 0x04C11DB7
+
 
 /******************/
 /* Local Typedefs */
@@ -68,10 +72,16 @@
 /* Local Variables */
 /*******************/
 
+/* Table of CRCs of all 8-bit messages. */
+static uint32_t H5_crc_table[256];
+
+/* Flag: has the table been computed? */
+static hbool_t H5_crc_table_computed = FALSE;
+
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_fletcher32
+ * Function:	H5_checksum_fletcher32
  *
  * Purpose:	This routine provides a generic, fast checksum algorithm for
  *              use in the library.
@@ -80,7 +90,11 @@
  *                  http://en.wikipedia.org/wiki/Fletcher%27s_checksum
  *              for more details, etc.
  *
- * Note #2:     The algorithm below differs from that given in the Wikipedia
+ * Note #2:     Per the information in RFC 3309:
+ *                      (http://tools.ietf.org/html/rfc3309)
+ *              Fletcher's checksum is not reliable for small buffers.
+ *
+ * Note #3:     The algorithm below differs from that given in the Wikipedia
  *              page by copying the data into 'sum1' in a more portable way
  *              and also by initializing 'sum1' and 'sum2' to 0 instead of
  *              0xffff (for backward compatibility reasons, mostly).
@@ -93,13 +107,13 @@
  *-------------------------------------------------------------------------
  */
 uint32_t
-H5_fletcher32(const void *_data, size_t _len)
+H5_checksum_fletcher32(const void *_data, size_t _len)
 {
     const uint8_t *data = (const uint8_t *)_data;  /* Pointer to the data to be summed */
     size_t len = _len / 2;      /* Length in 16-bit words */
     uint32_t sum1 = 0, sum2 = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_fletcher32)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_fletcher32)
 
     /* Sanity check */
     HDassert(_data);
@@ -134,7 +148,107 @@ H5_fletcher32(const void *_data, size_t _len)
     sum2 = (sum2 & 0xffff) + (sum2 >> 16);
 
     FUNC_LEAVE_NOAPI((sum2 << 16) | sum1)
-} /* end H5_fletcher32() */
+} /* end H5_checksum_fletcher32() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_checksum_crc_make_table
+ *
+ * Purpose:	Compute the CRC table for the CRC checksum algorithm
+ *
+ * Return:	none
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, September  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5_checksum_crc_make_table(void)
+{
+    uint32_t c;         /* Checksum for each byte value */
+    unsigned n, k;      /* Local index variables */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_crc_make_table)
+
+    /* Compute the checksum for each possible byte value */
+    for(n = 0; n < 256; n++) {
+        c = (uint32_t) n;
+        for(k = 0; k < 8; k++)
+            if(c & 1)
+                c = H5_CRC_QUOTIENT ^ (c >> 1);
+            else
+                c = c >> 1;
+        H5_crc_table[n] = c;
+    }
+    H5_crc_table_computed = TRUE;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5_checksum_crc_make_table() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_checksum_crc_make_table
+ *
+ * Purpose:	Update a running CRC with the bytes buf[0..len-1]--the CRC
+ *              should be initialized to all 1's, and the transmitted value
+ *              is the 1's complement of the final running CRC (see the
+ *              H5_checksum_crc() routine below)).
+ *
+ * Return:	32-bit CRC checksum of input buffer (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, September  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static uint32_t
+H5_checksum_crc_update(uint32_t crc, const uint8_t *buf, size_t len)
+{
+    size_t n;           /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_crc_update)
+
+    /* Initialize the CRC table if necessary */
+    if(!H5_crc_table_computed)
+        H5_checksum_crc_make_table();
+
+    /* Update the CRC with the results from this buffer */
+    for(n = 0; n < len; n++)
+        crc = H5_crc_table[(crc ^ buf[n]) & 0xff] ^ (crc >> 8);
+
+    FUNC_LEAVE_NOAPI(crc)
+} /* end H5_checksum_crc_update() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_checksum_crc
+ *
+ * Purpose:	This routine provides a generic checksum algorithm for
+ *              use in the library.
+ *
+ * Note:        This algorithm was based on the implementation described
+ *              in the document describing the PNG image format:
+ *                  http://www.w3.org/TR/PNG/#D-CRCAppendix
+ *
+ * Return:	32-bit CRC checksum of input buffer (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, September  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t
+H5_checksum_crc(const void *_data, size_t len)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_crc)
+
+    /* Sanity check */
+    HDassert(_data);
+    HDassert(len > 0);
+
+    FUNC_LEAVE_NOAPI(H5_checksum_crc_update((uint32_t)0xffffffffL, (const uint8_t *)_data, len) ^ 0xffffffffL)
+} /* end H5_checksum_crc() */
 
 
 /*-------------------------------------------------------------------------
@@ -163,10 +277,11 @@ H5_checksum_metadata(const void *data, size_t len)
     HDassert(len > 0);
 
     /* Choose the appropriate checksum routine */
-    /* (use fletcher32 for everything right now, but will probably go
-     *  with a CRC algorithm for "shorter" pieces of metadata eventually)
-     */
-    chksum = H5_fletcher32(data, len);
+    /* (use Fletcher's checksum for "larger" buffers and CRC for "shorter" ones) */
+    if(len < 256)
+        chksum = H5_checksum_crc(data, len);
+    else
+        chksum = H5_checksum_fletcher32(data, len);
 
     FUNC_LEAVE_NOAPI(chksum)
 } /* end H5_checksum_metadata() */

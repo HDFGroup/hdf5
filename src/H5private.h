@@ -1447,7 +1447,8 @@ H5_DLL int H5T_term_interface(void);
 H5_DLL int H5Z_term_interface(void);
 
 /* Checksum functions */
-H5_DLL uint32_t H5_fletcher32(const void *data, size_t len);
+H5_DLL uint32_t H5_checksum_fletcher32(const void *data, size_t len);
+H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len);
 
 /* Functions for debugging */

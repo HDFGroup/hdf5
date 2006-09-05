@@ -102,7 +102,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             UINT32DECODE(tmp_src, stored_fletcher);
 
             /* Compute checksum (can't fail) */
-            fletcher = H5_fletcher32(src, src_nbytes);
+            fletcher = H5_checksum_fletcher32(src, src_nbytes);
 
             /* The reversed checksum.  There was a bug in the calculating code of
              * the Fletcher32 checksum in the library before v1.6.3.  The checksum
@@ -136,7 +136,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         unsigned char *dst;     /* Temporary pointer to destination buffer */
 
         /* Compute checksum (can't fail) */
-        fletcher = H5_fletcher32(src, nbytes);
+        fletcher = H5_checksum_fletcher32(src, nbytes);
 
 	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")
