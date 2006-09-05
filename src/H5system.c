@@ -567,7 +567,8 @@ HDremove_all(char *fname)
     if(_fname) {
         HDstrcpy(_fname, fname);
         HDstrcat(_fname,";*");
-        HDremove(_fname);
+        /* Do not use HDremove; function becomes recursive (see H5private.h file)*/
+        remove(_fname);
         H5MM_xfree(_fname);
         ret_value = 0;
     }
