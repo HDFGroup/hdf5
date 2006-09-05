@@ -34,7 +34,7 @@ const char *FILENAME[] = {
 };
 
 #define INSERT_SPLIT_ROOT_NREC  63
-#define INSERT_MANY             (500*1000)
+#define INSERT_MANY             (1000*1000)
 #define FIND_MANY               (INSERT_MANY/100)
 #define FIND_NEIGHBOR           2000
 #define DELETE_SMALL            20
@@ -710,7 +710,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_2leaf_split
+ * Function:	test_insert_level1_side_split
  *
  * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
@@ -728,7 +728,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_insert_level1_2leaf_split(hid_t fapl)
+test_insert_level1_side_split(hid_t fapl)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -752,7 +752,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree
      */
-    TESTING("B-tree insert: split 1 leaf to 2 in level 1 B-tree (l->r)");
+    TESTING("B-tree insert: split side leaf into 2 leaves in level 1 B-tree (l->r)");
 
     /*
      * Create v2 B-tree
@@ -810,7 +810,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree
      */
-    TESTING("B-tree insert: split 1 leaf to 2 in level 1 B-tree (r->l)");
+    TESTING("B-tree insert: split side leaf into 2 leaves in level 1 B-tree (r->l)");
 
     /*
      * Create v2 B-tree
@@ -876,7 +876,7 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
-} /* test_insert_level1_2leaf_split() */
+} /* test_insert_level1_side_split() */
 
 
 /*-------------------------------------------------------------------------
@@ -1028,7 +1028,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_3leaf_split
+ * Function:	test_insert_level1_middle_split
  *
  * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
@@ -1047,7 +1047,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_insert_level1_3leaf_split(hid_t fapl)
+test_insert_level1_middle_split(hid_t fapl)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1072,7 +1072,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree
      */
-    TESTING("B-tree insert: split 3 leaves to 4 in level 1 B-tree");
+    TESTING("B-tree insert: split middle leaf into 2 leaves in level 1 B-tree");
 
     /*
      * Create v2 B-tree
@@ -1114,17 +1114,17 @@ test_insert_level1_3leaf_split(hid_t fapl)
         TEST_ERROR
     if(bt2_stat.nrecords != (3 * INSERT_SPLIT_ROOT_NREC))
         TEST_ERROR
-    record = ((3 * INSERT_SPLIT_ROOT_NREC) / 4) - 1;
+    record = 62;
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = (2 * ((3 * INSERT_SPLIT_ROOT_NREC) / 4)) - 1;
+    record = 94;
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 3 * ((3 * INSERT_SPLIT_ROOT_NREC) / 4);
+    record = 126;
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
@@ -1152,7 +1152,7 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
-} /* test_insert_level1_3leaf_split() */
+} /* test_insert_level1_middle_split() */
 
 
 /*-------------------------------------------------------------------------
@@ -1211,7 +1211,7 @@ test_insert_make_level2(hid_t fapl)
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-    for(; u < ((INSERT_SPLIT_ROOT_NREC * 27) + 1); u++) {
+    for(; u < ((INSERT_SPLIT_ROOT_NREC * 29) + 1); u++) {
         record = u + 4;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -1222,9 +1222,9 @@ test_insert_make_level2(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 27) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 29) + 1))
         TEST_ERROR
-    record = 885;
+    record = 948;
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1253,11 +1253,11 @@ test_insert_make_level2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 27) + 5))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 29) + 5))
         TEST_ERROR
 
     /* Attempt to find non-existant record in level-2 B-tree */
-    idx = INSERT_SPLIT_ROOT_NREC * 28;
+    idx = INSERT_SPLIT_ROOT_NREC * 30;
     H5E_BEGIN_TRY {
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
@@ -1266,12 +1266,12 @@ test_insert_make_level2(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to find existant record in root of level-2 B-tree */
-    idx = 885;
+    idx = 948;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
-    record = 885;
+    record = 948;
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1304,15 +1304,15 @@ test_insert_make_level2(hid_t fapl)
     /* Attempt to index non-existant record in level-2 B-tree */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC * 28), find_cb, NULL);
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC * 30), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
         TEST_ERROR
 
     /* Attempt to index existing record in root of level-2 B-tree */
-    idx = 885;
-    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)885, find_cb, &idx) < 0)
+    idx = 948;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)948, find_cb, &idx) < 0)
         FAIL_STACK_ERROR
 
     /* Attempt to index existing record in internal node of level-2 B-tree */
@@ -1398,8 +1398,8 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-    for(; u < ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2)); u++) {
-        record = u + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 2;
+    for(; u < ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2)); u++) {
+        record = u + INSERT_SPLIT_ROOT_NREC + 1;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -1409,26 +1409,26 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2)))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2)))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 1718;       /* Right-most record in right internal node */
+    record = 1859;       /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 1780;      /* Right-most record in right-most leaf */
+    record = 1921;      /* Right-most record in right-most leaf */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert record to force redistribution of rightmost leaf */
-    record = u + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 2;
+    record = u + INSERT_SPLIT_ROOT_NREC + 1;
     if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
         FAIL_STACK_ERROR
 
@@ -1437,19 +1437,19 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2) + 1))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 1734;       /* Right-most record in right internal node */
+    record = 1875;       /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 1781;      /* Right-most record in right-most leaf */
+    record = 1922;      /* Right-most record in right-most leaf */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -1464,9 +1464,9 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2) + 1))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1496,9 +1496,9 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + 1))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1523,9 +1523,9 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + 1))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1535,19 +1535,19 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 615;       /* Record in middle node after insertion point */
+    record = 630;       /* Record in middle node after insertion point */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 553;       /* Record in leaf node just after insertion point */
+    record = 568;       /* Record in leaf node just after insertion point */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Add more records to middle leaf, to force a split and a 3 node redistribution on middle leaf */
-    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC / 4) + 2; u++) {
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC / 2) + 1; u++) {
         record = u + (INSERT_SPLIT_ROOT_NREC * 8) + (INSERT_SPLIT_ROOT_NREC / 2) + 1;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -1558,9 +1558,9 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + (INSERT_SPLIT_ROOT_NREC / 4) + 3))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + (INSERT_SPLIT_ROOT_NREC / 2) + 2))
         TEST_ERROR
-    record = 930;       /* Record in root node */
+    record = 1008;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1575,7 +1575,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 553;       /* Record in leaf node just after insertion point */
+    record = 568;       /* Record in leaf node just after insertion point */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -1587,7 +1587,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 28) + (INSERT_SPLIT_ROOT_NREC / 4) + 3))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 30) + (INSERT_SPLIT_ROOT_NREC / 2) + 2))
         TEST_ERROR
 
     /* Close file */
@@ -1662,7 +1662,7 @@ test_insert_level2_leaf_split(hid_t fapl)
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-    for(; u < ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2)); u++) {
+    for(; u < ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2)); u++) {
         record = u + 2;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -1673,19 +1673,19 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2)))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2)))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 1671;       /* Right-most record in right internal node */
+    record = 1797;       /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 1733;      /* Right-most record in right-most leaf */
+    record = 1859;      /* Right-most record in right-most leaf */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -1693,7 +1693,7 @@ test_insert_level2_leaf_split(hid_t fapl)
 
     /* Insert enough records to force right-most leaf to split */
     for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC / 2) + 1); u++) {
-        record = u + (INSERT_SPLIT_ROOT_NREC * 27) + (INSERT_SPLIT_ROOT_NREC / 2) + 2;
+        record = u + (INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2) + 2;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -1703,24 +1703,24 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 28))
+    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 30))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 1702;      /* Next-to-right-most record in right-most internal node */
+    record = 1828;      /* Next-to-right-most record in right-most internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 1734;      /* Right-most record in right-most internal node */
+    record = 1860;      /* Right-most record in right-most internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 1765;      /* Right-most record in right-most leaf */
+    record = 1891;      /* Right-most record in right-most leaf */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -1735,9 +1735,9 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 28))
+    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 30))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1763,9 +1763,9 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + 1))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1795,9 +1795,9 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + 1))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -1818,7 +1818,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     if(rec_depth != 0)
         TEST_ERROR
 
-    /* Add another record to middle leaf, to force a 3->4 node split on middle leaf */
+    /* Add another record to middle leaf, to force a node split on middle leaf */
     record = (INSERT_SPLIT_ROOT_NREC * 8) + 1;
     if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
         FAIL_STACK_ERROR
@@ -1828,24 +1828,24 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 28) + 2))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 30) + 2))
         TEST_ERROR
-    record = 883;       /* Record in root node */
+    record = 946;       /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 488;       /* Left-most record of 3->4 split in left internal node */
+    record = 504;       /* Left-most record of split in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 536;       /* Middle record of 3->4 split in left internal node */
+    record = 537;       /* Middle record of split in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 583;       /* Right-most record of 3->4 split in left internal node */
+    record = 568;       /* Right-most record of split in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
@@ -1862,7 +1862,7 @@ test_insert_level2_leaf_split(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 28) + 2))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 30) + 2))
         TEST_ERROR
 
     /* Close file */
@@ -1933,9 +1933,9 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
-    /* And fill up right internal node, to just before to split it */
-    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 41); u++) {
-        record = u + (INSERT_SPLIT_ROOT_NREC * 5) - 1;
+    /* And fill up right internal node, to just before to redistribute it */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 44); u++) {
+        record = u + (INSERT_SPLIT_ROOT_NREC * 6) - 4;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -1945,26 +1945,26 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 41))
+    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 44))
         TEST_ERROR
-    record = 1195;      /* Record in root node */
+    record = 1318;      /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2865;      /* Right-most record in right internal node */
+    record = 3114;      /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2896;      /* Right-most record in right leaf node */
+    record = 3145;      /* Right-most record in right leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert record to redistribute right-most internal node */
-    record = u + (INSERT_SPLIT_ROOT_NREC * 5) - 1;
+    record = u + (INSERT_SPLIT_ROOT_NREC * 6) - 4;
     if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
         FAIL_STACK_ERROR
 
@@ -1973,19 +1973,19 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 41) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 44) + 1))
         TEST_ERROR
-    record = 1636;      /* Record in root node */
+    record = 1822;      /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2865;      /* Right-most record in right internal node */
+    record = 3114;      /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2897;      /* Right-most record in right leaf node */
+    record = 3146;      /* Right-most record in right leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -2000,26 +2000,26 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 41) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 44) + 1))
         TEST_ERROR
-    record = 1636;      /* Record in root node */
+    record = 1822;      /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 376;      /* Left-most record in left internal node */
+    record = 436;      /* Left-most record in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 314;      /* Left-most record in left leaf node */
+    record = 374;      /* Left-most record in left leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Force left-most internal node to redistribute */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 5) - 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 6) - 4); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -2030,14 +2030,14 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 46))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 50) - 3))
         TEST_ERROR
-    record = 1384;      /* Record in root node */
+    record = 1570;      /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 46;      /* Left-most record in left internal node */
+    record = 61;      /* Left-most record in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
@@ -2055,7 +2055,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC * 46))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 50) - 3))
         TEST_ERROR
 
     /* Close file */
@@ -2117,7 +2117,7 @@ test_insert_level2_2internal_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree
      */
-    TESTING("B-tree insert: split 2 internals to 3 in level 2 B-tree (r->l)");
+    TESTING("B-tree insert: split side internal node to 2 in level 2 B-tree (r->l)");
 
     /*
      * Create v2 B-tree
@@ -2127,8 +2127,8 @@ test_insert_level2_2internal_split(hid_t fapl)
 
     /* Insert enough records to force root to split into 2 internal nodes */
     /* (And fill up two child internal nodes) */
-    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 55); u++) {
-        record = u + (INSERT_SPLIT_ROOT_NREC * 10) + (INSERT_SPLIT_ROOT_NREC / 4) - 2;
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 59); u++) {
+        record = u + (INSERT_SPLIT_ROOT_NREC * 14) - (INSERT_SPLIT_ROOT_NREC / 4) + 3;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -2138,26 +2138,26 @@ test_insert_level2_2internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 55))
+    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 59))
         TEST_ERROR
-    record = 2406;      /* Record in root node */
+    record = 2759;      /* Record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 4076;      /* Right-most record in right internal node */
+    record = 4555;      /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 4107;      /* Right-most record in right leaf node */
+    record = 4586;      /* Right-most record in right leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert record to split right-most internal node */
-    record = u + (INSERT_SPLIT_ROOT_NREC * 10) + (INSERT_SPLIT_ROOT_NREC / 4) - 2;
+    record = u + (INSERT_SPLIT_ROOT_NREC * 14) - (INSERT_SPLIT_ROOT_NREC / 4) + 3;
     if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
         FAIL_STACK_ERROR
 
@@ -2166,24 +2166,24 @@ test_insert_level2_2internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
-    record = 2406;      /* Left record in root node */
+    record = 2759;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3288;      /* Right record in root node */
+    record = 3704;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 4076;      /* Right-most record in right internal node */
+    record = 4555;      /* Right-most record in right internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 4108;      /* Right-most record in right leaf node */
+    record = 4387;      /* Right-most record in right leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -2191,33 +2191,33 @@ test_insert_level2_2internal_split(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert: split 2 internals to 3 in level 2 B-tree (l->r)");
+    TESTING("B-tree insert: split side internal node to 2 in level 2 B-tree (l->2)");
 
     /* Check up on B-tree */
     if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
-    record = 2406;      /* Left record in root node */
+    record = 2759;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 705;      /* Left-most record in left internal node */
+    record = 932;      /* Left-most record in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 643;      /* Left-most record in left leaf node */
+    record = 870;      /* Left-most record in left leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Force left-most internal node to split */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 10) + (INSERT_SPLIT_ROOT_NREC / 4) - 2); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 14) - (INSERT_SPLIT_ROOT_NREC / 4) + 3); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -2228,19 +2228,19 @@ test_insert_level2_2internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 65) + (INSERT_SPLIT_ROOT_NREC / 4) - 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 73) - (INSERT_SPLIT_ROOT_NREC / 4) + 4))
         TEST_ERROR
-    record = 658;      /* Left record in root node */
+    record = 870;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 1524;      /* Next-to-left-most record in root node */
+    record = 1814;      /* Next-to-left-most record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 46;      /* Left-most record in left internal node */
+    record = 61;      /* Left-most record in left internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
@@ -2257,7 +2257,7 @@ test_insert_level2_2internal_split(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 65) + (INSERT_SPLIT_ROOT_NREC / 4) - 1))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 73) - (INSERT_SPLIT_ROOT_NREC / 4) + 4))
         TEST_ERROR
 
     /* Close file */
@@ -2328,15 +2328,14 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
-    /* Insert enough records to force root to split into 2 internal nodes */
-    /* Also forces right-most internal node to split */
+    /* Insert enough records to force root to split into 3 internal nodes */
     for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 36); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-    for(; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
-        record = u + (INSERT_SPLIT_ROOT_NREC * 9) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4);
+    for(; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
+        record = u + (INSERT_SPLIT_ROOT_NREC * 13) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 3;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -2346,14 +2345,14 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3259;      /* Right record in root node */
+    record = 3703;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
@@ -2363,19 +2362,19 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2944;      /* Record to right of insertion point in middle internal node */
+    record = 3199;      /* Record to right of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2882;      /* Record just above insertion point in leaf node */
+    record = 3137;      /* Record just above insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert records to fill up middle internal node */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 9) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) - 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 13) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 2); u++) {
         record = u + (INSERT_SPLIT_ROOT_NREC * 36);
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -2386,29 +2385,29 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 64) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4)))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 72) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 3))
         TEST_ERROR
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3259;      /* Right record in root node */
+    record = 3703;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2862;      /* Record to left of insertion point in middle internal node */
+    record = 3104;      /* Record to left of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2911;      /* Record to right of insertion point in middle internal node */
+    record = 3137;      /* Record to right of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2882;      /* Record just above insertion point in leaf node */
+    record = 3135;      /* Record just above insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -2424,29 +2423,31 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 64) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 72) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 4))
         TEST_ERROR
-    record = 1448;      /* Left record in root node */
+    record = 1574;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2721;      /* Right record in root node */
+    record = 3104;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
+#ifdef NONE
     record = 2862;      /* Record to left of insertion point in right internal node (now) */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2911;      /* Record to right of insertion point in right internal node (now) */
+#endif /* NONE */
+    record = 3137;      /* Record to right of insertion point in right internal node (now) */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 2882;      /* Record just above insertion point in leaf node */
+    record = 3135;      /* Record just above insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -2458,7 +2459,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 64) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 1))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 72) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 4))
         TEST_ERROR
 
     /* Close file */
@@ -2530,13 +2531,14 @@ test_insert_level2_3internal_split(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 3 internal nodes */
-    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 28); u++) {
+    /* (and fill right internal node) */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 31); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
-    for(; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
-        record = u + ((INSERT_SPLIT_ROOT_NREC * 20) + ((2 * INSERT_SPLIT_ROOT_NREC) / 3) + 1);
+    for(; u < (INSERT_SPLIT_ROOT_NREC * 74); u++) {
+        record = u + ((INSERT_SPLIT_ROOT_NREC * 13) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 3);
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -2546,39 +2548,37 @@ test_insert_level2_3internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(bt2_stat.nrecords != (INSERT_SPLIT_ROOT_NREC * 74))
         TEST_ERROR
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3948;      /* Right record in root node */
+    record = 3703;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-#ifdef NONE
-    record = 2267;      /* Record to left of insertion point in middle internal node */
+    record = 1952;      /* Record to left of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-#endif /* NONE */
-    record = 3129;      /* Record to right of insertion point in middle internal node */
+    record = 2884;      /* Record to right of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 3067;      /* Record just above insertion point in leaf node */
+    record = 2822;      /* Record just after insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert records to fill up middle internal node */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 20) + ((2 * INSERT_SPLIT_ROOT_NREC) / 3)); u++) {
-        record = u + (INSERT_SPLIT_ROOT_NREC * 28);
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 13) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 2); u++) {
+        record = u + (INSERT_SPLIT_ROOT_NREC * 31);
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -2588,38 +2588,36 @@ test_insert_level2_3internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 75) + ((2 * INSERT_SPLIT_ROOT_NREC) / 3) + 1))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 87) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 2))
         TEST_ERROR
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3082;      /* Right record in root node */
+    record = 3703;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3049;      /* Record to left of insertion point in middle internal node */
+    record = 2789;      /* Record to left of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-#ifdef NONE
-    record = 3129;      /* Record to right of insertion point in middle internal node */
+    record = 2822;      /* Record to right of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-#endif /* NONE */
-    record = 3067;      /* Record just above insertion point in leaf node */
+    record = 2823;      /* Record just above insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
         TEST_ERROR
 
     /* Insert record to split middle internal node */
-    record = u + (INSERT_SPLIT_ROOT_NREC * 28);
+    record = u + (INSERT_SPLIT_ROOT_NREC * 31);
     if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
         FAIL_STACK_ERROR
 
@@ -2628,34 +2626,36 @@ test_insert_level2_3internal_split(hid_t fapl)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
-    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 75) + ((2 * INSERT_SPLIT_ROOT_NREC) / 3) + 2))
+    if(bt2_stat.nrecords != ((INSERT_SPLIT_ROOT_NREC * 87) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 3))
         TEST_ERROR
-    record = 1322;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2421;      /* Middle record in root node */
+    record = 2789;      /* Middle record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 3507;      /* Right record in root node */
+    record = 3703;      /* Right record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
+#ifdef NONE
     record = 3049;      /* Record to left of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 3082;      /* Record to right of insertion point in middle internal node */
+#endif /* NONE */
+    record = 2822;      /* Record to right of insertion point in middle internal node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 1)
         TEST_ERROR
-    record = 3067;      /* Record just above insertion point in leaf node */
+    record = 2823;      /* Record just after insertion point in leaf node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 0)
@@ -2667,7 +2667,7 @@ test_insert_level2_3internal_split(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != ((INSERT_SPLIT_ROOT_NREC * 75) + ((2 * INSERT_SPLIT_ROOT_NREC) / 3) + 2))
+    if(idx != ((INSERT_SPLIT_ROOT_NREC * 87) + ((3 * INSERT_SPLIT_ROOT_NREC) / 4) + 3))
         TEST_ERROR
 
     /* Close file */
@@ -2715,6 +2715,7 @@ test_insert_lots(hid_t fapl)
     unsigned    u;                      /* Local index variable */
     unsigned    swap_idx;               /* Location to swap with when shuffling */
     hsize_t     temp_rec;               /* Temporary record */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
     hsize_t     nrec;                   /* Number of records in B-tree */
     herr_t      ret;                    /* Generic error return value */
 
@@ -2726,8 +2727,14 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif /* QAK */
     HDsrandom((unsigned long)curr_time);
 
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree insert: create random level 4 B-tree");
+
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR
+    if((records = HDmalloc(sizeof(hsize_t) * INSERT_MANY)) == NULL)
+        TEST_ERROR
 
     /* Initialize record #'s */
     for(u=0; u<INSERT_MANY; u++)
@@ -2744,54 +2751,62 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create the file to work on */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if (NULL==(f=H5I_object(file))) {
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
 
     /*
      * Create v2 B-tree
      */
-    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-
-    /*
-     * Test inserting many records into v2 B-tree
-     */
-    TESTING("B-tree insert: create random level 4 B-tree");
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
 
     /* Insert random records */
-    for(u=0; u<INSERT_MANY; u++) {
-        record=records[u];
-        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
-#ifdef QAK
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
-#endif /* QAK */
-            H5_FAILED();
-            H5Eprint_stack(H5E_DEFAULT, stdout);
-            goto error;
-        }
-    }
+    for(u = 0; u < INSERT_MANY; u++) {
+        record = records[u];
+        if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+        FAIL_STACK_ERROR
+    if(bt2_stat.depth != 4)
+        TEST_ERROR
+    if(bt2_stat.nrecords != INSERT_MANY)
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Check up on B-tree after re-open */
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+        FAIL_STACK_ERROR
+    if(bt2_stat.depth != 4)
+        TEST_ERROR
+    if(bt2_stat.nrecords != INSERT_MANY)
+        TEST_ERROR
 
     /* Iterate over B-tree to check records have been inserted correctly */
     idx = 0;
-    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
-#ifdef QAK
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
-#endif /* QAK */
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx) < 0)
+        FAIL_STACK_ERROR
 
     /* Make certain that the index is correct */
-    if(idx != INSERT_MANY) TEST_ERROR
+    if(idx != INSERT_MANY)
+        TEST_ERROR
 
     /* Attempt to find non-existant record in level-4 B-tree */
     idx = INSERT_MANY*2;
@@ -2799,15 +2814,17 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Find random records */
-    for(u=0; u<FIND_MANY; u++) {
+    for(u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
         idx = (hsize_t)(HDrandom()%INSERT_MANY);
 
         /* Attempt to find existant record in root of level-4 B-tree */
-        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR
+        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+            FAIL_STACK_ERROR
     } /* end for */
 
     /* Attempt to index non-existant record in level-4 B-tree */
@@ -2816,41 +2833,44 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Find random records */
-    for(u=0; u<FIND_MANY; u++) {
+    for(u = 0; u < FIND_MANY; u++) {
         /* Pick random record */
-        idx = (hsize_t)(HDrandom()%INSERT_MANY);
+        idx = (hsize_t)(HDrandom() % INSERT_MANY);
 
         /* Attempt to find existant record in root of level-4 B-tree */
-        if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, idx, find_cb, &idx)<0) TEST_ERROR
+        if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, idx, find_cb, &idx) < 0)
+            FAIL_STACK_ERROR
     } /* end for */
 
     PASSED();
 
     TESTING("B-tree insert: attempt duplicate record in level 4 B-tree");
 
-    record=INSERT_MANY/2;
+    record = INSERT_MANY / 2;
     H5E_BEGIN_TRY {
         ret = H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record);
     } H5E_END_TRY;
     /* Should fail */
-    if(ret != FAIL) TEST_ERROR
+    if(ret != FAIL)
+        TEST_ERROR
 
     /* Query the number of records in the B-tree */
-    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    } /* end if */
+    if(H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec) < 0)
+        FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != INSERT_MANY) TEST_ERROR
+    if(nrec != INSERT_MANY)
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
 
     PASSED();
-
-    if (H5Fclose(file)<0) TEST_ERROR
 
     HDfree(records);
 
@@ -4521,7 +4541,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from right leaf */
 
-    /* Remove records from right leaf until its ready to redistribute */
+    /* Remove records from right leaf until its ready to merge */
     for(u = 0; u < 14; u++) {
         record = (INSERT_SPLIT_ROOT_NREC * 2) - (u + 1);
         rrecord = HSIZET_MAX;
@@ -4669,7 +4689,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
 
     /* Attempt to remove record from root node of a level-1 B-tree to force promotion from middle leaf */
 
-    /* Remove records from middle leaf until its ready to redistribute */
+    /* Remove records from middle leaf until it's ready to merge */
     for(u = 0; u < 50; u++) {
         record = ((3 * INSERT_SPLIT_ROOT_NREC) / 2) - (u + 1);
         rrecord = HSIZET_MAX;
@@ -4918,19 +4938,19 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -4943,7 +4963,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -4960,7 +4980,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion */
@@ -4979,7 +4999,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -4987,7 +5007,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55))
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59))
         TEST_ERROR
 
     PASSED();
@@ -5001,7 +5021,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     record = 1133;
@@ -5019,7 +5039,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5027,7 +5047,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 1)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 1)
         TEST_ERROR
 
     PASSED();
@@ -5041,7 +5061,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     record = 2267;
@@ -5059,7 +5079,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5067,7 +5087,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 2)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 2)
         TEST_ERROR
 
     PASSED();
@@ -5076,7 +5096,7 @@ test_remove_level2_promote(hid_t fapl)
     TESTING("B-tree remove: promote record from root of level-2 B-tree");
 
     /* Check information about record in root node */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5084,17 +5104,17 @@ test_remove_level2_promote(hid_t fapl)
     if(ninfo.nrec != 2)
         TEST_ERROR
 
-    record = 1763;
+    record = 1889;
     rrecord = HSIZET_MAX;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
         FAIL_STACK_ERROR
 
     /* Make certain that the record value is correct */
-    if(rrecord != 1763)
+    if(rrecord != 1889)
         TEST_ERROR
 
     /* Check information about record in root node */
-    record = 1764;      /* Left record in root node */
+    record = 1890;      /* Left record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5107,11 +5127,11 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 3)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 3)
         TEST_ERROR
 
     /* Check information about record in root node */
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5119,17 +5139,17 @@ test_remove_level2_promote(hid_t fapl)
     if(ninfo.nrec != 2)
         TEST_ERROR
 
-    record = 2645;
+    record = 2834;
     rrecord = HSIZET_MAX;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
         FAIL_STACK_ERROR
 
     /* Make certain that the record value is correct */
-    if(rrecord != 2645)
+    if(rrecord != 2834)
         TEST_ERROR
 
     /* Check information about record in root node */
-    record = 2646;      /* Right record in root node */
+    record = 2835;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5142,7 +5162,7 @@ test_remove_level2_promote(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 4)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 4)
         TEST_ERROR
 
     /* Close file */
@@ -5209,19 +5229,19 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5234,7 +5254,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5245,23 +5265,23 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     if(!H5F_addr_defined(root_addr))
         TEST_ERROR
 
-    record = 3433;      /* Right-most record in root node */
+    record = 3685;      /* Right-most record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     for(u = 0; u < 8; u++) {
-        record = ((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1);
+        record = ((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1);
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
-        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 55) + 1)- (u + 1)))
+        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 59) + 1)- (u + 1)))
             TEST_ERROR
 
         /* Query the number of records in the B-tree */
@@ -5269,25 +5289,25 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
-    record = 3433;
+    record = 3685;
     rrecord = HSIZET_MAX;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
         FAIL_STACK_ERROR
 
     /* Make certain that the record value is correct */
-    if(rrecord != 3433)
+    if(rrecord != 3685)
         TEST_ERROR
 
-    record = 3429;      /* Right-most record in root node */
+    record = 3681;      /* Right-most record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5295,7 +5315,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 8)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 8)
         TEST_ERROR
 
     /* Close file */
@@ -5362,19 +5382,19 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5387,7 +5407,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5403,7 +5423,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     /* Attempt to remove record from left internal node of a level-2 B-tree to force promotion w/redistribution */
@@ -5422,7 +5442,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
@@ -5440,7 +5460,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5448,7 +5468,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 38)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 38)
         TEST_ERROR
 
     /* Close file */
@@ -5515,19 +5535,19 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5540,7 +5560,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5552,23 +5572,23 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         TEST_ERROR
 
     /* Check information about record in right internal node */
-    record = 3433;      /* Right-most record in right internal node */
+    record = 3685;      /* Right-most record in right internal node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
     for(u = 0; u < 15; u++) {
-        record = ((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1);
+        record = ((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1);
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
-        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 55) + 1)- (u + 1)))
+        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 59) + 1)- (u + 1)))
             TEST_ERROR
 
         /* Query the number of records in the B-tree */
@@ -5576,26 +5596,27 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
-    record = 3426;
+    /* Force merge by promoting current right-most record */
+    record = 3678;
     rrecord = HSIZET_MAX;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
         FAIL_STACK_ERROR
 
     /* Make certain that the record value is correct */
-    if(rrecord != 3426)
+    if(rrecord != 3678)
         TEST_ERROR
 
     /* Check information about record in right internal node */
-    record = 3401;      /* Right-most record in right internal node */
+    record = 3653;      /* Right-most record in right internal node (now) */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 12)
+    if(ninfo.nrec != 13)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5603,7 +5624,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 15)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 15)
         TEST_ERROR
 
     /* Close file */
@@ -5670,19 +5691,19 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5695,7 +5716,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5712,10 +5733,10 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
-    /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
+    /* Attempt to remove record from left internal node of a level-2 B-tree to force promotion w/redistribution */
     for(u = 0; u < 112; u++) {
         record = 48 + u;
         rrecord = HSIZET_MAX;
@@ -5731,10 +5752,11 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
+    /* Force merge of left-most internal nodes by promotion */
     record = 25;
     rrecord = HSIZET_MAX;
     if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
@@ -5745,12 +5767,12 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         TEST_ERROR
 
     /* Check information about record in left internal node */
-    record = 37;      /* Left-most record in left internal node */
+    record = 37;      /* Left-most record in left internal node (now) */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 26)
+    if(ninfo.nrec != 28)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -5758,7 +5780,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != (INSERT_SPLIT_ROOT_NREC * 55) - 112)
+    if(nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 112)
         TEST_ERROR
 
     /* Close file */
@@ -5825,19 +5847,19 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5850,7 +5872,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5862,7 +5884,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force 2 internal nodes to merge */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 20) + 15); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 21) + 15); u++) {
         record = u;
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
@@ -5877,11 +5899,11 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
-    record = 2645;      /* Middle record in root node */
+    record = 2834;      /* Middle record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5953,19 +5975,19 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -5978,7 +6000,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -5990,14 +6012,14 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force 2 internal nodes to merge */
-    for(u=0; u < ((INSERT_SPLIT_ROOT_NREC * 5) + 17); u++) {
-        record = ((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1);
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 5) + 17); u++) {
+        record = ((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1);
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
-        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(rrecord != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
 
         /* Query the number of records in the B-tree */
@@ -6005,11 +6027,11 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u+ 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u+ 1)))
             TEST_ERROR
     } /* end for */
 
-    record = 1763;      /* Middle record in root node */
+    record = 1889;      /* Middle record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -6081,19 +6103,19 @@ test_remove_level2_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -6106,7 +6128,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -6117,8 +6139,8 @@ test_remove_level2_3internal_merge(hid_t fapl)
     if(!H5F_addr_defined(root_addr))
         TEST_ERROR
 
-    /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion w/redistribution */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 22) + 15); u++) {
+    /* Attempt to remove record from middle internal node of a level-2 B-tree to force promotion w/redistribution */
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 23) + 15); u++) {
         record = (INSERT_SPLIT_ROOT_NREC * 20) + u;
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
@@ -6133,11 +6155,11 @@ test_remove_level2_3internal_merge(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
     } /* end for */
 
-    record = 1070;      /* Right record in root node */
+    record = 1196;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -6210,19 +6232,19 @@ test_remove_level2_collapse_right(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
     } /* end for */
 
     /* Check record values in root of B-tree */
-    record = 1763;      /* Left record in root node */
+    record = 1889;      /* Left record in root node */
     if((rec_depth = H5B2_get_node_depth_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)) < 0)
         FAIL_STACK_ERROR
     if(rec_depth != 2)
         TEST_ERROR
-    record = 2645;      /* Right record in root node */
+    record = 2834;      /* Right record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -6235,7 +6257,7 @@ test_remove_level2_collapse_right(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Make certain that the # of records is correct */
-    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 55) + 1))
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
         TEST_ERROR
 
     /* Query the address of the root node in the B-tree */
@@ -6247,14 +6269,14 @@ test_remove_level2_collapse_right(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to remove records from a level-2 B-tree to force back to level-1 */
-    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 32) + 17; u++) {
-        record = ((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1);
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC * 34) + 17; u++) {
+        record = ((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1);
         rrecord = HSIZET_MAX;
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
-        if(record != (((INSERT_SPLIT_ROOT_NREC * 55) + 1) - (u + 1)))
+        if(record != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
             TEST_ERROR
 
         /* Query the number of records in the B-tree */
@@ -6262,7 +6284,7 @@ test_remove_level2_collapse_right(hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Make certain that the # of records is correct */
-        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 55) + 1)  - (u + 1)))
+        if(nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1)  - (u + 1)))
             TEST_ERROR
     } /* end for */
 
@@ -6340,11 +6362,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Initialize record #'s */
-    for(u=0; u<INSERT_MANY; u++)
+    for(u = 0; u < INSERT_MANY; u++)
         records[u] = u;
 
     /* Shuffle record #'s */
-    for(u=0; u<INSERT_MANY; u++) {
+    for(u = 0; u < INSERT_MANY; u++) {
         swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
@@ -6379,6 +6401,18 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 4)
         TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
 
     /* Re-shuffle record #'s */
     for(u = 0; u < INSERT_MANY; u++) {
@@ -6538,7 +6572,7 @@ test_find_neighbor(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 13)
+    if(ninfo.nrec != 14)
         TEST_ERROR
 
     /* Neighbor is in internal node */
@@ -6548,7 +6582,7 @@ test_find_neighbor(hid_t fapl)
     if(record != 250)
         TEST_ERROR
 
-    record = 1762;      /* Record in root node */
+    record = 1888;      /* Record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -6557,10 +6591,10 @@ test_find_neighbor(hid_t fapl)
         TEST_ERROR
 
     /* Neighbor is in root node */
-    search = 1763;
+    search = 1889;
     if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record) < 0)
         FAIL_STACK_ERROR
-    if(record != 1762)
+    if(record != 1888)
         TEST_ERROR
 
     search = (FIND_NEIGHBOR * 2) + 1;
@@ -6614,7 +6648,7 @@ test_find_neighbor(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 17)
+    if(ninfo.nrec != 16)
         TEST_ERROR
 
     /* Neighbor is in internal node */
@@ -6625,10 +6659,10 @@ test_find_neighbor(hid_t fapl)
         TEST_ERROR
 
     /* Neighbor is in root node */
-    search = 1761;
+    search = 1887;
     if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record) < 0)
         FAIL_STACK_ERROR
-    if(record != 1762)
+    if(record != 1888)
         TEST_ERROR
 
     search = ((FIND_NEIGHBOR - 1) * 2) - 1;
@@ -6949,7 +6983,7 @@ test_modify(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
-    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 55) + 1); u++) {
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC * 59) + 1); u++) {
         record = u * 5;
         if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
             FAIL_STACK_ERROR
@@ -7024,7 +7058,7 @@ test_modify(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     /* Attempt to modify a record in an internal node */
@@ -7038,7 +7072,7 @@ test_modify(hid_t fapl)
         FAIL_STACK_ERROR
     if(ninfo.depth != 1)
         TEST_ERROR
-    if(ninfo.nrec != 27)
+    if(ninfo.nrec != 29)
         TEST_ERROR
 
     /* Attempt to find modified record */
@@ -7063,7 +7097,7 @@ test_modify(hid_t fapl)
 
     TESTING("B-tree modify: modify record in root node");
 
-    record = 13225;      /* Record in root node */
+    record = 9445;      /* Record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -7072,12 +7106,12 @@ test_modify(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to modify a record in a root node */
-    record = 13225;
-    modify = 13228;
+    record = 9445;
+    modify = 9448;
     if(H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR
 
-    record = 13228;      /* Record in root node */
+    record = 9448;      /* Record in root node */
     if(H5B2_get_node_info_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, &ninfo) < 0)
         FAIL_STACK_ERROR
     if(ninfo.depth != 2)
@@ -7086,16 +7120,16 @@ test_modify(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to find modified record */
-    record = 13228;
-    found = 13228;
+    record = 9448;
+    found = 9448;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) < 0)
         STACK_ERROR
-    if(found != 13228)
+    if(found != 9448)
         TEST_ERROR
 
     /* Attempt to find original record */
-    record = 13225;
-    found = 13225;
+    record = 9445;
+    found = 9445;
     H5E_BEGIN_TRY {
 	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
     } H5E_END_TRY;
@@ -7157,9 +7191,9 @@ main(void)
 	nerrors += test_insert_basic(fapl);
 	nerrors += test_insert_split_root(fapl);
 	nerrors += test_insert_level1_2leaf_redistrib(fapl);
-	nerrors += test_insert_level1_2leaf_split(fapl);
+	nerrors += test_insert_level1_side_split(fapl);
 	nerrors += test_insert_level1_3leaf_redistrib(fapl);
-	nerrors += test_insert_level1_3leaf_split(fapl);
+	nerrors += test_insert_level1_middle_split(fapl);
 	nerrors += test_insert_make_level2(fapl);
 	nerrors += test_insert_level2_leaf_redistrib(fapl);
 	nerrors += test_insert_level2_leaf_split(fapl);

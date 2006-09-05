@@ -326,20 +326,20 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     H5RC_INC(bt2_shared);
     incr_rc=TRUE;
 
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
 
     /* Current depth of the tree */
-    depth = bt2->depth;
+    depth = shared->depth;
 
     /* Release header */
     if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2 = NULL;
-
-    /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
 
     /* Check for empty tree */
     if(curr_node_ptr.node_nrec==0)

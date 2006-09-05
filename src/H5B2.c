@@ -123,13 +123,12 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
     /* Assign internal information */
     HDmemset(&bt2->cache_info, 0, sizeof(H5AC_info_t));
-    bt2->depth = 0;
     bt2->root.addr = HADDR_UNDEF;
     bt2->root.node_nrec = 0;
     bt2->root.all_nrec = 0;
 
     /* Initialize shared B-tree info */
-    if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent) < 0)
+    if(H5B2_shared_init(f, bt2, type, 0, node_size, rrec_size, split_percent, merge_percent) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
@@ -184,7 +183,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2->shared);
+    shared = H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /* Check if the root node is allocated yet */
@@ -197,21 +196,19 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         bt2_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
     /* Check if we need to split the root node (equiv. to a 1->2 node split) */
-    else if((bt2->depth == 0 && bt2->root.node_nrec == shared->split_leaf_nrec) ||
-            (bt2->depth == 1 && bt2->root.node_nrec == shared->split_twig_nrec) ||
-            (bt2->depth > 1 && bt2->root.node_nrec == shared->split_brch_nrec)) {
+    else if(bt2->root.node_nrec == shared->node_info[shared->depth].split_nrec) {
         /* Split root node */
-        if(H5B2_split_root(f, dxpl_id, bt2, &bt2_flags, bt2->shared) < 0)
+        if(H5B2_split_root(f, dxpl_id, bt2, &bt2_flags) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
     } /* end if */
 
     /* Attempt to insert record into B-tree */
-    if(bt2->depth > 0) {
-        if(H5B2_insert_internal(f, dxpl_id, bt2->shared, bt2->depth, &bt2_flags, &bt2->root, udata) < 0)
+    if(shared->depth > 0) {
+        if(H5B2_insert_internal(f, dxpl_id, bt2->shared, shared->depth, &bt2_flags, &bt2->root, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
-        if(H5B2_insert_leaf(f,dxpl_id,bt2->shared,&bt2->root, udata) < 0)
+        if(H5B2_insert_leaf(f, dxpl_id, bt2->shared, &bt2->root, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree leaf node")
     } /* end else */
 
@@ -249,6 +246,7 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_operator_t op, void *op_data)
 {
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
     hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t root_ptr;           /* Node pointer info for root node */
@@ -264,29 +262,33 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(op);
 
     /* Look up the B-tree header */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
-    bt2_shared=bt2->shared;
+    bt2_shared = bt2->shared;
     H5RC_INC(bt2_shared);
-    incr_rc=TRUE;
+    incr_rc = TRUE;
+
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
 
     /* Make copy of the root node pointer */
     root_ptr = bt2->root;
 
     /* Current depth of the tree */
-    depth=bt2->depth;
+    depth = shared->depth;
 
     /* Release header */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    bt2=NULL;
+    bt2 = NULL;
 
     /* Iterate through records */
-    if(root_ptr.node_nrec>0) {
+    if(root_ptr.node_nrec > 0) {
         /* Iterate through nodes */
-        if((ret_value=H5B2_iterate_node(f,dxpl_id,bt2_shared,depth,&root_ptr,op,op_data))<0)
+        if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, depth, &root_ptr, op, op_data)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
     } /* end if */
 
@@ -352,20 +354,20 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5RC_INC(bt2_shared);
     incr_rc=TRUE;
 
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
 
     /* Current depth of the tree */
-    depth = bt2->depth;
+    depth = shared->depth;
 
     /* Release header */
     if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    bt2=NULL;
-
-    /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
+    bt2 = NULL;
 
     /* Check for empty tree */
     if(curr_node_ptr.node_nrec==0)
@@ -515,23 +517,23 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5RC_INC(bt2_shared);
     incr_rc=TRUE;
 
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
 
     /* Current depth of the tree */
-    depth = bt2->depth;
+    depth = shared->depth;
 
     /* Release header */
     if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    bt2=NULL;
-
-    /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
+    bt2 = NULL;
 
     /* Check for empty tree */
-    if(curr_node_ptr.node_nrec==0)
+    if(curr_node_ptr.node_nrec == 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Check for index greater than the number of records in the tree */
@@ -679,7 +681,7 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2->shared);
+    shared = H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /* Check for empty B-tree */
@@ -687,14 +689,25 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
 
     /* Attempt to remove record from B-tree */
-    if(bt2->depth > 0) {
+    if(shared->depth > 0) {
         hbool_t depth_decreased = FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
-        if(H5B2_remove_internal(f, dxpl_id, bt2->shared, &depth_decreased, NULL, bt2->depth,
+        if(H5B2_remove_internal(f, dxpl_id, bt2->shared, &depth_decreased, NULL, shared->depth,
                 &(bt2->cache_info), &bt2_flags, &bt2->root, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
-        bt2->depth -= depth_decreased;
+        /* Check for decreasing the depth of the B-tree */
+        if(depth_decreased) {
+            /* Destroy free list factories for previous depth */
+            if(shared->node_info[shared->depth].nat_rec_fac)
+                if(H5FL_fac_term(shared->node_info[shared->depth].nat_rec_fac) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's native record block factory")
+            if(shared->node_info[shared->depth].node_ptr_fac)
+                if(H5FL_fac_term(shared->node_info[shared->depth].node_ptr_fac) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
+
+            shared->depth -= depth_decreased;
+        } /* end for */
     } /* end if */
     else {
         if(H5B2_remove_leaf(f, dxpl_id, bt2->shared, &bt2->root, udata, op, op_data) < 0)
@@ -789,7 +802,8 @@ herr_t
 H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_compare_t range, void *udata, H5B2_found_t op, void *op_data)
 {
-    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_neighbor, FAIL)
@@ -801,16 +815,20 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(op);
 
     /* Look up the B-tree header */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
 
     /* Check for empty tree */
     if(!H5F_addr_defined(bt2->root.addr))
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Attempt to find neighbor record in B-tree */
-    if(bt2->depth>0) {
-        if(H5B2_neighbor_internal(f, dxpl_id, bt2->shared, bt2->depth, &bt2->root, NULL, range, udata, op, op_data)<0)
+    if(shared->depth > 0) {
+        if(H5B2_neighbor_internal(f, dxpl_id, bt2->shared, shared->depth, &bt2->root, NULL, range, udata, op, op_data)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree internal node")
     } /* end if */
     else {
@@ -853,7 +871,8 @@ herr_t
 H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_remove_t op, void *op_data)
 {
-    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_delete, FAIL)
@@ -867,9 +886,13 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
+
     /* Delete all nodes in B-tree */
     if(H5F_addr_defined(bt2->root.addr))
-        if(H5B2_delete_node(f, dxpl_id, bt2->shared, bt2->depth, &bt2->root, op, op_data) < 0)
+        if(H5B2_delete_node(f, dxpl_id, bt2->shared, shared->depth, &bt2->root, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
     /* Release space for B-tree node on disk */
@@ -935,20 +958,20 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5RC_INC(bt2_shared);
     incr_rc = TRUE;
 
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
 
     /* Current depth of the tree */
-    depth = bt2->depth;
+    depth = shared->depth;
 
     /* Release header */
     if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2 = NULL;
-
-    /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
 
     /* Check for empty tree */
     if(curr_node_ptr.node_nrec==0)

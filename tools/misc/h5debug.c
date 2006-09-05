@@ -74,7 +74,7 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr = 0, extra = 0, extra2 = 0;
+    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0;
     uint8_t     sig[SIGLEN];
     size_t      u;
     herr_t      status = SUCCEED;
@@ -121,6 +121,8 @@ main(int argc, char *argv[])
         extra = HDstrtoll(argv[3], NULL, 0);
     if(argc > 4)
         extra2 = HDstrtoll(argv[4], NULL, 0);
+    if(argc > 5)
+        extra3 = HDstrtoll(argv[5], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
@@ -235,88 +237,42 @@ main(int argc, char *argv[])
                 HDexit(4);
         } /* end switch */
 
-    } else if(!HDmemcmp(sig, H5B2_BRCH_MAGIC, H5B2_SIZEOF_MAGIC)) {
+    } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is two bytes after the
+         * subclass.  The subclass identifier is the byte after the
          * B-tree signature.
          */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC + 1];
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records node in order to dump internal node\n");
+        if(extra == 0 || extra2 == 0 || extra3 == 0) {
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
+            fprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             fprintf(stderr, "v2 B-tree internal node usage:\n");
-            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records>\n");
+            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth>\n");
             HDexit(4);
         } /* end if */
 
-        /* Note: a depth of '2' is used here because the actual depth isn't
-         *      important, as long as it's > 1, to indicate a 'branch' internal
-         *      node.
-         */
         switch(subtype) {
             case H5B2_TEST_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)2);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)2);
-                break;
-
-            default:
-                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-                HDexit(4);
-        } /* end switch */
-
-    } else if(!HDmemcmp(sig, H5B2_TWIG_MAGIC, H5B2_SIZEOF_MAGIC)) {
-        /*
-         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is two bytes after the
-         * B-tree signature.
-         */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
-
-        /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records node in order to dump internal node\n");
-            fprintf(stderr, "v2 B-tree internal node usage:\n");
-            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records>\n");
-            HDexit(4);
-        } /* end if */
-
-        /* Note: a depth of '1' is used here to indicate a 'twig' internal node */
-        switch(subtype) {
-            case H5B2_TEST_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)1);
-                break;
-
-            case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)1);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)1);
-                break;
-
-            case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)1);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)1);
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             default:
@@ -327,10 +283,10 @@ main(int argc, char *argv[])
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is two bytes after the
+         * subclass.  The subclass identifier is the byte after the
          * B-tree signature.
          */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC + 1];
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {

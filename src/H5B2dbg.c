@@ -91,6 +91,8 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 {
     H5B2_t	*bt2 = NULL;            /* B-tree header info */
     H5B2_shared_t *shared;              /* Shared B-tree information */
+    unsigned    u;                      /* Local index variable */
+    char                temp_str[128];  /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_hdr_debug, FAIL)
@@ -140,7 +142,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      bt2->cache_info.is_dirty ? "True" : "False");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Depth:",
-	      bt2->depth);
+	      shared->depth);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of records in tree:",
 	      bt2->root.all_nrec);
@@ -150,39 +152,21 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of root node:",
 	      bt2->root.addr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Max. number of records per internal 'branch' node:",
-	      shared->branch_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Max. number of records per internal 'twig' node:",
-	      shared->twig_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Max. number of records per leaf node:",
-	      shared->leaf_nrec);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Split percent:",
 	      shared->split_percent);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Merge percent:",
 	      shared->merge_percent);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal 'branch' node records to split at:",
-	      shared->split_brch_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal 'twig' node records to split at:",
-	      shared->split_twig_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Leaf records to split at:",
-	      shared->split_leaf_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal 'branch' node records to merge at:",
-	      shared->merge_brch_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Internal 'twig' node records to merge at:",
-	      shared->merge_twig_nrec);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Leaf records to merge at:",
-	      shared->merge_leaf_nrec);
+
+    /* Print relevant node info */
+    HDfprintf(stream, "%*sNode Info: (max_nrec/split_nrec/merge_nrec)\n", indent, "");
+    for(u = 0; u < (shared->depth + 1); u++) {
+        sprintf(temp_str, "Depth %u:", u);
+        HDfprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3),
+            temp_str,
+            shared->node_info[u].max_nrec, shared->node_info[u].split_nrec, shared->node_info[u].merge_nrec);
+    } /* end for */
 
 done:
     if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)

@@ -105,11 +105,8 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     shared = H5RC_GET_OBJ(bt2->shared);
 
     /* Get information about the B-tree */
-    info->depth = bt2->depth;
+    info->depth = shared->depth;
     info->nrecords = bt2->root.all_nrec;
-    info->branch_nrec = shared->branch_nrec;
-    info->twig_nrec = shared->twig_nrec;
-    info->leaf_nrec = shared->leaf_nrec;
 
 done:
     /* Release B-tree header node */
