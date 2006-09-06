@@ -26,123 +26,10 @@
 #include "H5Ppublic.h"         /* Property lists                       */
 #include "H5Gpkg.h"             /* Groups                               */
 
-/*-------------------------------------------------------------------------
- * Function:	H5L_extern_traverse
- *
- * Purpose:	Default traversal function for external links. This can
- *              be overridden using H5Lregister().
- *
- *              Given a filename and path packed into the link udata,
- *              attempts to open an object within an external file.
- *              If the H5L_ELINK_PREFIX_PROP property is set in the
- *              link access property list, appends that prefix to the
- *              filename being opened.
- *
- * Return:	ID of the opened object on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static hid_t H5L_extern_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
-{
-    hid_t         fid;
-    char         *file_name;
-    char         *obj_name;
-    char         *prefix;
-    size_t        fname_len;
-    hbool_t       fname_alloc = FALSE;
-    unsigned      intent;
-    hid_t         ret_value = -1;
-
-    file_name = (char *) udata;
-    fname_len = strlen(file_name);
-    obj_name = ((char *) udata) + fname_len + 1;
-
-    /* See if the external link prefix property is set */
-    if(H5Pget_elink_prefix(lapl_id, &prefix) < 0)
-        goto error;
-
-    /* If so, prepend it to the filename */
-    if(prefix != NULL)
-    {
-        size_t buf_size;
-
-        buf_size = HDstrlen(prefix);
-
-        /* Allocate a buffer to hold the filename plus prefix */
-        file_name = malloc(buf_size + fname_len + 1);
-        fname_alloc = TRUE;
-
-        /* Add the external link's filename to the prefix supplied */
-        strcpy(file_name, prefix);
-        strcat(file_name, udata);
-    }
-
-    /* Figure out if we should open with read-write or read-only */
-    if((fid = H5Iget_file_id(cur_group)) < 0)
-        goto error;
-    if(H5Fget_intent(fid, &intent) < 0)
-        goto error;
-    if(H5Fclose(fid) < 0)
-        goto error;
-
-    if((fid = H5Fopen(file_name, intent, H5P_DEFAULT)) < 0)
-        goto error;
-    ret_value = H5Oopen(fid, obj_name, lapl_id); /* If this fails, our return value will be negative. */
-    if(H5Fclose(fid) < 0)
-        goto error;
-
-    /* Free file_name if it's been allocated */
-    if(fname_alloc)
-        free(file_name);
-
-    return ret_value;
-
-error:
-    /* Free file_name if it's been allocated */
-    if(fname_alloc)
-        free(file_name);
-    return -1;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5L_extern_query
- *
- * Purpose:	Default query function for external links. This can
- *              be overridden using H5Lregister().
- *
- *              Returns the size of the link's user data. If a buffer of
- *              is provided, copies at most buf_size bytes of the udata
- *              into it.
- *
- * Return:	Size of buffer on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static ssize_t H5L_extern_query(const char * link_name, void * udata, size_t udata_size, void * buf /*out*/, size_t buf_size)
-{
-    size_t        ret_value;
-
-    /* If the buffer is NULL, skip writng anything in it and just return
-     * the size needed */
-    if(buf)
-    {
-        if(udata_size < buf_size)
-            buf_size = udata_size;
-
-        /* Copy the udata verbatim up to udata_size*/
-        memcpy(buf, udata, udata_size);
-    }
-
-    ret_value = udata_size;
-    return ret_value;
-}
+static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
+    void * udata, size_t UNUSED udata_size, hid_t lapl_id);
+static ssize_t H5L_extern_query(const char UNUSED * link_name, void * udata,
+    size_t udata_size, void * buf /*out*/, size_t buf_size);
 
 /* Default External Link link class */
 const H5L_link_class_t H5L_EXTERN_LINK_CLASS[1] = {{
@@ -166,9 +53,10 @@ USAGE
 
 RETURNS
     Non-negative on success/Negative on failure
+
 DESCRIPTION
     Initializes any interface-specific data or routines.  (Just calls
-    H5T_init_iterface currently).
+    H5L_init currently).
 
 --------------------------------------------------------------------------*/
 static herr_t
@@ -180,7 +68,130 @@ H5L_init_extern_interface(void)
 } /* H5L_init_extern_interface() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5L_extern_traverse
+ *
+ * Purpose:	Default traversal function for external links. This can
+ *              be overridden using H5Lregister().
+ *
+ *              Given a filename and path packed into the link udata,
+ *              attempts to open an object within an external file.
+ *              If the H5L_ELINK_PREFIX_PROP property is set in the
+ *              link access property list, appends that prefix to the
+ *              filename being opened.
+ *
+ * Return:	ID of the opened object on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, July 10, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
+    void * udata, size_t UNUSED udata_size, hid_t lapl_id)
+{
+    hid_t         fid;
+    char         *file_name;
+    char         *obj_name;
+    char         *prefix;
+    size_t        fname_len;
+    hbool_t       fname_alloc = FALSE;
+    unsigned      intent;
+    hid_t         ret_value = -1;
 
+    file_name = (char *) udata;
+    fname_len = HDstrlen(file_name);
+    obj_name = ((char *) udata) + fname_len + 1;
+
+    /* See if the external link prefix property is set */
+    if(H5Pget_elink_prefix(lapl_id, &prefix) < 0)
+        goto error;
+
+    /* If so, prepend it to the filename */
+    if(prefix != NULL)
+    {
+        size_t buf_size;
+
+        buf_size = HDstrlen(prefix);
+
+        /* Allocate a buffer to hold the filename plus prefix */
+        file_name = H5MM_malloc(buf_size + fname_len + 1);
+        fname_alloc = TRUE;
+
+        /* Add the external link's filename to the prefix supplied */
+        HDstrcpy(file_name, prefix);
+        HDstrcat(file_name, udata);
+    }
+
+    /* Figure out if we should open with read-write or read-only */
+    if((fid = H5Iget_file_id(cur_group)) < 0)
+        goto error;
+    if(H5Fget_intent(fid, &intent) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    if((fid = H5Fopen(file_name, intent, H5P_DEFAULT)) < 0)
+        goto error;
+    ret_value = H5Oopen(fid, obj_name, lapl_id); /* If this fails, our return value will be negative. */
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    /* Free file_name if it's been allocated */
+    if(fname_alloc)
+        H5MM_xfree(file_name);
+
+    return ret_value;
+
+error:
+    /* Free file_name if it's been allocated */
+    if(fname_alloc)
+        H5MM_xfree(file_name);
+
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_extern_query
+ *
+ * Purpose:	Default query function for external links. This can
+ *              be overridden using H5Lregister().
+ *
+ *              Returns the size of the link's user data. If a buffer of
+ *              is provided, copies at most buf_size bytes of the udata
+ *              into it.
+ *
+ * Return:	Size of buffer on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, July 10, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static ssize_t
+H5L_extern_query(const char UNUSED * link_name, void * udata,
+    size_t udata_size, void * buf /*out*/, size_t buf_size)
+{
+    size_t        ret_value;
+
+    /* If the buffer is NULL, skip writng anything in it and just return
+     * the size needed */
+    if(buf) {
+        if(udata_size < buf_size)
+            buf_size = udata_size;
+
+        /* Copy the udata verbatim up to udata_size*/
+        HDmemcpy(buf, udata, udata_size);
+    }
+
+    ret_value = udata_size;
+
+    return ret_value;
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Lcreate_external
  *
@@ -232,7 +243,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     HDstrcpy(temp_name + (HDstrlen(file_name) + 1), obj_name);
 
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, temp_name, buf_size, H5L_LINK_EXTERNAL, H5G_TARGET_NORMAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, temp_name, buf_size, H5L_LINK_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -240,8 +251,8 @@ done:
         H5MM_free(temp_name);
     FUNC_LEAVE_API(ret_value);
 } /* end H5Lcreate_external() */
-
 
+
 /*-------------------------------------------------------------------------
  * Function: H5L_register_external
  *
@@ -257,9 +268,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_register_external()
+H5L_register_external(void)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5L_register_external, FAIL)
 
@@ -318,3 +329,4 @@ H5Lunpack_elink_val(char *ext_linkval, char **filename, char **obj_path)
 done:
     FUNC_LEAVE_API(ret_value)
 }
+

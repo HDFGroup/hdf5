@@ -58,9 +58,6 @@ static herr_t H5G_traverse_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
-static herr_t H5G_traverse_elink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
-    hid_t dxpl_id);
 static herr_t H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
@@ -160,7 +157,6 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5O_loc_t           grp_oloc_copy;
     H5O_loc_t          *new_oloc=NULL;
     H5F_t              *temp_file=NULL;
-    H5F_t              *new_file=NULL;
     H5G_t              *grp;
     H5P_genplist_t     *lapl_default;
     H5P_genplist_t     *lapl;                   /* LAPL with nlinks set */

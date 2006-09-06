@@ -119,7 +119,7 @@ H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t d
     /* Create symbol table private heap */
     if(H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
-    name_offset = H5HL_insert(f, dxpl_id, stab->heap_addr, 1, "");
+    name_offset = H5HL_insert(f, dxpl_id, stab->heap_addr, (size_t)1, "");
     if((size_t)(-1) == name_offset)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap")
 

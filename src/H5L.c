@@ -691,7 +691,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_link_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
+H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_link_t link_type,
+    const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
     H5G_loc_t	link_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -708,7 +709,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_link_t link_type, con
 
     /* Create external link */
     if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type,
-                H5G_TARGET_NORMAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+                lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1039,7 +1040,6 @@ herr_t
 H5L_link(H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
            hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5F_t *file = NULL;                 /* File link will be in */
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1107,7 +1107,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 
     /* Set the link's name correctly */
     /* Casting away const OK -QAK */
-    udata->lnk->name = name;
+    udata->lnk->name = (char *)name;
 
     /* Insert link into group */
     if(H5G_obj_insert(grp_loc->oloc, name, udata->lnk, (hbool_t)(udata->lnk->type == H5L_LINK_HARD ? TRUE : FALSE), udata->dxpl_id) < 0)
@@ -1425,9 +1425,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, void * ud_data,
-    size_t ud_data_size, H5L_link_t type, unsigned traverse_flags,
-    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
+H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void * ud_data,
+    size_t ud_data_size, H5L_link_t type, hid_t lcpl_id, hid_t lapl_id,
+    hid_t dxpl_id)
 {
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1438,7 +1438,6 @@ H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, void * ud_data,
     HDassert(type >= H5L_LINK_UD_MIN && type <= H5L_LINK_MAX);
     HDassert(link_loc);
     HDassert(link_name && *link_name);
-    HDassert(ud_data_size >= 0);
     HDassert(ud_data_size == 0 || ud_data);
 
     /* Initialize the link struct's pointer to its udata buffer */
@@ -1720,8 +1719,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud10_t *udata = (H5L_trav_ud10_t *)_udata;   /* User data passed in */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
@@ -1796,6 +1796,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *l
             }
         }
     }
+
 done:
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0)
@@ -2043,7 +2044,7 @@ done:
  */
 static herr_t
 H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud1_t *udata = (H5L_trav_ud1_t *)_udata;   /* User data passed in */
     H5L_linkinfo_t *linfo = udata->linfo;
@@ -2086,7 +2087,7 @@ H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const
               link_class = H5L_find_class(lnk->type);
 
               if(link_class != NULL && link_class->query_func != NULL) {
-                  if((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL, 0)) < 0)
+                  if((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL, (size_t)0)) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query buffer size callback returned failure")
 
                   linfo->u.link_size = cb_ret;
@@ -2153,7 +2154,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5L_get_default_lcpl()
+H5L_get_default_lcpl(void)
 {
     hid_t ret_value = FAIL;       /* Return value */
 
