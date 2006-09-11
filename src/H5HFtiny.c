@@ -63,6 +63,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id,
+    H5HF_operator_t op, void *op_data);
 
 
 /*********************/
@@ -233,31 +235,33 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_tiny_read
+ * Function:	H5HF_tiny_op_real
  *
- * Purpose:	Read a 'tiny' object from the heap
+ * Purpose:	Internal routine to perform operation on 'tiny' object
  *
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
- *		Aug  8 2006
+ *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
+static herr_t
+H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
+    void *op_data)
 {
-    size_t enc_obj_size;        /* Encoded object size */
+    size_t enc_obj_size;                /* Encoded object size */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_tiny_read)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_tiny_op_real)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
     HDassert(id);
-    HDassert(obj);
+    HDassert(op);
 
     /* Check if 'tiny' object ID is in extended form */
     if(!hdr->tiny_len_extended) {
@@ -281,11 +285,86 @@ H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
         id++; id++;
     } /* end else */
 
-    /* Retrieve the object's data */
-    HDmemcpy(obj, id, (enc_obj_size + 1));
+    /* Call the user's 'op' callback */
+    if(op(id, (enc_obj_size + 1), op_data) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
 
+done:
     FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_tiny_op_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_tiny_read
+ *
+ * Purpose:	Read a 'tiny' object from the heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug  8 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_tiny_read)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Call the internal 'op' routine */
+    if(H5HF_tiny_op_real(hdr, id, H5HF_op_memcpy, obj) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_tiny_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_tiny_op
+ *
+ * Purpose:	Operate directly on a 'tiny' object
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sept 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
+    void *op_data)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_tiny_op)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(op);
+
+    /* Call the internal 'op' routine routine */
+    if(H5HF_tiny_op_real(hdr, id, op, op_data) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_tiny_op() */
 
 
 /*-------------------------------------------------------------------------

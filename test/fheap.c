@@ -295,6 +295,30 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	op_memcpy
+ *
+ * Purpose:	Perform 'memcpy' for an object
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+op_memcpy(const void *obj, size_t obj_len, void *op_data)
+{
+    /* Make copy of the object */
+    HDmemcpy(op_data, obj, obj_len);
+
+    return(SUCCEED);
+} /* op_memcpy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	add_obj
  *
  * Purpose:	Add an object to heap
@@ -13512,6 +13536,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
 
+    /* Check 'op' functionality on first huge object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id, op_memcpy, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
     /* Insert second object too large for managed heap blocks */
     obj_size = SMALL_STAND_SIZE + 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
@@ -13542,6 +13573,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
 
+    /* Check 'op' functionality on second huge object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id2, op_memcpy, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
     /* Insert third object too large for managed heap blocks */
     obj_size = SMALL_STAND_SIZE + 3;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id3) < 0)
@@ -13568,6 +13606,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
     HDmemset(shared_robj_g, 0, obj_size);
     if(H5HF_read(fh, dxpl, heap_id3, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Check 'op' functionality on third huge object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id3, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
@@ -13605,6 +13650,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
     HDmemset(shared_robj_g, 0, obj_size);
     if(H5HF_read(fh, dxpl, heap_id4, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Check 'op' functionality on fourth ('normal') object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id4, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
@@ -13647,6 +13699,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
 
+    /* Check 'op' functionality on fifth ('normal') object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id5, op_memcpy, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
 
     /* Insert sixth object small enough to encode in heap ID */
     obj_size = tparam->actual_id_len - 2;
@@ -13678,6 +13737,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR
 
+    /* Check 'op' functionality on sixth ('tiny') object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id6, op_memcpy, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
     /* Insert seventh object small enough to encode in heap ID */
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id7) < 0)
@@ -13704,6 +13770,13 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
     HDmemset(shared_robj_g, 0, obj_size);
     if(H5HF_read(fh, dxpl, heap_id7, shared_robj_g) < 0)
+        FAIL_STACK_ERROR
+    if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
+        TEST_ERROR
+
+    /* Check 'op' functionality on seventh ('tiny') object */
+    HDmemset(shared_robj_g, 0, obj_size);
+    if(H5HF_op(fh, dxpl, heap_id7, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
     if(HDmemcmp(shared_wobj_g, shared_robj_g, obj_size))
         TEST_ERROR

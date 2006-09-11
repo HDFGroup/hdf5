@@ -83,6 +83,31 @@ H5FL_DEFINE_STATIC(H5HF_t);
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_op_memcpy
+ *
+ * Purpose:	Performs a 'memcpy' operation for a heap 'op' callback
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_op_memcpy(const void *obj, size_t obj_len, void *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_op_memcpy)
+
+    /* Perform memcpy() */
+    HDmemcpy(op_data, obj, obj_len);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_op_memcpy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_create
  *
  * Purpose:	Creates a new empty fractal heap in the file.
@@ -493,6 +518,69 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_op
+ *
+ * Purpose:	Perform an operation directly on a heap object
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sept 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *_id, H5HF_operator_t op,
+    void *op_data)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HF_op, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(op);
+
+    /* Get the ID flags */
+    id_flags = *id;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Check type of object in heap */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        /* Operate on object from managed heap blocks */
+        if(H5HF_man_op(fh->hdr, dxpl_id, id, op, op_data) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Operate on 'huge' object from file */
+        if(H5HF_huge_op(fh->hdr, dxpl_id, id, op, op_data) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'huge' object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Operate on 'tiny' object from file */
+        if(H5HF_tiny_op(fh->hdr, id, op, op_data) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'tiny' object from fractal heap")
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_op() */
 
 
 /*-------------------------------------------------------------------------

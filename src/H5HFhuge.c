@@ -78,6 +78,8 @@ herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
 
 /* Local 'huge' object support routines */
 static hsize_t H5HF_huge_new_id(H5HF_hdr_t *hdr);
+static herr_t H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    const uint8_t *id, hbool_t is_read, H5HF_operator_t op, void *op_data);
 
 /*********************/
 /* Package Variables */
@@ -571,9 +573,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_huge_read
+ * Function:	H5HF_huge_op_real
  *
- * Purpose:	Read a 'huge' object from the heap
+ * Purpose:	Internal routine to perform an operation on a 'huge' object
  *
  * Return:	SUCCEED/FAIL
  *
@@ -583,8 +585,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
+static herr_t
+H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    hbool_t is_read, H5HF_operator_t op, void *op_data)
 {
     void *read_buf;                     /* Pointer to buffer for reading */
     haddr_t obj_addr;                   /* Object's address in the file */
@@ -592,14 +595,14 @@ H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     unsigned filter_mask = 0;           /* Filter mask for object (only used for filtered objects) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_read)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_op_real)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
     HDassert(id);
-    HDassert(obj);
+    HDassert(is_read || op);
 
     /* Skip over the flag byte */
     id++;
@@ -651,14 +654,15 @@ H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     } /* end else */
 
     /* Set up buffer for reading */
-    if(hdr->filter_len > 0) {
+    if(hdr->filter_len > 0 || !is_read) {
         if(NULL == (read_buf = H5MM_malloc((size_t)obj_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
     } /* end if */
     else
-        read_buf = obj;
+        read_buf = op_data;
 
     /* Read the object's (possibly filtered) data from the file */
+    /* (reads directly into application's buffer if no filters are present) */
     if(H5F_block_read(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, (size_t)obj_size, dxpl_id, read_buf) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_READERROR, FAIL, "can't read 'huge' object's data from the file")
 
@@ -672,17 +676,107 @@ H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
         read_size = nbytes = obj_size;
         if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "input filter failed")
-
-        /* Copy object to user's buffer */
-        HDmemcpy(obj, read_buf, nbytes);
-
-        /* Release read buffer */
-        H5MM_xfree(read_buf);
+        obj_size = nbytes;
     } /* end if */
+
+    /* Perform correct operation on buffer read in */
+    if(is_read) {
+        /* Copy object to user's buffer if there's filters on heap data */
+        /* (if there's no filters, the object was read directly into the user's buffer) */
+        if(hdr->filter_len > 0)
+            HDmemcpy(op_data, read_buf, (size_t)obj_size);
+    } /* end if */
+    else {
+        /* Call the user's 'op' callback */
+        if(op(read_buf, (size_t)obj_size, op_data) < 0) {
+            /* Release buffer */
+            H5MM_xfree(read_buf);
+
+            /* Indicate error */
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
+        } /* end if */
+    } /* end if */
+
+    /* Release the buffer for reading */
+    if(hdr->filter_len > 0 || !is_read)
+        H5MM_xfree(read_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_huge_op_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_huge_read
+ *
+ * Purpose:	Read a 'huge' object from the heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sept 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_huge_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_read)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Call the internal 'op' routine */
+    if(H5HF_huge_op_real(hdr, dxpl_id, id, TRUE, NULL, obj) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_huge_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_huge_op
+ *
+ * Purpose:	Operate directly on a 'huge' object
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sept 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_huge_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    H5HF_operator_t op, void *op_data)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_op)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(op);
+
+    /* Call the internal 'op' routine routine */
+    if(H5HF_huge_op_real(hdr, dxpl_id, id, FALSE, op, op_data) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_huge_op() */
 
 
 /*-------------------------------------------------------------------------

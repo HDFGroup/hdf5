@@ -619,6 +619,8 @@ H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
     const void *obj, void *id);
 H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
+H5_DLL herr_t H5HF_man_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id);
 
 /* 'Huge' object routines */
@@ -629,6 +631,8 @@ H5_DLL herr_t H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id,
     const uint8_t *id, size_t *obj_len_p);
 H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
+H5_DLL herr_t H5HF_huge_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_huge_remove(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id);
 H5_DLL herr_t H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
@@ -640,6 +644,8 @@ H5_DLL herr_t H5HF_tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj
 H5_DLL herr_t H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id,
     size_t *obj_len_p);
 H5_DLL herr_t H5HF_tiny_read(H5HF_hdr_t *fh, const uint8_t *id, void *obj);
+H5_DLL herr_t H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id,
+    H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_tiny_remove(H5HF_hdr_t *fh, const uint8_t *id);
 
 /* Metadata cache callbacks */
@@ -702,6 +708,9 @@ H5_DLL herr_t H5HF_sect_row_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL H5HF_indirect_t *H5HF_sect_row_get_iblock(H5HF_free_section_t *sect);
 H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries);
+
+/* Internal operator callbacks */
+H5_DLL herr_t H5HF_op_memcpy(const void *obj, size_t obj_len, void *op_data);
 
 /* Testing routines */
 #ifdef H5HF_TESTING

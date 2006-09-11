@@ -93,6 +93,10 @@ typedef struct H5HF_stat_t {
 /* Fractal heap info (forward decl - defined in H5HFpkg.h) */
 typedef struct H5HF_t H5HF_t;
 
+/* Typedef for 'op' operations */
+typedef herr_t (*H5HF_operator_t)(const void *obj/*in*/, size_t obj_len,
+        void *op_data/*in,out*/);
+
 
 /*****************************/
 /* Library-private Variables */
@@ -111,6 +115,8 @@ H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *id,
     size_t *obj_len_p/*out*/);
 H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
+H5_DLL herr_t H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *_id,
+    H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
 H5_DLL herr_t H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);

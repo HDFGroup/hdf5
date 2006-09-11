@@ -230,6 +230,7 @@ MINOR, HEAP, H5E_CANTCOMPUTE, Can't compute value
 MINOR, HEAP, H5E_CANTEXTEND, Can't extend heap's space
 MINOR, HEAP, H5E_CANTATTACH, Can't attach object
 MINOR, HEAP, H5E_CANTUPDATE, Can't update object
+MINOR, HEAP, H5E_CANTOPERATE, Can't operate on object
 
 # Free space manager errors
 MINOR, FSPACE, H5E_CANTMERGE, Can't merge objects

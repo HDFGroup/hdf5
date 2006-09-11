@@ -57,7 +57,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
+static herr_t H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    const uint8_t *id, H5HF_operator_t op, void *op_data);
 
 /*********************/
 /* Package Variables */
@@ -228,9 +229,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_read
+ * Function:	H5HF_man_op_real
  *
- * Purpose:	Read an object from a managed heap
+ * Purpose:	Internal routine to perform an operation on a managed heap
+ *              object
  *
  * Return:	SUCCEED/FAIL
  *
@@ -240,8 +242,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
+static herr_t
+H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, 
+    H5HF_operator_t op, void *op_data)
 {
     H5HF_direct_t *dblock;              /* Pointer to direct block to query */
     hsize_t obj_off;                    /* Object's offset in heap */
@@ -252,14 +255,14 @@ H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     size_t dblock_size;                 /* Direct block size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_read)
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_op_real)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
     HDassert(id);
-    HDassert(obj);
+    HDassert(op);
 
     /* Skip over the flag byte */
     id++;
@@ -354,8 +357,14 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
     /* Point to location for object */
     p = dblock->blk + blk_off;
 
-    /* Copy the object's data into the heap */
-    HDmemcpy(obj, p, obj_len);
+    /* Call the user's 'op' callback */
+    if(op(p, obj_len, op_data) < 0) {
+        /* Release direct block */
+        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
+    } /* end if */
 
     /* Unlock direct block */
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -364,7 +373,80 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_op_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_read
+ *
+ * Purpose:	Read an object from a managed heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 17 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_read)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Call the internal 'op' routine routine */
+    if(H5HF_man_op_real(hdr, dxpl_id, id, H5HF_op_memcpy, obj) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_op
+ *
+ * Purpose:	Operate directly on an object from a managed heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sept 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    H5HF_operator_t op, void *op_data)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_op)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(op);
+
+    /* Call the internal 'op' routine routine */
+    if(H5HF_man_op_real(hdr, dxpl_id, id, op, op_data) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_op() */
 
 
 /*-------------------------------------------------------------------------
