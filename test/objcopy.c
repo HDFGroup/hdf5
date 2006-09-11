@@ -6560,7 +6560,9 @@ main(void)
 	nerrors += test_copy_group_wide_loop(fapl);
 	nerrors += test_copy_group_links(fapl);
 	nerrors += test_copy_soft_link(fapl);
+#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += test_copy_ext_link(fapl);
+#endif /* H5_CANNOT_OPEN_TWICE */
 	nerrors += test_copy_exist(fapl);
 	nerrors += test_copy_path(fapl);
 	nerrors += test_copy_same_file_named_datatype(fapl);

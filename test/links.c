@@ -5070,15 +5070,18 @@ main(void)
 	nerrors += test_move_preserves(fapl);
 #endif
 	nerrors += test_compat(fapl);
-
+#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_root(fapl) < 0 ? 1 : 0;
+#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_path(fapl) < 0 ? 1 : 0;
         nerrors += external_link_mult(fapl) < 0 ? 1 : 0;
 #ifdef H5_GROUP_REVISION
         nerrors += external_link_self(fapl) < 0 ? 1 : 0;
 #endif
+#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_pingpong(fapl) < 0 ? 1 : 0;
         nerrors += external_link_toomany(fapl) < 0 ? 1 : 0;
+#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_dangling(fapl) < 0 ? 1 : 0;
         nerrors += external_link_recursive(fapl) < 0 ? 1 : 0;
         nerrors += external_link_query(fapl) < 0 ? 1 : 0;
@@ -5090,7 +5093,9 @@ main(void)
 #ifdef H5_GROUP_REVISION
         nerrors += external_link_ride(fapl) < 0 ? 1 : 0;
 #endif /* H5_GROUP_REVISION */
+#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_closing(fapl) < 0 ? 1 : 0;
+#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_endian(fapl) < 0 ? 1 : 0;
 
         /* These tests assume that external links are a form of UD links,
