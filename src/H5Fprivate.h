@@ -454,6 +454,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
 
+/* Definition for 'use latest format version' flag */
+#define H5F_ACS_LATEST_FORMAT_NAME              "latest_format"
+#define H5F_ACS_LATEST_FORMAT_SIZE              sizeof(hbool_t)
+#define H5F_ACS_LATEST_FORMAT_DEF               FALSE
+
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"

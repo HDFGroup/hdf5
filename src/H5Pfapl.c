@@ -1462,11 +1462,84 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
 
     /* Get values */
     if (size) {
-        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+        if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'small data' block size");
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_small_data_block_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_latest_format
+ *
+ * Purpose:	Indicates that the library should always use the latest version
+ *      of the file format when creating objects.  If this flag is not set,
+ *      the library will always use the most backwardly compatibly format
+ *      possible that can store the information about an object.
+ *
+ *	The default value is set to FALSE (creating backwardly compatible files)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September 9, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_latest_format(hid_t plist_id, hbool_t latest)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_latest_format, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_latest_format() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_latest_format
+ *
+ * Purpose:	Returns the current settings for the 'latest format' flag
+ *      from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September 9, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_latest_format(hid_t plist_id, hbool_t *latest/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(H5Pget_latest_format, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value */
+    if(latest)
+        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, latest) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'latest format' flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_latest_format() */
 
