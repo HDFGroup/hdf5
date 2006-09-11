@@ -1349,7 +1349,7 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size)<0)
+    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
     if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
@@ -1573,7 +1573,7 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
-    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size)<0)
+    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
     if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
@@ -1725,22 +1725,22 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(leaf->nrec == curr_node_ptr->node_nrec);
 
     /* Check for inserting into empty leaf */
-    if(leaf->nrec==0)
-        idx=0;
+    if(leaf->nrec == 0)
+        idx = 0;
     else {
         /* Find correct location to insert this record */
-        if((cmp = H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx)) == 0)
+        if((cmp = H5B2_locate_record(shared->type, leaf->nrec, shared->nat_off, leaf->leaf_native, udata, &idx)) == 0)
             HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
         if(cmp > 0)
             idx++;
 
         /* Make room for new record */
-        if(idx<leaf->nrec)
-            HDmemmove(H5B2_LEAF_NREC(leaf,shared,idx+1),H5B2_LEAF_NREC(leaf,shared,idx),shared->type->nrec_size*(leaf->nrec-idx));
+        if(idx < leaf->nrec)
+            HDmemmove(H5B2_LEAF_NREC(leaf, shared, idx + 1), H5B2_LEAF_NREC(leaf, shared, idx), shared->type->nrec_size * (leaf->nrec-idx));
     } /* end else */
 
     /* Make callback to store record in native form */
-    if((shared->type->store)(H5B2_LEAF_NREC(leaf,shared,idx), udata) < 0)
+    if((shared->type->store)(H5B2_LEAF_NREC(leaf, shared, idx), udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
 
     /* Update record count for node pointer to current node */
@@ -1808,9 +1808,9 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         size_t      split_nrec; /* Number of records to split node at */
 
         /* Locate node pointer for child */
-        if((cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx)) == 0)
+        if((cmp = H5B2_locate_record(shared->type, internal->nrec, shared->nat_off, internal->int_native, udata, &idx)) == 0)
             HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
-        if(cmp>0)
+        if(cmp > 0)
             idx++;
 
         /* Set the number of redistribution retries */
@@ -2175,7 +2175,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 
     /* Descend into last child node, if current node is an internal node */
     if(!ret_value && depth>0) {
-        if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
+        if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
     } /* end if */
 
@@ -2224,11 +2224,11 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Lock current B-tree node */
     leaf_addr = curr_node_ptr->addr;
-    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared = H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Sanity check number of records */
@@ -2236,12 +2236,12 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(leaf->nrec == curr_node_ptr->node_nrec);
 
     /* Find correct location to remove this record */
-    if(H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx) != 0)
+    if(H5B2_locate_record(shared->type, leaf->nrec, shared->nat_off, leaf->leaf_native, udata, &idx) != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
 
     /* Make 'remove' callback if there is one */
     if(op)
-        if((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) < 0)
+        if((op)(H5B2_LEAF_NREC(leaf, shared, idx), op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record into leaf node")
 
     /* Update number of records in node */
@@ -2252,12 +2252,12 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     if(leaf->nrec > 0) {
         /* Pack record out of leaf */
-        if(idx<leaf->nrec)
-            HDmemmove(H5B2_LEAF_NREC(leaf,shared,idx),H5B2_LEAF_NREC(leaf,shared,idx+1),shared->type->nrec_size*(leaf->nrec-idx));
+        if(idx < leaf->nrec)
+            HDmemmove(H5B2_LEAF_NREC(leaf, shared, idx), H5B2_LEAF_NREC(leaf, shared, (idx + 1)), shared->type->nrec_size * (leaf->nrec-idx));
     } /* end if */
     else {
         /* Release space for B-tree node on disk */
-        if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size)<0)
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
 
         /* Let the cache know that the object is deleted */
@@ -2434,7 +2434,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                 idx = 0;
             else {
 /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
-                cmp=H5B2_locate_record(shared->type, internal->nrec, shared->nat_off, internal->int_native, udata, &idx);
+                cmp = H5B2_locate_record(shared->type, internal->nrec, shared->nat_off, internal->int_native, udata, &idx);
                 if(cmp >= 0)
                     idx++;
             } /* end else */
@@ -2630,15 +2630,15 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(op);
 
     /* Lock current B-tree node */
-    if (NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node_ptr->addr, curr_node_ptr->node_nrec, depth, H5AC_READ)))
+    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node_ptr->addr, curr_node_ptr->node_nrec, depth, H5AC_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared = H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Locate node pointer for child */
-    cmp = H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
+    cmp = H5B2_locate_record(shared->type, internal->nrec, shared->nat_off, internal->int_native, udata, &idx);
     if(cmp > 0)
         idx++;
 
@@ -2656,11 +2656,11 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Attempt to find neighboring record */
     if(depth>1) {
-        if(H5B2_neighbor_internal(f, dxpl_id, bt2_shared, depth-1, &internal->node_ptrs[idx], neighbor_loc, comp, udata, op, op_data)<0)
+        if(H5B2_neighbor_internal(f, dxpl_id, bt2_shared, depth-1, &internal->node_ptrs[idx], neighbor_loc, comp, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree internal node")
     } /* end if */
     else {
-        if(H5B2_neighbor_leaf(f, dxpl_id, bt2_shared, &internal->node_ptrs[idx], neighbor_loc, comp, udata, op, op_data)<0)
+        if(H5B2_neighbor_leaf(f, dxpl_id, bt2_shared, &internal->node_ptrs[idx], neighbor_loc, comp, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree leaf node")
     } /* end else */
 
@@ -2723,7 +2723,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 
         /* Descend into children */
         for(u=0; u<internal->nrec+1; u++)
-            if(H5B2_delete_node(f, dxpl_id, bt2_shared, depth-1, &(internal->node_ptrs[u]), op, op_data)<0)
+            if(H5B2_delete_node(f, dxpl_id, bt2_shared, depth-1, &(internal->node_ptrs[u]), op, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node descent failed")
     } /* end if */
     else {
@@ -2752,7 +2752,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     } /* end if */
 
     /* Release space for current B-tree node on disk */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, curr_node->addr, (hsize_t)shared->node_size)<0)
+    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, curr_node->addr, (hsize_t)shared->node_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
 
 done:
