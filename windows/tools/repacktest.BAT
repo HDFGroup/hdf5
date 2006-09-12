@@ -277,10 +277,11 @@ set flag=-i %test_szip% -o %output_szip%
 :: The following checks whether szip library is available,
 :: If not, skip the test.
 ::-----------
-if "%HDF5_EXT_SZIP%"=="" goto SKIP_SZIP_COPY
-call %tooltest% %test_szip% %nodiff%
-: SKIP_SZIP_COPY
-call %tooltest% %test_szip% %nodiff% skip
+if "%HDF5_EXT_SZIP%"=="" (
+	call %tooltest% %test_szip% %nodiff% skip
+) else (
+	call %tooltest% %test_szip% %nodiff% 
+)
 
 ::------------
 ::szip remove
@@ -291,11 +292,11 @@ set flag=-i %test_szip% -o %output_szip% -f dset_szip:NONE
 :: The following checks whether szip library is available,
 :: If not, skip the test.
 ::-----------
-if "%HDF5_EXT_SZIP%"=="" goto SKIP_SZIP_REMOVE
-call %tooltest% %test_szip% %nodiff%
-
-: SKIP_SZIP_REMOVE
-call %tooltest% %test_szip% %nodiff% skip
+if "%HDF5_EXT_SZIP%"=="" (
+	call %tooltest% %test_szip% %nodiff% skip
+) else (
+ 	call %tooltest% %test_szip% %nodiff% 
+)
 
 ::--------------
 :: deflate copy
@@ -306,11 +307,11 @@ set flag=-i %test_deflate% -o %output_deflate%
 :: The following checks whether zlib library is available,
 :: If not, skip the test.
 ::-----------
-if "%HDF5_EXT_ZLIB%"=="" goto SKIP_ZLIB_COPY
-call %tooltest% %test_deflate% %nodiff% 
-
-: SKIP_ZLIB_COPY
-call %tooltest% %test_deflate% %nodiff% skip
+if "%HDF5_EXT_ZLIB%"=="" (
+	call %tooltest% %test_deflate% %nodiff% skip
+) else (
+	call %tooltest% %test_deflate% %nodiff% skip
+)
 
 ::---------------
 :: deflate remove
@@ -321,11 +322,11 @@ set flag=-i %test_deflate% -o %output_deflate% -f dset_deflate:NONE
 :: The following checks whether zlib library is available,
 :: If not, skip the test.
 ::-----------
-if "%HDF5_EXT_ZLIB%"=="" goto SKIP_ZLIB_REMOVE
-call %tooltest% %test_deflate% %nodiff%
-
-: SKIP_ZLIB_REMOVE
-call %tooltest% %test_deflate% %nodiff% skip
+if "%HDF5_EXT_ZLIB%"=="" (
+	call %tooltest% %test_deflate% %nodiff% skip
+) else (
+	call %tooltest% %test_deflate% %nodiff% 
+)
 
 
 ::--------------  
