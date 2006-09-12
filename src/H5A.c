@@ -282,7 +282,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     }
 
     /* Copy the attribute name */
-    attr->name = HDstrdup(name);
+    attr->name = H5MM_xstrdup(name);
 
     /* Copy the attribute's datatype */
     attr->dt = H5T_copy(type, H5T_COPY_ALL);
@@ -1344,7 +1344,7 @@ H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxp
     /* Copy the attribute name. */
     if(found_attr.name)
         HDfree(found_attr.name);
-    found_attr.name = HDstrdup(new_name);
+    found_attr.name = H5MM_xstrdup(new_name);
     if(!found_attr.name)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "String copy failed")
 
@@ -1585,7 +1585,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr, unsigned update_flags)
         new_attr->obj_opened = FALSE;
 
         /* Copy the guts of the attribute */
-        new_attr->name = HDstrdup(old_attr->name);
+        new_attr->name = H5MM_xstrdup(old_attr->name);
         new_attr->dt = H5T_copy(old_attr->dt, H5T_COPY_ALL);
         new_attr->ds = H5S_copy(old_attr->ds, FALSE);
     } /* end if */

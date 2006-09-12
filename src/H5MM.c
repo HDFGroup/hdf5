@@ -165,29 +165,24 @@ done:
  *		matzke@llnl.gov
  *		Jul 10 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value=NULL;
+    char	*ret_value = NULL;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xstrdup);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xstrdup)
 
-    if (s) {
+    if(s) {
         ret_value = H5MM_malloc(HDstrlen(s) + 1);
-        assert (ret_value);
+        HDassert(ret_value);
         HDstrcpy(ret_value, s);
     } /* end if */
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MM_xstrdup() */
 
 
 /*-------------------------------------------------------------------------

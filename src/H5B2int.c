@@ -2131,14 +2131,15 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     HDassert(op);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared = H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
-    if(depth>0) {
+    /* Protect current node & set up variables */
+    if(depth > 0) {
         H5B2_internal_t *internal;     /* Pointer to internal node */
 
         /* Lock the current B-tree node */
-        if (NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node->addr, curr_node->node_nrec, depth, H5AC_READ)))
+        if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node->addr, curr_node->node_nrec, depth, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Set up information about current node */
@@ -2164,7 +2165,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     for(u = 0; u < curr_node->node_nrec && !ret_value; u++) {
         /* Descend into child node, if current node is an internal node */
         if(depth > 0) {
-            if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, depth-1, &(node_ptrs[u]), op, op_data)) < 0)
+            if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, (depth - 1), &(node_ptrs[u]), op, op_data)) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
         } /* end if */
 
@@ -2174,15 +2175,15 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     } /* end for */
 
     /* Descend into last child node, if current node is an internal node */
-    if(!ret_value && depth>0) {
-        if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data)) < 0)
+    if(!ret_value && depth > 0) {
+        if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, (depth - 1), &(node_ptrs[u]), op, op_data)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
     } /* end if */
 
 done:
     /* Unlock current node */
     if(node)
-        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
