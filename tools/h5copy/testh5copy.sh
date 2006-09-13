@@ -51,10 +51,12 @@ VERIFY()
 # Run a test and print PASS or *FAIL*. If h5copy can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
-# $1 is input file
-# $2 is output file
+# Assumed arguments:
+# $1 is -i
+# $2 is input file
+# $3 is -o
+# $4 is output file
 # $* everything else arguments for h5copy.
-
 
 TOOLTEST() 
 {
