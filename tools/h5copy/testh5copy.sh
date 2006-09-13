@@ -14,13 +14,14 @@
 #
 # Tests for the h5copy tool
 #
-# Pedro Vicente Nunes
-# pvn@hdfgroup.org
+# Pedro Vicente Nunes (pvn@hdfgroup.org), Albert Cheng (acheng@hdfgroup.org)
 # Thursday, July 20, 2006
 #
 
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
+H5DIFF=../h5diff/h5diff     # The h5diff tool name 
+H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the h5diff  tool binary
 
 nerrors=0
 
@@ -32,31 +33,81 @@ test -d ../testfiles || mkdir ../testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
-TESTING() {
-	SPACES="                                                               "
-	    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+TESTING() 
+{
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+VERIFY() 
+{
+    SPACES="                                                               "
+    echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*. If h5copy can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
+# $1 is input file
+# $2 is output file
+# $* everything else arguments for h5copy.
 
-TOOLTEST() {
+
+TOOLTEST() 
+{
+     runh5diff=yes
+     if [ "$1" = -i ]; then
+      inputfile=$2
+     else
+      runh5diff=no
+     fi
+     if [ "$3" = -o ]; then
+      outputfile=$4
+     else 
+      runh5diff=no
+     fi
+  
     TESTING $H5COPY $@
     (
-	echo "#############################"
-	echo " output for '$H5COPY $@'"
-	echo "#############################"
-	$RUNSERIAL $H5COPY_BIN $@
+    echo "#############################"
+    echo " output for '$H5COPY $@'"
+    echo "#############################"
+    $RUNSERIAL $H5COPY_BIN $@
     ) > output.out
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	echo "failed result is:"
-	cat output.out
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    echo "failed result is:"
+    cat output.out
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
+    echo " PASSED"
+    fi
+    
+    if [ $runh5diff != no ]; then
+     H5DIFFTEST $inputfile $outputfile 
+    fi
+}
+
+# Call the h5diff tool
+#
+H5DIFFTEST() 
+{
+    VERIFY  $@
+    if [ "`uname -s`" = "TFLOPS O/S" ]; then
+     $RUNSERIAL $H5DIFF_BIN $@ -q
+    else
+     $RUNSERIAL $H5DIFF_BIN "$@" -q
+    fi
+    RET=$?
+    if [ $RET != 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
     fi
 }
 
@@ -64,11 +115,15 @@ TOOLTEST() {
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-TOOLTEST -v -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -s array -d array
-TOOLTEST -v -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -s g1 -d g1
+TOOLTEST -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -v -s array -d array
+
+
 
 if test $nerrors -eq 0 ; then
     echo "All h5copy tests passed."
 fi
 
 exit $nerrors
+
+
+
