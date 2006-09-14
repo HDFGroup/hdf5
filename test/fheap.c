@@ -914,7 +914,7 @@ static int
 del_objs(H5F_t *f, hid_t dxpl, H5HF_t **fh, fheap_test_param_t *tparam,
     fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
-    haddr_t fh_addr;            /* Address of fractal heap */
+    haddr_t fh_addr = HADDR_UNDEF;      /* Address of fractal heap */
     size_t id_len;              /* Size of fractal heap IDs */
     size_t obj_idx;             /* Index of the object to remove */
     size_t u;                   /* Local index variable */
