@@ -1,5 +1,8 @@
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if your system generates wrong code for log2 routine. */
+#undef BAD_LOG2_CODE_GENERATED
+
 /* Define if your system can handle converting denormalized floating-point
    values. */
 #undef CONVERT_DENORMAL_FLOAT

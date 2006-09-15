@@ -189,3 +189,9 @@ if [ -z "$hdf5_mpi_complex_derived_datatype_works" -a $CC_BASENAME = cc ]; then
 #        hdf5_mpi_special_collective_io_works='no'
     fi
 fi
+
+# Set flag to generate alternate code for H5V_log2_gen, to avoid
+# problems with the MIPSpro compiler 7.30 and IRIX64 6.5 (ie. other
+# combinations might work, but haven't been tested)
+# (9/15/06 - QAK)
+hdf5_cv_bad_log2_code_generated=${hdf5_cv_bad_log2_code_generated='yes'}

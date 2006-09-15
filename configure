@@ -51915,6 +51915,28 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if bad code for log2 routine is generated" >&5
+echo $ECHO_N "checking if bad code for log2 routine is generated... $ECHO_C" >&6
+if test "${hdf5_cv_bad_log2_code_generated+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  hdf5_cv_bad_log2_code_generated=no
+fi
+
+
+if test ${hdf5_cv_bad_log2_code_generated} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define BAD_LOG2_CODE_GENERATED 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 
 H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
 

@@ -346,19 +346,28 @@ static const char LogTable256[] =
 static H5_inline unsigned UNUSED
 H5V_log2_gen(hsize_t n)
 {
-    unsigned r = 0;                     /* r will be log2(n) */
+    unsigned r;                         /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */
 
-    if((ttt = (unsigned)(n >> 32)))
-        if((tt = (unsigned)(n >> 48)))
-            r = (t = (unsigned)(n >> 56)) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+#ifdef H5_BAD_LOG2_CODE_GENERATED
+    if(n > (uint64_t)0x7fffffffffffffff)
+        r = 63;
+    else {
+        n &= (uint64_t)0x7fffffffffffffff;
+#endif /* H5_BAD_LOG2_CODE_GENERATED */
+        if((ttt = (unsigned)(n >> 32)))
+            if((tt = (unsigned)(n >> 48)))
+                r = (t = (unsigned)(n >> 56)) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+            else
+                r = (t = (unsigned)(n >> 40)) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
         else
-            r = (t = (unsigned)(n >> 40)) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
-    else
-        if((tt = (unsigned)(n >> 16)))
-            r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
-        else
-            r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[n];
+            if((tt = (unsigned)(n >> 16)))
+                r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
+            else
+                r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[n];
+#ifdef H5_BAD_LOG2_CODE_GENERATED
+    } /* end else */
+#endif /* H5_BAD_LOG2_CODE_GENERATED  */
 
     return(r);
 } /* H5V_log2_gen() */
