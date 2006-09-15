@@ -29,11 +29,11 @@ $ type sys$input
 $ run  lheap
 $ type sys$input
  
-$ type sys$input
--------			Running fheap    	-------
-$ run  fheap
-$ type sys$input
- 
+$! type sys$input
+$!-------			Running fheap    	-------
+$! run  fheap
+$! type sys$input
+
 $ type sys$input
 -------			Running ohdr    	-------
 $ run  ohdr 
