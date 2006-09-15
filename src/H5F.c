@@ -2761,6 +2761,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
     H5F_t * file = NULL;
     herr_t ret_value=SUCCEED;
     FUNC_ENTER_API(H5Fget_intent, FAIL)
+    H5TRACE2("e","i*Iu",file_id,intent_flags);
 
     if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")

@@ -55,7 +55,7 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_4)
 subdir = perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

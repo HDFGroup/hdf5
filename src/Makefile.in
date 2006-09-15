@@ -61,7 +61,7 @@ DIST_COMMON = $(include_HEADERS) $(srcdir)/H5config.h.in \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libhdf5.settings.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
-	$(top_srcdir)/config/lt_vers.am
+	$(top_srcdir)/config/lt_vers.am COPYING
 noinst_PROGRAMS = H5detect$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

@@ -69,9 +69,9 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/config/commence.am \
-	$(top_srcdir)/configure COPYING bin/compile bin/config.guess \
-	bin/config.sub bin/depcomp bin/install-sh bin/ltmain.sh \
-	bin/missing bin/mkinstalldirs
+	$(top_srcdir)/configure COPYING bin/COPYING bin/compile \
+	bin/config.guess bin/config.sub bin/depcomp bin/install-sh \
+	bin/ltmain.sh bin/missing bin/mkinstalldirs
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in

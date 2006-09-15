@@ -1495,6 +1495,7 @@ H5Pset_latest_format(hid_t plist_id, hbool_t latest)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_latest_format, FAIL)
+    H5TRACE2("e","ib",plist_id,latest);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
@@ -1529,6 +1530,7 @@ H5Pget_latest_format(hid_t plist_id, hbool_t *latest/*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_latest_format, FAIL)
+    H5TRACE2("e","ix",plist_id,latest);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
