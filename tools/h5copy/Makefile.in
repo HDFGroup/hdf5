@@ -30,7 +30,7 @@
 # HDF5 Library Makefile(.in)
 #
 
-SOURCES = h5copy.c
+SOURCES = h5copy.c $(h5copygentest_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -58,6 +58,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 bin_PROGRAMS = h5copy$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1)
 subdir = tools/h5copy
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -68,6 +69,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+am__EXEEXT_1 = h5copygentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5copy_SOURCES = h5copy.c
 h5copy_OBJECTS = h5copy.$(OBJEXT)
@@ -75,6 +77,11 @@ h5copy_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
 am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 h5copy_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am_h5copygentest_OBJECTS = h5copygentest.$(OBJEXT)
+h5copygentest_OBJECTS = $(am_h5copygentest_OBJECTS)
+h5copygentest_LDADD = $(LDADD)
+h5copygentest_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -86,8 +93,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5copy.c
-DIST_SOURCES = h5copy.c
+SOURCES = h5copy.c $(h5copygentest_SOURCES)
+DIST_SOURCES = h5copy.c $(h5copygentest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -326,9 +333,13 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
+TEST_PROG = h5copygentest
 TEST_SCRIPT = $(srcdir)/testh5copy.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5copy$(EXEEXT)
+
+# source file for the test file generator
+h5copygentest_SOURCES = h5copygentest.c
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
@@ -410,9 +421,19 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
 h5copy$(EXEEXT): $(h5copy_OBJECTS) $(h5copy_DEPENDENCIES) 
 	@rm -f h5copy$(EXEEXT)
 	$(LINK) $(h5copy_LDFLAGS) $(h5copy_OBJECTS) $(h5copy_LDADD) $(LIBS)
+h5copygentest$(EXEEXT): $(h5copygentest_OBJECTS) $(h5copygentest_DEPENDENCIES) 
+	@rm -f h5copygentest$(EXEEXT)
+	$(LINK) $(h5copygentest_LDFLAGS) $(h5copygentest_OBJECTS) $(h5copygentest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -421,6 +442,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5copy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5copygentest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -530,7 +552,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_SCRIPTS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS) all-local
@@ -564,7 +586,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -613,17 +636,17 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool ctags \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool ctags distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-binPROGRAMS install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-local pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.

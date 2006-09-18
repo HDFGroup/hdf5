@@ -896,6 +896,7 @@
 ./tools/h5copy/testh5copy.sh
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
+./tools/h5copy/h5copygentest.c
 ./tools/h5copy/Makefile.am
 
 
@@ -1328,6 +1329,9 @@
 ./tools/testfiles/u511.txt
 ./tools/testfiles/u512.txt
 ./tools/testfiles/u513.txt
+
+# test files for h5copy
+./tools/testfiles/h5copytst.h5
 
 # high level libraries
 ./hl/COPYING

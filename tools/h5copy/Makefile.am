@@ -23,12 +23,17 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
+TEST_PROG=h5copygentest
 TEST_SCRIPT=$(srcdir)/testh5copy.sh
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5copy$(EXEEXT)
 
 # This is our main target, the h5copy tool
 bin_PROGRAMS=h5copy
+check_PROGRAMS=$(TEST_PROG)
+
+# source file for the test file generator
+h5copygentest_SOURCES=h5copygentest.c
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

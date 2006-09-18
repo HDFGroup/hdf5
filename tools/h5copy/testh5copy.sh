@@ -23,6 +23,9 @@ H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
 H5DIFF=../h5diff/h5diff     # The h5diff tool name 
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the h5diff  tool binary
 
+TESTFILE=$srcdir/../testfiles/h5copytst.h5
+FILEOUT=h5copytst.out.h5
+
 nerrors=0
 
 # The build (current) directory might be different than the source directory.
@@ -117,7 +120,8 @@ H5DIFFTEST()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-TOOLTEST -i $srcdir/../testfiles/test1.h5 -o test1.out.h5 -v -s array -d array
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple -d simple
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk -d chunk
 
 
 
