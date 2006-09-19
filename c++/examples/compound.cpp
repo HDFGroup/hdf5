@@ -50,7 +50,7 @@ int main(void)
 {
    /* First structure  and dataset*/
    typedef struct s1_t {
-	int      a;
+	int    a;
 	float  b;
 	double c;
    } s1_t;
@@ -58,7 +58,7 @@ int main(void)
    /* Second structure (subset of s1_t)  and dataset*/
    typedef struct s2_t {
 	double c;
-	int      a;
+	int    a;
    } s2_t;
 
    // Try block to detect exceptions raised by any of the calls inside it
@@ -67,8 +67,8 @@ int main(void)
       /*
        * Initialize the data
        */
-      int        i;
-      s1_t       s1[LENGTH];
+      int  i;
+      s1_t s1[LENGTH];
       for (i = 0; i< LENGTH; i++)
       {
          s1[i].a = i;
@@ -85,7 +85,7 @@ int main(void)
       /*
        * Create the data space.
        */
-      hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
+      hsize_t dim[] = {LENGTH};   /* Dataspace dimensions */
       DataSpace space( RANK, dim );
 
       /*
@@ -105,10 +105,10 @@ int main(void)
        * Create the dataset.
        */
       DataSet* dataset;
-      dataset = new DataSet( file->createDataSet( DATASET_NAME, mtype1, space ));
+      dataset = new DataSet(file->createDataSet(DATASET_NAME, mtype1, space));
 
       /*
-       * Wtite data to the dataset;
+       * Write data to the dataset;
        */
       dataset->write( s1, mtype1 );
 
@@ -117,16 +117,6 @@ int main(void)
        */
       delete dataset;
       delete file;
-
-      // Get the class of the first member in mtype1, then get its type
-      H5T_class_t member1_class = mtype1.getMemberClass( 2 );
-      if( member1_class == H5T_FLOAT )
-      {
-	 FloatType member2 = mtype1.getMemberFloatType( 2 );
-	 H5std_string norm_string;
-	 H5T_norm_t norm = member2.getNorm( norm_string );
-	 cout << "Normalization type is " << norm_string << endl;
-      }
 
       /*
        * Open the file and the dataset.
@@ -146,7 +136,7 @@ int main(void)
        * Read two fields c and a from s1 dataset. Fields in the file
        * are found by their names "c_name" and "a_name".
        */
-      s2_t       s2[LENGTH];
+      s2_t s2[LENGTH];
       dataset->read( s2, mtype2 );
 
       /*
@@ -172,7 +162,7 @@ int main(void)
       /*
        * Read field b from s1 dataset. Field in the file is found by its name.
        */
-      float s3[LENGTH];  // Third "structure" - used to read float field of s1)
+      float s3[LENGTH];  // Third "structure" - used to read float field of s1
       dataset->read( s3, mtype3 );
 
       /*

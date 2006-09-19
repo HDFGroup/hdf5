@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
+ * Copyright by the Board of Trustees of the University of Illinois.	     *
+ * All rights reserved.	                                                     *
+ *	                                                                     *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
@@ -41,8 +41,8 @@
     using namespace H5;
 #endif
 
-const H5std_string	FILE_NAME( "Group.h5" );
-const int	RANK = 2;
+const H5std_string FILE_NAME( "Group.h5" );
+const int	   RANK = 2;
 
 // Operator function
 extern "C" herr_t file_info(hid_t loc_id, const char *name, void *opdata);
@@ -53,159 +53,174 @@ int main(void)
     hsize_t  dims[2];
     hsize_t  cdims[2];
 
-   // Try block to detect exceptions raised by any of the calls inside it
-   try
-   {
-      /*
-       * Turn off the auto-printing when failure occurs so that we can
-       * handle the errors appropriately
-       */
-      Exception::dontPrint();
+    // Try block to detect exceptions raised by any of the calls inside it
+    try
+    {
+	/*
+	 * Turn off the auto-printing when failure occurs so that we can
+	 * handle the errors appropriately
+	 */
+	Exception::dontPrint();
 
-      /*
-       * Create the named file, truncating the existing one if any,
-       * using default create and access property lists.
-       */
-      H5File *file = new H5File( FILE_NAME, H5F_ACC_TRUNC );
+	/*
+	 * Create the named file, truncating the existing one if any,
+	 * using default create and access property lists.
+	 */
+	H5File *file = new H5File( FILE_NAME, H5F_ACC_TRUNC );
 
-      /*
-       * Create a group in the file
-       */
-      Group* group = new Group( file->createGroup( "/Data" ));
+	/*
+	 * Create a group in the file
+	 */
+	Group* group = new Group( file->createGroup( "/Data" ));
 
-      /*
-       * Create dataset "Compressed Data" in the group using absolute
-       * name. Dataset creation property list is modified to use
-       * GZIP compression with the compression effort set to 6.
-       * Note that compression can be used only when dataset is chunked.
-       */
-      dims[0] = 1000;
-      dims[1] = 20;
-      cdims[0] = 20;
-      cdims[1] = 20;
-      DataSpace dataspace( RANK, dims ); // create the new dataspace
-					 // for the dataset
+	/*
+	 * Create dataset "Compressed Data" in the group using absolute
+	 * name. Dataset creation property list is modified to use
+	 * GZIP compression with the compression effort set to 6.
+	 * Note that compression can be used only when dataset is chunked.
+	 */
+	dims[0] = 1000;
+	dims[1] = 20;
+	cdims[0] = 20;
+	cdims[1] = 20;
+	DataSpace *dataspace = new DataSpace(RANK, dims); // create new dspace
+	DSetCreatPropList ds_creatplist;  // create dataset creation prop list
+	ds_creatplist.setChunk( 2, cdims );  // then modify it for compression
+	ds_creatplist.setDeflate( 6 );
 
-      DSetCreatPropList ds_creatplist;  // create dataset creation prop list
-      ds_creatplist.setChunk( 2, cdims );  // then modify it for compression
-      ds_creatplist.setDeflate( 6 );
+	/*
+	 * Create the first dataset.
+	 */
+	DataSet* dataset = new DataSet(file->createDataSet(
+		"/Data/Compressed_Data", PredType::NATIVE_INT, 
+		*dataspace, ds_creatplist ));
 
-      DataSet* dataset = new DataSet( file->createDataSet( "/Data/Compressed_Data", PredType::NATIVE_INT, dataspace, ds_creatplist ));
+	/*
+	 * Close the first dataset.
+	 */
+	delete dataset;
+	delete dataspace;
 
-      /*
-       * Close the dataset and the file.
-       */
-      delete dataset;
-      delete group;
-      delete file;
+	/*
+	 * Create the second dataset.
+	 */
+	dims[0] = 500;
+	dims[1] = 20;
+	dataspace = new DataSpace(RANK, dims); // create second dspace
+	dataset = new DataSet(file->createDataSet("/Data/Float_Data", 
+			PredType::NATIVE_FLOAT, *dataspace));
 
-      /*
-       * Now reopen the file and group in the file.
-       */
-      file = new H5File( FILE_NAME, H5F_ACC_RDWR );
-      group = new Group( file->openGroup( "Data" ));
+	delete dataset;
+	delete dataspace;
+	delete group;
+	delete file;
 
-      /*
-       * Access "Compressed_Data" dataset in the group.
-       */
-      try {  // to determine if the dataset exists in the group
-         dataset = new DataSet( group->openDataSet( "Compressed_Data" ));
-      }
-      catch( GroupIException not_found_error )
-      {
-	 cout << " Dataset is not found." << endl;
-      }
-      cout << "dataset \"/Data/Compressed_Data\" is open" << endl;
+	/*
+	 * Now reopen the file and group in the file.
+	 */
+	file = new H5File(FILE_NAME, H5F_ACC_RDWR);
+	group = new Group(file->openGroup("Data"));
 
-      /*
-       * Close the dataset.
-       */
-      delete dataset;
+	/*
+	 * Access "Compressed_Data" dataset in the group.
+	 */
+	try {  // to determine if the dataset exists in the group
+	    dataset = new DataSet( group->openDataSet( "Compressed_Data" ));
+	}
+	catch( GroupIException not_found_error ) {
+	    cout << " Dataset is not found." << endl;
+	}
+	cout << "dataset \"/Data/Compressed_Data\" is open" << endl;
 
-      /*
-       * Create hard link to the Data group.
-       */
-      file->link( H5G_LINK_HARD, "Data", "Data_new" );
+	/*
+	 * Close the dataset.
+	 */
+	delete dataset;
 
-      /*
-       * We can access "Compressed_Data" dataset using created
-       * hard link "Data_new".
-       */
-      try {  // to determine if the dataset exists in the file
-         dataset = new DataSet( file->openDataSet( "/Data_new/Compressed_Data" ));
-      }
-      catch( FileIException not_found_error )
-      {
-         cout << " Dataset is not found." << endl;
-      }
-      cout << "dataset \"/Data_new/Compressed_Data\" is open" << endl;
+	/*
+	 * Create hard link to the Data group.
+	 */
+	file->link( H5G_LINK_HARD, "Data", "Data_new" );
 
-      /*
-       * Close the dataset.
-       */
-      delete dataset;
+	/*
+	 * We can access "Compressed_Data" dataset using created
+	 * hard link "Data_new".
+	 */
+	try {  // to determine if the dataset exists in the file
+	    dataset = new DataSet(file->openDataSet( "/Data_new/Compressed_Data" ));
+	}
+	catch( FileIException not_found_error )
+	{
+	    cout << " Dataset is not found." << endl;
+	}
+	cout << "dataset \"/Data_new/Compressed_Data\" is open" << endl;
 
-      /*
-       * Use iterator to see the names of the objects in the file
-       * root directory.
-       */
-      cout << endl << "Iterating over elements in the file" << endl;
-      herr_t idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
-      cout << endl;
+	/*
+	 * Close the dataset.
+	 */
+	delete dataset;
 
-      /*
-       * Unlink  name "Data" and use iterator to see the names
-       * of the objects in the file root direvtory.
-       */
-      cout << "Unlinking..." << endl;
-      try {  // attempt to unlink the dataset
-         file->unlink( "Data" );
-      }
-      catch( FileIException unlink_error )
-      {
-         cout << " unlink failed." << endl;
-      }
-      cout << "\"Data\" is unlinked" << endl;
+	/*
+	 * Use iterator to see the names of the objects in the file
+	 * root directory.
+	 */
+	cout << endl << "Iterating over elements in the file" << endl;
+	herr_t idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
+	cout << endl;
 
-      cout << endl << "Iterating over elements in the file again" << endl;
-      idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
-      cout << endl;
+	/*
+	 * Unlink  name "Data" and use iterator to see the names
+	 * of the objects in the file root direvtory.
+	 */
+	cout << "Unlinking..." << endl;
+	try {  // attempt to unlink the dataset
+	    file->unlink( "Data" );
+	}
+	catch( FileIException unlink_error )
+	{
+	    cout << " unlink failed." << endl;
+	}
+	cout << "\"Data\" is unlinked" << endl;
 
-      /*
-       * Close the file.
-       */
-      delete file;
+	cout << endl << "Iterating over elements in the file again" << endl;
+	idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
+	cout << endl;
 
-   }  // end of try block
+	/*
+	 * Close the group and file.
+	 */
+	delete group;
+	delete file;
+    }  // end of try block
 
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-      error.printError();
-      return -1;
-   }
+    // catch failure caused by the H5File operations
+    catch( FileIException error )
+    {
+	error.printError();
+	return -1;
+    }
 
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-      error.printError();
-      return -1;
-   }
+    // catch failure caused by the DataSet operations
+    catch( DataSetIException error )
+    {
+	error.printError();
+	return -1;
+    }
 
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-      error.printError();
-      return -1;
-   }
+    // catch failure caused by the DataSpace operations
+    catch( DataSpaceIException error )
+    {
+	error.printError();
+	return -1;
+    }
 
-   // catch failure caused by the Attribute operations
-   catch( AttributeIException error )
-   {
-      error.printError();
-      return -1;
-   }
-   return 0;
+    // catch failure caused by the Attribute operations
+    catch( AttributeIException error )
+    {
+	error.printError();
+	return -1;
+    }
+    return 0;
 }
 
 /*
@@ -227,5 +242,5 @@ file_info(hid_t loc_id, const char *name, void *opdata)
 
     H5Gclose(group);
     return 0;
- }
+}
 
