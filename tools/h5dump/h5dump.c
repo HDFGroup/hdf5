@@ -461,6 +461,11 @@ static struct long_options l_opts[] = {
     { "xml-n", require_arg, 'X' },
     { "xml", no_arg, 'x' },
     { "xm", no_arg, 'x' },
+    { "onlyattr", no_arg, 'A' },
+    { "escape", no_arg, 'e' },
+    { "noindex", no_arg, 'y' },
+    { "binary", require_arg, 'b' },
+    { "form", require_arg, 'F' },
     { NULL, 0, '\0' }
 };
 
@@ -592,24 +597,25 @@ usage(const char *prog)
     fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
-    fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
+    fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes; data \n");
+    fprintf(stdout, "                          of datasets is not displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    fprintf(stdout, "     -e,                  Escape non printing characters\n");
+    fprintf(stdout, "     -e, --escape         Escape non printing characters\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
-    fprintf(stdout, "     -y                   Do not print array indices with the data\n");
+    fprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
     fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    fprintf(stdout, "     -b F                 Output raw data into file F in binary form (use with -d)\n");
-    fprintf(stdout, "     -F T                 Form of binary output (T can be NA for native type,\n");
-    fprintf(stdout, "                          DI for the disk file type, LE or BE for pre-existing little or big endian types)\n");
-    fprintf(stdout, "                          E.g., to dump a dataset called 'integer' in a file called `test1.h5', use\n");
-    fprintf(stdout, "                          h5dump -b bin.out -F LE -d integer test1.h5\n");
+    fprintf(stdout, "     -b F, --binary=F     Output raw data into file F in binary form \n");
+    fprintf(stdout, "                          (recommended usage is with --dataset=P)\n");
+    fprintf(stdout, "     -F T, --form=T       Form of binary output. T is: NA for native type,\n");
+    fprintf(stdout, "                          DI for the disk file type, LE or BE for pre-existing\n");
+    fprintf(stdout, "                          little or big endian types\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -653,6 +659,10 @@ usage(const char *prog)
     fprintf(stdout, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type \n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "      h5dump -d /dset -b out.bin -F LE quux.h5\n");
     fprintf(stdout, "\n");
 }
 
