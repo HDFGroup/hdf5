@@ -1776,6 +1776,7 @@
 ./windows/tools/repacktest.BAT
 ./windows/tools/testhdf5tools.BAT
 ./windows/tools/tooltest.bat
+./windows/tools/jamtest.bat
 
 #windows batchfile
 ./windows/hdf5bt.BAT
