@@ -27,8 +27,7 @@
  * loc_id = H5Topen( fid, name);
  *
  * Return:
- *  0 : no differences found
- *  1 : differences found
+ *  number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -37,21 +36,22 @@
  *-------------------------------------------------------------------------
  */
 
-int diff_attr(hid_t      loc1_id,
-              hid_t      loc2_id,
-              const char *path1,
-              const char *path2,
-              diff_opt_t *options
-              )
+hsize_t
+diff_attr(hid_t      loc1_id,
+          hid_t      loc2_id,
+          const char *path1,
+          const char *path2,
+          diff_opt_t *options
+          )
 {
- hid_t      attr1_id=-1;     /* attr ID */
- hid_t      attr2_id=-1;     /* attr ID */
- hid_t      space1_id=-1;    /* space ID */
- hid_t      space2_id=-1;    /* space ID */
- hid_t      ftype1_id=-1;    /* file data type ID */
- hid_t      ftype2_id=-1;    /* file data type ID */
- hid_t      mtype1_id=-1;    /* memory data type ID */
- hid_t      mtype2_id=-1;    /* memory data type ID */
+ hid_t      attr1_id;     /* attr ID */
+ hid_t      attr2_id;     /* attr ID */
+ hid_t      space1_id;    /* space ID */
+ hid_t      space2_id;    /* space ID */
+ hid_t      ftype1_id;    /* file data type ID */
+ hid_t      ftype2_id;    /* file data type ID */
+ hid_t      mtype1_id;    /* memory data type ID */
+ hid_t      mtype2_id;    /* memory data type ID */
  size_t     msize1;       /* memory size of memory type */
  size_t     msize2;       /* memory size of memory type */
  void       *buf1=NULL;   /* data buffer */
@@ -66,8 +66,7 @@ int diff_attr(hid_t      loc1_id,
  char       np1[512];
  char       np2[512];
  int        n1, n2, i, j;
- int        ret=0;
- hsize_t    nfound;
+ hsize_t    found, nfound=0;
  int        cmp=1;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0)
@@ -76,7 +75,7 @@ int diff_attr(hid_t      loc1_id,
   goto error;
 
  if (n1!=n2)
-  return 1;
+  return nfound;
 
  for ( i = 0; i < n1; i++)
  {
@@ -109,7 +108,6 @@ int diff_attr(hid_t      loc1_id,
    }
    H5Aclose(attr1_id);
    H5Aclose(attr2_id);
-   ret=1;
    continue;
   }
 
@@ -207,7 +205,7 @@ int diff_attr(hid_t      loc1_id,
  if (options->m_verbose)
  {
   printf( "Attribute:   <%s> and <%s>\n",np1,np2);
-  nfound = diff_array(buf1,
+  found = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -218,7 +216,8 @@ int diff_attr(hid_t      loc1_id,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
-  print_found(nfound);
+  print_found(found);
+  nfound += found;
 
  }
  /* check first if we have differences */
@@ -228,7 +227,7 @@ int diff_attr(hid_t      loc1_id,
   {
    /* shut up temporarily */
    options->m_quiet=1;
-   nfound = diff_array(buf1,
+   found = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -241,10 +240,10 @@ int diff_attr(hid_t      loc1_id,
                      attr2_id);
    /* print again */
    options->m_quiet=0;
-   if (nfound)
+   if (found)
    {
     printf( "Attribute:   <%s> and <%s>\n",np1,np2);
-    nfound = diff_array(buf1,
+    found = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -255,13 +254,14 @@ int diff_attr(hid_t      loc1_id,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
-    print_found(nfound);
+    print_found(found);
+    nfound += found;
    } /*if*/
   } /*if*/
   /* in quiet mode, just count differences */
   else
   {
-   nfound = diff_array(buf1,
+   found = diff_array(buf1,
                      buf2,
                      nelmts1,
                      rank1,
@@ -272,6 +272,7 @@ int diff_attr(hid_t      loc1_id,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
+   nfound += found;
   } /*else quiet */
  } /*else verbose */
  }/*cmp*/
@@ -297,7 +298,7 @@ int diff_attr(hid_t      loc1_id,
   HDfree(buf2);
  } /* i */
 
- return ret;
+ return nfound;
 
 error:
  H5E_BEGIN_TRY {
@@ -316,7 +317,7 @@ error:
  } H5E_END_TRY;
 
  options->err_stat=1;
- return 0;
+ return nfound;
 }
 
 
