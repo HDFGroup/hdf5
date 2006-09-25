@@ -125,6 +125,7 @@ typedef struct H5G_shared_t H5G_shared_t;
  */
 H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
+H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL herr_t H5G_free(H5G_t *grp);

@@ -221,8 +221,8 @@ H5F_init_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if (H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE)
-        HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* ========== File Creation Property Class Initialization ============*/
     assert(H5P_CLS_FILE_CREATE_g!=-1);
@@ -2033,7 +2033,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
     if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
     if(H5P_DEFAULT == fcpl_id)
@@ -2133,7 +2133,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
     if ((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else
@@ -2618,7 +2618,7 @@ H5F_try_close(H5F_t *f)
     /* (Only try to flush the file if it was opened with write access) */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush and destroy all caches */
-        if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
                       H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
@@ -2628,7 +2628,7 @@ H5F_try_close(H5F_t *f)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if (H5F_dest(f, H5AC_dxpl_id) < 0)
+    if(H5F_dest(f, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
 done:
@@ -2666,15 +2666,15 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (H5I_FILE != H5I_get_type(file_id))
+    if(H5I_FILE != H5I_get_type(file_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if (H5I_dec_ref (file_id)<0)
-	HGOTO_ERROR (H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+    if(H5I_dec_ref (file_id) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2738,8 +2738,8 @@ done:
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
     FUNC_LEAVE_API(ret_value)
 }
-
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Fget_intent
  *
@@ -2759,11 +2759,12 @@ herr_t
 H5Fget_intent(hid_t file_id, unsigned *intent_flags)
 {
     H5F_t * file = NULL;
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_API(H5Fget_intent, FAIL)
     H5TRACE2("e","i*Iu",file_id,intent_flags);
 
-    if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* If no intent flags were passed in, exit quietly */

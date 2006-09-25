@@ -132,12 +132,12 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     assert(p);
 
     if (NULL==(attr = H5FL_CALLOC(H5A_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version number */
     version = *p++;
     if (version<H5O_ATTR_VERSION_1 || version>H5O_ATTR_VERSION_3)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message");
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
 
     /* Get the flags byte if we have a later version of the attribute */
     if(version>H5O_ATTR_VERSION_1)
@@ -162,7 +162,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 
     /* Decode and store the name */
     if (NULL==(attr->name=H5MM_strdup((const char *)p)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(name_len);    /* advance the memory pointer */
     else
@@ -174,18 +174,18 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 
         /* Get the shared information */
 	if (NULL == (shared = (H5O_MSG_SHARED->decode) (f, dxpl_id, p)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message");
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
         if((attr->dt= H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL))==NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
 
         /* Free the shared information */
         H5O_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
         if((attr->dt=(H5O_MSG_DTYPE->decode)(f,dxpl_id,p))==NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(attr->dt_size);
@@ -194,10 +194,10 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 
     /* decode the attribute dataspace */
     if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if((extent=(H5O_MSG_SDSPACE->decode)(f,dxpl_id,p))==NULL)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
     /* Copy the extent information */
     HDmemcpy(&(attr->ds->extent),extent, sizeof(H5S_extent_t));
@@ -207,7 +207,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(attr->ds_size);
@@ -220,7 +220,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     /* Go get the data */
     if(attr->data_size) {
         if (NULL==(attr->data = H5FL_BLK_MALLOC(attr_buf, attr->data_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         HDmemcpy(attr->data,p,attr->data_size);
     }
 
@@ -342,16 +342,16 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
         /* Get shared message information from datatype */
         if ((H5O_MSG_DTYPE->get_share)(f, attr->dt, &sh_mesg/*out*/)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype")
 
         /* Encode shared message information for datatype */
         if((H5O_MSG_SHARED->encode)(f,p,&sh_mesg)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype")
     } /* end if */
     else {
         /* Encode datatype information */
         if((H5O_MSG_DTYPE->encode)(f,p,attr->dt)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2) {
         HDmemset(p+attr->dt_size, 0, H5O_ALIGN(attr->dt_size)-attr->dt_size);
@@ -362,7 +362,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* encode the attribute dataspace */
     if((H5O_MSG_SDSPACE->encode)(f,p,&(attr->ds->extent))<0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace")
     if(version < H5O_ATTR_VERSION_2) {
         HDmemset(p+attr->ds_size, 0, H5O_ALIGN(attr->ds_size)-attr->ds_size);
         p += H5O_ALIGN(attr->ds_size);
@@ -409,7 +409,7 @@ H5O_attr_copy(const void *_src, void *_dst, unsigned update_flags)
 
     /* copy */
     if (NULL == (ret_value = H5A_copy(_dst,src,update_flags)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -589,7 +589,7 @@ H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_l
         /* Decrement the reference count on the shared datatype, if requested */
         if(adj_link)
             if(H5T_link(attr->dt, -1, dxpl_id)<0)
-                HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -628,7 +628,7 @@ H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
         if(H5T_link(attr->dt,1,dxpl_id)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count");
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -685,13 +685,14 @@ H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *typ
  *              November 1, 2005
  *
  * Modifications: Peter Cao
- *              December 17, 2005
- *              Datatype conversion for variable length datatype
+ *              December 17, 2005: datatype conversion for variable length datatype
+ *              August 1, 2006: fix reference datatype
+ *              
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
+H5O_attr_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5A_t        *attr_src = (H5A_t *)native_src;
@@ -808,7 +809,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
             if(NULL == (dt_mem = H5T_copy(attr_src->dt, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
             if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
-                HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
 
             /* create variable-length datatype at the destinaton file */
             if((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->dt)) < 0)
@@ -874,12 +875,32 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
 
             if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
-        }  /* type conversion */
+        }  /* end if */
+        else if((H5T_get_class(attr_src->dt, FALSE) == H5T_REFERENCE) && (file_src != file_dst)) {
+            /* copy object pointed by reference. The current implementation does not deal with
+               nested reference such as reference in a compound structure */
+
+            /* Check for expanding references */
+            if(cpy_info->expand_ref) {
+                size_t ref_count;
+
+                /* Determine # of reference elements to copy */
+                ref_count = attr_dst->data_size / attr_dst->dt_size;
+
+                /* Copy objects referenced in source buffer to destination file and set destination elements */
+                if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
+                        file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy reference attribute")
+            } /* end if */
+            else
+                /* Reset value to zero */
+                HDmemset(attr_dst->data, 0, attr_dst->data_size);
+	} /* end if */
         else {
             HDassert(attr_dst->data_size == attr_src->data_size);
             HDmemcpy(attr_dst->data, attr_src->data, attr_src->data_size);
         } /* end else */
-    } /* end if */
+    } /* end if(attr_src->data) */
 
     /* Indicate that the fill values aren't to be written out */
     attr_dst->initialized = TRUE;
@@ -980,7 +1001,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 
         /* Get shared message information from datatype */
         if ((H5O_MSG_DTYPE->get_share)(f, mesg->dt, &sh_mesg/*out*/)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't retrieve shared message information");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't retrieve shared message information")
 
         debug=H5O_MSG_SHARED->debug;
         dt_mesg=&sh_mesg;

@@ -277,7 +277,6 @@ H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
  * Utility functions
  */
 H5_DLL char * H5G_normalize(const char *name);
-H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL const char * H5G_component(const char *name, size_t *size_p);
 H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,

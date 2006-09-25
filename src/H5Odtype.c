@@ -1236,7 +1236,8 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
      * of the datatype if it's a vlen datatype)
      */
     if(udata) {
-        if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+        if((H5T_detect_class(dt_src, H5T_VLEN) > 0)  || 
+                (H5T_get_class(dt_src, FALSE) == H5T_REFERENCE)) {
             /* Create a memory copy of the variable-length datatype */
             if(NULL == (udata->src_dtype = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")

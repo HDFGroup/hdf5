@@ -830,7 +830,7 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
     /* Check if this sequence actually has any data */
     if(hobjid.addr>0) {
         /* Read the VL information from disk */
-        if(H5HG_read(f,dxpl_id,&hobjid,buf)==NULL)
+        if(H5HG_read(f,dxpl_id,&hobjid,buf, NULL)==NULL)
             HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information")
     } /* end if */
 

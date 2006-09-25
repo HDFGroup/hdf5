@@ -442,40 +442,40 @@ done:
 herr_t
 H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
 {
-    unsigned	i;
+    unsigned	u;                      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest)
 
     /* check args */
-    assert(oh);
+    HDassert(oh);
 
     /* Verify that node is clean */
-    assert (oh->cache_info.is_dirty==FALSE);
+    HDassert(oh->cache_info.is_dirty == FALSE);
 
     /* destroy chunks */
-    for (i = 0; i < oh->nchunks; i++) {
+    for(u = 0; u < oh->nchunks; u++) {
         /* Verify that chunk is clean */
-        assert (oh->chunk[i].dirty==0);
+        HDassert(oh->chunk[u].dirty == 0);
 
-        oh->chunk[i].image = H5FL_BLK_FREE(chunk_image,oh->chunk[i].image);
-    }
+        oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
+    } /* end for */
     if(oh->chunk)
-        oh->chunk = H5FL_SEQ_FREE(H5O_chunk_t,oh->chunk);
+        oh->chunk = H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
 
     /* destroy messages */
-    for (i = 0; i < oh->nmesgs; i++) {
+    for(u = 0; u < oh->nmesgs; u++) {
         /* Verify that message is clean */
-        assert (oh->mesg[i].dirty==0);
+        HDassert(oh->mesg[u].dirty == 0);
 
-        H5O_free_mesg(&oh->mesg[i]);
-    }
+        H5O_free_mesg(&oh->mesg[u]);
+    } /* end for */
     if(oh->mesg)
-        oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t,oh->mesg);
+        oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
 
     /* destroy object header */
     H5FL_FREE(H5O_t,oh);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dest() */
 
 

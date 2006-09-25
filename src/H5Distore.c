@@ -192,15 +192,17 @@ typedef struct H5D_istore_it_ud3_t {
 /* B-tree callback info for iteration to copy data */
 typedef struct H5D_istore_it_ud4_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    H5F_t               *file_dst;              /* Destination file for copy */
+    H5F_t               *file_src;              /* Source file for copy */
     haddr_t             addr_dst;               /* Address of dest. B-tree */
     void                *buf;                   /* Buffer to hold chunk data for read/write */
+    void                *bkg;                   /* Buffer for background information during type conversion */
     size_t              buf_size;               /* Buffer size */
 
     /* needed for converting variable-length data */
     hid_t               tid_src;                /* Datatype ID for source datatype */
     hid_t               tid_dst;                /* Datatype ID for destination datatype */
     hid_t               tid_mem;                /* Datatype ID for memory datatype */
+    H5T_t               *dt_src;                /* Source datatype */
     H5T_path_t          *tpath_src_mem;         /* Datatype conversion path from source file to memory */
     H5T_path_t          *tpath_mem_dst;         /* Datatype conversion path from memory to dest. file */
     void                *reclaim_buf;           /* Buffer for reclaiming data */
@@ -210,6 +212,10 @@ typedef struct H5D_istore_it_ud4_t {
 
     /* needed for compressed variable-length data */
     H5O_pline_t         *pline;                 /* Filter pipeline */
+
+    /* needed for copy object pointed by refs */
+    H5F_t               *file_dst;              /* Destination file for copy */
+    H5O_copy_t          *cpy_info;              /* Copy options */
 } H5D_istore_it_ud4_t;
 
 /* B-tree callback info for iteration to obtain chunk address and the index of the chunk for all chunks in the B-tree. */
@@ -915,7 +921,7 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
     rank = udata->common.mesg->u.chunk.ndims - 1;
 
     if(H5V_chunk_index(rank,lt_key->offset,udata->common.mesg->u.chunk.dim,udata->down_chunks,&chunk_index)<0)
-       HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+       HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     udata->chunk_addr[chunk_index] = addr;
 
@@ -982,16 +988,17 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
  *-------------------------------------------------------------------------
  */
 static int
-H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t addr_src,
-                                 const void UNUSED *_rt_key, void *_udata)
+H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
+    haddr_t addr_src, const void UNUSED *_rt_key, void *_udata)
 {
     H5D_istore_it_ud4_t     *udata = (H5D_istore_it_ud4_t *)_udata;
     const H5D_istore_key_t  *lt_key = (const H5D_istore_key_t *)_lt_key;
     H5D_istore_ud1_t        udata_dst;                  /* User data about new destination chunk */
-    void                    *bkg = NULL;             /* Temporary buffer for copying data */
     hbool_t                 is_vlen = FALSE;
+    hbool_t                 fix_ref = FALSE;
 
     /* General information about chunk copy */
+    void                    *bkg = udata->bkg;
     void                    *buf = udata->buf;
     size_t                  buf_size = udata->buf_size;
     H5O_pline_t             *pline = udata->pline;
@@ -1007,17 +1014,23 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy)
 
     /* Check parameter for type conversion */
-    if (udata->tid_src > 0)
-        is_vlen = TRUE;
+    if(udata->dt_src) {
+        if(H5T_detect_class(udata->dt_src, H5T_VLEN) > 0)
+            is_vlen = TRUE;
+        else if((H5T_get_class(udata->dt_src, FALSE) == H5T_REFERENCE) && (udata->file_src != udata->file_dst))
+            fix_ref = TRUE;
+        else
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy dataset elements")
+    } /* end if */
 
     /* Check for filtered chunks */
-    if (pline && pline->nused) {
+    if(pline && pline->nused) {
         is_compressed = TRUE;
         cb_struct.func = NULL; /* no callback function when failed */
     } /* end if */
 
     /* Resize the buf if it is too small to hold the data */
-    if ( nbytes > buf_size) {
+    if(nbytes > buf_size) {
         /* Re-allocate memory for copying the chunk */
         if(NULL == (udata->buf = H5MM_realloc(udata->buf, nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed for raw data chunk")
@@ -1030,8 +1043,8 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
     if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, nbytes, dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, H5B_ITER_ERROR, "unable to read raw data chunk")
 
-    /* need to uncompress variable-length data */
-    if (is_compressed && is_vlen) {
+    /* Need to uncompress variable-length & reference data elements */
+    if(is_compressed && (is_vlen | fix_ref)) {
         unsigned filter_mask = lt_key->filter_mask;
 
         if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &nbytes, &buf_size, &buf) < 0)
@@ -1057,9 +1070,8 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
         /* Copy into another buffer, to reclaim memory later */
         HDmemcpy(reclaim_buf, buf, reclaim_buf_size);
 
-        /* allocate temporary bkg buff for data conversion */
-        if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed")
+        /* Set background buffer to all zeros */
+        HDmemset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
         if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
@@ -1069,14 +1081,31 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
         if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5B_ITER_ERROR, "unable to reclaim variable-length data")
     } /* end if */
+    else if(fix_ref) {
+        /* Check for expanding references */
+        /* (background buffer has already been zeroed out, if not expanding) */
+        if(udata->cpy_info->expand_ref) {
+            size_t ref_count;
+
+            /* Determine # of reference elements to copy */
+            ref_count = nbytes / H5T_get_size(udata->dt_src);
+
+            /* Copy the reference elements */
+            if(H5O_copy_expand_ref(f_src, buf, dxpl_id, udata->file_dst, bkg, ref_count, H5T_get_ref_type(udata->dt_src), udata->cpy_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+        } /* end if */
+
+        /* After fix ref, copy the new reference elements to the buffer to write out */
+        HDmemcpy(buf, bkg, buf_size);
+    } /* end if */
 
     /* Copy source chunk callback information for insertion */
     HDmemset(&udata_dst, 0, sizeof(udata_dst));
     HDmemcpy(&(udata_dst.common.key), lt_key, sizeof(H5D_istore_key_t));
     udata_dst.common.mesg = udata->common.mesg;     /* Share this pointer for a short while */
 
-    /* need to compress variable-length data before writing to file*/
-    if (is_compressed && is_vlen) {
+    /* Need to compress variable-length & reference data elements before writing to file */
+    if(is_compressed && (is_vlen || fix_ref) ) {
         if(H5Z_pipeline(pline, 0, &(udata_dst.common.key.filter_mask), edc_read,
                 cb_struct, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_READERROR, H5B_ITER_ERROR, "output pipeline failed")
@@ -1095,9 +1124,6 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key, haddr_t a
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5B_ITER_ERROR, "unable to write raw data to file")
 
 done:
-    if(bkg)
-        H5FL_BLK_FREE(type_conv, bkg);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_iter_copy() */
 
@@ -1128,12 +1154,12 @@ H5D_istore_init (const H5F_t *f, const H5D_t *dset)
 	rdcc->nslots = H5F_RDCC_NELMTS(f);
 	rdcc->slot = H5FL_SEQ_CALLOC (H5D_rdcc_ent_ptr_t,rdcc->nslots);
 	if (NULL==rdcc->slot)
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
 
     /* Allocate the shared structure */
     if(H5D_istore_shared_create(f, &dset->shared->layout)<0)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_init() */
@@ -1362,7 +1388,7 @@ H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags)
     } /* end for */
 
     if (nerrors)
-	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1415,7 +1441,7 @@ H5D_istore_dest (H5D_t *dset, hid_t dxpl_id)
 	    nerrors++;
     }
     if (nerrors)
-	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
     if(rdcc->slot)
         H5FL_SEQ_FREE (H5D_rdcc_ent_ptr_t,rdcc->slot);
@@ -1423,9 +1449,9 @@ H5D_istore_dest (H5D_t *dset, hid_t dxpl_id)
 
     /* Free the raw B-tree node buffer */
     if(dset->shared->layout.u.chunk.btree_shared==NULL)
-        HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
+        HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5RC_DEC(dset->shared->layout.u.chunk.btree_shared)<0)
-	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1455,7 +1481,7 @@ H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
 
     /* Allocate space for the shared structure */
     if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
 
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_ISTORE;
@@ -1467,12 +1493,12 @@ H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 #ifdef H5_USING_PURIFY
 HDmemset(shared->page,0,shared->sizeof_rnode);
 #endif /* H5_USING_PURIFY */
     if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
     /* Initialize the offsets into the native key buffer */
     for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
@@ -1480,7 +1506,7 @@ HDmemset(shared->page,0,shared->sizeof_rnode);
 
     /* Make shared B-tree info reference counted */
     if(NULL==(layout->u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1626,7 +1652,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
     }
 
     if (nerrors)
-	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
+	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1726,7 +1752,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
         rdcc->nhits++;
 #endif
         if (NULL==(chunk=H5D_istore_chunk_alloc (chunk_size,pline)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
 
     } else {
         H5D_istore_ud1_t tmp_udata;		/*B-tree pass-through	*/
@@ -1778,7 +1804,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             if (NULL==(chunk = H5D_istore_chunk_alloc (chunk_size,pline)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
 
             if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined")
@@ -2077,7 +2103,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
 
         /* Do I/O directly on chunk without reading it into the cache */
         if ((ret_value=H5D_contig_readvv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
-            HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read raw data to file")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data to file")
     } /* end if */
     else {
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
@@ -2257,9 +2283,9 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
     /* Additional sanity checks when operating in parallel */
     if(IS_H5FD_MPI(dset->oloc.file)) {
         if (chunk_addr==HADDR_UNDEF)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
         if (dset->shared->dcpl_cache.pline.nused>0)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2277,7 +2303,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 
         /* Do I/O directly on chunk without reading it into the cache */
         if ((ret_value=H5D_contig_writevv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
     } /* end if */
     else {
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
@@ -2317,7 +2343,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 #endif /* OLD_WAY */
 
         if (NULL==(chunk=H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
 
         /* Use the vectorized memory copy routine to do actual work */
         if((naccessed=H5V_memcpyvv(chunk,chunk_max_nseq,chunk_curr_seq,chunk_len_arr,chunk_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_len_arr,mem_offset_arr))<0)
@@ -2325,7 +2351,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 
         H5_CHECK_OVERFLOW(naccessed,ssize_t,size_t);
         if (H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, (size_t)naccessed)<0)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "uanble to unlock raw data chunk")
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "uanble to unlock raw data chunk")
 
         /* Set return value */
         ret_value=naccessed;
@@ -2582,17 +2608,17 @@ done:
 static void *
 H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
-    void *ret_value=NULL;		/* Return value */
+    void *ret_value = NULL;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_chunk_alloc)
 
-    assert(size);
-    assert(pline);
+    HDassert(size);
+    HDassert(pline);
 
-    if(pline->nused>0)
-        ret_value=H5MM_malloc(size);
+    if(pline->nused > 0)
+        ret_value = H5MM_malloc(size);
     else
-        ret_value=H5FL_BLK_MALLOC(chunk,size);
+        ret_value = H5FL_BLK_MALLOC(chunk, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_istore_chunk_alloc() */
@@ -2749,16 +2775,16 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
      * or if there are any pipeline filters defined,
      * set the "should fill" flag
      */
-    if((!full_overwrite && (fill_time==H5D_FILL_TIME_ALLOC ||
-            (fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_USER_DEFINED)))
-            || pline.nused>0)
-        should_fill=1;
+    if((!full_overwrite && (fill_time == H5D_FILL_TIME_ALLOC ||
+            (fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)))
+            || pline.nused > 0)
+        should_fill = 1;
 
     /* Check if fill values should be written to blocks */
     if(should_fill) {
         /* Allocate chunk buffer for processes to use when writing fill values */
-        H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
-        if (NULL==(chunk = H5D_istore_chunk_alloc((size_t)chunk_size,&pline)))
+        H5_CHECK_OVERFLOW(chunk_size, hsize_t, size_t);
+        if(NULL == (chunk = H5D_istore_chunk_alloc((size_t)chunk_size, &pline)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk")
 
         /* Fill the chunk with the proper values */
@@ -3249,7 +3275,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 
     /* Get the "down" sizes for each dimension */
     if(H5V_array_down(rank,chunks,down_chunks)<0)
-        HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* Create a data space for a chunk & set the extent */
     for(u = 0; u < rank; u++)
@@ -3298,7 +3324,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 
             /* Calculate the index of this chunk */
             if(H5V_chunk_index(rank,chunk_offset,layout->u.chunk.dim,down_chunks,&store.chunk.index)<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
             store.chunk.offset=chunk_offset;
 	    if(NULL == (chunk = H5D_istore_lock(io_info, NULL, FALSE, &idx_hint)))
@@ -3386,7 +3412,7 @@ H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
 
         /* Allocate the shared structure */
         if(H5D_istore_shared_create(f, &tmp_layout)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
         /* Delete entire B-tree */
         if(H5B_delete(f, dxpl_id, H5B_ISTORE, tmp_layout.u.chunk.addr, &udata)<0)
@@ -3394,9 +3420,9 @@ H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
 
         /* Free the raw B-tree node buffer */
         if(tmp_layout.u.chunk.btree_shared==NULL)
-            HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
+            HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
         if(H5RC_DEC(tmp_layout.u.chunk.btree_shared)<0)
-            HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+            HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 
 done:
@@ -3453,7 +3479,7 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
 
     /* Get the "down" sizes for each dimension */
     if(H5V_array_down(rank,chunks,down_chunks)<0)
-        HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* Fill the DXPL cache values for later use */
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
@@ -3468,7 +3494,7 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
 
         /* Calculate the index of this chunk */
         if(H5V_chunk_index(rank,ent->offset,dset->shared->layout.u.chunk.dim,down_chunks,&idx)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
         /* Compute the index for the chunk entry */
         old_idx=ent->idx;   /* Save for later */
@@ -3486,7 +3512,7 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
 
                 /* Remove the old entry from the cache */
                 if (H5D_istore_preempt(&io_info, old_ent, TRUE )<0)
-                    HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+                    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
             } /* end if */
 
             /* Insert this chunk into correct location in hash table */
@@ -3517,7 +3543,7 @@ done:
  */
 herr_t
 H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
-    H5O_layout_t *layout_dst,  H5T_t *dt_src, H5O_pline_t *pline, hid_t dxpl_id)
+    H5O_layout_t *layout_dst,  H5T_t *dt_src, H5O_copy_t *cpy_info, H5O_pline_t *pline, hid_t dxpl_id)
 {
     H5D_istore_it_ud4_t    udata;
     H5T_path_t  *tpath_src_mem = NULL, *tpath_mem_dst = NULL;   /* Datatype conversion paths */
@@ -3527,6 +3553,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     size_t      buf_size;               /* Size of copy buffer */
     size_t      reclaim_buf_size;       /* Size of reclaim buffer */
     void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Buffer for background during type conversion */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       sid_buf = -1;           /* ID for buffer dataspace */
@@ -3556,71 +3583,87 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
 
     /* If there's a source datatype, set up type conversion information */
     if(dt_src) {
-        H5T_t *dt_dst;              /* Destination datatype */
-        H5T_t *dt_mem;              /* Memory datatype */
-        size_t mem_dt_size;         /* Memory datatype size */
-        size_t tmp_dt_size;         /* Temp. datatype size */
-        size_t max_dt_size;         /* Max atatype size */
-        hsize_t buf_dim;            /* Dimension for buffer */
-        unsigned u;
+        if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+            H5T_t *dt_dst;              /* Destination datatype */
+            H5T_t *dt_mem;              /* Memory datatype */
+            size_t mem_dt_size;         /* Memory datatype size */
+            size_t tmp_dt_size;         /* Temp. datatype size */
+            size_t max_dt_size;         /* Max atatype size */
+            hsize_t buf_dim;            /* Dimension for buffer */
+            unsigned u;
 
-        /* Create datatype ID for src datatype */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+            /* Create datatype ID for src datatype */
+            if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
-        /* create a memory copy of the variable-length datatype */
-        if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
-            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
+            /* create a memory copy of the variable-length datatype */
+            if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 
-        /* create variable-length datatype at the destinaton file */
-        if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
+            /* create variable-length datatype at the destinaton file */
+            if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+            if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
+            if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
 
-        /* Set up the conversion functions */
-        if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
-        if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
+            /* Set up the conversion functions */
+            if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+            if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
 
-        /* Determine largest datatype size */
-        if(0 == (max_dt_size = H5T_get_size(dt_src)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, mem_dt_size);
-        if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+            /* Determine largest datatype size */
+            if(0 == (max_dt_size = H5T_get_size(dt_src)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+            if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+            max_dt_size = MAX(max_dt_size, mem_dt_size);
+            if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+            max_dt_size = MAX(max_dt_size, tmp_dt_size);
 
-        /* Compute the number of elements per chunk */
-        nelmts = 1;
-        for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
-            nelmts *= layout_src->u.chunk.dim[u];
+            /* Compute the number of elements per chunk */
+            nelmts = 1;
+            for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
+                nelmts *= layout_src->u.chunk.dim[u];
 
-        /* Create the space and set the initial extent */
-        buf_dim = nelmts;
-        if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+            /* Create the space and set the initial extent */
+            buf_dim = nelmts;
+            if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
-        /* Atomize */
-        if((sid_buf = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
-            H5S_close(buf_space);
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+            /* Atomize */
+            if((sid_buf = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+                H5S_close(buf_space);
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+            } /* end if */
+
+            /* Set initial buffer sizes */
+            buf_size = nelmts * max_dt_size;
+            reclaim_buf_size = nelmts * mem_dt_size;
+
+            /* Allocate memory for reclaim buf */
+            if(NULL == (reclaim_buf = H5MM_malloc(reclaim_buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
         } /* end if */
+        else {
+            buf_size = layout_src->u.chunk.size;
+            reclaim_buf_size = 0;
+        } /* end else */
 
-        /* Set initial buffer sizes */
-        buf_size = nelmts * max_dt_size;
-        reclaim_buf_size = nelmts * mem_dt_size;
-
-        /* Allocate memory for reclaim buf */
-        if(NULL == (reclaim_buf = H5MM_malloc(reclaim_buf_size)))
+        /* Allocate background memory for converting the chunk */
+        if(NULL == (bkg = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+        /* Check for reference datatype and no expanding references & clear background buffer */
+        if(!cpy_info->expand_ref && 
+                ((H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) && (f_src != f_dst)))
+            /* Reset value to zero */
+            HDmemset(bkg, 0, buf_size);
     } /* end if */
     else {
         buf_size = layout_src->u.chunk.size;
@@ -3634,13 +3677,15 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     /* Initialize the callback structure for the source */
     HDmemset(&udata, 0, sizeof udata);
     udata.common.mesg = layout_src;
-    udata.file_dst = f_dst;
+    udata.file_src = f_src;
     udata.addr_dst = layout_dst->u.chunk.addr;
     udata.buf = buf;
+    udata.bkg = bkg;
     udata.buf_size = buf_size;
     udata.tid_src = tid_src;
     udata.tid_mem = tid_mem;
     udata.tid_dst = tid_dst;
+    udata.dt_src = dt_src;
     udata.tpath_src_mem = tpath_src_mem;
     udata.tpath_mem_dst = tpath_mem_dst;
     udata.reclaim_buf = reclaim_buf;
@@ -3648,6 +3693,8 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     udata.buf_space = buf_space;
     udata.nelmts = nelmts;
     udata.pline = pline;
+    udata.file_dst = f_dst;
+    udata.cpy_info = cpy_info;
 
     /* copy the chunked data by iteration */
     if(H5B_iterate(f_src, dxpl_id, H5B_ISTORE, H5D_istore_iter_copy, layout_src->u.chunk.addr, &udata) < 0)
@@ -3670,9 +3717,11 @@ done:
         if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
-        H5MM_xfree (buf);
+        H5MM_xfree(buf);
+    if(bkg)
+        H5MM_xfree(bkg);
     if(reclaim_buf)
-        H5MM_xfree (reclaim_buf);
+        H5MM_xfree(reclaim_buf);
 
     if(H5RC_DEC(layout_src->u.chunk.btree_shared) < 0)
         HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
@@ -3812,7 +3861,7 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 
     /* Allocate the shared structure */
     if(H5D_istore_shared_create(f, &layout)<0)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
     /* Set up B-tree user data */
     HDmemset(&udata, 0, sizeof udata);
@@ -3822,9 +3871,9 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 
     /* Free the raw B-tree node buffer */
     if(layout.u.chunk.btree_shared==NULL)
-        HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
+        HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5RC_DEC(layout.u.chunk.btree_shared)<0)
-	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

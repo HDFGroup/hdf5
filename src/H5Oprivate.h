@@ -74,7 +74,7 @@ typedef struct H5O_copy_t {
     hbool_t copy_shallow;               /* Flag to perform shallow hierarchy copy */
     hbool_t expand_soft_link;           /* Flag to expand soft links */
     hbool_t expand_ext_link;            /* Flag to expand external links */
-    hbool_t expand_obj_ref;             /* Flag to expand object references */
+    hbool_t expand_ref;                 /* Flag to expand object references */
     hbool_t copy_without_attr;          /* Flag to not copy attributes */
     int curr_depth;                     /* Current depth in hierarchy copied */
     int max_depth;                      /* Maximum depth in hierarchy to copy */
@@ -371,6 +371,9 @@ H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*o
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth);
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
+    H5F_t *file_dst, void *_dst_ref, size_t ref_count, H5R_type_t ref_type,
+    H5O_copy_t *cpy_info);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
 

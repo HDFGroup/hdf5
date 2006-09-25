@@ -77,7 +77,7 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
       H5G_COPY_SHALLOW_HIERARCHY_FLAG\n\
       H5G_COPY_EXPAND_SOFT_LINK_FLAG\n\
       H5G_COPY_EXPAND_EXT_LINK_FLAG\n\
-      H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG\n\
+      H5G_COPY_EXPAND_REFERENCE_FLAG\n\
       H5G_COPY_WITHOUT_ATTR_FLAG\n\
       H5G_COPY_ALL\n");
 }
@@ -127,7 +127,7 @@ static int parse_flag(const char* str_flag, unsigned *flag)
  }
  else  if (strcmp(str_flag,"ref")==0)
  {
-  fla = H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG;
+  fla = H5G_COPY_EXPAND_REFERENCE_FLAG;
  }
  else  if (strcmp(str_flag,"noattr")==0)
  {

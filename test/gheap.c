@@ -109,7 +109,7 @@ test_1 (hid_t fapl)
 	size = i+1;
 	memset (out, 'A'+i%26, size);
 	H5Eclear_stack(H5E_DEFAULT);
-	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in)) {
+	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in, NULL)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
 	    nerrors++;
@@ -196,7 +196,7 @@ test_2 (hid_t fapl)
 	size = 1024-i;
 	memset (out, 'A'+i%26, size);
 	H5Eclear_stack(H5E_DEFAULT);
-	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in)) {
+	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in, NULL)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
 	    nerrors++;

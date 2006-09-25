@@ -524,7 +524,7 @@ H5_debug_mask(const char *s)
 	} else if (HDisdigit(*s)) {
 	    int fd = (int)HDstrtol (s, &rest, 0);
 	    if ((stream=HDfdopen(fd, "w"))!=NULL)
-	        (void)HDsetvbuf (stream, NULL, _IOLBF, 0);
+	        (void)HDsetvbuf (stream, NULL, _IOLBF, (size_t)0);
 	    s = rest;
 	} else {
 	    s++;

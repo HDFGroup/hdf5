@@ -37,7 +37,7 @@
  *                  H5G_COPY_SHALLOW_HIERARCHY_FLAG    -- Copy only immediate members
  *                  H5G_COPY_EXPAND_SOFT_LINK_FLAG     -- Expand soft links into new objects/
  *                  H5G_COPY_EXPAND_EXT_LINK_FLAG      -- Expand external links into new objects
- *                  H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG -- Copy objects that are pointed by references
+ *                  H5G_COPY_EXPAND_REFERENCE_FLAG -- Copy objects that are pointed by references
  *                  H5G_COPY_WITHOUT_ATTR_FLAG         -- Copy object without copying attributes
 *
  * Return:      Non-negative on success/Negative on failure

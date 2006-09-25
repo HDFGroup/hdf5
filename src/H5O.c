@@ -32,8 +32,10 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"         /* Links			  	*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
@@ -74,9 +76,15 @@ typedef struct {
     hbool_t adj_link;           /* Whether to adjust links when removing messages */
 } H5O_iter_ud1_t;
 
-/* Typedef for "internal" iteration operations */
-typedef herr_t (*H5O_operator_int_t)(H5O_mesg_t *mesg/*in,out*/, unsigned idx,
+/* Typedef for "internal library" iteration operations */
+typedef herr_t (*H5O_lib_operator_t)(H5O_mesg_t *mesg/*in,out*/, unsigned idx,
     unsigned * oh_flags_ptr, void *operator_data/*in,out*/);
+
+/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
+typedef union {
+    H5O_operator_t app_op;      /* Application callback for each message */
+    H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+} H5O_mesg_operator_t;
 
 /*
  * This table contains a list of object types, descriptions, and the
@@ -221,7 +229,7 @@ static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *typ
     const void *mesg, unsigned flags, unsigned update_flags,
     unsigned * oh_flags_ptr);
 static herr_t H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
-    H5AC_protect_t prot, hbool_t internal, void *op, void *op_data, hid_t dxpl_id);
+    H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
 static H5G_obj_t H5O_obj_type_real(H5O_t *oh);
 static const H5O_obj_class_t *H5O_obj_class(H5O_t *oh);
 static void * H5O_copy_mesg_file(const H5O_msg_class_t *type, H5F_t *file_src, void *mesg_src,
@@ -229,6 +237,8 @@ static void * H5O_copy_mesg_file(const H5O_msg_class_t *type, H5F_t *file_src, v
 static herr_t H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_copy_free_addrmap_cb(void *item, void *key, void *op_data);
+static herr_t H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id,
+    H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, H5O_copy_t *cpy_info);
 
 
 /*-------------------------------------------------------------------------
@@ -293,8 +303,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
-
+} /* end H5Oopen() */
 
 
 /*-------------------------------------------------------------------------
@@ -371,9 +380,9 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
-
+} /* end H5Oopen_by_addr() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Oclose
  *
@@ -403,23 +412,23 @@ H5Oclose(hid_t object_id)
     /* Get the type of the object and open it in the correct way */
     switch(H5I_get_type(object_id))
     {
-      case(H5I_GROUP):
-      case(H5I_DATATYPE):
-      case(H5I_DATASET):
-        if( H5I_object(object_id) == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object");
-        if (H5I_dec_ref(object_id) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
-      break;
+        case(H5I_GROUP):
+        case(H5I_DATATYPE):
+        case(H5I_DATASET):
+            if(H5I_object(object_id) == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
+            if(H5I_dec_ref(object_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+            break;
 
-      default:
-	    HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)");
-      break;
-    }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
+        break;
+    } /* end switch */
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Oclose() */
 
 
 /*-------------------------------------------------------------------------
@@ -447,6 +456,7 @@ H5Oincr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;
     int         ret_value;
+
     FUNC_ENTER_API(H5Oincr_refcount, FAIL)
     H5TRACE1("Is","i",object_id);
 
@@ -458,7 +468,7 @@ H5Oincr_refcount(hid_t object_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5O_incr_refcount() */
 
 
 /*-------------------------------------------------------------------------
@@ -481,7 +491,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int H5Odecr_refcount(hid_t object_id)
+int
+H5Odecr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;
     int         ret_value;
@@ -496,7 +507,7 @@ int H5Odecr_refcount(hid_t object_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Odecr_refcount() */
 
 
 /*-------------------------------------------------------------------------
@@ -1098,28 +1109,25 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_copy_real (const H5O_msg_class_t *type, const void *mesg, void *dst)
+H5O_copy_real(const H5O_msg_class_t *type, const void *mesg, void *dst)
 {
     void	*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_real);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_real)
 
     /* check args */
-    assert (type);
-    assert (type->copy);
+    HDassert(type);
+    HDassert(type->copy);
 
-    if (mesg) {
-	if (NULL==(ret_value=(type->copy)(mesg, dst, 0)))
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message");
-    }
+    if(mesg)
+	if(NULL == (ret_value = (type->copy)(mesg, dst, 0)))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_copy_real() */
 
 
@@ -1157,7 +1165,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
     if(adjust != 0 && 0 == (loc->file->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* get header */
     if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr,
@@ -1287,7 +1295,7 @@ H5O_count_real(H5O_loc_t *loc, const H5O_msg_class_t *type, hid_t dxpl_id)
 
     /* Load the object header */
     if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Loop over all messages, counting the ones of the type looked for */
     for(u = acc = 0; u < oh->nmesgs; u++)
@@ -1514,7 +1522,7 @@ H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence, v
 	 * returning.
 	 */
 	if(NULL==(ret_value = (type->copy) (oh->mesg[idx].native, mesg, 0)))
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end else */
 
 done:
@@ -1710,7 +1718,7 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     HDassert(0 == (flags & ~H5O_FLAG_BITS));
 
     if(0 == (loc->file->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
@@ -1744,7 +1752,7 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     } else if(oh->mesg[idx].flags & H5O_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify constant message")
     } else if(oh->mesg[idx].flags & H5O_FLAG_SHARED) {
-	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify shared (constant) message")
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify shared (constant) message")
     }
 
     /* Write the information to the message */
@@ -1797,7 +1805,7 @@ H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
     HDassert(H5F_addr_defined(loc->addr));
 
     if(0 == (loc->file->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, NULL, "no write intent on file")
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "no write intent on file")
 
     if(NULL == (ret_value = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
@@ -1980,7 +1988,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
         HDmemset(sh_mesg,0,sizeof(H5O_shared_t));
 
         if (NULL==orig_type->get_share)
-            HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable");
+            HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable");
         if ((orig_type->get_share)(f, orig_mesg, sh_mesg/*out*/) < 0) {
             /*
              * If the message isn't shared then turn off the shared bit
@@ -2001,7 +2009,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
 
     /* Compute the size needed to store the message on disk */
     if ((size = ((*new_type)->raw_size) (f, *new_mesg)) >=H5O_MAX_SIZE)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large");
 
     /* Allocate space in the object headed for the message */
     if ((ret_value = H5O_alloc(f, dxpl_id, oh, orig_type, size, oh_flags_ptr)) == UFAIL)
@@ -2009,7 +2017,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
 
     /* Increment any links in message */
     if((*new_type)->link && ((*new_type)->link)(f,dxpl_id,(*new_mesg)) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, UFAIL, "unable to adjust shared object link count");
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, UFAIL, "unable to adjust shared object link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2485,9 +2493,10 @@ done:
  */
 static herr_t
 H5O_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence,
-    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
+    H5O_operator_t app_op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
 {
     H5O_iter_ud1_t udata;               /* User data for iterator */
+    H5O_mesg_operator_t op;             /* Wrapper for operator */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_remove_real)
@@ -2498,19 +2507,20 @@ H5O_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence,
     HDassert(type);
 
     if (0==(loc->file->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
+	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Set up iterator operator data */
     udata.f = loc->file;
     udata.dxpl_id = dxpl_id;
     udata.sequence = sequence;
     udata.nfailed = 0;
-    udata.op = op;
+    udata.op = app_op;
     udata.op_data = op_data;
     udata.adj_link = adj_link;
 
     /* Iterate over the messages, deleting appropriate one(s) */
-    if(H5O_iterate_real(loc, type, H5AC_WRITE, TRUE, (void *)H5O_remove_cb, &udata, dxpl_id) < 0)
+    op.lib_op = H5O_remove_cb;
+    if(H5O_iterate_real(loc, type, H5AC_WRITE, TRUE, op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over messages")
 
     /* Fail if we tried to remove any constant messages */
@@ -3622,11 +3632,11 @@ H5O_share (H5F_t *f, hid_t dxpl_id, const H5O_msg_class_t *type, const void *mes
     /* Encode the message put it in the global heap */
     if ((size = (type->raw_size)(f, mesg))>0) {
 	if (NULL==(buf = H5MM_malloc (size)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	if ((type->encode)(f, buf, mesg) < 0)
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 	if (H5HG_insert (f, dxpl_id, size, buf, hobj) < 0)
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL, "unable to store message in global heap");
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to store message in global heap");
     }
 
 done:
@@ -3670,7 +3680,7 @@ H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg)
 
     /* Compute the raw data size for the mesg */
     if ((ret_value = (type->raw_size)(f, mesg))==0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3709,7 +3719,7 @@ H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg)
 
     /* Compute the raw data size for the mesg */
     if((ret_value = (type->raw_size)(f, mesg)) == 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
 
     /* Adjust size for alignment, if necessary */
     ret_value = H5O_ALIGN(ret_value);
@@ -3760,7 +3770,7 @@ H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
 
     /* Compute the raw data size for the mesg */
     if((ret_value = (type->get_share)(f, mesg, share)) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve shared message information")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve shared message information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4005,7 +4015,7 @@ H5O_encode(H5F_t *f, unsigned char *buf, void *obj, unsigned type_id)
 
     /* Encode */
     if ((type->encode)(f, buf, obj) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4045,7 +4055,7 @@ H5O_decode(H5F_t *f, const unsigned char *buf, unsigned type_id)
 
     /* decode */
     if((ret_value = (type->decode)(f, 0, buf))==NULL)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4084,11 +4094,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
+H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
     void *op_data, hid_t dxpl_id)
 {
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    herr_t ret_value;           /* Return value */
+    H5O_mesg_operator_t op;         /* Wrapper for operator */
+    herr_t ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_iterate, FAIL)
 
@@ -4101,7 +4112,8 @@ H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     HDassert(type);
 
     /* Call the "real" iterate routine */
-    if((ret_value = H5O_iterate_real(loc, type, H5AC_READ, FALSE, (void *)op, op_data, dxpl_id)) < 0)
+    op.app_op = app_op;
+    if((ret_value = H5O_iterate_real(loc, type, H5AC_READ, FALSE, op, op_data, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
 
 done:
@@ -4144,7 +4156,7 @@ done:
  */
 static herr_t
 H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect_t prot,
-    hbool_t internal, void *op, void *op_data, hid_t dxpl_id)
+    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id)
 {
     H5O_t		*oh = NULL;     /* Pointer to actual object header */
     unsigned            oh_flags = H5AC__NO_FLAGS_SET;  /* Start iteration with no flags set on object header */
@@ -4160,7 +4172,7 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(type);
-    HDassert(op);
+    HDassert(op.app_op);
 
     /* Protect the object header to iterate over */
     if (NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, prot)))
@@ -4178,12 +4190,12 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
             /* Check for making an "internal" (i.e. within the H5O package) callback */
             if(internal) {
                 /* Call the "internal" iterator callback */
-                if((ret_value = ((H5O_operator_int_t)op)(idx_msg, sequence, &oh_flags, op_data)) != 0)
+                if((ret_value = (op.lib_op)(idx_msg, sequence, &oh_flags, op_data)) != 0)
                     break;
             } /* end if */
             else {
                 /* Call the iterator callback */
-                if((ret_value = ((H5O_operator_t)op)(idx_msg->native, sequence, op_data)) != 0)
+                if((ret_value = (op.app_op)(idx_msg->native, sequence, op_data)) != 0)
                     break;
             } /* end else */
 
@@ -4635,7 +4647,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
         /* Create memory image for the new chunk */
         if(NULL == (oh_dst->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, chunk_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Copy the chunk image from source to destination in memory */
         /* (This copies over all the messages which don't require special
@@ -4913,6 +4925,9 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
         /* When an object is copied for the first time, increment it's link */
         inc_link = TRUE;
+
+        /* indicate that a new object is created */
+        ret_value++;
     } /* end if */
     else {
         /* Object has already been copied, set it's address in destination file */
@@ -5013,8 +5028,8 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         cpy_info.expand_soft_link = TRUE;
     if((cpy_option & H5G_COPY_EXPAND_EXT_LINK_FLAG) > 0)
         cpy_info.expand_ext_link = TRUE;
-    if((cpy_option & H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG) > 0)
-        cpy_info.expand_obj_ref = TRUE;
+    if((cpy_option & H5G_COPY_EXPAND_REFERENCE_FLAG) > 0)
+        cpy_info.expand_ref = TRUE;
     if((cpy_option & H5G_COPY_WITHOUT_ATTR_FLAG) > 0)
         cpy_info.copy_without_attr = TRUE;
 
@@ -5071,7 +5086,7 @@ H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *
 
     /* Call the debug method in the class */
     if ((ret_value = (type->debug)(f, dxpl_id, mesg, stream, indent, fwidth)) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5156,7 +5171,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 
     /* debug each message */
     if (NULL==(sequence = H5MM_calloc(NELMTS(H5O_msg_class_g)*sizeof(int))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     for (i=0, mesg_total=0; i < oh->nmesgs; i++) {
 	mesg_total += H5O_SIZEOF_MSGHDR(f) + oh->mesg[i].raw_size;
 	HDfprintf(stream, "%*sMessage %d...\n", indent, "", i);
@@ -5249,6 +5264,184 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_debug_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_obj_by_ref
+ *
+ * Purpose:     Copy the object pointed by _src_ref.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao       
+ *              Aug 7 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id, H5O_loc_t *dst_oloc,
+    H5G_loc_t *dst_root_loc, H5O_copy_t *cpy_info)
+{
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5O_copy_obj_by_ref, FAIL)
+
+    HDassert(src_oloc);
+    HDassert(dst_oloc);
+
+    /* Perform the copy, or look up existing copy */
+    if((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+    /* Check if a new valid object is copied to the destination */
+    if(H5F_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
+        char    tmp_obj_name[80];
+        H5G_name_t      new_path;
+        H5O_loc_t       new_oloc;
+        H5G_loc_t       new_loc;
+
+        /* Set up group location for new object */
+        new_loc.oloc = &new_oloc;
+        new_loc.path = &new_path;
+        H5G_loc_reset(&new_loc);
+        new_oloc.file = dst_oloc->file;
+        new_oloc.addr = dst_oloc->addr;
+
+        /* Pick a default name for the new object */
+        sprintf(tmp_obj_name, "~obj_pointed_by_%llu", (unsigned long_long)dst_oloc->addr);
+
+        /* Create a link to the newly copied object */
+        if(H5L_link(dst_root_loc, tmp_obj_name, &new_loc, H5P_DEFAULT, H5P_DEFAULT, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
+
+        H5G_loc_free(&new_loc);
+    } /* if (H5F_addr_defined(dst_oloc.addr)) */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_obj_by_ref() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_copy_expand_ref
+ *
+ * Purpose:	Copy the object pointed by _src_ref.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao	
+ *		Aug 7 2006 
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
+    H5F_t *file_dst, void *_dst_ref, size_t ref_count, H5R_type_t ref_type,
+    H5O_copy_t *cpy_info)
+{
+    H5O_loc_t 	dst_oloc;         	/* Copied object object location */
+    H5O_loc_t	src_oloc;          	/* Temporary object location for source object */
+    H5G_loc_t   dst_root_loc;           /* The location of root group of the destination file */
+    size_t      i;                      /* Local index variable */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5O_copy_expand_ref, FAIL)
+
+    /* Sanity checks */
+    HDassert(file_src);
+    HDassert(_src_ref);
+    HDassert(file_dst);
+    HDassert(_dst_ref);
+    HDassert(ref_count);
+    HDassert(cpy_info);
+
+    /* Initialize object locations */
+    H5O_loc_reset(&src_oloc);
+    H5O_loc_reset(&dst_oloc);
+    src_oloc.file = file_src;
+    dst_oloc.file = file_dst;
+
+    /* Set up the root group in the destination file */
+    if(NULL == (dst_root_loc.oloc = H5G_oloc(H5G_rootof(file_dst))))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+    if(NULL == (dst_root_loc.path = H5G_nameof(H5G_rootof(file_dst))))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+
+    /* Copy object references */
+    if(H5R_OBJECT == ref_type) {
+        hobj_ref_t *src_ref = (hobj_ref_t *)_src_ref;
+        hobj_ref_t *dst_ref = (hobj_ref_t *)_dst_ref;
+
+        /* Making equivalent references in the destination file */
+        for(i = 0; i < ref_count; i++) {
+            /* Set up for the object copy for the reference */
+            src_oloc.addr = src_ref[i];
+            dst_oloc.addr = HADDR_UNDEF;
+
+            /* Attempt to copy object from source to destination file */
+            if(H5O_copy_obj_by_ref(&src_oloc, dxpl_id, &dst_oloc, &dst_root_loc, cpy_info) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+            /* Set the object reference info for the destination file */
+            dst_ref[i] = dst_oloc.addr;
+	} /* end for */
+    }  /* end if */
+    /* Copy region references */
+    else if(H5R_DATASET_REGION == ref_type) {
+        hdset_reg_ref_t *src_ref = (hdset_reg_ref_t *)_src_ref;
+        hdset_reg_ref_t *dst_ref = (hdset_reg_ref_t *)_dst_ref;
+        uint8_t *buf;           /* Buffer to store serialized selection in */
+        uint8_t *p;             /* Pointer to OID to store */
+        H5HG_t hobjid;          /* Heap object ID */
+        size_t buf_size;        /* Length of object in heap */
+  
+        /* Making equivalent references in the destination file */
+        for(i = 0; i < ref_count; i++) {
+            /* Get the heap ID for the dataset region */
+            p = (uint8_t *)(&src_ref[i]);
+            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(hobjid.addr));
+            INT32DECODE(p, hobjid.idx);
+
+            /* Get the dataset region from the heap (allocate inside routine) */
+            if((buf = H5HG_read(src_oloc.file, dxpl_id, &hobjid, NULL, &buf_size)) == NULL)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
+
+            /* Get the object oid for the dataset */
+            p = (uint8_t *)buf;
+            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(src_oloc.addr));
+            dst_oloc.addr = HADDR_UNDEF;
+
+            /* copy the object pointed by the ref to the destination */
+            if(H5O_copy_obj_by_ref(&src_oloc, dxpl_id, &dst_oloc, &dst_root_loc, cpy_info) < 0) {
+                H5MM_xfree(buf);
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+            } /* end if */
+
+            /* Serialize object ID */
+            p = (uint8_t *)buf;
+            H5F_addr_encode(dst_oloc.file, &p, dst_oloc.addr);
+
+            /* Save the serialized buffer to the destination */
+            if(H5HG_insert(dst_oloc.file, dxpl_id, buf_size, buf, &hobjid) < 0) {
+                H5MM_xfree(buf);
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "Unable to write dataset region information")
+            } /* end if */
+
+            /* Set the dataset region reference info for the destination file */
+            p = (uint8_t *)(&dst_ref[i]);
+            H5F_addr_encode(dst_oloc.file, &p, hobjid.addr);
+            INT32ENCODE(p, hobjid.idx);
+
+            /* Free the buffer allocated in H5HG_read() */
+            H5MM_xfree(buf);
+        } /* end for */
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_expand_ref() */
 
 
 /*-------------------------------------------------------------------------

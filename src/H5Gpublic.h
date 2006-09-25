@@ -81,7 +81,7 @@ typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 #define H5G_COPY_SHALLOW_HIERARCHY_FLAG         (0x0002u)   /* Copy only immediate members */
 #define H5G_COPY_EXPAND_SOFT_LINK_FLAG          (0x0004u)   /* Expand soft links into new objects */
 #define H5G_COPY_EXPAND_EXT_LINK_FLAG           (0x0008u)   /* Expand external links into new objects */
-#define H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG      (0x0010u)   /* Copy objects that are pointed by references */
+#define H5G_COPY_EXPAND_REFERENCE_FLAG      (0x0010u)   /* Copy objects that are pointed by references */
 #define H5G_COPY_WITHOUT_ATTR_FLAG              (0x0020u)   /* Copy object without copying attributes */
 #define H5G_COPY_ALL                            (0x003Fu)   /* All object copying flags (for internal checking) */
 

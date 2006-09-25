@@ -35,9 +35,9 @@
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
-static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
-static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, void *_ref);
-static H5G_obj_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
+static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref);
+static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
+static H5G_obj_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -334,12 +334,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hid_t
-H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
+H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
     H5G_loc_t loc;              /* Group location */
-    uint8_t *p;                 /* Pointer to OID to store */
+    const uint8_t *p;           /* Pointer to OID to store */
     int oid_type;               /* type of object being dereferenced */
     hid_t ret_value;
 
@@ -355,31 +355,27 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 
     switch(ref_type) {
         case H5R_OBJECT:
-        {
-            hobj_ref_t *ref = (hobj_ref_t *)_ref; /* Only object references currently supported */
-
-            oloc.addr = *ref;
-        } /* end case */
-        break;
+            oloc.addr = *(const hobj_ref_t *)_ref; /* Only object references currently supported */
+            break;
 
         case H5R_DATASET_REGION:
         {
-            hdset_reg_ref_t *ref = (hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
+            const hdset_reg_ref_t *ref = (const hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             H5HG_t hobjid;  /* Heap object ID */
             uint8_t *buf;   /* Buffer to store serialized selection in */
 
             /* Get the heap ID for the dataset region */
-            p = (uint8_t *)ref;
-            H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(hobjid.addr));
+            p = (const uint8_t *)ref;
+            H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL)) == NULL)
+            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
-            p = (uint8_t *)buf;
-            H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(oloc.addr));
+            p = buf;
+            H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
             /* Free the buffer allocated in H5HG_read() */
             H5MM_xfree(buf);
@@ -486,7 +482,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rdereference(hid_t id, H5R_type_t ref_type, void *_ref)
+H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
@@ -537,13 +533,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5S_t *
-H5R_get_region(H5F_t *file, hid_t dxpl_id, void *_ref)
+H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
-    uint8_t *p;                 /* Pointer to OID to store */
-    hdset_reg_ref_t *ref = (hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
-    H5HG_t hobjid;  /* Heap object ID */
-    uint8_t *buf;   /* Buffer to store serialized selection in */
+    const uint8_t *p;           /* Pointer to OID to store */
+    const hdset_reg_ref_t *ref = (const hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
+    H5HG_t hobjid;              /* Heap object ID */
+    uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
     H5S_t *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_get_region)
@@ -556,17 +552,17 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, void *_ref)
     oloc.file = file;
 
     /* Get the heap ID for the dataset region */
-    p = (uint8_t *)ref;
-    H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(hobjid.addr));
-    INT32DECODE(p,hobjid.idx);
+    p = (const uint8_t *)ref;
+    H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
+    INT32DECODE(p, hobjid.idx);
 
     /* Get the dataset region from the heap (allocate inside routine) */
-    if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL)) == NULL)
+    if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
         HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, NULL, "Unable to read dataset region information")
 
     /* Get the object oid for the dataset */
-    p = (uint8_t *)buf;
-    H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(oloc.addr));
+    p = buf;
+    H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
     /* Open and copy the dataset's dataspace */
     if((ret_value = H5S_read(&oloc, dxpl_id)) == NULL)
@@ -576,10 +572,11 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, void *_ref)
     if(H5S_select_deserialize(ret_value, p) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't deserialize selection")
 
-    /* Free the buffer allocated in H5HG_read() */
-    H5MM_xfree(buf);
-
 done:
+    /* Free the buffer allocated in H5HG_read() */
+    if(buf)
+        H5MM_xfree(buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R_get_region() */
 
@@ -608,7 +605,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rget_region(hid_t id, H5R_type_t ref_type, void *ref)
+H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;          /* Object's group location */
     H5S_t *space = NULL;    /* Dataspace object */
@@ -661,10 +658,10 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5G_obj_t
-H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
+H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
-    uint8_t *p;                 /* Pointer to OID to store */
+    const uint8_t *p;           /* Pointer to OID to store */
     H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_get_obj_type)
@@ -678,32 +675,28 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 
     switch(ref_type) {
         case H5R_OBJECT:
-        {
-            hobj_ref_t *ref = (hobj_ref_t *)_ref; /* Only object references currently supported */
-
             /* Get the object oid */
-            oloc.addr = *ref;
-        } /* end case */
-        break;
+            oloc.addr = *(const hobj_ref_t *)_ref; /* Only object references currently supported */
+            break;
 
         case H5R_DATASET_REGION:
         {
-            hdset_reg_ref_t *ref = (hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
+            const hdset_reg_ref_t *ref = (const hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             H5HG_t hobjid;  /* Heap object ID */
             uint8_t *buf;   /* Buffer to store serialized selection in */
 
             /* Get the heap ID for the dataset region */
-            p = (uint8_t *)ref;
-            H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(hobjid.addr));
+            p = (const uint8_t *)ref;
+            H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL)) == NULL)
+            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, H5G_UNKNOWN, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
-            p = (uint8_t *)buf;
-            H5F_addr_decode(oloc.file, (const uint8_t **)&p, &(oloc.addr));
+            p = buf;
+            H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
             /* Free the buffer allocated in H5HG_read() */
             H5MM_xfree(buf);
@@ -725,7 +718,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, H5G_UNKNOWN, "dereferencing deleted object")
 
     /* Get the OID type */
-    ret_value = H5O_obj_type(&oloc,dxpl_id);
+    ret_value = H5O_obj_type(&oloc, dxpl_id);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -756,7 +749,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5G_obj_t
-H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *ref)
+H5Rget_obj_type(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;          /* Object location */
     H5G_obj_t ret_value;

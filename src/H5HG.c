@@ -1081,57 +1081,63 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
+H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
+    size_t *buf_size)
 {
     H5HG_heap_t	*heap = NULL;
-    int	i;
     size_t	size;
     uint8_t	*p = NULL;
     void	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5HG_read, NULL);
+    FUNC_ENTER_NOAPI(H5HG_read, NULL)
 
     /* Check args */
-    assert (f);
-    assert (hobj);
+    HDassert(f);
+    HDassert(hobj);
 
     /* Load the heap */
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
 
-    assert (hobj->idx<heap->nused);
-    assert (heap->obj[hobj->idx].begin);
+    HDassert(hobj->idx < heap->nused);
+    HDassert(heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
-    p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
-    if (!object && NULL==(object = H5MM_malloc (size)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    HDmemcpy (object, p, size);
+    p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR(f);
+    /* Allocate a buffer for the object read in, if the user didn't give one */
+    if(!object && NULL == (object = H5MM_malloc(size)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    HDmemcpy(object, p, size);
 
     /*
      * Advance the heap in the CWFS list. We might have done this already
      * with the H5AC_protect(), but it won't hurt to do it twice.
      */
-    if (heap->obj[0].begin) {
-	for (i=0; i<f->shared->ncwfs; i++) {
-	    if (f->shared->cwfs[i]==heap) {
-		if (i) {
-		    f->shared->cwfs[i] = f->shared->cwfs[i-1];
-		    f->shared->cwfs[i-1] = heap;
-		}
+    if(heap->obj[0].begin) {
+        int	i;
+
+	for(i = 0; i < f->shared->ncwfs; i++)
+	    if(f->shared->cwfs[i] == heap) {
+		if(i) {
+		    f->shared->cwfs[i] = f->shared->cwfs[i - 1];
+		    f->shared->cwfs[i - 1] = heap;
+		} /* end if */
 		break;
-	    }
-	}
-    }
+	    } /* end if */
+    } /* end if */
+
+    /* If the caller would like to know the heap object's size, set that */
+    if(buf_size)
+        *buf_size = size;
 
     /* Set return value */
-    ret_value=object;
+    ret_value = object;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET)<0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET)<0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HG_read() */
 
 
 /*-------------------------------------------------------------------------
