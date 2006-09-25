@@ -1,3 +1,4 @@
 #############################
 Expected output for 'h5diff file1.h5 file1.h5'
 #############################
+0 differences found

@@ -3,3 +3,4 @@ Expected output for 'h5diff file3.h5 file3.h5 -v l1 l2'
 #############################
 Soft Link:        </l1> and </l2>
 1 differences found
+1 differences found

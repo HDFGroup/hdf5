@@ -5,3 +5,4 @@ Comparison not possible: </dset> is of type H5G_DATASET and </t1> is of type H5G
 --------------------------------
 Some objects are not comparable
 --------------------------------
+0 differences found

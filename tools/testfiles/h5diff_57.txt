@@ -10,3 +10,4 @@ Comparison not supported: </dset7a> has sign H5T_SGN_2 and </dset7b> has sign H5
 --------------------------------
 Some objects are not comparable
 --------------------------------
+0 differences found

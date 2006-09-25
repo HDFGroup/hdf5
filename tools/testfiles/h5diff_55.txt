@@ -9,3 +9,4 @@ position        dset5a          dset5b          difference
 [ 2 0 ]          1.000000        5.000000        4.000000       
 [ 2 1 ]          1.000000        6.000000        5.000000       
 4 differences found
+4 differences found

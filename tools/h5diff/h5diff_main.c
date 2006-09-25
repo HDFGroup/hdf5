@@ -63,7 +63,7 @@ int main(int argc, const char *argv[])
 
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
- print_results(&options);
+ print_results(&options,nfound);
 
 /*-------------------------------------------------------------------------
  * exit code

@@ -3,3 +3,4 @@ Expected output for 'h5diff file1.h5 file2.h5'
 #############################
 Dataset:     </g1/dset1> and </g1/dset1>
 4 differences found
+4 differences found

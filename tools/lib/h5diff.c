@@ -982,7 +982,7 @@ hsize_t diff (hid_t file1_id,
   *-------------------------------------------------------------------------
   */
   if (path1)
-   diff_attr (type1_id, type2_id, path1, path2, options);
+   nfound += diff_attr (type1_id, type2_id, path1, path2, options);
 
   if (H5Tclose (type1_id) < 0)
    goto out;
@@ -1019,7 +1019,7 @@ hsize_t diff (hid_t file1_id,
   *-------------------------------------------------------------------------
   */
   if (path1)
-   diff_attr (grp1_id, grp2_id, path1, path2, options);
+   nfound += diff_attr (grp1_id, grp2_id, path1, path2, options);
 
   if (H5Gclose (grp1_id) < 0)
    goto out;

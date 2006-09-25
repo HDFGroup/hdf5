@@ -9,3 +9,4 @@ position        dset7           dset8           difference      relative
 [ 2 0 ]          100             150             50              0.500000      
 [ 2 1 ]          100             200             100             1.000000      
 4 differences found
+4 differences found

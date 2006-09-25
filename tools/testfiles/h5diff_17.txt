@@ -27,3 +27,4 @@ position        dset1           dset1           difference
 4 differences found
 Group:       </> and </>
 0 differences found
+4 differences found

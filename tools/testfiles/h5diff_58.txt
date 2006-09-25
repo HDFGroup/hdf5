@@ -11,3 +11,4 @@ point #1              (2,2)              (3,3)
 point #3              (1,6)              (2,5)
 point #4              (2,8)              (1,7)
 4 differences found
+4 differences found
