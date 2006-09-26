@@ -20,15 +20,15 @@
 /* 
  This program reads binary output from h5dump (-b option).
  To use change the following 3 symbols accordingly.
- For example, to read 6 elements of a float type , define
+ For example, to read 2 elements of a float type , define
 
-  #define NELMTS     6
+  #define NELMTS     2
   #define TYPE       float
   #define FORMAT     "%f "
 
 */
 
-#define NELMTS     2
+#define NELMTS     6
 #define TYPE       int
 #define FORMAT     "%d "
 

@@ -611,10 +611,10 @@ usage(const char *prog)
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    fprintf(stdout, "     -b F, --binary=F     Output raw data into file F in binary form \n");
-    fprintf(stdout, "                          (recommended usage is with --dataset=P)\n");
-    fprintf(stdout, "     -F T, --form=T       Form of binary output. T is: NA for native type,\n");
-    fprintf(stdout, "                          DI for the disk file type, LE or BE for pre-existing\n");
+    fprintf(stdout, "     -b F, --binary=F     Binary output, of form F (into file -o F).\n");
+    fprintf(stdout, "                          Recommended usage is with --dataset=P\n");
+    fprintf(stdout, "                          Form F of binary output is: MEMORY for memory type,\n");
+    fprintf(stdout, "                          FILE for the disk file type, LE or BE for pre-existing\n");
     fprintf(stdout, "                          little or big endian types\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
@@ -2870,15 +2870,14 @@ set_binary_form(const char *form)
 {
  int bform=-1;
 
- if (strcmp(form,"NA")==0) /* native form */
+ if (strcmp(form,"MEMORY")==0) /* native form */
   bform = 0;
- else if (strcmp(form,"DI")==0) /* file type form */
+ else if (strcmp(form,"FILE")==0) /* file type form */
   bform = 1;
  else if (strcmp(form,"LE")==0) /* convert to little endian */
   bform = 2;
  else if (strcmp(form,"BE")==0) /* convert to big endian */
   bform = 3;
-
 
  return bform;
 }
@@ -3365,6 +3364,10 @@ parse_command_line(int argc, const char *argv[])
     struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
 
+    /* some logic to handle both -o and -b order */
+    const char          *outfname=NULL;
+    bin_form = -1;
+
     /* this will be plenty big enough to hold the info */
     hand = calloc((size_t)argc, sizeof(struct handler_t));
 
@@ -3479,37 +3482,48 @@ parse_start:
 
             last_was_dset = FALSE;
             break;
-        case 'o':
-            if (set_output_file(opt_arg, 0) < 0){
-                /* failed to set output file */
-                usage(progname);
-                leave(EXIT_FAILURE);
-            }
 
-            usingdasho = TRUE;
-            last_was_dset = FALSE;
-            break;
+        case 'o':
+         
+         if (bin_form > 0 )
+         {
+          if (set_output_file(opt_arg, 1) < 0){
+           usage(progname);
+           leave(EXIT_FAILURE);
+          }
+         }
+         else
+         {
+          if (set_output_file(opt_arg, 0) < 0){
+           usage(progname);
+           leave(EXIT_FAILURE);
+          }
+         }
+      
+         usingdasho = TRUE;
+         last_was_dset = FALSE;
+         outfname = opt_arg;
+         break;
 
        case 'b':
-            if (set_output_file(opt_arg, 1) < 0){
-                /* failed to set output file */
-                usage(progname);
-                leave(EXIT_FAILURE);
-            }
-
-            bin_output = TRUE;
-            last_was_dset = FALSE;
-            break;
-
-      case 'F':
-            if ( ( bin_form = set_binary_form(opt_arg)) < 0){
-                /* failed to set binary form */
-                usage(progname);
-                leave(EXIT_FAILURE);
-            }
-
-            last_was_dset = FALSE;
-            break;
+            
+        if ( ( bin_form = set_binary_form(opt_arg)) < 0){
+         /* failed to set binary form */
+         usage(progname);
+         leave(EXIT_FAILURE);
+        }
+        if (outfname!=NULL) {
+         if (set_output_file(outfname, 1) < 0){
+          /* failed to set output file */
+          usage(progname);
+          leave(EXIT_FAILURE);
+         }
+         
+         bin_output = TRUE;
+         last_was_dset = FALSE;
+        }
+        
+        break;
 
         /** begin XML parameters **/
         case 'x':

@@ -81,6 +81,7 @@
 #define FILE52  "tldouble.h5"
 #define FILE53  "textlink.h5"
 #define FILE54  "tudlink.h5"
+#define FILE55  "tbinary.h5"
 
 
 
@@ -5551,6 +5552,44 @@ error:
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_binary
+ *
+ * Purpose:     Generate a file to be used in the binary output test 
+ *              Contains:
+ *              1) an integer dataset
+ *              2) a float dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_binary()
+{
+ hid_t    fid, sid, idid, fdid;
+ hsize_t  dims[1] = {6};
+ int      ibuf[6]  = {1,2,3,4,5,6};
+ float    fbuf[6]  = {1,2,3,4,5,6};
+
+ fid = H5Fcreate(FILE55, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+ 
+ /* create datasets */
+ idid = H5Dcreate(fid, "integer", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+ fdid = H5Dcreate(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT);
+ 
+ /* write */
+ H5Dwrite(idid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf);
+ H5Dwrite(fdid, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
+ 
+ /* close */
+ H5Sclose(sid);
+ H5Dclose(idid);
+ H5Dclose(fdid);
+ H5Fclose(fid);
+}
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -5613,6 +5652,7 @@ int main(void)
     gent_aindices();
     gent_longlinks();
     gent_ldouble();
+    gent_binary();
 
     return 0;
 }

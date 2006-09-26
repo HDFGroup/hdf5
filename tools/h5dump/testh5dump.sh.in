@@ -323,10 +323,10 @@ TOOLTEST tlonglinks.ddl tlonglinks.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST tbin1.ddl -d integer -b out1.bin test1.h5
-TOOLTEST tbin2.ddl -d integer -b out2.bin -F DI test1.h5
-TOOLTEST tbin3.ddl -d integer -b out3.bin -F LE test1.h5
-TOOLTEST tbin4.ddl -d integer -b out4.bin -F BE test1.h5
+TOOLTEST tbin1.ddl -d integer -o out1.bin -b MEMORY tbinary.h5
+TOOLTEST tbin2.ddl -d float   -o out2.bin -b FILE   tbinary.h5
+TOOLTEST tbin3.ddl -d integer -o out3.bin -b LE     tbinary.h5
+TOOLTEST tbin4.ddl -d float   -o out4.bin -b BE     tbinary.h5
    # Clean up binary output files
    if test -z "$HDF5_NOCLEANUP"; then
       rm -f $srcdir/../testfiles/out[1-4].bin

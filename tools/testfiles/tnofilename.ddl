@@ -21,10 +21,10 @@ usage: h5dump [OPTIONS] file
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -o F, --output=F     Output raw data into file F
-     -b F, --binary=F     Output raw data into file F in binary form 
-                          (recommended usage is with --dataset=P)
-     -F T, --form=T       Form of binary output. T is: NA for native type,
-                          DI for the disk file type, LE or BE for pre-existing
+     -b F, --binary=F     Binary output, of form F (into file -o F).
+                          Recommended usage is with --dataset=P
+                          Form F of binary output is: MEMORY for memory type,
+                          FILE for the disk file type, LE or BE for pre-existing
                           little or big endian types
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
