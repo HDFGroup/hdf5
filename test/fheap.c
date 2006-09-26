@@ -821,7 +821,7 @@ del_objs_half_refill(H5F_t *f, hid_t dxpl, H5HF_t **fh, fheap_test_param_t *tpar
     fheap_heap_ids_t *keep_ids)
 {
     unsigned char *wobj;        /* Buffer for object to insert */
-    haddr_t fh_addr;            /* Address of fractal heap */
+    haddr_t fh_addr = HADDR_UNDEF;      /* Address of fractal heap */
     size_t id_len;              /* Size of fractal heap IDs */
     size_t half_nobjs;          /* Half of total # of objects */
     size_t obj_idx;             /* Index of the object to remove */
