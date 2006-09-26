@@ -1127,6 +1127,7 @@
 ./tools/testfiles/tvms.ddl
 ./tools/testfiles/tldouble.h5
 ./tools/testfiles/tvms.h5
+./tools/testfiles/tbinary.h5
 ./tools/testfiles/tbin1.ddl
 ./tools/testfiles/tbin2.ddl
 ./tools/testfiles/tbin3.ddl
