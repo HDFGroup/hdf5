@@ -662,7 +662,7 @@ usage(const char *prog)
     fprintf(stdout, "\n");
     fprintf(stdout, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type \n");
     fprintf(stdout, "\n");
-    fprintf(stdout, "      h5dump -d /dset -b out.bin -F LE quux.h5\n");
+    fprintf(stdout, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
     fprintf(stdout, "\n");
 }
 

@@ -72,6 +72,6 @@ usage: h5dump [OPTIONS] file
 
   3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type 
 
-      h5dump -d /dset -b out.bin -F LE quux.h5
+      h5dump -d /dset -b LE -o out.bin quux.h5
 
 h5dump error: missing file name
