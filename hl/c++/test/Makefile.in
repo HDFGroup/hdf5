@@ -71,9 +71,10 @@ ptableTest_OBJECTS = $(am_ptableTest_OBJECTS)
 ptableTest_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 am__DEPENDENCIES_2 = $(top_builddir)/hl/src/libhdf5_hl.la
-am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
+am__DEPENDENCIES_3 = $(top_builddir)/c++/src/libhdf5_cpp.la
+am__DEPENDENCIES_4 = $(top_builddir)/src/libhdf5.la
 ptableTest_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -322,7 +323,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # Include directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/c++/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test -I$(top_builddir)/hl/test -I$(top_srcdir)/hl/test
 
 # Shared C++ libraries aren't universally supported.
 @CXX_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
@@ -331,8 +332,8 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src
 # executed, generally most specific tests to least specific tests.
 TEST_PROG = ptableTest
 
-# The tests depend on the hdf5 library and the hdf5_hl library
-LDADD = $(LIBH5CPP_HL) $(LIBH5_HL) $(LIBHDF5)
+# The tests depend on the hdf5, hdf5 C++, and hdf5_hl libraries
+LDADD = $(LIBH5CPP_HL) $(LIBH5_HL) $(LIBH5CPP) $(LIBHDF5)
 ptableTest_SOURCES = ptableTest.cpp
 
 # Automake needs to be taught how to build lib, progs, and tests targets.

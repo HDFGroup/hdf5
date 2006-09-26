@@ -21,10 +21,10 @@
 include $(top_srcdir)/config/commence.am
 
 # Add include directories to C preprocessor flags
-AM_CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src
+AM_CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_builddir)/test -I$(top_srcdir)/test -I$(top_srcdir)/hl/src
 
-# The tests depend on the hdf5 and hdf5_hl libraries
-LDADD=$(LIBH5_HL) $(LIBHDF5)
+# The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
+LDADD=$(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.

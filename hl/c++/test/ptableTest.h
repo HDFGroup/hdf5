@@ -23,7 +23,8 @@
 #define PTABLETEST
 
 #include "H5PacketTable.h"
-#include "h5test.h"
+#include "H5Cpp.h"
+#include "h5hltest.h"
 
 static hid_t fileID;
 
@@ -35,6 +36,9 @@ int TestCompoundDatatype(void);
 
 /* Test the GetNext functions and their indexes */
 int TestGetNext(void);
+
+/* Make sure that setting compression through the C++ API works. */
+int TestCompress(void);
 
 /* Ensure that the functions return the correct errors in
  * response to invalid indexes */

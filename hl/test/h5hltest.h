@@ -25,17 +25,15 @@
 /* Get the HDF5 public header */
 #include "hdf5.h"
 
+/* Get the HDF5 test header */
+#include "h5test.h"
+
 /* Include the High-Level private header */
 #include "H5HLprivate2.h"
 
-/* These are copied from the test/h5test.h header */
-#define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
+/* Macros used in HL tests */
 #define TESTING2(WHAT)  {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
 #define TESTING3(WHAT)  {printf("%-70s", "" WHAT); fflush(stdout);}
-#define PASSED()	{puts(" PASSED");fflush(stdout);}
-#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
-#define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
-#define EXAMPLE(WHAT)	{printf("%-70s", "Example " WHAT); fflush(stdout);}
 
 #endif /* _H5HLTEST_H */
 

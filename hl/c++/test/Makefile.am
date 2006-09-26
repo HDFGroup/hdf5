@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/c++/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test -I$(top_builddir)/hl/test -I$(top_srcdir)/hl/test
 
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL
@@ -33,8 +33,8 @@ endif
 TEST_PROG=ptableTest
 check_PROGRAMS=$(TEST_PROG)
 
-# The tests depend on the hdf5 library and the hdf5_hl library
-LDADD=$(LIBH5CPP_HL) $(LIBH5_HL) $(LIBHDF5)
+# The tests depend on the hdf5, hdf5 C++, and hdf5_hl libraries
+LDADD=$(LIBH5CPP_HL) $(LIBH5_HL) $(LIBH5CPP) $(LIBHDF5)
 
 ptableTest_SOURCES=ptableTest.cpp
 include $(top_srcdir)/config/conclude.am

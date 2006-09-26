@@ -498,6 +498,7 @@ H5Odecr_refcount(hid_t object_id)
     int         ret_value;
 
     FUNC_ENTER_API(H5Odecr_refcount, FAIL)
+    H5TRACE1("Is","i",object_id);
 
     /* Get the object's oloc so we can adjust its link count */
     if((oloc = H5O_get_oloc(object_id)) == NULL)

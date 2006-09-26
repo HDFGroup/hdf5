@@ -30,7 +30,8 @@ extern "C" {
 H5_HLDLL hid_t H5PTcreate_fl ( hid_t loc_id,
                       const char *dset_name,
                       hid_t dtype_id,
-                      hsize_t chunk_size );
+                      hsize_t chunk_size,
+                      int compression );
 
 H5_HLDLL hid_t H5PTcreate_vl ( hid_t loc_id,
                       const char *dset_name,

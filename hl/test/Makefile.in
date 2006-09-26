@@ -73,24 +73,30 @@ test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/hl/src/libhdf5_hl.la
-am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
-test_ds_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
+am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
+test_ds_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
-test_image_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+test_image_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 test_lite_SOURCES = test_lite.c
 test_lite_OBJECTS = test_lite.$(OBJEXT)
 test_lite_LDADD = $(LDADD)
-test_lite_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+test_lite_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 test_packet_SOURCES = test_packet.c
 test_packet_OBJECTS = test_packet.$(OBJEXT)
 test_packet_LDADD = $(LDADD)
-test_packet_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+test_packet_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 test_table_SOURCES = test_table.c
 test_table_OBJECTS = test_table.$(OBJEXT)
 test_table_LDADD = $(LDADD)
-test_table_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+test_table_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -345,10 +351,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog combine_tables[1-2].h5 \
 	test_table.h5 test_packet_table.h5
 
 # Add include directories to C preprocessor flags
-AM_CPPFLAGS = -I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src
+AM_CPPFLAGS = -I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_builddir)/test -I$(top_srcdir)/test -I$(top_srcdir)/hl/src
 
-# The tests depend on the hdf5 and hdf5_hl libraries
-LDADD = $(LIBH5_HL) $(LIBHDF5)
+# The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
+LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.

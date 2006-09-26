@@ -46,8 +46,8 @@ int main(void)
     if(fileID <0)
         fprintf(stderr, "Couldn't create file.\n");
 
-    /* Create a fixed-length packet table. */
-    FL_PacketTable ptable(fileID, "/examplePacketTable", H5T_NATIVE_INT, 1);
+    /* Create a fixed-length packet table with compression level 5. */
+    FL_PacketTable ptable(fileID, "/examplePacketTable", H5T_NATIVE_INT, 100, 5);
     if(! ptable.IsValid())
         fprintf(stderr, "Unable to create packet table.");
 

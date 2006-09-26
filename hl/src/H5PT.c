@@ -57,7 +57,7 @@ herr_t H5PT_get_index(htbl_t *table_id, hsize_t *pt_index);
  *
  * Date: March 12, 2004
  *
- * Comments: This function does not handle compression or fill data
+ * Comments: This function does not handle fill data
  *           currently.  Fill data is not necessary because the
  *           table is initially of size 0.
  *
@@ -69,7 +69,8 @@ herr_t H5PT_get_index(htbl_t *table_id, hsize_t *pt_index);
 hid_t H5PTcreate_fl ( hid_t loc_id,
                               const char *dset_name,
                               hid_t dtype_id,
-                              hsize_t chunk_size )
+                              hsize_t chunk_size,
+                              int compression )
 {
   htbl_t * table = NULL;
   hid_t dset_id = H5I_BADID;
@@ -99,6 +100,11 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   plist_id = H5Pcreate (H5P_DATASET_CREATE);
   if ( H5Pset_chunk ( plist_id, 1, dims_chunk ) < 0 )
     goto out;
+  if(compression >= 0 && compression <= 9)
+  {
+    if( H5Pset_deflate(plist_id, compression) < 0)
+        goto out;
+  }
 
   /* Create the dataset. */
   if ( (dset_id=H5Dcreate( loc_id, dset_name, dtype_id, space_id, plist_id))<0 )
@@ -175,7 +181,7 @@ hid_t H5PTcreate_vl ( hid_t loc_id,
   if (vltype < 0)
     goto out;
 
-  if((ret_value=H5PTcreate_fl(loc_id, dset_name, vltype, chunk_size)) <0)
+  if((ret_value=H5PTcreate_fl(loc_id, dset_name, vltype, chunk_size, 0)) <0)
     goto out;
 
   /* close the vltype */

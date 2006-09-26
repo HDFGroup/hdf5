@@ -103,10 +103,11 @@ public:
     /* Constructor
      * Creates a packet table in which to store fixed length packets.
      * Takes the ID of the file the packet table will be created in, the name of
-     * the packet table, the ID of the datatype of the set, and the size
-     * of a memory chunk used in chunking.
+     * the packet table, the ID of the datatype of the set, the size
+     * of a memory chunk used in chunking, and the desired compression level
+     * (0-9, or -1 for no compression).
      */
-    FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, int chunkSize);
+    FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, hsize_t chunkSize, int compression = -1);
 
     /* "Open" Constructor
      * Opens an existing fixed-length packet table.
@@ -169,7 +170,7 @@ public:
      * Takes the ID of the file the packet table will be created in, the name of
      * the packet table, and the size of a memory chunk used in chunking.
      */
-    VL_PacketTable(hid_t fileID, char* name, int chunkSize);
+    VL_PacketTable(hid_t fileID, char* name, hsize_t chunkSize);
 
     /* "Open" Constructor
      * Opens an existing variable-length packet table.

@@ -50,8 +50,9 @@ int main(void)
  fid=H5Fcreate("packet_table_FLexample.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
 
     /* Create a fixed-length packet table within the file */
-    /* This table's "packets" will be simple integers. */
- ptable = H5PTcreate_fl(fid, "Packet Test Dataset", H5T_NATIVE_INT, (hsize_t)1);
+    /* This table's "packets" will be simple integers and it will use compression
+     * level 5. */
+ ptable = H5PTcreate_fl(fid, "Packet Test Dataset", H5T_NATIVE_INT, (hsize_t)100, 5);
  if(ptable == H5I_INVALID_HID)
      goto out;
 
