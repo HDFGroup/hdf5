@@ -11,4 +11,3 @@ position        dset3           dset4           difference      relative
 [ 2 0 ]          100             140             40              0.4           
 [ 2 1 ]          100             200             100             1             
 6 differences found
-6 differences found

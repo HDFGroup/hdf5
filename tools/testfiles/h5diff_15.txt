@@ -11,4 +11,3 @@ position        dset3           dset4           difference
 [ 2 0 ]          100.000000      140.000000      40.000000      
 [ 2 1 ]          100.000000      200.000000      100.000000     
 6 differences found
-6 differences found

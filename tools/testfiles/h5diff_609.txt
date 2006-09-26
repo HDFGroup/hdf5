@@ -1,4 +1,3 @@
 #############################
 Expected output for 'h5diff file1.h5 file2.h5 -d 200 g1/dset3 g1/dset4'
 #############################
-0 differences found

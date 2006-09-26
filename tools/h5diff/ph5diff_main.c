@@ -79,7 +79,7 @@ int main(int argc, const char *argv[])
 
 	nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
-	print_results(&options,nfound);
+	print_results(&options);
 
 	MPI_Finalize();
 
@@ -95,7 +95,7 @@ int main(int argc, const char *argv[])
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	print_results(&options,nfound);
+	print_results(&options);
 	print_manager_output();
 
 	MPI_Finalize();

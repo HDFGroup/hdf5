@@ -181,7 +181,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
  *-------------------------------------------------------------------------
  */
 
-void  print_results(diff_opt_t* options, hsize_t nfound)
+void  print_results(diff_opt_t* options)
 {
  if (options->m_quiet || options->err_stat)
   return;
@@ -201,8 +201,6 @@ void  print_results(diff_opt_t* options, hsize_t nfound)
   if (!options->m_verbose)
    printf("Use -v for a list of objects.\n");
  }
-
- print_found(nfound);
 
 }
 

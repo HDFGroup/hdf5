@@ -1145,4 +1145,3 @@ position        float3D of </>  float3D of </>  difference
 --------------------------------
 Some objects are not comparable
 --------------------------------
-912 differences found

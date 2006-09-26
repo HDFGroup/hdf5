@@ -438,7 +438,7 @@ hsize_t diff_datasetid( hid_t did1,
  */
 
  if (obj1_name)
-  nfound += diff_attr(did1,did2,obj1_name,obj2_name,options);
+  diff_attr(did1,did2,obj1_name,obj2_name,options);
 
  }/*cmp*/
 

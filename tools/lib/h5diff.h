@@ -138,13 +138,12 @@ int diff_can_type( hid_t       f_type1, /* file data type */
                    diff_opt_t  *options );
 
 
-hsize_t
-diff_attr(hid_t      loc1_id,
-          hid_t      loc2_id,
-          const char *path1,
-          const char *path2,
-          diff_opt_t *options
-          );
+int diff_attr(hid_t      loc1_id,
+              hid_t      loc2_id,
+              const char *path1,
+              const char *path2,
+              diff_opt_t *options
+              );
 
 
 /*-------------------------------------------------------------------------
