@@ -5,7 +5,13 @@
 cd h5jam%2\%1 
 echo off
 copy /Y ..\..\testfiles\tall.h5 tall.h5 >temp.txt
+copy /Y ..\..\testfiles\twithub.h5 twithub.h5 >temp.txt
+copy /Y ..\..\testfiles\twithub513.h5 twithub513.h5 >temp.txt
 copy /Y ..\..\testfiles\u10.txt u10.txt >temp.txt
+copy /Y ..\..\testfiles\u511.txt u511.txt >temp.txt
+copy /Y ..\..\testfiles\u512.txt u512.txt >temp.txt
+copy /Y ..\..\testfiles\u513.txt u513.txt >temp.txt
+
 h5jam -u u10.txt -i tall.h5 -o ta2.h5             
 echo h5jam -u u10.txt -i tall.h5 -o ta2.h5                                    PASSED             
 h5jam -u u511.txt -i tall.h5 -o ta3.h5     
