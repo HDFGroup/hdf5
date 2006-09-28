@@ -219,7 +219,6 @@ struct H5FD_t {
     unsigned long       feature_flags;  /* VFL Driver feature Flags */
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
-    hsize_t             reserved_alloc; /* Space reserved for later alloc calls */
 
     /* Metadata aggregation fields */
     hsize_t             def_meta_block_size;  /* Metadata allocation
