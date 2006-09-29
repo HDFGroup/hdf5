@@ -439,8 +439,8 @@ done:
  *              and other VERY BAD THINGS!
  *
  *              This function increments the "hard link" reference count
- *              for an object. It should be used a user-defined link
- *              that references an object by address is deleted. When the
+ *              for an object. It should be used when a user-defined link
+ *              that references an object by address is created. When the
  *              link is deleted, H5Odecr_refcount should be used.
  *
  * Return:	Success:	Non-negative
