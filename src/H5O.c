@@ -443,7 +443,7 @@ done:
  *              that references an object by address is deleted. When the
  *              link is deleted, H5Odecr_refcount should be used.
  *
- * Return:	Success:	The object's new refcount
+ * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
  * Programmer:	James Laird
@@ -451,11 +451,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5Oincr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;
-    int         ret_value;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Oincr_refcount, FAIL)
     H5TRACE1("Is","i",object_id);
@@ -464,7 +464,8 @@ H5Oincr_refcount(hid_t object_id)
     if((oloc = H5O_get_oloc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-    ret_value = H5O_link(oloc, 1, H5AC_dxpl_id);
+    if(H5O_link(oloc, 1, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -491,11 +492,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5Odecr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;
-    int         ret_value;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Odecr_refcount, FAIL)
     H5TRACE1("Is","i",object_id);
@@ -504,7 +505,8 @@ H5Odecr_refcount(hid_t object_id)
     if((oloc = H5O_get_oloc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-    ret_value = H5O_link(oloc, -1, H5AC_dxpl_id);
+    if(H5O_link(oloc, -1, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
