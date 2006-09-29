@@ -1057,6 +1057,10 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* configuring with --enable-debug=all produces compiler errors on most
+  platforms.  Users who want to run HDF5 in debug mode should use
+  --enable-debug rather than --enable-debug=all to enable debugging
+  information on most modules.
 * On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
   double to (unsigned) long long and from (unsigned)long long to long double. 
 * On Altix SGI with Intel 9.0 testmeta.c would not compile with -O3
