@@ -24,7 +24,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 t_cache
+TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
 TEST_SCRIPT_PARA=testph5.sh
 
 check_PROGRAMS = $(TEST_PROG_PARA)

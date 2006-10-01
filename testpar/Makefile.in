@@ -29,7 +29,7 @@
 #
 # hdf5 Parallel Library Test Makefile(.in)
 #
-SOURCES = t_cache.c t_mpi.c t_posix_compliant.c $(testphdf5_SOURCES)
+SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_posix_compliant.c $(testphdf5_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -66,7 +66,8 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testph5.sh
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
-	testphdf5$(EXEEXT) t_cache$(EXEEXT)
+	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
+	t_pflush2$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -77,6 +78,14 @@ t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
 t_mpi_LDADD = $(LDADD)
 t_mpi_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+t_pflush1_SOURCES = t_pflush1.c
+t_pflush1_OBJECTS = t_pflush1.$(OBJEXT)
+t_pflush1_LDADD = $(LDADD)
+t_pflush1_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+t_pflush2_SOURCES = t_pflush2.c
+t_pflush2_OBJECTS = t_pflush2.$(OBJEXT)
+t_pflush2_LDADD = $(LDADD)
+t_pflush2_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 t_posix_compliant_SOURCES = t_posix_compliant.c
 t_posix_compliant_OBJECTS = t_posix_compliant.$(OBJEXT)
 t_posix_compliant_LDADD = $(LDADD)
@@ -100,9 +109,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = t_cache.c t_mpi.c t_posix_compliant.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c t_mpi.c t_posix_compliant.c \
-	$(testphdf5_SOURCES)
+SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_posix_compliant.c $(testphdf5_SOURCES)
+DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_posix_compliant.c $(testphdf5_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -344,7 +354,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
@@ -419,6 +429,12 @@ t_cache$(EXEEXT): $(t_cache_OBJECTS) $(t_cache_DEPENDENCIES)
 t_mpi$(EXEEXT): $(t_mpi_OBJECTS) $(t_mpi_DEPENDENCIES) 
 	@rm -f t_mpi$(EXEEXT)
 	$(LINK) $(t_mpi_LDFLAGS) $(t_mpi_OBJECTS) $(t_mpi_LDADD) $(LIBS)
+t_pflush1$(EXEEXT): $(t_pflush1_OBJECTS) $(t_pflush1_DEPENDENCIES) 
+	@rm -f t_pflush1$(EXEEXT)
+	$(LINK) $(t_pflush1_LDFLAGS) $(t_pflush1_OBJECTS) $(t_pflush1_LDADD) $(LIBS)
+t_pflush2$(EXEEXT): $(t_pflush2_OBJECTS) $(t_pflush2_DEPENDENCIES) 
+	@rm -f t_pflush2$(EXEEXT)
+	$(LINK) $(t_pflush2_LDFLAGS) $(t_pflush2_OBJECTS) $(t_pflush2_LDADD) $(LIBS)
 t_posix_compliant$(EXEEXT): $(t_posix_compliant_OBJECTS) $(t_posix_compliant_DEPENDENCIES) 
 	@rm -f t_posix_compliant$(EXEEXT)
 	$(LINK) $(t_posix_compliant_LDFLAGS) $(t_posix_compliant_OBJECTS) $(t_posix_compliant_LDADD) $(LIBS)
@@ -439,6 +455,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mdset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mpi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_ph5basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_posix_compliant.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_span_tree.Po@am__quote@
