@@ -563,29 +563,29 @@ H5G_link_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     if(HDstrcmp(lnk->name, udata->name) == 0) {
         switch(lnk->type)
         {
-          case H5L_TYPE_HARD:
-            {
-                H5O_loc_t tmp_oloc;             /* Temporary object location */
+            case H5L_TYPE_HARD:
+                {
+                    H5O_loc_t tmp_oloc;             /* Temporary object location */
 
-                /* Build temporary object location */
-                tmp_oloc.file = udata->file;
-                tmp_oloc.addr = lnk->u.hard.addr;
+                    /* Build temporary object location */
+                    tmp_oloc.file = udata->file;
+                    tmp_oloc.addr = lnk->u.hard.addr;
 
-                /* Get the type of the object */
-                /* Note: no way to check for error :-( */
-                *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
-            }
-            break;
+                    /* Get the type of the object */
+                    /* Note: no way to check for error :-( */
+                    *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
+                }
+                break;
 
-          case H5L_TYPE_SOFT:
-            *(udata->obj_type) = H5G_LINK;
-            break;
+            case H5L_TYPE_SOFT:
+                *(udata->obj_type) = H5G_LINK;
+                break;
 
-          default:  /* User-defined link */
-            if(lnk->type < H5L_TYPE_UD_MIN)
-               HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
+            default:  /* User-defined link */
+                if(lnk->type < H5L_TYPE_UD_MIN)
+                   HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
 
-            *(udata->obj_type) = H5G_UDLINK;
+                *(udata->obj_type) = H5G_UDLINK;
         }
         /* Stop the iteration, we found the correct link */
         HGOTO_DONE(H5O_ITER_STOP)

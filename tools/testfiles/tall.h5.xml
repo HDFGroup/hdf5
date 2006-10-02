@@ -172,7 +172,7 @@ Expected output for 'h5dump --xml tall.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_8696" H5Path= "/g2/dset2.2" Parents="xid_1848" H5ParentPaths="/g2">
+      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_8688" H5Path= "/g2/dset2.2" Parents="xid_1848" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

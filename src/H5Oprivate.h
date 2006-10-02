@@ -108,9 +108,10 @@ typedef struct H5O_copy_t {
  * (Data structure in memory)
  */
 typedef struct H5O_linfo_t {
+    hbool_t     index_corder;           /* Are creation order values indexed on links? */
     hsize_t     nlinks;                 /* Number of links in the group      */
-    int64_t     min_corder;             /* Min. creation order value for group */
-    int64_t     max_corder;             /* Max. creation order value for group */
+    int64_t     min_corder;             /* Current min. creation order value for group */
+    int64_t     max_corder;             /* Current max. creation order value for group */
     haddr_t     link_fheap_addr;        /* Address of fractal heap for storing "dense" links */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of links */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
@@ -252,7 +253,6 @@ typedef struct H5O_ginfo_t {
 
     /* "New" format group info (stored) */
     hbool_t     track_corder;           /* Are creation order values tracked on links? */
-    hbool_t     index_corder;           /* Are creation order values indexed on links? */
     uint32_t	max_compact;		/* Maximum # of compact links        */
     uint32_t	min_dense;		/* Minimum # of "dense" links        */
     uint32_t	est_num_entries;	/* Estimated # of entries in group   */

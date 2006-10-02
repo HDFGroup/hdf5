@@ -66,9 +66,9 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 /* Current version of group info information */
 #define H5O_GINFO_VERSION 	1
 
-/* Flags for group flag encoding */
-#define H5O_GINFO_FLAG_TRACK_CORDER        0x01
-#define H5O_GINFO_FLAG_INDEX_CORDER        0x02
+/* Flags for group info flag encoding */
+#define H5O_GINFO_FLAG_TRACK_NAME          0x01
+#define H5O_GINFO_FLAG_TRACK_CORDER        0x02
 
 /* Declare a free list to manage the H5O_ginfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ginfo_t);
@@ -104,6 +104,11 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     /* check args */
     HDassert(p);
 
+#ifndef NDEBUG
+{
+    const uint8_t *start_p = p;
+#endif /* NDEBUG */
+
     /* Version of message */
     if(*p++ != H5O_GINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
@@ -114,8 +119,8 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
     /* Get the flags for the group */
     flags = *p++;
+    HDassert(flags & H5O_GINFO_FLAG_TRACK_NAME);
     ginfo->track_corder = (flags & H5O_GINFO_FLAG_TRACK_CORDER) ? TRUE : FALSE;
-    ginfo->index_corder = (flags & H5O_GINFO_FLAG_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     UINT32DECODE(p, ginfo->max_compact)
@@ -125,8 +130,13 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     UINT32DECODE(p, ginfo->est_num_entries)
     UINT32DECODE(p, ginfo->est_name_len)
 
+#ifndef NDEBUG
+    HDassert((size_t)(p - start_p) == H5O_ginfo_size(f, ginfo));
+}
+#endif /* NDEBUG */
+
     /* Set return value */
-    ret_value=ginfo;
+    ret_value = ginfo;
 
 done:
     if(ret_value == NULL)
@@ -164,12 +174,17 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(ginfo);
 
-    /* encode */
+#ifndef NDEBUG
+{
+    uint8_t *start_p = p;
+#endif /* NDEBUG */
+
+    /* Message version */
     *p++ = H5O_GINFO_VERSION;
 
-    /* The flags for the group */
-    flags = ginfo->track_corder ? H5O_GINFO_FLAG_TRACK_CORDER : 0;
-    flags |= ginfo->index_corder ? H5O_GINFO_FLAG_INDEX_CORDER : 0;
+    /* The flags for the group info */
+    flags = H5O_GINFO_FLAG_TRACK_NAME;          /* Names are always tracked */
+    flags |= ginfo->track_corder ? H5O_GINFO_FLAG_TRACK_CORDER : 0;
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
@@ -179,6 +194,11 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* Estimated # of entries & name lengths */
     UINT32ENCODE(p, ginfo->est_num_entries)
     UINT32ENCODE(p, ginfo->est_name_len)
+
+#ifndef NDEBUG
+    HDassert((size_t)(p - start_p) == H5O_ginfo_size(f, ginfo));
+}
+#endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_encode() */
@@ -205,8 +225,8 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 static void *
 H5O_ginfo_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
-    const H5O_ginfo_t   *ginfo = (const H5O_ginfo_t *) _mesg;
-    H5O_ginfo_t         *dest = (H5O_ginfo_t *) _dest;
+    const H5O_ginfo_t   *ginfo = (const H5O_ginfo_t *)_mesg;
+    H5O_ginfo_t         *dest = (H5O_ginfo_t *)_dest;
     void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_ginfo_copy)
@@ -220,7 +240,7 @@ H5O_ginfo_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     *dest = *ginfo;
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -324,8 +344,6 @@ H5O_ginfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	      "Track creation order of links:", ginfo->track_corder);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-	      "Index creation order of links:", ginfo->index_corder);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. compact links:", ginfo->max_compact);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,

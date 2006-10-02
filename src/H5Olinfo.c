@@ -73,6 +73,10 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
 /* Current version of link info information */
 #define H5O_LINFO_VERSION 	1
 
+/* Flags for link info index flag encoding */
+#define H5O_LINFO_INDEX_NAME          0x01
+#define H5O_LINFO_INDEX_CORDER        0x02
+
 /* Data exchange structure to use when copying links from src to dst */
 typedef struct {
     const H5O_loc_t *src_oloc;          /* Source object location */
@@ -100,13 +104,12 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
+    unsigned char index_flags;  /* Flags for encoding link index info */
     H5O_linfo_t	*linfo = NULL;  /* Link info */
     void        *ret_value;     /* Return value */
 
@@ -116,13 +119,23 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     HDassert(f);
     HDassert(p);
 
-    /* decode */
+#ifndef NDEBUG
+{
+    const uint8_t *start_p = p;
+#endif /* NDEBUG */
+
+    /* Version of message */
     if(*p++ != H5O_LINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
     /* Allocate space for message */
-    if (NULL == (linfo = H5FL_MALLOC(H5O_linfo_t)))
+    if(NULL == (linfo = H5FL_MALLOC(H5O_linfo_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Get the index flags for the group */
+    index_flags = *p++;
+    HDassert(index_flags & H5O_LINFO_INDEX_NAME);
+    linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Number of links in the group */
     H5F_DECODE_LENGTH(f, p, linfo->nlinks)
@@ -134,11 +147,19 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     /* Address of fractal heap to store "dense" links */
     H5F_addr_decode(f, &p, &(linfo->link_fheap_addr));
 
-    /* Address of v2 B-tree to index names of links */
+    /* Address of v2 B-tree to index names of links (names are always indexed) */
     H5F_addr_decode(f, &p, &(linfo->name_bt2_addr));
 
-    /* Address of v2 B-tree to index creation order of links */
-    H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
+    /* Address of v2 B-tree to index creation order of links, if there is one */
+    if(linfo->index_corder)
+        H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
+    else
+        linfo->corder_bt2_addr = HADDR_UNDEF;
+
+#ifndef NDEBUG
+    HDassert((size_t)(p - start_p) == H5O_linfo_size(f, linfo));
+}
+#endif /* NDEBUG */
 
     /* Set return value */
     ret_value = linfo;
@@ -163,14 +184,13 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
-    const H5O_linfo_t       *linfo = (const H5O_linfo_t *) _mesg;
+    const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
+    unsigned char       index_flags;          /* Flags for encoding link index info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_encode)
 
@@ -179,8 +199,18 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(linfo);
 
-    /* encode */
+#ifndef NDEBUG
+{
+    uint8_t *start_p = p;
+#endif /* NDEBUG */
+
+    /* Message version */
     *p++ = H5O_LINFO_VERSION;
+
+    /* The flags for the link indices */
+    index_flags = H5O_LINFO_INDEX_NAME;       /* Names are always indexed */
+    index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
+    *p++ = index_flags;
 
     /* Number of links in the group */
     H5F_ENCODE_LENGTH(f, p, linfo->nlinks)
@@ -195,8 +225,16 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     /* Address of v2 B-tree to index names of links */
     H5F_addr_encode(f, &p, linfo->name_bt2_addr);
 
-    /* Address of v2 B-tree to index creation order of links */
-    H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
+    /* Address of v2 B-tree to index creation order of links, if they are indexed */
+    if(linfo->index_corder)
+        H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
+    else
+        HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
+
+#ifndef NDEBUG
+    HDassert((size_t)(p - start_p) == H5O_linfo_size(f, linfo));
+}
+#endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_encode() */
@@ -216,14 +254,12 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_linfo_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
-    const H5O_linfo_t   *linfo = (const H5O_linfo_t *) _mesg;
+    const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     H5O_linfo_t         *dest = (H5O_linfo_t *) _dest;
     void                *ret_value;     /* Return value */
 
@@ -260,25 +296,25 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_linfo_size(const H5F_t *f, const void UNUSED *_mesg)
+H5O_linfo_size(const H5F_t *f, const void *_mesg)
 {
+    const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     size_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_size)
 
     /* Set return value */
     ret_value = 1                       /* Version */
+                + 1                     /* Index flags */
                 + H5F_SIZEOF_SIZE(f)    /* Number of links */
-                + 8                     /* Min. creation order value */
-                + 8                     /* Max. creation order value */
+                + 8                     /* Curr. min. creation order value */
+                + 8                     /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
-                + H5F_SIZEOF_ADDR(f);   /* Address of v2 B-tree for indexing creation order values of links */
+                + (linfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_size() */
@@ -293,8 +329,6 @@ H5O_linfo_size(const H5F_t *f, const void UNUSED *_mesg)
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, August 23, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -530,8 +564,6 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              Aug 23 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -549,6 +581,8 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Index creation order of links:", linfo->index_corder);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of links:", linfo->nlinks);
     HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth,
