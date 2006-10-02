@@ -207,6 +207,26 @@ typedef ssize_t			hssize_t;
 #endif
 #define HADDR_MAX		(HADDR_UNDEF-1)
 
+/* int64_t type is used for creation order field for links.  It may be
+ * defined in Posix.1g, otherwise it is defined here.
+ */
+#if H5_SIZEOF_INT64_T>=8
+#elif H5_SIZEOF_INT>=8
+    typedef int int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG>=8
+    typedef long int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
+#elif H5_SIZEOF_LONG_LONG>=8
+    typedef long_long int64_t;
+#   undef H5_SIZEOF_INT64_T
+#   define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for int64_t"
+#endif
+
 /* Common iteration orders */
 typedef enum {
     H5_ITER_INC,        /* Increasing order */
