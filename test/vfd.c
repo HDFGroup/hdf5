@@ -227,11 +227,13 @@ test_family_opens(char *fname, hid_t fa_pl)
     H5E_BEGIN_TRY {
         file=H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
+    if(file >= 0) TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
     H5E_BEGIN_TRY {
         file=H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
+    if(file >= 0) TEST_ERROR
 
     /* Case 3: reopen file with wrong member size */
     if(H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT)<0)
@@ -240,15 +242,15 @@ test_family_opens(char *fname, hid_t fa_pl)
     H5E_BEGIN_TRY {
         file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
     } H5E_END_TRY;
+    if(file >= 0) TEST_ERROR
 
     /* Case 4: reopen file with wrong name template */
-    strcpy(wrong_name, fname);
-    for(i=0; i<1024; i++) {
+    HDstrcpy(wrong_name, fname);
+    for(i = 0; i < 1024; i++)
         if(wrong_name[i] == '5') {
             wrong_name[i] = '4';
             break;
         }
-    }
 
     if(H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
         TEST_ERROR;
@@ -256,11 +258,13 @@ test_family_opens(char *fname, hid_t fa_pl)
     H5E_BEGIN_TRY {
         file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
     } H5E_END_TRY;
+    if(file >= 0) TEST_ERROR
 
     return 0;
+
 error:
     return -1;
-}
+} /* end test_family_opens() */
 
 
 /*-------------------------------------------------------------------------
@@ -318,7 +322,7 @@ test_family(void)
 
     /* Test different wrong ways to reopen family files where there's only
      * one member file existing. */
-    if(test_family_opens(filename, fapl)<0)
+    if(test_family_opens(filename, fapl) < 0)
         TEST_ERROR;
 
     /* Reopen the file with default member file size */
@@ -332,8 +336,8 @@ test_family(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         TEST_ERROR;
 
-    /* The file size is supposed to be about 300 bytes right now. */
-    if(file_size<KB/4 || file_size>4*KB)
+    /* The file size is supposed to be about 800 bytes right now. */
+    if(file_size < (KB / 2) || file_size > KB)
         TEST_ERROR;
 
     /* Create and write dataset */
@@ -635,9 +639,9 @@ test_multi(void)
 
     /* Before any data is written, the raw data file is empty.  So
      * the file size is only the size of metadata file.  It's supposed
-     * to be 400 bytes.
+     * to be 800 bytes.
      */
-    if(file_size<(KB/4) || file_size>4*KB)
+    if(file_size < (KB / 2) || file_size > KB)
         TEST_ERROR;
 
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)

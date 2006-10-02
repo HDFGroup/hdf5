@@ -483,7 +483,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf)
+H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
 {
     uint8_t         sbuf[H5F_SUPERBLOCK_SIZE];  /* Superblock encoding buffer       */
     uint8_t         dbuf[H5F_DRVINFOBLOCK_SIZE];/* Driver info block encoding buffer*/
@@ -622,13 +622,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf)
         } /* end if */
     } /* end if */
 
-    /* Update the user's buffer, if given */
-    if (buf) {
-        HDmemcpy(buf, sbuf, superblock_size);
-        HDmemcpy(&buf[superblock_size], dbuf, driver_size);
-    } /* end if */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_write_superblock() */
 

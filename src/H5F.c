@@ -1444,20 +1444,21 @@ done:
 static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
-    H5F_t	*f=NULL, *ret_value;
+    H5F_t	*f = NULL, *ret_value;
     H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
 
-    if (NULL==(f=H5FL_CALLOC(H5F_t)))
+    if(NULL == (f = H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     f->file_id = -1;
 
-    if (shared) {
-        HDassert( lf == NULL );
+    if(shared) {
+        HDassert(lf == NULL);
 	f->shared = shared;
-    } else {
-        HDassert( lf != NULL );
+    } /* end if */
+    else {
+        HDassert(lf != NULL);
 	f->shared = H5FL_CALLOC(H5F_file_t);
 	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
@@ -1526,7 +1527,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if ( SUCCEED != H5AC_create(f, &(f->shared->mdc_initCacheCfg)) )
+	if(SUCCEED != H5AC_create(f, &(f->shared->mdc_initCacheCfg)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache")
 
         /* Create the file's "open object" information */
@@ -1548,14 +1549,14 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     ret_value = f;
 
 done:
-    if (!ret_value && f) {
-	if (!shared)
-            H5FL_FREE(H5F_file_t,f->shared);
-	H5FL_FREE(H5F_t,f);
-    }
+    if(!ret_value && f) {
+	if(!shared)
+            H5FL_FREE(H5F_file_t, f->shared);
+	H5FL_FREE(H5F_t, f);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -1603,14 +1604,17 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     HDassert(f);
 
     if(1 == f->shared->nrefs) {
+        /* Flush at this point since the file will be closed */
+        /* (Only try to flush here if the file structure was successfully
+         *      initialized (i.e., the file struct is being shutdown in an
+         *      orderly manner with the 'closing' flag set)
+         */
+        if(f->closing) {
 #if H5AC_DUMP_STATS_ON_CLOSE
-        /* Dump debugging info */
-        H5AC_stats(f);
+            /* Dump debugging info */
+            H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
-        /* Flush at this point since the file will be closed */
-        /* (Only try to flush the file if it was opened with write access) */
-        if(f->shared->flags & H5F_ACC_RDWR) {
             /* Flush and invalidate all caches */
             if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
                 /* Push error, but keep going*/
@@ -1771,22 +1775,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     H5F_t              *file = NULL;        /*the success return value      */
     H5F_file_t         *shared = NULL;      /*shared part of `file'         */
     H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
-    H5G_loc_t           root_loc;           /*root location                 */
-    H5O_loc_t           root_oloc;          /*root object location          */
-    H5G_name_t          root_path;          /*root group hier. path         */
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
-    hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
-    hbool_t             fam_sec2=FALSE;     /*change family to sec2 driver? */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
-
-    /* Set up root location to fill in */
-    root_loc.oloc = &root_oloc;
-    root_loc.path = &root_path;
 
     /*
      * If the driver has a `cmp' method then the driver is capable of
@@ -1796,9 +1791,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * Otherwise it is the application's responsibility to never open the
      * same file more than once at a time.
      */
-    if((drvr=H5FD_get_class(fapl_id))==NULL)
+    if((drvr = H5FD_get_class(fapl_id)) == NULL)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
-    driver_has_cmp = (NULL!=drvr->cmp);
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1811,23 +1805,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * application's responsibility to prevent this situation (there's no
      * way for us to detect it here anyway).
      */
-    if (driver_has_cmp) {
+    if(drvr->cmp)
 	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
-    } else {
+    else
 	tent_flags = flags;
-    }
 
-    if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-	if (tent_flags == flags)
+    if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+	if(tent_flags == flags)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
         H5E_clear_stack(NULL);
 	tent_flags = flags;
-	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
+	if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
     } /* end if */
 
     /* Is the file already open? */
-    if ((shared = H5F_sfile_search(lf)) != NULL) {
+    if((shared = H5F_sfile_search(lf)) != NULL) {
 	/*
 	 * The file is already open, so use that one instead of the one we
 	 * just opened. We only one one H5FD_t* per file so one doesn't
@@ -1839,45 +1832,39 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	 */
 	if(H5FD_close(lf) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
-	if (flags & H5F_ACC_TRUNC)
+	if(flags & H5F_ACC_TRUNC)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open")
-	if (flags & H5F_ACC_EXCL)
+	if(flags & H5F_ACC_EXCL)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists")
-	if ((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
+	if((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
 
         /* Allocate new "high-level" file struct */
-        if ((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
+        if((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
-
-        lf = file->shared->lf;
-    } else if (flags!=tent_flags) {
-	/*
-	 * This file is not yet open by the library and the flags we used to
-	 * open it are different than the desired flags. Close the tentative
-	 * file and open it for real.
-	 */
-	if(H5FD_close(lf) < 0) {
-	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+    } /* end if */
+    else {
+        /* Check if tentative open was good enough */
+        if(flags != tent_flags) {
+            /*
+             * This file is not yet open by the library and the flags we used to
+             * open it are different than the desired flags. Close the tentative
+             * file and open it for real.
+             */
+            if(H5FD_close(lf) < 0) {
+                file = NULL; /*to prevent destruction of wrong file*/
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+            } /* end if */
+            if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
+                file = NULL; /*to prevent destruction of wrong file*/
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+            } /* end if */
         } /* end if */
-	if (NULL==(lf=H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
-	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-	}
-	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
-	file->shared->flags = flags;
-    } else {
-	/*
-	 * This file is not yet open by the library and our tentative opening
-	 * above is good enough.
-	 */
-	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
 
-	file->shared->flags = flags;
-    }
+        if(NULL == (file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
+        file->shared->flags = flags;
+    } /* end else */
 
     /* Short cuts */
     shared = file->shared;
@@ -1892,6 +1879,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
 
+    /* Get the file access property list, for future queries */
     if(NULL == (a_plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
@@ -1900,50 +1888,58 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * in the later step, the library can ignore the family driver information saved
      * in the superblock.
      */
-    if(H5P_exist_plist(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
-        if(H5P_get(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &fam_sec2) < 0)
+    if(H5P_exist_plist(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0) {
+        if(H5P_get(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &shared->fam_to_sec2) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
-
-    file->shared->fam_to_sec2 = fam_sec2;
+    } /* end if */
+    else
+        shared->fam_to_sec2 = FALSE;
 
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
      */
-    if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
-        void *buf=NULL;         /* Buffer to hold superblock info */
-
+    if(0 == H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
         /* Initialize information about the superblock and allocate space for it */
-        if (H5F_init_superblock(file, dxpl_id) == 0)
+        if(H5F_init_superblock(file, dxpl_id) == 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
         /* Create and open the root group */
         /* (This must be after the space for the superblock is allocated in
          *      the file)
          */
-        if (H5G_mkroot(file, dxpl_id, NULL) < 0)
+        if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
         /* Write the superblock to the file */
         /* (This must be after the root group is created, since the root
          *      group's symbol table entry is part of the superblock)
          */
-        if (H5F_write_superblock(file, dxpl_id, buf) < 0)
+        if(H5F_write_superblock(file, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
 
     } else if (1 == shared->nrefs) {
+        H5G_loc_t           root_loc;           /*root location                 */
+        H5O_loc_t           root_oloc;          /*root object location          */
+        H5G_name_t          root_path;          /*root group hier. path         */
+
+        /* Set up root location to fill in */
+        root_loc.oloc = &root_oloc;
+        root_loc.path = &root_path;
+        H5G_loc_reset(&root_loc);
+
 	/* Read the superblock if it hasn't been read before. */
         if(H5F_read_superblock(file, dxpl_id, &root_loc, HADDR_UNDEF, NULL, (size_t)0) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
-	/* Make sure we can open the root group */
-	if (H5G_mkroot(file, dxpl_id, &root_loc) < 0)
+	/* Open the root group */
+	if(H5G_mkroot(file, dxpl_id, &root_loc) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
-    }
+    } /* end if */
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1956,26 +1952,26 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 
     if(shared->nrefs == 1) {
         if(fc_degree == H5F_CLOSE_DEFAULT)
-            shared->fc_degree = shared->lf->cls->fc_degree;
+            shared->fc_degree = lf->cls->fc_degree;
         else
             shared->fc_degree = fc_degree;
     } else if(shared->nrefs > 1) {
-        if(fc_degree==H5F_CLOSE_DEFAULT && shared->fc_degree!=shared->lf->cls->fc_degree)
+        if(fc_degree == H5F_CLOSE_DEFAULT && shared->fc_degree != lf->cls->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
-        if(fc_degree!=H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
+        if(fc_degree != H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
-    }
+    } /* end if */
 
     /* Success */
     ret_value = file;
 
 done:
-    if (!ret_value && file)
+    if(!ret_value && file)
         if(H5F_dest(file, dxpl_id) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -2075,22 +2071,23 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
-    if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if (ret_value<0 && new_file)
+    if(ret_value < 0 && new_file)
         if(H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fcreate() */
 
 
 /*-------------------------------------------------------------------------
@@ -2143,9 +2140,9 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5TRACE3("i","sIui",filename,flags,fapl_id);
 
     /* Check/fix arguments. */
-    if (!filename || !*filename)
+    if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
-    if ((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
+    if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
     if(H5P_DEFAULT == fapl_id)
@@ -2155,22 +2152,23 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if (ret_value<0 && new_file)
+    if(ret_value < 0 && new_file)
         if(H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fopen() */
 
 
 /*-------------------------------------------------------------------------
@@ -2330,7 +2328,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
 
     /* Sanity check arguments */
-    assert(f);
+    HDassert(f);
 
     /*
      * Nothing to do if the file is read only.	This determination is
@@ -2397,7 +2395,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end if */
 
     /* Write the superblock to disk */
-    if(H5F_write_superblock(f, dxpl_id, NULL) != SUCCEED)
+    if(H5F_write_superblock(f, dxpl_id) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 
     /* Flush file buffers to disk. */
@@ -2546,13 +2544,13 @@ H5F_try_close(H5F_t *f)
              * caches and update the object header anyway so that failing to
              * close all objects isn't a major problem.
              */
-            if ((nopen_files + nopen_objs) > 0)
+            if((nopen_files + nopen_objs) > 0)
                 HGOTO_DONE(SUCCEED)
             break;
 
         case H5F_CLOSE_SEMI:
             /* Can leave safely if file IDs are still open on this file */
-            if (nopen_files > 0)
+            if(nopen_files > 0)
                 HGOTO_DONE(SUCCEED)
 
             /* Sanity check: If close degree if "semi" and we have gotten this
@@ -2589,7 +2587,6 @@ H5F_try_close(H5F_t *f)
 
             /* Get the list of IDs of open dataset, group, & attribute objects */
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
-
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
                     if(H5I_dec_ref(objs[u]) < 0)
@@ -2602,7 +2599,6 @@ H5F_try_close(H5F_t *f)
              * open named datatype ID will get closed twice.
              */
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
-
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
                     if(H5I_dec_ref(objs[u]) < 0)
@@ -2677,7 +2673,7 @@ H5Fclose(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fclose() */
 
 
 /*-------------------------------------------------------------------------
@@ -2712,6 +2708,7 @@ H5Freopen(hid_t file_id)
     FUNC_ENTER_API(H5Freopen, FAIL)
     H5TRACE1("i","i",file_id);
 
+    /* Check arguments */
     if(NULL == (old_file = H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
@@ -2735,6 +2732,7 @@ done:
     if(ret_value < 0 && new_file)
 	if(H5F_dest(new_file, H5AC_dxpl_id) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
 

@@ -176,7 +176,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL hsize_t H5F_init_superblock(const H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf);
+H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, uint8_t *buf, size_t buf_size);
 
 /* Shared file list related routines */
