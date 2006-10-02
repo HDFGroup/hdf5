@@ -57,7 +57,6 @@ int check_file(char* name, hid_t fapl)
 
     plist = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
-    
     if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
 
     /* Open the dataset */
@@ -97,11 +96,14 @@ int check_file(char* name, hid_t fapl)
     }
 
     if (H5Gclose(groups)<0) goto error;
-    if (H5Pclose(plist)<0) goto error;
     if (H5Dclose(dset)<0) goto error;
     if (H5Fclose(file)<0) goto error;
+    if (H5Pclose(plist)<0) goto error;
     return 0;
 error:
+    if (H5Fclose(file)<0) goto error;
+    if (H5Pclose(plist)<0) goto error;
+
     return 1;
 
     
@@ -128,7 +130,7 @@ error:
 int
 main(int argc, char* argv[])
 {
-    hid_t fapl;
+    hid_t fapl1, fapl2;
     H5E_auto_stack_t func;
 
     char	name[1024];
@@ -142,27 +144,32 @@ main(int argc, char* argv[])
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);  
 
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(fapl, comm, info);
+    fapl1 = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl1, comm, info);
 
-    if(mpi_rank == 0) 
+    fapl2 = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl2, comm, info);
+
+    
+    if(mpi_rank == 0)
 	TESTING("H5Fflush (part2 with flush)");
-
+    
     /* Don't run this test using the core or split file drivers */
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL)
         envval = "nomatch";
     if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
 	/* Check the case where the file was flushed */
-	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	if(check_file(name, fapl))
+	h5_fixname(FILENAME[0], fapl1, name, sizeof name);
+	if(check_file(name, fapl1))
 	{
 	    H5_FAILED()
 	    goto error;
 	}
 	else if(mpi_rank == 0) 
-	    PASSED();
-    
+	{
+	    PASSED()
+	}
 	
 	/* Check the case where the file was not flushed.  This should give an error
 	 * so we turn off the error stack temporarily */
@@ -171,11 +178,13 @@ main(int argc, char* argv[])
 	H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
 	H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
-	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	if(check_file(name, fapl))
+	h5_fixname(FILENAME[1], fapl2, name, sizeof name);
+	if(check_file(name, fapl2))
 	{
 	    if(mpi_rank == 0) 
+	    {
 		PASSED()
+	    }
 	}
 	else
 	{
@@ -185,13 +194,16 @@ main(int argc, char* argv[])
 	H5Eset_auto_stack(H5E_DEFAULT, func, NULL);
 
 
-	h5_cleanup(FILENAME, fapl);
+	h5_cleanup(&FILENAME[0], fapl1);
+	h5_cleanup(&FILENAME[1], fapl2);
     }
     else
     {
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }
+
+    MPI_Finalize();
     return 0;
 
     error:

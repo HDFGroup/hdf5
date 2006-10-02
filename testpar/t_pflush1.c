@@ -164,7 +164,8 @@ main(int argc, char* argv[])
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }
-
+    
+    MPI_Finalize();
     HD_exit(0);
 
     error:
