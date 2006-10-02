@@ -860,15 +860,15 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
         }
-        if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(dset_type))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
         /* Do the conversion */
-        if (H5T_convert(tpath, src_id, dst_id, 1, 0, 0, buf, bkg, dxpl_id)<0)
+        if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
         /* Update the fill message */
-        if (buf!=fill->buf) {
+        if(buf != fill->buf) {
             H5MM_xfree(fill->buf);
             fill->buf = buf;
         }

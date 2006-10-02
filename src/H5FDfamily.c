@@ -623,7 +623,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
     FUNC_ENTER_NOAPI(H5FD_family_sb_encode, FAIL)
 
     /* Name and version number */
-    strncpy(name, "NCSAfami",8);
+    strncpy(name, "NCSAfami", (size_t)8);
     name[8] = '\0';
 
     /* copy member file size */

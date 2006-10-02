@@ -391,8 +391,8 @@ H5D_contig_write(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     assert (buf);
 
     H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,store);
-    if (H5D_contig_writevv(&io_info,
-            1, &dset_curr_seq, &dset_len, &dset_off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+    if(H5D_contig_writevv(&io_info, (size_t)1, &dset_curr_seq, &dset_len,
+            &dset_off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed")
 
 done:

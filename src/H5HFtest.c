@@ -450,15 +450,13 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_id_type_test(const H5HF_t *fh, const void *_id, unsigned char *obj_type)
+H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
 {
     const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_get_id_type_test)
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(fh->hdr);
     HDassert(id);
     HDassert(obj_type);
 

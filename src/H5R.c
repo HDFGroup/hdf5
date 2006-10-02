@@ -60,8 +60,7 @@ H5R_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5R_init_interface);
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_register_type(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
-		       (H5I_free_t)NULL)<0)
+    if(H5I_register_type(H5I_REFERENCE, (size_t)H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS, (H5I_free_t)NULL) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:

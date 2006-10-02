@@ -232,7 +232,7 @@ HDmemset(heap->chunk,0,size);
                      "memory allocation failed");
 
     /* Initialize the header */
-    HDmemcpy (heap->chunk, H5HG_MAGIC, H5HG_SIZEOF_MAGIC);
+    HDmemcpy (heap->chunk, H5HG_MAGIC, (size_t)H5HG_SIZEOF_MAGIC);
     p = heap->chunk + H5HG_SIZEOF_MAGIC;
     *p++ = H5HG_VERSION;
     *p++ = 0; /*reserved*/
@@ -340,16 +340,16 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     assert (!udata2);
 
     /* Read the initial 4k page */
-    if (NULL==(heap = H5FL_CALLOC (H5HG_heap_t)))
+    if(NULL == (heap = H5FL_CALLOC (H5HG_heap_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->addr = addr;
-    if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,H5HG_MINSIZE)))
+    if(NULL == (heap->chunk = H5FL_BLK_MALLOC(heap_chunk, (size_t)H5HG_MINSIZE)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (H5F_block_read(f, H5FD_MEM_GHEAP, addr, H5HG_MINSIZE, dxpl_id, heap->chunk)<0)
+    if(H5F_block_read(f, H5FD_MEM_GHEAP, addr, (size_t)H5HG_MINSIZE, dxpl_id, heap->chunk)<0)
 	HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection");
 
     /* Magic number */
-    if (HDmemcmp (heap->chunk, H5HG_MAGIC, H5HG_SIZEOF_MAGIC))
+    if(HDmemcmp(heap->chunk, H5HG_MAGIC, (size_t)H5HG_SIZEOF_MAGIC))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "bad global heap collection signature");
     p = heap->chunk + H5HG_SIZEOF_MAGIC;
 

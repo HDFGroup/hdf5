@@ -176,16 +176,16 @@ H5E_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5E_init_interface)
 
     /* Initialize the atom group for the error class IDs */
-    if(H5I_register_type(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_unregister_class)<H5I_FILE)
+    if(H5I_register_type(H5I_ERROR_CLASS, (size_t)H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS,
+                    (H5I_free_t)H5E_unregister_class) < H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the major error IDs */
-    if(H5I_register_type(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_close_msg)<H5I_FILE)
+    if(H5I_register_type(H5I_ERROR_MSG, (size_t)H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS,
+                    (H5I_free_t)H5E_close_msg) < H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the error stacks */
-    if(H5I_register_type(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_close_stack)<H5I_FILE)
+    if(H5I_register_type(H5I_ERROR_STACK, (size_t)H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS,
+                    (H5I_free_t)H5E_close_stack) < H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
@@ -804,7 +804,7 @@ H5Eget_major(H5E_major_t maj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
     /* Get the message's text */
-    if((size = H5E_get_msg(msg, &type, NULL, 0))<0)
+    if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
 
     if(type != H5E_MAJOR)
@@ -854,7 +854,7 @@ H5Eget_minor(H5E_minor_t min)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
     /* Get the message's text */
-    if((size = H5E_get_msg(msg, &type, NULL, 0))<0)
+    if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
 
     if(type != H5E_MINOR)

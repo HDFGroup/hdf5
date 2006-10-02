@@ -1322,10 +1322,10 @@ H5FD_log_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 
     FUNC_ENTER_NOAPI(H5FD_log_flush, FAIL)
 
-    if (file->eoa>file->eof) {
-        if (-1==file_seek(file->fd, (file_offset_t)(file->eoa-1), SEEK_SET))
+    if(file->eoa>file->eof) {
+        if(-1 == file_seek(file->fd, (file_offset_t)(file->eoa - 1), SEEK_SET))
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-        if (write(file->fd, "", 1)!=1)
+        if(write(file->fd, "", (size_t)1) != 1)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
         file->eof = file->eoa;
         file->pos = file->eoa;

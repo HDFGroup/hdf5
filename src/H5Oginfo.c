@@ -93,7 +93,7 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     H5O_ginfo_t         *ginfo = NULL;  /* Pointer to group information message */
     unsigned char       flags;          /* Flags for encoding group info */
@@ -102,7 +102,6 @@ H5O_ginfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     FUNC_ENTER_NOAPI_NOINIT(H5O_ginfo_decode)
 
     /* check args */
-    HDassert(f);
     HDassert(p);
 
     /* Version of message */
@@ -154,7 +153,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
+H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
     unsigned char       flags;          /* Flags for encoding group info */
@@ -162,7 +161,6 @@ H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ginfo_encode)
 
     /* check args */
-    HDassert(f);
     HDassert(p);
     HDassert(ginfo);
 
@@ -249,7 +247,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ginfo_size(const H5F_t *f, const void UNUSED *_mesg)
+H5O_ginfo_size(const H5F_t UNUSED *f, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 

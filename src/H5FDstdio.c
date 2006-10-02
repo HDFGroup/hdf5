@@ -365,13 +365,13 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL)
 
     /* Build the return value */
-    if (NULL==(file = calloc(1,sizeof(H5FD_stdio_t))))
+    if(NULL==(file = calloc((size_t)1, sizeof(H5FD_stdio_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
     file->fp = f;
     file->op = H5FD_STDIO_OP_SEEK;
     file->pos = HADDR_UNDEF;
     file->write_access=write_access;    /* Note the write_access for later */
-    if (fseek(file->fp, 0, SEEK_END) < 0) {
+    if(fseek(file->fp, (long)0, SEEK_END) < 0) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
     } else {
         long x = ftell (file->fp);
@@ -735,8 +735,8 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
      * will advance the file position by N.  If N is zero or an error
      * occurs then the file position is undefined.
      */
-    n = fread(buf, 1, size, file->fp);
-    if (n == 0 && ferror(file->fp)) {
+    n = fread(buf, (size_t)1, size, file->fp);
+    if(n == 0 && ferror(file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "fread failed", -1)
@@ -816,7 +816,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * advanced by the number of bytes read.  Otherwise nobody knows where it
      * is.
      */
-    if (size != fwrite(buf, 1, size, file->fp)) {
+    if(size != fwrite(buf, (size_t)1, size, file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1)

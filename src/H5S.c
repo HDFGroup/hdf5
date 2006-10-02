@@ -93,8 +93,7 @@ H5S_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5S_init_interface);
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_register_type(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
-		       H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close)<0)
+    if(H5I_register_type(H5I_DATASPACE, (size_t)H5I_DATASPACEID_HASHSIZE, H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close) < 0)
 	HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 #ifdef H5_HAVE_PARALLEL
@@ -620,18 +619,18 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
             break;
 
         case H5S_SIMPLE:
-            if (src->size) {
-                dst->size = H5FL_ARR_MALLOC(hsize_t,src->rank);
-                for (u = 0; u < src->rank; u++)
+            if(src->size) {
+                dst->size = H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
+                for(u = 0; u < src->rank; u++)
                     dst->size[u] = src->size[u];
-            }
+            } /* end if */
             else
-                dst->size=NULL;
-            if (src->max) {
-                dst->max = H5FL_ARR_MALLOC(hsize_t,src->rank);
-                for (u = 0; u < src->rank; u++)
+                dst->size = NULL;
+            if(src->max) {
+                dst->max = H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
+                for(u = 0; u < src->rank; u++)
                     dst->max[u] = src->max[u];
-            }
+            } /* end if */
             else
                 dst->max=NULL;
             break;
@@ -1343,23 +1342,22 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 
         /* Set the rank and allocate space for the dims */
         space->extent.rank = rank;
-        space->extent.size = H5FL_ARR_MALLOC(hsize_t,rank);
+        space->extent.size = H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
 
         /* Copy the dimensions & compute the number of elements in the extent */
-        for(u=0, nelem=1; u<space->extent.rank; u++) {
-            space->extent.size[u]=dims[u];
-            nelem*=dims[u];
+        for(u = 0, nelem = 1; u < space->extent.rank; u++) {
+            space->extent.size[u] = dims[u];
+            nelem *= dims[u];
         } /* end for */
         space->extent.nelem = nelem;
 
         /* Copy the maximum dimensions if specified */
-        if(max!=NULL) {
-            space->extent.max = H5FL_ARR_MALLOC(hsize_t,rank);
+        if(max != NULL) {
+            space->extent.max = H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
             HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } /* end if */
-        else {
+        else
             space->extent.max = NULL;
-        }
     }
 
     /* Selection related cleanup */

@@ -200,18 +200,18 @@ H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
     /* Shift vector by making copies */
     if(shift_dist > 0) { /* left shift */
         /* Copy part to be shifted to a temporary buffer */
-        H5T_bit_copy (tmp_buf, 0, buf, offset, (size_t)(size-shift_dist));
+        H5T_bit_copy(tmp_buf, (size_t)0, buf, offset, (size_t)(size - shift_dist));
 
         /* Copy it back to the original buffer */
-        H5T_bit_copy (buf, offset+shift_dist, tmp_buf, 0, (size_t)(size-shift_dist));
+        H5T_bit_copy(buf, offset + shift_dist, tmp_buf, (size_t)0, (size_t)(size - shift_dist));
 
         /* Zero-set the left part*/
         H5T_bit_set(buf, offset, (size_t)shift_dist, 0);
     } else { /* right shift */
         shift_dist = - shift_dist;
-        H5T_bit_copy(tmp_buf, 0, buf, offset+shift_dist, (size_t)(size-shift_dist));
-        H5T_bit_copy (buf, offset, tmp_buf, 0, (size_t)(size-shift_dist));
-        H5T_bit_set(buf, offset+size-shift_dist, (size_t)shift_dist, 0);
+        H5T_bit_copy(tmp_buf, (size_t)0, buf, offset + shift_dist, (size_t)(size - shift_dist));
+        H5T_bit_copy (buf, offset, tmp_buf, (size_t)0, (size_t)(size - shift_dist));
+        H5T_bit_set(buf, offset + size - shift_dist, (size_t)shift_dist, 0);
     }
 
     /* Free temporary buffer */
@@ -247,32 +247,33 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     size_t	i, hs;
     uint64_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d);
+    FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d)
 
     assert (8*sizeof(val)>=size);
 
-    H5T_bit_copy ((uint8_t*)&val, 0, buf, offset, size);
-    switch (H5T_native_order_g) {
+    H5T_bit_copy((uint8_t*)&val, (size_t)0, buf, offset, size);
+    switch(H5T_native_order_g) {
         case H5T_ORDER_LE:
             break;
 
         case H5T_ORDER_BE:
-            for (i=0, hs=sizeof(val)/2; i<hs; i++) {
+            for(i = 0, hs = sizeof(val) / 2; i < hs; i++) {
                 uint8_t tmp = ((uint8_t*)&val)[i];
-                ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val)-(i+1)];
-                ((uint8_t*)&val)[sizeof(val)-(i+1)] = tmp;
+                ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val) - (i + 1)];
+                ((uint8_t*)&val)[sizeof(val) - (i + 1)] = tmp;
             }
             break;
 
         default:
             /* Unknown endianness. Bail out. */
-            return -1;
+            HGOTO_DONE(UFAIL)
     }
 
     /* Set return value */
-    ret_value=val;
+    ret_value = val;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -313,7 +314,7 @@ H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, uint64_t val)
             HDabort ();
     }
 
-    H5T_bit_copy (buf, offset, (uint8_t*)&val, 0, size);
+    H5T_bit_copy(buf, offset, (uint8_t*)&val, (size_t)0, size);
 }
 
 
@@ -680,11 +681,11 @@ H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
     }
 
     /* The last partial byte */
-    if (size>0) {
+    if(size > 0) {
         /* Similar to the first byte case, where sequence ends in the same byte as starts */
         tmp = buf[idx];
         tmp = ~tmp;
-        H5T_bit_copy (&(buf[idx]), 0, &tmp, 0, size);
+        H5T_bit_copy(&(buf[idx]), (size_t)0, &tmp, (size_t)0, size);
     }
 
 done:

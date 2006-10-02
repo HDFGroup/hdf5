@@ -726,8 +726,7 @@ H5_DLL unsigned H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos);
 H5_DLL hsize_t H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row);
 H5_DLL hsize_t H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row);
 H5_DLL herr_t H5HF_get_id_off_test(const H5HF_t *fh, const void *id, hsize_t *obj_off);
-H5_DLL herr_t H5HF_get_id_type_test(const H5HF_t *fh, const void *id,
-    unsigned char *obj_type);
+H5_DLL herr_t H5HF_get_id_type_test(const void *id, unsigned char *obj_type);
 H5_DLL herr_t H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len,
     hbool_t *len_extended);
 H5_DLL herr_t H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id,

@@ -81,7 +81,7 @@ H5FO_create(const H5F_t *f)
     assert(f->shared);
 
     /* Create container used to store open object info */
-    if((f->shared->open_objs=H5SL_create(H5SL_TYPE_HADDR,0.5,16))==NULL)
+    if((f->shared->open_objs = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container")
 
 done:
@@ -399,7 +399,7 @@ H5FO_top_create(H5F_t *f)
     HDassert(f);
 
     /* Create container used to store open object info */
-    if((f->obj_count = H5SL_create(H5SL_TYPE_HADDR, 0.5, 16)) == NULL)
+    if((f->obj_count = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object container")
 
 done:

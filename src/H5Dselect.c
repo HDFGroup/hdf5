@@ -128,7 +128,7 @@ H5D_select_fscat (H5D_io_info_t *io_info,
         mem_off=0;
 
         /* Write sequence list out */
-        if ((*io_info->ops.writevv)(io_info, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if((*io_info->ops.writevv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -223,7 +223,7 @@ H5D_select_fgath (H5D_io_info_t *io_info,
         mem_off=0;
 
         /* Read sequence list in */
-        if ((*io_info->ops.readvv)(io_info, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if((*io_info->ops.readvv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */

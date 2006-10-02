@@ -11809,7 +11809,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -11965,7 +11965,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -11995,7 +11995,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id2, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12201,7 +12201,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12231,7 +12231,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     obj_size = SMALL_STAND_SIZE + 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id2, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12261,7 +12261,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     obj_size = SMALL_STAND_SIZE + 3;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id3) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id3, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id3, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12515,7 +12515,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12545,7 +12545,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id2, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12575,7 +12575,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 3;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id3) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id3, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id3, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -12605,7 +12605,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id4) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id4, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id4, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_MAN)
         TEST_ERROR
@@ -12642,7 +12642,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_SIZE(fh, 3) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id5) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id5, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id5, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_MAN)
         TEST_ERROR
@@ -12963,7 +12963,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -13141,7 +13141,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_TINY)
         TEST_ERROR
@@ -13297,7 +13297,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_TINY)
         TEST_ERROR
@@ -13327,7 +13327,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id2, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_TINY)
         TEST_ERROR
@@ -13546,7 +13546,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -13583,7 +13583,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id2, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -13620,7 +13620,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = SMALL_STAND_SIZE + 3;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id3) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id3, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id3, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_HUGE)
         TEST_ERROR
@@ -13657,7 +13657,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id4) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id4, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id4, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_MAN)
         TEST_ERROR
@@ -13701,7 +13701,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = DBLOCK_SIZE(fh, 3) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id5) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id5, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id5, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_MAN)
         TEST_ERROR
@@ -13747,7 +13747,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id6) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id6, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id6, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_TINY)
         TEST_ERROR
@@ -13784,7 +13784,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     obj_size = tparam->actual_id_len - 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id7) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id7, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id7, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_TINY)
         TEST_ERROR
@@ -14139,7 +14139,7 @@ test_filtered_man_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     obj_size = DBLOCK_SIZE(fh, 0) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
-    if(H5HF_get_id_type_test(fh, heap_id, &obj_type) < 0)
+    if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
         FAIL_STACK_ERROR
     if(obj_type != H5HF_ID_TYPE_MAN)
         TEST_ERROR

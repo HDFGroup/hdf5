@@ -464,7 +464,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     if(H5HL_create(file_dst, dxpl_id, heap_size, &efl_dst->heap_addr/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create heap")
 
-    name_offset = H5HL_insert(file_dst, dxpl_id, efl_dst->heap_addr, 1, "");
+    name_offset = H5HL_insert(file_dst, dxpl_id, efl_dst->heap_addr, (size_t)1, "");
     if((size_t)(-1) == name_offset)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't initialize heap")
     HDassert(0 == name_offset);

@@ -3458,7 +3458,7 @@ H5C_flush_to_min_clean(H5F_t * f,
                                      primary_dxpl_id,
                                      secondary_dxpl_id,
                                      cache_ptr,
-                                     0,
+                                     (size_t)0,
                                      write_permitted,
                                      &first_flush);
 

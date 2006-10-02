@@ -773,7 +773,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     H5Eclear_stack(H5E_DEFAULT);
 
     /* Name and version number */
-    strncpy(name, "NCSAmulti",8);
+    strncpy(name, "NCSAmulti", (size_t)8);
     name[8] = '\0';
 
     assert(7==H5FD_MEM_NTYPES);
@@ -1220,7 +1220,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
      * Initialize the file from the file access properties, using default
      * values if necessary.
      */
-    if (NULL==(file=calloc(1, sizeof(H5FD_multi_t))))
+    if (NULL==(file=calloc((size_t)1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
     if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);

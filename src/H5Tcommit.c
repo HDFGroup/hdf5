@@ -83,10 +83,10 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     H5G_name_t  insert_path;               /* Path of group in which to create object */
     H5O_loc_t   insert_oloc;               /* oloc of group in which to create object */
     hbool_t     insert_loc_valid = FALSE;  /* Is insertion_loc valid? */
-    H5F_t       *file;
+    H5F_t       *file = NULL;
     H5T_t	*type = NULL;
     hbool_t     uncommit = FALSE;          /* TRUE if H5T_commit needs to be undone */
-    H5T_state_t old_state;                 /* The state of the datatype before H5T_commit. */
+    H5T_state_t old_state = H5T_STATE_TRANSIENT; /* The state of the datatype before H5T_commit. */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tcommit, FAIL)
@@ -269,7 +269,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id,
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if(H5O_create(file, dxpl_id, 64, &(type->oloc)) < 0)
+    if(H5O_create(file, dxpl_id, (size_t)64, &(type->oloc)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if(H5O_modify(&(type->oloc), H5O_DTYPE_ID, 0, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, type, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")

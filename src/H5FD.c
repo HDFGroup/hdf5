@@ -116,7 +116,7 @@ H5FD_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_init_interface)
 
-    if(H5I_register_type(H5I_VFL, H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<H5I_FILE)
+    if(H5I_register_type(H5I_VFL, (size_t)H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<H5I_FILE)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
@@ -3806,9 +3806,9 @@ H5FD_get_freespace(const H5FD_t *file)
     H5FD_free_t *free_node;     /* Pointer to node on free list */
     H5FD_mem_t type;            /* Type of memory */
     haddr_t ma_addr = HADDR_UNDEF;    /* Base "metadata aggregator" address */
-    hsize_t ma_size;            /* Size of "metadata aggregator" */
+    hsize_t ma_size = 0;        /* Size of "metadata aggregator" */
     haddr_t sda_addr = HADDR_UNDEF;    /* Base "small data aggregator" address */
-    hsize_t sda_size;           /* Size of "small data aggregator" */
+    hsize_t sda_size = 0;       /* Size of "small data aggregator" */
     haddr_t eoa;                /* End of allocated space in the file */
     hssize_t ret_value = 0;     /* Return value */
 

@@ -237,7 +237,7 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     p = hdr;
 
     /* Check magic number */
-    if (HDmemcmp(hdr, H5HL_MAGIC, H5HL_SIZEOF_MAGIC))
+    if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature");
     p += H5HL_SIZEOF_MAGIC;
 
@@ -490,7 +490,7 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
     /* serialize the header */
     p = buf;
     fl = heap->freelist;
-    HDmemcpy(p, H5HL_MAGIC, H5HL_SIZEOF_MAGIC);
+    HDmemcpy(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC);
     p += H5HL_SIZEOF_MAGIC;
     *p++ = H5HL_VERSION;
     *p++ = 0;	/*reserved*/
@@ -894,7 +894,7 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, unsign
     assert(heap);
     assert(H5F_addr_defined(addr));
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_flags) != SUCCEED)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_flags) != SUCCEED)
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:

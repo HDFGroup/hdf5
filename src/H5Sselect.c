@@ -1112,7 +1112,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     /* Loop, while elements left in selection */
     while(max_elem>0 && user_ret==0) {
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space,0,&iter,H5D_XFER_HYPER_VECTOR_SIZE_DEF,max_elem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_XFER_HYPER_VECTOR_SIZE_DEF, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1327,12 +1327,12 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
          * that the selection iterator shouldn't be "flattened", since we
          * aren't actually going to be doing I/O with the iterators.
          */
-        if (H5S_select_iter_init(&iter1, space1, 0)<0)
+        if(H5S_select_iter_init(&iter1, space1, (size_t)0) < 0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        iter1_init=1;
-        if (H5S_select_iter_init(&iter2, space2, 0)<0)
+        iter1_init = 1;
+        if(H5S_select_iter_init(&iter2, space2, (size_t)0) < 0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        iter2_init=1;
+        iter2_init = 1;
 
         /* Iterate over all the blocks in each selection */
         while(1) {
@@ -1474,7 +1474,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     /* Loop, while elements left in selection */
     while(max_elem>0) {
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space,0,&iter,H5D_XFER_HYPER_VECTOR_SIZE_DEF,max_elem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_XFER_HYPER_VECTOR_SIZE_DEF, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop over sequences */
