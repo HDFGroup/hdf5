@@ -511,7 +511,7 @@ static int traverse( hid_t loc_id,
     H5Lget_linkinfo( loc_id, path, &linkbuf, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    if(linkbuf.linkclass == H5L_LINK_EXTERNAL)
+    if(linkbuf.type == H5L_TYPE_EXTERNAL)
     {
       if (statbuf.linklen>0)
       {

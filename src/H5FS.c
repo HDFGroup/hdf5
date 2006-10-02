@@ -231,6 +231,7 @@ herr_t
 H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr)
 {
     H5FS_t *fspace = NULL;              /* Free space header loaded from file */
+    H5FS_prot_t fs_prot;                /* Temporary information for protecting free space header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_delete, FAIL)
@@ -242,8 +243,14 @@ HDfprintf(stderr, "%s: Deleting free space manager\n", FUNC);
     HDassert(f);
     HDassert(H5F_addr_defined(fs_addr));
 
+    /* Initialize user data for protecting the free space manager */
+    /* (no class information necessary for delete) */
+    fs_prot.nclasses = 0;
+    fs_prot.classes = NULL;
+    fs_prot.cls_init_udata = NULL;
+
     /* Protect the free space header */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space header")
 
     /* Delete serialized section storage, if there are any */
@@ -404,7 +411,7 @@ H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
     FUNC_ENTER_NOAPI_NOINIT(H5FS_new)
 
     /* Check arguments. */
-    HDassert(nclasses || classes);
+    HDassert(nclasses == 0 || (nclasses > 0 && classes));
 
     /*
      * Allocate free space structure

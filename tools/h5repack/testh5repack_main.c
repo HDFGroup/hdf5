@@ -36,7 +36,7 @@
 const char *progname = "h5repacktst";
 int d_status = EXIT_SUCCESS;
 
-int main (int argc, char **argv)
+int main (int argc, const char *argv[])
 {
  pack_opt_t  pack_options;
  diff_opt_t  diff_options;

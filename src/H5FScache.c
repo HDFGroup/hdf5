@@ -209,9 +209,10 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(f, p, fspace->ghost_sect_count);
 
     /* # of section classes */
+    /* (only check if we actually have some classes) */
     UINT16DECODE(p, nclasses);
-    if(fspace->nclasses != nclasses)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown section class count mismatch")
+    if(fspace->nclasses > 0 && fspace->nclasses != nclasses)
+	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
 
     /* Shrink percent */
     UINT16DECODE(p, fspace->shrink_percent);
@@ -409,7 +410,8 @@ H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
     } /* end for */
 
     /* Release the memory for the free space section classes */
-    fspace->sect_cls = H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
+    if(fspace->sect_cls)
+        fspace->sect_cls = H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
 
     /* Free free space info */
     H5FL_FREE(H5FS_t, fspace);

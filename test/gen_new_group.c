@@ -32,8 +32,8 @@
 
 int main(void)
 {
-#ifdef H5_GROUP_REVISION
     hid_t fid = -1;             /* File ID */
+    hid_t fapl = -1;            /* File access property list ID */
     hid_t fcpl = -1;            /* File creation property list ID */
     hid_t gid = -1;             /* Group creation property list ID */
     hid_t sid = -1;             /* Dataspace ID */
@@ -43,11 +43,20 @@ int main(void)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) goto error;
 
     /* Adjust group creation parameters for root group */
-    /* (So that it is created in symbol-table form) */
+    /* (So that it is created in "dense storage" form) */
     if(H5Pset_link_phase_change(fcpl, 0, 0) < 0) goto error;
 
+    /* Copy the file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+
+    /* Set the "use the latest version of the format" flag for creating objects in the file */
+    if(H5Pset_latest_format(fapl, TRUE) < 0) TEST_ERROR
+
     /* Create file for test groups */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) <0) goto error;
+    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) <0) goto error;
+
+    /* Close file access property list */
+    if(H5Pclose(fapl) < 0) goto error;
 
     /* Close file creation property list */
     if(H5Pclose(fcpl) < 0) goto error;
@@ -78,20 +87,18 @@ int main(void)
 
     /* Close file */
     if(H5Fclose(fid) < 0) goto error;
-#endif /* H5_GROUP_REVISION */
 
     return 0;
 
-#ifdef H5_GROUP_REVISION
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(did);
+        H5Dclose(did);
         H5Sclose(sid);
-        H5Dclose(gid);
-        H5Dclose(fcpl);
+        H5Gclose(gid);
+        H5Pclose(fcpl);
+        H5Pclose(fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-#endif /* H5_GROUP_REVISION */
 }
 

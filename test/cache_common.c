@@ -2196,7 +2196,7 @@ unprotect_entry(H5C_t * cache_ptr,
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
                                entry_ptr->addr, (void *)entry_ptr,
-                               flags, 0);
+                               flags, (size_t)0);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||

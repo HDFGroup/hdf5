@@ -228,17 +228,19 @@ struct H5FD_t {
                                                * allocation region left */
     haddr_t             eoma;                 /* End of metadata
                                                * allocated region */
+                                              /* (ie. beginning of space available) */
 
     /* "Small data" aggregation fields */
-    hsize_t             def_sdata_block_size;   /* "Small data"
-                                                 * allocation block size
-                                                 * (if aggregating "small
-                                                 * data") */
-    hsize_t             cur_sdata_block_size;   /* Current size of "small
-                                                 * data" allocation
-                                                 * region left */
-    haddr_t             eosda;                  /* End of "small data"
-                                                 * allocated region */
+    hsize_t             def_sdata_block_size; /* "Small data"
+                                               * allocation block size
+                                               * (if aggregating "small
+                                               * data") */
+    hsize_t             cur_sdata_block_size; /* Current size of "small
+                                               * data" allocation
+                                               * region left */
+    haddr_t             eosda;                /* End of "small data"
+                                               * allocated region */
+                                              /* (ie. beginning of space available) */
 
     /* Metadata accumulator fields */
     unsigned char      *meta_accum;     /* Buffer to hold the accumulated metadata */

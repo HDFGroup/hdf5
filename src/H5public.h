@@ -57,6 +57,7 @@
 #endif
 
 
+/* Include the Windows API adapter header early */
 #include "H5api_adpt.h"
 
 #ifdef __cplusplus
@@ -205,6 +206,13 @@ typedef ssize_t			hssize_t;
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"
 #endif
 #define HADDR_MAX		(HADDR_UNDEF-1)
+
+/* Common iteration orders */
+typedef enum {
+    H5_ITER_INC,        /* Increasing order */
+    H5_ITER_DEC,        /* Decreasing order */
+    H5_ITER_NATIVE      /* No particular order, whatever is fastest */
+} H5_iter_order_t;
 
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);

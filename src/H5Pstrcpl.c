@@ -23,7 +23,6 @@
 
 /* Static function prototypes */
 
-#ifdef H5_GROUP_REVISION
 /*-------------------------------------------------------------------------
  * Function:  H5Pset_char_encoding
  *
@@ -96,6 +95,4 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_char_encoding() */
-
-#endif /* H5_GROUP_REVISION */
 

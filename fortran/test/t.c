@@ -128,22 +128,3 @@ nh5_exit_c(int_f *status)
     HDexit((int)*status);
 }   /* h5_exit_c */
 
-
-/*----------------------------------------------------------------------------
- * Name:        h5_group_revision_c
- * Purpose:     Checks if H5_GROUP_REVISION variable defined
- * Inputs:
- * Returns:     1 if defines, 0 otherwise
- * Programmer:  Elena Pourmal
- *              Saturday, May 13, 2006
- * Modifications:
- *---------------------------------------------------------------------------*/
-int_f
-nh5_group_revision_c()
-{
-    int_f ret =0;
-#ifdef H5_GROUP_REVISION
-       ret = 1;
-#endif
-    return ret;
-}   /* h5_group_revision_c */

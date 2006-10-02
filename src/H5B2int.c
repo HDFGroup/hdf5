@@ -2115,12 +2115,13 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     const H5B2_node_ptr_t *curr_node, H5B2_operator_t op, void *op_data)
 {
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    const H5AC_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
-    void *node=NULL;                    /* Pointers to current node */
-    uint8_t *native;                    /* Pointers to node's native records */
-    H5B2_node_ptr_t *node_ptrs=NULL;    /* Pointers to node's node pointers */
+    const H5AC_class_t *curr_node_class = NULL; /* Pointer to current node's class info */
+    void *node = NULL;                  /* Pointers to current node */
+    uint8_t *node_native;               /* Pointers to node's native records */
+    uint8_t *native = NULL;             /* Pointers to copy of node's native records */
+    H5B2_node_ptr_t *node_ptrs = NULL;  /* Pointers to node's node pointers */
     unsigned u;                         /* Local index */
-    herr_t	ret_value = H5B2_ITER_CONT;
+    herr_t ret_value = H5B2_ITER_CONT;  /* Iterator return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_iterate_node)
 
@@ -2145,8 +2146,14 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Set up information about current node */
         curr_node_class = H5AC_BT2_INT;
         node = internal;
-        native = internal->int_native;
-        node_ptrs = internal->node_ptrs;
+        node_native = internal->int_native;
+
+        /* Allocate space for the node pointers in memory */
+        if((node_ptrs = H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
+
+        /* Copy the node pointers */
+        HDmemcpy(node_ptrs, internal->node_ptrs, (sizeof(H5B2_node_ptr_t) * (curr_node->node_nrec + 1)));
     } /* end if */
     else {
         H5B2_leaf_t *leaf;             /* Pointer to leaf node */
@@ -2158,8 +2165,20 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Set up information about current node */
         curr_node_class = H5AC_BT2_LEAF;
         node = leaf;
-        native = leaf->leaf_native;
+        node_native = leaf->leaf_native;
     } /* end else */
+
+    /* Allocate space for the native keys in memory */
+    if((native = H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
+
+    /* Copy the native keys */
+    HDmemcpy(native, node_native, (shared->type->nrec_size * curr_node->node_nrec));
+
+    /* Unlock the node */
+    if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+    node = NULL;
 
     /* Iterate through records, in order */
     for(u = 0; u < curr_node->node_nrec && !ret_value; u++) {
@@ -2170,8 +2189,10 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         } /* end if */
 
         /* Make callback for current record */
-        if((ret_value = (op)(H5B2_NAT_NREC(native, shared, u), op_data)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
+        if(!ret_value) {
+            if((ret_value = (op)(H5B2_NAT_NREC(native, shared, u), op_data)) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
+        } /* end if */
     } /* end for */
 
     /* Descend into last child node, if current node is an internal node */
@@ -2181,10 +2202,11 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     } /* end if */
 
 done:
-    /* Unlock current node */
-    if(node)
-        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+    /* Release the node pointers & native records, if they were copied */
+    if(node_ptrs)
+        H5FL_FAC_FREE(shared->node_info[depth].node_ptr_fac, node_ptrs);
+    if(native)
+        H5FL_FAC_FREE(shared->node_info[depth].nat_rec_fac, native);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate_node() */

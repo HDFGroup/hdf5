@@ -1221,12 +1221,12 @@ test_file_freespace(void)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Set the space allocation time to early */
-    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
+    ret = H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
     CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create datasets in file */
-    for(u=0; u<10; u++) {
-        sprintf(name,"Dataset %u",u);
+    for(u = 0; u < 10; u++) {
+        sprintf(name, "Dataset %u", u);
         dset = H5Dcreate(file, name, H5T_STD_U32LE, dspace, dcpl);
         CHECK(dset, FAIL, "H5Dcreate");
 
@@ -1239,22 +1239,21 @@ test_file_freespace(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close dataset creation property list */
-    ret=H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
-#ifdef H5_GROUP_REVISION
     /* Check that there is the right amount of free space in the file */
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(free_space, 420, "H5Fget_freespace");
+    VERIFY(free_space, 2368, "H5Fget_freespace");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(free_space, 588, "H5Fget_freespace");
+    VERIFY(free_space, 588, "H5Fget_freespace");        /* XXX: fix me */
 #endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Delete datasets in file */
-    for(u=0; u<10; u++) {
-        sprintf(name,"Dataset %u",u);
+    for(u = 0; u < 10; u++) {
+        sprintf(name, "Dataset %u", u);
         ret = H5Gunlink(file, name);
         CHECK(ret, FAIL, "H5Gunlink");
     } /* end for */
@@ -1263,16 +1262,14 @@ test_file_freespace(void)
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(free_space, 4628, "H5Fget_freespace");
+    VERIFY(free_space, 5512, "H5Fget_freespace");
 #else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(free_space, 4592, "H5Fget_freespace");
+    VERIFY(free_space, 4592, "H5Fget_freespace");       /* XXX: fix me */
 #endif /* H5_HAVE_LARGE_HSIZET */
-#endif /* H5_GROUP_REVISION */
 
     /* Close file */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
 } /* end test_file_freespace() */
 
 /****************************************************************

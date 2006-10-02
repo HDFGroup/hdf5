@@ -546,147 +546,147 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    break;
 
 	case 'F':
-	    switch (type[1]) {
-	    case 'd':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5F_close_degree_t degree = va_arg(ap, H5F_close_degree_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (degree) {
-		    case H5F_CLOSE_DEFAULT:
-			fprintf(out, "H5F_CLOSE_DEFAULT");
-			break;
-		    case H5F_CLOSE_WEAK:
-			fprintf(out, "H5F_CLOSE_WEAK");
-			break;
-		    case H5F_CLOSE_SEMI:
-			fprintf(out, "H5F_CLOSE_SEMI");
-			break;
-		    case H5F_CLOSE_STRONG:
-			fprintf(out, "H5F_CLOSE_STRONG");
-			break;
-		    }
-		}
-		break;
+	    switch(type[1]) {
+                case 'd':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5F_close_degree_t degree = va_arg(ap, H5F_close_degree_t); /*lint !e64 Type mismatch not really occuring */
 
-	    case 's':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5F_scope_t scope = va_arg(ap, H5F_scope_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (scope) {
-		    case H5F_SCOPE_LOCAL:
-			fprintf(out, "H5F_SCOPE_LOCAL");
-			break;
-		    case H5F_SCOPE_GLOBAL:
-			fprintf(out, "H5F_SCOPE_GLOBAL");
-			break;
-		    case H5F_SCOPE_DOWN:
-			fprintf(out, "H5F_SCOPE_DOWN "
-				"/*FOR INTERNAL USE ONLY!*/");
-			break;
-		    }
-		}
-		break;
+                        switch(degree) {
+                            case H5F_CLOSE_DEFAULT:
+                                fprintf(out, "H5F_CLOSE_DEFAULT");
+                                break;
+                            case H5F_CLOSE_WEAK:
+                                fprintf(out, "H5F_CLOSE_WEAK");
+                                break;
+                            case H5F_CLOSE_SEMI:
+                                fprintf(out, "H5F_CLOSE_SEMI");
+                                break;
+                            case H5F_CLOSE_STRONG:
+                                fprintf(out, "H5F_CLOSE_STRONG");
+                                break;
+                        }
+                    }
+                    break;
 
-	    default:
-		fprintf(out, "BADTYPE(F%c)", type[1]);
-		goto error;
+                case 's':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5F_scope_t scope = va_arg(ap, H5F_scope_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(scope) {
+                            case H5F_SCOPE_LOCAL:
+                                fprintf(out, "H5F_SCOPE_LOCAL");
+                                break;
+                            case H5F_SCOPE_GLOBAL:
+                                fprintf(out, "H5F_SCOPE_GLOBAL");
+                                break;
+                            case H5F_SCOPE_DOWN:
+                                fprintf(out, "H5F_SCOPE_DOWN "
+                                        "/*FOR INTERNAL USE ONLY!*/");
+                                break;
+                        }
+                    }
+                    break;
+
+                default:
+                    fprintf(out, "BADTYPE(F%c)", type[1]);
+                    goto error;
 	    }
 	    break;
 
 	case 'G':
-	    switch (type[1]) {
-	    case 'l':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5L_link_t link_type = va_arg (ap, H5L_link_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (link_type) {
-		    case H5L_LINK_ERROR:
-			fprintf (out, "H5L_LINK_ERROR");
-			break;
-		    case H5L_LINK_HARD:
-			fprintf (out, "H5L_LINK_HARD");
-			break;
-		    case H5L_LINK_SOFT:
-			fprintf (out, "H5L_LINK_SOFT");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)link_type);
-			break;
-		    }
-		}
-		break;
+	    switch(type[1]) {
+                case 'l':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5L_type_t link_type = va_arg(ap, H5L_type_t); /*lint !e64 Type mismatch not really occuring */
 
-	    case 'o':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5G_obj_t obj_type = va_arg (ap, H5G_obj_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (obj_type) {
-		    case H5G_UNKNOWN:
-			fprintf (out, "H5G_UNKNOWN");
-			break;
-		    case H5G_LINK:
-			fprintf (out, "H5G_LINK");
-			break;
-		    case H5G_UDLINK:
-			fprintf (out, "H5G_UDLINK");
-			break;
-		    case H5G_GROUP:
-			fprintf (out, "H5G_GROUP");
-			break;
-		    case H5G_DATASET:
-			fprintf (out, "H5G_DATASET");
-			break;
-		    case H5G_TYPE:
-			fprintf (out, "H5G_TYPE");
-			break;
-		    case H5G_RESERVED_5:
-		    case H5G_RESERVED_6:
-		    case H5G_RESERVED_7:
-			fprintf (out, "H5G_RESERVED(%ld)",(long)obj_type);
-			break;
-		    default:
-			fprintf (out, "%ld", (long)obj_type);
-			break;
-		    }
-		}
-		break;
+                        switch(link_type) {
+                            case H5L_TYPE_ERROR:
+                                fprintf(out, "H5L_TYPE_ERROR");
+                                break;
+                            case H5L_TYPE_HARD:
+                                fprintf(out, "H5L_TYPE_HARD");
+                                break;
+                            case H5L_TYPE_SOFT:
+                                fprintf(out, "H5L_TYPE_SOFT");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)link_type);
+                                break;
+                        }
+                    }
+                    break;
 
-	    case 's':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5G_stat_t *statbuf = va_arg (ap, H5G_stat_t*); /*lint !e64 Type mismatch not really occuring */
-		    fprintf (out, "0x%lx", (unsigned long)statbuf);
-		}
-		break;
+                case 'o':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5G_obj_t obj_type = va_arg(ap, H5G_obj_t); /*lint !e64 Type mismatch not really occuring */
 
-	    default:
-		fprintf (out, "BADTYPE(G%c)", type[1]);
-		goto error;
+                        switch(obj_type) {
+                            case H5G_UNKNOWN:
+                                fprintf(out, "H5G_UNKNOWN");
+                                break;
+                            case H5G_LINK:
+                                fprintf(out, "H5G_LINK");
+                                break;
+                            case H5G_UDLINK:
+                                fprintf(out, "H5G_UDLINK");
+                                break;
+                            case H5G_GROUP:
+                                fprintf(out, "H5G_GROUP");
+                                break;
+                            case H5G_DATASET:
+                                fprintf(out, "H5G_DATASET");
+                                break;
+                            case H5G_TYPE:
+                                fprintf(out, "H5G_TYPE");
+                                break;
+                            case H5G_RESERVED_5:
+                            case H5G_RESERVED_6:
+                            case H5G_RESERVED_7:
+                                fprintf(out, "H5G_RESERVED(%ld)",(long)obj_type);
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)obj_type);
+                                break;
+                        }
+                    }
+                    break;
+
+                case 's':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t*); /*lint !e64 Type mismatch not really occuring */
+
+                        fprintf(out, "0x%lx", (unsigned long)statbuf);
+                    }
+                    break;
+
+                default:
+                    fprintf(out, "BADTYPE(G%c)", type[1]);
+                    goto error;
 	    }
 	    break;
 

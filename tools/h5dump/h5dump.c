@@ -1544,9 +1544,9 @@ dump_all(hid_t group, const char *name, void * op_data)
         case H5G_UDLINK:
         {
             indentation(indent);
-            switch(linfo.linkclass)
+            switch(linfo.type)
             {
-              case H5L_LINK_EXTERNAL:
+              case H5L_TYPE_EXTERNAL:
               {
                 char *targbuf;
                 char *filename;
@@ -1569,7 +1569,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                     } else {
                       if (!doxml) {
                           indentation(indent + COL);
-                          printf("LINKCLASS %d\n", linfo.linkclass);
+                          printf("LINKCLASS %d\n", linfo.type);
                           indentation(indent + COL);
                           printf("TARGETFILE \"%s\"\n", filename);
                           indentation(indent + COL);
@@ -1625,7 +1625,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                       indentation(indent + COL);
                   }
                   if (!doxml) {
-                      printf("LINKCLASS %d\n", linfo.linkclass);
+                      printf("LINKCLASS %d\n", linfo.type);
                   }
                   else /* XML */
                   {
@@ -1648,7 +1648,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                                 t_name,             /* LinkName */
                                 linkxid,            /* OBJ-XID */
                                 t_obj_path,         /* H5SourcePath */
-                                linfo.linkclass,    /* LinkClass */
+                                linfo.type,    /* LinkClass */
                                 parentxid,          /* Parents */
                                 t_prefix);          /* H5ParentPaths */
                     HDfree(t_prefix);
@@ -3237,14 +3237,14 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
         begin_obj(dump_header_format->udlinkbegin, links,
                   dump_header_format->udlinkblockbegin);
         indentation(COL);
-        switch(linfo.linkclass) {
-          case H5L_LINK_EXTERNAL:
+        switch(linfo.type) {
+          case H5L_TYPE_EXTERNAL:
               begin_obj(dump_header_format->extlinkbegin, links,
                         dump_header_format->extlinkblockbegin);
               if (H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
                   if(H5Lunpack_elink_val(buf, &elink_file, &elink_path)>=0) {
                       indentation(COL);
-                      printf("LINKCLASS %d\n", linfo.linkclass);
+                      printf("LINKCLASS %d\n", linfo.type);
                       indentation(COL);
                       printf("TARGETFILE \"%s\"\n", elink_file);
                       indentation(COL);
@@ -3266,7 +3266,7 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
               begin_obj(dump_header_format->udlinkbegin, links,
                         dump_header_format->udlinkblockbegin);
               indentation(COL);
-              printf("LINKCLASS %d\n", linfo.linkclass);
+              printf("LINKCLASS %d\n", linfo.type);
               end_obj(dump_header_format->udlinkend,
                       dump_header_format->udlinkblockend);
         }

@@ -1717,32 +1717,33 @@ done:
 static herr_t
 H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 {
-    size_t      extent_size;
-    hssize_t    sselect_size;
-    size_t      select_size;
-    H5F_t       f;                /* fake file structure*/
+    size_t      extent_size;    /* Size of serialized dataspace extent */
+    hssize_t    sselect_size;   /* Signed size of serialized dataspace selection */
+    size_t      select_size;    /* Size of serialized dataspace selection */
+    H5F_t       f;              /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5S_encode, FAIL);
 
     /* Fake file structure, used only for header message operation */
     f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
+    HDassert(f.shared);
     f.shared->sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;
 
     /* Find out the size of buffer needed for extent */
-    if((extent_size=H5O_raw_size(H5O_SDSPACE_ID, &f, obj))==0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size");
+    if((extent_size = H5O_raw_size(H5O_SDSPACE_ID, &f, obj)) == 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
-    if((sselect_size=H5S_SELECT_SERIAL_SIZE(obj))<0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size");
-    H5_ASSIGN_OVERFLOW(select_size,sselect_size,hssize_t,size_t);
+    if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
+    H5_ASSIGN_OVERFLOW(select_size, sselect_size, hssize_t, size_t);
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
-    if(!buf || *nalloc<(extent_size+select_size+1+1+1+4)) {
-        *nalloc = extent_size+select_size+1+1+1+4;
-	HGOTO_DONE(ret_value);
-    }
+    if(!buf || *nalloc<(extent_size + select_size + 1 + 1 + 1 + 4)) {
+        *nalloc = extent_size + select_size + 1 + 1 + 1 + 4;
+	HGOTO_DONE(ret_value)
+    } /* end if */
 
     /* Encode the type of the information */
     *buf++ = H5O_SDSPACE_ID;
@@ -1757,26 +1758,26 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     UINT32ENCODE(buf, extent_size);
 
     /* Encode the extent part of dataspace */
-    if(H5O_encode(&f, buf, obj, H5O_SDSPACE_ID)<0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space");
-    buf +=extent_size;
+    if(H5O_encode(&f, buf, obj, H5O_SDSPACE_ID) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
+    buf += extent_size;
 
     /* Encode the selection part of dataspace.  */
-    if(H5S_SELECT_SERIALIZE(obj, buf) <0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space");
+    if(H5S_SELECT_SERIALIZE(obj, buf) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
 
 done:
     if(f.shared)
         H5MM_free(f.shared);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_encode() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Sdecode
  *
- * Purpose:	Decode a binary object description of data space and
+ * Purpose:	Decode a binary object description of dataspace and
  *              return a new object handle.
  *
  * Return:	Success:	dataspace ID(non-negative)
@@ -1787,8 +1788,6 @@ done:
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1797,22 +1796,22 @@ H5Sdecode(const void *buf)
     H5S_t       *ds;
     hid_t       ret_value;
 
-    FUNC_ENTER_API (H5Sdecode, FAIL);
+    FUNC_ENTER_API (H5Sdecode, FAIL)
     H5TRACE1("i","x",buf);
 
-    if (buf==NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
+    if(buf == NULL)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
-    if((ds = H5S_decode(buf))==NULL)
+    if((ds = H5S_decode(buf)) == NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
 
     /* Register the type and return the ID */
-    if ((ret_value=H5I_register (H5I_DATASPACE, ds))<0)
-	HGOTO_ERROR (H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+    if((ret_value = H5I_register(H5I_DATASPACE, ds)) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sdecode() */
 
 
 /*-------------------------------------------------------------------------
@@ -1829,23 +1828,21 @@ done:
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5S_t*
 H5S_decode(const unsigned char *buf)
 {
     H5S_t       *ds;
-    H5S_extent_t        *extent;
+    H5S_extent_t *extent;
     size_t      extent_size;      /* size of the extent message*/
     H5F_t       f;                /* fake file structure*/
     H5S_t       *ret_value;
 
-    FUNC_ENTER_NOAPI(H5S_decode, NULL);
+    FUNC_ENTER_NOAPI(H5S_decode, NULL)
 
     /* Initialize this before anything goes bad... */
-    f.shared=NULL;
+    f.shared = NULL;
 
     /* Decode the type of the information */
     if(*buf++ != H5O_SDSPACE_ID)
@@ -1865,35 +1862,36 @@ H5S_decode(const unsigned char *buf)
     UINT32DECODE(buf, extent_size);
 
     /* Decode the extent part of dataspace */
-    if((extent = H5O_decode(&f, buf, H5O_SDSPACE_ID))==NULL)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
+    /* (pass mostly bogus file pointer and bogus DXPL) */
+    if((extent = H5O_decode(&f, H5P_DEFAULT, buf, H5O_SDSPACE_ID))==NULL)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
     buf += extent_size;
 
     /* Copy the extent into dataspace structure */
     if((ds = H5FL_CALLOC(H5S_t))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table");
-    if(H5O_copy(H5O_SDSPACE_ID, extent, &(ds->extent))==NULL)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy object");
-    if(H5S_extent_release(extent)<0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, NULL, "can't release previous dataspace");
-    H5FL_FREE(H5S_extent_t,extent);
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table")
+    if(H5O_copy(H5O_SDSPACE_ID, extent, &(ds->extent)) == NULL)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy object")
+    if(H5S_extent_release(extent) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, NULL, "can't release previous dataspace")
+    H5FL_FREE(H5S_extent_t, extent);
 
     /* Initialize to "all" selection. Deserialization relies on valid existing selection. */
-    if(H5S_select_all(ds,0)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+    if(H5S_select_all(ds, 0) < 0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */
-    if(H5S_SELECT_DESERIALIZE(ds, buf)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection");
+    if(H5S_SELECT_DESERIALIZE(ds, buf) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */
-    ret_value=ds;
+    ret_value = ds;
 
 done:
     H5MM_xfree(f.shared);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -1908,22 +1906,15 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              October 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
 H5S_raw_size(const H5F_t *f, const H5S_t *space)
 {
-    size_t      ret_value;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_raw_size)
 
-    FUNC_ENTER_NOAPI(H5S_raw_size, 0);
-
-    /* Find out the size of buffer needed for extent */
-    ret_value=H5O_raw_size(H5O_SDSPACE_ID, f, &(space->extent));
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    /* Return the size of buffer needed for extent */
+    FUNC_LEAVE_NOAPI(H5O_raw_size(H5O_SDSPACE_ID, f, &(space->extent)))
 } /* end H5S_raw_size() */
 
 

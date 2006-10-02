@@ -43,29 +43,29 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink(hid_t cur_loc_id, H5L_link_t type, const char *cur_name, const char *new_name)
+H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name, const char *new_name)
 {
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Glink, FAIL)
     H5TRACE4("e","iLlss",cur_loc_id,type,cur_name,new_name);
 
-    if(type == H5L_LINK_HARD)
+    if(type == H5L_TYPE_HARD)
     {
-      if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, H5L_SAME_LOC, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
+        if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, H5L_SAME_LOC, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
-    else if(type == H5L_LINK_SOFT)
+    else if(type == H5L_TYPE_SOFT)
     {
-      if((ret_value = H5Lcreate_soft(cur_name, cur_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
+        if((ret_value = H5Lcreate_soft(cur_name, cur_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
     else
       HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Glink() */
 
 
 /*-------------------------------------------------------------------------
@@ -77,7 +77,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
+H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_type_t type,
     hid_t new_loc_id, const char *new_name)
 {
     herr_t ret_value;
@@ -85,11 +85,11 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_link_t type,
     FUNC_ENTER_API(H5Glink2, FAIL)
     H5TRACE5("e","isLlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
-    if(type == H5L_LINK_HARD) {
+    if(type == H5L_TYPE_HARD) {
         if((ret_value = H5Lcreate_hard(cur_loc_id, cur_name, new_loc_id, new_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "Couldn't create link")
     }
-    else if(type == H5L_LINK_SOFT) {
+    else if(type == H5L_TYPE_SOFT) {
         /* Soft links only need one location, the new_loc_id, but it's possible that
          * new_loc_id is H5L_SAME_LOC */
         if(new_loc_id == H5L_SAME_LOC)

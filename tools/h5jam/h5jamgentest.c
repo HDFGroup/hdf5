@@ -121,17 +121,18 @@ typedef struct s1_t {
 #define VLSTR_TYPE      "vl_string_type"
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group, void UNUSED * udata, size_t UNUSED udata_size, hid_t UNUSED lapl_id)
 {
 return -1;
 }
 #define MY_LINKCLASS 187
-const H5L_link_class_t UD_link_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,    /* H5L_link_class_t version       */
+const H5L_class_t UD_link_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
     MY_LINKCLASS,             /* Link type id number            */
     "UD link class",          /* name for debugging             */
     NULL,                     /* Creation callback              */
     NULL,                     /* Move/rename callback           */
+    NULL,                     /* Copy callback                  */
     UD_traverse,              /* The actual traversal function  */
     NULL,                     /* Deletion callback              */
     NULL                      /* Query callback                 */
@@ -156,21 +157,24 @@ g2 : dset2.1  dset2.2 udlink
 
 */
 
-static void gent_ub(const char * filename, int ub_size, int ub_fill) {
-hid_t fid, group, attr, dataset, space;
-hid_t create_plist;
-hsize_t dims[2];
-int data[2][2], dset1[10][10], dset2[20];
-char buf[BUF_SIZE];
-int i, j;
-float dset2_1[10], dset2_2[3][5];
-int fd;
-char *bp;
+static void
+gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
+{
+    hid_t fid, group, attr, dataset, space;
+    hid_t create_plist;
+    hsize_t dims[2];
+    int data[2][2], dset1[10][10], dset2[20];
+    char buf[BUF_SIZE];
+    int i, j;
+    size_t u;
+    float dset2_1[10], dset2_2[3][5];
+    int fd;
+    char *bp;
 
   if(ub_size > 0)
   {
       create_plist = H5Pcreate(H5P_FILE_CREATE);
-      H5Pset_userblock(create_plist,(hsize_t)ub_size);
+      H5Pset_userblock(create_plist, (hsize_t)ub_size);
       fid = H5Fcreate(filename, H5F_ACC_TRUNC, create_plist, H5P_DEFAULT);
   }
   else
@@ -179,23 +183,23 @@ char *bp;
   }
 
   /* create groups */
-  group = H5Gcreate (fid, "/g1", 0);
+  group = H5Gcreate(fid, "/g1", (size_t)0);
   H5Gclose(group);
 
-  group = H5Gcreate (fid, "/g2", 0);
+  group = H5Gcreate(fid, "/g2", (size_t)0);
   H5Gclose(group);
 
-  group = H5Gcreate (fid, "/g1/g1.1", 0);
+  group = H5Gcreate(fid, "/g1/g1.1", (size_t)0);
   H5Gclose(group);
 
-  group = H5Gcreate (fid, "/g1/g1.2", 0);
+  group = H5Gcreate(fid, "/g1/g1.2", (size_t)0);
   H5Gclose(group);
 
-  group = H5Gcreate (fid, "/g1/g1.2/g1.2.1", 0);
+  group = H5Gcreate(fid, "/g1/g1.2/g1.2.1", (size_t)0);
   H5Gclose(group);
 
   /* root attributes */
-  group = H5Gopen (fid, "/");
+  group = H5Gopen(fid, "/");
 
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
@@ -263,7 +267,7 @@ char *bp;
 
   /* soft link */
   group = H5Gopen (fid, "/g1/g1.2/g1.2.1");
-  H5Glink (group, H5L_LINK_SOFT, "somevalue", "slink");
+  H5Glink (group, H5L_TYPE_SOFT, "somevalue", "slink");
   H5Gclose(group);
 
   group = H5Gopen (fid, "/g2");
@@ -293,38 +297,37 @@ char *bp;
 
   /* user-defined link */
   H5Lregister(UD_link_class);
-  H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
 
   H5Fclose(fid);
 
   /* If a user block is being used, write to it here */
   if(ub_size > 0)
   {
-        HDassert(ub_size < BUF_SIZE);
+        HDassert(ub_size <= BUF_SIZE);
 
-	fd = HDopen(filename,O_RDWR, 0);
-	if (fd < 0) {
-		/* panic */
-	}
+	fd = HDopen(filename, O_RDWR, 0);
+        HDassert(fd >= 0);
+
 	/* fill buf with pattern */
-	memset(buf,'\0',ub_size);
+	HDmemset(buf, '\0', ub_size);
 	bp = buf;
-	for (i = 0; i < ub_fill; i++) {
-		*bp++ = pattern[i%10];
-	}
+	for (u = 0; u < ub_fill; u++)
+            *bp++ = pattern[u % 10];
 
-	HDwrite(fd,buf,ub_size);
+	HDwrite(fd, buf, ub_size);
 
 	close(fd);
   }
 }
 
 static void
-create_textfile(const char *name, size_t size) {
-char *buf;
-int fd;
-size_t i;
-char *bp;
+create_textfile(const char *name, size_t size)
+{
+    char *buf;
+    int fd;
+    size_t i;
+    char *bp;
 
 	#ifdef WIN32
 	fd = _creat(name, _S_IREAD | _S_IWRITE);
@@ -334,7 +337,7 @@ char *bp;
 	if (fd < 0) {
 		/* panic */
 	}
-	buf = calloc(size,1);
+	buf = calloc(size, (size_t)1);
 	if (buf == NULL) {
 		/* panic */
 	}
@@ -353,29 +356,27 @@ char *bp;
 #ifdef notdef
 /* not used yet */
 void
-create_binfile(char *name, off_t size) {
-char *buf;
-int fd;
-int i;
-char *bp;
+create_binfile(char *name, off_t size)
+{
+    char *buf;
+    int fd;
+    int i;
+    char *bp;
 
-	fd = creat(name,0777);
-	if (fd < 0) {
-		/* panic */
-	}
-	buf = calloc(size,1);
-	if (buf == NULL) {
-		/* panic */
-	}
-	/* fill buf with pattern */
-	bp = buf;
-	for (i = 0; i < size; i++) {
-		*bp++ = (char) i & 0xff;
-	}
+    fd = creat(name,0777);
+    HDassert(fd >= 0);
 
-	HDwrite(fd,buf,size);
+    buf = calloc(size,1);
+    HDassert(buf);
 
-	close(fd);
+    /* fill buf with pattern */
+    bp = buf;
+    for (i = 0; i < size; i++)
+        *bp++ = (char) i & 0xff;
+
+    HDwrite(fd,buf,size);
+
+    close(fd);
 }
 #endif
 
@@ -390,30 +391,30 @@ int main(void)
 {
 
 /*
-create_textfile(UBTXT1,0);
+create_textfile(UBTXT1, (size_t)0);
 */
-create_textfile(UBTXT2,10);
-create_textfile(UBTXT3,511);
-create_textfile(UBTXT4,512);
-create_textfile(UBTXT5,513);
+create_textfile(UBTXT2, (size_t)10);
+create_textfile(UBTXT3, (size_t)511);
+create_textfile(UBTXT4, (size_t)512);
+create_textfile(UBTXT5, (size_t)513);
 /*
-create_textfile(UBTXT6,1023);
-create_textfile(UBTXT7,1024);
-create_textfile(UBTXT8,1025);
-create_textfile(UBTXT9,2047);
-create_textfile(UBTXT10,2048);
-create_textfile(UBTXT11,2049);
+create_textfile(UBTXT6, (size_t)1023);
+create_textfile(UBTXT7, (size_t)1024);
+create_textfile(UBTXT8, (size_t)1025);
+create_textfile(UBTXT9, (size_t)2047);
+create_textfile(UBTXT10, (size_t)2048);
+create_textfile(UBTXT11, (size_t)2049);
 
-create_binfile(UBBIN1,0);
-create_binfile(UBBIN2,10);
-create_binfile(UBBIN3,511);
-create_binfile(UBBIN4,512);
-create_binfile(UBBIN5,513);
+create_binfile(UBBIN1, (off_t)0);
+create_binfile(UBBIN2, (off_t)10);
+create_binfile(UBBIN3, (off_t)511);
+create_binfile(UBBIN4, (off_t)512);
+create_binfile(UBBIN5, (off_t)513);
 
 */
-    gent_ub(FILE7, 0, 0);
-    gent_ub(FILE8, 512, strlen(pattern));
-    gent_ub(FILE9, 1024, 513);
+    gent_ub(FILE7, (size_t)0, (size_t)0);
+    gent_ub(FILE8, (size_t)512, HDstrlen(pattern));
+    gent_ub(FILE9, (size_t)1024, (size_t)513);
 
     return 0;
 }

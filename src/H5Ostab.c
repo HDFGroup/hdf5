@@ -45,8 +45,8 @@ static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
-static herr_t H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
-    void *mesg_dst, hbool_t *modified, hid_t dxpl_id, H5O_copy_t *cpy_info);
+static herr_t H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
+    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
@@ -272,23 +272,21 @@ H5O_stab_free (void *mesg)
  * Programmer:  Quincey Koziol
  *              Thursday, March 20, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg, hbool_t adj_link)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete)
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     /* Free the file space for the symbol table */
-    if (H5G_stab_delete(f, dxpl_id, mesg, adj_link)<0)
+    if(H5G_stab_delete(f, dxpl_id, mesg, adj_link) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:
@@ -362,19 +360,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
-    void *mesg_dst, hbool_t UNUSED *modified, hid_t dxpl_id, H5O_copy_t *cpy_info)
+H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
+    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    H5G_bt_it_ud5_t     udata;      /* B-tree user data */
     const H5O_stab_t    *stab_src = (const H5O_stab_t *)mesg_src;
     H5O_stab_t          *stab_dst = (H5O_stab_t *)mesg_dst;
-    H5F_t               *file_src = parent_src_oloc->file;
+    H5G_bt_it_ud5_t     udata;      /* B-tree user data */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_stab_post_copy_file)
 
     /* check args */
-    HDassert(file_src);
     HDassert(stab_src);
     HDassert(H5F_addr_defined(dst_oloc->addr));
     HDassert(dst_oloc->file);
@@ -386,14 +382,14 @@ H5O_stab_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, 
         HGOTO_DONE(SUCCEED)
 
     /* Set up B-tree iteration user data */
-    udata.src_oloc = (H5O_loc_t *)parent_src_oloc;      /* Casting away const OK - QAK */
+    udata.src_oloc = src_oloc;
     udata.src_heap_addr = stab_src->heap_addr;
     udata.dst_file = dst_oloc->file;
     udata.dst_stab = stab_dst;
     udata.cpy_info = cpy_info;
 
     /* Iterate over objects in group, copying them */
-    if((H5B_iterate(file_src, dxpl_id, H5B_SNODE, H5G_node_copy, stab_src->btree_addr, &udata)) < 0)
+    if((H5B_iterate(src_oloc->file, dxpl_id, H5B_SNODE, H5G_node_copy, stab_src->btree_addr, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
 done:

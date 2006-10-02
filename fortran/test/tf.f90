@@ -201,38 +201,3 @@
 
           END SUBROUTINE h5_exit_f
 
-!----------------------------------------------------------------------
-! Name:		h5_group_revision_f 
-!
-! Purpose: Checks if group revisions are defined	
-!
-! Inputs:  
-!
-! Outputs:  
-!	flag	
-!
-! Programmer:	Elena Pourmal
-!		May 13, 2006
-!
-!
-!----------------------------------------------------------------------
-          SUBROUTINE h5_group_revision_f(flag)
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5_group_revision_f
-!DEC$endif
-            IMPLICIT NONE
-            INTEGER, INTENT(OUT) :: flag         ! Return code
-            INTEGER              :: flag1
-            INTERFACE
-              INTEGER FUNCTION h5_group_revision_c()
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_GROUP_REVISION_C':: h5_group_revision_c
-              !DEC$ ENDIF
-              END FUNCTION h5_group_revision_c
-            END INTERFACE
-
-            flag =  h5_group_revision_c()
-
-          END SUBROUTINE h5_group_revision_f

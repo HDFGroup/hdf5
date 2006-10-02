@@ -497,6 +497,8 @@
 ./src/H5FSpublic.h
 ./src/H5FSsection.c
 ./src/H5G.c
+./src/H5Gbtree2.c
+./src/H5Gdense.c
 ./src/H5Gdeprec.c
 ./src/H5Gent.c
 ./src/H5Glink.c

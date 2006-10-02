@@ -1085,7 +1085,7 @@ hsize_t diff (hid_t file1_id,
     goto out;
 
    /* Only external links will have a query function registered */
-   if(li1.linkclass == H5L_LINK_EXTERNAL && li2.linkclass == H5L_LINK_EXTERNAL)
+   if(li1.type == H5L_TYPE_EXTERNAL && li2.type == H5L_TYPE_EXTERNAL)
    {
       buf1 = HDmalloc (li1.u.link_size);
       buf2 = HDmalloc (li2.u.link_size);
@@ -1134,7 +1134,7 @@ hsize_t diff (hid_t file1_id,
       /* If the link classes or the buffer length are not the
        * same, the links are "different"
        */
-      if((li1.linkclass != li2.linkclass) || (li1.u.link_size != li2.u.link_size))
+      if((li1.type != li2.type) || (li1.u.link_size != li2.u.link_size))
         nfound = 1;
       else
         nfound = 0;

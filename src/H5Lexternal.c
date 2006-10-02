@@ -32,9 +32,9 @@ static ssize_t H5L_extern_query(const char UNUSED * link_name, void * udata,
     size_t udata_size, void * buf /*out*/, size_t buf_size);
 
 /* Default External Link link class */
-const H5L_link_class_t H5L_EXTERN_LINK_CLASS[1] = {{
-    H5L_LINK_CLASS_T_VERS,      /* H5L_link_class_t version       */
-    H5L_LINK_EXTERNAL,      /* Link type id number            */
+const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
+    H5L_LINK_CLASS_T_VERS,      /* H5L_class_t version            */
+    H5L_TYPE_EXTERNAL,		/* Link type id number            */
     "external_link",            /* Link name for debugging        */
     NULL,                       /* Creation callback              */
     NULL,                       /* Move callback                  */
@@ -243,7 +243,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     HDstrcpy(temp_name + (HDstrlen(file_name) + 1), obj_name);
 
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, temp_name, buf_size, H5L_LINK_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, temp_name, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

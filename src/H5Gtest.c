@@ -29,7 +29,6 @@
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
-#ifdef H5_GROUP_REVISION
 
 /*--------------------------------------------------------------------------
  NAME
@@ -43,7 +42,7 @@
     Non-negative TRUE/FALSE on success, negative on failure
  DESCRIPTION
     Checks to see if the group has no link messages and no symbol table message
-    dimensionality and shape.
+    and no "dense" link storage
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
@@ -54,7 +53,8 @@ htri_t
 H5G_is_empty_test(hid_t gid)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
-    htri_t msg_exists = 0;      /* Indicate that a header message is present */
+    htri_t msg_exists = FALSE;  /* Indicate that a header message is present */
+    htri_t linfo_exists = FALSE;/* Indicate that the 'link info' message is present */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_is_empty_test, FAIL)
@@ -63,17 +63,79 @@ H5G_is_empty_test(hid_t gid)
     if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
+    /* "New format" checks */
+
     /* Check if the group has any link messages */
     if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINK_ID, 0, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-    if(msg_exists > 0)
+    if(msg_exists > 0) {
+        /* Sanity check that new group format shouldn't have old messages */
+        if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(msg_exists > 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
+
         HGOTO_DONE(FALSE)
+    } /* end if */
+
+    /* Check for a link info message */
+    if((linfo_exists = H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(linfo_exists > 0) {
+        H5O_linfo_t linfo;		/* Link info message */
+
+        /* Sanity check that new group format shouldn't have old messages */
+        if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(msg_exists > 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link info messages found")
+
+        /* Get the link info */
+        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
+
+        /* Check for 'dense' link storage file addresses being defined */
+        if(H5F_addr_defined(linfo.link_fheap_addr))
+            HGOTO_DONE(FALSE)
+        if(H5F_addr_defined(linfo.name_bt2_addr))
+            HGOTO_DONE(FALSE)
+        if(H5F_addr_defined(linfo.corder_bt2_addr))
+            HGOTO_DONE(FALSE)
+
+        /* Check for link count */
+        if(linfo.nlinks > 0)
+            HGOTO_DONE(FALSE)
+    } /* end if */
+
+    /* "Old format" checks */
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-    if(msg_exists > 0)
-        HGOTO_DONE(FALSE)
+    if(msg_exists > 0) {
+        H5O_stab_t stab;        /* Info about local heap & B-tree */
+        hsize_t nlinks;         /* Number of links in the group */
+
+        /* Sanity check that old group format shouldn't have new messages */
+        if(linfo_exists > 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link info messages found")
+        if((msg_exists = H5O_exists(&(grp->oloc), H5O_GINFO_ID, 0, H5AC_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(msg_exists > 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and group info messages found")
+
+        /* Get the B-tree & local heap info */
+        if(NULL == H5O_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbol table message")
+
+        /* Get the count of links in the group */
+        if(H5G_stab_count(&(grp->oloc), &nlinks, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to count links")
+
+        /* Check for link count */
+        if(nlinks > 0)
+            HGOTO_DONE(FALSE)
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -185,7 +247,73 @@ H5G_has_stab_test(hid_t gid)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G_has_stab_test() */
-#endif /* H5_GROUP_REVISION */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_is_new_dense_test
+ PURPOSE
+    Determine whether a group is in the "new" format and dense
+ USAGE
+    htri_t H5G_is_new_dense_test(gid)
+        hid_t gid;              IN: group to check
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks to see if the group is in the "new" format for groups (link messages/
+    fractal heap+v2 B-tree) and if it is in "dense" storage form (ie. it has
+    a name B-tree index).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5G_is_new_dense_test(hid_t gid)
+{
+    H5G_t *grp = NULL;          /* Pointer to group */
+    htri_t msg_exists = 0;      /* Indicate that a header message is present */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_is_new_dense_test, FAIL)
+
+    /* Get group structure */
+    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Check if the group has a symbol table message */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+        HGOTO_DONE(FALSE)
+
+    /* Check if the group has any link messages */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINK_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0)
+        HGOTO_DONE(FALSE)
+
+    /* Check if the group has link info message */
+    if((msg_exists = H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(msg_exists > 0) {
+        H5O_linfo_t linfo;		/* Link info message */
+
+        /* Get the link info */
+        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
+
+        /* Check for 'dense' link storage file addresses being defined */
+        if(!H5F_addr_defined(linfo.link_fheap_addr))
+            HGOTO_DONE(FALSE)
+        if(!H5F_addr_defined(linfo.name_bt2_addr))
+            HGOTO_DONE(FALSE)
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5G_is_new_dense_test() */
 
 
 /*--------------------------------------------------------------------------

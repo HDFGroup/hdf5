@@ -33,7 +33,6 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 
-#ifdef H5_GROUP_REVISION
 /* PRIVATE PROTOTYPES */
 static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
@@ -67,6 +66,10 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 /* Current version of group info information */
 #define H5O_GINFO_VERSION 	1
 
+/* Flags for group flag encoding */
+#define H5O_GINFO_FLAG_TRACK_CORDER        0x01
+#define H5O_GINFO_FLAG_INDEX_CORDER        0x02
+
 /* Declare a free list to manage the H5O_ginfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ginfo_t);
 
@@ -90,9 +93,10 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_ginfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
     H5O_ginfo_t         *ginfo = NULL;  /* Pointer to group information message */
+    unsigned char       flags;          /* Flags for encoding group info */
     void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_ginfo_decode)
@@ -101,7 +105,7 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     HDassert(f);
     HDassert(p);
 
-    /* decode */
+    /* Version of message */
     if(*p++ != H5O_GINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -109,8 +113,10 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     if(NULL == (ginfo = H5FL_CALLOC(H5O_ginfo_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Get the local heap size hint */
-    UINT32DECODE(p, ginfo->lheap_size_hint)
+    /* Get the flags for the group */
+    flags = *p++;
+    ginfo->track_corder = (flags & H5O_GINFO_FLAG_TRACK_CORDER) ? TRUE : FALSE;
+    ginfo->index_corder = (flags & H5O_GINFO_FLAG_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     UINT32DECODE(p, ginfo->max_compact)
@@ -148,9 +154,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
-    const H5O_ginfo_t       *ginfo = (const H5O_ginfo_t *) _mesg;
+    const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
+    unsigned char       flags;          /* Flags for encoding group info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ginfo_encode)
 
@@ -162,14 +169,16 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* encode */
     *p++ = H5O_GINFO_VERSION;
 
-    /* Store the local heap size hint for the group */
-    UINT32ENCODE(p, ginfo->lheap_size_hint)
+    /* The flags for the group */
+    flags = ginfo->track_corder ? H5O_GINFO_FLAG_TRACK_CORDER : 0;
+    flags |= ginfo->index_corder ? H5O_GINFO_FLAG_INDEX_CORDER : 0;
+    *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
     UINT32ENCODE(p, ginfo->max_compact)
     UINT32ENCODE(p, ginfo->min_dense)
 
-    /* Store the estimated # of entries & name lengths */
+    /* Estimated # of entries & name lengths */
     UINT32ENCODE(p, ginfo->est_num_entries)
     UINT32ENCODE(p, ginfo->est_name_len)
 
@@ -240,7 +249,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ginfo_size(const H5F_t UNUSED *f, const void UNUSED *_mesg)
+H5O_ginfo_size(const H5F_t *f, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 
@@ -248,7 +257,7 @@ H5O_ginfo_size(const H5F_t UNUSED *f, const void UNUSED *_mesg)
 
     /* Set return value */
     ret_value = 1 +                     /* Version */
-                4 +                     /* Local heap size hint */
+                1 +                     /* Flags */
                 4 +                     /* "Max compact" links */
                 4 +                     /* "Min dense" links */
                 4 +                     /* Estimated # of entries in group */
@@ -315,22 +324,19 @@ H5O_ginfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Local heap size hint:", ginfo->lheap_size_hint);
-
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Track creation order of links:", ginfo->track_corder);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Index creation order of links:", ginfo->index_corder);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. compact links:", ginfo->max_compact);
-
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Min. dense links:", ginfo->min_dense);
-
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Estimated # of objects in group:", ginfo->est_num_entries);
-
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Estimated length of object in group's name:", ginfo->est_name_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_debug() */
-#endif /* H5_GROUP_REVISION */
 

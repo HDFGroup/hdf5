@@ -2027,28 +2027,6 @@ case "X-$CODESTACK" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Check if they would like the group revision code compiled in
-dnl
-AC_MSG_CHECKING([whether group revision code is enabled])
-AC_ARG_ENABLE([group-revision],
-              [AC_HELP_STRING([--enable-group-revision],
-                              [Enable the group revision code (for internal developers only).])],
-              [GROUPREVISION=$enableval])
-
-case "X-$GROUPREVISION" in
-  X-yes)
-      GROUPREVISION=yes
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([GROUP_REVISION], [1],
-                [Define if the group revision code is to be compiled in])
-    ;;
-  *)
-      GROUPREVISION=no
-      AC_MSG_RESULT([no])
-    ;;
-esac
-
-dnl ----------------------------------------------------------------------
 dnl Check if they would like the metadata trace file code compiled in
 dnl
 AC_MSG_CHECKING([whether metadata trace file code is enabled])

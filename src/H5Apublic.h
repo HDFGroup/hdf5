@@ -38,9 +38,7 @@ H5_DLL herr_t  H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 H5_DLL herr_t  H5Aclose(hid_t attr_id);
 H5_DLL hid_t   H5Aget_space(hid_t attr_id);
 H5_DLL hid_t   H5Aget_type(hid_t attr_id);
-#ifdef H5_GROUP_REVISION
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
-#endif /* H5_GROUP_REVISION */
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);

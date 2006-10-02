@@ -42,7 +42,7 @@
 
 /* Private macros */
 #define H5HL_FREE_NULL	1		/*end of free list on disk	*/
-#define H5HL_MIN_HEAP   256             /* Minimum size to reduce heap buffer to */
+#define H5HL_MIN_HEAP   128             /* Minimum size to reduce heap buffer to */
 
 /*
  * Local heap collection version.
@@ -343,8 +343,8 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
     FUNC_ENTER_NOAPI(H5HL_minimize_heap_space, FAIL)
 
     /* check args */
-    HDassert( f );
-    HDassert( heap );
+    HDassert(f);
+    HDassert(heap);
 
     sizeof_hdr = H5HL_SIZEOF_HDR(f);    /* cache H5HL header size for file */
 
@@ -358,12 +358,12 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
         H5HL_free_t    *last_fl = NULL;
 
         /* Search for a free block at the end of the buffer */
-        for (tmp_fl = heap->freelist; tmp_fl; tmp_fl = tmp_fl->next)
+        for(tmp_fl = heap->freelist; tmp_fl; tmp_fl = tmp_fl->next)
             /* Check if the end of this free block is at the end of the buffer */
-            if (tmp_fl->offset + tmp_fl->size == heap->heap_alloc) {
+            if(tmp_fl->offset + tmp_fl->size == heap->heap_alloc) {
                 last_fl = tmp_fl;
                 break;
-            }
+            } /* end if */
 
         /*
          * Found free block at the end of the buffer, decide what to do
@@ -980,16 +980,16 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     HDassert(buf_size > 0);
     HDassert(buf);
 
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, (size_t)(-1), "no write intent on file");
+    if(0 == (f->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, (size_t)(-1), "no write intent on file")
 
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap");
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap")
 
     heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Cache this for later */
-    sizeof_hdr= H5HL_SIZEOF_HDR(f);
+    sizeof_hdr = H5HL_SIZEOF_HDR(f);
 
     /*
      * In order to keep the free list descriptors aligned on word boundaries,
@@ -1280,21 +1280,21 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     FUNC_ENTER_NOAPI(H5HL_remove, FAIL);
 
     /* check arguments */
-    HDassert( f );
-    HDassert( H5F_addr_defined(addr) );
-    HDassert( size > 0 );
-    HDassert( offset == H5HL_ALIGN(offset) );
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(size > 0);
+    HDassert(offset == H5HL_ALIGN(offset));
 
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
+    if(0 == (f->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     size = H5HL_ALIGN (size);
 
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap")
 
-    HDassert( offset < heap->heap_alloc );
-    HDassert( offset + size <= heap->heap_alloc );
+    HDassert(offset < heap->heap_alloc);
+    HDassert(offset + size <= heap->heap_alloc);
 
     fl = heap->freelist;
     heap_flags |= H5AC__DIRTIED_FLAG;
@@ -1304,106 +1304,105 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
      * free chunk.  It might also fall between two chunks in such a way
      * that all three chunks can be combined into one.
      */
-    while (fl) {
-	if (offset + size == fl->offset) {
+    while(fl) {
+	if((offset + size) == fl->offset) {
 	    fl->offset = offset;
 	    fl->size += size;
-	    assert (fl->offset==H5HL_ALIGN (fl->offset));
-	    assert (fl->size==H5HL_ALIGN (fl->size));
+	    HDassert(fl->offset==H5HL_ALIGN (fl->offset));
+	    HDassert(fl->size==H5HL_ALIGN (fl->size));
 	    fl2 = fl->next;
-	    while (fl2) {
-		if (fl2->offset + fl2->size == fl->offset) {
+	    while(fl2) {
+		if((fl2->offset + fl2->size) == fl->offset) {
 		    fl->offset = fl2->offset;
 		    fl->size += fl2->size;
-		    assert (fl->offset==H5HL_ALIGN (fl->offset));
-		    assert (fl->size==H5HL_ALIGN (fl->size));
+		    HDassert(fl->offset == H5HL_ALIGN (fl->offset));
+		    HDassert(fl->size == H5HL_ALIGN (fl->size));
 		    fl2 = H5HL_remove_free(heap, fl2);
-	            if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
-                             ( (2 * fl->size) > heap->heap_alloc ) ) {
-                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	            if(((fl->offset + fl->size) == heap->heap_alloc ) &&
+                             ((2 * fl->size) > heap->heap_alloc )) {
+                        if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
 	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
 		fl2 = fl2->next;
 	    }
-	    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
-                     ( (2 * fl->size) > heap->heap_alloc ) ) {
-                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0 )
+	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
+                     ((2 * fl->size) > heap->heap_alloc)) {
+                if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
 	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
-
-	} else if (fl->offset + fl->size == offset) {
+	} else if(fl->offset + fl->size == offset) {
 	    fl->size += size;
 	    fl2 = fl->next;
-	    assert (fl->size==H5HL_ALIGN (fl->size));
-	    while (fl2) {
-		if (fl->offset + fl->size == fl2->offset) {
+	    HDassert(fl->size==H5HL_ALIGN (fl->size));
+	    while(fl2) {
+		if(fl->offset + fl->size == fl2->offset) {
 		    fl->size += fl2->size;
-		    assert (fl->size==H5HL_ALIGN (fl->size));
+		    HDassert(fl->size==H5HL_ALIGN (fl->size));
 		    fl2 = H5HL_remove_free(heap, fl2);
-	            if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
-                            ( (2 * fl->size) > heap->heap_alloc ) ) {
-                        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	            if(((fl->offset + fl->size) == heap->heap_alloc) &&
+                            ((2 * fl->size) > heap->heap_alloc)) {
+                        if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
 	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
 		fl2 = fl2->next;
 	    }
-	    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
-                    ( (2 * fl->size) > heap->heap_alloc ) ) {
-                if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
+                    ((2 * fl->size) > heap->heap_alloc)) {
+                if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
 	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 	}
 	fl = fl->next;
-    }
+    } /* end while */
 
     /*
      * The amount which is being removed must be large enough to
      * hold the free list data.	 If not, the freed chunk is forever
      * lost.
      */
-    if (size < H5HL_SIZEOF_FREE(f)) {
+    if(size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
-	if (H5DEBUG(HL)) {
+	if(H5DEBUG(HL)) {
 	    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n",
 		    (unsigned long) size);
 	}
 #endif
 	HGOTO_DONE(SUCCEED);
-    }
+    } /* end if */
 
     /*
      * Add an entry to the free list.
      */
-    if (NULL==(fl = H5FL_MALLOC(H5HL_free_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     fl->offset = offset;
     fl->size = size;
-    assert (fl->offset==H5HL_ALIGN (fl->offset));
-    assert (fl->size==H5HL_ALIGN (fl->size));
+    HDassert(fl->offset == H5HL_ALIGN(fl->offset));
+    HDassert(fl->size == H5HL_ALIGN(fl->size));
     fl->prev = NULL;
     fl->next = heap->freelist;
-    if (heap->freelist)
+    if(heap->freelist)
         heap->freelist->prev = fl;
     heap->freelist = fl;
 
-    if ( ( (fl->offset + fl->size) == heap->heap_alloc ) &&
-            ( (2 * fl->size) > heap->heap_alloc ) ) {
-        if ( H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
+    if(((fl->offset + fl->size) == heap->heap_alloc) &&
+            ((2 * fl->size) > heap->heap_alloc)) {
+        if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
-    }
+    } /* end if */
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5HL_remove() */
 
 
 /*-------------------------------------------------------------------------

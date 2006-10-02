@@ -183,11 +183,6 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
             UINT32DECODE (*pp, ent->cache.slink.lval_offset);
             break;
 
-        case H5G_CACHED_ULINK:
-            UINT32DECODE (*pp, ent->cache.ulink.udata_size);
-            UINT32DECODE (*pp, ent->cache.ulink.udata_offset);
-            UINT32DECODE (*pp, ent->cache.ulink.link_type);
-            break;
         default:
             /* Error or unknown type. Bail out. */
             return -1;
@@ -302,12 +297,6 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
                 UINT32ENCODE (*pp, ent->cache.slink.lval_offset);
                 break;
 
-            case H5G_CACHED_ULINK:
-                UINT32ENCODE (*pp, ent->cache.ulink.udata_size);
-                UINT32ENCODE (*pp, ent->cache.ulink.udata_offset);
-                UINT32ENCODE (*pp, ent->cache.ulink.link_type);
-                break;
-
             default:
                 /* Unknown cached type. Bail out. */
                 return -1;
@@ -411,10 +400,8 @@ H5G_ent_reset(H5G_entry_t *ent)
  *
  * Purpose:     Convert a link to a symbol table entry
  *
- * Return:      Success:        Non-negative, with *pp pointing to the first byte
- *                              after the last symbol.
- *
- *              Failure:        Negative
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
@@ -450,12 +437,12 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
 
     /* Build correct information for symbol table entry based on link type */
     switch(lnk->type) {
-        case H5L_LINK_HARD:
+        case H5L_TYPE_HARD:
             ent->type = H5G_NOTHING_CACHED;
             ent->header = lnk->u.hard.addr;
             break;
 
-        case H5L_LINK_SOFT:
+        case H5L_TYPE_SOFT:
             {
                 size_t	lnk_offset;		/* Offset to sym-link value	*/
 
@@ -470,24 +457,7 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
             break;
 
         default:
-          if(lnk->type < H5L_LINK_UD_MIN)
-              HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type")
-
-          {
-                size_t udata_offset = (size_t) (-1);  /* Offset to data buffer */
-
-                if(lnk->u.ud.size > 0)
-                {
-                  if((size_t)(-1) == (udata_offset = H5HL_insert(f, dxpl_id,
-                        heap_addr, lnk->u.ud.size, lnk->u.ud.udata)))
-                      HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write user data to local heap")
-                }
-
-                ent->type = H5G_CACHED_ULINK;
-                ent->cache.ulink.udata_size = lnk->u.ud.size;
-                ent->cache.ulink.udata_offset = udata_offset;
-                ent->cache.ulink.link_type = lnk->type;
-          }
+          HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type")
     } /* end switch */
 
     /* Set the file for the entry */
@@ -536,7 +506,7 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 	      ent->dirty ? "Yes" : "No");
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
 	      "Cache info type:");
-    switch (ent->type) {
+    switch(ent->type) {
         case H5G_NOTHING_CACHED:
             HDfprintf(stream, "Nothing Cached\n");
             break;
@@ -554,88 +524,30 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             break;
 
         case H5G_CACHED_SLINK:
-            HDfprintf (stream, "Symbolic Link\n");
+            HDfprintf(stream, "Symbolic Link\n");
             HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
                       "Cached information:");
-            HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
-            if (heap>0 && H5F_addr_defined(heap)) {
+            if(heap > 0 && H5F_addr_defined(heap)) {
                 const H5HL_t *heap_ptr;
 
                 heap_ptr = H5HL_protect(ent->file, dxpl_id, heap);
                 lval = H5HL_offset_into(ent->file, heap_ptr, ent->cache.slink.lval_offset);
-                HDfprintf (stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
+                HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);
                 H5HL_unprotect(ent->file, dxpl_id, heap_ptr, heap, H5AC__NO_FLAGS_SET);
-            }
+            } /* end if */
             else
                 HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");
-            break;
-
-        case H5G_CACHED_ULINK:
-            if(ent->cache.ulink.link_type == H5L_LINK_EXTERNAL)
-            {
-              HDfprintf (stream, "External Link\n");
-              HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
-                        "Cached information:");
-              if(ent->cache.ulink.udata_size > 0)
-              {
-                  HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                              "User data offset:",
-                              (unsigned long)(ent->cache.ulink.udata_offset));
-              }
-              HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                          "User data size:",
-                          (unsigned long)(ent->cache.ulink.udata_size));
-              if (heap>0 && H5F_addr_defined(heap)) {
-                  const H5HL_t *heap_ptr;
-                  char * filename;
-                  char * pathname;
-
-                  heap_ptr = H5HL_protect(ent->file, dxpl_id, heap);
-                  lval = H5HL_offset_into(ent->file, heap_ptr, ent->cache.ulink.udata_offset);
-                  if(H5Lunpack_elink_val(lval, &filename, &pathname) < 0) return FAIL;
-
-                  HDfprintf (stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
-                            "External link file name:",
-                            lval);
-                  HDfprintf (stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
-                            "External link object name:",
-                            pathname);
-                  H5HL_unprotect(ent->file, dxpl_id, heap_ptr, heap, H5AC__NO_FLAGS_SET);
-              } else {
-                  HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given!");
-              }
-            }
-            else
-            {
-                HDfprintf (stream, "User-defined Link\n");
-                HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
-                          "Cached information:");
-                HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                            "Link class:",
-                            (unsigned long)(ent->cache.ulink.link_type));
-                if(ent->cache.ulink.udata_size > 0)
-                {
-                     HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                                "User data offset:",
-                                (unsigned long)(ent->cache.ulink.udata_offset));
-                }
-                HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                            "User data size:",
-                            (unsigned long)(ent->cache.ulink.udata_size));
-                if (heap<=0 || !H5F_addr_defined(heap)) {
-                    HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given!");
-                }
-            }
             break;
 
         default:
             HDfprintf(stream, "*** Unknown symbol type %d\n", ent->type);
             break;
-    }
+    } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }

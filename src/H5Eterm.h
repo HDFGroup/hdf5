@@ -104,7 +104,8 @@ H5E_ALIGNMENT_g=
 H5E_BADMESG_g=    
 H5E_CANTDELETE_g=    
 H5E_BADITER_g=    
-H5E_CANTPACK_g=
+H5E_CANTPACK_g=    
+H5E_CANTRESET_g=
 
 /* System level errors */    
 H5E_SYSERRSTR_g=

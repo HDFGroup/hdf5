@@ -377,6 +377,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't pack messages"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTPACK_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTRESET_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't reset object"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTRESET_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* System level errors */
 assert(H5E_SYSERRSTR_g==(-1));

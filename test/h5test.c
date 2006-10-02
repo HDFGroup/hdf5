@@ -224,7 +224,7 @@ h5_reset(void)
     H5E_BEGIN_TRY {
 	hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 			       H5P_DEFAULT);
-	hid_t grp = H5Gcreate(file, "emit", 0);
+	hid_t grp = H5Gcreate(file, "emit", (size_t)0);
 	H5Gclose(grp);
 	H5Fclose(file);
 	HDunlink(filename);
@@ -466,10 +466,10 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-char *
+const char *
 h5_rmprefix(const char *filename)
 {
-    char *ret_ptr;
+    const char *ret_ptr;
 
     if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
 	ret_ptr = filename;
@@ -527,7 +527,7 @@ h5_fileaccess(void)
 	if (H5Pset_fapl_stdio(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "core")) {
 	/* In-core temporary file with 1MB increment */
-	if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
+	if (H5Pset_fapl_core(fapl, (size_t)1024*1024, FALSE)<0) return -1;
     } else if (!HDstrcmp(name, "split")) {
 	/* Split meta data and raw data each using default driver */
 	if (H5Pset_fapl_split(fapl,
@@ -575,7 +575,7 @@ h5_fileaccess(void)
         if ((val = HDstrtok(NULL, " \t\n\r")))
             log_flags = (unsigned)HDstrtol(val, NULL, 0);
 
-        if (H5Pset_fapl_log(fapl, NULL, log_flags, 0) < 0)
+        if (H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
 	    return -1;
     } else {
 	/* Unknown driver */
@@ -675,9 +675,8 @@ h5_show_hostname(void)
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
-    if (gethostname(hostname, 80) < 0){
+    if (gethostname(hostname, (size_t)80) < 0)
 	printf(" gethostname failed\n");
-    }
     else
 	printf(" hostname=%s\n", hostname);
 #else

@@ -219,12 +219,12 @@ void soft_link_example()
      * A link class can have NULL for any callback except its traverse
      * callback.
      */
-    const H5L_link_class_t UD_soft_class[1] = {{
+    const H5L_class_t UD_soft_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
         UD_SOFT_CLASS,              /* Link class id number. This can be any
-                                     * value between H5L_LINK_UD_MIN (64) and
-                                     * H5L_LINK_MAX (255). It should be a
+                                     * value between H5L_TYPE_UD_MIN (64) and
+                                     * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
                                      * another kind of link. We'll use 65. */
         "UD_soft_link",             /* Link class name for debugging  */
@@ -318,12 +318,12 @@ void hard_link_example()
      * A link class can have NULL for any callback except its traverse
      * callback.
      */
-    const H5L_link_class_t UD_hard_class[1] = {{
+    const H5L_class_t UD_hard_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
         UD_HARD_CLASS,              /* Link class id number. This can be any
-                                     * value between H5L_LINK_UD_MIN (64) and
-                                     * H5L_LINK_MAX (255). It should be a
+                                     * value between H5L_TYPE_UD_MIN (64) and
+                                     * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
                                      * another kind of link. We'll use 66. */
         "UD_hard_link",             /* Link class name for debugging  */
@@ -533,12 +533,12 @@ void plist_link_example()
      * A link class can have NULL for any callback except its traverse
      * callback.
      */
-    const H5L_link_class_t UD_plist_class[1] = {{
+    const H5L_class_t UD_plist_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
         UD_PLIST_CLASS,             /* Link class id number. This can be any
-                                     * value between H5L_LINK_UD_MIN (64) and
-                                     * H5L_LINK_MAX (255). It should be a
+                                     * value between H5L_TYPE_UD_MIN (64) and
+                                     * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
                                      * another kind of link. We'll use 67. */
         "UD_plist_link",            /* Link class name for debugging  */

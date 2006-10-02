@@ -25,10 +25,10 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Cpublic.h"
-#include "H5Ipublic.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
 #include "H5FDpublic.h"
+#include "H5Ipublic.h"
 #include "H5MMpublic.h"
 #include "H5Tpublic.h"
 #include "H5Zpublic.h"
@@ -357,7 +357,6 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
 
-#ifdef H5_GROUP_REVISION
 /* Link creation property list (LCPL) routines */
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
@@ -369,12 +368,12 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
 H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
 H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
+H5_DLL herr_t H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder);
+H5_DLL herr_t H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /* out */);
 
 /* String creation property list (SCPL) routines */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
-
-#endif /* H5_GROUP_REVISION */
 
 /* Link access property list (LAPL) routines */
 H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);

@@ -40,9 +40,9 @@ Expected output for 'h5dump --xml -A tall.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
-   <hdf5:Group Name="g1" OBJ-XID="xid_792" H5Path="/g1" Parents="xid_96" H5ParentPaths="/" >
-      <hdf5:Group Name="g1.1" OBJ-XID="xid_2512" H5Path="/g1/g1.1" Parents="xid_792" H5ParentPaths="/g1" >
-         <hdf5:Dataset Name="dset1.1.1" OBJ-XID="xid_5432" H5Path= "/g1/g1.1/dset1.1.1" Parents="xid_2512" H5ParentPaths="/g1/g1.1">
+   <hdf5:Group Name="g1" OBJ-XID="xid_808" H5Path="/g1" Parents="xid_96" H5ParentPaths="/" >
+      <hdf5:Group Name="g1.1" OBJ-XID="xid_2560" H5Path="/g1/g1.1" Parents="xid_808" H5ParentPaths="/g1" >
+         <hdf5:Dataset Name="dset1.1.1" OBJ-XID="xid_5528" H5Path= "/g1/g1.1/dset1.1.1" Parents="xid_2560" H5ParentPaths="/g1/g1.1">
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>
@@ -102,7 +102,7 @@ Expected output for 'h5dump --xml -A tall.h5'
                <hdf5:NoData/>
             </hdf5:Data>
          </hdf5:Dataset>
-         <hdf5:Dataset Name="dset1.1.2" OBJ-XID="xid_8272" H5Path= "/g1/g1.1/dset1.1.2" Parents="xid_2512" H5ParentPaths="/g1/g1.1">
+         <hdf5:Dataset Name="dset1.1.2" OBJ-XID="xid_8272" H5Path= "/g1/g1.1/dset1.1.2" Parents="xid_2560" H5ParentPaths="/g1/g1.1">
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>
@@ -126,15 +126,15 @@ Expected output for 'h5dump --xml -A tall.h5'
             </hdf5:Data>
          </hdf5:Dataset>
       </hdf5:Group>
-      <hdf5:Group Name="g1.2" OBJ-XID="xid_3536" H5Path="/g1/g1.2" Parents="xid_792" H5ParentPaths="/g1" >
-         <hdf5:Group Name="g1.2.1" OBJ-XID="xid_4232" H5Path="/g1/g1.2/g1.2.1" Parents="xid_3536" H5ParentPaths="/g1/g1.2" >
-            <hdf5:SoftLink LinkName="slink" OBJ-XID="xid_18446744073709551614" H5SourcePath="/g1/g1.2/g1.2.1/slink" TargetPath="somevalue"  Parents="xid_4232" H5ParentPaths="/g1/g1.2/g1.2.1" />
+      <hdf5:Group Name="g1.2" OBJ-XID="xid_3600" H5Path="/g1/g1.2" Parents="xid_808" H5ParentPaths="/g1" >
+         <hdf5:Group Name="g1.2.1" OBJ-XID="xid_4312" H5Path="/g1/g1.2/g1.2.1" Parents="xid_3600" H5ParentPaths="/g1/g1.2" >
+            <hdf5:SoftLink LinkName="slink" OBJ-XID="xid_18446744073709551614" H5SourcePath="/g1/g1.2/g1.2.1/slink" TargetPath="somevalue"  Parents="xid_4312" H5ParentPaths="/g1/g1.2/g1.2.1" />
          </hdf5:Group>
-         <hdf5:ExternalLink LinkName="extlink" OBJ-XID="xid_18446744073709551613" H5SourcePath="/g1/g1.2/extlink" TargetFilename="somefile"  TargetPath="somepath"  Parents="xid_3536" H5ParentPaths="/g1/g1.2" />
+         <hdf5:ExternalLink LinkName="extlink" OBJ-XID="xid_18446744073709551613" H5SourcePath="/g1/g1.2/extlink" TargetFilename="somefile"  TargetPath="somepath"  Parents="xid_3600" H5ParentPaths="/g1/g1.2" />
       </hdf5:Group>
    </hdf5:Group>
-   <hdf5:Group Name="g2" OBJ-XID="xid_1816" H5Path="/g2" Parents="xid_96" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset2.1" OBJ-XID="xid_8872" H5Path= "/g2/dset2.1" Parents="xid_1816" H5ParentPaths="/g2">
+   <hdf5:Group Name="g2" OBJ-XID="xid_1848" H5Path="/g2" Parents="xid_96" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset2.1" OBJ-XID="xid_3688" H5Path= "/g2/dset2.1" Parents="xid_1848" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -157,7 +157,7 @@ Expected output for 'h5dump --xml -A tall.h5'
             <hdf5:NoData/>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_9472" H5Path= "/g2/dset2.2" Parents="xid_1816" H5ParentPaths="/g2">
+      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_8696" H5Path= "/g2/dset2.2" Parents="xid_1848" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -181,7 +181,7 @@ Expected output for 'h5dump --xml -A tall.h5'
             <hdf5:NoData/>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:UserDefined LinkName="udlink" OBJ-XID="xid_18446744073709551612" H5SourcePath="/g2/udlink" LinkClass="187"  Parents="xid_1816" H5ParentPaths="/g2" />
+      <hdf5:UserDefined LinkName="udlink" OBJ-XID="xid_18446744073709551612" H5SourcePath="/g2/udlink" LinkClass="187"  Parents="xid_1848" H5ParentPaths="/g2" />
    </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

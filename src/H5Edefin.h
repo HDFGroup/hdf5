@@ -103,6 +103,7 @@ hid_t H5E_BADMESG_g        = FAIL;      /* Unrecognized message */
 hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
 hid_t H5E_BADITER_g        = FAIL;      /* Iteration failed */
 hid_t H5E_CANTPACK_g       = FAIL;      /* Can't pack messages */
+hid_t H5E_CANTRESET_g      = FAIL;      /* Can't reset object */
 
 /* System level errors */
 hid_t H5E_SYSERRSTR_g      = FAIL;      /* System error message */

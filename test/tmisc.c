@@ -3768,7 +3768,6 @@ test_misc22(void)
 } /* end test_misc22() */
 #endif /* H5_HAVE_FILTER_SZIP */
 
-#ifdef H5_GROUP_REVISION
 /****************************************************************
 **
 **  test_misc23(): Test intermediate group creation.
@@ -4075,7 +4074,6 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Fclose");
 
 } /* end test_misc23() */
-#endif /* H5_GROUP_REVISION */
 
 /****************************************************************
 **
@@ -4114,13 +4112,13 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Tcommit");
 
     /* Create soft links to the objects created */
-    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5L_LINK_SOFT, file_id, MISC24_GROUP_LINK);
+    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5L_TYPE_SOFT, file_id, MISC24_GROUP_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
-    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5L_LINK_SOFT, file_id, MISC24_DATASET_LINK);
+    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5L_TYPE_SOFT, file_id, MISC24_DATASET_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
-    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5L_LINK_SOFT, file_id, MISC24_DATATYPE_LINK);
+    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5L_TYPE_SOFT, file_id, MISC24_DATATYPE_LINK);
     CHECK(ret, FAIL, "H5Glink2");
 
     /* Close IDs for objects */
@@ -4668,9 +4666,7 @@ test_misc(void)
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();      /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
-#ifdef H5_GROUP_REVISION
     test_misc23();      /* Test intermediate group creation */
-#endif /* H5_GROUP_REVISION */
     test_misc24();      /* Test inappropriate API opens of objects */
     test_misc25a();     /* Exercise null object header message merge bug */
     test_misc25b();     /* Exercise null object header message merge bug on existing file */

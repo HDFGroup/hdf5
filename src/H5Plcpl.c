@@ -24,7 +24,6 @@
 
 /* Static function prototypes */
 
-#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_create_intermediate_group
@@ -96,6 +95,4 @@ H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd_group /*out
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_create_intermediate_group() */
-
-#endif /* H5_GROUP_REVISION */
 

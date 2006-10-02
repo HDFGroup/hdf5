@@ -48,13 +48,13 @@
  *		|              |            | file.                          |
  *              +--------------+------------+--------------------------------+
  * 		| File ID      | "foo/bar"  | Find `foo' within `bar' within |
- *		|              |            | the current working group of   |
- *		|              |            | the specified file.            |
+ *		|              |            | the root group of the specified|
+ *		|              |            | file.                          |
  *              +--------------+------------+--------------------------------+
  * 		| File ID      | "/"        | The root group of the specified|
  *		|              |            | file.                          |
  *              +--------------+------------+--------------------------------+
- * 		| File ID      | "."        | The current working group of   |
+ * 		| File ID      | "."        | The root group of the specified|
  *		|              |            | the specified file.            |
  *              +--------------+------------+--------------------------------+
  * 		| Group ID     | "/foo/bar" | Find `foo' within `bar' within |
@@ -93,7 +93,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 
 /* Local macros */
-#define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
 
 /* Local typedefs */
@@ -201,7 +200,6 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
 
-#ifdef H5_GROUP_REVISION
     /* Check if we need to create a non-standard GCPL */
     if(size_hint > 0) {
         H5P_genplist_t  *gc_plist;  /* Property list created */
@@ -229,7 +227,6 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
     } /* end if */
     else
-#endif /* H5_GROUP_REVISION */
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
     /* What file is the group being added to?  This may not be the same file
@@ -246,16 +243,19 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     if(NULL == (grp = H5G_create(file, H5AC_dxpl_id, tmp_gcpl, H5P_DEFAULT)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
+    /* Get an ID for the newly created group */
     if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
+    /* Get the new group's location */
     if(H5G_loc(grp_id, &grp_loc) <0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get location for new group")
 
-    /* Link the group */
-    if( H5L_link(&loc, name, &grp_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+    /* Link the new group to its parent group */
+    if(H5L_link(&loc, name, &grp_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to group")
 
+    /* Set the return value */
     ret_value = grp_id;
 
 done:
@@ -277,7 +277,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate() */
 
-#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gcreate_expand
@@ -345,6 +344,7 @@ H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
+    /* Create the new group & get its ID */
     if(NULL == (grp = H5G_create(loc.oloc->file, H5AC_dxpl_id, gcpl_id, gapl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
@@ -358,7 +358,6 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_expand() */
-#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -581,8 +580,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Giterate(hid_t loc_id, const char *name, int *idx_p,
-	    H5G_iterate_t op, void *op_data)
+H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
+    void *op_data)
 {
     int         last_obj;               /* Index of last object looked at */
     int		idx;                    /* Internal location to hold index */
@@ -604,7 +603,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
     last_obj = 0;
 
     /* Call private function. */
-    if((ret_value = H5G_obj_iterate(loc_id, name, idx, &last_obj, op, op_data, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_obj_iterate(loc_id, name, H5_ITER_INC, idx, &last_obj, op, op_data, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
     /* Check for too high of a starting index (ex post facto :-) */
@@ -614,7 +613,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 
     /* Set the index we stopped at */
     if(idx_p)
-        *idx_p=last_obj;
+        *idx_p = last_obj;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -868,7 +867,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_comment() */
 
-#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gget_create_plist
@@ -937,7 +935,6 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_create_plist() */
-#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -1380,20 +1377,16 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
      */
     if (loc == NULL) {
         H5P_genplist_t *fc_plist;       /* File creation property list */
-#ifdef H5_GROUP_REVISION
         H5O_ginfo_t     ginfo;          /* Group info parameters */
-#endif /* H5_GROUP_REVISION */
 
         /* Get the file creation property list */
         /* (Which is a sub-class of the group creation property class) */
         if(NULL == (fc_plist = H5I_object(f->shared->fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-#ifdef H5_GROUP_REVISION
         /* Get the group info property */
         if(H5P_get(fc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
-#endif /* H5_GROUP_REVISION */
 
         /* Set up group location for root group */
         new_root_loc.oloc = &new_root_oloc;
@@ -1401,11 +1394,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
         H5G_loc_reset(&new_root_loc);
         loc = &new_root_loc;
 
-	if(H5G_obj_create(f, dxpl_id,
-#ifdef H5_GROUP_REVISION
-                &ginfo,
-#endif /* H5_GROUP_REVISION */
-                loc->oloc/*out*/) < 0)
+	if(H5G_obj_create(f, dxpl_id, &ginfo, loc->oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(loc->oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")
@@ -1470,9 +1459,7 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
     H5P_genplist_t  *gc_plist;  /* Property list created */
-#ifdef H5_GROUP_REVISION
     H5O_ginfo_t ginfo;          /* Group info */
-#endif /* H5_GROUP_REVISION */
     unsigned    oloc_init = 0;  /* Flag to indicate that the group object location was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
@@ -1495,18 +1482,12 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
     if(NULL == (gc_plist = H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
-#ifdef H5_GROUP_REVISION
     /* Get the group info property */
     if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get group info")
-#endif /* H5_GROUP_REVISION */
 
     /* Create the group object header */
-    if(H5G_obj_create(file, dxpl_id,
-#ifdef H5_GROUP_REVISION
-            &ginfo,
-#endif /* H5_GROUP_REVISION */
-            &(grp->oloc)/*out*/) < 0)
+    if(H5G_obj_create(file, dxpl_id, &ginfo, &(grp->oloc)/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group object header")
     oloc_init = 1;    /* Indicate that the object location information is valid */
 
@@ -1516,6 +1497,7 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
     if(H5FO_insert(grp->oloc.file, grp->oloc.addr, grp->shared, TRUE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects")
 
+    /* Set the count of times the object is opened */
     grp->shared->fo_count = 1;
     
     /* Set return value */
@@ -1671,11 +1653,8 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
     obj_opened = TRUE;
 
     /* Check if this object has the right message(s) to be treated as a group */
-    if(H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0
-#ifdef H5_GROUP_REVISION
-            && H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0
-#endif /* H5_GROUP_REVISION */
-            )
+    if((H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0)
+            && (H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group")
 
 done:
@@ -1931,10 +1910,9 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
 
         /* Info for soft and UD links is gotten by H5L_get_linkinfo. If we have
-         * a hard link, follow it and get info on the object */
-        if(udata->follow_link || !lnk ||
-                (lnk->type == H5L_LINK_HARD)) {
-
+         *      a hard link, follow it and get info on the object
+         */
+        if(udata->follow_link || !lnk || (lnk->type == H5L_TYPE_HARD)) {
             /* Get object type */
 	    statbuf->type = H5O_obj_type(obj_loc->oloc, udata->dxpl_id);
             if(statbuf->type == H5G_UNKNOWN)
@@ -2029,16 +2007,16 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
             ret = H5L_get_linkinfo(loc, name, &linfo, H5P_DEFAULT, dxpl_id);
         } H5E_END_TRY
 
-        if(ret >=0 && linfo.linkclass != H5L_LINK_HARD)
+        if(ret >=0 && linfo.type != H5L_TYPE_HARD)
         {
             statbuf->linklen = linfo.u.link_size;
-            if(linfo.linkclass == H5L_LINK_SOFT)
+            if(linfo.type == H5L_TYPE_SOFT)
             {
                 statbuf->type = H5G_LINK;
             }
             else  /* UD link. H5L_get_linkinfo checked for invalid link classes */
             {
-                HDassert(linfo.linkclass >= H5L_LINK_UD_MIN && linfo.linkclass <= H5L_LINK_MAX);
+                HDassert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
                 statbuf->type = H5G_UDLINK;
             }
         }

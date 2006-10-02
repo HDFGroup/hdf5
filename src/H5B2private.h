@@ -56,13 +56,15 @@ typedef enum H5B2_subid_t {
     H5B2_FHEAP_HUGE_FILT_INDIR_ID, /* B-tree is for fractal heap indirectly accessed, filtered 'huge' objects */
     H5B2_FHEAP_HUGE_DIR_ID, 	/* B-tree is for fractal heap directly accessed, non-filtered 'huge' objects */
     H5B2_FHEAP_HUGE_FILT_DIR_ID, /* B-tree is for fractal heap directly accessed, filtered 'huge' objects */
+    H5B2_GRP_DENSE_NAME_ID,     /* B-tree is for indexing 'name' field for "dense" link storage in groups */
+    H5B2_GRP_DENSE_CORDER_ID,   /* B-tree is for indexing 'creation order' field for "dense" link storage in groups */
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
 
 /* Define the operator callback function pointer for H5B2_iterate() */
 typedef int (*H5B2_operator_t)(const void *record, void *op_data);
 
-/* Define the 'found' callback function pointer for H5B2_find() & H5B2_neighbor() */
+/* Define the 'found' callback function pointer for H5B2_find(), H5B2_neighbor() & H5B2_index() */
 typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
 
 /* Define the 'modify' callback function pointer for H5B2_modify() */
@@ -106,7 +108,7 @@ struct H5B2_class_t {
 /* v2 B-tree metadata statistics info */
 typedef struct H5B2_stat_t {
     unsigned depth;             /* Depth of B-tree */
-    unsigned nrecords;          /* Number of records */
+    hsize_t nrecords;          /* Number of records */
 } H5B2_stat_t;
 
 /*****************************/

@@ -1008,7 +1008,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_type() */
 
-#ifdef H5_GROUP_REVISION
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1063,8 +1062,7 @@ H5Aget_create_plist(hid_t attr_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-#endif /* H5_GROUP_REVISION */
+} /* end H5Aget_create_plist() */
 
 
 /*--------------------------------------------------------------------------

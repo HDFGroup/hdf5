@@ -49,8 +49,8 @@ static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
 {
 return -1;
 }
-const H5L_link_class_t UD_link_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,    /* H5L_link_class_t version       */
+const H5L_class_t UD_link_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
     MY_LINKCLASS,             /* Link type id number            */
     "UD link class",          /* name for debugging             */
     NULL,                     /* Creation callback              */
@@ -2242,8 +2242,8 @@ int test_types(const char *file1,
  *-------------------------------------------------------------------------
  */
 
- status = H5Glink(fid1, H5L_LINK_SOFT, "g1", "l1");
- status = H5Glink(fid1, H5L_LINK_SOFT, "g2", "l2");
+ status = H5Glink(fid1, H5L_TYPE_SOFT, "g1", "l1");
+ status = H5Glink(fid1, H5L_TYPE_SOFT, "g2", "l2");
 
 /*-------------------------------------------------------------------------
  * H5G_UDLINK

@@ -150,7 +150,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id)
 {
-    const H5L_link_class_t   *link_class;       /* User-defined link class */
+    const H5L_class_t   *link_class;       /* User-defined link class */
     hid_t               cb_return = -1;         /* The ID the user-defined callback returned */
     H5G_loc_t           grp_loc_copy;
     H5G_name_t          grp_path_copy;
@@ -168,7 +168,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     /* Sanity check */
     HDassert(grp_loc);
     HDassert(lnk);
-    HDassert(lnk->type >= H5L_LINK_UD_MIN);
+    HDassert(lnk->type >= H5L_TYPE_UD_MIN);
     HDassert(obj_loc);
     HDassert(nlinks);
 
@@ -310,7 +310,7 @@ H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     /* Sanity check */
     HDassert(grp_loc);
     HDassert(lnk);
-    HDassert(lnk->type == H5L_LINK_SOFT);
+    HDassert(lnk->type == H5L_TYPE_SOFT);
     HDassert(nlinks);
 
     /* Set up temporary location */
@@ -545,16 +545,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
         /* If there's valid information in the link, reset it */
         if(link_valid) {
-#ifdef H5_GROUP_REVISION
             H5O_reset(H5O_LINK_ID, &lnk);
-#else /* H5_GROUP_REVISION */
-            /* Free information for link (but don't free link pointer) */
-            if(lnk.type == H5L_LINK_SOFT)
-                lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
-            else if(lnk.type >= H5L_LINK_UD_MIN && lnk.u.ud.size > 0)
-                lnk.u.ud.udata = H5MM_xfree(lnk.u.ud.udata);
-            lnk.name = H5MM_xfree(lnk.name);
-#endif /* H5_GROUP_REVISION */
             link_valid = FALSE;
         } /* end if */
 
@@ -565,8 +556,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         /* If the lookup was OK, try traversing soft links and mount points, if allowed */
         if(lookup_status >= 0) {
             /* Indicate that the link info is valid */
-            HDassert(lnk.type >= H5L_LINK_HARD);
-            if(lnk.type >H5L_LINK_BUILTIN_MAX && lnk.type < H5L_LINK_UD_MIN)
+            HDassert(lnk.type >= H5L_TYPE_HARD);
+            if(lnk.type >H5L_TYPE_BUILTIN_MAX && lnk.type < H5L_TYPE_UD_MIN)
                 HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "unknown link type")
             link_valid = TRUE;
 
@@ -577,7 +568,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             /* Set the object location, if it's a hard link set the address also */
             obj_loc.oloc->file = grp_loc.oloc->file;
             obj_loc.oloc->holding_file = FALSE;
-            if(lnk.type == H5L_LINK_HARD)
+            if(lnk.type == H5L_TYPE_HARD)
                 obj_loc.oloc->addr = lnk.u.hard.addr;
             obj_loc_valid = TRUE;
 
@@ -586,7 +577,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
              * is the last component of the name and the H5G_TARGET_SLINK bit of
              * TARGET is set then we don't follow it.
              */
-            if(H5L_LINK_SOFT == lnk.type &&
+            if(H5L_TYPE_SOFT == lnk.type &&
                     (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
                 if((*nlinks)-- <= 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
@@ -599,7 +590,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
              * is the last component of the name and the H5G_TARGET_UDLINK bit of
              * TARGET is set then we don't follow it.
              */
-            if( lnk.type >= H5L_LINK_UD_MIN && ((0 == (target & H5G_TARGET_UDLINK)) || !last_comp) ) {
+            if( lnk.type >= H5L_TYPE_UD_MIN && ((0 == (target & H5G_TARGET_UDLINK)) || !last_comp) ) {
                 if((*nlinks)-- <= 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
                 if(H5G_traverse_ud(&grp_loc/*in,out*/, &lnk/*in*/, &obj_loc, nlinks, lapl_id, dxpl_id) < 0)
@@ -660,26 +651,29 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         if(lookup_status < 0) {
             /* If an intermediate group doesn't exist & flag is set, create the group */
             if(target & H5G_CRT_INTMD_GROUP) {
-#ifdef H5_GROUP_REVISION
                 H5O_ginfo_t	ginfo;		/* Group info message for parent group */
 
                 /* Get the group info for parent group */
-                if(NULL == H5O_read(grp_loc.oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
-                    HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
-#endif /* H5_GROUP_REVISION */
+                /* (OK if not found) */
+                if(NULL == H5O_read(grp_loc.oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id)) {
+                    H5O_ginfo_t def_ginfo = H5G_CRT_GROUP_INFO_DEF;
+
+                    /* Clear error stack from not finding the group info message */
+                    H5E_clear_stack(NULL);
+
+                    /* Use default group info settings */
+                    HDmemcpy(&ginfo, &def_ginfo, sizeof(H5O_ginfo_t));
+                } /* end if */
 
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
-                if(H5G_obj_create(grp_oloc.file, dxpl_id,
-#ifdef H5_GROUP_REVISION
-                        &ginfo,
-#endif /* H5_GROUP_REVISION */
-                        obj_loc.oloc/*out*/) < 0)
+                if(H5G_obj_create(grp_oloc.file, dxpl_id, &ginfo, obj_loc.oloc/*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */
-                if(H5G_loc_insert(&grp_loc, H5G_comp_g, &obj_loc, TRUE, dxpl_id) < 0)
+                if(H5G_loc_insert(&grp_loc, H5G_comp_g, &obj_loc, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group")
+
                 /* Close new group */
                 if(H5O_close(obj_loc.oloc) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
@@ -742,18 +736,8 @@ done:
         H5G_loc_free(&grp_loc);
     
     /* If there's valid information in the link, reset it */
-    if(link_valid) {
-#ifdef H5_GROUP_REVISION
+    if(link_valid)
         H5O_reset(H5O_LINK_ID, &lnk);
-#else /* H5_GROUP_REVISION */
-        /* Free information for link (but don't free link pointer) */
-        if(lnk.type == H5L_LINK_SOFT)
-            lnk.u.soft.name = H5MM_xfree(lnk.u.soft.name);
-        else if(lnk.type >= H5L_LINK_UD_MIN && lnk.u.ud.size > 0)
-            lnk.u.ud.udata = H5MM_xfree(lnk.u.ud.udata);
-        lnk.name = H5MM_xfree(lnk.name);
-#endif /* H5_GROUP_REVISION */
-    } /* end if */
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_real() */

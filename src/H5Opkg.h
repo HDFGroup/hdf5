@@ -74,7 +74,7 @@ struct H5O_msg_class_t {
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
     herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
-    herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hbool_t *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
+    herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 };
 

@@ -81,9 +81,7 @@ htri_t
 H5O_group_isa(struct H5O_t *oh)
 {
     htri_t	stab_exists;            /* Whether the 'stab' message is in the object header */
-#ifdef H5_GROUP_REVISION
     htri_t	linfo_exists;           /* Whether the 'linfo' message is in the object header */
-#endif /* H5_GROUP_REVISION */
     htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_group_isa)
@@ -93,16 +91,10 @@ H5O_group_isa(struct H5O_t *oh)
     /* Check for any of the messages that indicate a group */
     if((stab_exists = H5O_exists_oh(oh, H5O_STAB_ID, 0)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-#ifdef H5_GROUP_REVISION
     if((linfo_exists = H5O_exists_oh(oh, H5O_LINFO_ID, 0)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-#endif /* H5_GROUP_REVISION */
 
-#ifdef H5_GROUP_REVISION
     ret_value = (stab_exists > 0 || linfo_exists > 0);
-#else /* H5_GROUP_REVISION */
-    ret_value = stab_exists > 0;
-#endif /* H5_GROUP_REVISION */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

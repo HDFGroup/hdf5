@@ -24,7 +24,6 @@
 
 /* Static function prototypes */
 
-#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_local_heap_size_hint
@@ -292,7 +291,87 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_est_link_info() */
-
 
-#endif /* H5_GROUP_REVISION */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_creation_order_tracking
+ *
+ * Purpose:     Set the flag to track creation order of links in a group
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              September 12, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5O_ginfo_t ginfo;                  /* Group information structure */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pset_creation_order_tracking, FAIL)
+    H5TRACE2("e","ib",plist_id,track_corder);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get group info */
+    if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+
+    /* Update fields */
+    ginfo.track_corder = track_corder;
+
+    /* Set group info */
+    if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_creation_order_tracking() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_creation_order_tracking
+ *
+ * Purpose:     Returns the flag indicating that creation order is tracked
+ *              for links in a group.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              September 12, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /*out*/)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_creation_order_tracking, FAIL)
+    H5TRACE2("e","ix",plist_id,track_corder);
+
+    /* Get values */
+    if(track_corder) {
+        H5P_genplist_t *plist;      /* Property list pointer */
+        H5O_ginfo_t ginfo;          /* Group information structure */
+
+        /* Get the plist structure */
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Get group info */
+        if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+
+        if(track_corder)
+            *track_corder = ginfo.track_corder;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_creation_order_tracking() */
 

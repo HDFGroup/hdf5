@@ -100,11 +100,9 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name,
 			      const char *comment);
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 			   char *buf);
-#ifdef H5_GROUP_REVISION
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id,
     hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
-#endif /* H5_GROUP_REVISION */
 H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 
@@ -112,22 +110,22 @@ H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  * of the HDF5 API.
  * Use of these functions and variables is depreciated.
  */
-H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5L_link_t type,
+H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5L_type_t type,
                const char *cur_name, const char *new_name);
 H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,
                       const char *dst_name);
 H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name,
-                   H5L_link_t type, hid_t new_loc_id, const char *new_name);
+                   H5L_type_t type, hid_t new_loc_id, const char *new_name);
 H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name,
                        hid_t dst_loc_id, const char *dst_name);
 H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name,
                       size_t size, char *buf/*out*/);
 
-#define H5G_LINK_ERROR H5L_LINK_ERROR
-#define H5G_LINK_HARD H5L_LINK_HARD
-#define H5G_LINK_SOFT H5L_LINK_SOFT
-#define H5G_link_t H5L_link_t
+#define H5G_LINK_ERROR H5L_TYPE_ERROR
+#define H5G_LINK_HARD H5L_TYPE_HARD
+#define H5G_LINK_SOFT H5L_TYPE_SOFT
+#define H5G_link_t H5L_type_t
 #define H5G_SAME_LOC H5L_SAME_LOC
 
 
@@ -135,5 +133,4 @@ H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name,
 }
 #endif
 #endif
-
 

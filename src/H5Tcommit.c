@@ -154,7 +154,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit() */
 
-#ifdef H5_GROUP_REVISION
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tcommit_expand
@@ -209,7 +208,6 @@ H5Tcommit_expand(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit_expand() */
-#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------

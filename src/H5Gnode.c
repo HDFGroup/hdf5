@@ -382,18 +382,18 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
     if ((buf=H5FL_BLK_MALLOC(symbol_node,size))==NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for symbol table node");
     p=buf;
-    if (NULL==(sym = H5FL_CALLOC(H5G_node_t)) ||
-            NULL==(sym->entry=H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)))))
+    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)) ||
+            NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
+    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node");
     /* magic */
-    if (HDmemcmp(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature");
     p += 4;
 
     /* version */
-    if (H5G_NODE_VERS != *p++)
+    if(H5G_NODE_VERS != *p++)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node version");
     /* reserved */
     p++;
@@ -402,16 +402,16 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
     UINT16DECODE(p, sym->nsyms);
 
     /* entries */
-    if (H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+    if(H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries");
 
     /* Set return value */
     ret_value = sym;
 
 done:
-    if (buf)
+    if(buf)
         H5FL_BLK_FREE(symbol_node,buf);
-    if (!ret_value) {
+    if(!ret_value) {
         if (sym)
             if(H5G_node_dest(f, sym)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node");
@@ -543,7 +543,7 @@ H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
     p = buf;
 
     /* magic number */
-    HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
+    HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
     p += 4;
 
     /* version number */
@@ -717,16 +717,16 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     assert(f);
     assert(H5B_INS_FIRST == op);
 
-    if (NULL==(sym = H5FL_CALLOC(H5G_node_t)))
+    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     size = H5G_node_size(f);
-    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
 
-    sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)));
-    if (NULL==sym->entry)
+    sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)));
+    if(NULL==sym->entry)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    if (H5AC_set(f, dxpl_id, H5AC_SNODE, *addr_p, sym, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_SNODE, *addr_p, sym, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to cache symbol table leaf node");
     /*
      * The left and right symbols in an empty tree are both the
@@ -734,17 +734,17 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
      * allows the comparison functions to work correctly without knowing
      * that there are no symbols.
      */
-    if (lt_key)
+    if(lt_key)
         lt_key->offset = 0;
-    if (rt_key)
+    if(rt_key)
         rt_key->offset = 0;
 
 done:
-    if(ret_value<0) {
-        if(sym!=NULL) {
-            if(sym->entry!=NULL)
-                H5FL_SEQ_FREE(H5G_entry_t,sym->entry);
-            H5FL_FREE(H5G_node_t,sym);
+    if(ret_value < 0) {
+        if(sym != NULL) {
+            if(sym->entry != NULL)
+                H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+            H5FL_FREE(H5G_node_t, sym);
         } /* end if */
     } /* end if */
 
@@ -793,23 +793,23 @@ H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     assert(rt_key);
 
     /* Get base address of heap */
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
-    base = H5HL_offset_into(f, heap, 0);
+    base = H5HL_offset_into(f, heap, (size_t)0);
 
     /* Get pointers to string names */
-    s1=base+lt_key->offset;
-    s2=base+rt_key->offset;
+    s1 = base + lt_key->offset;
+    s2 = base + rt_key->offset;
 
     /* Set return value */
     ret_value = HDstrcmp(s1, s2);
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
+    if(heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -854,10 +854,10 @@ H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_cmp3);
 
     /* Get base address of heap */
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
 
-    base = H5HL_offset_into(f, heap, 0);
+    base = H5HL_offset_into(f, heap, (size_t)0);
 
     /* left side */
     s=base+lt_key->offset;
@@ -935,7 +935,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
-    base = H5HL_offset_into(f, heap, 0);
+    base = H5HL_offset_into(f, heap, (size_t)0);
 
     /*
      * Binary search.
@@ -1048,7 +1048,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
-    base = H5HL_offset_into(f, heap, 0);
+    base = H5HL_offset_into(f, heap, (size_t)0);
 
     /*
      * Where does the new symbol get inserted?	We use a binary search.
@@ -1228,7 +1228,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
-        base = H5HL_offset_into(f, heap, 0);
+        base = H5HL_offset_into(f, heap, (size_t)0);
 
         /* Find the name with a binary search */
         rt = sn->nsyms;
@@ -1251,84 +1251,51 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         switch(sn->entry[idx].type)
         {
-          case H5G_CACHED_SLINK:
-          {
-            /* Set the type of the link removed */
-            *(udata->obj_type) = H5G_LINK;
+            case H5G_CACHED_SLINK:
+                /* Set the type of the link removed */
+                *(udata->obj_type) = H5G_LINK;
 
-            /* Remove the symbolic link value */
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
+                /* Remove the symbolic link value */
+                if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
-            s = H5HL_offset_into(f, heap, sn->entry[idx].cache.slink.lval_offset);
-            if(s) {
-                len = HDstrlen(s) + 1;
-                found = 1;
-            } /* end if */
-            else
-                found = 0;
+                s = H5HL_offset_into(f, heap, sn->entry[idx].cache.slink.lval_offset);
+                if(s) {
+                    len = HDstrlen(s) + 1;
+                    found = 1;
+                } /* end if */
+                else
+                    found = 0;
 
-            if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
-            heap = NULL; s = NULL;
+                if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
+                heap = NULL; s = NULL;
 
-            if(found)
-                H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.slink.lval_offset, len);
+                if(found)
+                    H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.slink.lval_offset, len);
 
-            H5E_clear_stack(NULL); /* no big deal */
-          }
-          break;
+                H5E_clear_stack(NULL); /* no big deal */
+                break;
 
-          case H5G_CACHED_ULINK:
-          {
-            size_t ud_data_size = 0;       /* User link data size */
-            hbool_t ud_data_found;           /* Indicate that the link user data was found */
-
-            /* Set the type of the link removed */
-            *(udata->obj_type) = H5G_UDLINK;
-
-            /* Remove the link user data from the heap */
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
-
-            s = H5HL_offset_into(f, heap, sn->entry[idx].cache.ulink.udata_offset);
-            if(s)
+            default:
             {
-                ud_data_found = 1;
-                ud_data_size = sn->entry[idx].cache.ulink.udata_size;
+                H5O_loc_t tmp_oloc;             /* Temporary object location */
+
+                /* Build temporary object location */
+                tmp_oloc.file = f;
+                HDassert(H5F_addr_defined(sn->entry[idx].header));
+                tmp_oloc.addr = sn->entry[idx].header;
+
+                /* Get the type of the object */
+                if((*(udata->obj_type) = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to determine object type")
+
+                /* Decrement the reference count, if requested */
+                if(udata->adj_link)
+                    if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count")
+                break;
             }
-            else
-                ud_data_found = 0;
-            if(H5HL_unprotect(f, dxpl_id, heap, udata->common.heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name")
-            heap = NULL; s = NULL;
-
-            if(ud_data_found)
-                H5HL_remove(f, dxpl_id, udata->common.heap_addr, sn->entry[idx].cache.ulink.udata_offset, ud_data_size);
-
-            H5E_clear_stack(NULL); /* no big deal */
-          }
-          break;
-
-          default:
-          {
-            H5O_loc_t tmp_oloc;             /* Temporary object location */
-
-            /* Build temporary object location */
-            tmp_oloc.file = f;
-            HDassert(H5F_addr_defined(sn->entry[idx].header));
-            tmp_oloc.addr = sn->entry[idx].header;
-
-            /* Get the type of the object */
-            if((*(udata->obj_type) = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to determine object type")
-
-            /* Decrement the reference count, if requested */
-            if(udata->adj_link) {
-                if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count")
-            } /* end if */
-          }
         } /* end switch */
 
         /* Remove the name from the local heap */
@@ -1418,8 +1385,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         /* Reduce the link count for all entries in this node */
         for(idx = 0; idx < sn->nsyms; idx++) {
-            if(!(H5G_CACHED_SLINK == sn->entry[idx].type ||
-                    H5G_CACHED_ULINK == sn->entry[idx].type)) {
+            if(!(H5G_CACHED_SLINK == sn->entry[idx].type)) {
                 /* Decrement the reference count, if requested */
                 if(udata->adj_link) {
                     HDassert(H5F_addr_defined(sn->entry[idx].header));
@@ -1471,14 +1437,15 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
+H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+    const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_ud1_t	*udata = (H5G_bt_it_ud1_t *)_udata;
     H5G_node_t		*sn = NULL;
     const H5HL_t        *heap = NULL;
     unsigned		nsyms;                  /* # of symbols in node */
-    size_t		n, *name_off=NULL;
+    H5G_entry_t		*ents = NULL;           /* Copy of entries in this node */
+    size_t		n;
     const char		*name;
     char		buf[1024], *s;
     unsigned		u;                      /* Local index variable */
@@ -1497,18 +1464,17 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
      * Save information about the symbol table node since we can't lock it
      * because we're about to call an application function.
      */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
     nsyms = sn->nsyms;
-    if (NULL==(name_off = H5FL_SEQ_MALLOC(size_t, (size_t)nsyms)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
-    for(u = 0; u < nsyms; u++)
-        name_off[u] = sn->entry[u].name_off;
+    if(NULL == (ents = H5FL_SEQ_MALLOC(H5G_entry_t, (size_t)nsyms)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed")
+    HDmemcpy(ents, sn->entry, sizeof(H5G_entry_t) * nsyms);
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED) {
+    if(H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED) {
         sn = NULL;
-        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-    }
+        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
+    } /* end if */
 
     sn=NULL;    /* Make certain future references will be caught */
 
@@ -1516,49 +1482,72 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t a
      * Iterate over the symbol table node entries.
      */
     for(u = 0, ret_value = H5B_ITER_CONT; u < nsyms && !ret_value; u++) {
-        if (udata->skip>0) {
+        if(udata->skip > 0)
             --udata->skip;
-        } else {
-            if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name");
+        else {
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
 
-            name = H5HL_offset_into(f, heap, name_off[u]);
-            assert (name);
-            n = HDstrlen (name);
+            name = H5HL_offset_into(f, heap, ents[u].name_off);
+            HDassert(name);
+            n = HDstrlen(name);
 
-            if (n+1>sizeof(buf)) {
-                if (NULL==(s = H5MM_malloc (n+1)))
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
-            } else {
+            /* Allocate space or point to existing buffer */
+            if((n + 1) > sizeof(buf)) {
+                if(NULL == (s = H5MM_malloc(n + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed")
+            } /* end if */
+            else
                 s = buf;
-            }
-            HDstrcpy (s, name);
 
-            if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
-            heap=NULL; name=NULL;
+            /* Make a copy of the name */
+            HDstrcpy(s, name);
 
-            ret_value = (udata->op)(udata->group_id, s, udata->op_data);
-            if (s!=buf)
-                H5MM_xfree (s);
-        }
+            if(H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
+            heap = NULL; name = NULL;
+
+            /* Check for internal callback with link info */
+            if(udata->lib_internal) {
+                H5O_link_t lnk;         /* Link for entry */
+
+                /* Convert the entry to a link */
+                if(H5G_link_convert(f, dxpl_id, &lnk, udata->heap_addr, &ents[u], s) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5B_ITER_ERROR, "unable to convert symbol table entry to link")
+
+                /* Call the library's callback */
+                ret_value = (udata->op.lib_op)(&lnk, udata->op_data);
+
+                /* Release memory for link object */
+                if(H5O_reset(H5O_LINK_ID, &lnk) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5B_ITER_ERROR, "unable to release link message")
+            } /* end if */
+            else
+                /* Make the application's callback */
+                ret_value = (udata->op.app_op)(udata->group_id, s, udata->op_data);
+
+            /* Free the memory for the name, if we used a dynamically allocated buffer */
+            if(s != buf)
+                H5MM_xfree(s);
+        } /* end else */
 
         /* Increment the number of entries passed through */
         /* (whether we skipped them or not) */
-        (*udata->final_ent)++;
-    }
-    if (ret_value<0)
-        HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
+        if(udata->final_ent)
+            (*udata->final_ent)++;
+    } /* end for */
+    if(ret_value < 0)
+        HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
-    if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
+    if(heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
 
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
 
-    if(name_off)
-        H5FL_SEQ_FREE(size_t,name_off);
+    if(ents)
+        H5FL_SEQ_FREE(H5G_entry_t, ents);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1717,23 +1706,19 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         loc_idx = udata->idx - udata->num_objs;
 
         /* Check for a soft link */
-        switch(sn->entry[loc_idx].type)
-        {
-        case H5G_CACHED_SLINK:
-            udata->type = H5G_LINK;
-            break;
-        case H5G_CACHED_ULINK:
-            udata->type = H5G_UDLINK;
-            break;
+        switch(sn->entry[loc_idx].type) {
+            case H5G_CACHED_SLINK:
+                udata->type = H5G_LINK;
+                break;
 
-        default:
-            /* Build temporary object location */
-            tmp_oloc.file = f;
-            HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
-            tmp_oloc.addr = sn->entry[loc_idx].header;
+            default:
+                /* Build temporary object location */
+                tmp_oloc.file = f;
+                HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
+                tmp_oloc.addr = sn->entry[loc_idx].header;
 
-            udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
-            break;
+                udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
+                break;
         }
         ret_value = H5B_ITER_STOP;
     } else {
@@ -1746,78 +1731,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_node_type() */
-
-#ifdef H5_GROUP_REVISION
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_stab_convert
- *
- * Purpose:	This function gets called when the entries in a group are
- *              converted from a symbol table to link messages.
- *
- * Return:	0 if object isn't found in this node; 1 if found;
- *              Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Sep  5, 2005
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_node_stab_convert(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
-{
-    H5G_bt_it_ud4_t	*udata = (H5G_bt_it_ud4_t*)_udata;
-    H5G_node_t		*sn = NULL;             /* Pointer to symbol table node to operate on */
-    const H5HL_t        *heap = NULL;           /* Pointer to local heap for group */
-    const char		*name;                  /* Pointer to name of link */
-    const H5G_entry_t   *ent;                   /* Pointer to current entry */
-    unsigned            u;                      /* Local index variable */
-    int                 ret_value = H5B_ITER_CONT;
-
-    FUNC_ENTER_NOAPI(H5G_node_stab_convert, H5B_ITER_ERROR)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(udata);
-
-    /* Lock the symbol table node */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
-
-    /* Lock the local heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
-
-    /* Convert all the entries from this node into link messages */
-    for(u = 0, ent = sn->entry; u < sn->nsyms; u++, ent++) {
-        /* Get a pointer to the link's name in the local heap */
-        name = H5HL_offset_into(f, heap, ent->name_off);
-        HDassert(name);
-
-        /* Check for too many links for link table */
-        if(udata->nlinks >= udata->max_links)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "too many links for table")
-
-        /* Convert entry into link message object */
-        if(H5G_link_convert(&(udata->lnk_table[udata->nlinks]), ent, heap, name) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "can't convert entry to link message")
-
-        /* Increment number of links stored */
-        udata->nlinks++;
-    } /* end for */
-
-done:
-    if(heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
-
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_stab_convert() */
-#endif /* H5_GROUP_REVISION */
 
 
 /*-------------------------------------------------------------------------
@@ -1961,7 +1874,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_ud5_t       *udata = (H5G_bt_it_ud5_t *)_udata;
-    H5O_loc_t             *parent_src_oloc = udata->src_oloc;
+    const H5O_loc_t       *src_oloc = udata->src_oloc;
     H5O_copy_t            *cpy_info = udata->cpy_info;
     const H5HL_t          *heap = NULL;
     H5G_node_t	          *sn = NULL;
@@ -1993,87 +1906,73 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         /* expand soft link */
         if(H5G_CACHED_SLINK == src_ent->type && cpy_info->expand_soft_link) {
             H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
-            H5G_loc_t   grp_loc;        /* Group location for parent of soft link */
-            H5G_name_t  grp_path;       /* Path for parent of soft link */
+            H5G_loc_t   grp_loc;        /* Group location holding soft link */
+            H5G_name_t  grp_path;       /* Path for group holding soft link */
             char *link_name;            /* Pointer to value of soft link */
 
             /* Make a temporary copy, so that it will not change the info in the cache */
             HDmemcpy(&tmp_src_ent, src_ent, sizeof(H5G_entry_t));
-            src_ent = &tmp_src_ent;
 
             /* Set up group location for soft link to start in */
             H5G_name_reset(&grp_path);
             grp_loc.path = &grp_path;
-            grp_loc.oloc = parent_src_oloc;
+            grp_loc.oloc = (H5O_loc_t *)src_oloc;
 
             /* Get pointer to link value in local heap */
-            link_name = (char *)H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
+            link_name = (char *)H5HL_offset_into(f, heap, tmp_src_ent.cache.slink.lval_offset);
 
             /* Check if the object pointed by the soft link exists in the source file */
             /* (It would be more efficient to make a specialized traversal callback,
              *      but this is good enough for now... -QAK)
              */
-            if(H5G_get_objinfo(&grp_loc, link_name, TRUE, &statbuf, H5AC_ind_dxpl_id) >= 0) {
+            if(H5G_get_objinfo(&grp_loc, link_name, TRUE, &statbuf, dxpl_id) >= 0) {
 #if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-                src_ent->header = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
+                tmp_src_ent.header = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
 #else
-                src_ent->header = statbuf.objno[0];
+                tmp_src_ent.header = statbuf.objno[0];
 #endif
+                src_ent = &tmp_src_ent;
             } /* end if */
+            else
+                H5E_clear_stack(NULL); /* discard any errors from a dangling soft link */
         } /* if ((H5G_CACHED_SLINK == src_ent->type)... */
 
         /* Check if object in source group is a hard link */
         if(H5F_addr_defined(src_ent->header)) {
-            H5O_loc_t new_oloc;         /* Copied object object location */
-            H5O_loc_t src_oloc;         /* Temporary object location for source object */
+            H5O_loc_t new_dst_oloc;     /* Copied object location in destination */
+            H5O_loc_t tmp_src_oloc;     /* Temporary object location for source object */
 
             /* Set up copied object location to fill in */
-            H5O_loc_reset(&new_oloc);
-            new_oloc.file = udata->dst_file;
+            H5O_loc_reset(&new_dst_oloc);
+            new_dst_oloc.file = udata->dst_file;
 
             /* Build temporary object location for source */
-            src_oloc.file = f;
-            HDassert(H5F_addr_defined(src_ent->header));
-            src_oloc.addr = src_ent->header;
+            H5O_loc_reset(&tmp_src_oloc);
+            tmp_src_oloc.file = f;
+            tmp_src_oloc.addr = src_ent->header;
 
             /* Copy the shared object from source to destination */
-            if(H5O_copy_header_map(&src_oloc, &new_oloc, dxpl_id, cpy_info, TRUE) < 0)
+            if(H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, dxpl_id, cpy_info, TRUE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B_ITER_ERROR, "unable to copy object")
 
             /* Construct link information for eventual insertion */
-            lnk.type = H5L_LINK_HARD;
-            lnk.u.hard.addr = new_oloc.addr;
+            lnk.type = H5L_TYPE_HARD;
+            lnk.u.hard.addr = new_dst_oloc.addr;
         } /* ( H5F_addr_defined(src_ent->header)) */
         else if(H5G_CACHED_SLINK == src_ent->type) {
             /* it is a soft link */
 
             /* Construct link information for eventual insertion */
-            lnk.type = H5L_LINK_SOFT;
+            lnk.type = H5L_TYPE_SOFT;
             lnk.u.soft.name = H5HL_offset_into(f, heap, src_ent->cache.slink.lval_offset);
-        } /* else if */
-        else if(H5G_CACHED_ULINK == src_ent->type) {
-            /* user-defined link */
-
-            /* Construct link information for eventual insertion */
-            lnk.type = src_ent->cache.ulink.link_type;
-            lnk.u.ud.size = src_ent->cache.ulink.udata_size;
-            lnk.u.ud.udata = H5HL_offset_into(f, heap, src_ent->cache.ulink.udata_offset);
         } /* else if */
         else
             HDassert(0 && "Unknown entry type");
 
         /* Set up common link data */
-#ifdef H5_HAVE_GETTIMEOFDAY
-        {
-            struct timeval now_tv;
-
-            HDgettimeofday(&now_tv, NULL);
-            lnk.ctime = now_tv.tv_sec;
-        }
-#else /* H5_HAVE_GETTIMEOFDAY */
-        lnk.ctime = HDtime(NULL);
-#endif /* H5_HAVE_GETTIMEOFDAY */
         lnk.cset = H5F_CRT_DEFAULT_CSET;          /* XXX: Allow user to set this */
+        lnk.corder = 0;                     /* Creation order is not tracked for old-style links */
+        lnk.corder_valid = FALSE;            /* Creation order is not valid */
         /* lnk.name = name; */              /* This will be set in callback */
 
         /* Determine name of source object */

@@ -2797,8 +2797,6 @@ done:
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2810,19 +2808,19 @@ H5Tdecode(const void *buf)
     FUNC_ENTER_API (H5Tdecode, FAIL);
     H5TRACE1("i","x",buf);
 
-    if (buf==NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
+    if(buf == NULL)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
-    if((dt = H5T_decode(buf))==NULL)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+    if((dt = H5T_decode(buf)) == NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
-    if ((ret_value=H5I_register (H5I_DATATYPE, dt))<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    if((ret_value = H5I_register (H5I_DATATYPE, dt)) < 0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tdecode() */
 
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...
@@ -2895,8 +2893,6 @@ done:
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -2904,22 +2900,24 @@ H5T_decode(const unsigned char *buf)
 {
     H5T_t       *ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_decode, NULL);
+    FUNC_ENTER_NOAPI(H5T_decode, NULL)
 
     /* Decode the type of the information */
     if(*buf++ != H5O_DTYPE_ID)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype")
 
     /* Decode the version of the datatype information */
     if(*buf++ != H5T_ENCODE_VERSION)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
-    if((ret_value = H5O_decode(NULL, buf, H5O_DTYPE_ID))==NULL)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+    /* Decode the serialized datatype message */
+    /* (pass bogus file pointer and DXPL) */
+    if((ret_value = H5O_decode(NULL, H5P_DEFAULT, buf, H5O_DTYPE_ID)) == NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_decode() */
 
 
 /*-------------------------------------------------------------------------

@@ -84,21 +84,15 @@ typedef struct H5O_copy_t {
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
-#ifdef H5_GROUP_REVISION
 #define H5O_LINFO_ID    0x0002          /* Link Info Message. */
-#endif /* H5_GROUP_REVISION */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
-#ifdef H5_GROUP_REVISION
 #define H5O_LINK_ID     0x0006          /* Link Message. */
-#endif /* H5_GROUP_REVISION */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
-#ifdef H5_GROUP_REVISION
 #define H5O_GINFO_ID	0x000a          /* Group Info Message.  */
-#endif /* H5_GROUP_REVISION */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
@@ -108,15 +102,19 @@ typedef struct H5O_copy_t {
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
 
-#ifdef H5_GROUP_REVISION
 /*
  * Link Info Message.
+ * (Contains dynamic information about links in a group)
  * (Data structure in memory)
  */
 typedef struct H5O_linfo_t {
-    hsize_t             nlinks;         /* Number of links in the group      */
+    hsize_t     nlinks;                 /* Number of links in the group      */
+    int64_t     min_corder;             /* Min. creation order value for group */
+    int64_t     max_corder;             /* Max. creation order value for group */
+    haddr_t     link_fheap_addr;        /* Address of fractal heap for storing "dense" links */
+    haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of links */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
 } H5O_linfo_t;
-#endif /* H5_GROUP_REVISION */
 
 /*
  * Fill Value Message. (Old)
@@ -161,8 +159,9 @@ typedef struct H5O_link_ud_t {
 } H5O_link_ud_t;
 
 typedef struct H5O_link_t {
-    H5L_link_t  type;                   /* Type of link */
-    time_t      ctime;                  /* Time link was createed */
+    H5L_type_t  type;                   /* Type of link */
+    hbool_t     corder_valid;           /* Creation order for link is valid (not stored) */
+    int64_t     corder;                 /* Creation order for link (stored if it's valid) */
     H5T_cset_t  cset;                   /* Character set of link name	*/
     char	*name;			/* Link name */
     union {
@@ -244,14 +243,20 @@ typedef struct H5O_bogus_t {
 
 /*
  * Group info message.
+ * (Contains static information about a group)
  * (Data structure in memory)
  */
 typedef struct H5O_ginfo_t {
-    size_t      lheap_size_hint;        /* Local heap size hint              */
-    unsigned	max_compact;		/* Maximum # of compact links        */
-    unsigned	min_dense;		/* Minimum # of "dense" links        */
-    unsigned	est_num_entries;	/* Estimated # of entries in group   */
-    unsigned	est_name_len;		/* Estimated length of entry name    */
+    /* "Old" format group info (not stored) */
+    uint32_t    lheap_size_hint;        /* Local heap size hint              */
+
+    /* "New" format group info (stored) */
+    hbool_t     track_corder;           /* Are creation order values tracked on links? */
+    hbool_t     index_corder;           /* Are creation order values indexed on links? */
+    uint32_t	max_compact;		/* Maximum # of compact links        */
+    uint32_t	min_dense;		/* Minimum # of "dense" links        */
+    uint32_t	est_num_entries;	/* Estimated # of entries in group   */
+    uint32_t	est_name_len;		/* Estimated length of entry name    */
 } H5O_ginfo_t;
 
 /*
@@ -355,11 +360,13 @@ H5_DLL herr_t H5O_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence
     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_free(unsigned type_id, void *mesg);
-H5_DLL herr_t H5O_encode(H5F_t *f, unsigned char *buf, void *obj, unsigned type_id);
-H5_DLL void* H5O_decode(H5F_t *f, const unsigned char *buf, unsigned type_id);
+H5_DLL herr_t H5O_encode(H5F_t *f, unsigned char *buf, const void *obj, unsigned type_id);
+H5_DLL void* H5O_decode(H5F_t *f, hid_t dxpl_id, const unsigned char *buf,
+    unsigned type_id);
 H5_DLL void *H5O_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL size_t H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg);
-H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg);
+H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg,
+    size_t extra_raw);
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
@@ -376,12 +383,6 @@ H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id
     H5O_copy_t *cpy_info);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
-
-/*
- * These functions operate on links
- */
-H5_DLL void *H5O_link_copy(const void *_mesg, void *_dest, unsigned update_flags);
-
 
 /*
  * These functions operate on object locations

@@ -137,7 +137,11 @@ addr_insert(H5G_stat_t *sb)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
     idtab_g.obj[n] = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
+#else
+    idtab_g.obj[n] = (haddr_t)sb->objno[0];
+#endif
 } /* end addr_insert() */
 
 
@@ -161,9 +165,13 @@ addr_lookup(H5G_stat_t *sb)
     haddr_t obj_addr;           /* Object's address in the file */
     size_t  n;
 
-    if (sb->nlink<2) return FALSE; /*only one link possible*/
+    if(sb->nlink<2) return FALSE; /*only one link possible*/
 
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
     obj_addr = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
+#else
+    obj_addr = (haddr_t)sb->objno[0];
+#endif
     for(n = 0; n < idtab_g.nobjs; n++)
         if(idtab_g.obj[n] == obj_addr)
             return TRUE;
@@ -371,10 +379,10 @@ test_copy_attach_attribute_vl(hid_t loc_id)
     unsigned int i, j;
     int ret_value = -1;
 
-    if ( (sid = H5Screate_simple(1, &dim1, NULL)) < 0 )
+    if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 )
         goto done;
 
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
         goto done;
 
     for(i = 0; i < 4; i++) {
@@ -384,22 +392,22 @@ test_copy_attach_attribute_vl(hid_t loc_id)
             ((int *)buf[i].p)[j] = j+1;
     } /* end for */
 
-    if ( (aid = H5Acreate(loc_id, "vlen attribute", tid, sid, H5P_DEFAULT)) < 0)
+    if((aid = H5Acreate(loc_id, "vlen attribute", tid, sid, H5P_DEFAULT)) < 0)
         goto done;
 
-    if ( H5Awrite(aid, tid, buf) < 0)
+    if(H5Awrite(aid, tid, buf) < 0)
         goto done;
 
     ret_value = 0;
 
 done:
-    if (tid >0 && sid > 0)
+    if(tid >0 && sid > 0)
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
-    if (sid > 0)
+    if(sid > 0)
         H5Sclose(sid);
-    if (tid > 0)
+    if(tid > 0)
         H5Tclose(tid);
-    if (aid > 0)
+    if(aid > 0)
         H5Aclose(aid);
     return ret_value;
 } /* end of attach_attribute_vl */
@@ -438,13 +446,13 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         attr_data[0] = 100 * i;
         attr_data[1] = 200 * i;
 
-        if ( (aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0)
+        if((aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0)
             goto done;
 
-        if ( H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
+        if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
             goto done;
 
-        if (aid > 0)
+        if(aid > 0)
             H5Aclose(aid);
 
          aid = -1;
@@ -453,9 +461,9 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
     ret_value = 0;
 
 done:
-    if (sid > 0)
+    if(sid > 0)
         H5Sclose(sid);
-    if (aid > 0)
+    if(aid > 0)
         H5Aclose(aid);
 
     return ret_value;
@@ -482,7 +490,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
     int  attr_data[2], i;
     hsize_t dim1 = 2;
 
-    if ( (sid = H5Screate_simple(1, &dim1, NULL)) < 0 ) goto done;
+    if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 ) goto done;
 
     for (i=0; i<NUM_ATTRIBUTES; i++) {
         sprintf(attr_name, "%d attr", i);
@@ -492,24 +500,24 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         attr_data[1] = 200 * i;
 
         /* Add attribute to first object */
-        if ( (aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
-        if ( H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
-        if ( H5Aclose(aid) < 0) goto done;
+        if((aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
+        if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
+        if(H5Aclose(aid) < 0) goto done;
 
         /* Add attribute to second object */
-        if ( (aid = H5Acreate(loc_id2, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
-        if ( H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
-        if ( H5Aclose(aid) < 0) goto done;
+        if((aid = H5Acreate(loc_id2, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
+        if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
+        if(H5Aclose(aid) < 0) goto done;
     }
 
-    if ( H5Sclose(sid) < 0) goto done;
+    if(H5Sclose(sid) < 0) goto done;
 
     return 0;
 
 done:
-    if (sid > 0)
+    if(sid > 0)
         H5Sclose(sid);
-    if (aid > 0)
+    if(aid > 0)
         H5Aclose(aid);
 
     return -1;
@@ -543,41 +551,41 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf)
     /* Check the datatypes are equal */
 
     /* Open the datatype for the source attribute */
-    if ( (tid = H5Aget_type(aid)) < 0) TEST_ERROR
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
 
     /* Open the datatype for the destination attribute */
-    if ( (tid2 = H5Aget_type(aid2)) < 0) TEST_ERROR
+    if((tid2 = H5Aget_type(aid2)) < 0) TEST_ERROR
 
     /* Check that both datatypes are committed/not committed */
-    if ( (is_committed = H5Tcommitted(tid)) < 0) TEST_ERROR
-    if ( (is_committed2 = H5Tcommitted(tid2)) < 0) TEST_ERROR
-    if ( is_committed != is_committed2) TEST_ERROR
+    if((is_committed = H5Tcommitted(tid)) < 0) TEST_ERROR
+    if((is_committed2 = H5Tcommitted(tid2)) < 0) TEST_ERROR
+    if(is_committed != is_committed2) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* Determine the size of datatype (for later) */
-    if ( (elmt_size = H5Tget_size(tid)) == 0) TEST_ERROR
+    if((elmt_size = H5Tget_size(tid)) == 0) TEST_ERROR
 
     /* Check the dataspaces are equal */
 
     /* Open the dataspace for the source attribute */
-    if ( (sid = H5Aget_space(aid)) < 0) TEST_ERROR
+    if((sid = H5Aget_space(aid)) < 0) TEST_ERROR
 
     /* Open the dataspace for the destination attribute */
-    if ( (sid2 = H5Aget_space(aid2)) < 0) TEST_ERROR
+    if((sid2 = H5Aget_space(aid2)) < 0) TEST_ERROR
 
     /* Compare the dataspaces */
-    if ( H5Sextent_equal(sid, sid2) != TRUE) TEST_ERROR
+    if(H5Sextent_equal(sid, sid2) != TRUE) TEST_ERROR
 
     /* Determine the number of elements in dataspace (for later) */
-    if ( (nelmts = H5Sget_simple_extent_npoints(sid2)) < 0) TEST_ERROR
+    if((nelmts = H5Sget_simple_extent_npoints(sid2)) < 0) TEST_ERROR
 
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ( (rbuf = HDcalloc( elmt_size, (size_t)nelmts)) == NULL) TEST_ERROR
-    if ( (rbuf2 = HDcalloc( elmt_size, (size_t)nelmts)) == NULL) TEST_ERROR
+    if((rbuf = HDcalloc( elmt_size, (size_t)nelmts)) == NULL) TEST_ERROR
+    if((rbuf2 = HDcalloc( elmt_size, (size_t)nelmts)) == NULL) TEST_ERROR
 
     /* Read data from the source attribute */
     if(H5Aread(aid, tid, rbuf) < 0) TEST_ERROR
@@ -605,16 +613,16 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf)
     HDfree(rbuf2);
 
     /* close the source dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the destination dataspace */
-    if ( H5Sclose(sid2) < 0) TEST_ERROR
+    if(H5Sclose(sid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     return TRUE;
 
@@ -908,57 +916,57 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Check the datatypes are equal */
 
     /* Open the datatype for the source dataset */
-    if ( (tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
 
     /* Open the datatype for the destination dataset */
-    if ( (tid2 = H5Dget_type(did2)) < 0) TEST_ERROR
+    if((tid2 = H5Dget_type(did2)) < 0) TEST_ERROR
 
     /* Check that both datatypes are committed/not committed */
-    if ( (is_committed = H5Tcommitted(tid)) < 0) TEST_ERROR
-    if ( (is_committed2 = H5Tcommitted(tid2)) < 0) TEST_ERROR
-    if ( is_committed != is_committed2) TEST_ERROR
+    if((is_committed = H5Tcommitted(tid)) < 0) TEST_ERROR
+    if((is_committed2 = H5Tcommitted(tid2)) < 0) TEST_ERROR
+    if(is_committed != is_committed2) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* Determine the size of datatype (for later) */
-    if ( (elmt_size = H5Tget_size(tid)) == 0) TEST_ERROR
+    if((elmt_size = H5Tget_size(tid)) == 0) TEST_ERROR
 
 
     /* Check the dataspaces are equal */
 
     /* Open the dataspace for the source dataset */
-    if ( (sid = H5Dget_space(did)) < 0) TEST_ERROR
+    if((sid = H5Dget_space(did)) < 0) TEST_ERROR
 
     /* Open the dataspace for the destination dataset */
-    if ( (sid2 = H5Dget_space(did2)) < 0) TEST_ERROR
+    if((sid2 = H5Dget_space(did2)) < 0) TEST_ERROR
 
     /* Compare the dataspaces */
-    if ( H5Sextent_equal(sid, sid2) != TRUE) TEST_ERROR
+    if(H5Sextent_equal(sid, sid2) != TRUE) TEST_ERROR
 
     /* Determine the number of elements in dataspace (for later) */
-    if ( (nelmts = H5Sget_simple_extent_npoints(sid)) < 0) TEST_ERROR
+    if((nelmts = H5Sget_simple_extent_npoints(sid)) < 0) TEST_ERROR
 
 
     /* Check the dataset creation property lists are equal */
 
     /* Open the dataset creation property list for the source dataset */
-    if ( (dcpl = H5Dget_create_plist(did)) < 0) TEST_ERROR
+    if((dcpl = H5Dget_create_plist(did)) < 0) TEST_ERROR
 
     /* Open the dataset creation property list for the destination dataset */
-    if ( (dcpl2 = H5Dget_create_plist(did2)) < 0) TEST_ERROR
+    if((dcpl2 = H5Dget_create_plist(did2)) < 0) TEST_ERROR
 
     /* Compare the dataset creation property lists */
-    if ( H5Pequal(dcpl, dcpl2) != TRUE) TEST_ERROR
+    if(H5Pequal(dcpl, dcpl2) != TRUE) TEST_ERROR
 
     /* Get the number of filters on dataset */
-    if ( (nfilters = H5Pget_nfilters(dcpl)) < 0) TEST_ERROR
+    if((nfilters = H5Pget_nfilters(dcpl)) < 0) TEST_ERROR
 
     /* close the source dataset creation property list */
-    if ( H5Pclose(dcpl) < 0) TEST_ERROR
+    if(H5Pclose(dcpl) < 0) TEST_ERROR
 
     /* close the destination dataset creation property list */
-    if ( H5Pclose(dcpl2) < 0) TEST_ERROR
+    if(H5Pclose(dcpl2) < 0) TEST_ERROR
 
 
     /* Check the allocated storage is the same */
@@ -974,7 +982,7 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
      *  data in each dataset will (probably) be different and the storage
      *  size will thus vary)
      */
-    if (!(nfilters > 0 && H5Tdetect_class(tid, H5T_VLEN))) {
+    if(!(nfilters > 0 && H5Tdetect_class(tid, H5T_VLEN))) {
         hsize_t storage_size = H5Dget_storage_size(did);        /* Dataset's raw data storage size */
         hsize_t storage_size2 = H5Dget_storage_size(did2);      /* 2nd Dataset's raw data storage size */
 
@@ -1011,20 +1019,20 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     HDfree(rbuf2);
 
     /* close the source dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the destination dataspace */
-    if ( H5Sclose(sid2) < 0) TEST_ERROR
+    if(H5Sclose(sid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
 
     /* Check if the attributes are equal */
-    if ( compare_std_attributes(did, did2, pid) != TRUE) TEST_ERROR
+    if(compare_std_attributes(did, did2, pid) != TRUE) TEST_ERROR
 
 
     /* Datasets should be the same. :-) */
@@ -1099,8 +1107,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
         /* Loop over contents of groups */
         for(idx = 0; idx < num_objs; idx++) {
             /* Check name of objects */
-            if(H5Gget_objname_by_idx(gid, idx, objname, NAME_BUF_SIZE) < 0) TEST_ERROR
-            if(H5Gget_objname_by_idx(gid2, idx, objname2, NAME_BUF_SIZE) < 0) TEST_ERROR
+            if(H5Gget_objname_by_idx(gid, idx, objname, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR
+            if(H5Gget_objname_by_idx(gid2, idx, objname2, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR
             if(HDstrcmp(objname, objname2)) TEST_ERROR
 
             /* Check type of objects */
@@ -1136,8 +1144,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                         char linkname2[NAME_BUF_SIZE];           /* Link value */
 
                         /* Check link values */
-                        if(H5Lget_linkval(gid, objname, NAME_BUF_SIZE, linkname, H5P_DEFAULT) < 0) TEST_ERROR
-                        if(H5Lget_linkval(gid2, objname2, NAME_BUF_SIZE, linkname2, H5P_DEFAULT) < 0) TEST_ERROR
+                        if(H5Lget_linkval(gid, objname, (size_t)NAME_BUF_SIZE, linkname, H5P_DEFAULT) < 0) TEST_ERROR
+                        if(H5Lget_linkval(gid2, objname2, (size_t)NAME_BUF_SIZE, linkname2, H5P_DEFAULT) < 0) TEST_ERROR
                         if(HDstrcmp(linkname, linkname2)) TEST_ERROR
                     }
                     break;
@@ -1187,12 +1195,12 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                       char linkval2[NAME_BUF_SIZE];           /* Link value */
 
                       /* Check that both links are the same type and the same size */
-                      if(linfo.linkclass != linfo2.linkclass) TEST_ERROR
+                      if(linfo.type != linfo2.type) TEST_ERROR
                       if(linfo.u.link_size != linfo2.u.link_size) TEST_ERROR
 
                       /* Get link udata */
-                      if(H5Lget_linkval(gid, objname, NAME_BUF_SIZE, linkval, H5P_DEFAULT) < 0) TEST_ERROR
-                      if(H5Lget_linkval(gid2, objname2, NAME_BUF_SIZE, linkval2, H5P_DEFAULT) < 0) TEST_ERROR
+                      if(H5Lget_linkval(gid, objname, (size_t)NAME_BUF_SIZE, linkval, H5P_DEFAULT) < 0) TEST_ERROR
+                      if(H5Lget_linkval(gid2, objname2, (size_t)NAME_BUF_SIZE, linkval2, H5P_DEFAULT) < 0) TEST_ERROR
 
                       /* Compare link udata */
                       if(HDmemcmp(linkval, linkval2, objstat.linklen)) TEST_ERROR
@@ -1254,53 +1262,53 @@ test_copy_named_datatype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if ( (tid = H5Topen(fid_src, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
+    if((tid = H5Topen(fid_src, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
 
     /* open the copied datatype */
-    if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
+    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1347,53 +1355,53 @@ test_copy_named_datatype_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL)) < 0) TEST_ERROR
+    if((tid = H5Topen(fid_src, NAME_DATATYPE_VL)) < 0) TEST_ERROR
 
     /* open the copied datatype */
-    if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL)) < 0) TEST_ERROR
+    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL)) < 0) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1440,59 +1448,59 @@ test_copy_named_datatype_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create first vlen datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create second (nested) vlen datatype */
-    if ( (tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
+    if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL_VL, tid2)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL_VL, tid2)) < 0) TEST_ERROR
 
     /* close the first datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the second datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if ( (tid = H5Topen(fid_src, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
+    if((tid = H5Topen(fid_src, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
 
     /* open the copied datatype */
-    if ( (tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
+    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1550,66 +1558,66 @@ test_copy_dataset_simple(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
     dim2d[1] = DIM_SIZE_2;
 
     /* create 2D dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1660,63 +1668,63 @@ test_copy_dataset_simple_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
     dim2d[1] = DIM_SIZE_2;
 
     /* create 2D dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1780,73 +1788,73 @@ test_copy_dataset_compound(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0] = DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tcreate (H5T_COMPOUND, sizeof(comp_t))) < 0) TEST_ERROR
-    if (H5Tinsert(tid, "int_name", HOFFSET(comp_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if (H5Tinsert(tid, "double_name", HOFFSET(comp_t, d), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+    if((tid = H5Tcreate (H5T_COMPOUND, sizeof(comp_t))) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "int_name", HOFFSET(comp_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "double_name", HOFFSET(comp_t, d), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_COMPOUND, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_COMPOUND, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -1908,73 +1916,73 @@ test_copy_dataset_chunked(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2028,70 +2036,70 @@ test_copy_dataset_chunked_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2154,7 +2162,7 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2163,73 +2171,73 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     max_dim2d[1]=H5S_UNLIMITED;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, max_dim2d)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, max_dim2d)) < 0) TEST_ERROR
 
     /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* Set extended dataset dimensions */
     new_dim2d[0] = DIM_SIZE_1 * 2;
     new_dim2d[1] = DIM_SIZE_2 * 2;
 
     /* Extend dataset's dimensions */
-    if ( H5Dextend(did, new_dim2d) < 0) TEST_ERROR
+    if(H5Dextend(did, new_dim2d) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2295,74 +2303,74 @@ test_copy_dataset_compressed(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create and set comp & chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
-    if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -2424,73 +2432,73 @@ test_copy_dataset_compact(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create and set compact plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_COMPACT, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_COMPACT, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2554,43 +2562,43 @@ test_copy_dataset_external(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* set dataset creation plist */
     size = DIM_SIZE_1 * sizeof (int);
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_external(pid, FILE_EXT, (off_t)0, size) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_external(pid, FILE_EXT, (off_t)0, size) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_EXTERNAL, H5T_NATIVE_INT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_EXTERNAL, H5T_NATIVE_INT, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close external plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
 /* Don't change the address in the destination file for this test, it causes the
  * external file list's heap to be at a different location and generates a false
@@ -2599,32 +2607,32 @@ test_copy_dataset_external(hid_t fapl)
  */
 #if 0
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 #endif /* 0 */
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2683,69 +2691,69 @@ test_copy_dataset_named_dtype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2805,84 +2813,84 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create named datatype _inside_ hierarchy to copy */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if ( (H5Tcommit(gid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit(gid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2944,84 +2952,84 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create named datatype _outside_ hierarchy to copy */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3082,80 +3090,80 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if ( (did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* Add attributes to datasets in a way that creates lots of chunks */
-    if ( test_copy_attach_paired_attributes(did, did2, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_paired_attributes(did, did2, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the first dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the second dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3216,87 +3224,87 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create named datatype _outside_ hierarchy to copy */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if ( (did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if ( (did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* Add attributes to datasets in a way that creates lots of chunks */
-    if ( test_copy_attach_paired_attributes(did, did2, tid) < 0) TEST_ERROR
+    if(test_copy_attach_paired_attributes(did, did2, tid) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the first dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the second dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3361,72 +3369,72 @@ test_copy_dataset_contig_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3492,79 +3500,79 @@ test_copy_dataset_chunked_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3629,79 +3637,79 @@ test_copy_dataset_compact_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create and set compact plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3755,68 +3763,68 @@ test_copy_attribute_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
     dim2d[1] = DIM_SIZE_2;
 
     /* create 2D dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach VL attribute to the dataset */
-    if ( test_copy_attach_attribute_vl(did) < 0) TEST_ERROR
+    if(test_copy_attach_attribute_vl(did) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* Check if the attributes are equal */
 
-    if ( (aid = H5Aopen_idx(did, 0)) < 0) TEST_ERROR
-    if ( (aid2 = H5Aopen_idx(did2, 0)) < 0) TEST_ERROR
-    if ( compare_attribute(aid, aid2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
-    if ( H5Aclose(aid) < 0) TEST_ERROR
-    if ( H5Aclose(aid2) < 0) TEST_ERROR
+    if((aid = H5Aopen_idx(did, 0)) < 0) TEST_ERROR
+    if((aid2 = H5Aopen_idx(did2, 0)) < 0) TEST_ERROR
+    if(compare_attribute(aid, aid2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Aclose(aid2) < 0) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3890,80 +3898,80 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create and set comp & chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
-    if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, tid, sid, pid)) < 0) TEST_ERROR
 
     /* close chunk plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -4019,53 +4027,53 @@ test_copy_group_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_EMPTY, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_EMPTY, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4125,78 +4133,78 @@ test_copy_group(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if ( (did = H5Dcreate(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* create a sub-group */
-    if ( (gid_sub = H5Gcreate(fid_src, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
+    if((gid_sub = H5Gcreate(fid_src, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
     if( H5Gclose(gid_sub) < 0) TEST_ERROR
 
     /* create another  sub-group */
-    if ( (gid_sub = H5Gcreate(fid_src, NAME_GROUP_SUB_2, (size_t)0)) < 0) TEST_ERROR
+    if((gid_sub = H5Gcreate(fid_src, NAME_GROUP_SUB_2, (size_t)0)) < 0) TEST_ERROR
     if( H5Gclose(gid_sub) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4391,87 +4399,87 @@ test_copy_group_deep(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create nested sub-groups & datasets */
     for(i = 0; i < NUM_SUB_GROUPS; i++) {
         sprintf(objname, "Group #%d", i);
-        if ( (gid_sub = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid_sub = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
 
         for(j = 0; j < NUM_SUB_GROUPS; j++) {
             sprintf(objname, "Group #%d", j);
-            if ( (gid_sub2 = H5Gcreate(gid_sub, objname, (size_t)0)) < 0) TEST_ERROR
+            if((gid_sub2 = H5Gcreate(gid_sub, objname, (size_t)0)) < 0) TEST_ERROR
 
             for(k = 0; k < NUM_DATASETS; k++) {
                 sprintf(objname, "Dataset #%d", k);
 
                 /* add a dataset to the group */
-                if ( (did = H5Dcreate(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
-                if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
-                if ( H5Dclose(did) < 0) TEST_ERROR
+                if((did = H5Dcreate(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+                if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+                if(H5Dclose(did) < 0) TEST_ERROR
             } /* end for */
 
-            if( H5Gclose(gid_sub2) < 0) TEST_ERROR
+            if(H5Gclose(gid_sub2) < 0) TEST_ERROR
         } /* end for */
 
-        if( H5Gclose(gid_sub) < 0) TEST_ERROR
+        if(H5Gclose(gid_sub) < 0) TEST_ERROR
     } /* end for */
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4522,21 +4530,21 @@ test_copy_group_loop(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* create sub-groups */
-    if ( (gid_sub = H5Gcreate(gid, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
+    if((gid_sub = H5Gcreate(gid, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
 
-    if ( (gid_sub2 = H5Gcreate(gid, NAME_GROUP_SUB_SUB, (size_t)0)) < 0) TEST_ERROR
+    if((gid_sub2 = H5Gcreate(gid, NAME_GROUP_SUB_SUB, (size_t)0)) < 0) TEST_ERROR
 
     /* Create link to top group */
-    if ( H5Glink2(gid, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
+    if(H5Glink2(gid, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
 
     /* close sub sub group */
     if( H5Gclose(gid_sub2) < 0) TEST_ERROR
@@ -4545,44 +4553,44 @@ test_copy_group_loop(hid_t fapl)
     if( H5Gclose(gid_sub) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4639,31 +4647,31 @@ test_copy_group_wide_loop(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* create wide sub-group hierarchy, with multiple links to higher groups */
     for(u = 0; u < NUM_WIDE_LOOP_GROUPS; u++) {
         sprintf(objname, "%s-%u", NAME_GROUP_SUB, u);
-        if ( (gid_sub = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid_sub = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
 
         for(v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
             sprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
-            if ( (gid_sub2 = H5Gcreate(gid_sub, objname, (size_t)0)) < 0) TEST_ERROR
+            if((gid_sub2 = H5Gcreate(gid_sub, objname, (size_t)0)) < 0) TEST_ERROR
 
             /* Create link to top group */
-            if ( H5Glink2(gid, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
+            if(H5Glink2(gid, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
 
             /* Create link to sub-group */
-            if ( H5Glink2(gid_sub, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP2) < 0) TEST_ERROR
+            if(H5Glink2(gid_sub, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP2) < 0) TEST_ERROR
 
             /* Create link to self :-) */
-            if ( H5Glink2(gid_sub2, ".", H5L_LINK_HARD, gid_sub2, NAME_GROUP_LOOP3) < 0) TEST_ERROR
+            if(H5Glink2(gid_sub2, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP3) < 0) TEST_ERROR
 
             /* close sub sub group */
             if( H5Gclose(gid_sub2) < 0) TEST_ERROR
@@ -4674,44 +4682,44 @@ test_copy_group_wide_loop(hid_t fapl)
     } /* end for */
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4772,82 +4780,82 @@ test_copy_group_links(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a hard link to the dataset */
-    if (H5Glink(fid_src, H5L_LINK_HARD, NAME_LINK_DATASET, NAME_LINK_HARD) < 0) TEST_ERROR
+    if(H5Glink(fid_src, H5L_TYPE_HARD, NAME_LINK_DATASET, NAME_LINK_HARD) < 0) TEST_ERROR
 
     /* make a soft link to the dataset */
-    if (H5Glink(fid_src, H5L_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
 
     /* make a soft link to nowhere */
-    if (H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
+    if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
 
     /* make a dangling external link */
-    if (H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if ( (gid = H5Gopen(fid_src, NAME_GROUP_LINK)) < 0) TEST_ERROR
+    if((gid = H5Gopen(fid_src, NAME_GROUP_LINK)) < 0) TEST_ERROR
 
     /* open the destination group */
-    if ( (gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if ( compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
 
     /* close the destination group */
-    if ( H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* close the source group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -4907,73 +4915,73 @@ test_copy_soft_link(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a soft link to the dataset */
-    if (H5Glink(fid_src, H5L_LINK_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
 
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset through the soft link for copy */
-    if ( (did = H5Dopen(fid_src, NAME_LINK_SOFT)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_LINK_SOFT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5034,80 +5042,80 @@ test_copy_ext_link(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
-    if ( (gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
 
     /* attach attributes to the group */
-    if ( test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
     dim2d[1]=DIM_SIZE_2;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if ( (did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
     /* close the dataset */
-    if (H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
     /* close the group */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* create file to hold external links to the src file */
-    if ( (fid_ext = H5Fcreate(ext_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_ext = H5Fcreate(ext_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create group in the file that will hold the external link */
-    if ( (gid = H5Gcreate(fid_ext, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_ext, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
 
     /* Create an external link to the dataset in the source file */
-    if ( H5Lcreate_external(src_filename, NAME_LINK_DATASET, fid_ext, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external(src_filename, NAME_LINK_DATASET, fid_ext, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* close the group and file */
-    if ( H5Gclose(gid) < 0) TEST_ERROR
-    if (H5Fclose(fid_ext) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid_ext) < 0) TEST_ERROR
 
     /* open the "extern" file with read-only */
-    if ( (fid_ext = H5Fopen(ext_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_ext = H5Fopen(ext_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_ext, NAME_LINK_EXTERN, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_ext, NAME_LINK_EXTERN, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset through the external link */
-    if ( (did = H5Dopen(fid_ext, NAME_LINK_EXTERN)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_ext, NAME_LINK_EXTERN)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the EXT file */
-    if ( H5Fclose(fid_ext) < 0) TEST_ERROR
+    if(H5Fclose(fid_ext) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5167,45 +5175,45 @@ test_copy_exist(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
     dim2d[1] = DIM_SIZE_2;
 
     /* create 2D dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE,fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_SIMPLE,fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* try to copy the dataset from SRC to DST again (should fail) */
     H5E_BEGIN_TRY {
@@ -5214,10 +5222,10 @@ test_copy_exist(hid_t fapl)
     if( ret >= 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5276,42 +5284,42 @@ test_copy_path(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
     dim2d[1] = DIM_SIZE_2;
 
     /* create 2D dataspace */
-    if ( (sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     /* attach attributes to the dataset */
-    if ( test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST (should fail - intermediate groups not there) */
     H5E_BEGIN_TRY {
@@ -5320,38 +5328,38 @@ test_copy_path(hid_t fapl)
     if( ret >= 0) TEST_ERROR
 
     /* Create the intermediate groups in destination file */
-    if ( (gid = H5Gcreate(fid_dst, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_dst, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
-    if ( (gid = H5Gcreate(fid_dst, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_dst, NAME_GROUP_SUB, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
-    if ( (gid = H5Gcreate(fid_dst, NAME_GROUP_SUB_SUB, (size_t)0)) < 0) TEST_ERROR
-    if ( H5Gclose(gid) < 0) TEST_ERROR
+    if((gid = H5Gcreate(fid_dst, NAME_GROUP_SUB_SUB, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST, using full path */
-    if ( H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_SUB_SUB)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SUB_SUB)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5398,32 +5406,32 @@ test_copy_same_file_named_datatype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if ( (H5Tcommit(fid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
 
 
     /* copy the datatype from SRC to DST */
-    if ( H5Gcopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the copied datatype */
-    if ( (tid2 = H5Topen(fid, NAME_DATATYPE_SIMPLE2)) < 0) TEST_ERROR
+    if((tid2 = H5Topen(fid, NAME_DATATYPE_SIMPLE2)) < 0) TEST_ERROR
 
     /* Compare the datatypes */
-    if ( H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
 
     /* close the destination datatype */
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close the source datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the file */
-    if ( H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5508,88 +5516,88 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* make a copy of the datatype for later use */
-    if ( (tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
+    if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
 
     /* create and set compact plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid_copy) < 0) TEST_ERROR
+    if(H5Tclose(tid_copy) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5655,81 +5663,81 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* make a copy of the datatype for later use */
-    if ( (tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
+    if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid_copy) < 0) TEST_ERROR
+    if(H5Tclose(tid_copy) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5796,88 +5804,88 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* make a copy of the datatype for later use */
-    if ( (tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
+    if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid_copy) < 0) TEST_ERROR
+    if(H5Tclose(tid_copy) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -5945,89 +5953,89 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* make a copy of the datatype for later use */
-    if ( (tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
+    if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if ( (H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
-    if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+    if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid_copy) < 0) TEST_ERROR
+    if(H5Tclose(tid_copy) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -6108,82 +6116,82 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create nested VL datatype */
-    if ( (tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
+    if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
     /* create and set compact plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -6263,81 +6271,81 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create nested VL datatype */
-    if ( (tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
+    if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
     /* create and set compact plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -6417,82 +6425,82 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create nested VL datatype */
-    if ( (tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
+    if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -6573,83 +6581,83 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if ( (fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
     /* create dataspace */
-    if ( (sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if ( (tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create nested VL datatype */
-    if ( (tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
+    if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
-    if ( (pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if ( H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
-    if ( H5Pset_deflate(pid, 9) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+    if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if ( (did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
 
     /* write data into file */
-    if ( H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close compact plist */
-    if ( H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Pclose(pid) < 0) TEST_ERROR
 
     /* close the dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
     /* open the source file with read-only */
-    if ( (fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if ( H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gcopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if ( (did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if ( (did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
-    if ( compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
 
     /* close the destination dataset */
-    if ( H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* close the source dataset */
-    if ( H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
 
     /* close the SRC file */
-    if ( H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
 
     /* close the DST file */
-    if ( H5Fclose(fid_dst) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
     /* Reclaim vlen buffer */
-    if ( H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close datatype */
-    if ( H5Tclose(tid) < 0) TEST_ERROR
-    if ( H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* close dataspace */
-    if ( H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -6768,14 +6776,14 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
     if((flag & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
         /* Create group to copy */
         if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_LINK_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
+        if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR
+        if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
         if(H5Gclose(gid) < 0) TEST_ERROR
 
         /* Create group to compare with */
         if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK2, (size_t)0)) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_LINK_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_LINK_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR
+        if(H5Glink(fid_src, H5L_TYPE_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR
+        if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR
         if(H5Gclose(gid) < 0) TEST_ERROR
     } /* end if */
 
@@ -6804,29 +6812,27 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
         if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if ( (fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination
        files aren't the same */
-    if ( H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
     /* create property to pass copy options */
-    if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
 
     /* set options for object copy */
-    if ( H5Pset_copy_object(pid, flag) < 0) TEST_ERROR
+    if(H5Pset_copy_object(pid, flag) < 0) TEST_ERROR
 
     /* Verify object copy flags */
-    if ( H5Pget_copy_object(pid, &cpy_flags) < 0) TEST_ERROR
-    if ( cpy_flags != flag) TEST_ERROR
+    if(H5Pget_copy_object(pid, &cpy_flags) < 0) TEST_ERROR
+    if(cpy_flags != flag) TEST_ERROR
 
     /* copy the group from SRC to DST */
     if(crt_intermediate_grp) {
         /* Create link creation plist to pass in intermediate group creation */
         if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
-#ifdef H5_GROUP_REVISION
         if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) TEST_ERROR
-#endif /* H5_GROUP_REVISION */
 
         if(H5Gcopy(fid_src, NAME_GROUP_TOP, fid_dst, "/new_g0/new_g00", pid, lcpl_id) < 0) TEST_ERROR
 
@@ -6942,71 +6948,90 @@ main(void)
         envval = "nomatch";
 
     if(HDstrcmp(envval, "stdio") && HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        int nerrors = 0;
-        hid_t	fapl;
+        int     nerrors = 0;
+        hid_t	fapl, fapl2;
+        hbool_t new_format;
 
 	/* Setup */
 	h5_reset();
 	fapl = h5_fileaccess();
 
-	/* The tests... */
-	nerrors += test_copy_named_datatype(fapl);
-	nerrors += test_copy_named_datatype_vl(fapl);
-	nerrors += test_copy_named_datatype_vl_vl(fapl);
-	nerrors += test_copy_dataset_simple(fapl);
-	nerrors += test_copy_dataset_simple_empty(fapl);
-	nerrors += test_copy_dataset_compound(fapl);
-	nerrors += test_copy_dataset_chunked(fapl);
-	nerrors += test_copy_dataset_chunked_empty(fapl);
-	nerrors += test_copy_dataset_chunked_sparse(fapl);
-	nerrors += test_copy_dataset_compressed(fapl);
-	nerrors += test_copy_dataset_compact(fapl);
-	nerrors += test_copy_dataset_external(fapl);
-	nerrors += test_copy_dataset_named_dtype(fapl);
-	nerrors += test_copy_dataset_named_dtype_hier(fapl);
-	nerrors += test_copy_dataset_named_dtype_hier_outside(fapl);
-	nerrors += test_copy_dataset_multi_ohdr_chunks(fapl);
-	nerrors += test_copy_dataset_attr_named_dtype(fapl);
-	nerrors += test_copy_dataset_contig_vl(fapl);
-	nerrors += test_copy_dataset_chunked_vl(fapl);
-	nerrors += test_copy_dataset_compact_vl(fapl);
-	nerrors += test_copy_dataset_compressed_vl(fapl);
-	nerrors += test_copy_attribute_vl(fapl);
-	nerrors += test_copy_dataset_compact_named_vl(fapl);
-	nerrors += test_copy_dataset_contig_named_vl(fapl);
-	nerrors += test_copy_dataset_chunked_named_vl(fapl);
-	nerrors += test_copy_dataset_compressed_named_vl(fapl);
-	nerrors += test_copy_dataset_compact_vl_vl(fapl);
-	nerrors += test_copy_dataset_contig_vl_vl(fapl);
-	nerrors += test_copy_dataset_chunked_vl_vl(fapl);
-	nerrors += test_copy_dataset_compressed_vl_vl(fapl);
-	nerrors += test_copy_group_empty(fapl);
-	nerrors += test_copy_root_group(fapl);
-	nerrors += test_copy_group(fapl);
-	nerrors += test_copy_group_deep(fapl);
-	nerrors += test_copy_group_loop(fapl);
-	nerrors += test_copy_group_wide_loop(fapl);
-	nerrors += test_copy_group_links(fapl);
-	nerrors += test_copy_soft_link(fapl);
-#ifndef H5_CANNOT_OPEN_TWICE
-        nerrors += test_copy_ext_link(fapl);
-#endif /* H5_CANNOT_OPEN_TWICE */
-	nerrors += test_copy_exist(fapl);
-	nerrors += test_copy_path(fapl);
-	nerrors += test_copy_same_file_named_datatype(fapl);
-	nerrors += test_copy_option(fapl, H5G_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Gcopy(): without attributes");
-#ifdef H5_GROUP_REVISION
-	nerrors += test_copy_option(fapl, 0, TRUE, "H5Gcopy(): with missing groups");
-#endif
-	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Gcopy(): expand soft link");
-	nerrors += test_copy_option(fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Gcopy(): shallow group copy");
-	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Gcopy(): expand object reference");
+        /* Copy the file access property list */
+        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
+        /* Set the "use the latest version of the format" flag for creating objects in the file */
+        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+
+        /* Test with old & new format groups */
+        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
+
+            /* Set the FAPL for the type of format */
+            if(new_format) {
+                puts("\nTesting with new group format:");
+                my_fapl = fapl2;
+            } /* end if */
+            else {
+                puts("Testing with old group format:");
+                my_fapl = fapl;
+            } /* end else */
+
+            /* The tests... */
+            nerrors += test_copy_named_datatype(my_fapl);
+            nerrors += test_copy_named_datatype_vl(my_fapl);
+            nerrors += test_copy_named_datatype_vl_vl(my_fapl);
+            nerrors += test_copy_dataset_simple(my_fapl);
+            nerrors += test_copy_dataset_simple_empty(my_fapl);
+            nerrors += test_copy_dataset_compound(my_fapl);
+            nerrors += test_copy_dataset_chunked(my_fapl);
+            nerrors += test_copy_dataset_chunked_empty(my_fapl);
+            nerrors += test_copy_dataset_chunked_sparse(my_fapl);
+            nerrors += test_copy_dataset_compressed(my_fapl);
+            nerrors += test_copy_dataset_compact(my_fapl);
+            nerrors += test_copy_dataset_external(my_fapl);
+            nerrors += test_copy_dataset_named_dtype(my_fapl);
+            nerrors += test_copy_dataset_named_dtype_hier(my_fapl);
+            nerrors += test_copy_dataset_named_dtype_hier_outside(my_fapl);
+            nerrors += test_copy_dataset_multi_ohdr_chunks(my_fapl);
+            nerrors += test_copy_dataset_attr_named_dtype(my_fapl);
+            nerrors += test_copy_dataset_contig_vl(my_fapl);
+            nerrors += test_copy_dataset_chunked_vl(my_fapl);
+            nerrors += test_copy_dataset_compact_vl(my_fapl);
+            nerrors += test_copy_dataset_compressed_vl(my_fapl);
+            nerrors += test_copy_attribute_vl(my_fapl);
+            nerrors += test_copy_dataset_compact_named_vl(my_fapl);
+            nerrors += test_copy_dataset_contig_named_vl(my_fapl);
+            nerrors += test_copy_dataset_chunked_named_vl(my_fapl);
+            nerrors += test_copy_dataset_compressed_named_vl(my_fapl);
+            nerrors += test_copy_dataset_compact_vl_vl(my_fapl);
+            nerrors += test_copy_dataset_contig_vl_vl(my_fapl);
+            nerrors += test_copy_dataset_chunked_vl_vl(my_fapl);
+            nerrors += test_copy_dataset_compressed_vl_vl(my_fapl);
+            nerrors += test_copy_group_empty(my_fapl);
+            nerrors += test_copy_root_group(my_fapl);
+            nerrors += test_copy_group(my_fapl);
+            nerrors += test_copy_group_deep(my_fapl);
+            nerrors += test_copy_group_loop(my_fapl);
+            nerrors += test_copy_group_wide_loop(my_fapl);
+            nerrors += test_copy_group_links(my_fapl);
+            nerrors += test_copy_soft_link(my_fapl);
+#ifndef H5_CANNOT_OPEN_TWICE
+            nerrors += test_copy_ext_link(my_fapl);
+#endif /* H5_CANNOT_OPEN_TWICE */
+            nerrors += test_copy_exist(my_fapl);
+            nerrors += test_copy_path(my_fapl);
+            nerrors += test_copy_same_file_named_datatype(my_fapl);
+            nerrors += test_copy_option(my_fapl, H5G_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Gcopy(): without attributes");
+            nerrors += test_copy_option(my_fapl, 0, TRUE, "H5Gcopy(): with missing groups");
+            nerrors += test_copy_option(my_fapl, H5G_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Gcopy(): expand soft link");
+            nerrors += test_copy_option(my_fapl, H5G_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Gcopy(): shallow group copy");
+            nerrors += test_copy_option(my_fapl, H5G_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Gcopy(): expand object reference");
 
 /* TODO: not implemented
-	nerrors += test_copy_option(fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Gcopy: expand external link");
-	nerrors += test_copy_mount(fapl);
+            nerrors += test_copy_option(my_fapl, H5G_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Gcopy: expand external link");
+            nerrors += test_copy_mount(my_fapl);
  */
+        } /* end for */
 
 	/* Reset file address checking info */
 	addr_reset();
@@ -7026,5 +7051,8 @@ main(void)
         puts("All object copying tests skipped - Incompatible with current Virtual File Driver");
 
     return 0;
+
+error:
+    return 1;
 } /* main */
 

@@ -1770,10 +1770,10 @@ udlink_open(hid_t location, const char *name)
 
     if(H5Lget_linkinfo(location, name, &linfo, H5P_DEFAULT) < 0) return -1;
 
-    switch(linfo.linkclass)
+    switch(linfo.type)
     {
       /* For external links, try to display info for the object it points to */
-      case H5L_LINK_EXTERNAL:
+      case H5L_TYPE_EXTERNAL:
         if ((buf = HDmalloc(linfo.u.link_size))==NULL) goto error;
         if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) goto error;
 

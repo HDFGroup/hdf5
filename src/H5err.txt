@@ -188,6 +188,7 @@ MINOR, OHDR, H5E_BADMESG, Unrecognized message
 MINOR, OHDR, H5E_CANTDELETE, Can't delete message
 MINOR, OHDR, H5E_BADITER, Iteration failed
 MINOR, OHDR, H5E_CANTPACK, Can't pack messages
+MINOR, OHDR, H5E_CANTRESET, Can't reset object
 
 # Group related errors
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object

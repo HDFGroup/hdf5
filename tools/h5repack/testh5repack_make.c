@@ -259,7 +259,7 @@ int make_all_objects(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 
- H5Glink(loc_id, H5L_LINK_SOFT, "dset", "link");
+ H5Glink(loc_id, H5L_TYPE_SOFT, "dset", "link");
 
 /*-------------------------------------------------------------------------
  * H5G_UDLINK
@@ -357,11 +357,11 @@ int make_hlinks(hid_t loc_id)
 
  if (write_dset(loc_id,2,dims,"dset",H5T_NATIVE_INT,buf)<0)
   return -1;
- if (H5Glink(loc_id, H5L_LINK_HARD, "dset", "link1 to dset")<0)
+ if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link1 to dset")<0)
   return -1;
- if (H5Glink(loc_id, H5L_LINK_HARD, "dset", "link2 to dset")<0)
+ if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link2 to dset")<0)
   return -1;
- if (H5Glink(loc_id, H5L_LINK_HARD, "dset", "link3 to dset")<0)
+ if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link3 to dset")<0)
   return -1;
 
 
@@ -377,9 +377,9 @@ int make_hlinks(hid_t loc_id)
  if ((group3_id = H5Gcreate(group2_id,"g3",0))<0)
   return -1;
 
- if (H5Glink2(loc_id, "g1", H5L_LINK_HARD, group2_id, "link1 to g1")<0)
+ if (H5Glink2(loc_id, "g1", H5L_TYPE_HARD, group2_id, "link1 to g1")<0)
   return -1;
- if (H5Glink2(group1_id, "g2", H5L_LINK_HARD, group3_id, "link1 to g2")<0)
+ if (H5Glink2(group1_id, "g2", H5L_TYPE_HARD, group3_id, "link1 to g2")<0)
   return -1;
 
  H5Gclose(group1_id);

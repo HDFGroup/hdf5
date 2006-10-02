@@ -118,9 +118,9 @@ error:
     return -1;
 }
 
-const H5L_link_class_t elink_unix2win_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,      /* H5L_link_class_t version       */
-    H5L_LINK_EXTERNAL,          /* Link type id number            */
+const H5L_class_t elink_unix2win_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,      /* H5L_class_t version       */
+    H5L_TYPE_EXTERNAL,          /* Link type id number            */
     "unix2win external link",   /* Link class name for debugging  */
     NULL,                       /* Creation callback              */
     NULL,                       /* Move callback                  */

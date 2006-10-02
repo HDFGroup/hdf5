@@ -364,7 +364,7 @@ done:
  */
 herr_t
 H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
-    hbool_t inc_link, hid_t dxpl_id)
+    hid_t dxpl_id)
 {
     H5O_link_t  lnk;                    /* Link for object to insert */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -376,25 +376,17 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
     HDassert(name && *name);
     HDassert(obj_loc);
 
-    /* "Translate" object location into link object */
-    lnk.type = H5L_LINK_HARD;
-#ifdef H5_HAVE_GETTIMEOFDAY
-    {
-        struct timeval now_tv;
-
-        HDgettimeofday(&now_tv, NULL);
-        lnk.ctime = now_tv.tv_sec;
-    }
-#else /* H5_HAVE_GETTIMEOFDAY */
-    lnk.ctime = HDtime(NULL);
-#endif /* H5_HAVE_GETTIMEOFDAY */
+    /* Create link object for the object location */
+    lnk.type = H5L_TYPE_HARD;
     lnk.cset = H5F_CRT_DEFAULT_CSET;
+    lnk.corder = 0;     /* Will be reset if the group is tracking creation order */
+    lnk.corder_valid = FALSE;   /* Indicate that the creation order isn't valid (yet) */
     /* Casting away const OK -QAK */
     lnk.name = (char *)name;
     lnk.u.hard.addr = obj_loc->oloc->addr;
 
     /* Insert new group into current group's symbol table */
-    if(H5G_obj_insert(grp_loc->oloc, name, &lnk, inc_link, dxpl_id) < 0)
+    if(H5G_obj_insert(grp_loc->oloc, name, &lnk, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object")
 
     /* Set the name of the object location */
@@ -404,6 +396,7 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_insert() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc_exists

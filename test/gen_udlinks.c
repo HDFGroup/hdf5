@@ -69,6 +69,9 @@ main (void)
   /* Create an external link in the first file pointing to the group in the second file */
   if(H5Lcreate_external(filename2, "group", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) goto error;
 
+  if((H5Fclose(fid1)) < 0) goto error;
+  if((H5Fclose(fid2)) < 0) goto error;
+
   return 0;
 
 error:
