@@ -1602,7 +1602,21 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     /* Sanity check */
     HDassert(f);
 
-    if (1==f->shared->nrefs) {
+    if(1 == f->shared->nrefs) {
+#if H5AC_DUMP_STATS_ON_CLOSE
+        /* Dump debugging info */
+        H5AC_stats(f);
+#endif /* H5AC_DUMP_STATS_ON_CLOSE */
+
+        /* Flush at this point since the file will be closed */
+        /* (Only try to flush the file if it was opened with write access) */
+        if(f->shared->flags & H5F_ACC_RDWR) {
+            /* Flush and invalidate all caches */
+            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+        } /* end if */
+
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
@@ -1612,7 +1626,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
          * Do not close the root group since we didn't count it, but free
          * the memory associated with it.
          */
-        if (f->shared->root_grp) {
+        if(f->shared->root_grp) {
             /* Free the ID to name buffer */
             if(H5G_free_grp_name(f->shared->root_grp) < 0)
                 /* Push error, but keep going*/
@@ -1622,16 +1636,16 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             if(H5G_free(f->shared->root_grp) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-            f->shared->root_grp=NULL;
-        }
-        if (H5AC_dest(f, dxpl_id))
+            f->shared->root_grp = NULL;
+        } /* end if */
+        if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-        if (H5FO_dest(f) < 0)
+        if(H5FO_dest(f) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-        f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
-        if (H5G_node_close(f) < 0)
+        f->shared->cwfs = H5MM_xfree(f->shared->cwfs);
+        if(H5G_node_close(f) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
@@ -1644,14 +1658,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
         /* Close low-level file */
-        if (H5FD_close(f->shared->lf) < 0)
+        if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
 
         /* Destroy shared file struct */
         f->shared = H5FL_FREE(H5F_file_t,f->shared);
 
-    } else if (f->shared->nrefs>0) {
+    } else if(f->shared->nrefs > 0) {
         /*
          * There are other references to the shared part of the file.
          * Only decrement the reference count.
@@ -1665,7 +1679,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     f->mtab.nalloc = 0;
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
-    H5FL_FREE(H5F_t,f);
+    H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_dest() */
@@ -2325,31 +2339,30 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      * calling H5F_flush() with the read-only handle, still causes data
      * to be flushed.
      */
-    if (0 == (H5F_ACC_RDWR & f->shared->flags))
+    if(0 == (H5F_ACC_RDWR & f->shared->flags))
 	HGOTO_DONE(SUCCEED)
 
-    /* Flush other stuff depending on scope */
-    if (H5F_SCOPE_GLOBAL == scope) {
-	while (f->mtab.parent)
+    /* Flush other files, depending on scope */
+    if(H5F_SCOPE_GLOBAL == scope) {
+	while(f->mtab.parent)
             f = f->mtab.parent;
 
 	scope = H5F_SCOPE_DOWN;
-    }
-
-    if (H5F_SCOPE_DOWN == scope)
-        for (i = 0; i < f->mtab.nmounts; i++)
-            if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
+    } /* end while */
+    if(H5F_SCOPE_DOWN == scope)
+        for(i = 0; i < f->mtab.nmounts; i++)
+            if(H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
                 nerrors++;
 
     /* Flush any cached dataset storage raw data */
-    if (H5D_flush(f, dxpl_id, flags) < 0)
+    if(H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
-    /* flush (and invalidate) the entire meta data cache */
+    /* flush (and invalidate, if requested) the entire meta data cache */
     H5AC_flags = 0;
-    if ( (flags & H5F_FLUSH_INVALIDATE) != 0 )
+    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-    if (H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
+    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
     /*
@@ -2357,38 +2370,38 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      * the file closes), release the unused portion of the metadata and
      * "small data" blocks back to the free lists in the file.
      */
-    if (flags & H5F_FLUSH_INVALIDATE) {
-        if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+    if(flags & H5F_FLUSH_INVALIDATE) {
+        if(f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
             /* Return the unused portion of the metadata block to a free list */
-            if (f->shared->lf->eoma != 0)
-                if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
+            if(f->shared->lf->eoma != 0)
+                if(H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
                         f->shared->lf->eoma, f->shared->lf->cur_meta_block_size) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block")
 
             /* Reset metadata block information, just in case */
-            f->shared->lf->eoma=0;
-            f->shared->lf->cur_meta_block_size=0;
+            f->shared->lf->eoma = 0;
+            f->shared->lf->cur_meta_block_size = 0;
         } /* end if */
 
-        if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+        if(f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
             /* Return the unused portion of the "small data" block to a free list */
-            if (f->shared->lf->eosda != 0)
-                if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
+            if(f->shared->lf->eosda != 0)
+                if(H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
                         f->shared->lf->eosda, f->shared->lf->cur_sdata_block_size) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block")
 
             /* Reset "small data" block information, just in case */
-            f->shared->lf->eosda=0;
-            f->shared->lf->cur_sdata_block_size=0;
+            f->shared->lf->eosda = 0;
+            f->shared->lf->cur_sdata_block_size = 0;
         } /* end if */
     } /* end if */
 
     /* Write the superblock to disk */
-    if (H5F_write_superblock(f, dxpl_id, NULL) != SUCCEED)
+    if(H5F_write_superblock(f, dxpl_id, NULL) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 
     /* Flush file buffers to disk. */
-    if (H5FD_flush(f->shared->lf, dxpl_id,
+    if(H5FD_flush(f->shared->lf, dxpl_id,
                    (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
@@ -2609,20 +2622,6 @@ H5F_try_close(H5F_t *f)
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
 
-#if H5AC_DUMP_STATS_ON_CLOSE
-    /* Dump debugging info */
-    H5AC_stats(f);
-#endif /* H5AC_DUMP_STATS_ON_CLOSE */
-
-    /* Flush at this point since the file will be closed */
-    /* (Only try to flush the file if it was opened with write access) */
-    if(f->intent&H5F_ACC_RDWR) {
-        /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
-
     /*
      * Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
@@ -2706,38 +2705,38 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5F_t	*old_file=NULL;
-    H5F_t	*new_file=NULL;
+    H5F_t	*old_file = NULL;
+    H5F_t	*new_file = NULL;
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Freopen, FAIL)
     H5TRACE1("i","i",file_id);
 
-    if (NULL==(old_file=H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (old_file = H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL==(new_file=H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
+    if(NULL == (new_file = H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
     /* Keep old file's read/write intent in new file */
-    new_file->intent=old_file->intent;
+    new_file->intent = old_file->intent;
 
     /* Duplicate old file's name */
     new_file->name = H5MM_xstrdup(old_file->name);
 
-    if ((ret_value=H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if (ret_value<0 && new_file)
+    if(ret_value < 0 && new_file)
 	if(H5F_dest(new_file, H5AC_dxpl_id) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Freopen() */
 
 
 /*-------------------------------------------------------------------------

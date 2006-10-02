@@ -460,6 +460,9 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         /* Sanity check */
         HDassert(hdr->dirty);
 
+        /* Set the shared heap header's file context for this operation */
+        hdr->f = f;
+
         /* Compute the size of the heap header on disk */
         size = hdr->heap_size;
 
@@ -706,6 +709,9 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     /* Get the pointer to the shared heap header */
     hdr = par_info->hdr;
 
+    /* Set the shared heap header's file context for this operation */
+    hdr->f = f;
+
     /* Share common heap information */
     iblock->hdr = hdr;
     if(H5HF_hdr_incr(hdr) < 0)
@@ -903,6 +909,9 @@ HDfprintf(stderr, "%s: Flushing indirect block, addr = %a, destroy = %u\n", FUNC
         /* Get the pointer to the shared heap header */
         hdr = iblock->hdr;
 
+        /* Set the shared heap header's file context for this operation */
+        hdr->f = f;
+
         /* Allocate buffer to encode block */
 /* XXX: Use free list factories? */
 #ifdef QAK
@@ -1034,6 +1043,9 @@ H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 #endif /* QAK */
+
+    /* Set the shared heap header's file context for this operation */
+    iblock->hdr->f = f;
 
     /* Decrement reference count on shared info */
     HDassert(iblock->hdr);
@@ -1168,6 +1180,9 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     /* Get the pointer to the shared heap header */
     hdr = par_info->hdr;
 
+    /* Set the shared heap header's file context for this operation */
+    hdr->f = f;
+
     /* Share common heap information */
     dblock->hdr = hdr;
     if(H5HF_hdr_incr(hdr) < 0)
@@ -1290,6 +1305,9 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         /* Get the pointer to the shared heap header */
         hdr = dblock->hdr;
 
+        /* Set the shared heap header's file context for this operation */
+        hdr->f = f;
+
         HDassert(dblock->blk);
         p = dblock->blk;
 
@@ -1403,6 +1421,9 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
 #endif /* QAK */
+
+    /* Set the shared heap header's file context for this operation */
+    dblock->hdr->f = f;
 
     /* Decrement reference count on shared fractal heap info */
     HDassert(dblock->hdr);

@@ -2010,8 +2010,10 @@ static int
 test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
+    hid_t	file2 = -1;             /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5F_t	*f2 = NULL;             /* Internal file object pointer */
     H5HF_create_t test_cparam;          /* Creation parameters for heap */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     H5HF_t      *fh2 = NULL;            /* 2nd fractal heap wrapper */
@@ -2029,6 +2031,14 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     /* Get a pointer to the internal file object */
     if(NULL == (f = H5I_object(file)))
         STACK_ERROR
+
+    /* Re-open the file */
+    if((file2 = H5Freopen(file)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f2 = H5I_object(file2)))
+        FAIL_STACK_ERROR
 
     /*
      * Test fractal heap creation
@@ -2062,18 +2072,41 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     if(H5HF_cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
+    /* Close the second fractal heap wrapper */
+    if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    fh2 = NULL;
+
+    /* Open the fractal heap through the second file handle */
+    if(NULL == (fh2 = H5HF_open(f2, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Query the type of address mapping */
+    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    if(H5HF_get_cparam_test(fh2, &test_cparam) < 0)
+        FAIL_STACK_ERROR
+    if(H5HF_cmp_cparam_test(cparam, &test_cparam))
+        TEST_ERROR
+
     /* Close the first fractal heap wrapper */
     if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
+
+    /* Close the first file */
+    /* (close before second file, to detect error on internal heap header's
+     *  shared file information)
+     */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
 
     /* Close the second fractal heap wrapper */
     if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
         FAIL_STACK_ERROR
     fh2 = NULL;
 
-    /* Close the file */
-    if(H5Fclose(file) < 0)
+    /* Close the second file */
+    if(H5Fclose(file2) < 0)
         FAIL_STACK_ERROR
 
     /* All tests passed */
@@ -2085,7 +2118,10 @@ error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+        if(fh2)
+            H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
 	H5Fclose(file);
+	H5Fclose(file2);
     } H5E_END_TRY;
     return(1);
 } /* test_open_twice() */
