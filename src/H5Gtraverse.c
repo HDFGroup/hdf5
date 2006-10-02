@@ -196,15 +196,14 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
 
     /* Record number of soft links left to traverse in the property list.
      * If no property list exists yet, create one. */
-    if(lapl_id == H5P_DEFAULT)
-    {
-      HDassert(H5P_LINK_ACCESS_DEFAULT != -1);
-      if(NULL == (lapl_default = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
-          HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get default property list")
+    if(lapl_id == H5P_DEFAULT) {
+        HDassert(H5P_LINK_ACCESS_DEFAULT != -1);
+        if(NULL == (lapl_default = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get default property list")
 
-      if((lapl_id = H5P_copy_plist(lapl_default)) <0)
-          HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
-    }
+        if((lapl_id = H5P_copy_plist(lapl_default)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
+    } /* end if */
 
     if(NULL == (lapl = H5I_object(lapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
@@ -218,25 +217,29 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     /* Get the oloc from the ID the user callback returned */
     switch(H5I_get_type(cb_return))
     {
-      case H5I_GROUP:
-          if((new_oloc = H5G_oloc(H5I_object(cb_return))) == NULL)
-              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from group ID")
-              break;
-      case H5I_DATASET:
-          if((new_oloc = H5D_oloc(H5I_object(cb_return))) ==NULL)
-              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from dataset ID")
-              break;
-      case H5I_DATATYPE:
-          if((new_oloc = H5T_oloc(H5I_object(cb_return))) ==NULL)
-              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from datatype ID")
-              break;
-      case H5I_FILE:
-          if((temp_file = H5I_object(cb_return)) == NULL)
-              HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "couldn't get file from ID")
-          if((new_oloc = H5G_oloc(temp_file->shared->root_grp)) ==NULL)
-              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get root group location from file ID")
-              break;
-      default:
+        case H5I_GROUP:
+            if((new_oloc = H5G_oloc(H5I_object(cb_return))) == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from group ID")
+                break;
+
+        case H5I_DATASET:
+            if((new_oloc = H5D_oloc(H5I_object(cb_return))) ==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from dataset ID")
+                break;
+
+        case H5I_DATATYPE:
+            if((new_oloc = H5T_oloc(H5I_object(cb_return))) ==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from datatype ID")
+                break;
+
+        case H5I_FILE:
+            if((temp_file = H5I_object(cb_return)) == NULL)
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "couldn't get file from ID")
+            if((new_oloc = H5G_oloc(temp_file->shared->root_grp)) ==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get root group location from file ID")
+                break;
+
+        default:
             HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL, "not a valid location or object ID")
     }
 
@@ -247,7 +250,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     /* Hold the file open until we free this object header (otherwise the
      * object location will be invalidated when the file closes).
      */
-    if(H5O_loc_hold_file(obj_loc->oloc) <0)
+    if(H5O_loc_hold_file(obj_loc->oloc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
 
     /* We have a copy of the location and we're holding the file open.
@@ -258,20 +261,16 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
 done:
     /* Close location given to callback. */
     if(cur_grp > 0)
-    {
-      if(H5I_object_verify(cur_grp, H5I_GROUP))
         if(H5I_dec_ref(cur_grp) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for current location")
-    }
 
-    if(ret_value < 0 && cb_return >= 0)
-    {
-      if(H5I_dec_ref(cb_return) < 0)
+    if(ret_value < 0 && cb_return > 0)
+        if(H5I_dec_ref(cb_return) < 0)
               HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5G_traverse_ud() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_traverse_slink
@@ -590,7 +589,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
              * is the last component of the name and the H5G_TARGET_UDLINK bit of
              * TARGET is set then we don't follow it.
              */
-            if( lnk.type >= H5L_TYPE_UD_MIN && ((0 == (target & H5G_TARGET_UDLINK)) || !last_comp) ) {
+            if(lnk.type >= H5L_TYPE_UD_MIN &&
+                    (0 == (target & H5G_TARGET_UDLINK) || !last_comp) ) {
                 if((*nlinks)-- <= 0)
                     HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
                 if(H5G_traverse_ud(&grp_loc/*in,out*/, &lnk/*in*/, &obj_loc, nlinks, lapl_id, dxpl_id) < 0)
@@ -619,13 +619,12 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
              * file open so that closing the grp_loc doesn't close the file.
              */
             if(grp_loc.oloc->holding_file && grp_loc.oloc->file == obj_loc.oloc->file)
-               if(H5O_loc_hold_file(obj_loc.oloc) < 0)
-                  HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
+                if(H5O_loc_hold_file(obj_loc.oloc) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
         } /* end if */
 
         /* Check for last component in name provided */
-        if(last_comp)
-        {
+        if(last_comp) {
             H5O_link_t         *cb_lnk;    /* Pointer to link info for callback */
             H5G_loc_t          *cb_loc;    /* Pointer to object location for callback */
 
@@ -682,9 +681,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                  * newly-created group should, as well.
                  */
                 if(grp_loc.oloc->holding_file)
-                  if(H5O_loc_hold_file(obj_loc.oloc) < 0)
-                      HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
-
+                    if(H5O_loc_hold_file(obj_loc.oloc) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
             } /* end if */
             else
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
@@ -720,8 +718,6 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
      HDassert(!(own_loc & H5G_OWN_GRP_LOC));
      if(own_loc & H5G_OWN_OBJ_LOC)
          own_loc |= H5G_OWN_GRP_LOC;
-
-    HGOTO_DONE(SUCCEED)
 
 done:
     /* If there's been an error, the callback doesn't really get ownership of
@@ -780,16 +776,13 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Set nlinks value from property list, if it exists */
     if(lapl_id == H5P_DEFAULT)
-    {
         nlinks = H5L_NLINKS_DEF;
-    }
-    else
-    {
+    else {
         if(NULL == (lapl = H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
         if(H5P_get(lapl, H5L_NLINKS_NAME, &nlinks) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
-    }
+    } /* end else */
 
     /* Go perform "real" traversal */
     if(H5G_traverse_real(loc, name, target, &nlinks, op, op_data, lapl_id, dxpl_id) < 0)

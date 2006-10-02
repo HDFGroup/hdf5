@@ -283,12 +283,10 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0) {
-        if(loc_found) {
+    if(ret_value < 0)
+        if(loc_found)
             if(H5G_loc_free(&obj_loc) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-        }
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
