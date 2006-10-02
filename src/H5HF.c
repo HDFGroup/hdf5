@@ -126,7 +126,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
-    haddr_t hdr_addr;           /* Heap header address */
+    haddr_t fh_addr;            /* Heap header address */
     H5HF_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_create, NULL)
@@ -138,7 +138,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     HDassert(cparam);
 
     /* Create shared fractal heap header */
-    if(HADDR_UNDEF == (hdr_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
+    if(HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */
@@ -146,7 +146,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 
     /* Lock the heap header into memory */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load fractal heap header")
 
     /* Point fractal heap wrapper at header and bump it's ref count */
@@ -154,22 +154,19 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     if(H5HF_hdr_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
-    /* Unlock heap header, now pinned */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
-    hdr = NULL;
+    /* Increment # of files using this heap header */
+    if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
-    /* Add heap to list of open objects in file */
-    if(H5FO_insert(f, fh->hdr->heap_addr, fh, FALSE) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert heap into list of open objects")
-
-    /* Set open object count */
-    fh->fo_count = 1;
+    /* Set file pointer for this heap open context */
+    fh->f = f;
 
     /* Set the return value */
     ret_value = fh;
 
 done:
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
             (void)H5HF_close(fh, dxpl_id);
@@ -208,42 +205,31 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
-    /* Check if group was already open */
-    if((fh = H5FO_opened(f, fh_addr)) == NULL) {
-
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
-
-        /* Load the heap header into memory */
+    /* Load the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
-        if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load fractal heap header")
+    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load fractal heap header")
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fspace);
 #endif /* QAK */
 
-        /* Create fractal heap info */
-        if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
+    /* Create fractal heap info */
+    if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 
-        /* Point fractal heap wrapper at header */
-        fh->hdr = hdr;
-        if(H5HF_hdr_incr(fh->hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+    /* Point fractal heap wrapper at header */
+    fh->hdr = hdr;
+    if(H5HF_hdr_incr(fh->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
-        /* Add heap to list of open objects in file */
-        if(H5FO_insert(f, fh->hdr->heap_addr, fh, FALSE) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert heap into list of open objects")
+    /* Increment # of files using this heap header */
+    if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
-        /* Set open object count */
-        fh->fo_count = 1;
-    } /* end if */
-    else {
-        /* Increment shared reference count */
-        fh->fo_count++;
-    } /* end else */
+    /* Set file pointer for this heap open context */
+    fh->f = f;
 
     /* Set the return value */
     ret_value = fh;
@@ -357,6 +343,9 @@ HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
     if(size == 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "can't insert 0-sized objects")
 
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
     /* Get the fractal heap header */
     hdr = fh->hdr;
 
@@ -429,6 +418,9 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Skip over the flag byte */
@@ -494,6 +486,9 @@ H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *_id, void *obj/*out*/)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Read object from managed heap blocks */
@@ -557,6 +552,9 @@ H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *_id, H5HF_operator_t op,
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Operate on object from managed heap blocks */
@@ -619,6 +617,9 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
     if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
         HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
 
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
         /* Remove object from managed heap blocks */
@@ -670,14 +671,10 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
      */
     HDassert(fh);
 
-    /* Decrement shared object count */
-    --fh->fo_count;
-
-    /* Check if this is the last reference to the shared heap wrapper */
-    if(0 == fh->fo_count) {
-        /* Remove the heap from the list of opened objects in the file */
-        if(H5FO_delete(fh->hdr->f, H5AC_dxpl_id, fh->hdr->heap_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
+    /* Decrement file reference & check if this is the last open fractal heap using the shared heap header */
+    if(0 == H5HF_hdr_fuse_decr(fh->hdr)) {
+        /* Set the shared heap header's file context for this operation */
+        fh->hdr->f = fh->f;
 
         /* Close the free space information */
         /* (Can't put this in header "destroy" routine, because it has
@@ -713,14 +710,14 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
          */
         if(H5HF_huge_term(fh->hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info")
-
-        /* Decrement the reference count on the heap header */
-        if(H5HF_hdr_decr(fh->hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
-
-        /* Release the fractal heap wrapper */
-        H5FL_FREE(H5HF_t, fh);
     } /* end if */
+
+    /* Decrement the reference count on the heap header */
+    if(H5HF_hdr_decr(fh->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+
+    /* Release the fractal heap wrapper */
+    H5FL_FREE(H5HF_t, fh);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -754,19 +751,16 @@ H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
-    /* Check if group was already open */
-    if(H5FO_opened(f, fh_addr) != NULL)
-        HGOTO_ERROR(H5E_HEAP, H5E_OBJOPEN, FAIL, "heap still open")
-
-    /* Clear any errors from H5FO_opened() */
-    H5E_clear_stack(NULL);
-
-    /* Load the heap header into memory */
+    /* Lock the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
     if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+
+    /* Check for files using shared heap header */
+    if(hdr->file_rc)
+        HGOTO_ERROR(H5E_HEAP, H5E_OBJOPEN, FAIL, "heap still open")
 
     /* Check for free space manager for heap */
     /* (must occur before attempting to delete the heap, so indirect blocks

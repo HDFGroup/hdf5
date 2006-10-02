@@ -512,7 +512,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_incr
  *
- * Purpose:	Increment reference count on shared heap header
+ * Purpose:	Increment component reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -548,7 +548,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_decr
  *
- * Purpose:	Decrement reference count on shared heap header
+ * Purpose:	Decrement component reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -573,13 +573,72 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
     hdr->rc--;
 
     /* Mark header as evictable again when no child blocks depend on it */
-    if(hdr->rc == 0)
+    if(hdr->rc == 0) {
+        HDassert(hdr->file_rc == 0);
         if(H5AC_unpin_entry(hdr->f, hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_decr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_fuse_incr
+ *
+ * Purpose:	Increment file reference count on shared heap header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Oct  1 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_fuse_incr(H5HF_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_fuse_incr)
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Increment file reference count on shared header */
+    hdr->file_rc++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_hdr_fuse_incr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_fuse_decr
+ *
+ * Purpose:	Decrement file reference count on shared heap header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Oct  1 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5HF_hdr_fuse_decr(H5HF_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_fuse_decr)
+
+    /* Sanity check */
+    HDassert(hdr);
+    HDassert(hdr->file_rc);
+
+    /* Decrement file reference count on shared header */
+    hdr->file_rc--;
+
+    FUNC_LEAVE_NOAPI(hdr->file_rc)
+} /* end H5HF_hdr_fuse_decr() */
 
 
 /*-------------------------------------------------------------------------

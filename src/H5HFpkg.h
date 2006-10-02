@@ -342,12 +342,13 @@ typedef struct H5HF_hdr_t {
     hsize_t     tiny_nobjs;     /* Number of 'tiny' objects in heap */
 
     /* Cached/computed values (not stored in header) */
-    size_t      rc;             /* Reference count of objects using heap header */
+    size_t      rc;             /* Reference count of heap's components using heap header */
     hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     size_t      heap_size;      /* Size of heap header in the file */
     H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
+    size_t      file_rc;        /* Reference count of files using heap header */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
     struct H5HF_indirect_t *root_iblock;    /* Pointer to pinned root indirect block */
@@ -419,7 +420,7 @@ typedef struct H5HF_direct_t {
 /* Fractal heap */
 struct H5HF_t {
     H5HF_hdr_t  *hdr;           /* Pointer to internal fractal heap header info */
-    unsigned    fo_count;       /* Open object count for file                 */
+    H5F_t      *f;              /* Pointer to file for heap */
 };
 
 /* Fractal heap "parent info" (for loading a block) */
@@ -554,6 +555,8 @@ H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_incr(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_decr(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_fuse_incr(H5HF_hdr_t *hdr);
+H5_DLL size_t H5HF_hdr_fuse_decr(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_dirty(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt);
 H5_DLL herr_t H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free);
