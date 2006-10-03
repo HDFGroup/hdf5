@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d integer -o out1.bin -b MEMORY tbinary.h5'
+Expected output for 'h5dump -d integer -o out1.bin -b LE tbinary.h5'
 #############################
 HDF5 "tbinary.h5" {
 DATASET "integer" {
