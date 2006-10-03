@@ -4354,7 +4354,7 @@ test_latest(void)
         double d;
     };
     hid_t       file = (-1);            /* File ID */
-    hid_t       tid = (-1);             /* Datatype ID */
+    hid_t       tid1 = (-1), tid2 = (-1); /* Datatype ID */
     hid_t       fapl = (-1);            /* File access property list */
     H5G_stat_t	sb;                     /* Stat buffer for committed datatype */
     hsize_t     old_dtype_oh_size;      /* Size of object header with "old" format */
@@ -4364,25 +4364,29 @@ test_latest(void)
 
     TESTING("encoding datatypes with the 'use the latest format' flag");
 
+    /* Create a compound datatype */
+    if((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
+        FAIL_STACK_ERROR
+
     /* Create file using default FAPL */
     h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    /* Create a compound datatype */
-    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
+    /* Make a copy of the datatype, to commit */
+    if((tid2 = H5Tcopy(tid1)) < 0)
         FAIL_STACK_ERROR
 
     /* Commit compound datatype */
-    if(H5Tcommit(file, compnd_type, tid) < 0)
+    if(H5Tcommit(file, compnd_type, tid2) < 0)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
@@ -4391,7 +4395,35 @@ test_latest(void)
     old_dtype_oh_size = sb.ohdr.size;
 
     /* Close datatype */
-    if(H5Tclose(tid) < 0)
+    if(H5Tclose(tid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check that datatype has been encoded/decoded correctly */
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataytpe for query */
+    if((tid2 = H5Topen(file, compnd_type)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify that the datatype was encoded/decoded correctly */
+    if(H5Tequal(tid1, tid2) <= 0)
+        FAIL_STACK_ERROR
+
+    /* Get information about datatype on disk */
+    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check that the object header info is still the same */
+    if(old_dtype_oh_size != sb.ohdr.size)
+        TEST_ERROR
+
+    /* Close datatype */
+    if(H5Tclose(tid2) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -4410,20 +4442,12 @@ test_latest(void)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
-    /* Create a compound datatype */
-    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
-        FAIL_STACK_ERROR
-    if(H5Tinsert(tid, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
+    /* Make a copy of the datatype, to commit */
+    if((tid2 = H5Tcopy(tid1)) < 0)
         FAIL_STACK_ERROR
 
     /* Commit compound datatype */
-    if(H5Tcommit(file, compnd_type, tid) < 0)
+    if(H5Tcommit(file, compnd_type, tid2) < 0)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
@@ -4436,15 +4460,48 @@ test_latest(void)
         TEST_ERROR
 
     /* Close datatype */
-    if(H5Tclose(tid) < 0)
+    if(H5Tclose(tid2) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
+    /* Check that datatype has been encoded/decoded correctly */
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataytpe for query */
+    if((tid2 = H5Topen(file, compnd_type)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify that the datatype was encoded/decoded correctly */
+    if(H5Tequal(tid1, tid2) <= 0)
+        FAIL_STACK_ERROR
+
+    /* Get information about datatype on disk */
+    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check that the object header info is still the same */
+    if(new_dtype_oh_size != sb.ohdr.size)
+        TEST_ERROR
+
+    /* Close datatype */
+    if(H5Tclose(tid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
     /* Close FAPL */
     if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close datatype */
+    if(H5Tclose(tid1) < 0)
         FAIL_STACK_ERROR
 
     PASSED();
@@ -4453,7 +4510,8 @@ test_latest(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5Tclose(tid);
+        H5Tclose(tid2);
+        H5Tclose(tid1);
         H5Fclose(file);
         H5Pclose(fapl);
     } H5E_END_TRY;
