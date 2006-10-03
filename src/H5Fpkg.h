@@ -35,6 +35,7 @@
 
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
@@ -155,12 +156,22 @@ struct H5F_t {
     H5F_mtab_t		mtab;		/* File mount table		*/
 };
 
-/* Forward declarations for prototype arguments */
-struct H5D_dxpl_cache_t;
-struct H5D_dcpl_cache_t;
-union H5D_storage_t;
+/*****************************/
+/* Package Private Variables */
+/*****************************/
 
-/* Private functions, not part of the publicly documented API */
+/* Declare a free list to manage the H5F_t struct */
+H5FL_EXTERN(H5F_t);
+
+/* Declare a free list to manage the H5F_file_t struct */
+H5FL_EXTERN(H5F_file_t);
+
+
+/******************************/
+/* Package Private Prototypes */
+/******************************/
+
+
 #ifdef NOT_YET
 H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 #endif /* NOT_YET */

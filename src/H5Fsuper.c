@@ -33,7 +33,7 @@
 NAME
    H5F_init_super_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5T_init_super_interface()
+    herr_t H5F_init_super_interface()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -96,7 +96,6 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     H5P_genplist_t     *c_plist;            /* File creation property list  */
     herr_t              ret_value = SUCCEED;
 
-    /* Decoding */
     FUNC_ENTER_NOAPI(H5F_read_superblock, FAIL)
 
     /* Short cuts */
@@ -363,7 +362,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_read_superblock() */
 
 
 /*-------------------------------------------------------------------------
@@ -395,7 +394,6 @@ H5F_init_superblock(const H5F_t *f, hid_t dxpl_id)
     H5P_genplist_t *plist;                      /* Property list                    */
     hsize_t         ret_value;
 
-    /* Encoding */
     FUNC_ENTER_NOAPI(H5F_init_superblock, UFAIL)
 
     /* Get the shared file creation property list */
@@ -500,7 +498,6 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
     H5P_genplist_t *plist;                      /* Property list                    */
     herr_t          ret_value = SUCCEED;
 
-    /* Encoding */
     FUNC_ENTER_NOAPI(H5F_write_superblock, FAIL)
 
     /* Get the shared file creation property list */

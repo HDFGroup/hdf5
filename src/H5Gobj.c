@@ -236,8 +236,8 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     HDassert(oloc);
 
     /* Check for using the latest version of the group format */
-/* XXX: add more checks for creating "new format" groups when needed */
-    if(f->shared->latest_format || ginfo->track_corder)
+    /* (add more checks for creating "new format" groups when needed) */
+    if(H5F_USE_LATEST_FORMAT(f) || ginfo->track_corder)
         use_latest_format = TRUE;
     else
         use_latest_format = FALSE;
@@ -277,7 +277,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
         hdr_size = 4 + 2 * H5F_SIZEOF_ADDR(f);
 
     /*
-     * Create symbol table object header.  It has a zero link count
+     * Create group's object header.  It has a zero link count
      * since nothing refers to it yet.	The link count will be
      * incremented if the object is added to the group directed graph.
      */

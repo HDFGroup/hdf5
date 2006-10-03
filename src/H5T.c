@@ -20,7 +20,6 @@
  */
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5T_init_interface
@@ -29,7 +28,7 @@
 #include "H5private.h"		/*generic functions			*/
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fpkg.h"             /* File                 		*/
+#include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Gprivate.h"		/*groups				  */
@@ -2764,23 +2763,24 @@ herr_t
 H5Tencode(hid_t obj_id, void *buf, size_t *nalloc)
 {
     H5T_t       *dtype;
-    herr_t      ret_value=SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API (H5Tencode, FAIL);
+    FUNC_ENTER_API (H5Tencode, FAIL)
     H5TRACE3("e","ix*z",obj_id,buf,nalloc);
 
     /* Check argument and retrieve object */
-    if (NULL==(dtype=H5I_object_verify(obj_id, H5I_DATATYPE)))
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (nalloc==NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size")
+    if(NULL == (dtype = H5I_object_verify(obj_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(nalloc == NULL)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size")
 
-    if(H5T_encode(dtype, buf, nalloc)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+    /* Go encode the datatype */
+    if(H5T_encode(dtype, buf, nalloc) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tencode() */
 
 
 /*-------------------------------------------------------------------------
@@ -2842,41 +2842,47 @@ done:
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
-    size_t      buf_size;
-    H5F_t       f;
+    size_t      buf_size;               /* Encoded size of datatype */
+    H5F_t       *f = NULL;              /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5T_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5T_encode, FAIL)
+
+    /* Allocate "fake" file structure */
+    if(NULL == (f = H5F_fake_alloc(0)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
-    if((buf_size=H5O_raw_size(H5O_DTYPE_ID, &f, obj))==0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size");
+    if((buf_size = H5O_raw_size(H5O_DTYPE_ID, f, obj)) == 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size")
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
-    if(!buf || *nalloc<(buf_size+1+1)) {
-        *nalloc = buf_size+1+1;
-	HGOTO_DONE(ret_value);
-    }
+    if(!buf || *nalloc < (buf_size + 1 + 1))
+        *nalloc = buf_size + 1 + 1;
+    else {
+        /* Encode the type of the information */
+        *buf++ = H5O_DTYPE_ID;
 
-    /* Encode the type of the information */
-    *buf++ = H5O_DTYPE_ID;
+        /* Encode the version of the dataspace information */
+        *buf++ = H5T_ENCODE_VERSION;
 
-    /* Encode the version of the dataspace information */
-    *buf++ = H5T_ENCODE_VERSION;
-
-    if(H5O_encode(&f, buf, obj, H5O_DTYPE_ID)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object");
+        /* Encode into user's buffer */
+        if(H5O_encode(f, buf, obj, H5O_DTYPE_ID) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object")
+    } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    /* Release fake file structure */
+    if(f && H5F_fake_free(f) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_encode() */
 
 
 /*-------------------------------------------------------------------------
@@ -2898,9 +2904,14 @@ done:
 static H5T_t *
 H5T_decode(const unsigned char *buf)
 {
+    H5F_t       *f = NULL;      /* Fake file structure*/
     H5T_t       *ret_value;
 
     FUNC_ENTER_NOAPI(H5T_decode, NULL)
+
+    /* Allocate "fake" file structure */
+    if(NULL == (f = H5F_fake_alloc(0)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode the type of the information */
     if(*buf++ != H5O_DTYPE_ID)
@@ -2911,11 +2922,14 @@ H5T_decode(const unsigned char *buf)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    /* (pass bogus file pointer and DXPL) */
-    if((ret_value = H5O_decode(NULL, H5P_DEFAULT, buf, H5O_DTYPE_ID)) == NULL)
+    if((ret_value = H5O_decode(f, H5AC_dxpl_id, buf, H5O_DTYPE_ID)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
 done:
+    /* Release fake file structure */
+    if(f && H5F_fake_free(f) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_decode() */
 

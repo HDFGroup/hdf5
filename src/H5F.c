@@ -26,7 +26,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -73,10 +72,10 @@ static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned fla
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
-H5FL_DEFINE_STATIC(H5F_t);
+H5FL_DEFINE(H5F_t);
 
 /* Declare a free list to manage the H5F_file_t struct */
-H5FL_DEFINE_STATIC(H5F_file_t);
+H5FL_DEFINE(H5F_file_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1450,7 +1449,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
     f->file_id = -1;
 
     if(shared) {
@@ -1459,7 +1458,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     } /* end if */
     else {
         HDassert(lf != NULL);
-	f->shared = H5FL_CALLOC(H5F_file_t);
+        if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
@@ -2856,11 +2856,6 @@ H5F_sizeof_addr(const H5F_t *f)
  * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *		September 29, 2000
  *
- * Modifications:
- *
- * 		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -2873,7 +2868,7 @@ H5F_sizeof_size(const H5F_t *f)
     assert(f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->sizeof_size)
-}
+} /* H5F_sizeof_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -2892,9 +2887,6 @@ H5F_sizeof_size(const H5F_t *f)
  *		slu@ncsa.uiuc.edu
  *		Oct 14 2001
  *
- * Modifications:
- *		Quincey Koziol, 2001-10-15
- *		Added this header and removed unused ret_value variable.
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -2907,7 +2899,7 @@ H5F_sym_leaf_k(const H5F_t *f)
     assert(f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->sym_leaf_k)
-}
+} /* end H5F_sym_leaf_k() */
 
 
 /*-------------------------------------------------------------------------
@@ -2926,9 +2918,6 @@ H5F_sym_leaf_k(const H5F_t *f)
  *		slu@ncsa.uiuc.edu
  *		Oct 14 2001
  *
- * Modifications:
- *		Quincey Koziol, 2001-10-15
- *		Added this header and removed unused ret_value variable.
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -3455,8 +3444,6 @@ H5F_gc_ref(const H5F_t *f)
  *		koziol@ncsa.uiuc.edu
  *		May 25 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -3470,6 +3457,35 @@ H5F_get_fcpl(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->fcpl_id)
 } /* end H5F_get_fcpl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_use_latest_format
+ *
+ * Purpose:	Retrieve the 'use the latest version of the format' flag for
+ *              the file.
+ *
+ * Return:	Success:	Non-negative, the 'use the latest format' flag
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct  2 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_use_latest_format(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_use_latest_format)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->latest_format)
+} /* end H5F_use_latest_format() */
 
 
 /*-------------------------------------------------------------------------

@@ -13,7 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5S_init_interface
@@ -22,7 +21,7 @@
 #define _H5S_IN_H5S_C
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -1701,14 +1700,11 @@ done:
  *              in a buffer.
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Raymond Lu
  *              slu@ncsa.uiuc.edu
  *              July 14, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1718,55 +1714,55 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     size_t      extent_size;    /* Size of serialized dataspace extent */
     hssize_t    sselect_size;   /* Signed size of serialized dataspace selection */
     size_t      select_size;    /* Size of serialized dataspace selection */
-    H5F_t       f;              /* Fake file structure*/
+    H5F_t       *f = NULL;      /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5S_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5S_encode, FAIL)
 
-    /* Fake file structure, used only for header message operation */
-    f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
-    HDassert(f.shared);
-    f.shared->sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;
+    /* Allocate "fake" file structure */
+    if(NULL == (f = H5F_fake_alloc(0)))
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed for extent */
-    if((extent_size = H5O_raw_size(H5O_SDSPACE_ID, &f, obj)) == 0)
+    if((extent_size = H5O_raw_size(H5O_SDSPACE_ID, f, obj)) == 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
+    /* Find out the size of buffer needed for selection */
     if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
     H5_ASSIGN_OVERFLOW(select_size, sselect_size, hssize_t, size_t);
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
-    if(!buf || *nalloc<(extent_size + select_size + 1 + 1 + 1 + 4)) {
+    if(!buf || *nalloc < (extent_size + select_size + 1 + 1 + 1 + 4))
         *nalloc = extent_size + select_size + 1 + 1 + 1 + 4;
-	HGOTO_DONE(ret_value)
-    } /* end if */
+    else {
+        /* Encode the type of the information */
+        *buf++ = H5O_SDSPACE_ID;
 
-    /* Encode the type of the information */
-    *buf++ = H5O_SDSPACE_ID;
+        /* Encode the version of the dataspace information */
+        *buf++ = H5S_ENCODE_VERSION;
 
-    /* Encode the version of the dataspace information */
-    *buf++ = H5S_ENCODE_VERSION;
+        /* Encode the "size of size" information */
+        *buf++ = (unsigned char)H5F_SIZEOF_SIZE(f);
 
-    /* Encode the "size of size" information */
-    *buf++ = (unsigned char)f.shared->sizeof_size;
+        /* Encode size of extent information. Pointer is actually moved in this macro. */
+        UINT32ENCODE(buf, extent_size);
 
-    /* Encode size of extent information. Pointer is actually moved in this macro. */
-    UINT32ENCODE(buf, extent_size);
+        /* Encode the extent part of dataspace */
+        if(H5O_encode(f, buf, obj, H5O_SDSPACE_ID) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
+        buf += extent_size;
 
-    /* Encode the extent part of dataspace */
-    if(H5O_encode(&f, buf, obj, H5O_SDSPACE_ID) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
-    buf += extent_size;
-
-    /* Encode the selection part of dataspace.  */
-    if(H5S_SELECT_SERIALIZE(obj, buf) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
+        /* Encode the selection part of dataspace.  */
+        if(H5S_SELECT_SERIALIZE(obj, buf) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
+    } /* end else */
 
 done:
-    if(f.shared)
-        H5MM_free(f.shared);
+    /* Release fake file structure */
+    if(f && H5F_fake_free(f) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_encode() */
@@ -1833,14 +1829,12 @@ H5S_decode(const unsigned char *buf)
 {
     H5S_t       *ds;
     H5S_extent_t *extent;
-    size_t      extent_size;      /* size of the extent message*/
-    H5F_t       f;                /* fake file structure*/
+    size_t      extent_size;            /* size of the extent message*/
+    H5F_t       *f = NULL;              /* Fake file structure*/
+    size_t      sizeof_size;            /* 'Size of sizes' for file */
     H5S_t       *ret_value;
 
     FUNC_ENTER_NOAPI(H5S_decode, NULL)
-
-    /* Initialize this before anything goes bad... */
-    f.shared = NULL;
 
     /* Decode the type of the information */
     if(*buf++ != H5O_SDSPACE_ID)
@@ -1850,18 +1844,19 @@ H5S_decode(const unsigned char *buf)
     if(*buf++ != H5S_ENCODE_VERSION)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_VERSION, NULL, "unknown version of encoded dataspace");
 
-    /* Fake file structure, used only for header message operation */
-    f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
-
     /* Decode the "size of size" information */
-    f.shared->sizeof_size = *buf++;
+    sizeof_size = *buf++;
+
+    /* Allocate "fake" file structure */
+    if(NULL == (f = H5F_fake_alloc(sizeof_size)))
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode size of extent information */
     UINT32DECODE(buf, extent_size);
 
     /* Decode the extent part of dataspace */
     /* (pass mostly bogus file pointer and bogus DXPL) */
-    if((extent = H5O_decode(&f, H5P_DEFAULT, buf, H5O_SDSPACE_ID))==NULL)
+    if((extent = H5O_decode(f, H5P_DEFAULT, buf, H5O_SDSPACE_ID))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
     buf += extent_size;
 
@@ -1886,7 +1881,9 @@ H5S_decode(const unsigned char *buf)
     ret_value = ds;
 
 done:
-    H5MM_xfree(f.shared);
+    /* Release fake file structure */
+    if(f && H5F_fake_free(f) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release fake file struct")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_decode() */

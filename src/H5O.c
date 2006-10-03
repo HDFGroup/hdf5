@@ -3996,6 +3996,7 @@ H5O_encode(H5F_t *f, unsigned char *buf, const void *obj, unsigned type_id)
     FUNC_ENTER_NOAPI(H5O_encode,FAIL)
 
     /* check args */
+    HDassert(f);
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
@@ -4037,6 +4038,7 @@ H5O_decode(H5F_t *f, hid_t dxpl_id, const unsigned char *buf, unsigned type_id)
     FUNC_ENTER_NOAPI(H5O_decode, NULL)
 
     /* check args */
+    HDassert(f);
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);

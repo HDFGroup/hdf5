@@ -106,7 +106,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     H5G_loc_reset(&insertion_loc);
     if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
-    insert_loc_valid=TRUE;
+    insert_loc_valid = TRUE;
     file = insertion_loc.oloc->file;
 
     /* Record the type's state so that we can revert to it if linking fails */
@@ -116,25 +116,24 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     if(H5T_commit(file, type, H5AC_dxpl_id, H5P_DATATYPE_CREATE_DEFAULT, H5P_DEFAULT) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
+    /* Get the group location for the newly committed datatype */
     if(H5G_loc(type_id, &type_loc) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get committed datatype's location")
 
     /* Link the type into the group hierarchy */
-    if( H5L_link(&loc, name, &type_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-    {
+    if(H5L_link(&loc, name, &type_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0) {
         uncommit = TRUE;    /* Linking failed, and we need to undo H5T_commit. */
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to type")
-    }
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to type")
+    } /* end if */
 
 done:
-    if(insert_loc_valid) {
+    if(insert_loc_valid)
         if(H5G_loc_free(&insertion_loc) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free location")
-    }
+
     /* If the datatype was committed but couldn't be linked, we need to return it to the state it was in
      * before it was committed. */
-    if(TRUE == uncommit)
-    {
+    if(TRUE == uncommit) {
 	if(type->shared->state == H5T_STATE_OPEN && H5F_addr_defined(type->oloc.addr)) {
             /* Remove the datatype from the list of opened objects in the file */
             if(H5FO_top_decr(type->oloc.file, type->oloc.addr) < 0)
@@ -150,7 +149,9 @@ done:
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
 	    type->oloc.addr = HADDR_UNDEF;
             type->shared->state = old_state;
-	} /* end if */    }
+	} /* end if */
+    } /* end if */
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit() */
 
@@ -224,13 +225,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id,
-    hid_t tcpl_id, hid_t UNUSED tapl_id)
+H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED tapl_id)
 {
-/*    H5F_t	*file = NULL; */
     H5P_genplist_t  *tc_plist;          /* Property list created */
     H5G_loc_t   type_loc;               /* Dataset location */
-    herr_t      ret_value = SUCCEED;      /* Return value */
+    size_t      dtype_size;             /* Size of the datatype message */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
 
@@ -265,11 +265,15 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id,
     type_loc.path = &(type->path);
     H5G_loc_reset(&type_loc);
 
+    /* Calculate message size infomation, for creating object header */
+    dtype_size = H5O_mesg_size(H5O_DTYPE_ID, file, type, (size_t)0);
+    HDassert(dtype_size);
+
     /*
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if(H5O_create(file, dxpl_id, (size_t)64, &(type->oloc)) < 0)
+    if(H5O_create(file, dxpl_id, dtype_size, &(type->oloc)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if(H5O_modify(&(type->oloc), H5O_DTYPE_ID, 0, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, type, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")

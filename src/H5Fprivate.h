@@ -262,6 +262,7 @@ typedef struct H5F_t H5F_t;
 /* Sieve buffer size for datasets */
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
+#define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #else /* H5F_PACKAGE */
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
@@ -276,6 +277,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
+#define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #endif /* H5F_PACKAGE */
 
 
@@ -515,6 +517,7 @@ H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
+H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
@@ -535,6 +538,10 @@ H5_DLL herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id,
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
+
+/* Routines for creating & destroying "fake" file structures */
+H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
+H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth);

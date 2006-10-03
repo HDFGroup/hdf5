@@ -4329,6 +4329,138 @@ test_encode(void)
     return 1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_latest
+ *
+ * Purpose:     Test encoding datatypes with the "use the latest version of
+ *              the file format" flag turned on.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              October 2, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_latest(void)
+{
+    struct s1 {
+        int    a;
+        float  b;
+        long   c;
+        double d;
+    };
+    hid_t       file = (-1);            /* File ID */
+    hid_t       tid = (-1);             /* Datatype ID */
+    hid_t       fapl = (-1);            /* File access property list */
+    H5G_stat_t	sb;                     /* Stat buffer for committed datatype */
+    hsize_t     old_dtype_oh_size;      /* Size of object header with "old" format */
+    hsize_t     new_dtype_oh_size;      /* Size of object header with "new" format */
+    char        filename[1024];         /* Buffer for filename */
+    const char  compnd_type[] = "Compound_type";        /* Name of committed datatype */
+
+    TESTING("encoding datatypes with the 'use the latest format' flag");
+
+    /* Create file using default FAPL */
+    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a compound datatype */
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
+        FAIL_STACK_ERROR
+
+    /* Commit compound datatype */
+    if(H5Tcommit(file, compnd_type, tid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get information about datatype on disk */
+    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+        FAIL_STACK_ERROR
+    old_dtype_oh_size = sb.ohdr.size;
+
+    /* Close datatype */
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Set the 'use the latest format' flag in the FAPL */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_latest_format(fapl, TRUE) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create file using default FAPL */
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a compound datatype */
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(tid, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
+        FAIL_STACK_ERROR
+
+    /* Commit compound datatype */
+    if(H5Tcommit(file, compnd_type, tid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get information about datatype on disk */
+    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+        FAIL_STACK_ERROR
+    new_dtype_oh_size = sb.ohdr.size;
+    
+    /* Check that the new format is smaller than the old format */
+    if(old_dtype_oh_size <= new_dtype_oh_size)
+        TEST_ERROR
+
+    /* Close datatype */
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close FAPL */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Tclose(tid);
+        H5Fclose(file);
+        H5Pclose(fapl);
+    } H5E_END_TRY;
+
+    return 1;
+} /* end test_latest() */
+
 typedef struct {
     unsigned num_range_hi;      /* Number of H5T_CONV_EXCEPT_RANGE_HI exceptions seen */
     unsigned num_range_low;     /* Number of H5T_CONV_EXCEPT_RANGE_LOW exceptions seen */
@@ -4529,7 +4661,7 @@ main(void)
     reset_hdf5();
     fapl = h5_fileaccess();
 
-    if (ALIGNMENT)
+    if(ALIGNMENT)
 	printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
 
     /* Do the tests */
@@ -4538,9 +4670,10 @@ main(void)
     nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
-    nerrors += test_transient (fapl);
-    nerrors += test_named (fapl);
+    nerrors += test_transient(fapl);
+    nerrors += test_named(fapl);
     nerrors += test_encode();
+    nerrors += test_latest();
     nerrors += test_int_float_except();
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
