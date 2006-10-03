@@ -44,7 +44,7 @@ CFG=hdf5 - Win32 AlphaDbg
 F90=df.exe
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
 # ADD F90 /compile_only /include:"..\..\..\proj\hdf5\Release/" /include:"Release/" /nologo /warn:nofileopt
-CPP=cl.exe
+CPP=xicl6.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 RSC=rc.exe
@@ -53,7 +53,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -72,7 +72,7 @@ LIB32=link.exe -lib
 F90=df.exe
 # ADD BASE F90 /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
 # ADD F90 /browser /compile_only /debug:full /include:"..\..\..\proj\hdf5\Debug/" /include:"Debug/" /nologo /warn:nofileopt
-CPP=cl.exe
+CPP=xicl6.exe
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 RSC=rc.exe
@@ -81,7 +81,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"..\..\..\proj\hdf5\Debug\hdf5d.lib"
 
@@ -97,16 +97,16 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-CPP=cl.exe
-# ADD BASE CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
-# ADD CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 F90=df.exe
 # ADD BASE F90 /browser /compile_only /debug:full /include:"hdf5___W/" /nologo /warn:nofileopt
 # ADD F90 /browser /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
+CPP=cl.exe
+# ADD BASE CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -122,16 +122,16 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-CPP=cl.exe
-# ADD BASE CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 F90=df.exe
 # ADD BASE F90 /compile_only /include:"hdf5___0/" /nologo /warn:nofileopt
 # ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
+CPP=cl.exe
+# ADD BASE CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -770,6 +770,21 @@ SOURCE=..\..\..\src\H5FDstream.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Ffake.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5FL.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -916,6 +931,36 @@ SOURCE=..\..\..\src\H5G.c
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 # PROP Intermediate_Dir "..\..\..\proj\hdf5\Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Gbtree2.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Gdense.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
 
