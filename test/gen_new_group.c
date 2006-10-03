@@ -27,6 +27,7 @@
  */
 
 #include "hdf5.h"
+#include "h5test.h"
 
 #define FILENAME "group_new.h5"
 
