@@ -47,10 +47,10 @@ int main(void)
     if(H5Pset_link_phase_change(fcpl, 0, 0) < 0) goto error;
 
     /* Copy the file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) goto error;
 
     /* Set the "use the latest version of the format" flag for creating objects in the file */
-    if(H5Pset_latest_format(fapl, TRUE) < 0) TEST_ERROR
+    if(H5Pset_latest_format(fapl, TRUE) < 0) goto error;
 
     /* Create file for test groups */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) <0) goto error;
