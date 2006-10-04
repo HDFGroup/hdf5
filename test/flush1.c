@@ -27,6 +27,7 @@
 const char *FILENAME[] = {
     "flush",
     "noflush",
+    "noflush_extend",
     NULL
 };
 
@@ -35,7 +36,7 @@ static double	the_data[100][100];
 /*-------------------------------------------------------------------------
  * Function:	create_file
  *
- * Purpose:	Creates file used in part 1 of the test
+ * Purpose:	Creates files used in part 1 of the test
  *
  * Return:	Success:	0
  *
@@ -93,6 +94,59 @@ error:
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	extend_file
+ *
+ * Purpose:	Add a small dataset to the file.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Leon Arber
+ *              Oct. 4, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t extend_file(hid_t file)
+{ 
+    hid_t	dcpl, space, dset;
+    hsize_t	ds_size[2] = {100, 100};
+    hsize_t	ch_size[2] = {5, 5};
+    hsize_t	i, j;
+
+    /* Create a chunked dataset */
+    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;
+    if ((space=H5Screate_simple(2, ds_size, NULL))<0) goto error;
+    if ((dset=H5Dcreate(file, "dset2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT))<0)
+	goto error;
+
+    /* Write some data */
+    for (i=0; i<ds_size[0]; i++) {
+	/*
+	 * The extra cast in the following statement is a bug workaround
+	 * for the Win32 version 5.0 compiler.
+	 * 1998-11-06 ptl
+	 */
+	for (j=0; j<ds_size[1]; j++) {
+	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
+	}
+    }
+    if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
+		the_data)<0) goto error;
+
+
+    return file;
+
+error:
+        HD_exit(1);
+
+}
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -108,6 +162,8 @@ error:
  * Modifications:
  * 		Leon Arber
  * 		Sept. 26, 2006, expand test to check for failure if H5Fflush is not called.
+ * 		Oct. 4 2006, expand test to check for partial failure in case file is flushed, but then
+ * 				new datasets are created after the flush.
  * 		
  *
  *-------------------------------------------------------------------------
@@ -133,6 +189,14 @@ main(void)
 	/* Flush and exit without closing the library */
 	if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) goto error;
 
+	/* Create the file */
+	h5_fixname(FILENAME[2], fapl, name, sizeof name);
+	file = create_file(name, fapl);
+	/* Flush and exit without closing the library */
+	if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) goto error;
+	/* Add a bit to the file and don't flush the new part */
+	extend_file(file);
+	
 	/* Create the other file which will not be flushed */
 	h5_fixname(FILENAME[1], fapl, name, sizeof name);
 	file = create_file(name, fapl);

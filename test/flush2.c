@@ -26,37 +26,36 @@
 const char *FILENAME[] = {
     "flush",
     "noflush",
+    "noflush_extend",
     NULL
 };
 
 static double	the_data[100][100];
 
-
 /*-------------------------------------------------------------------------
- * Function:	check_file
+ * Function:	check_dset
  *
- * Purpose:	Part 2 of a two-part H5Fflush() test.
+ * Purpose:	Part 2 of a two-part H5Fflush() test, checks if the data in a dataset
+ * 		is what it is supposed to be.
  *
  * Return:	Success:	0
  *
  *		Failure:	1
  *
  * Programmer:	Leon Arber
- *              Sept. 26, 2006.
+ *              Oct. 4, 2006.
  *
  *-------------------------------------------------------------------------
  */
-int check_file(char* name, hid_t fapl)
-{
-    hid_t	file, space, dset, groups, grp;
-    hsize_t	ds_size[2];
+int check_dset(hid_t file, const char* name)
+{ 
+    hid_t	space, dset;
+    hsize_t	ds_size[2] = {100, 100};
     double	error;
     hsize_t	i, j;
 
-    if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
-
     /* Open the dataset */
-    if ((dset=H5Dopen(file, "dset"))<0) goto error;
+    if ((dset=H5Dopen(file, name))<0) goto error;
     if ((space=H5Dget_space(dset))<0) goto error;
     if (H5Sget_simple_extent_dims(space, ds_size, NULL)<0) goto error;
     assert(100==ds_size[0] && 100==ds_size[1]);
@@ -82,6 +81,36 @@ int check_file(char* name, hid_t fapl)
 	    }
 	}
     }
+    if (H5Dclose(dset)<0) goto error;
+    return 0;
+
+error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_file
+ *
+ * Purpose:	Part 2 of a two-part H5Fflush() test.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Leon Arber
+ *              Sept. 26, 2006.
+ *
+ *-------------------------------------------------------------------------
+ */
+int check_file(char* filename, hid_t fapl, int flag)
+{
+    hid_t	file, groups, grp;
+    char	name[1024];
+    int		i;
+
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
+    if(check_dset(file, "dset")) goto error;
 
     /* Open some groups */
     if ((groups=H5Gopen(file, "some_groups"))<0) goto error;
@@ -91,8 +120,14 @@ int check_file(char* name, hid_t fapl)
 	if (H5Gclose(grp)<0) goto error;
     }
 
+    /* Check to see if that last added dataset in the third file is accessible 
+     * (it shouldn't be...but it might.  Flag an error in case it is for now */
+    if(flag)
+    {
+	if(check_dset(file, "dset2")) goto error;
+    }
+
     if (H5Gclose(groups)<0) goto error;
-    if (H5Dclose(dset)<0) goto error;
     if (H5Fclose(file)<0) goto error;
     return 0;
 error:
@@ -139,7 +174,7 @@ main(void)
     if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
 	/* Check the case where the file was flushed */
 	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	if(check_file(name, fapl))
+	if(check_file(name, fapl, FALSE))
 	{
 	    H5_FAILED()
 	    goto error;
@@ -155,7 +190,7 @@ main(void)
 	H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
 	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	if(check_file(name, fapl))
+	if(check_file(name, fapl, FALSE))
 	    PASSED()
 	else
 	{
@@ -164,7 +199,23 @@ main(void)
 	}
 	H5Eset_auto_stack(H5E_DEFAULT, func, NULL);
 
+	/* Check the case where the file was flushed, but more data was added afterward.  This should give an error
+	 * so we turn off the error stack temporarily */
+	TESTING("H5Fflush (part2 with flush and later addition)");
+	H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
+	H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
+	h5_fixname(FILENAME[2], fapl, name, sizeof name);
+	if(check_file(name, fapl, TRUE))
+	    PASSED()
+	else
+	{
+	    H5_FAILED()
+	    goto error;
+	}
+	H5Eset_auto_stack(H5E_DEFAULT, func, NULL);
+
+	
 	h5_cleanup(FILENAME, fapl);
     }
     else
