@@ -164,8 +164,9 @@ main(int argc, char* argv[])
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }
-    
-    MPI_Finalize();
+ 
+ /* AIX doesn't like it when you try to call MPI_Finalize without closing all files. */   
+/*    MPI_Finalize();*/
     HD_exit(0);
 
     error:
