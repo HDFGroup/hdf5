@@ -5175,7 +5175,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL) 
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) {
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         hid_t	fapl, fapl2;    /* File access property lists */
         int	nerrors = 0;
         hbool_t new_format;     /* Whether to use the new format or not */

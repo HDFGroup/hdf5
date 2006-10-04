@@ -98,6 +98,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     size_t        fname_len;
     hbool_t       fname_alloc = FALSE;
     unsigned      intent;
+    hid_t         fapl_id;
     hid_t         ret_value = -1;
 
     file_name = (char *) udata;
@@ -124,17 +125,25 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         HDstrcat(file_name, udata);
     }
 
-    /* Figure out if we should open with read-write or read-only */
+    /* Whatever access properties and intent the user used on the old file,
+     * use the same ones to open the new file.  If this is a bad default,
+     * users can override this callback using H5Lregister.
+     */
     if((fid = H5Iget_file_id(cur_group)) < 0)
         goto error;
     if(H5Fget_intent(fid, &intent) < 0)
         goto error;
+    if((fapl_id = H5Fget_access_plist(fid)) < 0)
+        goto error;
     if(H5Fclose(fid) < 0)
         goto error;
 
-    if((fid = H5Fopen(file_name, intent, H5P_DEFAULT)) < 0)
+    /* Open the external file */
+    if((fid = H5Fopen(file_name, intent, fapl_id)) < 0)
         goto error;
     ret_value = H5Oopen(fid, obj_name, lapl_id); /* If this fails, our return value will be negative. */
+    if(H5Pclose(fapl_id) < 0)
+        goto error;
     if(H5Fclose(fid) < 0)
         goto error;
 
