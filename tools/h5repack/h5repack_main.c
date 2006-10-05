@@ -14,8 +14,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+/* module-scoped variables */
 const char *progname = "h5repack";
 int d_status = EXIT_SUCCESS;
 static void usage(void);
@@ -69,7 +71,10 @@ int main(int argc, char **argv)
 
    /* add the -f filter option */
    if (h5repack_addfilter(argv[i+1],&options)<0)
+   {
+    error_msg(progname, "in parsing filter\n");
     exit(1);
+   }
 
    /* jump to next */
    ++i;
@@ -78,7 +83,10 @@ int main(int argc, char **argv)
 
    /* parse the -l layout option */
    if (h5repack_addlayout(argv[i+1],&options)<0)
+   {
+    error_msg(progname, "in parsing layout\n");
     exit(1);
+   }
 
    /* jump to next */
    ++i;
@@ -87,7 +95,7 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-m") == 0) {
    options.threshold = parse_number(argv[i+1]);
    if ((int)options.threshold==-1) {
-    printf("Error: Invalid treshold size <%s>\n",argv[i+1]);
+    error_msg(progname, "invalid treshold size <%s>\n",argv[i+1]);
     exit(1);
    }
    ++i;
@@ -98,6 +106,7 @@ int main(int argc, char **argv)
   }
 
   else if (argv[i][0] == '-') {
+   error_msg(progname, " - is not a valid argument\n");
    usage();
    exit(1);
   }
@@ -105,6 +114,7 @@ int main(int argc, char **argv)
 
  if (infile == NULL || outfile == NULL)
  {
+  error_msg(progname, "file names missing\n");
   usage();
   exit(1);
  }

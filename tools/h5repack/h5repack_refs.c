@@ -12,12 +12,14 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools_utils.h"
 #include "h5repack.h"
+
+extern char  *progname;
 
 static const char* MapIdToName(hid_t refobj_id,
                                trav_table_t *travt);
@@ -173,7 +175,7 @@ int do_copy_refobjs(hid_t fidin,
     {
      buf=(void *) HDmalloc((unsigned)(nelmts*msize));
      if ( buf==NULL){
-      printf( "cannot read into memory\n" );
+      error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
      if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -183,7 +185,7 @@ int do_copy_refobjs(hid_t fidin,
       goto error;
      refbuf=HDmalloc((unsigned)nelmts*msize);
      if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
+      error_msg(progname, "cannot allocate memory\n" );
       goto error;
      }
      for ( u=0; u<nelmts; u++)
@@ -247,7 +249,7 @@ int do_copy_refobjs(hid_t fidin,
     {
      buf=(void *) HDmalloc((unsigned)(nelmts*msize));
      if ( buf==NULL){
-      printf( "cannot read into memory\n" );
+      error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
      if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -262,7 +264,7 @@ int do_copy_refobjs(hid_t fidin,
 
      refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
      if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
+      error_msg(progname, "cannot allocate memory\n" );
       goto error;
      }
      for ( u=0; u<nelmts; u++)
@@ -549,7 +551,7 @@ static int copy_refs_attr(hid_t loc_in,
     {
      buf=(void *) HDmalloc((unsigned)(nelmts*msize));
      if ( buf==NULL){
-      printf( "cannot read into memory\n" );
+      error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
      if (H5Aread(attr_id,mtype_id,buf)<0)
@@ -559,7 +561,7 @@ static int copy_refs_attr(hid_t loc_in,
       goto error;
      refbuf=HDmalloc((unsigned)nelmts*msize);
      if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
+      error_msg(progname, "cannot allocate memory\n" );
       goto error;
      }
      for ( k=0; k<nelmts; k++)
@@ -626,7 +628,7 @@ static int copy_refs_attr(hid_t loc_in,
     {
      buf=(void *) HDmalloc((unsigned)(nelmts*msize));
      if ( buf==NULL){
-      printf( "cannot read into memory\n" );
+      error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
      if (H5Aread(attr_id,mtype_id,buf)<0)
@@ -641,7 +643,7 @@ static int copy_refs_attr(hid_t loc_in,
 
      refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
      if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
+      error_msg(progname, "cannot allocate memory\n" );
       goto error;
      }
      for ( k=0; k<nelmts; k++)

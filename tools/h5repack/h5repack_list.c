@@ -12,13 +12,14 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
  * Function: check_objects
@@ -83,7 +84,7 @@ int check_objects(const char* fname,
   /* the input object names are present in the file and are valid */
   if (h5trav_getindext(name,travt)<0)
   {
-   printf("%sError: Could not find <%s> in file <%s>. Exiting...\n",
+   error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
     (options->verbose?"\n":""),name,fname);
    goto out;
   }

@@ -12,12 +12,15 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools_utils.h"
 #include "h5repack.h"
+
+extern char  *progname;
+
 
 #define PER(A,B) { per = 0;                                      \
                    if (A!=0)                                      \
@@ -178,11 +181,11 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
  if ((fidin=h5tools_fopen(fnamein, NULL, NULL, 0))<0 ){
-  printf("<%s>: %s\n", fnamein, H5FOPENERROR );
+  error_msg(progname, "<%s>: %s\n", fnamein, H5FOPENERROR );
   goto out;
  }
  if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0 ){
-  printf("<%s>: Could not create file\n", fnameout );
+  error_msg(progname, "<%s>: Could not create file\n", fnameout );
   goto out;
  }
 
@@ -201,7 +204,7 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
  if(do_copy_objects(fidin,fidout,travt,options)<0) {
-  printf("<%s>: Could not copy data to: %s\n", fnamein, fnameout);
+  error_msg(progname, "<%s>: Could not copy data to: %s\n", fnamein, fnameout);
   goto out;
  }
 
@@ -211,7 +214,7 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
  if(do_copy_refobjs(fidin,fidout,travt,options)<0) {
-  printf("<%s>: Could not copy data to: %s\n", fnamein, fnameout);
+  error_msg(progname, "<%s>: Could not copy data to: %s\n", fnamein, fnameout);
   goto out;
  }
 
@@ -409,7 +412,7 @@ int do_copy_objects(hid_t fidin,
     {
      buf=(void *) HDmalloc((unsigned)(nelmts*msize));
      if ( buf==NULL){
-      printf( "cannot read into memory\n" );
+      error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
      if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
@@ -735,7 +738,7 @@ int copy_attr(hid_t loc_in,
 
    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
    if ( buf==NULL){
-    printf( "cannot read into memory\n" );
+    error_msg(progname, "cannot read into memory\n" );
     goto error;
    }
    if (H5Aread(attr_id,mtype_id,buf)<0)

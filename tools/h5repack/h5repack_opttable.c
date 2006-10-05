@@ -12,11 +12,12 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
 #include <string.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
  * Function: init_packobject
@@ -67,7 +68,7 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
  }
  else
  {
-  printf("Cannot insert the filter in this object.\
+  error_msg(progname, "cannot insert the filter in this object.\
    Maximum capacity exceeded\n");
  }
 }
@@ -126,7 +127,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
  table->size += n_objs;
  table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
  if (table->objs==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
  for (i = table->nelems; i < table->size; i++)
@@ -151,7 +152,7 @@ int options_table_init( pack_opttbl_t **tbl )
  int i;
  pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
 
@@ -159,7 +160,7 @@ int options_table_init( pack_opttbl_t **tbl )
  table->nelems = 0;
  table->objs   = (pack_info_t*) malloc(table->size * sizeof(pack_info_t));
  if (table->objs==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
 
@@ -229,7 +230,7 @@ int options_add_layout( obj_list_t *obj_list,
      /* already chunk info inserted for this one; exit */
      if (table->objs[i].chunk.rank>0)
      {
-      printf("Input Error: chunk information already inserted for <%s>\n",obj_list[j].obj);
+      error_msg(progname, "chunk information already inserted for <%s>\n",obj_list[j].obj);
       exit(1);
      }
      /* insert the layout info */
