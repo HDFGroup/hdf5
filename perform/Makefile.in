@@ -31,8 +31,6 @@ LIBTOOLS=../tools/lib/libh5tools.la
 TEST_PROGS_PARA=h5perf
 TEST_PROGS=iopipe chunk overhead zip_perf perf_meta
 
-PUB_PROGS=h5perf
-
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5 *.raw *.dat x-gnuplot
