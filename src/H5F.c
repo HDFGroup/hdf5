@@ -1657,7 +1657,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
-        if((ret_value=H5I_dec_ref(f->shared->fcpl_id)) < 0)
+        if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
@@ -2617,6 +2617,18 @@ H5F_try_close(H5F_t *f)
     /* Unmount and close each child before closing the current file. */
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
+
+    /* Flush at this point since the file will be closed.  Don't invalidate
+     * the cache, since this file might still be open using another handle.
+     * However, make sure we flush in case that handle is read-only; its
+     * copy of the cache needs to be clean.
+     * Only try to flush the file if it was opened with write access.
+     */
+    if(f->intent&H5F_ACC_RDWR) {
+        /* Flush and destroy all caches */
+        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5C__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
 
     /*
      * Destroy the H5F_t struct and decrement the reference count for the
