@@ -17,9 +17,12 @@
  */
 
 #include "hdf5.h"
-#define FILENAME        "h5copytst.h5"
-#define DATASET_SIMPLE  "simple"
-#define DATASET_CHUNK   "chunk"
+#define FILENAME         "h5copytst.h5"
+#define DATASET_SIMPLE   "simple"
+#define DATASET_CHUNK    "chunk"
+#define DATASET_COMPACT  "compact"
+#define DATASET_COMPOUND "compound"
+
 
 
 /*-------------------------------------------------------------------------
@@ -84,6 +87,84 @@ static void gent_chunked_dataset(hid_t fid)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    gent_compact_dataset
+ *
+ * Purpose:     Generate a compact dataset in FID
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_compact_dataset(hid_t fid)
+{
+ hid_t   sid, did, pid;
+ hsize_t dims[1] = {6};
+ int     buf[6]  = {1,2,3,4,5,6};
+
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+
+ /* create property plist for chunk*/
+ pid = H5Pcreate(H5P_DATASET_CREATE);
+ H5Pset_layout (pid,H5D_COMPACT);
+ 
+ /* create dataset */
+ did = H5Dcreate(fid, DATASET_COMPACT, H5T_NATIVE_INT, sid, pid);
+ 
+ /* write */
+ H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ 
+ /* close */
+ H5Sclose(sid);
+ H5Dclose(did);
+ H5Pclose(pid);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_compound_dataset
+ *
+ * Purpose:     Generate a compound dataset in FID
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_compound_dataset(hid_t fid)
+{
+ typedef struct s_t
+ {
+  char str1[20];
+  char str2[20];
+ } s_t;
+ hid_t   sid, did, tid_c, tid_s;
+ hsize_t dims[1] = {2};
+ s_t     buf[2]  = {{"str1","str2"},{"str3","str4"}};
+
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+
+ /* create a compound type */
+ tid_c = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
+ tid_s = H5Tcopy (H5T_C_S1);
+ H5Tset_size (tid_s, 20);
+   
+ H5Tinsert (tid_c, "str1", HOFFSET(s_t,str1), tid_s);
+ H5Tinsert (tid_c, "str2", HOFFSET(s_t,str2), tid_s);
+
+ /* create dataset */
+ did = H5Dcreate(fid, DATASET_COMPOUND, tid_c, sid, H5P_DEFAULT);
+ 
+ /* write */
+ H5Dwrite(did, tid_c, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ 
+ /* close */
+ H5Sclose(sid);
+ H5Dclose(did);
+ H5Tclose(tid_c);
+ H5Tclose(tid_s);
+}
+
+
+
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -98,6 +179,8 @@ int main(void)
 
  gent_simple_dataset(fid);
  gent_chunked_dataset(fid);
+ gent_compact_dataset(fid);
+ gent_compound_dataset(fid);
  
  H5Fclose(fid);
  return 0;

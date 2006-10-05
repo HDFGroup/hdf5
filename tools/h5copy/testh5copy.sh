@@ -120,8 +120,11 @@ H5DIFFTEST()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple -d simple
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk -d chunk
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple    -d simple
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk     -d chunk
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compact   -d compact
+TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compound  -d compound
+
 
 
 
