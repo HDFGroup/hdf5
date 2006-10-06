@@ -19,12 +19,7 @@ USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
 USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 USE_FILTER_NBIT="@USE_FILTER_NBIT@"
-#
-#  Leave these tests off for now. Enable when filter is ready
-:
-#USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
-USE_FILTER_SCALEOFFSET="no"
-
+USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
 H5REPACK=h5repack               # The tool name
 H5REPACK_BIN=`pwd`/$H5REPACK    # The path of the tool binary
@@ -313,16 +308,16 @@ else
  TOOLTEST $arg
 fi
 
-# scaleoffset add
-arg="test_scaleoffset.h5 -f dset_none:S+O=31"
+# scaleoffset copy
+arg="test_scaleoffset.h5"
 if test $USE_FILTER_SCALEOFFSET != "yes" ; then
  SKIP $arg
 else
  TOOLTEST $arg
 fi
 
-# scaleoffset copy
-arg="test_scaleoffset.h5"
+# scaleoffset add
+arg="test_scaleoffset.h5 -f dset_none:SOFF=31,IN"
 if test $USE_FILTER_SCALEOFFSET != "yes" ; then
  SKIP $arg
 else
