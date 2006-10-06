@@ -310,10 +310,15 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 
 /*
  * Check the size of a file using MPI routines
+ * Temporary hack: SGI Altix MPI_File_get_size() does not work correctly
+ * for size >= 2GB. Use stat for now.
+ * If stat() does not work for other systems, need to make it conditional
+ * compile for Altix only.
  */
 MPI_Offset
 h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
 {
+#if 0
     MPI_File	fh;             /* MPI file handle */
     MPI_Offset	size=0;         /* File size to return */
 
@@ -325,6 +330,23 @@ h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
 
     if (MPI_SUCCESS != MPI_File_close(&fh))
         size=0;
+#else
+    MPI_Offset	size=0;         /* File size to return */
+#ifdef H5_HAVE_STAT64
+    /* use stat64 if available */
+    struct stat64 mystat;
+#else
+    struct stat mystat;
+#endif
+
+#ifdef H5_HAVE_STAT64
+    stat(filename, &mystat);
+#else
+    stat(filename, &mystat);
+#endif
+
+    size = mystat.st_size;
+#endif
 
 done:
     return(size);
