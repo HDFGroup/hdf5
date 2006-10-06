@@ -328,6 +328,11 @@ H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
 
 #ifdef H5_HAVE_PARALLEL
 
+#ifdef H5S_DEBUG
+#ifndef H5Dmpio_DEBUG
+#define H5Dmpio_DEBUG
+#endif /*H5Dmpio_DEBUG*/
+#endif/*H5S_DEBUG*/
 /* MPI-IO function to read , it will select either regular or irregular read */
 H5_DLL herr_t H5D_mpio_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
