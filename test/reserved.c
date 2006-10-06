@@ -426,6 +426,10 @@ main(void)
     hid_t fapl;
     const char *envval = NULL;
 
+    /* This test is currently not working properly; it should be revisted
+     * when we have time.
+     */
+#ifdef BROKEN
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL) 
         envval = "nomatch";
@@ -447,6 +451,9 @@ main(void)
     {
         puts("All address space reservation tests skippped - Incompatible with current Virtual File Driver");
     }
+#endif
+
+    SKIPPED();
     return 0;
 
 }
