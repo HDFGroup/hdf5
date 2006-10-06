@@ -147,7 +147,7 @@ echo.****************************************************
 
 ::Skip Tests 
 ::Put "skip" after the reference file, like the following
-::set flag=-i %test_scaleoffset% -o %output_scaleoffset% -f dset_none:S+O=31
+::set flag=-i %test_scaleoffset% -o %output_scaleoffset% -f dset_none:SOFF=31,IN
 ::call %tooltest% %test_scaleoffset% %nodiff% skip
 
 ::--------------
@@ -310,7 +310,7 @@ set flag=-i %test_deflate% -o %output_deflate%
 if "%HDF5_EXT_ZLIB%"=="" (
 	call %tooltest% %test_deflate% %nodiff% skip
 ) else (
-	call %tooltest% %test_deflate% %nodiff% skip
+	call %tooltest% %test_deflate% %nodiff% 
 )
 
 ::---------------
@@ -374,26 +374,26 @@ call %tooltest% %test_nbit% %nodiff%
 ::----------------
 :: scaleoffset add
 ::----------------
-set flag=-i %test_scaleoffset% -o %output_scaleoffset% -f dset_none:S+O=31
-call %tooltest% %test_scaleoffset% %nodiff% skip
+set flag=-i %test_scaleoffset% -o %output_scaleoffset% -f dset_none:SOFF=31,IN
+call %tooltest% %test_scaleoffset% %nodiff% 
 
 ::-----------------
 :: scaleoffset copy
 ::-----------------
 set flag=-i %test_scaleoffset% -o %output_scaleoffset%
-call %tooltest% %test_scaleoffset% %nodiff% skip
+call %tooltest% %test_scaleoffset% %nodiff% 
 
 ::-------------------
 :: scaleoffset remove
 ::-------------------
 set flag=-i %test_scaleoffset% -o %output_scaleoffset% -f dset_scaleoffset:NONE
-call %tooltest% %test_scaleoffset% %nodiff% skip 
+call %tooltest% %test_scaleoffset% %nodiff% 
 
 ::--------------------
 :: remove all  filters
 ::--------------------
 set flag=-i %test_all% -o %output_all%
-call %tooltest% %test_scaleoffset% %nodiff% skip
+call %tooltest% %test_scaleoffset% %nodiff% 
 
 ::------------------
 ::filter conversions
