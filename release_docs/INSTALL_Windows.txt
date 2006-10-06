@@ -23,7 +23,8 @@ Contents:
    Section VIII  :  How to build Multi-threaded version of HDF5 library
    Section IX    :  How to build and test HDF5 snapshot release
    Section X     :  How to build HDF5 with Thread-Safe Feature
-   Section XI    :  Misc.
+   Section XI    :  How to build HDF5 in Visual studio 2005
+   Section XII   :  Misc.
 
 
 ========================================================================
@@ -73,8 +74,6 @@ Preconditions:
           to ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/1.2/bin 
           to download the Zlib library.
 
-          Note: Zlib 1.2.2 DLL library can also be downloaded from
-          http://www.zlib.net/zlib122-dll.zip
       
       4.2 HDF5 uses Szip version 2.0 for compression and Szip
           compression software is provided with HDF5 products in
@@ -2245,9 +2244,26 @@ by other compilers.
  
    Go back to Section II, Step I(2) to Build, test and install HDF5 
    libary and tools.
-   
 ========================================================================
-                            Section XI: Misc.
+Section XI: How to build HDF5 in Visual studio 2005 on windows 64-bit platform
+========================================================================
+ Currently we only support HDF5 as an 32-bit application on windows 64-bit
+platform.
+ 
+ The building procedure is almost the same as building HDF5 on .Net 2003.
+ You may need to pay attention to the following reminders:
+ 1) To use zlib or szlib compression packages:
+    Use zlib 1.2.2 DLL provided at
+    ftp://ftp.ncsa.uiuc.edu/HDF/lib-external/zlib/1.2/bin/zlib122-windows.tar.gz
+    Use szlib 2.0 DLL provided at
+    ftp://ftp.ncsa.uiuc.edu/HDF/lib-external/szip/2.0/bin/windows/xp-net/
+ 2) Make sure that WIN32 macro is set at visual studio 2005. 
+ 3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
+ Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
+
+  
+========================================================================
+                            Section XII: Misc.
 ========================================================================
 
 1. drivers we support
