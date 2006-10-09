@@ -49,7 +49,8 @@ static double	the_data[100][100];
  *
  *-------------------------------------------------------------------------
  */
-hid_t create_file(char* name, hid_t fapl)
+static hid_t
+create_file(char* name, hid_t fapl)
 { 
     hid_t	file, dcpl, space, dset, groups, grp;
     hsize_t	ds_size[2] = {100, 100};

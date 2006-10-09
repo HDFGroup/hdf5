@@ -190,7 +190,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
-                  hid_t type_id,       /* dataset datatype */
                   pack_opt_t *options) /* repack options */
 {
 	int          nfilters;       /* number of filters in DCPL */

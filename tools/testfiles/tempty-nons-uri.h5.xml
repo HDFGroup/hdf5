@@ -100,7 +100,7 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       </Dataspace>
       <DataType>
          <ArrayType Ndims="1">
-            <ArrayDimension DimSize="4" DimPerm="0"/>
+            <ArrayDimension DimSize="4"/>
             <DataType>
                <AtomicType>
                   <IntegerType ByteOrder="LE" Sign="true" Size="4" />

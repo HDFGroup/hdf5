@@ -20,9 +20,9 @@ Expected output for 'h5dump --xml tarray2.h5'
       </hdf5:Dataspace>
       <hdf5:DataType>
          <hdf5:ArrayType Ndims="3">
-            <hdf5:ArrayDimension DimSize="3" DimPerm="0"/>
-            <hdf5:ArrayDimension DimSize="4" DimPerm="1"/>
-            <hdf5:ArrayDimension DimSize="5" DimPerm="2"/>
+            <hdf5:ArrayDimension DimSize="3"/>
+            <hdf5:ArrayDimension DimSize="4"/>
+            <hdf5:ArrayDimension DimSize="5"/>
             <hdf5:DataType>
                <hdf5:AtomicType>
                   <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />

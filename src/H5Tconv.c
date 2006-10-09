@@ -2980,12 +2980,12 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	src_delta, dst_delta;	/*source & destination stride	     */
     int	        direction;		/*direction of traversal	     */
     size_t	elmtno;			/*element number counter	     */
-    int         i;                      /* local index variable */
+    unsigned    u;                      /* local index variable */
     void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
     size_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_array, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_array, FAIL)
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
@@ -2996,23 +2996,17 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * information that remains (almost) constant for this
              * conversion path.
              */
-            if (NULL == (src = H5I_object(src_id)) ||
-                    NULL == (dst = H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_ARRAY==src->shared->type);
-            assert (H5T_ARRAY==dst->shared->type);
+            if(NULL == (src = H5I_object(src_id)) || NULL == (dst = H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+            HDassert(H5T_ARRAY==src->shared->type);
+            HDassert(H5T_ARRAY==dst->shared->type);
 
             /* Check the number and sizes of the dimensions */
-            if(src->shared->u.array.ndims!=dst->shared->u.array.ndims)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same number of dimensions");
-            for(i=0; i<src->shared->u.array.ndims; i++)
-                if(src->shared->u.array.dim[i]!=dst->shared->u.array.dim[i])
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same sizes of dimensions");
-#ifdef LATER
-            for(i=0; i<src->shared->u.array.ndims; i++)
-                if(src->shared->u.array.perm[i]!=dst->shared->u.array.perm[i])
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same dimension permutations");
-#endif /* LATER */
+            if(src->shared->u.array.ndims != dst->shared->u.array.ndims)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same number of dimensions")
+            for(u = 0; u < src->shared->u.array.ndims; u++)
+                if(src->shared->u.array.dim[u] != dst->shared->u.array.dim[u])
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same sizes of dimensions")
 
             /* Array datatypes don't need a background buffer */
             cdata->need_bkg = H5T_BKG_NO;
@@ -3027,22 +3021,21 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Conversion.
              */
-            if (NULL == (src = H5I_object(src_id)) ||
-                    NULL == (dst = H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            if (NULL == (src = H5I_object(src_id)) || NULL == (dst = H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
             /*
              * Do we process the values from beginning to end or vice
              * versa? Also, how many of the elements have the source and
              * destination areas overlapping?
              */
-            if (src->shared->size>=dst->shared->size || buf_stride>0) {
+            if(src->shared->size >= dst->shared->size || buf_stride > 0) {
                 sp = dp = (uint8_t*)_buf;
                 direction = 1;
             } else {
-                sp = (uint8_t*)_buf + (nelmts-1) *
+                sp = (uint8_t*)_buf + (nelmts - 1) *
                      (buf_stride ? buf_stride : src->shared->size);
-                dp = (uint8_t*)_buf + (nelmts-1) *
+                dp = (uint8_t*)_buf + (nelmts - 1) *
                      (buf_stride ? buf_stride : dst->shared->size);
                 direction = -1;
             }
@@ -3054,24 +3047,24 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             dst_delta = direction * (buf_stride ? buf_stride : dst->shared->size);
 
             /* Set up conversion path for base elements */
-            if (NULL==(tpath=H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id, FALSE))) {
-                HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes");
+            if(NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id, FALSE))) {
+                HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes")
             } else if (!H5T_path_noop(tpath)) {
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL)))<0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL)))<0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+                if((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL))) < 0 ||
+                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL))) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
             }
 
             /* Check if we need a background buffer for this conversion */
             if(tpath->cdata.need_bkg) {
                 /* Allocate background buffer */
-                bkg_buf_size=src->shared->u.array.nelem*MAX(src->shared->size,dst->shared->size);
-                if ((bkg_buf=H5FL_BLK_CALLOC(array_seq,bkg_buf_size))==NULL)
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+                bkg_buf_size = src->shared->u.array.nelem * MAX(src->shared->size, dst->shared->size);
+                if((bkg_buf = H5FL_BLK_CALLOC(array_seq, bkg_buf_size)) == NULL)
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
             } /* end if */
 
             /* Perform the actual conversion */
-            for (elmtno=0; elmtno<nelmts; elmtno++) {
+            for(elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
                 HDmemmove(dp, sp, src->shared->size);
 
@@ -3082,16 +3075,16 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /* Advance the source & destination pointers */
                 sp += src_delta;
                 dp += dst_delta;
-            }
+            } /* end for */
 
             /* Release the background buffer, if we have one */
-            if(bkg_buf!=NULL)
-                H5FL_BLK_FREE(array_seq,bkg_buf);
+            if(bkg_buf != NULL)
+                H5FL_BLK_FREE(array_seq, bkg_buf);
 
             /* Release the temporary datatype IDs used */
-            if (tsrc_id >= 0)
+            if(tsrc_id >= 0)
                 H5I_dec_ref(tsrc_id);
-            if (tdst_id >= 0)
+            if(tdst_id >= 0)
                 H5I_dec_ref(tdst_id);
             break;
 
@@ -3100,7 +3093,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }   /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_conv_array() */
 
 

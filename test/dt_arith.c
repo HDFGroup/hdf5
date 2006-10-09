@@ -390,7 +390,7 @@ static int without_hardware_g = 0;
 void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
-static int my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
+static int my_isinf(int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize);
 
 /*-------------------------------------------------------------------------
@@ -2717,7 +2717,7 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(dtype_t type, int endian, unsigned char *val, size_t size,
+my_isinf(int endian, unsigned char *val, size_t size,
         size_t mpos, size_t msize, size_t epos, size_t esize)
 {
     unsigned char *bits;
@@ -2801,7 +2801,9 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
     int			overflow;		/*overflow occurred	*/
+#ifdef H5_VMS
     int			maximal;		/*maximal value occurred, for VMS only.	*/
+#endif /* H5_VMS */
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
     int			sendian;		/* source type endianess */
@@ -3193,11 +3195,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(float),
+                if (overflow && my_isinf(dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
 #ifdef H5_VMS
-                if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(float),
+                if (maximal && my_isinf(dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* maximal value, no error */
 #endif /*H5_VMS*/
@@ -3209,11 +3211,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (underflow &&
                         HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
                     continue;	/* all underflowed, no error */
-                if (overflow && my_isinf(dst_type, dendian, buf+j*sizeof(double),
+                if (overflow && my_isinf(dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
 #ifdef H5_VMS
-                if (maximal && my_isinf(dst_type, dendian, buf+j*sizeof(double),
+                if (maximal && my_isinf(dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* maximal value, no error */
 #endif /*H5_VMS*/

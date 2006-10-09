@@ -1057,34 +1057,21 @@ static hbool_t
 display_array_type(hid_t type, int ind)
 {
     hid_t       super;
-    int         ndims, i, *perm=NULL, identity;
+    int         ndims, i;
     hsize_t     *dims=NULL;
 
     if (H5T_ARRAY!=H5Tget_class(type)) return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
         dims = malloc(ndims*sizeof(dims[0]));
-        perm = malloc(ndims*sizeof(perm[0]));
-        H5Tget_array_dims(type, dims, perm);
+        H5Tget_array_dims(type, dims, NULL);
 
         /* Print dimensions */
         for (i=0; i<ndims; i++)
             HDfprintf(stdout, "%s%Hu" , i?",":"[", dims[i]);
         putchar(']');
 
-        /* Print permutation vector if not identity */
-        for (i=0, identity=TRUE; identity && i<ndims; i++) {
-            if (i!=perm[i]) identity = FALSE;
-        }
-        if (!identity) {
-            fputs(" perm=[", stdout);
-            for (i=0; i<ndims; i++)
-                HDfprintf(stdout, "%s%d", i?",":"", perm[i]);
-            putchar(']');
-        }
-
         free(dims);
-        free(perm);
     } else {
         fputs(" [SCALAR]", stdout);
     }

@@ -46,7 +46,7 @@ test_h5o_open(void)
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
     hsize_t     dims[RANK];
     H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
-    hsize_t     num_objs=-1;                /* Number of objects in the group */
+    hsize_t     num_objs = 0;               /* Number of objects in the group */
     H5T_class_t type_class;                 /* Class of the datatype */
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -248,7 +248,7 @@ test_h5o_open_by_addr(void)
     haddr_t dtype_addr;
     hsize_t     dims[RANK];
     H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
-    hsize_t     num_objs=-1;                /* Number of objects in the group */
+    hsize_t     num_objs = 0;               /* Number of objects in the group */
     H5T_class_t type_class;                 /* Class of the datatype */
     herr_t      ret;                        /* Value returned from API calls */
 

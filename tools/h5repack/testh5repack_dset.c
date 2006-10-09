@@ -255,7 +255,7 @@ void write_dset_in(hid_t loc_id,
    }
  }
 
- type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,1,dims,"array",type_id,buf6);
  status = H5Tclose(type_id);
 
@@ -404,7 +404,7 @@ void write_dset_in(hid_t loc_id,
  }
 
 
- type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,2,dims2,"array2D",type_id,buf62);
  status = H5Tclose(type_id);
 
@@ -587,7 +587,7 @@ void write_dset_in(hid_t loc_id,
   }
  }
 
- type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,3,dims3,"array3D",type_id,buf63);
  status = H5Tclose(type_id);
 

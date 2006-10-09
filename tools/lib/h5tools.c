@@ -1434,7 +1434,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   }
   else
   {
-   s = mem;
+   s = (char *)mem;
    size = H5Tget_size(tid);
   }
   for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++)

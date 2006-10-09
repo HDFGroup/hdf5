@@ -1006,7 +1006,7 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (vlen = H5T_vlen_create(native_int)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL == (array = H5T_array_create(native_int,1,dim,NULL)))
+    if (NULL == (array = H5T_array_create(native_int, 1, dim)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     status = 0;
 
@@ -4047,17 +4047,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             if (dt1->shared->u.array.ndims > dt2->shared->u.array.ndims)
                 HGOTO_DONE(1);
 
-            for (j=0; j<dt1->shared->u.array.ndims; j++) {
-                if (dt1->shared->u.array.dim[j] < dt2->shared->u.array.dim[j])
+            for (u=0; u<dt1->shared->u.array.ndims; u++) {
+                if (dt1->shared->u.array.dim[u] < dt2->shared->u.array.dim[u])
                     HGOTO_DONE(-1);
-                if (dt1->shared->u.array.dim[j] > dt2->shared->u.array.dim[j])
-                    HGOTO_DONE(1);
-            }
-
-            for (j=0; j<dt1->shared->u.array.ndims; j++) {
-                if (dt1->shared->u.array.perm[j] < dt2->shared->u.array.perm[j])
-                    HGOTO_DONE(-1);
-                if (dt1->shared->u.array.perm[j] > dt2->shared->u.array.perm[j])
+                if (dt1->shared->u.array.dim[u] > dt2->shared->u.array.dim[u])
                     HGOTO_DONE(1);
             }
 

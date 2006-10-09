@@ -12,7 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "H5private.h"		/* Generic Functions			*/
@@ -99,7 +98,9 @@ static int        display_group = FALSE;
 static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
+#ifdef NOT_YET
 static int        display_dtype = FALSE;
+#endif /* NOT_YET */
 
 static const char *s_opts ="FfhGgDdTV";
 static struct long_options l_opts[] = {

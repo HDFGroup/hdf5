@@ -675,7 +675,7 @@ void write_dset_in(hid_t loc_id,
    }
  }
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,1,dims,"array",tid,buf6);
  status = H5Tclose(tid);
 
@@ -824,7 +824,7 @@ void write_dset_in(hid_t loc_id,
  }
 
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,2,dims2,"array2D",tid,buf62);
  status = H5Tclose(tid);
 
@@ -1008,7 +1008,7 @@ void write_dset_in(hid_t loc_id,
   }
  }
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,3,dims3,"array3D",tid,buf63);
  status = H5Tclose(tid);
 
@@ -1334,7 +1334,7 @@ position        array of </g1>  array of </g1>  difference
 [ 1 ]          5               0               5
 [ 1 ]          6               0               6
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,1,dims,"array",tid,buf6);
  status = H5Tclose(tid);
 
@@ -1613,7 +1613,7 @@ position        array2D of </g1> array2D of </g1> difference
 [ 2 1 ]          17              0               17
 [ 2 1 ]          18              0               18
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,2,dims2,"array2D",tid,buf62);
  status = H5Tclose(tid);
 
@@ -2001,7 +2001,7 @@ etc
 etc
 */
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,3,dims3,"array3D",tid,buf63);
  status = H5Tclose(tid);
 

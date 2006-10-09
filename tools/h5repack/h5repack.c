@@ -68,20 +68,18 @@ static void aux_initglb_filter(pack_opt_t *options)
  */
 int h5repack(const char* infile,
              const char* outfile,
-             pack_opt_t *options,
-             int argc,
-             const char *argv[])
+             pack_opt_t *options)
 {
  /* check input */
  if (check_options(options)<0)
   return -1;
 
  /* check for objects in input that are in the file */
- if (check_objects(infile,options,argc,argv)<0)
+ if (check_objects(infile,options) < 0)
   return -1;
 
  /* copy the objects  */
- if (copy_objects(infile,outfile,options,argc,argv)<0)
+ if (copy_objects(infile,outfile,options) < 0)
   return -1;
 
 

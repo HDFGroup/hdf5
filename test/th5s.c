@@ -544,8 +544,6 @@ test_h5s_encode(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Encoding and Decoding\n"));
 
-    H5open();
-
     /*-------------------------------------------------------------------------
      * Test encoding and decoding of simple dataspace and hyperslab selection.
      *-------------------------------------------------------------------------

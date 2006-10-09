@@ -14,6 +14,7 @@
 
 #include "h5test.h"
 
+#ifdef BROKEN
 const char *FILENAME[] = {
     "rsrv_heap",
     "rsrv_ohdr",
@@ -402,6 +403,7 @@ rsrv_vlen(void)
    } H5E_END_TRY
    return 1;
 }
+#endif /* BROKEN */
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -422,14 +424,14 @@ rsrv_vlen(void)
 int
 main(void)
 {
-    int num_errs=0;
-    hid_t fapl;
-    const char *envval = NULL;
-
     /* This test is currently not working properly; it should be revisted
      * when we have time.
      */
 #ifdef BROKEN
+    int num_errs=0;
+    hid_t fapl;
+    const char *envval = NULL;
+
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL) 
         envval = "nomatch";
@@ -451,7 +453,7 @@ main(void)
     {
         puts("All address space reservation tests skippped - Incompatible with current Virtual File Driver");
     }
-#endif
+#endif /* BROKEN */
 
     SKIPPED();
     return 0;

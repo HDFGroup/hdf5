@@ -111,7 +111,7 @@ static herr_t
 H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
     unsigned	flags, version;
-    unsigned	i, j;
+    unsigned	i;
     size_t	z;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -215,6 +215,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
         case H5T_COMPOUND:
             {
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
+                unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
                 offset_nbytes = (H5V_log2_gen((hsize_t)dt->shared->size) + 7) / 8;
@@ -232,8 +233,6 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                     unsigned ndims = 0;     /* Number of dimensions of the array field */
                     hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
-                    int perm[H5O_LAYOUT_NDIMS];     /* Dimension permutations */
-                    unsigned perm_word = 0; /* Dimension permutation information */
                     H5T_t *array_dt;    /* Temporary pointer to the array datatype */
                     H5T_t *temp_type;   /* Temporary pointer to the field's datatype */
 
@@ -264,8 +263,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                         HDassert(ndims <= 4);
                         *pp += 3;		/*reserved bytes */
 
-                        /* Decode dimension permutation (unused currently) */
-                        UINT32DECODE(*pp, perm_word);
+                        /* Skip dimension permutation */
+                        *pp += 4;
 
                         /* Skip reserved bytes */
                         *pp += 4;
@@ -291,12 +290,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                     if(version == H5O_DTYPE_VERSION_1) {
                         /* Check if this member is an array field */
                         if(ndims > 0) {
-                            /* Set up the permutation vector for the array create */
-                            for(j = 0; j < ndims; j++)
-                                perm[j]=(perm_word >> (j * 8)) & 0xff;
-
                             /* Create the array datatype for the field */
-                            if((array_dt = H5T_array_create(temp_type, (int)ndims, dim, perm)) == NULL) {
+                            if((array_dt = H5T_array_create(temp_type, ndims, dim)) == NULL) {
                                 for(j = 0; j <= i; j++)
                                     H5MM_xfree(dt->shared->u.compnd.memb[j].name);
                                 H5MM_xfree(dt->shared->u.compnd.memb);
@@ -441,25 +436,26 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
             break;
 
-        case H5T_ARRAY:  /* Array datatypes...  */
+        case H5T_ARRAY:  /* Array datatypes */
             /* Decode the number of dimensions */
             dt->shared->u.array.ndims = *(*pp)++;
 
             /* Double-check the number of dimensions */
-            assert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
+            HDassert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
 
-            /* Skip reserved bytes */
-            *pp += 3;
+            /* Skip reserved bytes, if version has them */
+            if(version < H5O_DTYPE_VERSION_3)
+                *pp += 3;
 
             /* Decode array dimension sizes & compute number of elements */
-            for(j = 0, dt->shared->u.array.nelem = 1; j < (unsigned)dt->shared->u.array.ndims; j++) {
-                UINT32DECODE(*pp, dt->shared->u.array.dim[j]);
-                dt->shared->u.array.nelem *= dt->shared->u.array.dim[j];
+            for(i = 0, dt->shared->u.array.nelem = 1; i < (unsigned)dt->shared->u.array.ndims; i++) {
+                UINT32DECODE(*pp, dt->shared->u.array.dim[i]);
+                dt->shared->u.array.nelem *= dt->shared->u.array.dim[i];
             } /* end for */
 
-            /* Decode array dimension permutations (even though they are unused currently) */
-            for(j = 0; j < (unsigned)dt->shared->u.array.ndims; j++)
-                UINT32DECODE(*pp, dt->shared->u.array.perm[j]);
+            /* Skip array dimension permutations, if version has them */
+            if(version < H5O_DTYPE_VERSION_3)
+                *pp += dt->shared->u.array.ndims * 4;
 
             /* Decode base type of array */
             if(NULL == (dt->shared->parent = H5T_alloc()))
@@ -856,25 +852,31 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             UINT16ENCODE(*pp, dt->shared->u.atomic.prec);
             break;
 
-        case H5T_ARRAY:  /* Array datatypes...  */
+        case H5T_ARRAY:  /* Array datatypes */
             /* Double-check the number of dimensions */
             HDassert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
 
             /* Encode the number of dimensions */
             *(*pp)++ = dt->shared->u.array.ndims;
 
-            /* Reserved */
-            *(*pp)++ = '\0';
-            *(*pp)++ = '\0';
-            *(*pp)++ = '\0';
+            /* Drop this information for Version 3 of the format */
+            if(!use_latest_format) {
+                /* Reserved */
+                *(*pp)++ = '\0';
+                *(*pp)++ = '\0';
+                *(*pp)++ = '\0';
+            } /* end if */
 
             /* Encode array dimensions */
             for(i = 0; i < (unsigned)dt->shared->u.array.ndims; i++)
                 UINT32ENCODE(*pp, dt->shared->u.array.dim[i]);
 
-            /* Encode array dimension permutations */
-            for(i = 0; i < (unsigned)dt->shared->u.array.ndims; i++)
-                UINT32ENCODE(*pp, dt->shared->u.array.perm[i]);
+            /* Drop this information for Version 3 of the format */
+            if(!use_latest_format) {
+                /* Encode 'fake' array dimension permutations */
+                for(i = 0; i < (unsigned)dt->shared->u.array.ndims; i++)
+                    UINT32ENCODE(*pp, i);
+            } /* end if */
 
             /* Encode base type of array's information */
             if(H5O_dtype_encode_helper(f, pp, dt->shared->parent) < 0)
@@ -890,8 +892,9 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
     /* (unless the "use the latest format" flag is set, which can "upgrade" the
      *          format of certain encodings)
      */
-    if(has_vax ||
-            (use_latest_format && (dt->shared->type == H5T_ENUM || dt->shared->type == H5T_COMPOUND)))
+    if(use_latest_format)
+        version = H5O_DTYPE_VERSION_LATEST;
+    else if(has_vax)
         version = H5O_DTYPE_VERSION_3;
     else if(has_array)
         version = H5O_DTYPE_VERSION_2;
@@ -1069,14 +1072,18 @@ done:
 static size_t
 H5O_dtype_size(const H5F_t *f, const void *_mesg)
 {
-    const H5T_t		*dt = (const H5T_t *)_mesg;
-    unsigned		i;                      /* Local index variable */
-    size_t		ret_value;
+    const H5T_t	*dt = (const H5T_t *)_mesg;
+    hbool_t     use_latest_format;      /* Flag indicating the new group format should be used */
+    unsigned	u;                      /* Local index variable */
+    size_t	ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_size)
 
     HDassert(f);
     HDassert(dt);
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Set the common size information */
     ret_value = 4 +     /* Type, class & flags */
@@ -1103,25 +1110,21 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
         case H5T_COMPOUND:
             {
                 htri_t has_array;      /* Whether a compound datatype has an array inside it */
-                hbool_t use_latest_format;      /* Flag indicating the new group format should be used */
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Check for an array datatype somewhere within the compound type */
                 has_array = H5T_detect_class(dt, H5T_ARRAY);
                 HDassert(has_array >= 0);
 
-                /* Get the file's 'use the latest version of the format' flag */
-                use_latest_format = H5F_USE_LATEST_FORMAT(f);
-
                 /* Compute the # of bytes required to store a member offset */
                 offset_nbytes = (H5V_log2_gen((hsize_t)dt->shared->size) + 7) / 8;
 
                 /* Compute the total size needed to encode compound datatype */
-                for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
+                for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {
                     size_t name_len;    /* Length of field's name */
 
                     /* Get length of field's name */
-                    name_len = HDstrlen(dt->shared->u.compnd.memb[i].name);
+                    name_len = HDstrlen(dt->shared->u.compnd.memb[u].name);
 
                     /* Newer versions of the format don't pad out the name */
                     if(use_latest_format)
@@ -1142,33 +1145,26 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                              4 +		/*permutation*/
                              4 +		/*reserved*/
                              16;		/*dimensions*/
-                    ret_value += H5O_dtype_size(f, dt->shared->u.compnd.memb[i].type);
+                    ret_value += H5O_dtype_size(f, dt->shared->u.compnd.memb[u].type);
                 } /* end for */
             }
             break;
 
         case H5T_ENUM:
-            {
-                hbool_t use_latest_format;      /* Flag indicating the new group format should be used */
+            ret_value += H5O_dtype_size(f, dt->shared->parent);
+            for(u = 0; u < dt->shared->u.enumer.nmembs; u++) {
+                size_t name_len;    /* Length of field's name */
 
-                /* Get the file's 'use the latest version of the format' flag */
-                use_latest_format = H5F_USE_LATEST_FORMAT(f);
+                /* Get length of field's name */
+                name_len = HDstrlen(dt->shared->u.enumer.name[u]);
 
-                ret_value += H5O_dtype_size(f, dt->shared->parent);
-                for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-                    size_t name_len;    /* Length of field's name */
-
-                    /* Get length of field's name */
-                    name_len = HDstrlen(dt->shared->u.enumer.name[i]);
-
-                    /* Newer versions of the format don't pad out the name */
-                    if(use_latest_format)
-                        ret_value += name_len + 1;
-                    else
-                        ret_value += ((name_len + 8) / 8) * 8;
-                } /* end for */
-                ret_value += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
-            }
+                /* Newer versions of the format don't pad out the name */
+                if(use_latest_format)
+                    ret_value += name_len + 1;
+                else
+                    ret_value += ((name_len + 8) / 8) * 8;
+            } /* end for */
+            ret_value += dt->shared->u.enumer.nmembs * dt->shared->parent->shared->size;
             break;
 
         case H5T_VLEN:
@@ -1180,9 +1176,12 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
             break;
 
         case H5T_ARRAY:
-            ret_value += 4; /* ndims & reserved bytes*/
+            ret_value += 1; /* ndims */
+            if(!use_latest_format)
+                ret_value += 3; /* reserved bytes*/
             ret_value += 4 * dt->shared->u.array.ndims; /* dimensions */
-            ret_value += 4 * dt->shared->u.array.ndims; /* dimension permutations */
+            if(!use_latest_format)
+                ret_value += 4 * dt->shared->u.array.ndims; /* dimension permutations */
             ret_value += H5O_dtype_size(f, dt->shared->parent);
             break;
 
@@ -1534,22 +1533,16 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
         }
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Location:", s);
-    } else if (H5T_ARRAY==dt->shared->type) {
+    } else if(H5T_ARRAY == dt->shared->type) {
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Rank:",
 		dt->shared->u.array.ndims);
-    fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-	for (i=0; i<(unsigned)dt->shared->u.array.ndims; i++) {
-        fprintf (stream, "%s%u", i?", ":"", (unsigned)dt->shared->u.array.dim[i]);
-    }
-    fprintf (stream, "}\n");
-    fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Permutation:");
-	for (i=0; i<(unsigned)dt->shared->u.array.ndims; i++) {
-        fprintf (stream, "%s%d", i?", ":"", dt->shared->u.array.perm[i]);
-    }
-    fprintf (stream, "}\n");
+        fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+        for(i = 0; i < dt->shared->u.array.ndims; i++)
+            fprintf(stream, "%s%u", (i ? ", " : ""), (unsigned)dt->shared->u.array.dim[i]);
+        fprintf(stream, "}\n");
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
-	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent+3, MAX(0, fwidth-3));
+	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent + 3, MAX(0, fwidth - 3));
     } else {
 	switch (dt->shared->u.atomic.order) {
             case H5T_ORDER_LE:

@@ -196,7 +196,7 @@ main (int argc, char *argv[])
     /* Create the memory data type */
     if ((s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t)))<0)
         goto error;
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
     if (H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), array_dt)<0 ||
@@ -227,7 +227,7 @@ main (int argc, char *argv[])
     /* Create a data type for s2 */
     if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t)))<0)
         goto error;
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
     if (H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), array_dt)<0 ||
@@ -269,7 +269,7 @@ main (int argc, char *argv[])
     /* Create a data type for s3 */
     if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t)))<0)
         goto error;
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
     if (H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), array_dt)<0 ||
@@ -346,7 +346,7 @@ main (int argc, char *argv[])
     /* Create a data type for s5 */
     if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t)))<0)
         goto error;
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
     if (H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT)<0 ||
             H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), array_dt)<0 ||

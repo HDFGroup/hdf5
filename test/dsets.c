@@ -833,9 +833,9 @@ test_conv_buffer(hid_t fid)
   /* Create the memory data type */
   if((ctype1 = H5Tcreate(H5T_COMPOUND, sizeof (CmpField)))<0) goto error;
 
-  if((arr_type1 = H5Tarray_create(H5T_NATIVE_INT, 3, dimsa, NULL))<0) goto error;
-  if((arr_type2 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL))<0) goto error;
-  if((arr_type3 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL))<0) goto error;
+  if((arr_type1 = H5Tarray_create(H5T_NATIVE_INT, 3, dimsa, NULL)) < 0) goto error;
+  if((arr_type2 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL)) < 0) goto error;
+  if((arr_type3 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL)) < 0) goto error;
 
   if(H5Tinsert(ctype1, "A", HOFFSET(CmpField, a), arr_type1)<0) goto error;
   if(H5Tinsert (ctype1, "B", HOFFSET(CmpField, b), arr_type2)<0) goto error;
@@ -847,8 +847,8 @@ test_conv_buffer(hid_t fid)
 
   if((ctype2 = H5Tcreate(H5T_COMPOUND, sizeof (CmpFieldR)))<0) goto error;
 
-  if((arr_type4 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL))<0) goto error;
-  if((arr_type5 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL))<0) goto error;
+  if((arr_type4 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL)) < 0) goto error;
+  if((arr_type5 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL)) < 0) goto error;
 
   if(H5Tinsert (ctype2, "B", HOFFSET(CmpFieldR, b), arr_type4)<0) goto error;
   if(H5Tinsert (ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5)<0) goto error;

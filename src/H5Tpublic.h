@@ -526,8 +526,9 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name,
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
 
 /* Operations defined on array datatypes */
-H5_DLL hid_t H5Tarray_create(hid_t base_id, int ndims,
-            const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
+H5_DLL hid_t H5Tarray_create(hid_t base_id, unsigned ndims,
+            const hsize_t dim[/* ndims */],
+            const int perm[/* ndims */]);
 H5_DLL int H5Tget_array_ndims(hid_t type_id);
 H5_DLL int H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[]);
 

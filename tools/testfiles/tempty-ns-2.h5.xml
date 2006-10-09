@@ -100,7 +100,7 @@ Expected output for 'h5dump --xml --xml-ns=thing: tempty.h5'
       </thing:Dataspace>
       <thing:DataType>
          <thing:ArrayType Ndims="1">
-            <thing:ArrayDimension DimSize="4" DimPerm="0"/>
+            <thing:ArrayDimension DimSize="4"/>
             <thing:DataType>
                <thing:AtomicType>
                   <thing:IntegerType ByteOrder="LE" Sign="true" Size="4" />

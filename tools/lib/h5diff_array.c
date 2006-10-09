@@ -1915,15 +1915,18 @@ hsize_t diff_region(hid_t obj1_id,
    for (i = 0; i < npoints1; i++)
    {
     hsize_t pt1, pt2;
-    int     diff=0;
+    int     diff_data = 0;
     for (j = 0; j < ndims1; j++)
     {
      pt1 = ptdata1[i * ndims1 + j];
      pt2 = ptdata2[i * ndims1 + j];
      if (pt1 != pt2)
-      diff=1;
+     {
+      diff_data = 1;
+      break;
+     }
     }
-    if (diff)
+    if (diff_data)
     {
      parallel_print("point #%d", i);
      print_points(i, ptdata1, ndims1);

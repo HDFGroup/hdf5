@@ -168,9 +168,7 @@ static void print_dataset_info(hid_t dcpl_id,
 
 int copy_objects(const char* fnamein,
                  const char* fnameout,
-                 pack_opt_t *options,
-                 int argc,
-                 const char *argv[])
+                 pack_opt_t *options)
 {
  hid_t         fidin;
  hid_t         fidout;
@@ -431,7 +429,7 @@ int do_copy_objects(hid_t fidin,
      *-------------------------------------------------------------------------
      */
      if (apply_s){
-      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,mtype_id,options)<0)
+      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options)<0)
        goto error;
      }
 

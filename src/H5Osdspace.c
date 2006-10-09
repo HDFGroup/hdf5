@@ -55,10 +55,18 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_sdspace_debug	        /* debug the message		    	*/
 }};
 
-/* Initial version of the "old" data space information */
-#define H5O_SDSPACE_VERSION	1
-/* Initial version of the "new" data space information */
+/* Initial version of the dataspace information */
+#define H5O_SDSPACE_VERSION_1	1
+
+/* This version adds support for "null" dataspaces, encodes the type of the
+ *      dataspace in the message and eliminated the rest of the "reserved"
+ *      bytes.
+ */
 #define H5O_SDSPACE_VERSION_2	2
+
+/* The latest version of the format.  Look through the 'encode' 
+ *      and 'size' callbacks for places to change when updating this. */
+#define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
 
 /* Declare external the free list for H5S_extent_t's */
 H5FL_EXTERN(H5S_extent_t);
@@ -107,83 +115,87 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     unsigned		i;		/* local counting variable */
     unsigned		flags, version;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* decode */
-    if ((sdim = H5FL_CALLOC(H5S_extent_t)) != NULL) {
-        /* Check version */
-        version = *p++;
-        if (version!=H5O_SDSPACE_VERSION && version!=H5O_SDSPACE_VERSION_2)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
+    if(NULL == (sdim = H5FL_CALLOC(H5S_extent_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, NULL, "dataspace structure allocation failed")
 
-        /* Get rank */
-        sdim->rank = *p++;
-        if (sdim->rank>H5S_MAX_RANK)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple data space dimensionality is too large");
+    /* Check version */
+    version = *p++;
+    if(version < H5O_SDSPACE_VERSION_1 || version > H5O_SDSPACE_VERSION_2)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in dataspace message")
 
-        /* Get dataspace flags for later */
-        flags = *p++;
+    /* Get rank */
+    sdim->rank = *p++;
+    if(sdim->rank > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple dataspace dimensionality is too large")
 
-        /* Get the type of the extent */
-        if(version>=H5O_SDSPACE_VERSION_2)
-            sdim->type = (H5S_class_t)*p++;
-        else {
-            /* Set the dataspace type to be simple or scalar as appropriate */
-            if(sdim->rank>0)
-                sdim->type = H5S_SIMPLE;
-            else
-                sdim->type = H5S_SCALAR;
+    /* Get dataspace flags for later */
+    flags = *p++;
 
-            /* Increment past reserved byte */
-            p++;
-        } /* end else */
+    /* Get or determine the type of the extent */
+    if(version >= H5O_SDSPACE_VERSION_2)
+        sdim->type = (H5S_class_t)*p++;
+    else {
+        /* Set the dataspace type to be simple or scalar as appropriate */
+        if(sdim->rank > 0)
+            sdim->type = H5S_SIMPLE;
+        else
+            sdim->type = H5S_SCALAR;
 
+        /* Increment past reserved byte */
+        p++;
+    } /* end else */
+
+    /* Only Version 1 has these reserved bytes */
+    if(version == H5O_SDSPACE_VERSION_1)
         p += 4; /*reserved*/
 
-        if(sdim->rank > 0) {
-            if(NULL == (sdim->size = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-            for(i = 0; i < sdim->rank; i++) {
-                H5F_DECODE_LENGTH (f, p, sdim->size[i]);
+    /* Decode dimension sizes */
+    if(sdim->rank > 0) {
+        if(NULL == (sdim->size = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        for(i = 0; i < sdim->rank; i++) {
+            H5F_DECODE_LENGTH(f, p, sdim->size[i]);
 #ifndef H5_HAVE_LARGE_HSIZET
-                /* Rudimentary check for overflow of the dimension size */
-                if(sdim->size[i] == 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, NULL, "invalid size detected");
+            /* Rudimentary check for overflow of the dimension size */
+            if(sdim->size[i] == 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, NULL, "invalid size detected")
 #endif /* H5_HAVE_LARGE_HSIZET */
-            } /* end for */
+        } /* end for */
 
-            if(flags & H5S_VALID_MAX) {
-                if(NULL == (sdim->max = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                for(i = 0; i < sdim->rank; i++)
-                    H5F_DECODE_LENGTH (f, p, sdim->max[i]);
-            }
-        }
+        if(flags & H5S_VALID_MAX) {
+            if(NULL == (sdim->max = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            for(i = 0; i < sdim->rank; i++)
+                H5F_DECODE_LENGTH (f, p, sdim->max[i]);
+        } /* end if */
+    } /* end if */
 
-        /* Compute the number of elements in the extent */
-        if(sdim->type == H5S_NULL)
-            sdim->nelem = 0;
-        else {
-            for(i=0, sdim->nelem=1; i<sdim->rank; i++)
-                sdim->nelem*=sdim->size[i];
-        }
-    }
+    /* Compute the number of elements in the extent */
+    if(sdim->type == H5S_NULL)
+        sdim->nelem = 0;
+    else {
+        for(i = 0, sdim->nelem = 1; i < sdim->rank; i++)
+            sdim->nelem *= sdim->size[i];
+    } /* end else */
 
     /* Set return value */
     ret_value = (void*)sdim;	/*success*/
 
 done:
-    if (!ret_value && sdim) {
+    if(!ret_value && sdim) {
         H5S_extent_release(sdim);
-        H5FL_FREE(H5S_extent_t,sdim);
+        H5FL_FREE(H5S_extent_t, sdim);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_sdspace_decode() */
 
 
 /*--------------------------------------------------------------------------
@@ -218,50 +230,64 @@ done:
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
+H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
-    const H5S_extent_t	*sdim = (const H5S_extent_t *) mesg;
-    unsigned		u;  /* Local counting variable */
+    const H5S_extent_t	*sdim = (const H5S_extent_t *)_mesg;
     unsigned		flags = 0;
+    unsigned		version;
+    hbool_t             use_latest_format;      /* Flag indicating the new group format should be used */
+    unsigned		u;  /* Local counting variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode)
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(sdim);
+    HDassert(f);
+    HDassert(p);
+    HDassert(sdim);
 
-    /* set flags */
-    if (sdim->max)
-        flags |= H5S_VALID_MAX;
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
-    /* encode */
-    if(sdim->type!=H5S_NULL)
-        *p++ = H5O_SDSPACE_VERSION;
+    /* Version */
+    if(use_latest_format)
+        version = H5O_SDSPACE_VERSION_LATEST;
+    else if(sdim->type == H5S_NULL || use_latest_format)
+        version = H5O_SDSPACE_VERSION_2;
     else
-        *p++ = H5O_SDSPACE_VERSION_2;
+        version = H5O_SDSPACE_VERSION_1;
+    *p++ = version;
+
+    /* Rank */
     *p++ = sdim->rank;
+
+    /* Flags */
+    if(sdim->max)
+        flags |= H5S_VALID_MAX;
     *p++ = flags;
-    if(sdim->type!=H5S_NULL)
-        *p++ = 0; /*reserved*/
-    else
+
+    /* Dataspace type */
+    if(version > H5O_SDSPACE_VERSION_1)
         *p++ = sdim->type;
-    *p++ = 0; /*reserved*/
-    *p++ = 0; /*reserved*/
-    *p++ = 0; /*reserved*/
-    *p++ = 0; /*reserved*/
+    else {
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+    } /* end else */
 
-    if (sdim->rank > 0) {
-        for (u = 0; u < sdim->rank; u++)
-            H5F_ENCODE_LENGTH (f, p, sdim->size[u]);
-        if (flags & H5S_VALID_MAX) {
-            for (u = 0; u < sdim->rank; u++)
-                H5F_ENCODE_LENGTH (f, p, sdim->max[u]);
-        }
-    }
+    /* Current & maximum dimensions */
+    if(sdim->rank > 0) {
+        for(u = 0; u < sdim->rank; u++)
+            H5F_ENCODE_LENGTH(f, p, sdim->size[u]);
+        if(flags & H5S_VALID_MAX) {
+            for(u = 0; u < sdim->rank; u++)
+                H5F_ENCODE_LENGTH(f, p, sdim->max[u]);
+        } /* end if */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_sdspace_encode() */
 
 
 /*--------------------------------------------------------------------------
@@ -332,25 +358,32 @@ done:
 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size(const H5F_t *f, const void *mesg)
+H5O_sdspace_size(const H5F_t *f, const void *_mesg)
 {
-    const H5S_extent_t	   *space = (const H5S_extent_t *) mesg;
+    const H5S_extent_t	*space = (const H5S_extent_t *)_mesg;
+    hbool_t             use_latest_format;      /* Flag indicating the new group format should be used */
+    size_t		ret_value;
 
-    /*
-     * All dimensionality messages are at least 8 bytes long.
-     */
-    size_t		    ret_value = 8;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_size)
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_size);
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
-    /* add in the dimension sizes */
-    ret_value += space->rank * H5F_SIZEOF_SIZE (f);
+    /* Basic information for all dataspace messages */
+    ret_value = 1 +             /* Version */
+            1 +                 /* Rank */
+            1 +                 /* Flags */
+            1 +                 /* Dataspace type/reserved */
+            (use_latest_format ? 0 : 4); /* Eliminated/reserved */
 
-    /* add in the space for the maximum dimensions, if they are present */
-    ret_value += space->max ? space->rank * H5F_SIZEOF_SIZE (f) : 0;
+    /* Add in the dimension sizes */
+    ret_value += space->rank * H5F_SIZEOF_SIZE(f);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    /* Add in the space for the maximum dimensions, if they are present */
+    ret_value += space->max ? (space->rank * H5F_SIZEOF_SIZE(f)) : 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_sdspace_size() */
 
 
 /*-------------------------------------------------------------------------

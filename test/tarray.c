@@ -92,7 +92,7 @@ test_array_atomic_1d(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid1 = H5Tarray_create (H5T_NATIVE_INT,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(H5T_NATIVE_INT, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
@@ -137,7 +137,7 @@ test_array_atomic_1d(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret=H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -194,7 +194,7 @@ test_array_funcs(void)
     herr_t		ret;	    /* Generic return value */
 
     /* Create a datatype to refer to */
-    type = H5Tarray_create (H5T_IEEE_F32BE,ARRAY1_RANK,tdims1,NULL);
+    type = H5Tarray_create(H5T_IEEE_F32BE, ARRAY1_RANK, tdims1, NULL);
     CHECK(type, FAIL, "H5Tarray_create");
 
     size=H5Tget_precision(type);
@@ -274,7 +274,7 @@ test_array_atomic_3d(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid = H5Tarray_create (H5T_NATIVE_INT,ARRAY2_RANK,tdims2,NULL);
+    tid = H5Tarray_create(H5T_NATIVE_INT, ARRAY2_RANK, tdims2, NULL);
     CHECK(tid, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
@@ -319,7 +319,7 @@ test_array_atomic_3d(void)
     VERIFY(ndims,ARRAY2_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid,rdims2,NULL);
+    ret = H5Tget_array_dims(tid, rdims2, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -406,11 +406,11 @@ test_array_array_atomic(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create a 2-D datatype to refer to */
-    tid2 = H5Tarray_create (H5T_NATIVE_INT,ARRAY3_RANK,tdims2,NULL);
+    tid2 = H5Tarray_create(H5T_NATIVE_INT, ARRAY3_RANK, tdims2, NULL);
     CHECK(tid2, FAIL, "H5Tarray_create");
 
     /* Create a 1-D datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
@@ -453,11 +453,11 @@ test_array_array_atomic(void)
     CHECK(tid1, FAIL, "H5Dget_type");
 
     /* Check the 1-D array rank */
-    ndims1=H5Tget_array_ndims(tid1);
+    ndims1 = H5Tget_array_ndims(tid1);
     VERIFY(ndims1,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the 1-D array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -476,7 +476,7 @@ test_array_array_atomic(void)
     VERIFY(ndims2,ARRAY3_RANK,"H5Tget_array_ndims");
 
     /* Get the 2-D array dimensions */
-    ret=H5Tget_array_dims(tid2,rdims2,NULL);
+    ret = H5Tget_array_dims(tid2, rdims2, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -582,7 +582,7 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close compound datatype */
@@ -631,7 +631,7 @@ test_array_compound_atomic(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -784,7 +784,7 @@ test_array_compound_array(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create an array of floats datatype */
-    tid3 = H5Tarray_create (H5T_NATIVE_FLOAT,ARRAY1_RANK,tdims1,NULL);
+    tid3 = H5Tarray_create(H5T_NATIVE_FLOAT, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid3, FAIL, "H5Tarray_create");
 
     /* Insert float array field */
@@ -796,7 +796,7 @@ test_array_compound_array(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close compound datatype */
@@ -845,7 +845,7 @@ test_array_compound_array(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -906,7 +906,7 @@ test_array_compound_array(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(mtid,rdims1,NULL);
+    ret = H5Tget_array_dims(mtid, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -1079,7 +1079,7 @@ test_array_vlen_atomic(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close VL datatype */
@@ -1132,7 +1132,7 @@ test_array_vlen_atomic(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -1287,7 +1287,7 @@ test_array_vlen_array(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create the nested array datatype to refer to */
-    tid3 = H5Tarray_create(H5T_NATIVE_UINT,ARRAY1_RANK,tdims1,NULL);
+    tid3 = H5Tarray_create(H5T_NATIVE_UINT, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid3, FAIL, "H5Tcreate");
 
     /* Create a VL datatype of 1-D arrays to refer to */
@@ -1299,7 +1299,7 @@ test_array_vlen_array(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close VL datatype */
@@ -1352,7 +1352,7 @@ test_array_vlen_array(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1,rdims1,NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -1383,7 +1383,7 @@ test_array_vlen_array(void)
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid3,rdims1,NULL);
+    ret = H5Tget_array_dims(tid3, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
@@ -1522,7 +1522,7 @@ test_array_bkg(void)
     hsize_t      dima[] = {ALEN};
 
     int          i, j;
-    int          ndims[3] = {1,1,1};
+    unsigned     ndims[3] = {1,1,1};
 
     typedef struct
     {
@@ -1606,7 +1606,7 @@ test_array_bkg(void)
     /* -------------------------------------- */
     for ( i = 0; i < dtsinfo.nsubfields; i++)
     {
-        array_dt = H5Tarray_create (dtsinfo.datatype[i], ndims[i], dima, NULL);
+        array_dt = H5Tarray_create(dtsinfo.datatype[i], ndims[i], dima, NULL);
         CHECK(array_dt, FAIL, "H5Tarray_create");
 
         status = H5Tinsert (type, dtsinfo.name[i], dtsinfo.offset[i], array_dt);
@@ -1683,7 +1683,7 @@ test_array_bkg(void)
     type = H5Tcreate(H5T_COMPOUND, sizeof(fld_t));
     CHECK(type, FAIL, "H5Tcreate");
 
-    array_dt = H5Tarray_create (H5T_NATIVE_FLOAT, 1, dima, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dima, NULL);
     CHECK(array_dt, FAIL, "H5Tarray_create");
 
     status = H5Tinsert (type, "Two", HOFFSET(fld_t, b), array_dt);
@@ -2005,7 +2005,7 @@ test_compat(void)
         VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
         /* Get the array dimensions */
-        ret=H5Tget_array_dims(mtid,rdims1,NULL);
+        ret = H5Tget_array_dims(mtid, rdims1, NULL);
         CHECK(ret, FAIL, "H5Tget_array_dims");
 
         /* Check the array dimensions */
@@ -2050,7 +2050,7 @@ test_compat(void)
         VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
         /* Get the array dimensions */
-        ret=H5Tget_array_dims(mtid,rdims1,NULL);
+        ret = H5Tget_array_dims(mtid,rdims1, NULL);
         CHECK(ret, FAIL, "H5Tget_array_dims");
 
         /* Check the array dimensions */

@@ -50,7 +50,7 @@ Expected output for 'h5dump --xml tcompound.h5'
             <hdf5:Field FieldName="int_array">
                <hdf5:DataType>
                   <hdf5:ArrayType Ndims="1">
-                     <hdf5:ArrayDimension DimSize="4" DimPerm="0"/>
+                     <hdf5:ArrayDimension DimSize="4"/>
                      <hdf5:DataType>
                         <hdf5:AtomicType>
                            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
@@ -62,8 +62,8 @@ Expected output for 'h5dump --xml tcompound.h5'
             <hdf5:Field FieldName="float_array">
                <hdf5:DataType>
                   <hdf5:ArrayType Ndims="2">
-                     <hdf5:ArrayDimension DimSize="5" DimPerm="0"/>
-                     <hdf5:ArrayDimension DimSize="6" DimPerm="1"/>
+                     <hdf5:ArrayDimension DimSize="5"/>
+                     <hdf5:ArrayDimension DimSize="6"/>
                      <hdf5:DataType>
                         <hdf5:AtomicType>
                            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />

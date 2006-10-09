@@ -47,7 +47,8 @@ static double	the_data[100][100];
  *
  *-------------------------------------------------------------------------
  */
-int check_dset(hid_t file, const char* name)
+static int
+check_dset(hid_t file, const char* name)
 { 
     hid_t	space, dset;
     hsize_t	ds_size[2] = {100, 100};
@@ -103,7 +104,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int check_file(char* filename, hid_t fapl, int flag)
+static int
+check_file(char* filename, hid_t fapl, int flag)
 {
     hid_t	file, groups, grp;
     char	name[1024];

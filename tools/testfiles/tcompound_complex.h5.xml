@@ -33,7 +33,7 @@ Expected output for 'h5dump --xml tcompound_complex.h5'
             <hdf5:Field FieldName="b_name">
                <hdf5:DataType>
                   <hdf5:ArrayType Ndims="1">
-                     <hdf5:ArrayDimension DimSize="4" DimPerm="0"/>
+                     <hdf5:ArrayDimension DimSize="4"/>
                      <hdf5:DataType>
                         <hdf5:AtomicType>
                            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLTERM"/>
@@ -52,8 +52,8 @@ Expected output for 'h5dump --xml tcompound_complex.h5'
             <hdf5:Field FieldName="d_name">
                <hdf5:DataType>
                   <hdf5:ArrayType Ndims="2">
-                     <hdf5:ArrayDimension DimSize="5" DimPerm="0"/>
-                     <hdf5:ArrayDimension DimSize="6" DimPerm="1"/>
+                     <hdf5:ArrayDimension DimSize="5"/>
+                     <hdf5:ArrayDimension DimSize="6"/>
                      <hdf5:DataType>
                         <hdf5:AtomicType>
                            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="2" />
@@ -72,7 +72,7 @@ Expected output for 'h5dump --xml tcompound_complex.h5'
             <hdf5:Field FieldName="f_name">
                <hdf5:DataType>
                   <hdf5:ArrayType Ndims="1">
-                     <hdf5:ArrayDimension DimSize="10" DimPerm="0"/>
+                     <hdf5:ArrayDimension DimSize="10"/>
                      <hdf5:DataType>
                         <hdf5:AtomicType>
                            <hdf5:FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />

@@ -54,7 +54,7 @@ Expected output for 'h5dump --xml tnestedcomp.h5'
                      <hdf5:Field FieldName="array_name">
                         <hdf5:DataType>
                            <hdf5:ArrayType Ndims="1">
-                              <hdf5:ArrayDimension DimSize="2" DimPerm="0"/>
+                              <hdf5:ArrayDimension DimSize="2"/>
                               <hdf5:DataType>
                                  <hdf5:AtomicType>
                                     <hdf5:FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />

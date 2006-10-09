@@ -548,7 +548,8 @@ static void gent_compound_dt(void) {       /* test compound data type */
     } dset5_t;
     dset5_t dset5[5];
 
-    int i, j, k, l, ndims;
+    int i, j, k, l;
+    unsigned ndims;
     hsize_t dim[2];
 
     hsize_t sdim = 5;
@@ -612,21 +613,21 @@ static void gent_compound_dt(void) {       /* test compound data type */
 
   ndims = 1; dim[0] = 4;
 
-  array_dt=H5Tarray_create(H5T_STD_I32BE,ndims,dim,NULL);
+  array_dt = H5Tarray_create(H5T_STD_I32BE, ndims, dim, NULL);
   H5Tinsert(type, "int_array", HOFFSET(dset3_t, a), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_NATIVE_INT,ndims,dim,NULL);
+  array_dt = H5Tarray_create(H5T_NATIVE_INT, ndims, dim, NULL);
   H5Tinsert(type2, "int_array", HOFFSET(dset3_t, a), array_dt);
   H5Tclose(array_dt);
 
   ndims = 2; dim[0] = 5; dim[1] = 6;
 
-  array_dt=H5Tarray_create(H5T_IEEE_F32BE,ndims,dim,NULL);
+  array_dt = H5Tarray_create(H5T_IEEE_F32BE, ndims, dim, NULL);
   H5Tinsert(type, "float_array", HOFFSET(dset3_t, b), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,ndims,dim,NULL);
+  array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, ndims, dim, NULL);
   H5Tinsert(type2, "float_array", HOFFSET(dset3_t, b), array_dt);
   H5Tclose(array_dt);
 
@@ -735,8 +736,8 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     } dset5_t;
     dset5_t dset5[10];
 
-    int i, ndims;
-    const int perm[2]={0,1};
+    int i;
+    unsigned ndims;
     hsize_t dim[2];
 
     hsize_t sdim, maxdim;
@@ -819,12 +820,12 @@ static void gent_compound_dt2(void) {       /* test compound data type */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
 
   ndims = 1; dim[0] = 4;
-  array_dt=H5Tarray_create(H5T_STD_I32BE,ndims,dim,perm);
+  array_dt = H5Tarray_create(H5T_STD_I32BE, ndims, dim, NULL);
   H5Tinsert(type, "int_array", HOFFSET(dset3_t, a), array_dt);
   H5Tclose(array_dt);
 
   ndims = 2; dim[0] = 5; dim[1] = 6;
-  array_dt=H5Tarray_create(H5T_IEEE_F32BE,ndims,dim,perm);
+  array_dt = H5Tarray_create(H5T_IEEE_F32BE, ndims, dim, NULL);
   H5Tinsert(type, "float_array", HOFFSET(dset3_t, b), array_dt);
   H5Tclose(array_dt);
 
@@ -1102,8 +1103,6 @@ static void gent_many(void)
     dset1_t dset1[6];
 
     hsize_t dim[4];
-    int idx[4] = {0,1,2,3};  /* normal indicies */
-    const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
     herr_t ret;
 
   fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1121,29 +1120,29 @@ static void gent_many(void)
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
   dim[0] = dim[1] = dim[2] = dim[3] = 2;
-  array_dt=H5Tarray_create(H5T_STD_I32BE,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_STD_I32BE, 4, dim, NULL);
   H5Tinsert(type, "a_array", HOFFSET(dset1_t, a), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_IEEE_F64BE,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_IEEE_F64BE, 4, dim, NULL);
   H5Tinsert(type, "b_array", HOFFSET(dset1_t, b), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_IEEE_F64BE,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_IEEE_F64BE, 4, dim, NULL);
   H5Tinsert(type, "c_array", HOFFSET(dset1_t, c), array_dt);
   H5Tclose(array_dt);
 
   type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
-  array_dt=H5Tarray_create(H5T_NATIVE_INT,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_NATIVE_INT, 4, dim, NULL);
   H5Tinsert(type2, "a_array", HOFFSET(dset1_t, a), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_NATIVE_DOUBLE,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_NATIVE_DOUBLE,4,dim, NULL);
   H5Tinsert(type2, "b_array", HOFFSET(dset1_t, b), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_NATIVE_DOUBLE,4,dim,perm);
+  array_dt = H5Tarray_create(H5T_NATIVE_DOUBLE, 4, dim, NULL);
   H5Tinsert(type2, "c_array", HOFFSET(dset1_t, c), array_dt);
   H5Tclose(array_dt);
 
@@ -1174,33 +1173,29 @@ static void gent_many(void)
   dims[0] = 10;
   space2 = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT);
-  for (i = 0; i < 10; i++) d[i] = 0.1 * i;
+  for (i = 0; i < 10; i++)
+      d[i] = 0.1 * i;
   H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
   H5Sclose(space2);
   H5Aclose(attr);
 
-  for (j=0; j<(int)sdim; j++) {
- for (i3 = 0; i3 < 2; i3++) {
-  idx[perm[3]] = i3;
- for (i2 = 0; i2 < 2; i2++) {
-  idx[perm[2]] = i2;
- for (i1 = 0; i1 < 2; i1++) {
-  idx[perm[1]] = i1;
- for (i0 = 0; i0 < 2; i0++) {
-  idx[perm[0]] = i0;
-
-  dset1[j].a[idx[3]][idx[2]][idx[1]][idx[0]] = i0+j;
-  dset1[j].b[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j);
+    for (j=0; j<(int)sdim; j++) {
+        for (i3 = 0; i3 < 2; i3++) {
+            for (i2 = 0; i2 < 2; i2++) {
+                for (i1 = 0; i1 < 2; i1++) {
+                    for (i0 = 0; i0 < 2; i0++) {
+                        dset1[j].a[i3][i2][i1][i0] = i0+j;
+                        dset1[j].b[i3][i2][i1][i0] = (double)(i0+j);
 #ifdef WIN32
-  dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+(signed __int64)sdim);
+                        dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+(signed __int64)sdim);
 #else
-  dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+sdim);
+                        dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+sdim);
 #endif
- }
- }
- }
- }
-  }
+                    }
+                }
+            }
+        }
+    }
 
   H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
 
@@ -1388,24 +1383,24 @@ static void gent_str(void) {
 
   mdims[0] = 8; mdims[1] = 10;
 
-  array_dt=H5Tarray_create(H5T_STD_I32BE,2,mdims,NULL);
+  array_dt = H5Tarray_create(H5T_STD_I32BE, 2, mdims, NULL);
   H5Tinsert(f_type, "int_array", HOFFSET(compound_t, a), array_dt);
   H5Tclose(array_dt);
 
-  array_dt=H5Tarray_create(H5T_NATIVE_INT,2,mdims,NULL);
+  array_dt = H5Tarray_create(H5T_NATIVE_INT, 2, mdims, NULL);
   H5Tinsert(f_type2, "int_array", HOFFSET(compound_t, a), array_dt);
   H5Tclose(array_dt);
 
   mdims[0] = 3; mdims[1] = 4;
 
   str_type = mkstr(32, H5T_STR_SPACEPAD);
-  array_dt=H5Tarray_create(str_type,2,mdims,NULL);
+  array_dt = H5Tarray_create(str_type, 2, mdims, NULL);
   H5Tinsert(f_type, "string", HOFFSET(compound_t, s), array_dt);
   H5Tclose(array_dt);
   H5Tclose(str_type);
 
   str_type = mkstr(33, H5T_STR_NULLTERM);
-  array_dt=H5Tarray_create(str_type,2,mdims,NULL);
+  array_dt = H5Tarray_create(str_type, 2, mdims, NULL);
   H5Tinsert(f_type2, "string", HOFFSET(compound_t, s), array_dt);
   H5Tclose(array_dt);
   H5Tclose(str_type);
@@ -1859,7 +1854,7 @@ static void gent_nestcomp(void)
     hid_t      char_id;    /* Handle for the string datatype */
     hid_t      array_dt;
     hsize_t     array_dims[] = {2};    /* Dataspace dimensions */
-    int        ndims = 1;    /* Number of dimensions in the array field */
+    unsigned    ndims = 1;    /* Number of dimensions in the array field */
 
     s2_t       s1[10];
     hid_t      s2_tid;     /* File datatype identifier */
@@ -1907,7 +1902,7 @@ static void gent_nestcomp(void)
     H5Tset_strpad(char_id, H5T_STR_NULLTERM);
     H5Tinsert(cmp_tid, "char_name", HOFFSET(cmp_t, a), char_id);
 
-    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,ndims,array_dims,NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, ndims, array_dims, NULL);
     H5Tinsert(cmp_tid, "array_name", HOFFSET(cmp_t, b), array_dt);
     H5Tclose(array_dt);
 
@@ -2416,7 +2411,7 @@ static void gent_array1(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create a datatype to refer to */
-    tid1 = H5Tarray_create (H5T_NATIVE_INT,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(H5T_NATIVE_INT, ARRAY1_RANK, tdims1, NULL);
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
@@ -2462,7 +2457,7 @@ static void gent_array2(void)
     sid = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create a datatype to refer to */
-    tid = H5Tarray_create (H5T_NATIVE_INT,ARRAY2_RANK,tdims2,NULL);
+    tid = H5Tarray_create(H5T_NATIVE_INT, ARRAY2_RANK, tdims2, NULL);
 
     /* Create a dataset */
     dataset=H5Dcreate(fid,"Dataset1",tid,sid,H5P_DEFAULT);
@@ -2510,10 +2505,10 @@ static void gent_array3(void)
     sid = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create a 2-D datatype to refer to */
-    tid2 = H5Tarray_create (H5T_NATIVE_INT,ARRAY3_RANK,tdims2,NULL);
+    tid2 = H5Tarray_create(H5T_NATIVE_INT, ARRAY3_RANK, tdims2, NULL);
 
     /* Create a 1-D datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
 
     /* Create a dataset */
     dataset=H5Dcreate(fid,"Dataset1",tid1,sid,H5P_DEFAULT);
@@ -2577,7 +2572,7 @@ static void gent_array4(void)
     assert(ret>=0);
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
 
     /* Close compound datatype */
     ret=H5Tclose(tid2);
@@ -2641,7 +2636,7 @@ static void gent_array5(void)
     assert(ret>=0);
 
     /* Create an array of floats datatype */
-    tid3 = H5Tarray_create (H5T_NATIVE_FLOAT,ARRAY1_RANK,tdims1,NULL);
+    tid3 = H5Tarray_create(H5T_NATIVE_FLOAT, ARRAY1_RANK, tdims1, NULL);
 
     /* Insert float array field */
     ret = H5Tinsert (tid2, "f", HOFFSET(s2_t,f), tid3);
@@ -2652,7 +2647,7 @@ static void gent_array5(void)
     assert(ret>=0);
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
 
     /* Close compound datatype */
     ret=H5Tclose(tid2);
@@ -2708,7 +2703,7 @@ static void gent_array6(void)
     tid2 = H5Tvlen_create(H5T_NATIVE_UINT);
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
 
     /* Close VL datatype */
     ret=H5Tclose(tid2);
@@ -2767,7 +2762,7 @@ static void gent_array7(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create the nested array datatype to refer to */
-    tid3 = H5Tarray_create(H5T_NATIVE_UINT,ARRAY1_RANK,tdims1,NULL);
+    tid3 = H5Tarray_create(H5T_NATIVE_UINT, ARRAY1_RANK, tdims1, NULL);
 
     /* Create a VL datatype of 1-D arrays to refer to */
     tid2 = H5Tvlen_create(tid3);
@@ -2777,7 +2772,7 @@ static void gent_array7(void)
     assert(ret>=0);
 
     /* Create an array datatype to refer to */
-    tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
+    tid1 = H5Tarray_create(tid2, ARRAY1_RANK, tdims1, NULL);
 
     /* Close VL datatype */
     ret=H5Tclose(tid2);
@@ -2842,7 +2837,7 @@ static void gent_empty(void)
     assert(ret>=0);
 
     /* write out an empty array dataset */
-    type = H5Tarray_create(H5T_NATIVE_INT,SPACE1_RANK,dims,NULL);
+    type = H5Tarray_create(H5T_NATIVE_INT, SPACE1_RANK, dims, NULL);
     dset = H5Dcreate(file, "Dataset4.0", type, space, H5P_DEFAULT);
     /* Don't write any data */
     ret = H5Dclose(dset);
@@ -3326,7 +3321,7 @@ static void write_attr_in(hid_t loc_id,
  * H5T_ARRAY
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,1,dims,"array",tid,buf6);
  status = H5Tclose(tid);
 
@@ -3436,7 +3431,7 @@ static void write_attr_in(hid_t loc_id,
  * H5T_ARRAY
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,2,dims2,"array2D",tid,buf62);
  status = H5Tclose(tid);
 
@@ -3575,7 +3570,7 @@ static void write_attr_in(hid_t loc_id,
   }
  }
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_attr(loc_id,3,dims3,"array3D",tid,buf63);
  status = H5Tclose(tid);
 
@@ -3768,7 +3763,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_ARRAY
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,1,dims,"array",tid,buf6);
  status = H5Tclose(tid);
 
@@ -3878,7 +3873,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_ARRAY
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,2,dims2,"array2D",tid,buf62);
  status = H5Tclose(tid);
 
@@ -4030,7 +4025,7 @@ static void write_dset_in(hid_t loc_id,
   }
  }
 
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(loc_id,3,dims3,"array3D",tid,buf63);
  status = H5Tclose(tid);
 
@@ -4289,8 +4284,7 @@ static void gent_compound_complex(void)
     assert (status >= 0);
 
     /* Create the array data type for the string array                */
-    str_array_id = H5Tarray_create(array_tid, F41_ARRAY_RANK,
-      array_dimb, NULL);
+    str_array_id = H5Tarray_create(array_tid, F41_ARRAY_RANK, array_dimb, NULL);
     assert (str_array_id >= 0);
 
     /* Copy the array data type for the character array               */
@@ -4302,13 +4296,11 @@ static void gent_compound_complex(void)
     assert (status >= 0);
 
     /* Create the array data type for the character array             */
-    array2_tid = H5Tarray_create(H5T_NATIVE_SHORT, F41_ARRAY_RANKd,
-      array_dimd, NULL);
+    array2_tid = H5Tarray_create(H5T_NATIVE_SHORT, F41_ARRAY_RANKd, array_dimd, NULL);
     assert (array2_tid >= 0);
 
     /* Create the array data type for the character array             */
-    array4_tid = H5Tarray_create(H5T_NATIVE_DOUBLE, F41_ARRAY_RANK,
-      array_dimf, NULL);
+    array4_tid = H5Tarray_create(H5T_NATIVE_DOUBLE, F41_ARRAY_RANK, array_dimf, NULL);
     assert (array4_tid >= 0);
 
     /* Create the memory data type                                    */
@@ -5232,7 +5224,7 @@ static void gent_fvalues(void)
  * dataset with a H5T_ARRAY fill value
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
  write_dset(fid,1,dims,"fill_array",tid,buf4);
  ret = H5Tclose(tid);
 
@@ -5568,7 +5560,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static void gent_binary()
+static void
+gent_binary(void)
 {
  hid_t    fid, sid, did, tid;
  hsize_t  dims[1] = {6};
@@ -5606,7 +5599,7 @@ static void gent_binary()
  * array
  *-------------------------------------------------------------------------
  */
- tid = H5Tarray_create(H5T_NATIVE_INT,1,dims,NULL);
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
  sid = H5Screate_simple(1, dimarray, NULL);
  did = H5Dcreate(fid, "array", tid, sid, H5P_DEFAULT);
  H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, abuf);

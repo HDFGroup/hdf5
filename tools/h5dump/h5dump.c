@@ -686,7 +686,6 @@ print_datatype(hid_t type,unsigned in_group)
     char       *fname;
     hid_t       mtype, str_type;
     unsigned    nmembers;
-    int         perm[H5DUMP_MAX_RANK];
     unsigned    ndims;
     unsigned    i;
     size_t      size=0;
@@ -1062,7 +1061,7 @@ done:
 
             /* Get array information */
             ndims = H5Tget_array_ndims(type);
-            H5Tget_array_dims(type, dims, perm);
+            H5Tget_array_dims(type, dims, NULL);
 
             /* Print array dimensions */
             for (i = 0; i < ndims; i++)
@@ -2100,7 +2099,7 @@ dump_subsetting_header(struct subset_t *sset, int dims)
  *-------------------------------------------------------------------------
  */
 static void
-dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_ai)
+dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 {
     h5tool_format_t   *outputformat = &dataformat;
     int         status = -1;
@@ -2115,7 +2114,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_ai)
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
-    outputformat->pindex=display_ai;
+    outputformat->pindex=display_index;
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
         outputformat->idx_n_fmt = "%lu";
@@ -4282,7 +4281,6 @@ xml_print_datatype(hid_t type, unsigned in_group)
     char                   *fname;
     hid_t                   mtype;
     unsigned                nmembers;
-    int                     perm[H5DUMP_MAX_RANK];
     unsigned                ndims;
     unsigned                i;
     size_t                  size;
@@ -4608,24 +4606,15 @@ xml_print_datatype(hid_t type, unsigned in_group)
             printf("%u\">\n", ndims);
 
             /* Get array information */
-            H5Tget_array_dims(type, dims, perm);
+            H5Tget_array_dims(type, dims, NULL);
 
             /* list of dimensions */
             indent += COL;
-            if (perm != NULL) {
-                /* for each dimension, list */
-                for (i = 0; i < ndims; i++) {
-                    indentation(indent);
-                    printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
-                           xmlnsprefix,(int) dims[i], (int) perm[i]);
-                }
-            } else {
-                for (i = 0; i < ndims; i++) {
-                    indentation(indent);
-                    printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
-                           xmlnsprefix,
-                           (int) dims[i]);
-                }
+            for (i = 0; i < ndims; i++) {
+                indentation(indent);
+                printf("<%sArrayDimension DimSize=\"%u\"/>\n",
+                       xmlnsprefix,
+                       (int) dims[i]);
             }
             indent -= COL;
 

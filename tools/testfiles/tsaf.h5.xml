@@ -1329,7 +1329,7 @@ Expected output for 'h5dump --xml tsaf.h5'
                      <hdf5:Field FieldName="_">
                         <hdf5:DataType>
                            <hdf5:ArrayType Ndims="1">
-                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:ArrayDimension DimSize="8"/>
                               <hdf5:DataType>
                                  <hdf5:AtomicType>
                                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
@@ -1347,7 +1347,7 @@ Expected output for 'h5dump --xml tsaf.h5'
                      <hdf5:Field FieldName="_">
                         <hdf5:DataType>
                            <hdf5:ArrayType Ndims="1">
-                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:ArrayDimension DimSize="8"/>
                               <hdf5:DataType>
                                  <hdf5:AtomicType>
                                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
@@ -1365,7 +1365,7 @@ Expected output for 'h5dump --xml tsaf.h5'
                      <hdf5:Field FieldName="_">
                         <hdf5:DataType>
                            <hdf5:ArrayType Ndims="1">
-                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:ArrayDimension DimSize="8"/>
                               <hdf5:DataType>
                                  <hdf5:AtomicType>
                                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
@@ -1882,7 +1882,7 @@ Expected output for 'h5dump --xml tsaf.h5'
                      <hdf5:Field FieldName="_">
                         <hdf5:DataType>
                            <hdf5:ArrayType Ndims="1">
-                              <hdf5:ArrayDimension DimSize="16" DimPerm="0"/>
+                              <hdf5:ArrayDimension DimSize="16"/>
                               <hdf5:DataType>
                                  <hdf5:AtomicType>
                                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />

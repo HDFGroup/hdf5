@@ -294,9 +294,8 @@ typedef struct H5T_opaque_t {
 /* An array datatype */
 typedef struct H5T_array_t {
     size_t	nelem;		/* total number of elements in array */
-    int		ndims;		/* member dimensionality        */
+    unsigned	ndims;		/* member dimensionality        */
     size_t	dim[H5S_MAX_RANK];  /* size in each dimension       */
-    int		perm[H5S_MAX_RANK]; /* index permutation            */
 } H5T_array_t;
 
 typedef enum H5T_state_t {
@@ -460,7 +459,7 @@ H5_DLL herr_t H5T_insert(const H5T_t *parent, const char *name, size_t offset,
 H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
 H5_DLL herr_t H5T_enum_insert(const H5T_t *dt, const char *name, const void *value);
 H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
-H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
+H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[]);
 H5_DLL herr_t H5T_sort_value(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T_sort_name(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);
@@ -1323,8 +1322,8 @@ H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
 H5_DLL htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 
 /* Array functions */
-H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
-        const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
+H5_DLL H5T_t * H5T_array_create(H5T_t *base, unsigned ndims,
+        const hsize_t dim[/* ndims */]);
 
 /* Compound functions */
 H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);

@@ -46,6 +46,7 @@
 
 static char    *h5tools_escape(char *s, size_t size);
 static hbool_t  h5tools_is_zero(const void *_mem, size_t size);
+static void     h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch);
 
 /*-------------------------------------------------------------------------
  * Function:	h5tools_str_close
@@ -460,69 +461,69 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t 
  *
  *-------------------------------------------------------------------------
  */
-void
-h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned char ch)
+static void
+h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
 {
     if (info->str_locale == ESCAPE_HTML) {
         if (ch <= ' ' || ch > '~')
             h5tools_str_append(str, "%%%02x", ch);
         else
-            h5tools_str_append(str, "%c", (char)ch);
+            h5tools_str_append(str, "%c", ch);
     } else {
         switch (ch) {
-        case '"':
-           if (!info->do_escape)
-            h5tools_str_append(str, "\"");
-           else
-            h5tools_str_append(str, "\\\"");
-            break;
-        case '\\':
-          if (!info->do_escape)
-            h5tools_str_append(str, "\\");
-          else
-            h5tools_str_append(str, "\\\\");
-            break;
-        case '\b':
-           if (!info->do_escape)
-            h5tools_str_append(str, "\b");
-           else
-            h5tools_str_append(str, "\\b");
-            break;
-        case '\f':
-           if (!info->do_escape)
-             h5tools_str_append(str, "\f");
-           else
-             h5tools_str_append(str, "\\f");
-            break;
-        case '\n':
-           if (!info->do_escape) {
-             h5tools_str_append(str, "\n");
-             h5tools_str_append(str, "           ");
-           }
-           else
-            h5tools_str_append(str, "\\n");
-         break;
-        case '\r':
-         if (!info->do_escape) {
-           h5tools_str_append(str, "\r");
-           h5tools_str_append(str, "           ");
-         }
-          else
-            h5tools_str_append(str, "\\r");
-            break;
-        case '\t':
-          if (!info->do_escape)
-           h5tools_str_append(str, "\t");
-          else
-           h5tools_str_append(str, "\\t");
-            break;
-        default:
-            if (isprint(ch))
-                h5tools_str_append(str, "%c", (char)ch);
-            else
-                h5tools_str_append(str, "\\%03o", ch);
+            case '"':
+               if (!info->do_escape)
+                h5tools_str_append(str, "\"");
+               else
+                h5tools_str_append(str, "\\\"");
+                break;
+            case '\\':
+              if (!info->do_escape)
+                h5tools_str_append(str, "\\");
+              else
+                h5tools_str_append(str, "\\\\");
+                break;
+            case '\b':
+               if (!info->do_escape)
+                h5tools_str_append(str, "\b");
+               else
+                h5tools_str_append(str, "\\b");
+                break;
+            case '\f':
+               if (!info->do_escape)
+                 h5tools_str_append(str, "\f");
+               else
+                 h5tools_str_append(str, "\\f");
+                break;
+            case '\n':
+               if (!info->do_escape) {
+                 h5tools_str_append(str, "\n");
+                 h5tools_str_append(str, "           ");
+               }
+               else
+                h5tools_str_append(str, "\\n");
+             break;
+            case '\r':
+             if (!info->do_escape) {
+               h5tools_str_append(str, "\r");
+               h5tools_str_append(str, "           ");
+             }
+              else
+                h5tools_str_append(str, "\\r");
+                break;
+            case '\t':
+              if (!info->do_escape)
+               h5tools_str_append(str, "\t");
+              else
+               h5tools_str_append(str, "\\t");
+                break;
+            default:
+                if (isprint(ch))
+                    h5tools_str_append(str, "%c", ch);
+                else
+                    h5tools_str_append(str, "\\%03o", ch);
 
-            break;
+                break;
         }
     }
 }
@@ -632,7 +633,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 #endif
      } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
                                H5Tequal(type, H5T_NATIVE_UCHAR))) {
-        h5tools_print_char(str, info, (unsigned char)(*ucp_vp));
+        h5tools_print_char(str, info, (char)(*ucp_vp));
     } else if (H5T_STRING == H5Tget_class(type)) {
         unsigned int i;
         char quote = '\0';
@@ -686,7 +687,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 }
 
                 /* Print the character */
-                h5tools_print_char(str, info, (unsigned char)(s[i]));
+                h5tools_print_char(str, info, s[i]);
 
                 /* Print the repeat count */
                 if (info->str_repeat && j > info->str_repeat) {

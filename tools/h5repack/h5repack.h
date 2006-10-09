@@ -114,8 +114,7 @@ typedef struct {
 extern "C" {
 #endif
 
-int h5repack           (const char* infile, const char* outfile, pack_opt_t *options,
-                        int argc, const char *argv[]);
+int h5repack           (const char* infile, const char* outfile, pack_opt_t *options);
 int h5repack_addfilter (const char* str, pack_opt_t *options);
 int h5repack_addlayout (const char* str, pack_opt_t *options);
 int h5repack_init      (pack_opt_t *options, int verbose);
@@ -138,15 +137,11 @@ int h5repack_cmpdcpl   (const char *fname1,
 
 
 int check_objects(const char* fname,
-                  pack_opt_t *options,
-                  int argc,
-                  const char *argv[]);
+                  pack_opt_t *options);
 
 int copy_objects(const char* fnamein,
                  const char* fnameout,
-                 pack_opt_t *options,
-                 int argc,
-                 const char *argv[]);
+                 pack_opt_t *options);
 
 void print_objlist(const char *filename,
                    int nobjects,
@@ -184,7 +179,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
-                  hid_t type_id,       /* datatype */
                   pack_opt_t *options); /* repack options */
 
 int has_filter(hid_t dcpl_id,

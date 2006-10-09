@@ -69,7 +69,7 @@ int main (int argc, const char *argv[])
  TESTING("    copy of datasets (fill values)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME0,FNAME0OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME0,FNAME0OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME0,FNAME0OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -90,7 +90,7 @@ int main (int argc, const char *argv[])
  TESTING("    copy of datasets (all datatypes)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME1,FNAME1OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME1,FNAME1OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -109,7 +109,7 @@ int main (int argc, const char *argv[])
  TESTING("    copy of datasets (attributes)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME2,FNAME2OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME2,FNAME2OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME2,FNAME2OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -129,7 +129,7 @@ int main (int argc, const char *argv[])
  TESTING("    copy of datasets (hardlinks)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME3,FNAME3OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME3,FNAME3OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME3,FNAME3OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -149,7 +149,7 @@ int main (int argc, const char *argv[])
  TESTING("    copy of allocation early file");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME5,FNAME5OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME5,FNAME5OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME5,FNAME5OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -183,7 +183,7 @@ int main (int argc, const char *argv[])
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -211,7 +211,7 @@ int main (int argc, const char *argv[])
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -249,7 +249,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset2:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -279,7 +279,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("SZIP=8,NN",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -312,7 +312,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -341,7 +341,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -372,7 +372,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -402,7 +402,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -451,7 +451,7 @@ if (szip_can_encode) {
   TEST_ERROR;
 #endif
 
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -474,7 +474,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -494,7 +494,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -515,7 +515,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CONTI",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -536,7 +536,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("CONTI",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -558,7 +558,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset1:COMPA",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -579,7 +579,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("COMPA",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -601,7 +601,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_compact:CONTI",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -621,7 +621,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_compact:CHUNK=2x5",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -641,7 +641,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_compact:COMPA",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -660,7 +660,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_contiguous:COMPA",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -679,7 +679,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_contiguous:CHUNK=3x6",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -699,7 +699,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_contiguous:CONTI",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -718,7 +718,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_chunk:COMPA",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -738,7 +738,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_chunk:CONTI",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -757,7 +757,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addlayout("dset_chunk:CHUNK=18x13",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME4,FNAME4OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -785,7 +785,7 @@ if (szip_can_encode) {
 if (szip_can_encode) {
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME7,FNAME7OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME7,FNAME7OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME7,FNAME7OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -810,7 +810,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_szip:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME7,FNAME7OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME7,FNAME7OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME7,FNAME7OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -833,7 +833,7 @@ if (szip_can_encode) {
 #ifdef H5_HAVE_FILTER_DEFLATE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME8,FNAME8OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME8,FNAME8OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME8,FNAME8OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -855,7 +855,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_deflate:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME8,FNAME8OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME8,FNAME8OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME8,FNAME8OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -876,7 +876,7 @@ if (szip_can_encode) {
 #ifdef H5_HAVE_FILTER_SHUFFLE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME9,FNAME9OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME9,FNAME9OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME9,FNAME9OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -897,7 +897,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_shuffle:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME9,FNAME9OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME9,FNAME9OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME9,FNAME9OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -916,7 +916,7 @@ if (szip_can_encode) {
 #ifdef H5_HAVE_FILTER_FLETCHER32
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME10,FNAME10OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME10,FNAME10OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME10,FNAME10OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -937,7 +937,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_fletcher32:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME10,FNAME10OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME10,FNAME10OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME10,FNAME10OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -957,7 +957,7 @@ if (szip_can_encode) {
 #ifdef H5_HAVE_FILTER_NBIT
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME12,FNAME12OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -978,7 +978,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_nbit:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME12,FNAME12OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -999,7 +999,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_int31:NBIT",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME12,FNAME12OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1017,7 +1017,7 @@ if (szip_can_encode) {
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack(FNAME13,FNAME13OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1038,7 +1038,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_scaleoffset:NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME13,FNAME13OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1060,7 +1060,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_none:SOFF=31,IN",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME13,FNAME13OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1096,7 +1096,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_deflate:SZIP=8,NN",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME11,FNAME11OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1124,7 +1124,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME11,FNAME11OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
@@ -1156,7 +1156,7 @@ if (szip_can_encode) {
   TEST_ERROR;
  if (h5repack_addfilter("NONE",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME11,FNAME11OUT,&pack_options,argc,argv)<0)
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   TEST_ERROR;
  if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;

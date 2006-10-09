@@ -167,10 +167,10 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
     assert(dtype);
 
-    if((h5_class = H5T_get_class(dtype, FALSE))==H5T_NO_CLASS)
+    if((h5_class = H5T_get_class(dtype, FALSE)) == H5T_NO_CLASS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
 
-    if((size =  H5T_get_size(dtype))==0)
+    if((size =  H5T_get_size(dtype)) == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size")
 
     switch(h5_class) {
@@ -336,9 +336,9 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer. */
 
-                /* Retrieve base type for enumarate type */
+                /* Retrieve base type for enumerated type */
                 if((super_type=H5T_get_super(dtype))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get base type for enumarate type")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get base type for enumerate type")
                 if((nat_super_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed")
 
@@ -359,7 +359,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 /* Retrieve member info and insert members into new enum type */
                 if((snmemb = H5T_get_nmembers(dtype))<=0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumarate data type doesn't have any member")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumerate data type doesn't have any member")
                 H5_ASSIGN_OVERFLOW(nmemb,snmemb,int,unsigned);
                 for(i=0; i<nmemb; i++) {
                     if((memb_name=H5T_get_member_name(dtype, i))==NULL)
@@ -400,37 +400,37 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 size_t      super_align=0;
 
                 /* Retrieve dimension information for array data type */
-                if((sarray_rank=H5T_get_array_ndims(dtype))<=0)
+                if((sarray_rank = H5T_get_array_ndims(dtype)) <= 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank")
-                H5_ASSIGN_OVERFLOW(array_rank,sarray_rank,int,unsigned);
-                if((dims = (hsize_t*)H5MM_malloc(array_rank*sizeof(hsize_t)))==NULL)
+                H5_ASSIGN_OVERFLOW(array_rank, sarray_rank, int, unsigned);
+                if((dims = (hsize_t*)H5MM_malloc(array_rank * sizeof(hsize_t))) == NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
-                if(H5T_get_array_dims(dtype, dims, NULL)<0)
+                if(H5T_get_array_dims(dtype, dims) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension size")
 
                 /* Retrieve base type for array type */
-                if((super_type=H5T_get_super(dtype))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type")
+                if((super_type = H5T_get_super(dtype)) == NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for array type")
                 if((nat_super_type = H5T_get_native_type(super_type, direction, &super_align,
-                                                         &super_offset, &super_size))==NULL)
+                                                         &super_offset, &super_size)) == NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed")
 
                 /* Close super type */
-                if(H5T_close(super_type)<0)
+                if(H5T_close(super_type) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype")
 
                 /* Create a new array type based on native type */
-                if((new_type=H5T_array_create(nat_super_type, sarray_rank, dims, NULL))==NULL)
+                if((new_type = H5T_array_create(nat_super_type, array_rank, dims)) == NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create array type")
 
                 /* Close base type */
-                if(H5T_close(nat_super_type)<0)
+                if(H5T_close(nat_super_type) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype")
 
-                for(i=0; i<array_rank; i++)
+                for(i = 0; i < array_rank; i++)
                     nelems *= dims[i];
-                H5_CHECK_OVERFLOW(nelems,hsize_t,size_t);
-                if(H5T_cmp_offset(comp_size, offset, super_size, (size_t)nelems, super_align, struct_align)<0)
+                H5_CHECK_OVERFLOW(nelems, hsize_t, size_t);
+                if(H5T_cmp_offset(comp_size, offset, super_size, (size_t)nelems, super_align, struct_align) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
 
                 H5MM_xfree(dims);
@@ -446,7 +446,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 /* Retrieve base type for array type */
                 if((super_type=H5T_get_super(dtype))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for VL type")
                 /* Don't need alignment, offset information if this VL isn't a field of compound type.  If it
                  * is, go to a few steps below to compute the information directly. */
                 if((nat_super_type = H5T_get_native_type(super_type, direction, NULL, NULL, &super_size))==NULL)

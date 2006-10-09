@@ -57,57 +57,54 @@ H5T_init_array_interface(void)
  * Purpose:	Create a new array data type based on the specified BASE_TYPE.
  *		The type is an array with NDIMS dimensionality and the size of the
  *      array is DIMS. The total member size should be relatively small.
- *      PERM is currently unimplemented and unused, but is designed to contain
- *      the dimension permutation from C order.
  *      Array datatypes are currently limited to H5S_MAX_RANK number of
  *      dimensions and must have the number of dimensions set greater than
  *      0. (i.e. 0 > ndims <= H5S_MAX_RANK)  All dimensions sizes must be greater
  *      than 0 also.
  *
  * Return:	Success:	ID of new array data type
- *
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Thursday, Oct 26, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
-    const int perm[/* ndims */])
+H5Tarray_create(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */],
+    const int UNUSED perm[/* ndims */])
 {
-    H5T_t	*base = NULL;		/* base data type	*/
-    H5T_t	*dt = NULL;		    /* new array data type	*/
-    int    i;                  /* local index variable */
-    hid_t	ret_value;	/* return value			*/
+    H5T_t	*base;		/* base data type	*/
+    H5T_t	*dt;		/* new array data type	*/
+    unsigned    u;              /* local index variable */
+    hid_t	ret_value;	/* return value	*/
 
-    FUNC_ENTER_API(H5Tarray_create, FAIL);
-    H5TRACE4("i","iIs*h*Is",base_id,ndims,dim,perm);
+    FUNC_ENTER_API(H5Tarray_create, FAIL)
+    H5TRACE3("i","iIs*h",base_id,ndims,dim);
 
     /* Check args */
-    if (ndims<1 || ndims>H5S_MAX_RANK)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality");
-    if (ndims>0 && !dim)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
-    for(i=0; i<ndims; i++)
-        if(!(dim[i]>0))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified");
-    if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+    if(ndims < 1 || ndims > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality")
+    if(!dim)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified")
+    for(u = 0; u < ndims; u++)
+        if(!(dim[u] > 0))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified")
+    if(NULL == (base = H5I_object_verify(base_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+    if(perm)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension permutations not supported")
 
     /* Create the actual array datatype */
-    if ((dt=H5T_array_create(base,ndims,dim,perm))==NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype");
+    if((dt = H5T_array_create(base, ndims, dim)) == NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype")
 
     /* Atomize the type */
-    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    if((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* end H5Tarray_create */
 
 
@@ -116,34 +113,29 @@ done:
  *
  * Purpose:	Internal routine to create a new array data type based on the
  *      specified BASE_TYPE.  The type is an array with NDIMS dimensionality
- *      and the size of the array is DIMS.  PERM is currently unimplemented
- *      and unused, but is designed to contain the dimension permutation from
- *      C order.  Array datatypes are currently limited to H5S_MAX_RANK number
- *      of *      dimensions.
+ *      and the size of the array is DIMS.
+ *      Array datatypes are currently limited to H5S_MAX_RANK number
+ *      of dimensions.
  *
  * Return:	Success:	ID of new array data type
- *
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Thursday, Oct 26, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
-    const int perm[/* ndims */])
+H5T_array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 {
-    H5T_t	*ret_value = NULL;		/*new array data type	*/
-    int    i;                  /* local index variable */
+    H5T_t	*ret_value;	/* new array data type	*/
+    unsigned    u;              /* local index variable */
 
-    FUNC_ENTER_NOAPI(H5T_array_create, NULL);
+    FUNC_ENTER_NOAPI(H5T_array_create, NULL)
 
-    assert(base);
-    assert(ndims>0 && ndims<=H5S_MAX_RANK);
-    assert(dim);
+    HDassert(base);
+    HDassert(ndims <= H5S_MAX_RANK);
+    HDassert(dim);
 
     /* Build new type */
     if(NULL == (ret_value = H5T_alloc()))
@@ -157,14 +149,10 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     ret_value->shared->u.array.ndims = ndims;
 
     /* Copy the array dimensions & compute the # of elements in the array */
-    for(i=0, ret_value->shared->u.array.nelem=1; i<ndims; i++) {
-        H5_ASSIGN_OVERFLOW(ret_value->shared->u.array.dim[i],dim[i],hsize_t,size_t);
-        ret_value->shared->u.array.nelem *= (size_t)dim[i];
+    for(u = 0, ret_value->shared->u.array.nelem = 1; u < ndims; u++) {
+        H5_ASSIGN_OVERFLOW(ret_value->shared->u.array.dim[u], dim[u], hsize_t, size_t);
+        ret_value->shared->u.array.nelem *= (size_t)dim[u];
     } /* end for */
-
-    /* Copy the dimension permutations */
-    for(i=0; i<ndims; i++)
-        ret_value->shared->u.array.perm[i] = perm ? perm[i] : i;
 
     /* Set the array's size (number of elements * element datatype's size) */
     ret_value->shared->size = ret_value->shared->parent->shared->size * ret_value->shared->u.array.nelem;
@@ -172,11 +160,11 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     /*
      * Set the "force conversion" flag if the base datatype indicates
      */
-    if(base->shared->force_conv==TRUE)
-        ret_value->shared->force_conv=TRUE;
+    if(base->shared->force_conv == TRUE)
+        ret_value->shared->force_conv = TRUE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_array_create */
 
 
@@ -191,30 +179,28 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, November 6, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 H5Tget_array_ndims(hid_t type_id)
 {
-    H5T_t	*dt = NULL;		    /* pointer to array data type	*/
+    H5T_t *dt;		    /* pointer to array data type	*/
     int	ret_value;	    /* return value			*/
 
-    FUNC_ENTER_API(H5Tget_array_ndims, FAIL);
+    FUNC_ENTER_API(H5Tget_array_ndims, FAIL)
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
-    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if(dt->shared->type!=H5T_ARRAY)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
+    if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(dt->shared->type != H5T_ARRAY)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype")
 
     /* Retrieve the number of dimensions */
     ret_value = H5T_get_array_ndims(dt);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* end H5Tget_array_ndims */
 
 
@@ -230,25 +216,18 @@ done:
  * Programmer:	Raymond Lu
  *              October 10, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 H5T_get_array_ndims(H5T_t *dt)
 {
-    int	ret_value;	    /* return value			*/
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_array_ndims)
 
-    FUNC_ENTER_NOAPI(H5T_get_array_ndims, FAIL);
-
-    assert(dt);
-    assert(dt->shared->type==H5T_ARRAY);
+    HDassert(dt);
+    HDassert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the number of dimensions */
-    ret_value=dt->shared->u.array.ndims;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(dt->shared->u.array.ndims)
 }   /* end H5T_get_array_ndims */
 
 
@@ -263,30 +242,28 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, November 6, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
+H5Tget_array_dims(hid_t type_id, hsize_t dims[], int UNUSED perm[])
 {
-    H5T_t	*dt = NULL;		    /* pointer to array data type	*/
+    H5T_t *dt;		/* pointer to array data type	*/
     int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_API(H5Tget_array_dims, FAIL);
-    H5TRACE3("Is","i*h*Is",type_id,dims,perm);
+    FUNC_ENTER_API(H5Tget_array_dims, FAIL)
+    H5TRACE2("Is","i*h",type_id,dims);
 
     /* Check args */
-    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if(dt->shared->type!=H5T_ARRAY)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
+    if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(dt->shared->type != H5T_ARRAY)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype")
 
     /* Retrieve the sizes of the dimensions */
-    if((ret_value=H5T_get_array_dims(dt, dims, perm))<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes");
+    if((ret_value = H5T_get_array_dims(dt, dims)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes")
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* end H5Tget_array_dims */
 
 
@@ -302,35 +279,28 @@ done:
  * Programmer:  Raymond Lu
  *              October 10, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
+H5T_get_array_dims(H5T_t *dt, hsize_t dims[])
 {
+    unsigned u;         /* Local index variable */
     int	ret_value;	/* return value			*/
-    int    i;                  /* Local index variable */
 
-    FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
+    FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL)
 
-    assert(dt);
-    assert(dt->shared->type==H5T_ARRAY);
+    HDassert(dt);
+    HDassert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
     if(dims)
-        for(i=0; i<dt->shared->u.array.ndims; i++)
-            dims[i]=dt->shared->u.array.dim[i];
-
-    /* Retrieve the dimension permutations */
-    if(perm)
-        for(i=0; i<dt->shared->u.array.ndims; i++)
-            perm[i]=dt->shared->u.array.perm[i];
+        for(u = 0; u < dt->shared->u.array.ndims; u++)
+            dims[u] = dt->shared->u.array.dim[u];
 
     /* Pass along the array rank as the return value */
-    ret_value=dt->shared->u.array.ndims;
+    ret_value = dt->shared->u.array.ndims;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_get_array_dims */
 

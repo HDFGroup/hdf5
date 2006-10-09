@@ -120,7 +120,7 @@ int main(int argc, char **argv)
  }
 
  /* pack it */
- ret=h5repack(infile,outfile,&options,argc,argv);
+ ret=h5repack(infile,outfile,&options);
 
  /* free tables */
  h5repack_end(&options);

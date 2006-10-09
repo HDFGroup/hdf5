@@ -752,7 +752,7 @@ test_compound_dtype3(hid_t file)
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /* Create array datatype */
-    if((tid2=H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid2 = H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
     if((tid=H5Tcreate(H5T_COMPOUND, 29))<0) TEST_ERROR;
@@ -767,7 +767,7 @@ test_compound_dtype3(hid_t file)
 			     H5P_DEFAULT))<0) TEST_ERROR;
 
     /* Create array datatype */
-    if((tid_m2=H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid_m2 = H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for datatype in memory */
     if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
@@ -1275,7 +1275,7 @@ test_array_dtype(hid_t file)
     if(H5Tinsert(tid2, "l", 5, H5T_STD_I64BE)<0) TEST_ERROR;
 
     /* Create array datatype for disk storage */
-    if((tid=H5Tarray_create(tid2, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid = H5Tarray_create(tid2, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_ARRAY_NAME, tid, space,
@@ -1288,7 +1288,7 @@ test_array_dtype(hid_t file)
     if(H5Tinsert(tid3, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG)<0) TEST_ERROR;
 
     /* Create array datatype for memory */
-    if((tid_m=H5Tarray_create(tid3, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid_m = H5Tarray_create(tid3, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
@@ -1403,14 +1403,14 @@ test_array_dtype2(hid_t file)
     if ((space = H5Screate_simple(2, space_dims, NULL))<0) TEST_ERROR;
 
     /* Create array datatype for disk storage */
-    if((tid=H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid = H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_ARRAY2_NAME, tid, space,
 			     H5P_DEFAULT))<0) TEST_ERROR;
 
     /* Create array datatype for memory */
-    if((tid_m=H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL))<0) TEST_ERROR;
+    if((tid_m = H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints3)<0)

@@ -328,7 +328,7 @@ test_detect(void)
     hid_t atom_vlc_id;  /* Atomic VL datatype of char */
     hid_t atom_vls_id;       /* Atomic VL string datatype */
     hid_t cplx_cmpd_id; /* Complex Compound datatype */
-    int rank=2;         /* Rank for array datatype */
+    unsigned rank = 2;         /* Rank for array datatype */
     hsize_t dims[2]={3,3};      /* Dimensions for array datatype */
 
     TESTING("H5Tdetect_class()");
@@ -366,8 +366,20 @@ test_detect(void)
     /*--------------------------------------------------------------------------------
      *  Test class of some complex types.
      *------------------------------------------------------------------------------*/
+    /* Try to create array datatype with a dimension permutation (should fail) */
+    H5E_BEGIN_TRY {
+        int perm[2]={0,1};      /* Dimensions permutations for array datatype */
+
+        atom_arr_id = H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, perm);
+    } H5E_END_TRY;
+    if(atom_arr_id>=0) {
+        H5_FAILED();
+        printf("Dimension permutation accepted?\n");
+        goto error;
+    } /* end if */
+
     /* Create an array datatype with an atomic base type */
-    if((atom_arr_id=H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, NULL))<0) TEST_ERROR
+    if((atom_arr_id = H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, NULL)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_arr_id,H5T_ARRAY)!=TRUE) TEST_ERROR
@@ -687,7 +699,7 @@ test_compound_2(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
@@ -697,7 +709,7 @@ test_compound_2(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
@@ -804,7 +816,7 @@ test_compound_3(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
@@ -814,7 +826,7 @@ test_compound_3(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
@@ -922,7 +934,7 @@ test_compound_4(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
@@ -932,7 +944,7 @@ test_compound_4(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
             H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
@@ -1040,12 +1052,12 @@ test_compound_5(void)
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
-    array_dt=H5Tarray_create(H5T_NATIVE_SHORT, 1, dims, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_SHORT, 1, dims, NULL);
     H5Tinsert(short_array, "_", 0, array_dt);
     H5Tclose(array_dt);
 
     int_array   = H5Tcreate(H5T_COMPOUND, 4*sizeof(int));
-    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
     H5Tinsert(int_array, "_", 0, array_dt);
     H5Tclose(array_dt);
 
@@ -1794,7 +1806,7 @@ test_compound_10(void)
     } /* end if */
 
     /* Create the array data type for c_string data */
-    if((arr_tid = H5Tarray_create(cmpd_tid,1,arr_dim, NULL))<0) {
+    if((arr_tid = H5Tarray_create(cmpd_tid, 1, arr_dim, NULL)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create array type\n");
         goto error;
