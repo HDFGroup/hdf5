@@ -1424,7 +1424,7 @@ static int test_arrays(void)
     if(ndims != 3)
         goto out;
 
-    if(H5Tget_array_dims(dtype, dims, NULL)<0)
+    if(H5Tget_array_dims(dtype, dims, NULL) < 0)
         goto out;
     if(dims[0] != 5 || dims[1] != 7 || dims[2] != 13)
         goto out;
@@ -1525,10 +1525,9 @@ static int test_complicated_compound(void)
     hid_t   dtype;
     int     nmembs;
     H5T_class_t type_class;
-    size_t  str_len;
     char*   line=NULL;
     FILE    *fp;
-    int     size = 1024;
+    size_t  size = 1024;
     char    *srcdir = getenv("srcdir"); /* the source directory */
     char    filename[1024]="";
 
@@ -1556,7 +1555,7 @@ static int test_complicated_compound(void)
      */
     if((line = (char*)calloc(size, sizeof(char)))==NULL)
         goto out;
-    if(fgets(line, size, fp)==NULL)
+    if(fgets(line, (int)size, fp)==NULL)
         goto out;
     while(strlen(line)==size-1) {
         size *= 2;
@@ -1566,7 +1565,7 @@ static int test_complicated_compound(void)
             goto out;
         if(fseek(fp, 0L, SEEK_SET)!=0)
             goto out;
-        if(fgets(line, size, fp)==NULL)
+        if(fgets(line, (int)size, fp)==NULL)
             goto out;
     }
 

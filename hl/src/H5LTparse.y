@@ -41,7 +41,7 @@ int csindex = -1;                /*pointer to the top of compound stack*/
 /*structure for array type information*/
 struct arr_info {
     hsize_t             dims[H5S_MAX_RANK];     /*size of each dimension, limited to 32 dimensions*/
-    int                 ndims;                  /*number of dimensions*/
+    unsigned            ndims;                  /*number of dimensions*/
     hbool_t             is_dim;                 /*flag to lexer for dimension*/
 };
 /*stack for nested array type*/
@@ -220,7 +220,7 @@ dim_list        :
                 |       dim_list dim
                 ;
 dim             :       '[' { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
-                        dimsize { int ndims = arr_stack[asindex].ndims;
+                        dimsize { unsigned ndims = arr_stack[asindex].ndims;
                                   arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
                                   arr_stack[asindex].ndims++;
                                   arr_stack[asindex].is_dim = 0; 

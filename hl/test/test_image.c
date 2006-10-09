@@ -833,7 +833,7 @@ static int read_palette(const char* fname,
 {
  FILE          *file;
  char          buffer[80];
- int           i;
+ unsigned      u;
  unsigned int  red;
  unsigned int  green;
  unsigned int  blue;
@@ -919,14 +919,14 @@ static int read_palette(const char* fname,
  }
 
  /* ensure there are a sensible number of colors in the palette */
- if ((nentries < 0) || (nentries > 256) || (nentries > palette_size))
+ if ((nentries > 256) || (nentries > palette_size))
  {
   fclose(file);
   return(-1);
  }
 
  /* read the palette entries */
- for (i = 0; i < nentries; i++)
+ for (u = 0; u < nentries; u++)
  {
   /* extract the red, green and blue color components.  */
   if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3)
@@ -935,9 +935,9 @@ static int read_palette(const char* fname,
    return -1;
   }
   /* store this palette entry */
-  palette[i].r = (unsigned char)red;
-  palette[i].g = (unsigned char)green;
-  palette[i].b = (unsigned char)blue;
+  palette[u].r = (unsigned char)red;
+  palette[u].g = (unsigned char)green;
+  palette[u].b = (unsigned char)blue;
  }
 
  /* close file */
@@ -945,6 +945,4 @@ static int read_palette(const char* fname,
 
  return nentries;
 }
-
-
 
