@@ -51,7 +51,7 @@ H5_HLDLL herr_t  H5PTclose( hid_t table_id );
  */
 
 H5_HLDLL herr_t  H5PTappend( hid_t table_id,
-                   hsize_t nrecords,
+                   size_t nrecords,
                    const void * data );
 
 /*-------------------------------------------------------------------------
@@ -63,12 +63,12 @@ H5_HLDLL herr_t  H5PTappend( hid_t table_id,
 
 
 H5_HLDLL herr_t  H5PTget_next( hid_t table_id,
-                     hsize_t nrecords,
+                     size_t nrecords,
                      void * data );
 
 H5_HLDLL herr_t  H5PTread_packets( hid_t table_id,
                          hsize_t start,
-                         hsize_t nrecords,
+                         size_t nrecords,
                          void *data );
 
 /*-------------------------------------------------------------------------
@@ -109,7 +109,7 @@ H5_HLDLL herr_t  H5PTget_index( hid_t table_id,
  */
 
 H5_HLDLL herr_t  H5PTfree_vlen_readbuff( hid_t table_id,
-                               hsize_t bufflen,
+                               size_t bufflen,
                                void * buff );
 
 #ifdef __cplusplus

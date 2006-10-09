@@ -14,7 +14,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include "h5hltest.h"
 #include "H5TBpublic.h"
 
@@ -126,7 +125,8 @@ static int compare_deleted(hsize_t rrecords, hsize_t dstart, hsize_t drecords,
  *-------------------------------------------------------------------------
  */
 
-static int test_table(hid_t fid, int write)
+static int
+test_table(hid_t fid, int do_write)
 {
  /* identifiers */
  hid_t       fid1;
@@ -341,7 +341,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("making table");
 
@@ -381,7 +381,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("writing records");
 
@@ -439,7 +439,7 @@ static int test_table(hid_t fid, int write)
  * we use the original "table1" instead
  *-------------------------------------------------------------------------
  */
- if(write)
+ if(do_write)
   strcpy(tname,"table2");
  else
   strcpy(tname,"table1");
@@ -466,7 +466,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("appending records");
 
@@ -512,7 +512,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("inserting records");
 
@@ -572,7 +572,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("deleting records");
 
@@ -739,7 +739,7 @@ static int test_table(hid_t fid, int write)
  *-------------------------------------------------------------------------
  */
 
- if (write)
+ if (do_write)
  {
  TESTING2("adding records");
 
@@ -799,7 +799,7 @@ static int test_table(hid_t fid, int write)
  *-------------------------------------------------------------------------
  */
 
- if (write)
+ if (do_write)
  {
  TESTING2("combining tables");
 
@@ -894,7 +894,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("writing fields by name");
 
@@ -959,7 +959,7 @@ static int test_table(hid_t fid, int write)
  * write and read the "Pressure" field
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
   if (H5TBmake_table(TITLE,fid,"table10",NFIELDS,NRECORDS,type_size_mem,
    field_names,field_offset,field_type,
@@ -993,7 +993,7 @@ static int test_table(hid_t fid, int write)
  * Write and read the "Latitude,Longitude" fields
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
   /* Write the new longitude and latitude information to all the records */
   start    = 0;
@@ -1023,7 +1023,7 @@ static int test_table(hid_t fid, int write)
  * Write and read the "Name,Pressure" fields
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  /* Write the new name and pressure information to all the records */
  start    = 0;
@@ -1085,7 +1085,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("writing fields by index");
 
@@ -1147,7 +1147,7 @@ static int test_table(hid_t fid, int write)
 
  TESTING2("reading fields by index");
 
- if (write)
+ if (do_write)
  {
  /* make an empty table */
  if (H5TBmake_table(TITLE,fid,"table12",NFIELDS,NRECORDS,type_size_mem,
@@ -1189,7 +1189,7 @@ static int test_table(hid_t fid, int write)
  * write and read the "Latitude,Longitude" fields
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  /* write the new longitude and latitude information to all the records */
  nfields = 2;
@@ -1222,7 +1222,7 @@ static int test_table(hid_t fid, int write)
  *-------------------------------------------------------------------------
  */
 
- if (write)
+ if (do_write)
  {
  /* write the new name and pressure information to all the records */
  nfields = 2;
@@ -1293,7 +1293,7 @@ static int test_table(hid_t fid, int write)
  *-------------------------------------------------------------------------
  */
 
- if (write)
+ if (do_write)
  {
  TESTING2("inserting fields");
 
@@ -1337,7 +1337,7 @@ static int test_table(hid_t fid, int write)
  *
  *-------------------------------------------------------------------------
  */
- if (write)
+ if (do_write)
  {
  TESTING2("deleting fields");
 

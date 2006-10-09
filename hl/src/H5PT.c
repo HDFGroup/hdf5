@@ -102,7 +102,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
     goto out;
   if(compression >= 0 && compression <= 9)
   {
-    if( H5Pset_deflate(plist_id, compression) < 0)
+    if( H5Pset_deflate(plist_id, (unsigned)compression) < 0)
         goto out;
   }
 
@@ -403,7 +403,7 @@ out:
  *-------------------------------------------------------------------------
  */
 herr_t H5PTappend( hid_t table_id,
-                           hsize_t nrecords,
+                           size_t nrecords,
                            const void * data )
 {
   htbl_t * table;
@@ -457,7 +457,7 @@ out:
  *-------------------------------------------------------------------------
  */
 herr_t H5PTget_next( hid_t table_id,
-                             hsize_t nrecords,
+                             size_t nrecords,
                              void * data)
 {
   htbl_t * table;
@@ -503,7 +503,7 @@ out:
  */
 herr_t H5PTread_packets( hid_t table_id,
                          hsize_t start,
-                         hsize_t nrecords,
+                         size_t nrecords,
                          void *data)
 {
   htbl_t * table;
@@ -780,11 +780,12 @@ out:
  */
 
 herr_t H5PTfree_vlen_readbuff( hid_t table_id,
-                               hsize_t bufflen,
+                               size_t _bufflen,
                                void * buff )
 {
   hid_t space_id = H5I_BADID;
   htbl_t * table;
+  hsize_t bufflen = _bufflen;
   herr_t ret_value;
 
   /* find the table struct from its ID */

@@ -13,7 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 #include "h5hltest.h"
 #include "H5PTpublic.h"
@@ -67,7 +66,7 @@ static particle_t testPart[NRECORDS] = {
  * function that compares one particle
  *-------------------------------------------------------------------------
  */
-static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
+static int cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf )
 {
  if ( ( strcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
   rbuf[i].lati != wbuf[j].lati ||
@@ -147,7 +146,7 @@ static int create_hl_table(hid_t fid)
   *-------------------------------------------------------------------------
   */
 
-  status=H5TBmake_table( "Table Title", fid, H5TB_TABLE_NAME, (hsize_t) NFIELDS,
+  status=H5TBmake_table( "Table Title", fid, H5TB_TABLE_NAME, (hsize_t)NFIELDS,
                         (hsize_t)NRECORDS, sizeof(particle_t),
                         field_names, part_offset, field_type,
                         chunk_size, fill_data, compress, testPart  );
@@ -182,7 +181,7 @@ static int test_create_close(hid_t fid)
     assert(part_t != -1);
 
     /* Create the table */
-    table = H5PTcreate_fl(fid, PT_NAME, part_t, 100, -1);
+    table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
     H5Tclose(part_t);
     if( H5PTis_valid(table) < 0)
       goto out;
@@ -265,17 +264,17 @@ static int test_append(hid_t fid)
         goto out;
 
     /* Append one particle */
-    err = H5PTappend(table, 1, &(testPart[0]));
+    err = H5PTappend(table, (size_t)1, &(testPart[0]));
     if( err < 0)
         goto out;
 
     /* Append several particles */
-    err = H5PTappend(table, 6, &(testPart[1]));
+    err = H5PTappend(table, (size_t)6, &(testPart[1]));
     if( err < 0)
         goto out;
 
     /* Append one more particle */
-    err = H5PTappend(table, 1, &(testPart[7]));
+    err = H5PTappend(table, (size_t)1, &(testPart[7]));
     if( err < 0)
         goto out;
 
@@ -314,7 +313,7 @@ static int test_read(hid_t fid)
     herr_t err;
     hid_t table;
     particle_t readBuf[NRECORDS];
-    hsize_t c;
+    size_t c;
 
     TESTING("H5PTread_packets");
 
@@ -324,17 +323,17 @@ static int test_read(hid_t fid)
         goto out;
 
     /* Read several particles */
-    err = H5PTread_packets(table, 0, 3, &(readBuf[0]));
+    err = H5PTread_packets(table, (hsize_t)0, 3, &(readBuf[0]));
     if( err < 0)
         goto out;
 
     /* Read one particle */
-    err = H5PTread_packets(table, 3, 1, &(readBuf[3]));
+    err = H5PTread_packets(table, (hsize_t)3, 1, &(readBuf[3]));
     if( err < 0)
         goto out;
 
     /* Read several particles */
-    err = H5PTread_packets(table, 4, (NRECORDS - 4 ), &(readBuf[4]));
+    err = H5PTread_packets(table, (hsize_t)4, (NRECORDS - 4 ), &(readBuf[4]));
     if( err < 0)
         goto out;
 
@@ -375,7 +374,7 @@ static int test_get_next(hid_t fid)
     hid_t table;
     particle_t readBuf[NRECORDS];
     particle_t readBuf2[NRECORDS];
-    hsize_t c;
+    size_t c;
 
     TESTING("H5PTget_next");
 
@@ -444,7 +443,7 @@ static int    test_big_table(hid_t fid)
     herr_t err;
     hid_t table;
     hid_t part_t;
-    hsize_t c;
+    size_t c;
     particle_t readPart;
     hsize_t count;
 
@@ -456,7 +455,7 @@ static int    test_big_table(hid_t fid)
     assert(part_t != -1);
 
     /* Create a new table */
-    table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, 33, -1);
+    table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, (hsize_t)33, -1);
     H5Tclose(part_t);
     if( H5PTis_valid(table) < 0)
         goto out;
@@ -465,7 +464,7 @@ static int    test_big_table(hid_t fid)
     for(c = 0; c < BIG_TABLE_SIZE ; c+=8)
     {
         /* Append eight particles at once*/
-        err = H5PTappend(table, 8, &(testPart[0]));
+        err = H5PTappend(table, (size_t)8, &(testPart[0]));
         if( err < 0)
             goto out;
     }
@@ -552,7 +551,7 @@ static int    test_varlen(hid_t fid)
   }
 
   /* Create the table */
-  table = H5PTcreate_vl(fid, VL_TABLE_NAME, 1001);
+  table = H5PTcreate_vl(fid, VL_TABLE_NAME, (hsize_t)1001);
   if( H5PTis_valid(table) < 0)
     goto out;
   if( H5PTis_varlen(table) != 1)
@@ -585,18 +584,18 @@ static int    test_varlen(hid_t fid)
       goto out;
 
   /* Add several variable-length packets */
-  err = H5PTappend(table, 8, writeBuffer );
+  err = H5PTappend(table, (size_t)8, writeBuffer );
   if(err < 0)
     goto out;
 
   /* Read them back */
-  err = H5PTread_packets(table, 0, 4, &(readBuffer[0]));
+  err = H5PTread_packets(table, (hsize_t)0, 4, &(readBuffer[0]));
   if( err < 0)
     goto out;
-  err = H5PTread_packets(table, 4, 1, &(readBuffer[4]));
+  err = H5PTread_packets(table, (hsize_t)4, 1, &(readBuffer[4]));
   if( err < 0)
     goto out;
-  err = H5PTread_packets(table, 5, (NRECORDS - 5 ), &(readBuffer[5]));
+  err = H5PTread_packets(table, (hsize_t)5, (NRECORDS - 5 ), &(readBuffer[5]));
   if( err < 0)
     goto out;
 
@@ -693,7 +692,7 @@ static int    test_opaque(hid_t fid)
     herr_t err;
     hid_t table;
     hid_t part_t;
-    hsize_t c;
+    size_t c;
     particle_t readBuf[NRECORDS];
 
     TESTING("opaque data");
@@ -709,18 +708,18 @@ static int    test_opaque(hid_t fid)
         return -1;
 
     /* Create a new table */
-    table = H5PTcreate_fl(fid, "Packet Test Dataset3", part_t, 100, -1);
+    table = H5PTcreate_fl(fid, "Packet Test Dataset3", part_t, (hsize_t)100, -1);
     H5Tclose(part_t);
     if( H5PTis_valid(table) < 0)
         goto out;
 
     /* Append several particles, starting at particle 1 */
-    err = H5PTappend(table, (NRECORDS - 1), &(testPart[1]));
+    err = H5PTappend(table, (size_t)(NRECORDS - 1), &(testPart[1]));
     if( err < 0)
         goto out;
 
     /* Read the particles back */
-    err = H5PTread_packets(table, 0, 7, &(readBuf[0]));
+    err = H5PTread_packets(table, (hsize_t)0, 7, &(readBuf[0]));
     if( err < 0)
         goto out;
 
@@ -754,7 +753,8 @@ static int    test_opaque(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-static int    test_compress()
+static int
+test_compress(void)
 {
     hid_t fid1 = -1;
     hid_t fid2 = -1;
@@ -762,10 +762,9 @@ static int    test_compress()
     herr_t err;
     hid_t table = -1;
     hid_t part_t = -1;
-    hsize_t c;
+    size_t c;
     particle_t readPart;
     hsize_t count;
-    hid_t plist_id = -1;
 
     TESTING("packet table compression");
 
@@ -791,7 +790,7 @@ static int    test_compress()
     assert(part_t != -1);
 
     /* Create a new table with compression level 1 */
-    table = H5PTcreate_fl(fid1, "Packet Compress Test Dataset", part_t, 80, 1);
+    table = H5PTcreate_fl(fid1, "Packet Compress Test Dataset", part_t, (hsize_t)80, 1);
     if( H5PTis_valid(table) < 0) TEST_ERROR;
 
     /* We can now use this table exactly the same way we use a normal uncompressed
@@ -800,7 +799,7 @@ static int    test_compress()
     for(c = 0; c < BIG_TABLE_SIZE ; c+=8)
     {
         /* Append eight particles at once*/
-        err = H5PTappend(table, 8, &(testPart[0]));
+        err = H5PTappend(table, (size_t)8, &(testPart[0]));
         if( err < 0) TEST_ERROR;
     }
 
@@ -827,13 +826,13 @@ static int    test_compress()
 
     /* Open the second file and create a new table with compression level 9. */
     if((fid2 = H5Fopen(TEST_COMPRESS_FILE2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
-    table = H5PTcreate_fl(fid2, "Packet Compress Test Dataset", part_t, 80, 9);
+    table = H5PTcreate_fl(fid2, "Packet Compress Test Dataset", part_t, (hsize_t)80, 9);
     if(table < 0) TEST_ERROR;
 
     for(c = 0; c < BIG_TABLE_SIZE ; c+=8)
     {
         /* Append eight particles at once*/
-        err = H5PTappend(table, 8, &(testPart[0]));
+        err = H5PTappend(table, (size_t)8, &(testPart[0]));
         if( err < 0) TEST_ERROR;
     }
     /* Read particles to ensure that all of them were written correctly  */
@@ -911,13 +910,13 @@ static int test_error(hid_t fid)
     goto out;
   if(H5PTclose(id) >= 0)
     goto out;
-  if(H5PTappend(id, 1, testPart) >= 0)
+  if(H5PTappend(id, (size_t)1, testPart) >= 0)
     goto out;
-  if(H5PTread_packets(id, 0, 1, readBuf) >= 0)
+  if(H5PTread_packets(id, (hsize_t)0, 1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
     goto out;
-  if(H5PTset_index(id, 1) >= 0)
+  if(H5PTset_index(id, (hsize_t)1) >= 0)
     goto out;
   if(H5PTget_index(id, NULL) >= 0)
     goto out;
@@ -936,13 +935,13 @@ static int test_error(hid_t fid)
     goto out;
   if(H5PTclose(id) >= 0)
     goto out;
-  if(H5PTappend(id, 1, testPart) >= 0)
+  if(H5PTappend(id, (size_t)1, testPart) >= 0)
     goto out;
-  if(H5PTread_packets(id, 0, 1, readBuf) >= 0)
+  if(H5PTread_packets(id, (hsize_t)0, 1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
     goto out;
-  if(H5PTset_index(id, 1) >= 0)
+  if(H5PTset_index(id, (hsize_t)1) >= 0)
     goto out;
   if(H5PTget_index(id, NULL) >= 0)
     goto out;
@@ -966,13 +965,13 @@ static int test_error(hid_t fid)
     goto out;
   if(H5PTclose(id) >= 0)
     goto out;
-  if(H5PTappend(id, 1, testPart) >= 0)
+  if(H5PTappend(id, (size_t)1, testPart) >= 0)
     goto out;
-  if(H5PTread_packets(id, 0, 1, readBuf) >= 0)
+  if(H5PTread_packets(id, (hsize_t)0, 1, readBuf) >= 0)
     goto out;
   if(H5PTcreate_index(id) >= 0)
     goto out;
-  if(H5PTset_index(id, 1) >= 0)
+  if(H5PTset_index(id, (hsize_t)1) >= 0)
     goto out;
   if(H5PTget_index(id, NULL) >= 0)
     goto out;

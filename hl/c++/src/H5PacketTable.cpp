@@ -81,7 +81,7 @@
      * Sets the index to point to the packet specified by index.
      * Returns 0 on success, negative on failure (if index is out of bounds)
      */
-    int PacketTable::SetIndex(unsigned int index)
+    int PacketTable::SetIndex(hsize_t index)
     {
         return H5PTset_index(table_id, index);
     }
@@ -90,7 +90,7 @@
      * Sets the index to point to the packet specified by index.
      * Returns 0 on success, negative on failure (if index is out of bounds)
      */
-    int PacketTable::GetIndex(int &error)
+    hsize_t PacketTable::GetIndex(int &error)
     {
         hsize_t index;
 
@@ -157,7 +157,7 @@
      * to be added and a pointer to their location in memory.
      * Returns 0 on success, -1 on failure.
      */
-    int FL_PacketTable::AppendPackets(unsigned int numPackets, void * data)
+    int FL_PacketTable::AppendPackets(size_t numPackets, void * data)
     {
         return H5PTappend(table_id, numPackets, data);
     }
@@ -168,7 +168,7 @@
      * to memory where the data should be stored.
      * Returns 0 on success, negative on failure
      */
-    int FL_PacketTable::GetPacket(unsigned int index, void * data)
+    int FL_PacketTable::GetPacket(hsize_t index, void * data)
     {
         return H5PTread_packets(table_id, index, 1, data);
     }
@@ -179,7 +179,7 @@
      * the memory where these packets should be stored.
      * Returns 0 on success, negative on failure.
      */
-    int FL_PacketTable::GetPackets(unsigned int startIndex, unsigned int endIndex, void * data)
+    int FL_PacketTable::GetPackets(hsize_t startIndex, hsize_t endIndex, void * data)
     {
         // Make sure the range of indexes is valid
         if (startIndex > endIndex)
@@ -205,7 +205,7 @@
      * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int FL_PacketTable::GetNextPackets(unsigned int numPackets, void * data)
+    int FL_PacketTable::GetNextPackets(size_t numPackets, void * data)
     {
         return H5PTget_next(table_id, numPackets, data);
     }
@@ -244,7 +244,7 @@
      * in bytes.
      * Returns 0 on success, negative on failure.
      */
-       int VL_PacketTable::AppendPacket(void * data, unsigned int length)
+       int VL_PacketTable::AppendPacket(void * data, size_t length)
     {
         hvl_t packet;
 
@@ -260,7 +260,7 @@
      * packets to be added and a pointer to an array of hvl_t structs in memory.
      * Returns 0 on success, negative on failure.
      */
-    int VL_PacketTable::AppendPackets(unsigned int numPackets, hvl_t * data)
+    int VL_PacketTable::AppendPackets(size_t numPackets, hvl_t * data)
     {
         return H5PTappend(table_id, numPackets, data);
     }
@@ -271,7 +271,7 @@
      * to a hvl_t struct in which to store the packet's size and location.
      * Returns 0 on success, negative on failure.
      */
-    int VL_PacketTable::GetPacket(unsigned int index, hvl_t * data)
+    int VL_PacketTable::GetPacket(hsize_t index, hvl_t * data)
     {
         return H5PTread_packets(table_id, index, 1, data);
     }
@@ -282,7 +282,7 @@
      * of hvl_t structs in memory in which to store pointers to the packets.
      * Returns 0 on success, negative on failure.
      */
-    int VL_PacketTable::GetPackets(unsigned int startIndex, unsigned int endIndex, hvl_t * data)
+    int VL_PacketTable::GetPackets(hsize_t startIndex, hsize_t endIndex, hvl_t * data)
     {
         // Make sure the range of indexes is valid
         if (startIndex > endIndex)
@@ -309,7 +309,7 @@
      * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int VL_PacketTable::GetNextPackets(unsigned int numPackets, hvl_t * data)
+    int VL_PacketTable::GetNextPackets(size_t numPackets, hvl_t * data)
     {
         return H5PTget_next(table_id, numPackets, data);
     }
@@ -320,7 +320,7 @@
      * location in memory.
      * Returns 0 on success, negative on error.
      */
-    int VL_PacketTable::FreeReadbuff(unsigned int numStructs, hvl_t * buffer)
+    int VL_PacketTable::FreeReadbuff(size_t numStructs, hvl_t * buffer)
     {
         return H5PTfree_vlen_readbuff( table_id, numStructs, buffer);
     }

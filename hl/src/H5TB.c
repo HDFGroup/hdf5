@@ -324,7 +324,7 @@ herr_t H5TBappend_records( hid_t loc_id,
   goto out;
 
  /* Append the records */
- if ((H5TB_common_append_records(did, mem_type_id, nrecords, nrecords_orig, data))<0)
+ if ((H5TB_common_append_records(did, mem_type_id, (size_t)nrecords, nrecords_orig, data))<0)
   goto out;
 
  /* Release the datatype. */
@@ -934,7 +934,7 @@ herr_t H5TBread_records( hid_t loc_id,
   goto out;
 
  /* Read the records */
- if ((H5TB_common_read_records(did, mem_type_id, start, nrecords, nrecords_orig, data)) < 0)
+ if ((H5TB_common_read_records(did, mem_type_id, start, (size_t)nrecords, nrecords_orig, data)) < 0)
   goto out;
 
  /* get the dataspace handle */
@@ -3671,7 +3671,7 @@ out:
  */
 herr_t H5TB_common_append_records( hid_t dataset_id,
                                   hid_t mem_type_id,
-                                  hsize_t nrecords,
+                                  size_t nrecords,
                                   hsize_t orig_table_size,
                                   const void * data)
 {
@@ -3746,7 +3746,7 @@ out:
 herr_t H5TB_common_read_records( hid_t dataset_id,
                                 hid_t mem_type_id,
                                 hsize_t start,
-                                hsize_t nrecords,
+                                size_t nrecords,
                                 hsize_t table_size,
                                 void *data)
 {

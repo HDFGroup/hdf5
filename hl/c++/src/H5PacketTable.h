@@ -72,13 +72,13 @@ public:
      * Sets the current packet to point to the packet specified by index.
      * Returns 0 on success, negative on failure (if index is out of bounds)
      */
-    int SetIndex(unsigned int index);
+    int SetIndex(hsize_t index);
 
     /* GetIndex
      * Returns the position of the current packet.
      * On failure, returns 0 and error is set to negative.
      */
-    int GetIndex(int& error);
+    hsize_t GetIndex(int& error);
 
     /* GetPacketCount
      * Returns the number of packets in the packet table.  Error
@@ -87,7 +87,7 @@ public:
      */
     hsize_t GetPacketCount(int& error);
 
-    unsigned int GetPacketCount()
+    hsize_t GetPacketCount()
     {
         int ignoreError;
         return GetPacketCount(ignoreError);
@@ -127,7 +127,7 @@ public:
      * to be added and a pointer to their location in memory.
      * Returns 0 on success, -1 on failure.
      */
-    int AppendPackets(unsigned int numPackets, void * data);
+    int AppendPackets(size_t numPackets, void * data);
 
     /* GetPacket (indexed)
      * Gets a single packet from the packet table.  Takes the index
@@ -135,7 +135,7 @@ public:
      * to memory where the data should be stored.
      * Returns 0 on success, negative on failure
      */
-    int GetPacket(unsigned int index, void * data);
+    int GetPacket(hsize_t index, void * data);
 
     /* GetPackets (multiple packets)
      * Gets multiple packets at once, all packets between
@@ -143,7 +143,7 @@ public:
      * the memory where these packets should be stored.
      * Returns 0 on success, negative on failure.
      */
-    int GetPackets(unsigned int startIndex, unsigned int endIndex, void * data);
+    int GetPackets(hsize_t startIndex, hsize_t endIndex, void * data);
 
     /* GetNextPacket (single packet)
      * Gets the next packet in the packet table.  Takes a pointer to
@@ -159,7 +159,7 @@ public:
      * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int GetNextPackets(unsigned int numPackets, void * data);
+    int GetNextPackets(size_t numPackets, void * data);
 };
 
 class H5_HLCPPDLL  VL_PacketTable : virtual public PacketTable
@@ -184,7 +184,7 @@ public:
      * in bytes.
      * Returns 0 on success, negative on failure.
      */
-    int AppendPacket(void * data, unsigned int length);
+    int AppendPacket(void * data, size_t length);
 
     /* AppendPackets (multiple packets)
      * Adds multiple variable-length packets to the packet table.  Takes the
@@ -192,7 +192,7 @@ public:
      * hvl_t structs in memory.
      * Returns 0 on success, negative on failure.
      */
-    int AppendPackets(unsigned int numPackets, hvl_t * data);
+    int AppendPackets(size_t numPackets, hvl_t * data);
 
     /* GetPacket (indexed)
      * Gets a single variable-length packet from the packet table.  Takes
@@ -200,7 +200,7 @@ public:
      * to a hvl_t struct in which to store the packet's size and location.
      * Returns 0 on success, negative on failure.
      */
-    int GetPacket(unsigned int index, hvl_t * data);
+    int GetPacket(hsize_t index, hvl_t * data);
 
     /* GetPackets (multiple packets)
      * Gets multiple variable-length packets at once, all packets between
@@ -208,7 +208,7 @@ public:
      * of hvl_t structs in memory in which to store pointers to the packets.
      * Returns 0 on success, negative on failure.
      */
-    int GetPackets(unsigned int startIndex, unsigned int endIndex, hvl_t * data);
+    int GetPackets(hsize_t startIndex, hsize_t endIndex, hvl_t * data);
 
     /* GetNextPacket (single packet)
      * Gets the next packet in the packet table.  Takes a pointer to
@@ -225,7 +225,7 @@ public:
      * Returns 0 on success, negative on failure.  Index
      * is not advanced on failure.
      */
-    int GetNextPackets(unsigned int numPackets, hvl_t * data);
+    int GetNextPackets(size_t numPackets, hvl_t * data);
 
     /* FreeReadbuff
      * Frees the buffers created when variable-length packets are read.
@@ -233,7 +233,7 @@ public:
      * location in memory.
      * Returns 0 on success, negative on error.
      */
-    int FreeReadbuff(unsigned int numStructs, hvl_t * buffer);
+    int FreeReadbuff(size_t numStructs, hvl_t * buffer);
 };
 
 #endif /* H5PTWRAP_H */
