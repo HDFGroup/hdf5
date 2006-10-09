@@ -432,7 +432,7 @@ HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_bl
         H5HF_direct_t *dblock;          /* Pointer to direct block to query */
 
         /* Lock first (root) direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, iblock, 0, H5AC_WRITE)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, NULL, 0, H5AC_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
 
         /* Attach direct block to new root indirect block */
