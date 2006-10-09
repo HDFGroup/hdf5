@@ -702,7 +702,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     HDassert(par_info);
 
     /* Allocate space for the fractal heap indirect block */
-    if(NULL == (iblock = H5FL_MALLOC(H5HF_indirect_t)))
+    if(NULL == (iblock = H5FL_CALLOC(H5HF_indirect_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
 
