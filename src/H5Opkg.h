@@ -35,7 +35,7 @@
 
 /* Object header macros */
 #define H5O_NMESGS	32		/*initial number of messages	     */
-#define H5O_NCHUNKS	8		/*initial number of chunks	     */
+#define H5O_NCHUNKS	2		/*initial number of chunks	     */
 
 /* Version of object header structure */
 #define H5O_VERSION		1

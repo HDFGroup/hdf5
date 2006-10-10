@@ -242,7 +242,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     UINT32DECODE(p, chunk_size);
 
     /* build the message array */
-    oh->alloc_nmesgs = MAX(H5O_NMESGS, nmesgs);
+    oh->alloc_nmesgs = nmesgs;
     if (NULL==(oh->mesg=H5FL_SEQ_CALLOC(H5O_mesg_t,(size_t)oh->alloc_nmesgs)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
