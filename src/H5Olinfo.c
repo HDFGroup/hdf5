@@ -119,11 +119,6 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     HDassert(f);
     HDassert(p);
 
-#ifndef NDEBUG
-{
-    const uint8_t *start_p = p;
-#endif /* NDEBUG */
-
     /* Version of message */
     if(*p++ != H5O_LINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
@@ -155,11 +150,6 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
         H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
     else
         linfo->corder_bt2_addr = HADDR_UNDEF;
-
-#ifndef NDEBUG
-    HDassert((size_t)(p - start_p) == H5O_linfo_size(f, linfo));
-}
-#endif /* NDEBUG */
 
     /* Set return value */
     ret_value = linfo;
@@ -199,11 +189,6 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(linfo);
 
-#ifndef NDEBUG
-{
-    uint8_t *start_p = p;
-#endif /* NDEBUG */
-
     /* Message version */
     *p++ = H5O_LINFO_VERSION;
 
@@ -230,11 +215,6 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
         H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
     else
         HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
-
-#ifndef NDEBUG
-    HDassert((size_t)(p - start_p) == H5O_linfo_size(f, linfo));
-}
-#endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_encode() */

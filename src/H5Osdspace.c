@@ -235,7 +235,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     const H5S_extent_t	*sdim = (const H5S_extent_t *)_mesg;
     unsigned		flags = 0;
     unsigned		version;
-    hbool_t             use_latest_format;      /* Flag indicating the new group format should be used */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
     unsigned		u;  /* Local counting variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode)
@@ -251,7 +251,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     /* Version */
     if(use_latest_format)
         version = H5O_SDSPACE_VERSION_LATEST;
-    else if(sdim->type == H5S_NULL || use_latest_format)
+    else if(sdim->type == H5S_NULL)
         version = H5O_SDSPACE_VERSION_2;
     else
         version = H5O_SDSPACE_VERSION_1;
@@ -361,7 +361,7 @@ static size_t
 H5O_sdspace_size(const H5F_t *f, const void *_mesg)
 {
     const H5S_extent_t	*space = (const H5S_extent_t *)_mesg;
-    hbool_t             use_latest_format;      /* Flag indicating the new group format should be used */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
     size_t		ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_size)

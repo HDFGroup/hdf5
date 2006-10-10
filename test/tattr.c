@@ -99,7 +99,7 @@ herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
 **
 ****************************************************************/
 static void
-test_attr_basic_write(void)
+test_attr_basic_write(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -120,7 +120,7 @@ test_attr_basic_write(void)
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -263,7 +263,7 @@ test_attr_basic_write(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create group */
-    group = H5Gcreate(fid1, GROUP1_NAME, 0);
+    group = H5Gcreate(fid1, GROUP1_NAME, (size_t)0);
     CHECK(group, FAIL, "H5Gcreate");
 
     /* Create dataspace for attribute */
@@ -313,7 +313,7 @@ test_attr_basic_write(void)
 **
 ****************************************************************/
 static void
-test_attr_basic_read(void)
+test_attr_basic_read(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -328,7 +328,7 @@ test_attr_basic_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -400,7 +400,7 @@ test_attr_basic_read(void)
 **
 ****************************************************************/
 static void
-test_attr_flush(void)
+test_attr_flush(hid_t fapl)
 {
     hid_t fil,          /* File ID */
         att,            /* Attribute ID */
@@ -413,7 +413,7 @@ test_attr_flush(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Flushing\n"));
 
-    fil = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fil = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fil, FAIL, "H5Fcreate");
 
     spc = H5Screate(H5S_SCALAR);
@@ -465,7 +465,7 @@ test_attr_flush(void)
 **
 ****************************************************************/
 static void
-test_attr_plist(void)
+test_attr_plist(hid_t fapl)
 {
     hid_t		fid1;           /* HDF5 File IDs		*/
     hid_t		dataset;        /* Dataset ID			*/
@@ -481,7 +481,7 @@ test_attr_plist(void)
     MESSAGE(5, ("Testing Attribute Property Lists\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -578,7 +578,7 @@ test_attr_plist(void)
 **
 ****************************************************************/
 static void
-test_attr_compound_write(void)
+test_attr_compound_write(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -593,7 +593,7 @@ test_attr_compound_write(void)
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -665,7 +665,7 @@ test_attr_compound_write(void)
 **
 ****************************************************************/
 static void
-test_attr_compound_read(void)
+test_attr_compound_read(hid_t fapl)
 {
     hid_t   fid1;		/* HDF5 File IDs		*/
     hid_t   dataset;	/* Dataset ID			*/
@@ -691,7 +691,7 @@ test_attr_compound_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -812,7 +812,7 @@ test_attr_compound_read(void)
 **
 ****************************************************************/
 static void
-test_attr_scalar_write(void)
+test_attr_scalar_write(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -825,7 +825,7 @@ test_attr_scalar_write(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -876,7 +876,7 @@ test_attr_scalar_write(void)
 **
 ****************************************************************/
 static void
-test_attr_scalar_read(void)
+test_attr_scalar_read(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -890,7 +890,7 @@ test_attr_scalar_read(void)
     MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -941,7 +941,7 @@ test_attr_scalar_read(void)
 **
 ****************************************************************/
 static void
-test_attr_mult_write(void)
+test_attr_mult_write(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -957,7 +957,7 @@ test_attr_mult_write(void)
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1059,7 +1059,7 @@ test_attr_mult_write(void)
 **
 ****************************************************************/
 static void
-test_attr_mult_read(void)
+test_attr_mult_read(hid_t fapl)
 {
     hid_t   fid1;		/* HDF5 File IDs		*/
     hid_t   dataset;	/* Dataset ID			*/
@@ -1084,7 +1084,7 @@ test_attr_mult_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1315,7 +1315,7 @@ herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
 **
 ****************************************************************/
 static void
-test_attr_iterate(void)
+test_attr_iterate(hid_t fapl)
 {
     hid_t   file;		/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
@@ -1328,7 +1328,7 @@ test_attr_iterate(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    file = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Create a dataspace */
@@ -1386,7 +1386,7 @@ test_attr_iterate(void)
 **
 ****************************************************************/
 static void
-test_attr_delete(void)
+test_attr_delete(hid_t fapl)
 {
     hid_t   fid1;		/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
@@ -1399,7 +1399,7 @@ test_attr_delete(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1500,7 +1500,7 @@ test_attr_delete(void)
 **
 ****************************************************************/
 static void
-test_attr_dtype_shared(void)
+test_attr_dtype_shared(hid_t fapl)
 {
     hid_t file_id;              /* File ID */
     hid_t dset_id;              /* Dataset ID */
@@ -1518,7 +1518,7 @@ test_attr_dtype_shared(void)
     MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
 
     /* Create a file */
-    file_id=H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id=H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Close file */
@@ -1531,7 +1531,7 @@ test_attr_dtype_shared(void)
         TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
 
     /* Re-open file */
-    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,H5P_DEFAULT);
+    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,fapl);
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Create a datatype to commit and use */
@@ -1616,7 +1616,7 @@ test_attr_dtype_shared(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open file */
-    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,H5P_DEFAULT);
+    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,fapl);
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Open dataset */
@@ -1675,33 +1675,70 @@ test_attr_dtype_shared(void)
 void
 test_attr(void)
 {
+    hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
+    hbool_t new_format;     /* Whether to use the new format or not */
+    herr_t ret;                 /* Generic return value */
+
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attributes\n"));
 
-    /* These next two tests use the same file information */
-    test_attr_basic_write();    /* Test basic H5A writing code */
-    test_attr_basic_read();     /* Test basic H5A reading code */
-    test_attr_flush();          /* Test H5A I/O in the presence of H5Fflush calls */
+    /* Create a default file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
 
-    /* This next test uses the same file information */
-    test_attr_plist();          /* Test attribute property lists */
+    /* Copy the file access property list */
+    fapl2 = H5Pcopy(fapl);
+    CHECK(fapl2, FAIL, "H5Pcopy");
 
-    /* These next two tests use the same file information */
-    test_attr_compound_write();  /* Test complex datatype H5A writing code */
-    test_attr_compound_read();   /* Test complex datatype H5A reading code */
+    /* Set the "use the latest version of the format" flag for creating objects in the file */
+    ret = H5Pset_latest_format(fapl2, TRUE);
+    CHECK(ret, FAIL, "H5Pset_latest_format");
 
-    /* These next two tests use the same file information */
-    test_attr_scalar_write();  /* Test scalar dataspace H5A writing code */
-    test_attr_scalar_read();   /* Test scalar dataspace H5A reading code */
+    /* Loop over using new group format */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        hid_t my_fapl;
 
-    /* These next four tests use the same file information */
-    test_attr_mult_write();     /* Test H5A writing code for multiple attributes */
-    test_attr_mult_read();      /* Test H5A reading code for multiple attributes */
-    test_attr_iterate();        /* Test H5A iterator code */
-    test_attr_delete();         /* Test H5A code for deleting attributes */
+        /* Set the FAPL for the type of format */
+        if(new_format) {
+            MESSAGE(7, ("testing with new file  format\n"));
+            my_fapl = fapl2;
+        } /* end if */
+        else {
+            MESSAGE(7, ("testing with old file format\n"));
+            my_fapl = fapl;
+        } /* end else */
 
-    /* This next test use the same file information */
-    test_attr_dtype_shared();   /* Test using shared dataypes in attributes */
+        /* These next two tests use the same file information */
+        test_attr_basic_write(my_fapl);    /* Test basic H5A writing code */
+        test_attr_basic_read(my_fapl);     /* Test basic H5A reading code */
+        test_attr_flush(my_fapl);          /* Test H5A I/O in the presence of H5Fflush calls */
+
+        /* This next test uses the same file information */
+        test_attr_plist(my_fapl);          /* Test attribute property lists */
+
+        /* These next two tests use the same file information */
+        test_attr_compound_write(my_fapl);  /* Test complex datatype H5A writing code */
+        test_attr_compound_read(my_fapl);   /* Test complex datatype H5A reading code */
+
+        /* These next two tests use the same file information */
+        test_attr_scalar_write(my_fapl);  /* Test scalar dataspace H5A writing code */
+        test_attr_scalar_read(my_fapl);   /* Test scalar dataspace H5A reading code */
+
+        /* These next four tests use the same file information */
+        test_attr_mult_write(my_fapl);     /* Test H5A writing code for multiple attributes */
+        test_attr_mult_read(my_fapl);      /* Test H5A reading code for multiple attributes */
+        test_attr_iterate(my_fapl);        /* Test H5A iterator code */
+        test_attr_delete(my_fapl);         /* Test H5A code for deleting attributes */
+
+        /* This next test use the same file information */
+        test_attr_dtype_shared(my_fapl);   /* Test using shared dataypes in attributes */
+    } /* end for */
+
+    /* Close  FAPLs */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(fapl2);
+    CHECK(ret, FAIL, "H5Pclose");
 }   /* test_attr() */
 
 

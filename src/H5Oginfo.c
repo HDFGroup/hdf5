@@ -104,11 +104,6 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     /* check args */
     HDassert(p);
 
-#ifndef NDEBUG
-{
-    const uint8_t *start_p = p;
-#endif /* NDEBUG */
-
     /* Version of message */
     if(*p++ != H5O_GINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
@@ -129,11 +124,6 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     /* Get the estimated # of entries & name lengths */
     UINT32DECODE(p, ginfo->est_num_entries)
     UINT32DECODE(p, ginfo->est_name_len)
-
-#ifndef NDEBUG
-    HDassert((size_t)(p - start_p) == H5O_ginfo_size(f, ginfo));
-}
-#endif /* NDEBUG */
 
     /* Set return value */
     ret_value = ginfo;
@@ -174,11 +164,6 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(ginfo);
 
-#ifndef NDEBUG
-{
-    uint8_t *start_p = p;
-#endif /* NDEBUG */
-
     /* Message version */
     *p++ = H5O_GINFO_VERSION;
 
@@ -194,11 +179,6 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* Estimated # of entries & name lengths */
     UINT32ENCODE(p, ginfo->est_num_entries)
     UINT32ENCODE(p, ginfo->est_name_len)
-
-#ifndef NDEBUG
-    HDassert((size_t)(p - start_p) == H5O_ginfo_size(f, ginfo));
-}
-#endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_encode() */

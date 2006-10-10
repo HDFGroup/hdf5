@@ -2486,6 +2486,9 @@ main(void)
             if(H5Fclose(file) < 0) TEST_ERROR
         } /* end for */
 
+        /* Close 2nd FAPL */
+	H5Pclose(fapl2);
+
         if (nerrors) {
             printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
 	    exit(1);

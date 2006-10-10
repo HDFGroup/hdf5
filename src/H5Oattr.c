@@ -74,6 +74,10 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
 /* Add support for different character encodings of attribute names */
 #define H5O_ATTR_VERSION_3      3
 
+/* The latest version of the format.  Look through the 'encode' 
+ *      and 'size' callback for places to change when updating this. */
+#define H5O_ATTR_VERSION_LATEST H5O_ATTR_VERSION_3
+
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
 
@@ -83,6 +87,7 @@ H5FL_EXTERN(H5S_t);
 /* Declare external the free list for H5S_extent_t's */
 H5FL_EXTERN(H5S_extent_t);
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_attr_decode
@@ -122,25 +127,25 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     H5S_extent_t	*extent;	/*extent dimensionality information  */
     size_t		name_len;   	/*attribute name length */
     int		        version;	/*message version number*/
-    unsigned            flags=0;        /* Attribute flags */
+    unsigned            flags = 0;      /* Attribute flags */
     H5A_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
-    if (NULL==(attr = H5FL_CALLOC(H5A_t)))
+    if(NULL == (attr = H5FL_CALLOC(H5A_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version number */
     version = *p++;
-    if (version<H5O_ATTR_VERSION_1 || version>H5O_ATTR_VERSION_3)
+    if(version < H5O_ATTR_VERSION_1 || version > H5O_ATTR_VERSION_3)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
 
     /* Get the flags byte if we have a later version of the attribute */
-    if(version>H5O_ATTR_VERSION_1)
+    if(version > H5O_ATTR_VERSION_1)
         flags = *p++;
     else
         p++;    /* Byte is unused when version<2 */
@@ -158,10 +163,10 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
      * as well as some reserved bytes.
      */
     if(version >= H5O_ATTR_VERSION_3)
-      attr->encoding = *p++;
+        attr->encoding = *p++;
 
     /* Decode and store the name */
-    if (NULL==(attr->name=H5MM_strdup((const char *)p)))
+    if(NULL == (attr->name = H5MM_strdup((const char *)p)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(name_len);    /* advance the memory pointer */
@@ -169,22 +174,22 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         p += name_len;    /* advance the memory pointer */
 
     /* decode the attribute datatype */
-    if (flags & H5O_ATTR_FLAG_TYPE_SHARED) {
+    if(flags & H5O_ATTR_FLAG_TYPE_SHARED) {
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_MSG_SHARED->decode) (f, dxpl_id, p)))
+	if (NULL == (shared = (H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
-        if((attr->dt= H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL))==NULL)
+        if((attr->dt = H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
 
         /* Free the shared information */
         H5O_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
-        if((attr->dt=(H5O_MSG_DTYPE->decode)(f,dxpl_id,p))==NULL)
+        if((attr->dt = (H5O_MSG_DTYPE->decode)(f, dxpl_id, p)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2)
@@ -193,20 +198,20 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         p += attr->dt_size;
 
     /* decode the attribute dataspace */
-    if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
+    if(NULL == (attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if((extent=(H5O_MSG_SDSPACE->decode)(f,dxpl_id,p))==NULL)
+    if((extent = (H5O_MSG_SDSPACE->decode)(f, dxpl_id, p)) == NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
     /* Copy the extent information */
-    HDmemcpy(&(attr->ds->extent),extent, sizeof(H5S_extent_t));
+    HDmemcpy(&(attr->ds->extent), extent, sizeof(H5S_extent_t));
 
     /* Release temporary extent information */
-    H5FL_FREE(H5S_extent_t,extent);
+    H5FL_FREE(H5S_extent_t, extent);
 
     /* Default to entire dataspace being selected */
-    if(H5S_select_all(attr->ds,0)<0)
+    if(H5S_select_all(attr->ds, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     if(version < H5O_ATTR_VERSION_2)
@@ -215,24 +220,24 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         p += attr->ds_size;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);
+    H5_ASSIGN_OVERFLOW(attr->data_size, H5S_GET_EXTENT_NPOINTS(attr->ds) * H5T_get_size(attr->dt), hsize_t, size_t);
 
     /* Go get the data */
     if(attr->data_size) {
-        if (NULL==(attr->data = H5FL_BLK_MALLOC(attr_buf, attr->data_size)))
+        if(NULL == (attr->data = H5FL_BLK_MALLOC(attr_buf, attr->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(attr->data,p,attr->data_size);
-    }
+        HDmemcpy(attr->data, p, attr->data_size);
+    } /* end if */
 
     /* Indicate that the fill values aren't to be written out */
-    attr->initialized=1;
+    attr->initialized = 1;
 
     /* Set return value */
-    ret_value=attr;
+    ret_value = attr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_attr_decode() */
 
 
 /*--------------------------------------------------------------------------
@@ -273,14 +278,18 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     size_t      name_len;   /* Attribute name length */
     unsigned    version;        /* Attribute version */
     hbool_t     type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    hbool_t     use_latest_format;      /* Flag indicating the newest file format should be used */
+    herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_encode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_encode)
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(attr);
+    HDassert(f);
+    HDassert(p);
+    HDassert(attr);
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt))
@@ -289,18 +298,20 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         type_shared = FALSE;
 
     /* Check which version to write out */
-    if(attr->encoding != H5T_CSET_ASCII)
-      version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    if(use_latest_format)
+        version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+    else if(attr->encoding != H5T_CSET_ASCII)
+        version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared)
-      version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
+        version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
     else
-      version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Encode Version */
     *p++ = version;
 
     /* Set attribute flags if version >1 */
-    if(version>H5O_ATTR_VERSION_1)
+    if(version > H5O_ATTR_VERSION_1)
         *p++ = (type_shared ? H5O_ATTR_FLAG_TYPE_SHARED : 0 );    /* Set flags for attribute */
     else
         *p++ = 0; /* Reserved, for version <2 */
@@ -310,7 +321,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
      * encoded lengths are exact but we pad each part except the data to be a
      * multiple of eight bytes (in the first version).
      */
-    name_len = HDstrlen(attr->name)+1;
+    name_len = HDstrlen(attr->name) + 1;
     UINT16ENCODE(p, name_len);
     UINT16ENCODE(p, attr->dt_size);
     UINT16ENCODE(p, attr->ds_size);
@@ -319,15 +330,15 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
      * Encode the character encoding used for the attribute's name
      * Also add several "reserved" fields to pad to 16 bytes.
      */
-    if(version>=H5O_ATTR_VERSION_3)
-      *p++=attr->encoding;
+    if(version >= H5O_ATTR_VERSION_3)
+      *p++ = attr->encoding;
 
     /*
      * Write the name including null terminator padded to the correct number
      * of bytes.
      */
     HDmemcpy(p, attr->name, name_len);
-    HDmemset(p+name_len, 0, H5O_ALIGN(name_len)-name_len);
+    HDmemset(p + name_len, 0, H5O_ALIGN(name_len) - name_len);
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN(name_len);
     else
@@ -338,33 +349,33 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         H5O_shared_t	sh_mesg;
 
         /* Reset shared message information */
-        HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+        HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information from datatype */
-        if ((H5O_MSG_DTYPE->get_share)(f, attr->dt, &sh_mesg/*out*/)<0)
+        if((H5O_MSG_DTYPE->get_share)(f, attr->dt, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype")
 
         /* Encode shared message information for datatype */
-        if((H5O_MSG_SHARED->encode)(f,p,&sh_mesg)<0)
+        if((H5O_MSG_SHARED->encode)(f, p, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype")
     } /* end if */
     else {
         /* Encode datatype information */
-        if((H5O_MSG_DTYPE->encode)(f,p,attr->dt)<0)
+        if((H5O_MSG_DTYPE->encode)(f, p, attr->dt) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2) {
-        HDmemset(p+attr->dt_size, 0, H5O_ALIGN(attr->dt_size)-attr->dt_size);
+        HDmemset(p + attr->dt_size, 0, H5O_ALIGN(attr->dt_size) - attr->dt_size);
         p += H5O_ALIGN(attr->dt_size);
     } /* end if */
     else
         p += attr->dt_size;
 
     /* encode the attribute dataspace */
-    if((H5O_MSG_SDSPACE->encode)(f,p,&(attr->ds->extent))<0)
+    if((H5O_MSG_SDSPACE->encode)(f, p, &(attr->ds->extent)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace")
     if(version < H5O_ATTR_VERSION_2) {
-        HDmemset(p+attr->ds_size, 0, H5O_ALIGN(attr->ds_size)-attr->ds_size);
+        HDmemset(p + attr->ds_size, 0, H5O_ALIGN(attr->ds_size) - attr->ds_size);
         p += H5O_ALIGN(attr->ds_size);
     } /* end if */
     else
@@ -372,13 +383,13 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* Store attribute data */
     if(attr->data)
-        HDmemcpy(p,attr->data,attr->data_size);
+        HDmemcpy(p, attr->data, attr->data_size);
     else
-        HDmemset(p,0,attr->data_size);
+        HDmemset(p, 0, attr->data_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5O_attr_encode() */
 
 
 /*--------------------------------------------------------------------------
@@ -402,18 +413,18 @@ H5O_attr_copy(const void *_src, void *_dst, unsigned update_flags)
     const H5A_t            *src = (const H5A_t *) _src;
     void                   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy)
 
     /* check args */
-    assert(src);
+    HDassert(src);
 
     /* copy */
-    if (NULL == (ret_value = H5A_copy(_dst,src,update_flags)))
+    if(NULL == (ret_value = H5A_copy(_dst, src, update_flags)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_copy() */
 
 
 /*--------------------------------------------------------------------------
@@ -437,19 +448,23 @@ done:
  *	Added padding between message parts for alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
+H5O_attr_size(const H5F_t *f, const void *_mesg)
 {
     const H5A_t         *attr = (const H5A_t *)_mesg;
     size_t		name_len;
     unsigned            version;        /* Attribute version */
     hbool_t             type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_size)
 
-    assert(attr);
+    HDassert(attr);
 
-    name_len = HDstrlen(attr->name)+1;
+    name_len = HDstrlen(attr->name) + 1;
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt))
@@ -458,47 +473,42 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
         type_shared = FALSE;
 
     /* Check which version to write out */
-    if(attr->encoding != H5T_CSET_ASCII)
-      version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    if(use_latest_format)
+        version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+    else if(attr->encoding != H5T_CSET_ASCII)
+        version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared)
-      version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
+        version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
     else
-      version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
+    /* Common size information */
+    ret_value = 1 +				/*version               */
+                1 +				/*reserved		*/
+                2 +				/*name size inc. null	*/
+                2 +				/*type size		*/
+                2; 				/*space size		*/
+
+    /* Version-specific size information */
     if(version == H5O_ATTR_VERSION_1)
-        ret_value = 1 +				/*version               */
-                    1 +				/*reserved		*/
-                    2 +				/*name size inc. null	*/
-                    2 +				/*type size		*/
-                    2 +				/*space size		*/
-                    H5O_ALIGN(name_len)	+	/*attribute name	*/
+        ret_value += H5O_ALIGN(name_len) +	/*attribute name	*/
                     H5O_ALIGN(attr->dt_size) +	/*data type		*/
                     H5O_ALIGN(attr->ds_size) +	/*data space		*/
                     attr->data_size;		/*the data itself	*/
     else if(version == H5O_ATTR_VERSION_2)
-        ret_value = 1 +				/*version               */
-                    1 +				/*flags			*/
-                    2 +				/*name size inc. null	*/
-                    2 +				/*type size		*/
-                    2 +				/*space size		*/
-                    name_len	+		/*attribute name	*/
+        ret_value += name_len	+		/*attribute name	*/
                     attr->dt_size +		/*data type		*/
                     attr->ds_size +		/*data space		*/
                     attr->data_size;		/*the data itself	*/
     else if(version == H5O_ATTR_VERSION_3)
-        ret_value = 1 +				/*version               */
-                    1 +				/*flags			*/
-                    2 +				/*name size inc. null	*/
-                    2 +				/*type size		*/
-                    2 +				/*space size		*/
-                    1 +                         /*character encoding    */
+        ret_value += 1 +                        /*character encoding    */
                     name_len	+		/*attribute name	*/
                     attr->dt_size +		/*data type		*/
                     attr->ds_size +		/*data space		*/
                     attr->data_size;		/*the data itself	*/
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -519,16 +529,15 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
 static herr_t
 H5O_attr_reset(void *_mesg)
 {
-    H5A_t                  *attr = (H5A_t *) _mesg;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5A_t                  *attr = (H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset)
 
-    if (attr)
+    if(attr)
         H5A_free(attr);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_attr_reset() */
 
 
 /*-------------------------------------------------------------------------
@@ -546,15 +555,15 @@ H5O_attr_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_free (void *mesg)
+H5O_attr_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
-    H5FL_FREE(H5A_t,mesg);
+    H5FL_FREE(H5A_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_attr_free() */
 
 
@@ -576,24 +585,24 @@ static herr_t
 H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_delete);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_delete)
 
     /* check args */
-    assert(f);
-    assert(attr);
+    HDassert(f);
+    HDassert(attr);
 
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt)) {
         /* Decrement the reference count on the shared datatype, if requested */
         if(adj_link)
-            if(H5T_link(attr->dt, -1, dxpl_id)<0)
+            if(H5T_link(attr->dt, -1, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_delete() */
 
 
@@ -616,23 +625,23 @@ static herr_t
 H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_link);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_link)
 
     /* check args */
-    assert(f);
-    assert(attr);
+    HDassert(f);
+    HDassert(attr);
 
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
-        if(H5T_link(attr->dt,1,dxpl_id)<0)
+        if(H5T_link(attr->dt,1,dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_link() */
 
 
@@ -964,15 +973,15 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     H5O_shared_t	sh_mesg;        /* Shared message information */
     void *dt_mesg;                      /* Pointer to datatype message to dump */
     herr_t      (*debug)(H5F_t*, hid_t, const void*, FILE*, int, int)=NULL;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_debug);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_debug)
 
     /* check args */
-    assert(f);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 	    "Name:",
@@ -997,18 +1006,18 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
                );
     if(H5T_committed(mesg->dt)) {
         /* Reset shared message information */
-        HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+        HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information from datatype */
-        if ((H5O_MSG_DTYPE->get_share)(f, mesg->dt, &sh_mesg/*out*/)<0)
+        if((H5O_MSG_DTYPE->get_share)(f, mesg->dt, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't retrieve shared message information")
 
-        debug=H5O_MSG_SHARED->debug;
-        dt_mesg=&sh_mesg;
+        debug = H5O_MSG_SHARED->debug;
+        dt_mesg = &sh_mesg;
     } /* end if */
     else {
-        debug=H5O_MSG_DTYPE->debug;
-        dt_mesg=mesg->dt;
+        debug = H5O_MSG_DTYPE->debug;
+        dt_mesg = mesg->dt;
     } /* end else */
     if(debug)
         (debug)(f, dxpl_id, dt_mesg, stream, indent+3, MAX(0, fwidth-3));
@@ -1016,11 +1025,12 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
         fprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
 
     fprintf(stream, "%*sData space...\n", indent, "");
-    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),
+    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth - 3),
 	    "Size:",
 	    (unsigned long)(mesg->ds_size));
-    H5S_debug(f, dxpl_id, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
+    H5S_debug(f, dxpl_id, mesg->ds, stream, indent+3, MAX(0, fwidth - 3));
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_debug() */
+

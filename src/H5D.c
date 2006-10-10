@@ -2034,6 +2034,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     H5S_t              *space;  /* Dataset's dataspace */
     H5D_alloc_time_t alloc_time;/* Dataset's allocation time */
     H5O_efl_t          *efl;    /* Dataset's external file list */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
 
     /* fill value variables */
     H5D_fill_time_t	fill_time;
@@ -2060,6 +2061,9 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     space = dset->shared->space;
     alloc_time = dset->shared->alloc_time;
     efl = &dset->shared->efl;
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(file);
 
     /* Add the dataset's raw data size to the size of the header, if the raw data will be stored as compact */
     if(layout->type == H5D_COMPACT)
@@ -2138,7 +2142,8 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
     /* If there is valid information for the old fill value struct, update it */
-    if (fill.buf) {
+    /* (only if we aren't trying to write the latest version of the file format) */
+    if(fill.buf && !use_latest_format) {
         /* Clear any previous values */
         if(H5O_reset(H5O_FILL_ID, fill_prop)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")

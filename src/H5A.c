@@ -268,18 +268,16 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 
     /* If the creation property list is H5P_DEFAULT, use the default character encoding */
     if(acpl_id == H5P_DEFAULT)
-    {
-      attr->encoding = H5P_CHAR_ENCODING_DEF;
-    }
+        attr->encoding = H5P_CHAR_ENCODING_DEF;
     else
     {
-      /* Get a local copy of the attribute creation property list */
-      if (NULL == (ac_plist = H5I_object(acpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        /* Get a local copy of the attribute creation property list */
+        if (NULL == (ac_plist = H5I_object(acpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-      if(H5P_get(ac_plist, H5P_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
-    }
+        if(H5P_get(ac_plist, H5P_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
+    } /* end else */
 
     /* Copy the attribute name */
     attr->name = H5MM_xstrdup(name);

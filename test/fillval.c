@@ -1266,7 +1266,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 static int
-test_compatible(void)
+test_compatible(hid_t fapl)
 {
   hid_t      file=-1, dset1=-1, dset2=-1;
   hid_t      dcpl1=-1, dcpl2=-1, fspace=-1, mspace=-1;
@@ -1287,7 +1287,7 @@ test_compatible(void)
   }
   strcat(testfile, FILE_COMPATIBLE);
 
-  if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+  if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, fapl))<0) {
       printf("    Could not open file %s. Try set $srcdir to point at the "
 	      "source directory of test\n", testfile);
       goto error;
@@ -1409,68 +1409,97 @@ error:
 int
 main(int argc, char *argv[])
 {
-    int		nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;
     const char  *envval = NULL;
-    hid_t	fapl=-1;
 
     envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL) 
+    if(envval == NULL) 
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
-        if (argc>=2) {
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
+        int	nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;
+        hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
+        hbool_t new_format;     /* Whether to use the new format or not */
+
+        if(argc >= 2) {
 	    test_contig = test_chunk = test_compact = 0;
-	    for (argno=1; argno<argc; argno++) {
-		if (!strcmp(argv[argno], "contiguous")) {
+	    for(argno = 1; argno < argc; argno++) {
+		if(!strcmp(argv[argno], "contiguous"))
 		    test_contig = 1;
-		} else if (!strcmp(argv[argno], "chunked")) {
+		else if(!strcmp(argv[argno], "chunked"))
 		    test_chunk = 1;
-		} else if (!strcmp(argv[argno], "compact")) {
+		else if(!strcmp(argv[argno], "compact"))
 		    test_compact =1;
-		} else {
+		else {
 		    fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
 		    exit(1);
 		}
-	    }
-	}
+	    } /* end for */
+	} /* end if */
 
 	h5_reset();
 	fapl = h5_fileaccess();
 
+	/* Property list tests */
 	nerrors += test_getset();
 
-	/* Chunked storage layout tests */
-	if (test_chunk) {
-	    nerrors += test_create(fapl, FILENAME[0], H5D_CHUNKED);
-	    nerrors += test_rdwr  (fapl, FILENAME[2], H5D_CHUNKED);
-	    nerrors += test_extend(fapl, FILENAME[4], H5D_CHUNKED);
-	}
+        /* Copy the file access property list */
+        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-	/* Contiguous storage layout tests */
-	if (test_contig) {
-	    nerrors += test_create(fapl, FILENAME[1], H5D_CONTIGUOUS);
-	    nerrors += test_rdwr  (fapl, FILENAME[3], H5D_CONTIGUOUS);
-	    nerrors += test_extend(fapl, FILENAME[5], H5D_CONTIGUOUS);
-	    nerrors += test_compatible();
-	}
+        /* Set the "use the latest version of the format" flag for creating objects in the file */
+        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
 
-	/* Compact dataset storage tests */
-	if (test_compact) {
-	    nerrors += test_create(fapl, FILENAME[6], H5D_COMPACT);
-	    nerrors += test_rdwr  (fapl, FILENAME[7], H5D_COMPACT);
-	}
+        /* Loop over using new group format */
+        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
 
-	if (nerrors) goto error;
+            /* Set the FAPL for the type of format */
+            if(new_format) {
+                puts("\nTesting with new file format:");
+                my_fapl = fapl2;
+            } /* end if */
+            else {
+                puts("Testing with old file format:");
+                my_fapl = fapl;
+            } /* end else */
+
+            /* Chunked storage layout tests */
+            if(test_chunk) {
+                nerrors += test_create(my_fapl, FILENAME[0], H5D_CHUNKED);
+                nerrors += test_rdwr  (my_fapl, FILENAME[2], H5D_CHUNKED);
+                nerrors += test_extend(my_fapl, FILENAME[4], H5D_CHUNKED);
+            } /* end if */
+
+            /* Contiguous storage layout tests */
+            if(test_contig) {
+                nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
+                nerrors += test_rdwr  (my_fapl, FILENAME[3], H5D_CONTIGUOUS);
+                nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
+                nerrors += test_compatible(my_fapl);
+            } /* end if */
+
+            /* Compact dataset storage tests */
+            if(test_compact) {
+                nerrors += test_create(my_fapl, FILENAME[6], H5D_COMPACT);
+                nerrors += test_rdwr  (my_fapl, FILENAME[7], H5D_COMPACT);
+            } /* end if */
+        } /* end for */
+
+        /* Close 2nd FAPL */
+	H5Pclose(fapl2);
+
+	if(nerrors)
+            goto error;
 	puts("All fill value tests passed.");
-	if (h5_cleanup(FILENAME, fapl)) remove(FILE_NAME_RAW);
-    }
+
+	if(h5_cleanup(FILENAME, fapl))
+            remove(FILE_NAME_RAW);
+    } /* end if */
     else
-    {
         puts("All fill value tests skipped - Incompatible with current Virtual File Driver");
-    }
+
     return 0;
 
-    error:
-        puts("***** FILL VALUE TESTS FAILED *****");
-        return 1;
-
+error:
+    puts("***** FILL VALUE TESTS FAILED *****");
+    return 1;
 }
+

@@ -121,13 +121,15 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     HDassert(pp && *pp);
     HDassert(dt && dt->shared);
 
-    /* decode */
+    /* Version, class & flags */
     UINT32DECODE(*pp, flags);
     version = (flags>>4) & 0x0f;
     if(version < H5O_DTYPE_VERSION_1 || version > H5O_DTYPE_VERSION_3)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for datatype message")
     dt->shared->type = (H5T_class_t)(flags & 0x0f);
     flags >>= 8;
+
+    /* Size */
     UINT32DECODE(*pp, dt->shared->size);
 
     switch(dt->shared->type) {
@@ -172,7 +174,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              * Floating-point types...
              */
             dt->shared->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
-            if(version == H5O_DTYPE_VERSION_3) {
+            if(version >= H5O_DTYPE_VERSION_3) {
                 /* Unsupported byte order*/
                 if((flags & 0x40) && !(flags & 0x1))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bad byte order for datatype message")
@@ -510,7 +512,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
     unsigned	i;
     size_t	n, z;
     uint8_t     version;                /* version number */
-    hbool_t     use_latest_format;      /* Flag indicating the new group format should be used */
+    hbool_t     use_latest_format;      /* Flag indicating the newest file format should be used */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode_helper)
@@ -1073,7 +1075,7 @@ static size_t
 H5O_dtype_size(const H5F_t *f, const void *_mesg)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
-    hbool_t     use_latest_format;      /* Flag indicating the new group format should be used */
+    hbool_t     use_latest_format;      /* Flag indicating the newest file format should be used */
     unsigned	u;                      /* Local index variable */
     size_t	ret_value;
 
