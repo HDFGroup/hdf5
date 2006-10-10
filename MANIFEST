@@ -466,6 +466,8 @@
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
+./src/H5FDdirect.c
+./src/H5FDdirect.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
 ./src/H5FDlog.c

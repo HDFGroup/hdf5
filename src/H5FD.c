@@ -43,6 +43,7 @@
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
+#include "H5FDdirect.h"		/* Direct file I/O			*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -161,6 +162,9 @@ H5FD_term_interface(void)
             /* Reset the VFL drivers, if they've been closed */
             if(H5I_nmembers(H5I_VFL)==0) {
                 H5FD_sec2_term();
+#ifdef H5_HAVE_DIRECT 
+                H5FD_direct_term();
+#endif           
                 H5FD_log_term();
                 H5FD_stdio_term();
                 H5FD_family_term();

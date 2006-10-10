@@ -54,6 +54,9 @@
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
+/* Define if the direct I/O virtual file driver should be compiled */
+#undef HAVE_DIRECT
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 

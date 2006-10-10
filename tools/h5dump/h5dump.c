@@ -638,7 +638,7 @@ usage(const char *prog)
     fprintf(stdout, "      -k L, --block=L     Size of block in hyperslab\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", and \"stream\". Without\n");
+    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
     fprintf(stdout, "        the file driver flag, the file will be opened with each driver in\n");
     fprintf(stdout, "        turn and in the order specified above until one driver succeeds\n");
     fprintf(stdout, "        in opening the file.\n");
@@ -2691,7 +2691,7 @@ dump_fcpl(hid_t fid)
     unsigned stab;      /* symbol table entry version # */
     unsigned shhdr;     /* shared object header version # */
     hid_t    fdriver;    /* file driver */
-    char     dname[15]; /* buffer to store driver name */
+    char     dname[32]; /* buffer to store driver name */
     unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
@@ -2731,6 +2731,8 @@ dump_fcpl(hid_t fid)
 
     if (H5FD_CORE==fdriver)
         HDstrcpy(dname,"H5FD_CORE");
+    else if (H5FD_DIRECT==fdriver)
+        HDstrcpy(dname,"H5FD_DIRECT");
     else if (H5FD_FAMILY==fdriver)
         HDstrcpy(dname,"H5FD_FAMILY");
     else if (H5FD_LOG==fdriver)
@@ -2747,7 +2749,9 @@ dump_fcpl(hid_t fid)
     else if (H5FD_STREAM==fdriver)
         HDstrcpy(dname,"H5FD_STREAM");
 #endif
-
+    else
+        HDstrcpy(dname,"Unknown driver");
+	
     indentation(indent + COL);
     printf("%s %s\n","FILE_DRIVER", dname);
     indentation(indent + COL);
@@ -6239,6 +6243,10 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
 	    return -1;
+    } else if (!HDstrcmp(name, "direct")) {
+        /* Substitute Direct I/O driver with sec2 driver temporarily because
+         * some output has sec2 driver as the standard. */	
+	if (H5Pset_fapl_sec2(fapl)<0) return -1;
     } else {
 	/* Unknown driver */
 	return -1;

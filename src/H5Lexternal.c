@@ -138,9 +138,9 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     if(H5Fclose(fid) < 0)
         goto error;
 
-    /* Open the external file */
     if((fid = H5Fopen(file_name, intent, fapl_id)) < 0)
         goto error;
+
     ret_value = H5Oopen(fid, obj_name, lapl_id); /* If this fails, our return value will be negative. */
     if(H5Pclose(fapl_id) < 0)
         goto error;

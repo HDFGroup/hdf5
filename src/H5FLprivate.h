@@ -35,7 +35,7 @@
 /* Private headers needed by this file */
 
 /* Macros for turning off free lists in the library */
-/* #define H5_NO_FREE_LISTS */
+/*#define H5_NO_FREE_LISTS*/
 #if defined H5_NO_FREE_LISTS || defined H5_USING_PURIFY
 #define H5_NO_REG_FREE_LISTS
 #define H5_NO_ARR_FREE_LISTS

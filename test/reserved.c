@@ -54,6 +54,7 @@ rsrv_heap(void)
 
     /* Create a new file. */
     fapl = h5_fileaccess();
+
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     /* Set file address sizes to be very small. */
     fcpl = H5Pcreate(H5P_FILE_CREATE);

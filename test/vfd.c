@@ -33,6 +33,7 @@ const char *FILENAME[] = {
     "core_file",
     "family_file",
     "multi_file",
+    "direct_file",
     NULL
 };
 
@@ -114,6 +115,88 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
     return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_direct
+ *
+ * Purpose:     Tests the file handle interface for DIRECT I/O driver
+ *
+ * Return:      Success:        exit(0)
+ *
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, 20 September 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_direct(void)
+{
+#ifdef H5_HAVE_DIRECT
+    hid_t       file=(-1), fapl, access_fapl = -1;
+    char        filename[1024];
+    int         *fhandle=NULL;
+    hsize_t     file_size;
+#endif /*H5_HAVE_DIRECT*/
+
+    TESTING("Direct I/O file driver");
+
+#ifndef H5_HAVE_DIRECT
+    SKIPPED();
+    return 0;
+#else /*H5_HAVE_DIRECT*/
+
+    /* Set property list and file name for SEC2 driver. */
+    fapl = h5_fileaccess();
+    if(H5Pset_fapl_direct(fapl)<0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        TEST_ERROR;
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
+        TEST_ERROR;
+
+    /* Check file handle API */
+    if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle)<0)
+        TEST_ERROR;
+    if(*fhandle<0)
+        TEST_ERROR;
+
+    /* Check file size API */
+    if(H5Fget_filesize(file, &file_size) < 0)
+        TEST_ERROR;
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.  It's 2KB right now.
+     */
+    if(file_size<1*KB || file_size>4*KB)
+        TEST_ERROR;
+
+    if(H5Fclose(file)<0)
+        TEST_ERROR;
+    h5_cleanup(FILENAME, fapl);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose (fapl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+#endif /*H5_HAVE_DIRECT*/
 }
 
 
@@ -736,6 +819,7 @@ main(void)
     nerrors += test_family()<0    ?1:0;
     nerrors += test_family_compat()<0    ?1:0;
     nerrors += test_multi()<0     ?1:0;
+    nerrors += test_direct()<0      ?1:0;
 
     if (nerrors){
 	printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",

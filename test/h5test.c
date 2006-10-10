@@ -577,6 +577,11 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
 	    return -1;
+    } else if (!HDstrcmp(name, "direct")) {
+#ifdef H5_HAVE_DIRECT
+	/* Linux direct read() and write() system calls */
+	if (H5Pset_fapl_direct(fapl)<0) return -1;
+#endif
     } else {
 	/* Unknown driver */
 	return -1;
