@@ -2605,10 +2605,13 @@ if test "$DIRECT_VFD" = "yes"; then
                 [Define if the direct I/O virtual file driver should be compiled])
    else
       AC_MSG_RESULT([no])
+      DIRECT_VFD=no
    fi
 else
       AC_MSG_RESULT([suppressed])
 fi
+
+AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
  
 dnl ----------------------------------------------------------------------
 dnl Decide whether the presence of user's exception handling functions is
@@ -3476,7 +3479,6 @@ dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
 
 AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
-AM_CONDITIONAL([BUILD_PABLO_CONDITIONAL], [test "X$HAVE_PABLO" = "Xyes"])
 AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
@@ -3797,6 +3799,9 @@ fi
 
 PRINT_N "                     Stream VFD"
 IF_ENABLED_DISABLED "$STREAM_VFD"
+
+PRINT_N "                     Direct VFD"
+IF_ENABLED_DISABLED "$DIRECT_VFD"
 
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"

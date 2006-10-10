@@ -80,7 +80,7 @@ H5Tarray_create(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */],
     hid_t	ret_value;	/* return value	*/
 
     FUNC_ENTER_API(H5Tarray_create, FAIL)
-    H5TRACE3("i","iIs*h",base_id,ndims,dim);
+    H5TRACE4("i","iIu*h*Is",base_id,ndims,dim,perm);
 
     /* Check args */
     if(ndims < 1 || ndims > H5S_MAX_RANK)
@@ -251,7 +251,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int UNUSED perm[])
     int	ret_value;	/* return value			*/
 
     FUNC_ENTER_API(H5Tget_array_dims, FAIL)
-    H5TRACE2("Is","i*h",type_id,dims);
+    H5TRACE3("Is","i*h*Is",type_id,dims,perm);
 
     /* Check args */
     if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

@@ -77,7 +77,11 @@ LDADD=libh5test.la $(LIBHDF5)
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 
-VFD_LIST = sec2 stdio core split multi family
+if DIRECT_VFD_CONDITIONAL
+  VFD_LIST = sec2 stdio core split multi family direct
+else
+  VFD_LIST = sec2 stdio core split multi family
+endif
 
 # Additional target for running timing test
 timings _timings: testmeta
