@@ -2751,9 +2751,11 @@ dump_fcpl(hid_t fid)
 #endif
     else
         HDstrcpy(dname,"Unknown driver");
-	
-    indentation(indent + COL);
-    printf("%s %s\n","FILE_DRIVER", dname);
+
+    /* Take out this because the driver used can be different from the 
+     * standard output. */ 	
+    /*indentation(indent + COL);
+    printf("%s %s\n","FILE_DRIVER", dname);*/
     indentation(indent + COL);
     printf("%s %u\n","ISTORE_K", istore_ik);
     printf("%s\n",END);
