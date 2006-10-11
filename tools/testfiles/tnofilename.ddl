@@ -48,7 +48,7 @@ usage: h5dump [OPTIONS] file
       -k L, --block=L     Size of block in hyperslab
 
   D - is the file driver to use in opening the file. Acceptable values
-        are "sec2", "family", "split", "multi", and "stream". Without
+        are "sec2", "family", "split", "multi", "direct", and "stream". Without
         the file driver flag, the file will be opened with each driver in
         turn and in the order specified above until one driver succeeds
         in opening the file.
