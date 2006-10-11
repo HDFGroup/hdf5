@@ -253,9 +253,10 @@ END SUBROUTINE h5aclose_f
     <dd>Creates a dataset as an attribute of another group, dataset, 
         or named datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Acreate</code> creates an attribute named <code>name</code>
-        and attached to the object specified with <code>loc_id</code>.  
-        <code>loc_id</code> is a group, dataset, or named datatype identifier.
+    <dd><code>H5Acreate</code> creates the attribute <code>name</code>
+        attached to the object specified with <code>loc_id</code>.  
+        <code>loc_id</code> can be a group, dataset, or named datatype 
+        identifier.
         <p>
         The attribute name specified in <code>name</code> must be unique. 
         Attempting to create an attribute with the same name as an already 
@@ -968,7 +969,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 May 2006");
+document.writeln("Last modified: 11 October 2006");
 -->
 </SCRIPT>
  
