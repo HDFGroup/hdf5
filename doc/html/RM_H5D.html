@@ -403,32 +403,40 @@ END SUBROUTINE h5dcreate_f
         <em>const hsize_t *</em> <code>size</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Extends a dataset with unlimited dimension.
+    <dd>Extends a dataset. 
 <dt><strong>Description:</strong>
     <dd><code>H5Dextend</code> verifies that the dataset is at least of size
-        <code>size</code>.  
+        <code>size</code>, extending it if necessary.  
         The dimensionality of <code>size</code> is the same as that of
         the dataspace of the dataset being changed.
-        This function cannot be applied to a dataset with fixed dimensions.
+	<p>
+        This function can be applied to the following datasets:
+        <ul>
+          <li>Any dataset with unlimited dimensions
+          <li>A dataset with fixed dimensions if the current dimension sizes
+          are less than the maximum sizes set with <code>maxdims</code> (see 
+          <a href="RM_H5S.html#Dataspace-CreateSimple">
+          <code>H5Screate_simple</code></a>)
+        </ul>
 	<p>
 	Space on disk is immediately allocated for the new dataset extent 
-        if the dataset's space allocation time is set to 
+        if the dataset&rsquo;s space allocation time is set to 
 	<code>H5D_ALLOC_TIME_EARLY</code>.
-	Fill values will be written to the dataset if the dataset's fill time 
-	is set to <code>H5D_FILL_TIME_IFSET</code> or 
+	Fill values will be written to the dataset if the dataset&rsquo;s 
+        fill time is set to <code>H5D_FILL_TIME_IFSET</code> &nbsp;or&nbsp; 
 	<code>H5D_FILL_TIME_ALLOC</code>.
-	(Also see 
-	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>
-	and 
-	<a href="RM_H5P.html#Property-SetAllocTime">H5Pset_alloc_time</a>.)
+	(See <a href="RM_H5P.html#Property-SetFillTime">
+        <code>H5Pset_fill_time</code></a>
+	and <a href="RM_H5P.html#Property-SetAllocTime">
+        <code>H5Pset_alloc_time</code></a>.)
 
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
             <td valign="top">IN: Identifier of the dataset.</td></tr>
         <tr>
-		    <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Array containing the new magnitude of each dimension.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1678,7 +1686,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 February 2006");
+document.writeln("Last modified: 11 October 2006");
 -->
 </SCRIPT>
  
