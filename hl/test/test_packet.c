@@ -28,8 +28,7 @@
 #define BIG_TABLE_SIZE  8000
 #define NFIELDS 5
 #define TEST_FILE_NAME "test_packet_table.h5"
-#define TEST_COMPRESS_FILE1 "test_packet_compress1.h5"
-#define TEST_COMPRESS_FILE2 "test_packet_compress2.h5"
+#define TEST_COMPRESS_FILE "test_packet_compress.h5"
 #define PT_NAME "Test Packet Table"
 #define VL_TABLE_NAME "Varlen Test Table"
 #define H5TB_TABLE_NAME "Table1"
@@ -749,7 +748,7 @@ static int    test_opaque(hid_t fid)
  * test_compress
  *
  * Ensures that a FL packet table can be compressed.
- * This test creates two new files, TEST_COMPRESS_FILE1 and TEST_COMPRESS_FILE2
+ * This test creates a file named TEST_COMPRESS_FILE
  *
  *-------------------------------------------------------------------------
  */
@@ -757,40 +756,29 @@ static int
 test_compress(void)
 {
     hid_t fid1 = -1;
-    hid_t fid2 = -1;
-    h5_stat_size_t size1, size2;
     herr_t err;
     hid_t table = -1;
     hid_t part_t = -1;
+    hid_t dset_id = -1;
+    hid_t plist_id = -1;
     size_t c;
+    size_t num_elems = 1;
+    unsigned filter_vals[1];
     particle_t readPart;
     hsize_t count;
 
     TESTING("packet table compression");
 
-    /* Create two empty files. */
-    if((fid1 = H5Fcreate(TEST_COMPRESS_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-    if((fid2 = H5Fcreate(TEST_COMPRESS_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-
-    /* Make sure that the two files are the same size (both should be empty) */
-    err = H5Fclose(fid1);
-    if(err < 0) TEST_ERROR;
-    err = H5Fclose(fid2);
-    if(err < 0) TEST_ERROR;
-    size1 = h5_get_file_size(TEST_COMPRESS_FILE1);
-    size2 = h5_get_file_size(TEST_COMPRESS_FILE2);
-    if(size1 != size2) TEST_ERROR;
-
-    /* Re-open file1 and create a compressed packet table in it */
-    if((fid1 = H5Fopen(TEST_COMPRESS_FILE1, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Create a file. */
+    if((fid1 = H5Fcreate(TEST_COMPRESS_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
     assert(part_t != -1);
 
-    /* Create a new table with compression level 1 */
-    table = H5PTcreate_fl(fid1, "Packet Compress Test Dataset", part_t, (hsize_t)80, 1);
+    /* Create a new table with compression level 8 */
+    table = H5PTcreate_fl(fid1, "Compressed Test Dataset", part_t, (hsize_t)80, 8);
     if( H5PTis_valid(table) < 0) TEST_ERROR;
 
     /* We can now use this table exactly the same way we use a normal uncompressed
@@ -818,56 +806,77 @@ test_compress(void)
         if( cmp_par(c % 8, 0, testPart, &readPart) != 0) TEST_ERROR;
     }
 
-    /* Close the table and the file */
+    /* Close the table */
     err = H5PTclose(table);
+    if( err < 0) TEST_ERROR;
+
+    /* Open the packet table as a regular dataset and make sure that the 
+     * compression filter is set.
+     */
+    dset_id = H5Dopen(fid1, "Compressed Test Dataset");
+    if( dset_id < 0) TEST_ERROR;
+
+    plist_id = H5Dget_create_plist(dset_id);
+    if( plist_id < 0) TEST_ERROR;
+
+    err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
+                      filter_vals, 0, NULL, NULL);
+    if( err < 0) TEST_ERROR;
+
+    /* The compression level should be 8, the value we passed in */
+    if(filter_vals[0] != 8) TEST_ERROR;
+
+    /* Clean up */
+    err = H5Pclose(plist_id);
+    if( err < 0) TEST_ERROR;
+    err = H5Dclose(dset_id);
+    if( err < 0) TEST_ERROR;
+
+    /* Create a new table without compression. */
+    table = H5PTcreate_fl(fid1, "Uncompressed Dataset", part_t, (hsize_t)80, -1);
+    if(table < 0) TEST_ERROR;
+
+    /* Close the packet table */
+    err = H5PTclose(table);
+    if( err < 0) TEST_ERROR;
+
+    /* Open the packet table as a regular dataset and make sure that the 
+     * compression filter is not set.
+     */
+    dset_id = H5Dopen(fid1, "Uncompressed Dataset");
+    if( dset_id < 0) TEST_ERROR;
+
+    plist_id = H5Dget_create_plist(dset_id);
+    if( plist_id < 0) TEST_ERROR;
+
+    H5E_BEGIN_TRY {
+    err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
+                      filter_vals, 0, NULL, NULL);
+    if( err >= 0) TEST_ERROR;
+    } H5E_END_TRY
+
+    /* Clean up */
+    err = H5Pclose(plist_id);
+    if( err < 0) TEST_ERROR;
+    err = H5Dclose(dset_id);
+    if( err < 0) TEST_ERROR;
+
+    /* Close the datatype and the file */
+    err = H5Tclose(part_t);
     if( err < 0) TEST_ERROR;
     err = H5Fclose(fid1);
     if( err < 0) TEST_ERROR;
-
-    /* Open the second file and create a new table with compression level 9. */
-    if((fid2 = H5Fopen(TEST_COMPRESS_FILE2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
-    table = H5PTcreate_fl(fid2, "Packet Compress Test Dataset", part_t, (hsize_t)80, 9);
-    if(table < 0) TEST_ERROR;
-
-    for(c = 0; c < BIG_TABLE_SIZE ; c+=8)
-    {
-        /* Append eight particles at once*/
-        err = H5PTappend(table, (size_t)8, &(testPart[0]));
-        if( err < 0) TEST_ERROR;
-    }
-    /* Read particles to ensure that all of them were written correctly  */
-    for(c = 0; c < BIG_TABLE_SIZE; c++)
-    {
-        err = H5PTget_next(table, 1, &readPart);
-        if(err < 0) TEST_ERROR;
-
-        /* Ensure that particles were read correctly */
-        if( cmp_par(c % 8, 0, testPart, &readPart) != 0) TEST_ERROR;
-    }
-
-    /* Close the datatype, the table, and the file */
-    err = H5Tclose(part_t);
-    if( err < 0) TEST_ERROR;
-    err = H5PTclose(table);
-    if( err < 0) TEST_ERROR;
-    err = H5Fclose(fid2);
-    if( err < 0) TEST_ERROR;
-
-    /* Since the table in file2 used a higher compression level than the one in
-     * file1, file2 should be smaller. */
-    size1 = h5_get_file_size(TEST_COMPRESS_FILE1);
-    size2 = h5_get_file_size(TEST_COMPRESS_FILE2);
-    if(size1 <= size2) TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
+       H5Pclose(plist_id);
+       H5Dclose(dset_id);
        H5Tclose(part_t);
        H5PTclose(table);
        H5Fclose(fid1);
-       H5Fclose(fid2);
     } H5E_END_TRY    
     H5_FAILED();
     return -1;
