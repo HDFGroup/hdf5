@@ -1379,20 +1379,23 @@ END SUBROUTINE h5sselect_all_f
 <dt><strong>Fortran90 Interface:</strong> h5sselect_elements_f
     <dd>
 	<pre>
-SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements,
+SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
                                 coord, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
-  INTEGER, INTENT(IN) :: op               ! Flag, valid values are:
+  INTEGER, INTENT(IN) :: operator         ! Flag, valid values are:
                                           !    H5S_SELECT_SET_F 
                                           !    H5S_SELECT_OR_F 
-  INTEGER, INTENT(IN) :: num_elements     ! Number of elements to be selected
+  INTEGER, INTENT(IN) :: rank             ! Number of dataspace 
+                                          ! dimensions</pre>
+<!-- NEW PAGE -->
+<pre>  INTEGER(SIZE_T), INTENT(IN) :: num_elements     
+                                          ! Number of elements to be 
+                                          ! selected
   INTEGER(HSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements:
-                                          ! coord(num_elements, rank)</pre>
-<!-- NEW PAGE -->
-<pre>
+                                          ! coord(num_elements, rank)
   INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5sselect_elements_f
@@ -1944,7 +1947,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2005");
+document.writeln("Last modified: 11 October 2006");
 -->
 </SCRIPT> 
 
