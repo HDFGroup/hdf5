@@ -2731,8 +2731,10 @@ dump_fcpl(hid_t fid)
 
     if (H5FD_CORE==fdriver)
         HDstrcpy(dname,"H5FD_CORE");
+#ifdef H5_HAVE_DIRECT
     else if (H5FD_DIRECT==fdriver)
         HDstrcpy(dname,"H5FD_DIRECT");
+#endif
     else if (H5FD_FAMILY==fdriver)
         HDstrcpy(dname,"H5FD_FAMILY");
     else if (H5FD_LOG==fdriver)
