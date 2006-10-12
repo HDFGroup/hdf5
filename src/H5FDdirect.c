@@ -24,8 +24,9 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FD_direct_init_interface
 
-/* For system function posix_memalign */
-#define _XOPEN_SOURCE 600
+/* For system function posix_memalign - Commented it out because copper isn't able to compile
+ * this file. */
+/* #define _XOPEN_SOURCE 600 */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
