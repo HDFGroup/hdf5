@@ -1037,7 +1037,7 @@ test_attr_dtype_shared(void)
 	// Get size of file
 	h5_stat_size_t empty_filesize;       // Size of empty file
 	empty_filesize = h5_get_file_size(FILENAME.c_str());
-	if (empty_filesize == 0)
+	if (empty_filesize < 0)
     	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
 
 	// Open the file again

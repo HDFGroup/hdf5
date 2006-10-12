@@ -1527,7 +1527,7 @@ test_attr_dtype_shared(hid_t fapl)
 
     /* Get size of file */
     empty_filesize=h5_get_file_size(FILENAME);
-    if(empty_filesize==0)
+    if(empty_filesize<0)
         TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
 
     /* Re-open file */

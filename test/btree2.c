@@ -6734,7 +6734,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of an empty file */
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Create the file to work on */
@@ -6762,7 +6762,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6812,7 +6812,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6862,7 +6862,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6912,7 +6912,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */

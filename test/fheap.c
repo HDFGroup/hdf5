@@ -654,7 +654,7 @@ open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((*empty_size = h5_get_file_size(filename)) == 0)
+    if((*empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -787,7 +787,7 @@ close_heap(char *filename, hid_t dxpl, fheap_test_param_t *tparam,
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -1822,7 +1822,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -1874,7 +1874,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -5896,7 +5896,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -5961,7 +5961,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6052,7 +6052,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6145,7 +6145,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6237,7 +6237,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6305,7 +6305,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6398,7 +6398,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6536,7 +6536,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6634,7 +6634,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) == 0)
+    if((empty_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6831,7 +6831,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -11870,7 +11870,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -12101,7 +12101,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -12407,7 +12407,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -12831,7 +12831,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -13048,7 +13048,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
@@ -13202,7 +13202,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -13433,7 +13433,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -14034,7 +14034,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -14232,7 +14232,7 @@ test_filtered_man_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
@@ -14405,7 +14405,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -14595,7 +14595,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0)
+    if((file_size = h5_get_file_size(filename)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);

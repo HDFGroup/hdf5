@@ -3767,7 +3767,7 @@ ud_hard_links(hid_t fapl)
 
     /* Get the size of the empty file for reference */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((empty_size = h5_get_file_size(filename))==0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename))<0) TEST_ERROR
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
@@ -3933,7 +3933,7 @@ ud_link_reregister(hid_t fapl)
 
     /* Get the size of the empty file for reference */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((empty_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 

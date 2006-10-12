@@ -349,7 +349,7 @@ lifecycle(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
@@ -510,7 +510,7 @@ lifecycle(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -574,7 +574,7 @@ long_compact(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Construct very long object name template */
     if((objname = HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))) == NULL) TEST_ERROR
@@ -654,7 +654,7 @@ long_compact(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -832,7 +832,7 @@ no_compact(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
@@ -893,7 +893,7 @@ no_compact(hid_t fapl)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR

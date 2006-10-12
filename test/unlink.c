@@ -549,7 +549,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of an empty file */
-    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((empty_size=h5_get_file_size(filename))<0) TEST_ERROR
 
 /* Create common objects for datasets */
 
@@ -606,7 +606,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -630,7 +630,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -654,7 +654,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -678,7 +678,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -702,7 +702,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -748,7 +748,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -772,7 +772,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -835,7 +835,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -862,7 +862,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -886,7 +886,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -917,7 +917,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -946,7 +946,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -1027,7 +1027,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -1060,7 +1060,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -1093,7 +1093,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -1130,7 +1130,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -1179,7 +1179,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR
@@ -2124,7 +2124,7 @@ test_full_group_compact(hid_t fapl)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     /* Get the size of the file with only the objects to keep */
-    if((keep_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open the file */
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
@@ -2188,7 +2188,7 @@ test_full_group_compact(hid_t fapl)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != keep_size) TEST_ERROR
@@ -2258,7 +2258,7 @@ test_full_group_dense(hid_t fapl)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     /* Get the size of the file with only the objects to keep */
-    if((keep_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open the file */
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
@@ -2335,7 +2335,7 @@ test_full_group_dense(hid_t fapl)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) == 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != keep_size) TEST_ERROR

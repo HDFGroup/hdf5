@@ -827,13 +827,15 @@ h5_dump_info_object(MPI_Info info)
  *
  * Purpose:	Get the current size of a file (in bytes)
  *
- * Return:	Success:	Size of file in bytes (could be 0)
- *		Failure:	0
+ * Return:	Success:	Size of file in bytes
+ *		Failure:	-1
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 22, 2003
  *
  * Modifications:
+ * 	Albert Cheng, Oct 11, 2006
+ *	Changed Failure return value to -1.
  *
  *-------------------------------------------------------------------------
  */
@@ -843,10 +845,10 @@ h5_get_file_size(const char *filename)
     h5_stat_t	sb;
 
     /* Get the file's statistics */
-    if (HDstat(filename, &sb)>=0)
+    if (HDstat(filename, &sb)==0)
         return((h5_stat_size_t)sb.st_size);
 
-    return(0);
+    return(-1);
 } /* end get_file_size() */
 
 /*
