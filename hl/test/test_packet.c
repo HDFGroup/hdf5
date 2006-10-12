@@ -819,8 +819,13 @@ test_compress(void)
     plist_id = H5Dget_create_plist(dset_id);
     if( plist_id < 0) TEST_ERROR;
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
+                      filter_vals, 0, NULL);
+#else
     err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
                       filter_vals, 0, NULL, NULL);
+#endif
     if( err < 0) TEST_ERROR;
 
     /* The compression level should be 8, the value we passed in */
@@ -850,8 +855,13 @@ test_compress(void)
     if( plist_id < 0) TEST_ERROR;
 
     H5E_BEGIN_TRY {
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
+                      filter_vals, 0, NULL);
+#else
     err = H5Pget_filter_by_id(plist_id, H5Z_FILTER_DEFLATE, NULL, &num_elems,
                       filter_vals, 0, NULL, NULL);
+#endif
     if( err >= 0) TEST_ERROR;
     } H5E_END_TRY
 
