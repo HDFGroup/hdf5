@@ -340,7 +340,8 @@ END SUBROUTINE h5iget_file_id_f
 <dl>
 <dt><strong>Name:</strong> <a name="Identify-GetName">H5Iget_name</a>
 <dt><strong>Signature:</strong>
-    <dd><em>ssize_t</em> <code>H5Iget_name</code>(<em>hid_t</em> <code>obj_id</code>,
+    <dd><em>ssize_t</em> <code>H5Iget_name</code>(
+                     <em>hid_t</em> <code>obj_id</code>,
 		     <em>char *</em><code>name</code>,
 		     <em>size_t</em> <code>size</code>
                      )
@@ -385,19 +386,20 @@ END SUBROUTINE h5iget_file_id_f
 <dt><strong>Parameters:</strong> 
     <ul><table>
       <tr>
-	    <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td valign="top">IN: Identifier of the object.  
-            This identifier can refer to a group, dataset, or named datatype.</td></tr>
+            This identifier can refer to a group, dataset, 
+            or named datatype.</td></tr>
       <tr>
-	    <td valign="top"><em>char *</em><code>name</code></td> 
+        <td valign="top"><em>char *</em><code>name</code></td> 
         <td valign="top">OUT: A name associated with the identifier.</td></tr>
       <tr>
-	    <td valign="top"><em>size_t size</em></td> 
+        <td valign="top"><em>size_t</em> <code>size</code></td> 
         <td valign="top">IN: The size of the <code>name</code> buffer.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong> 
-    <dd>Returns the length of the name if successful,
-        returning <code>0</code> (zero) if no name is associated with the identifier.
+    <dd>Returns the length of the name if successful, returning <code>0</code> 
+        (zero) if no name is associated with the identifier.
         Otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5iget_name_f
     <dd>
@@ -413,7 +415,7 @@ SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, hdferr)
 END SUBROUTINE h5iget_name_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -422,14 +424,14 @@ END SUBROUTINE h5iget_name_f
 <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>C</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.0</td>
+          <td valign="top">1.6.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+            Function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
@@ -717,7 +719,7 @@ Describes HDF5 Release 1.6.5, November 2005
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 6 February 2006");
+document.writeln("Last modified: 12 October 2006");
 -->
 </SCRIPT>
 
