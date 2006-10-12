@@ -1555,7 +1555,7 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
 
     /* Get values */
     if (size) {
-        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+        if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'small data' block size");
     } /* end if */
 
