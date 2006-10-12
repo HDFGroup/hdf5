@@ -35,7 +35,7 @@ nh5rcreate_object_c (haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
      hid_t c_loc_id;
      int ret_value_c;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hobj_ref_t ref_c;
 
      /*
@@ -82,7 +82,7 @@ nh5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid
      hid_t c_space_id;
      int ret_value_c;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hdset_reg_ref_t ref_c;
 
      /*

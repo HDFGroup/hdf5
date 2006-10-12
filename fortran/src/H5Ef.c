@@ -62,7 +62,7 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   herr_t status;
   FILE * file;
   char* c_name;
-  int c_namelen;
+  size_t c_namelen;
   c_namelen = *namelen;
   c_name = (char*)HD5f2cstring(name, c_namelen);
   if(c_name == NULL) return ret_val;
@@ -121,7 +121,7 @@ int_f
 nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
   int ret_val = -1;
-  char *c_name;
+  char *c_name = NULL;
   size_t c_namelen;
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
@@ -155,7 +155,7 @@ int_f
 nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
   int ret_val = -1;
-  char *c_name;
+  char *c_name = NULL;
   size_t c_namelen;
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
@@ -188,7 +188,7 @@ int_f
 nh5eset_auto_c(int_f* printflag)
 {
   int ret_val = -1;
-  herr_t status;
+  herr_t status = -1;
 
   if (*printflag == 1)
     status = H5Eset_auto_stack(H5E_DEFAULT, (H5E_auto_stack_t)H5Eprint, stderr);

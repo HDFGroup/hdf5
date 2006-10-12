@@ -680,22 +680,22 @@
             INTEGER, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pset_fill_value_c
+!            INTEGER, EXTERNAL :: h5pset_fill_value_integer_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pset_fill_value_integer_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_INTEGER_C'::h5pset_fill_value_integer_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: fillvalue
-              END FUNCTION h5pset_fill_value_c
+              END FUNCTION h5pset_fill_value_integer_c
             END INTERFACE
 
-            hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pset_fill_value_integer_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pset_fill_value_integer
 
 
@@ -715,22 +715,22 @@
             INTEGER, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pget_fill_value_c
+!            INTEGER, EXTERNAL :: h5pget_fill_value_integer_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pget_fill_value_integer_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_INTEGER_C'::h5pget_fill_value_integer_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER :: fillvalue
-              END FUNCTION h5pget_fill_value_c
+              END FUNCTION h5pget_fill_value_integer_c
             END INTERFACE
 
-            hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pget_fill_value_integer_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pget_fill_value_integer
 
 
@@ -750,22 +750,22 @@
             REAL, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pset_fill_value_c
+!            INTEGER, EXTERNAL :: h5pset_fill_value_real_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pset_fill_value_real_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_REAL_C'::h5pset_fill_value_real_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               REAL, INTENT(IN) :: fillvalue
-              END FUNCTION h5pset_fill_value_c
+              END FUNCTION h5pset_fill_value_real_c
             END INTERFACE
 
-            hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pset_fill_value_real_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pset_fill_value_real
 
 
@@ -785,22 +785,22 @@
             REAL, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pget_fill_value_c
+!            INTEGER, EXTERNAL :: h5pget_fill_value_real_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pget_fill_value_real_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_REAL_C'::h5pget_fill_value_real_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               REAL :: fillvalue
-              END FUNCTION h5pget_fill_value_c
+              END FUNCTION h5pget_fill_value_real_c
             END INTERFACE
 
-            hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pget_fill_value_real_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pget_fill_value_real
 
 
@@ -820,22 +820,22 @@
             DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pset_fill_value_c
+!            INTEGER, EXTERNAL :: h5pset_fill_value_double_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_DOUBLE_C'::h5pset_fill_value_double_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               DOUBLE PRECISION, INTENT(IN) :: fillvalue
-              END FUNCTION h5pset_fill_value_c
+              END FUNCTION h5pset_fill_value_double_c
             END INTERFACE
 
-            hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pset_fill_value_double
 
 
@@ -855,22 +855,22 @@
             DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-!            INTEGER, EXTERNAL :: h5pget_fill_value_c
+!            INTEGER, EXTERNAL :: h5pget_fill_value_double_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
+              INTEGER FUNCTION h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_DOUBLE_C'::h5pget_fill_value_double_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               DOUBLE PRECISION :: fillvalue
-              END FUNCTION h5pget_fill_value_c
+              END FUNCTION h5pget_fill_value_double_c
             END INTERFACE
 
-            hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+            hdferr = h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
           END SUBROUTINE h5pget_fill_value_double
 
           SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, &
@@ -4081,21 +4081,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pset_integer_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_INTEGER_C'::h5pset_integer_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               INTEGER, INTENT(IN) :: value
-              END FUNCTION h5pset_c
+              END FUNCTION h5pset_integer_c
             END INTERFACE
 
             name_len = LEN(name)
-        hdferr = h5pset_c(prp_id, name , name_len, value)
+        hdferr = h5pset_integer_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pset_integer
 
 !----------------------------------------------------------------------
@@ -4137,21 +4137,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pset_real_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_REAL_C'::h5pset_real_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               REAL, INTENT(IN) :: value
-              END FUNCTION h5pset_c
+              END FUNCTION h5pset_real_c
             END INTERFACE
 
             name_len = LEN(name)
-        hdferr = h5pset_c(prp_id, name , name_len, value)
+        hdferr = h5pset_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pset_real
 
 !----------------------------------------------------------------------
@@ -4193,21 +4193,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pset_double_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_DOUBLE_C'::h5pset_double_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pset_c
+              END FUNCTION h5pset_double_c
             END INTERFACE
 
             name_len = LEN(name)
-        hdferr = h5pset_c(prp_id, name , name_len, value)
+        hdferr = h5pset_double_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pset_double
 
 !----------------------------------------------------------------------
@@ -4309,21 +4309,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pget_integer_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_INTEGER_C'::h5pget_integer_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               INTEGER, INTENT(OUT) :: value
-              END FUNCTION h5pget_c
+              END FUNCTION h5pget_integer_c
             END INTERFACE
 
             name_len = LEN(name)
-        hdferr = h5pget_c(prp_id, name , name_len, value)
+        hdferr = h5pget_integer_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pget_integer
 
 !----------------------------------------------------------------------
@@ -4365,21 +4365,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pget_real_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_REAL_C'::h5pget_real_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               REAL, INTENT(OUT) :: value
-              END FUNCTION h5pget_c
+              END FUNCTION h5pget_real_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pget_c(prp_id, name , name_len, value)
+            hdferr = h5pget_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pget_real
 
 !----------------------------------------------------------------------
@@ -4421,21 +4421,21 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              INTEGER FUNCTION h5pget_double_c(prp_id, name, name_len, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_DOUBLE_C'::h5pget_double_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)         :: name_len
               DOUBLE PRECISION, INTENT(OUT) :: value
-              END FUNCTION h5pget_c
+              END FUNCTION h5pget_double_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pget_c(prp_id, name , name_len, value)
+            hdferr = h5pget_double_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pget_double
 
 !----------------------------------------------------------------------
@@ -5146,10 +5146,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              INTEGER FUNCTION h5pregister_integer_c(class, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_INTEGER_C'::h5pregister_integer_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: class
@@ -5157,11 +5157,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               INTEGER, INTENT(IN) :: value
-              END FUNCTION h5pregister_c
+              END FUNCTION h5pregister_integer_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pregister_c(class, name , name_len, size, value)
+            hdferr = h5pregister_integer_c(class, name , name_len, size, value)
           END SUBROUTINE h5pregister_integer
 
 !----------------------------------------------------------------------
@@ -5207,10 +5207,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              INTEGER FUNCTION h5pregister_real_c(class, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_REAL_C'::h5pregister_real_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: class
@@ -5218,11 +5218,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               REAL, INTENT(IN) :: value
-              END FUNCTION h5pregister_c
+              END FUNCTION h5pregister_real_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pregister_c(class, name , name_len, size, value)
+            hdferr = h5pregister_real_c(class, name , name_len, size, value)
           END SUBROUTINE h5pregister_real
 
 !----------------------------------------------------------------------
@@ -5268,10 +5268,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              INTEGER FUNCTION h5pregister_double_c(class, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_DOUBLE_C'::h5pregister_double_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: class
@@ -5279,11 +5279,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pregister_c
+              END FUNCTION h5pregister_double_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pregister_c(class, name , name_len, size, value)
+            hdferr = h5pregister_double_c(class, name , name_len, size, value)
           END SUBROUTINE h5pregister_double
 
 !----------------------------------------------------------------------
@@ -5393,10 +5393,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              INTEGER FUNCTION h5pinsert_integer_c(plist, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_INTEGER_C'::h5pinsert_integer_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: plist
@@ -5404,11 +5404,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               INTEGER, INTENT(IN) :: value
-              END FUNCTION h5pinsert_c
+              END FUNCTION h5pinsert_integer_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+            hdferr = h5pinsert_integer_c(plist, name , name_len, size, value)
           END SUBROUTINE h5pinsert_integer
 
 !----------------------------------------------------------------------
@@ -5453,10 +5453,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              INTEGER FUNCTION h5pinsert_real_c(plist, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_REAL_C'::h5pinsert_real_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: plist
@@ -5464,11 +5464,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               REAL, INTENT(IN) :: value
-              END FUNCTION h5pinsert_c
+              END FUNCTION h5pinsert_real_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+            hdferr = h5pinsert_real_c(plist, name , name_len, size, value)
           END SUBROUTINE h5pinsert_real
 
 !----------------------------------------------------------------------
@@ -5513,10 +5513,10 @@
             INTEGER :: name_len
 
             INTERFACE
-              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              INTEGER FUNCTION h5pinsert_double_c(plist, name, name_len, size, value)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_DOUBLE_C'::h5pinsert_double_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: plist
@@ -5524,11 +5524,11 @@
               INTEGER, INTENT(IN)         :: name_len
               INTEGER(SIZE_T), INTENT(IN) :: size 
               DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pinsert_c
+              END FUNCTION h5pinsert_double_c
             END INTERFACE
 
             name_len = LEN(name)
-            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+            hdferr = h5pinsert_double_c(plist, name , name_len, size, value)
           END SUBROUTINE h5pinsert_double
 
 !----------------------------------------------------------------------

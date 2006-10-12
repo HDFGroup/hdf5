@@ -34,7 +34,7 @@ nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      size_t c_size_hint;
      hid_t c_grp_id;
      hid_t c_loc_id;
@@ -81,7 +81,7 @@ nh5gopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hid_t c_grp_id;
      hid_t c_loc_id;
 
@@ -130,7 +130,7 @@ nh5gget_obj_info_idx_c
      int ret_value = -1;
      hid_t c_loc_id = (hid_t)*loc_id;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      size_t c_obj_namelen;
      char *c_obj_name = NULL;
      int type;
@@ -165,7 +165,7 @@ nh5gget_obj_info_idx_c
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-     HD5packFstring(c_obj_name, _fcdtocp(obj_name), (int)c_obj_namelen);
+     HD5packFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);
      ret_value = 0;
 
 DONE:
@@ -195,7 +195,7 @@ nh5gn_members_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
      int ret_value = -1;
      hid_t c_loc_id=(hid_t)*loc_id;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hsize_t c_nmembers;
      hid_t gid = (-1);
 
@@ -267,7 +267,7 @@ nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_
   hid_t c_loc_id;
   H5G_link_t c_link_type;
   char *c_current_name, *c_new_name;
-  int c_current_namelen, c_new_namelen;
+  size_t c_current_namelen, c_new_namelen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -324,7 +324,7 @@ nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,  int_f *link
   hid_t c_new_loc_id;
   H5G_link_t c_link_type;
   char *c_cur_name, *c_new_name;
-  int c_cur_namelen, c_new_namelen;
+  size_t c_cur_namelen, c_new_namelen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -372,7 +372,7 @@ nh5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
   int ret_value = -1;
   hid_t c_loc_id;
   char *c_name;
-  int c_namelen;
+  size_t c_namelen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -413,7 +413,7 @@ nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, in
   int ret_value = -1;
   hid_t c_loc_id;
   char *c_src_name, *c_dst_name;
-  int c_src_namelen, c_dst_namelen;
+  size_t c_src_namelen, c_dst_namelen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -464,7 +464,7 @@ nh5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst
   hid_t c_src_loc_id;
   hid_t c_dst_loc_id;
   char *c_src_name, *c_dst_name;
-  int c_src_namelen, c_dst_namelen;
+  size_t c_src_namelen, c_dst_namelen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -514,7 +514,7 @@ nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _f
   int ret_value = -1;
   hid_t c_loc_id;
   char *c_name;
-  int c_namelen;
+  size_t c_namelen;
   char *c_value = NULL;
   size_t c_size;
   herr_t c_ret_value;
@@ -547,7 +547,7 @@ nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _f
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
-  HD5packFstring(c_value, _fcdtocp(value), (int)*size);
+  HD5packFstring(c_value, _fcdtocp(value), (size_t)*size);
   ret_value = 0;
 
 DONE:
@@ -576,7 +576,7 @@ nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_
   int ret_value = -1;
   hid_t c_loc_id;
   char *c_name, *c_comment;
-  int c_namelen, c_commentlen;
+  size_t c_namelen, c_commentlen;
   herr_t c_ret_value;
   /*
    *  Convert Fortran name to C name
@@ -625,7 +625,7 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
   int ret_value = -1;
   hid_t c_loc_id;
   char *c_name;
-  int c_namelen;
+  size_t c_namelen;
   char *c_comment = NULL;
   size_t c_bufsize;
   herr_t c_ret_value;
@@ -657,7 +657,7 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
-  HD5packFstring(c_comment, _fcdtocp(comment), (int)*bufsize);
+  HD5packFstring(c_comment, _fcdtocp(comment), (size_t)*bufsize);
   ret_value = 0;
 
 DONE:

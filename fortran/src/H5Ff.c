@@ -496,9 +496,9 @@ nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
 int_f
 nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 {
-    char *c_buf=NULL;           /* Buffer to hold C string */
-    ssize_t size_c;
-    int_f ret_value=0;          /* Return value */
+    char *c_buf = NULL;           /* Buffer to hold C string */
+    ssize_t size_c = -1;
+    int_f ret_value = 0;          /* Return value */
 
      /*
       * Allocate buffer to hold name of an attribute

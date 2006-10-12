@@ -112,6 +112,79 @@ nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
       */
      return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
+int_f
+nh5awritec_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5awritec_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5awrite_c
@@ -125,8 +198,228 @@ nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  * Programmer:  Elena Pourmal
  *              Thursday, August 12, 1999
  * Modifications: dims parameter added
- *                April 4, 2001
+ *                                           April 4, 2001
+ *                Added nh5awrite_integer(real,double)_s,1-7 functions to eliminate
+ *                complains about wrong parameters types in h5awrite_c function
+ *                called by Fortran routines.
+ *                                           October 9, 2006 EIP
  *---------------------------------------------------------------------------*/
+int_f
+nh5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+}
+
 int_f
 nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 {
@@ -142,6 +435,7 @@ done:
      return ret_value;
 }
 
+
 /*----------------------------------------------------------------------------
  * Name:        h5areadc_c
  * Purpose:     Call h5aread_c to read character  attribute
@@ -155,6 +449,10 @@ done:
  *              Thursday, August 12, 1999
  * Modifications: dims parameter added.
  *                April 4, 2001
+ *                Added nh5areadc_s,1-7 functions to eliminate
+ *                complains about wrong parameters types in h5awrite_c function
+ *                called by Fortran routines.
+ *                                           October 9, 2006 EIP
  *---------------------------------------------------------------------------*/
 int_f
 nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
@@ -164,6 +462,78 @@ nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
       */
      return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
+int_f
+nh5areadc_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+nh5areadc_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+int_f
+nh5areadc_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5aread_c
@@ -178,6 +548,10 @@ nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  *              Thursday, August 12, 1999
  * Modifications: dims paramete added.
  *                April 4, 2001
+ *                Added nh5aread_integer(real,double)_s,1-7 functions to eliminate
+ *                complains about wrong parameters types in h5awrite_c function
+ *                called by Fortran routines.
+ *                                           October 9, 2006 EIP
  *---------------------------------------------------------------------------*/
 int_f
 nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
@@ -193,6 +567,223 @@ nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dim
 done:
      return ret_value;
 }
+
+int_f
+nh5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
+int_f
+nh5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+}
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5aclose_c
