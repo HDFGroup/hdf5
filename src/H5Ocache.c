@@ -40,7 +40,7 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
-static herr_t H5O_compute_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
+static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
 /* H5O inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_OHDR[1] = {{
@@ -49,7 +49,7 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_flush_func_t)H5O_flush,
     (H5AC_dest_func_t)H5O_dest,
     (H5AC_clear_func_t)H5O_clear,
-    (H5AC_size_func_t)H5O_compute_size,
+    (H5AC_size_func_t)H5O_size,
 }};
 
 
@@ -89,7 +89,7 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
 
             id = curr_msg->type->id;
             UINT16ENCODE(p, id);
-            HDassert(curr_msg->raw_size < H5O_MAX_SIZE);
+            HDassert(curr_msg->raw_size < H5O_MESG_MAX_SIZE);
             UINT16ENCODE(p, curr_msg->raw_size);
             *p++ = curr_msg->flags;
             *p++ = 0; /*reserved*/
@@ -181,19 +181,19 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* allocate ohdr and init chunk list */
     if (NULL==(oh = H5FL_CALLOC(H5O_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* read fixed-lenth part of object header */
+    /* read fixed-length part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
     assert(hdr_size<=sizeof(buf));
     if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header");
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header")
     p = buf;
 
     /* decode version */
     oh->version = *p++;
     if (H5O_VERSION != oh->version)
-	HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number");
+	HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
 
     /* reserved */
     p++;
@@ -210,8 +210,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* build the message array */
     oh->alloc_nmesgs = nmesgs;
-    if (NULL==(oh->mesg=H5FL_SEQ_CALLOC(H5O_mesg_t,(size_t)oh->alloc_nmesgs)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if (NULL==(oh->mesg=H5FL_SEQ_MALLOC(H5O_mesg_t,(size_t)oh->alloc_nmesgs)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* read each chunk from disk */
     while(H5F_addr_defined(chunk_addr)) {
@@ -221,7 +221,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    H5O_chunk_t *x = H5FL_SEQ_REALLOC (H5O_chunk_t, oh->chunk, (size_t)na);
 
 	    if(!x)
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 	    oh->alloc_nchunks = na;
 	    oh->chunk = x;
 	} /* end if */
@@ -232,9 +232,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
 	if(NULL==(oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, chunk_size)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 	if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id, oh->chunk[chunkno].image) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data");
+	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
 
 	/* load messages from this chunk */
 	for(p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
@@ -267,7 +267,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    } else {
 		/* new message */
 		if (oh->nmesgs >= nmesgs)
-		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages");
+		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages")
 		mesgno = oh->nmesgs++;
 		oh->mesg[mesgno].type = H5O_msg_class_g[id];
 		oh->mesg[mesgno].dirty = FALSE;
@@ -369,14 +369,13 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	UINT32ENCODE(p, oh->chunk[0].size);
 
 	/* zero to alignment */
-	HDmemset (p, 0, (size_t)(H5O_SIZEOF_HDR(f)-12));
+	HDmemset(p, 0, (size_t)(H5O_SIZEOF_HDR(f)-12));
 
 	/* write the object header prefix */
 
         /* Check if we can combine the object header prefix & the first chunk into one I/O operation */
-        if(oh->chunk[0].dirty && (addr + H5O_SIZEOF_HDR(f)) == oh->chunk[0].addr) {
+        if(oh->chunk[0].dirty && (addr + H5O_SIZEOF_HDR(f)) == oh->chunk[0].addr)
             combine = TRUE;
-        } /* end if */
         else {
             if(H5F_block_write(f, H5FD_MEM_OHDR, addr, (size_t)H5O_SIZEOF_HDR(f), dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header hdr to disk")
@@ -388,7 +387,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 HDassert(H5F_addr_defined(oh->chunk[u].addr));
                 if(u == 0 && combine) {
                     /* Allocate space for the combined prefix and first chunk */
-                    if((p = H5FL_BLK_MALLOC(chunk_image,(H5O_SIZEOF_HDR(f)+oh->chunk[u].size))) == NULL)
+                    if((p = H5FL_BLK_MALLOC(chunk_image, (H5O_SIZEOF_HDR(f) + oh->chunk[u].size))) == NULL)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Copy in the prefix */
@@ -516,7 +515,7 @@ H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy)
 
     if (destroy)
         if (H5O_dest(f, oh) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -524,17 +523,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_compute_size
+ * Function:	H5O_size
  *
  * Purpose:	Compute the size in bytes of the specified instance of
  *              H5O_t on disk, and return it in *len_ptr.  On failure,
  *              the value of *len_ptr is undefined.
- *
- *		The value returned will probably be low unless the object
- *		has just been flushed, as we simply total up the size of
- *		the header with the sizes of the chunks.  Thus any message
- *		that has been added since the last flush will not be
- *		reflected in the total.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -544,27 +537,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_compute_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr)
+H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr)
 {
-    unsigned	u;
-    size_t	size;
+    size_t	size;           /* Running sum of the object header's size */
+    unsigned	u;              /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_compute_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_size)
 
     /* check args */
     HDassert(f);
     HDassert(oh);
     HDassert(size_ptr);
 
+    /* Size of object header "prefix" */
     size = H5O_SIZEOF_HDR(f);
 
-    for (u = 0; u < oh->nchunks; u++)
+    /* Add sizes of all the chunks */
+    for(u = 0; u < oh->nchunks; u++)
         size += oh->chunk[u].size;
-
-    HDassert(size >= H5O_SIZEOF_HDR(f));
 
     *size_ptr = size;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-} /* H5O_compute_size() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5O_size() */
 

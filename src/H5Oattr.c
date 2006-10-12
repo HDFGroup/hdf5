@@ -29,19 +29,19 @@
 #include "H5Spkg.h"		/* Dataspaces				*/
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p);
-static void *H5O_attr_copy (const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_attr_size (const H5F_t *f, const void *_mesg);
-static herr_t H5O_attr_reset (void *_mesg);
-static herr_t H5O_attr_free (void *mesg);
-static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
+static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_attr_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
+static herr_t H5O_attr_reset(void *_mesg);
+static herr_t H5O_attr_free(void *mesg);
+static herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_attr_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
-static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
+static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
@@ -331,16 +331,15 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
      * Also add several "reserved" fields to pad to 16 bytes.
      */
     if(version >= H5O_ATTR_VERSION_3)
-      *p++ = attr->encoding;
+        *p++ = attr->encoding;
 
-    /*
-     * Write the name including null terminator padded to the correct number
-     * of bytes.
-     */
+    /* Write the name including null terminator */
     HDmemcpy(p, attr->name, name_len);
-    HDmemset(p + name_len, 0, H5O_ALIGN(name_len) - name_len);
-    if(version < H5O_ATTR_VERSION_2)
+    if(version < H5O_ATTR_VERSION_2) {
+        /* Pad to the correct number of bytes */
+        HDmemset(p + name_len, 0, H5O_ALIGN(name_len) - name_len);
         p += H5O_ALIGN(name_len);
+    } /* end if */
     else
         p += name_len;
 

@@ -536,7 +536,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
          */
         if(H5F_addr_defined(linfo.link_fheap_addr))
             use_new_dense = TRUE;
-        else if(linfo.nlinks < ginfo.max_compact && link_msg_size < H5O_MAX_SIZE)
+        else if(linfo.nlinks < ginfo.max_compact && link_msg_size < H5O_MESG_MAX_SIZE)
             use_new_dense = FALSE;
         else {
             H5G_obj_oh_it_ud1_t	udata;          /* User data for iteration */
@@ -942,7 +942,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                  * into an object header message)
                  */
                 for(u = 0; u < linfo.nlinks; u++)
-                    if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MAX_SIZE) {
+                    if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
                         can_convert = FALSE;
                         break;
                     } /* end if */

@@ -2515,7 +2515,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
                 /* Verify data size is smaller than maximum header message size
                  * (64KB) minus other layout message fields.
                  */
-                comp_data_size=H5O_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->shared->layout));
+                comp_data_size=H5O_MESG_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->shared->layout));
                 if(new_dset->shared->layout.u.compact.size > comp_data_size)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
 

@@ -34,7 +34,7 @@
 #define H5O_ALIGN(X)		(8*(((X)+8-1)/8))
 
 /* Object header macros */
-#define H5O_NMESGS	32		/*initial number of messages	     */
+#define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 
 /* Version of object header structure */
@@ -45,7 +45,7 @@
  */
 #define H5O_SIZEOF_HDR(F)						      \
     H5O_ALIGN(1 +		/*version number	*/		      \
-	      1 +		/*alignment		*/		      \
+	      1 +		/*reserved 		*/		      \
 	      2 +		/*number of messages	*/		      \
 	      4 +		/*reference count	*/		      \
 	      4)		/*header data size	*/

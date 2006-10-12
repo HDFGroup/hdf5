@@ -46,8 +46,7 @@ typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_t H5O_t;
 
 /* Object header macros */
-#define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
-#define H5O_MAX_SIZE	65536	        /*max obj header data size	     */
+#define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
 #define H5O_NEW_MESG	(-1)		/*new message			     */
 #define H5O_ALL		(-1)		/* Operate on all messages of type   */
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
