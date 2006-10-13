@@ -35,9 +35,10 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5FD, H5FDcore,"+-
         "H5FDfamily, H5FDlog, H5FDmpi, H5FDmpio,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDstdio,"+-
-        "H5FDstream, H5FL, H5FO,"+-
+        "H5FDstream, H5FDdirect, H5FL, H5FO, H5Ffake,"+-
         "H5FS, H5FScache, H5FSdbg, H5FSsection,"+-
         "H5G, H5Gdeprec, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
+        "H5Gdense, H5Gbtree2,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
         "H5HF, H5HFbtree2, H5HFcache, H5HFdbg, H5HFman, H5HFtest, H5HFstat,"+-
         "H5HFdblock, H5HFdtable, H5HFhuge, H5HFhdr, H5HFiblock,"+-
@@ -48,7 +49,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Olinfo, H5Olink, H5Omtime,"+-
         "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab,"+-
         "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pgcpl, H5Plapl, "+-
-        "H5Pocpl, H5Ptest"
+        "H5Pocpl, H5Ptest, H5Pstrcpl, H5Plcpl"
 $ cobj1= "H5R, H5RC,"+-
         "H5RS, H5S, H5Sall, H5Shyper, H5Smpio, H5Snone, H5Spoint,"+-
         "H5Sselect, H5Stest,"+-
