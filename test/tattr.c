@@ -1643,7 +1643,7 @@ test_attr_dtype_shared(hid_t fapl)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 3, "H5Aopen_name");
+    VERIFY(statbuf.nlink, 3, "H5Gget_objinfo");
 
     /* Unlink the dataset */
     ret=H5Gunlink(file_id,DSET1_NAME);
@@ -1652,7 +1652,7 @@ test_attr_dtype_shared(hid_t fapl)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.nlink, 1, "H5Gunlink");
+    VERIFY(statbuf.nlink, 1, "H5Gget_objinfo");
 
     /* Unlink the named datatype */
     ret=H5Gunlink(file_id,TYPE1_NAME);
@@ -1664,7 +1664,7 @@ test_attr_dtype_shared(hid_t fapl)
 
     /* Check size of file */
     filesize=h5_get_file_size(FILENAME);
-    VERIFY(filesize, empty_filesize, "H5Fclose");
+    VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dtype_shared() */
 
 /****************************************************************

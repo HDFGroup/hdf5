@@ -486,18 +486,18 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
       fprintf (stderr, "Stream VFD: connecting to host '%s' port %d\n",
                hostname, fapl->port);
 #endif
-      if (connect (sock, (struct sockaddr *) &server, sizeof (server)) < 0)
+      if (connect (sock, (struct sockaddr *) &server, (socklen_t)sizeof (server)) < 0)
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to connect")
     }
     else {
       server.sin_addr.s_addr = INADDR_ANY;
-      if (H5FD_STREAM_IOCTL_SOCKET (sock, FIONBIO, &on) < 0) {
+      if (H5FD_STREAM_IOCTL_SOCKET (sock, (int)FIONBIO, &on) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set non-blocking mode for socket")
       } else if (setsockopt (sock, IPPROTO_TCP, TCP_NODELAY, (const char *) &on,
-                           sizeof(on)) < 0) {
+                           (socklen_t)sizeof(on)) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option TCP_NODELAY")
       } else if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &on,
-                           sizeof(on)) < 0) {
+                           (socklen_t)sizeof(on)) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option SO_REUSEADDR")
       } else {
         /* Try to bind the socket to the given port.
@@ -775,7 +775,7 @@ H5FD_stream_flush (H5FD_t *_stream, hid_t UNUSED dxpl_id, unsigned UNUSED closin
     fromlen = sizeof (from);
     while (! H5FD_STREAM_ERROR_CHECK (sock = accept (stream->socket,
                                                      &from, &fromlen))) {
-      if (H5FD_STREAM_IOCTL_SOCKET (sock, FIONBIO, &on) < 0) {
+      if (H5FD_STREAM_IOCTL_SOCKET (sock, (int)FIONBIO, &on) < 0) {
         H5FD_STREAM_CLOSE_SOCKET (sock);
         continue;           /* continue the loop for other clients to connect */
       }

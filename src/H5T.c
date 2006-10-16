@@ -2854,7 +2854,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
     FUNC_ENTER_NOAPI(H5T_encode, FAIL)
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc(0)))
+    if(NULL == (f = H5F_fake_alloc((size_t)0)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
@@ -2910,7 +2910,7 @@ H5T_decode(const unsigned char *buf)
     FUNC_ENTER_NOAPI(H5T_decode, NULL)
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc(0)))
+    if(NULL == (f = H5F_fake_alloc((size_t)0)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode the type of the information */

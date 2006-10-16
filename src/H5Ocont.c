@@ -135,19 +135,21 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_encode)
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(cont);
+    HDassert(f);
+    HDassert(p);
+    HDassert(cont);
+    HDassert(H5F_addr_defined(cont->addr));
+    HDassert(cont->size > 0);
 
     /* encode */
     H5F_addr_encode(f, &p, cont->addr);
     H5F_ENCODE_LENGTH(f, p, cont->size);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_cont_encode() */
 
 
 /*-------------------------------------------------------------------------
