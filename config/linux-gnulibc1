@@ -86,12 +86,12 @@ case $FC_BASENAME in
     #
     f95)
         # Set required flag for compiling C stubs
-        H5_CFLAGS="$H5_CFLAGS -DH5_ABSOFT" 
+        H5_CFLAGS="$H5_CFLAGS" 
 
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
 # (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS -YEXT_NAMES=UCS"
+        H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
         DEBUG_FCFLAGS="-g"
         PROD_FCFLAGS="-O"

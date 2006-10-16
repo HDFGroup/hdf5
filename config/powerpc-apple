@@ -64,7 +64,7 @@ case $FC_BASENAME in
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
 # (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS -YEXT_NAMES=UCS"
+        H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
         DEBUG_FCFLAGS="-g"
         PROD_FCFLAGS="-O"
