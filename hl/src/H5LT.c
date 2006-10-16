@@ -28,6 +28,9 @@ int  input_len;
 char *myinput;
 int  indent = 0;
 
+
+
+
 /*-------------------------------------------------------------------------
  *
  * internal functions
@@ -1969,55 +1972,7 @@ out:
 }
 
 
-/*-------------------------------------------------------------------------
- *
- * General functions
- *
- *-------------------------------------------------------------------------
- */
 
-/*-------------------------------------------------------------------------
- * Function: H5LTcreate_compound_type
- *
- * Purpose:
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September 18, 2001
- *
- * Comments:
- *
- * Modifications:
- *
- *
- *-------------------------------------------------------------------------
- */
-
-hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[],
-                                const size_t *field_offset, const hid_t *field_types )
-{
-
- hid_t   tid;
- hsize_t i;
-
- /* Create the memory data type. */
- if ((tid = H5Tcreate (H5T_COMPOUND, size )) < 0 )
-  goto out;
-
- /* Insert fields. */
- for ( i = 0; i < nfields; i++)
- {
-  if ( H5Tinsert(tid, field_names[i], field_offset[i], field_types[i] ) < 0 )
-   goto out;
- }
-
- return tid;
-
-out:
- return -1;
-}
 
 /*-------------------------------------------------------------------------
  * Function: H5LTtext_to_dtype
@@ -2717,6 +2672,7 @@ out:
     return FAIL;
 }
 
+#ifdef NOT_YET
 /*-------------------------------------------------------------------------
  * Function: H5LTrepack
  *
@@ -2791,6 +2747,7 @@ out:
  return -1;
 
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------

@@ -328,13 +328,10 @@ H5_HLDLL herr_t  H5LTget_attribute_info( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-
-H5_HLDLL hid_t H5LTcreate_compound_type( hsize_t nfields, size_t size, const char *field_names[],
-                                const size_t *field_offset, const hid_t *field_types );
-
 H5_HLDLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type);
 H5_HLDLL herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len);
 
+#ifdef NOT_YET
 H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    hsize_t nrecords,
                    size_t src_size,
@@ -345,6 +342,8 @@ H5_HLDLL herr_t  H5LTrepack( hsize_t nfields,
                    const size_t *dst_sizes,
                    unsigned char *src_buf,
                    unsigned char *dst_buf );
+#endif /* NOT_YET */
+
 
 
 
