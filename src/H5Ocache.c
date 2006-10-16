@@ -23,17 +23,42 @@
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Opkg.h"             /* Object headers			*/
 
-/* Private typedefs */
+/****************/
+/* Local Macros */
+/****************/
 
-/* PRIVATE PROTOTYPES */
+/* Set the object header size to speculatively read in */
+/* (needs to be more than the default dataset header size) */
+#define H5O_SPEC_READ_SIZE 512
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -41,6 +66,21 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* H5O inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_OHDR[1] = {{
@@ -136,6 +176,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_flush_msgs() */
 
+#ifdef OLD_WAY
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_load
@@ -314,6 +355,215 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_load() */
+#else /* OLD_WAY */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_load
+ *
+ * Purpose:	Loads an object header from disk.
+ *
+ * Return:	Success:	Pointer to the new object header.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug  5 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5O_t *
+H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
+	 void UNUSED * _udata2)
+{
+    H5O_t	*oh = NULL;     /* Object header read in */
+    uint8_t     read_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
+    uint8_t	*p;             /* Pointer into buffer to decode */
+    size_t	spec_read_size; /* Size of buffer to speculatively read in */
+    size_t	prefix_size;    /* Size of object header prefix */
+    unsigned	nmesgs;         /* Total # of messages in this object header */
+    unsigned	curmesg = 0;    /* Current message being decoded in object header */
+    unsigned    skipped_msgs = 0;       /* Number of unknown messages skipped */
+    unsigned    merged_null_msgs = 0;   /* Number of null messages merged together */
+    haddr_t	chunk_addr;     /* Address of first chunk */
+    size_t	chunk_size;     /* Size of first chunk */
+    haddr_t     abs_eoa;	/* Absolute end of file address		*/
+    haddr_t     rel_eoa;	/* Relative end of file address		*/
+    H5O_t	*ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_load, NULL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(!_udata1);
+    HDassert(!_udata2);
+
+    /* Make certain we don't speculatively read off the end of the file */
+    if(HADDR_UNDEF == (abs_eoa = H5F_get_eoa(f)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine file size")
+
+    /* Adjust absolute EOA address to relative EOA address */
+    rel_eoa = abs_eoa - H5F_get_base_addr(f);
+
+    /* Compute the size of the speculative object header buffer */
+    H5_ASSIGN_OVERFLOW(spec_read_size, MIN(rel_eoa - addr, H5O_SPEC_READ_SIZE), /* From: */ hsize_t, /* To: */ size_t);
+
+    /* Attempt to speculatively read both object header prefix and first chunk */
+    if(H5F_block_read(f, H5FD_MEM_OHDR, addr, spec_read_size, dxpl_id, read_buf) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header")
+    p = read_buf;
+
+    /* allocate ohdr and init chunk list */
+    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* decode version */
+    oh->version = *p++;
+    if(H5O_VERSION != oh->version)
+	HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
+
+    /* reserved */
+    p++;
+
+    /* decode number of messages */
+    UINT16DECODE(p, nmesgs);
+
+    /* decode link count */
+    UINT32DECODE(p, oh->nlink);
+
+    /* decode first chunk size */
+    UINT32DECODE(p, chunk_size);
+
+    /* reserved */
+    p += 4;
+
+    /* Compute first chunk address */
+    prefix_size = (size_t)(p - read_buf);
+    chunk_addr = addr + (hsize_t)prefix_size;
+
+    /* build the message array */
+    oh->alloc_nmesgs = nmesgs;
+    if(NULL == (oh->mesg = H5FL_SEQ_MALLOC(H5O_mesg_t, oh->alloc_nmesgs)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* read each chunk from disk */
+    while(H5F_addr_defined(chunk_addr)) {
+        unsigned chunkno;       /* Current chunk's index */
+        size_t	mesg_size;      /* Size of message read in */
+
+	/* increase chunk array size */
+	if(oh->nchunks >= oh->alloc_nchunks) {
+	    unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
+	    H5O_chunk_t *x = H5FL_SEQ_REALLOC(H5O_chunk_t, oh->chunk, (size_t)na);
+
+	    if(!x)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	    oh->alloc_nchunks = na;
+	    oh->chunk = x;
+	} /* end if */
+
+	/* Init the chunk raw data info */
+	chunkno = oh->nchunks++;
+	oh->chunk[chunkno].dirty = FALSE;
+	oh->chunk[chunkno].addr = chunk_addr;
+	oh->chunk[chunkno].size = chunk_size;
+	if(NULL == (oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, chunk_size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Check for speculative read of first chunk containing all the data needed */
+        if(chunkno == 0 && (spec_read_size - prefix_size) >= chunk_size)
+            HDmemcpy(oh->chunk[chunkno].image, p, chunk_size);
+        else {
+            /* Read the chunk raw data */
+            if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id, oh->chunk[chunkno].image) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
+        } /* end else */
+
+	/* load messages from this chunk */
+	for(p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
+            unsigned    mesgno;         /* Current message to operate on */
+            unsigned	id;             /* ID (type) of current message */
+            uint8_t	flags;          /* Flags for current message */
+
+	    UINT16DECODE(p, id);
+	    UINT16DECODE(p, mesg_size);
+	    HDassert(mesg_size==H5O_ALIGN (mesg_size));
+	    flags = *p++;
+	    p += 3; /*reserved*/
+
+            /* Try to detect invalidly formatted object header messages */
+	    if(p + mesg_size > oh->chunk[chunkno].image + chunk_size)
+		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header")
+
+            /* Skip header messages we don't know about */
+            /* (Usually from future versions of the library */
+	    if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
+                skipped_msgs++;
+                continue;
+            } /* end if */
+
+            if((H5F_get_intent(f) & H5F_ACC_RDWR) &&
+	            H5O_NULL_ID == id && oh->nmesgs > 0 &&
+                    H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+                    oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+		/* combine adjacent null messages */
+		mesgno = oh->nmesgs - 1;
+		oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR(f) + mesg_size;
+		oh->mesg[mesgno].dirty = TRUE;
+                merged_null_msgs++;
+	    } else {
+		/* new message */
+		if (oh->nmesgs >= nmesgs)
+		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages")
+		mesgno = oh->nmesgs++;
+		oh->mesg[mesgno].type = H5O_msg_class_g[id];
+		oh->mesg[mesgno].dirty = FALSE;
+		oh->mesg[mesgno].flags = flags;
+		oh->mesg[mesgno].native = NULL;
+		oh->mesg[mesgno].raw = p;
+		oh->mesg[mesgno].raw_size = mesg_size;
+		oh->mesg[mesgno].chunkno = chunkno;
+	    } /* end else */
+	} /* end for */
+
+        HDassert(p == oh->chunk[chunkno].image + chunk_size);
+
+        /* decode next object header continuation message */
+        for(chunk_addr = HADDR_UNDEF; !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs; ++curmesg) {
+            if(H5O_CONT_ID == oh->mesg[curmesg].type->id) {
+                H5O_cont_t *cont;
+
+                cont = (H5O_MSG_CONT->decode) (f, dxpl_id, oh->mesg[curmesg].raw);
+                oh->mesg[curmesg].native = cont;
+                chunk_addr = cont->addr;
+                chunk_size = cont->size;
+                cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
+            } /* end if */
+        } /* end for */
+    } /* end while */
+
+    /* Mark the object header dirty if we've merged a message */
+    if(merged_null_msgs)
+	oh->cache_info.is_dirty = TRUE;
+
+    /* Sanity check for the correct # of messages in object header */
+    if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
+
+    /* Set return value */
+    ret_value = oh;
+
+done:
+    /* Release the [possibly partially initialized] object header on errors */
+    if(!ret_value && oh) {
+        if(H5O_dest(f,oh) < 0)
+	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_load() */
+#endif /* OLD_WAY */
 
 
 /*-------------------------------------------------------------------------
