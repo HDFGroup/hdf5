@@ -611,11 +611,10 @@ usage(const char *prog)
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    fprintf(stdout, "     -b F, --binary=F     Binary output, of form F (into file -o F).\n");
-    fprintf(stdout, "                          Recommended usage is with --dataset=P\n");
-    fprintf(stdout, "                          Form F of binary output is: MEMORY for memory type,\n");
-    fprintf(stdout, "                          FILE for the disk file type, LE or BE for pre-existing\n");
-    fprintf(stdout, "                          little or big endian types\n");
+    fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B. Recommended usage is\n");
+    fprintf(stdout, "                          with -o (output file) and -d (dataset). B can be:\n");
+    fprintf(stdout, "                          MEMORY for a memory type, FILE for the file type,\n");
+    fprintf(stdout, "                          LE or BE for pre-existing little or big endian types\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
