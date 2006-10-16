@@ -380,9 +380,16 @@ main(int argc, char *argv[])
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
 
+    } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC)) {
+        /*
+         * Debug v2 object header (which have signatures).
+         */
+
+        status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+
     } else if(sig[0] == H5O_VERSION_1) {
         /*
-         * This could be an object header.  Since they don't have a signature
+         * This could be a v1 object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
         status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);

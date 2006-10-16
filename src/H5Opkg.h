@@ -48,13 +48,9 @@
  * object header chunks directly into memory and operate on them there, even
  * on 64-bit architectures.  This allows us to reduce the number of disk I/O
  * requests with a minimum amount of mem-to-mem copies.
+ *
+ * Note: We no longer attempt to do this. - QAK, 10/16/06
  */
-/*
- * Note: We no longer attempt to do this.
- */
-#ifdef OLD_WAY
-#define H5O_ALIGN(X)		(8 * (((X) + 7) / 8))
-#else /* OLD_WAY */
 #define H5O_ALIGN_OLD(X)	(8 * (((X) + 7) / 8))
 #define H5O_ALIGN_VERS(V, X)						      \
      (((V) == H5O_VERSION_1) ?						      \
@@ -66,19 +62,20 @@
      H5O_ALIGN_VERS((O)->version, X)
 #define H5O_ALIGN_F(F, X)						      \
      H5O_ALIGN_VERS((H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
-#endif /* OLD_WAY */
+
+/* Size of signature information (on disk) */
+#define H5O_SIZEOF_MAGIC                4
+
+/* Object header signatures */
+#define H5O_HDR_MAGIC                   "OHDR"          /* Header */
+#define H5O_CHK_MAGIC                   "OCHK"          /* Continuation chunk */
+
+/* Size of checksum (on disk) */
+#define H5O_SIZEOF_CHKSUM               4
 
 /*
  * Size of object header prefix.
  */
-#ifdef OLD_WAY
-#define H5O_SIZEOF_HDR(F)						      \
-    H5O_ALIGN(1 +		/*version number	*/		      \
-	      1 +		/*reserved 		*/		      \
-	      2 +		/*number of messages	*/		      \
-	      4 +		/*reference count	*/		      \
-	      4)		/*header data size	*/
-#else /* OLD_WAY */
 #define H5O_SIZEOF_HDR_VERS(V)						      \
      (((V) == H5O_VERSION_1) ?						      \
         H5O_ALIGN_OLD(1 +	/*version number	*/		      \
@@ -87,28 +84,21 @@
                   4 +		/*reference count	*/		      \
                   4)		/*header data size	*/		      \
         :								      \
-		(4 +		/*magic number  	*/		      \
+		(H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
                   1 +		/*version number 	*/		      \
                   2 +		/*number of messages	*/		      \
                   4 +		/*reference count	*/		      \
-                  4)		/*header data size	*/		      \
+                  4 +		/*header data size	*/		      \
+                  H5O_SIZEOF_CHKSUM)	/*checksum size	        */		      \
     )
 #define H5O_SIZEOF_HDR_OH(O)						      \
      H5O_SIZEOF_HDR_VERS((O)->version)
 #define H5O_SIZEOF_HDR_F(F)						      \
      H5O_SIZEOF_HDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
-#endif /* OLD_WAY */
 
 /*
  * Size of object header message prefix
  */
-#ifdef OLD_WAY
-#define H5O_SIZEOF_MSGHDR(F)						      \
-     H5O_ALIGN(2 +	/*message type		*/			      \
-	       2 +	/*sizeof message data	*/			      \
-	       1 +	/*flags              	*/			      \
-	       3)	/*reserved		*/
-#else /* OLD_WAY */
 #define H5O_SIZEOF_MSGHDR_VERS(V)					      \
      (((V) == H5O_VERSION_1) ?						      \
          H5O_ALIGN_OLD(2 +	/*message type		*/			      \
@@ -123,7 +113,32 @@
      H5O_SIZEOF_MSGHDR_VERS((O)->version)
 #define H5O_SIZEOF_MSGHDR_F(F)						      \
      H5O_SIZEOF_MSGHDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
-#endif /* OLD_WAY */
+
+/*
+ * Size of chunk "header" for each chunk
+ */
+#define H5O_SIZEOF_CHKHDR_VERS(V)					      \
+     (((V) == H5O_VERSION_1) ?						      \
+                   0 +	/*no magic #  */				      \
+                   0 	/*no checksum */				      \
+        :								      \
+                   H5O_SIZEOF_MAGIC + 	/*magic #  */			      \
+                   H5O_SIZEOF_CHKSUM 	/*checksum */			      \
+    )
+#define H5O_SIZEOF_CHKHDR_OH(O)						      \
+     H5O_SIZEOF_CHKHDR_VERS((O)->version)
+
+/*
+ * Size of checksum for each chunk
+ */
+#define H5O_SIZEOF_CHKSUM_VERS(V)					      \
+     (((V) == H5O_VERSION_1) ?						      \
+                   0 	/*no checksum */				      \
+        :								      \
+                   H5O_SIZEOF_CHKSUM 	/*checksum */			      \
+    )
+#define H5O_SIZEOF_CHKSUM_OH(O)						      \
+     H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
 struct H5O_msg_class_t {
     unsigned	id;				 /*message type ID on disk   */
