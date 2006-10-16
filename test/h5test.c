@@ -579,8 +579,9 @@ h5_fileaccess(void)
 	    return -1;
     } else if (!HDstrcmp(name, "direct")) {
 #ifdef H5_HAVE_DIRECT
-	/* Linux direct read() and write() system calls */
-	if (H5Pset_fapl_direct(fapl)<0) return -1;
+	/* Linux direct read() and write() system calls.  Set memory boundary, file block size,
+	 * and copy buffer size to the default values. */
+	if (H5Pset_fapl_direct(fapl, 0, 0, 0)<0) return -1;
 #endif
     } else {
 	/* Unknown driver */

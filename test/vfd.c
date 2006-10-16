@@ -151,9 +151,10 @@ test_direct(void)
     return 0;
 #else /*H5_HAVE_DIRECT*/
 
-    /* Set property list and file name for SEC2 driver. */
+    /* Set property list and file name for Direct driver.  Set memory alignment boundary
+     * and file block size to 512 which is the minimum for Linux 2.6. */
     fapl = h5_fileaccess();
-    if(H5Pset_fapl_direct(fapl)<0)
+    if(H5Pset_fapl_direct(fapl, 512, 4096, 64*1024*1024)<0)
         TEST_ERROR;
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
