@@ -935,25 +935,27 @@ done:
 static void *
 H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 {
-    H5T_t		   *dt = NULL;
-    void                *ret_value;     /* Return value */
+    H5T_t	*dt = NULL;
+    void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode)
 
     /* check args */
-    assert(p);
+    HDassert(p);
 
+    /* Allocate datatype message */
     if(NULL == (dt = H5T_alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if (H5O_dtype_decode_helper(f, &p, dt) < 0)
+    /* Perform actual decode of message */
+    if(H5O_dtype_decode_helper(f, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type");
 
     /* Set return value */
-    ret_value=dt;
+    ret_value = dt;
 
 done:
-    if(ret_value==NULL) {
+    if(ret_value == NULL) {
         if(dt != NULL) {
             if(dt->shared != NULL)
                 H5FL_FREE(H5T_shared_t, dt->shared);
@@ -961,8 +963,8 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_decode() */
 
 
 /*--------------------------------------------------------------------------
@@ -1216,13 +1218,13 @@ H5O_dtype_reset(void *_mesg)
 {
     H5T_t		   *dt = (H5T_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_reset)
 
-    if (dt)
+    if(dt)
         H5T_free(dt);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_reset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1240,17 +1242,17 @@ H5O_dtype_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_free (void *mesg)
+H5O_dtype_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
     H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
     H5FL_FREE(H5T_t,mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1408,14 +1410,14 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     unsigned		i;
     size_t		k;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug)
 
     /* check args */
-    assert(f);
-    assert(dt);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(dt);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     switch (dt->shared->type) {
         case H5T_INTEGER:
@@ -1452,7 +1454,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             s = "vlen";
             break;
         default:
-            sprintf(buf, "H5T_CLASS_%d", (int) (dt->shared->type));
+            sprintf(buf, "H5T_CLASS_%d", (int)(dt->shared->type));
             s = buf;
             break;
     }
@@ -1462,51 +1464,50 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 
     fprintf(stream, "%*s%-*s %lu byte%s\n", indent, "", fwidth,
 	    "Size:",
-	    (unsigned long)(dt->shared->size), 1==dt->shared->size?"":"s");
+	    (unsigned long)(dt->shared->size), 1 == dt->shared->size ? "" : "s");
 
     if (H5T_COMPOUND == dt->shared->type) {
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.compnd.nmembs);
-	for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
+	for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
 	    sprintf(buf, "Member %d:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.compnd.memb[i].name);
 	    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth-3),
 		    "Byte offset:",
-		    (unsigned long) (dt->shared->u.compnd.memb[i].offset));
+		    (unsigned long)(dt->shared->u.compnd.memb[i].offset));
 	    H5O_dtype_debug(f, dxpl_id, dt->shared->u.compnd.memb[i].type, stream,
-			    indent+3, MAX(0, fwidth - 3));
+			    indent + 3, MAX(0, fwidth - 3));
 	}
-    } else if (H5T_ENUM==dt->shared->type) {
+    } else if(H5T_ENUM == dt->shared->type) {
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
 	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent+3, MAX(0, fwidth-3));
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.enumer.nmembs);
-	for (i=0; i<dt->shared->u.enumer.nmembs; i++) {
+	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
 	    sprintf(buf, "Member %d:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.enumer.name[i]);
 	    fprintf(stream, "%*s%-*s 0x", indent, "", fwidth,
 		    "Raw bytes of value:");
-	    for (k=0; k<dt->shared->parent->shared->size; k++) {
+	    for(k = 0; k < dt->shared->parent->shared->size; k++)
 		fprintf(stream, "%02x",
-			dt->shared->u.enumer.value[i*dt->shared->parent->shared->size+k]);
-	    }
+			dt->shared->u.enumer.value[i*dt->shared->parent->shared->size + k]);
 	    fprintf(stream, "\n");
-	}
+	} /* end for */
 
-    } else if (H5T_OPAQUE==dt->shared->type) {
+    } else if(H5T_OPAQUE == dt->shared->type) {
 	fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 		"Tag:", dt->shared->u.opaque.tag);
-    } else if (H5T_REFERENCE==dt->shared->type) {
+    } else if(H5T_REFERENCE == dt->shared->type) {
 	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
 		"Fix dumping reference types!");
-    } else if (H5T_VLEN==dt->shared->type) {
-        switch (dt->shared->u.vlen.type) {
+    } else if(H5T_VLEN == dt->shared->type) {
+        switch(dt->shared->u.vlen.type) {
             case H5T_VLEN_SEQUENCE:
                 s = "sequence";
                 break;
@@ -1517,11 +1518,11 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 sprintf(buf, "H5T_VLEN_%d", dt->shared->u.vlen.type);
                 s = buf;
                 break;
-        }
+        } /* end switch */
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Vlen type:", s);
 
-        switch (dt->shared->u.vlen.loc) {
+        switch(dt->shared->u.vlen.loc) {
             case H5T_LOC_MEMORY:
                 s = "memory";
                 break;
@@ -1532,7 +1533,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 sprintf(buf, "H5T_LOC_%d", dt->shared->u.vlen.loc);
                 s = buf;
                 break;
-        }
+        } /* end switch */
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Location:", s);
     } else if(H5T_ARRAY == dt->shared->type) {
@@ -1563,7 +1564,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 sprintf(buf, "H5T_ORDER_%d", dt->shared->u.atomic.order);
                 s = buf;
                 break;
-	}
+	} /* end switch */
 	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"Byte order:",
 		s);
@@ -1588,7 +1589,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             default:
                 s = "pad?";
                 break;
-	}
+	} /* end switch */
 	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"Low pad type:", s);
 
@@ -1602,7 +1603,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             default:
                 s = "pad?";
                 break;
-	}
+	} /* end switch */
 	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"High pad type:", s);
 
@@ -1622,7 +1623,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     }
                     s = buf;
                     break;
-	    }
+	    } /* end switch */
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Internal pad type:", s);
 
@@ -1639,7 +1640,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 default:
                     sprintf(buf, "H5T_NORM_%d", (int) (dt->shared->u.atomic.u.f.norm));
                     s = buf;
-	    }
+	    } /* end switch */
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Normalization:", s);
 
@@ -1679,13 +1680,12 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     sprintf(buf, "H5T_SGN_%d", (int) (dt->shared->u.atomic.u.i.sign));
                     s = buf;
                     break;
-	    }
+	    } /* end switch */
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Sign scheme:", s);
-
 	}
     }
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_debug() */
 

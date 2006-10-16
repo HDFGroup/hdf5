@@ -211,7 +211,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 
 	/* Encode the filter */
 	UINT16ENCODE(p, pline->filter[i].id);
-	UINT16ENCODE(p, H5O_ALIGN(name_length));
+	UINT16ENCODE(p, H5O_ALIGN_OLD(name_length));
 	UINT16ENCODE(p, pline->filter[i].flags);
 	UINT16ENCODE(p, pline->filter[i].cd_nelmts);
 	if (name_length>0) {
@@ -350,7 +350,7 @@ H5O_pline_size (const H5F_t UNUSED *f, const void *mesg)
 		2 +			/*name length			*/
 		2 +			/*flags				*/
 		2 +			/*number of client data values	*/
-		H5O_ALIGN(name_len);	/*length of the filter name	*/
+		H5O_ALIGN_OLD(name_len);	/*length of the filter name	*/
 
 	ret_value += pline->filter[i].cd_nelmts * 4;
 	if (pline->filter[i].cd_nelmts % 2)

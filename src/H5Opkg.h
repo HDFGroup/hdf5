@@ -25,38 +25,105 @@
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
 
+/* Object header macros */
+#define H5O_NMESGS	8 		/*initial number of messages	     */
+#define H5O_NCHUNKS	2		/*initial number of chunks	     */
+
+/* Versions of object header structure */
+
+/* Initial version of the object header format */
+#define H5O_VERSION_1		1
+
+/* Revised version - leaves out reserved bytes and alignment padding, and adds
+ *      magic number as prefix and checksum
+ */
+#define H5O_VERSION_2		2
+
+/* The latest version of the format.  Look through the 'flush' 
+ *      and 'size' callback for places to change when updating this. */
+#define H5O_VERSION_LATEST	H5O_VERSION_1
+
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
  * object header chunks directly into memory and operate on them there, even
  * on 64-bit architectures.  This allows us to reduce the number of disk I/O
  * requests with a minimum amount of mem-to-mem copies.
  */
-#define H5O_ALIGN(X)		(8*(((X)+8-1)/8))
-
-/* Object header macros */
-#define H5O_NMESGS	8 		/*initial number of messages	     */
-#define H5O_NCHUNKS	2		/*initial number of chunks	     */
-
-/* Version of object header structure */
-#define H5O_VERSION		1
+/*
+ * Note: We no longer attempt to do this.
+ */
+#ifdef OLD_WAY
+#define H5O_ALIGN(X)		(8 * (((X) + 7) / 8))
+#else /* OLD_WAY */
+#define H5O_ALIGN_OLD(X)	(8 * (((X) + 7) / 8))
+#define H5O_ALIGN_VERS(V, X)						      \
+     (((V) == H5O_VERSION_1) ?						      \
+		H5O_ALIGN_OLD(X)					      \
+        :								      \
+		(X)							      \
+    )
+#define H5O_ALIGN_OH(O, X)						      \
+     H5O_ALIGN_VERS((O)->version, X)
+#define H5O_ALIGN_F(F, X)						      \
+     H5O_ALIGN_VERS((H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
+#endif /* OLD_WAY */
 
 /*
- * Size of object header header.
+ * Size of object header prefix.
  */
+#ifdef OLD_WAY
 #define H5O_SIZEOF_HDR(F)						      \
     H5O_ALIGN(1 +		/*version number	*/		      \
 	      1 +		/*reserved 		*/		      \
 	      2 +		/*number of messages	*/		      \
 	      4 +		/*reference count	*/		      \
 	      4)		/*header data size	*/
+#else /* OLD_WAY */
+#define H5O_SIZEOF_HDR_VERS(V)						      \
+     (((V) == H5O_VERSION_1) ?						      \
+        H5O_ALIGN_OLD(1 +	/*version number	*/		      \
+                  1 +		/*reserved 		*/		      \
+                  2 +		/*number of messages	*/		      \
+                  4 +		/*reference count	*/		      \
+                  4)		/*header data size	*/		      \
+        :								      \
+		(4 +		/*magic number  	*/		      \
+                  1 +		/*version number 	*/		      \
+                  2 +		/*number of messages	*/		      \
+                  4 +		/*reference count	*/		      \
+                  4)		/*header data size	*/		      \
+    )
+#define H5O_SIZEOF_HDR_OH(O)						      \
+     H5O_SIZEOF_HDR_VERS((O)->version)
+#define H5O_SIZEOF_HDR_F(F)						      \
+     H5O_SIZEOF_HDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
+#endif /* OLD_WAY */
 
 /*
- * Size of message header
+ * Size of object header message prefix
  */
+#ifdef OLD_WAY
 #define H5O_SIZEOF_MSGHDR(F)						      \
      H5O_ALIGN(2 +	/*message type		*/			      \
 	       2 +	/*sizeof message data	*/			      \
-	       4)	/*reserved		*/
+	       1 +	/*flags              	*/			      \
+	       3)	/*reserved		*/
+#else /* OLD_WAY */
+#define H5O_SIZEOF_MSGHDR_VERS(V)					      \
+     (((V) == H5O_VERSION_1) ?						      \
+         H5O_ALIGN_OLD(2 +	/*message type		*/			      \
+                   2 +	/*sizeof message data	*/			      \
+                   1 +	/*flags              	*/			      \
+                   3)	/*reserved		*/			      \
+        :								      \
+                (2 +	/*message type		*/			      \
+                    2) 	/*sizeof message data	*/			      \
+    )
+#define H5O_SIZEOF_MSGHDR_OH(O)						      \
+     H5O_SIZEOF_MSGHDR_VERS((O)->version)
+#define H5O_SIZEOF_MSGHDR_F(F)						      \
+     H5O_SIZEOF_MSGHDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
+#endif /* OLD_WAY */
 
 struct H5O_msg_class_t {
     unsigned	id;				 /*message type ID on disk   */

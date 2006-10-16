@@ -169,7 +169,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     if(NULL == (attr->name = H5MM_strdup((const char *)p)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN(name_len);    /* advance the memory pointer */
+        p += H5O_ALIGN_OLD(name_len);    /* advance the memory pointer */
     else
         p += name_len;    /* advance the memory pointer */
 
@@ -193,7 +193,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN(attr->dt_size);
+        p += H5O_ALIGN_OLD(attr->dt_size);
     else
         p += attr->dt_size;
 
@@ -215,7 +215,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     if(version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN(attr->ds_size);
+        p += H5O_ALIGN_OLD(attr->ds_size);
     else
         p += attr->ds_size;
 
@@ -337,8 +337,8 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     HDmemcpy(p, attr->name, name_len);
     if(version < H5O_ATTR_VERSION_2) {
         /* Pad to the correct number of bytes */
-        HDmemset(p + name_len, 0, H5O_ALIGN(name_len) - name_len);
-        p += H5O_ALIGN(name_len);
+        HDmemset(p + name_len, 0, H5O_ALIGN_OLD(name_len) - name_len);
+        p += H5O_ALIGN_OLD(name_len);
     } /* end if */
     else
         p += name_len;
@@ -364,8 +364,8 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2) {
-        HDmemset(p + attr->dt_size, 0, H5O_ALIGN(attr->dt_size) - attr->dt_size);
-        p += H5O_ALIGN(attr->dt_size);
+        HDmemset(p + attr->dt_size, 0, H5O_ALIGN_OLD(attr->dt_size) - attr->dt_size);
+        p += H5O_ALIGN_OLD(attr->dt_size);
     } /* end if */
     else
         p += attr->dt_size;
@@ -374,8 +374,8 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     if((H5O_MSG_SDSPACE->encode)(f, p, &(attr->ds->extent)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace")
     if(version < H5O_ATTR_VERSION_2) {
-        HDmemset(p + attr->ds_size, 0, H5O_ALIGN(attr->ds_size) - attr->ds_size);
-        p += H5O_ALIGN(attr->ds_size);
+        HDmemset(p + attr->ds_size, 0, H5O_ALIGN_OLD(attr->ds_size) - attr->ds_size);
+        p += H5O_ALIGN_OLD(attr->ds_size);
     } /* end if */
     else
         p += attr->ds_size;
@@ -490,9 +490,9 @@ H5O_attr_size(const H5F_t *f, const void *_mesg)
 
     /* Version-specific size information */
     if(version == H5O_ATTR_VERSION_1)
-        ret_value += H5O_ALIGN(name_len) +	/*attribute name	*/
-                    H5O_ALIGN(attr->dt_size) +	/*data type		*/
-                    H5O_ALIGN(attr->ds_size) +	/*data space		*/
+        ret_value += H5O_ALIGN_OLD(name_len) +	/*attribute name	*/
+                    H5O_ALIGN_OLD(attr->dt_size) +	/*data type		*/
+                    H5O_ALIGN_OLD(attr->ds_size) +	/*data space		*/
                     attr->data_size;		/*the data itself	*/
     else if(version == H5O_ATTR_VERSION_2)
         ret_value += name_len	+		/*attribute name	*/

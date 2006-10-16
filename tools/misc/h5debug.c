@@ -380,7 +380,7 @@ main(int argc, char *argv[])
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
 
-    } else if(sig[0] == H5O_VERSION) {
+    } else if(sig[0] == H5O_VERSION_1) {
         /*
          * This could be an object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
