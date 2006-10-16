@@ -215,7 +215,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     HDassert((size_t)(p - buf) == size);
 
     /* Compute checksum on entire header */
-    computed_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM));
+    computed_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM), 0);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -312,7 +312,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         H5F_ENCODE_LENGTH(f, p, bt2->root.all_nrec);
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM));
+        metadata_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -547,7 +547,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -644,7 +644,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         } /* end for */
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -876,7 +876,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -959,7 +959,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         } /* end for */
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page));
+        metadata_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);

@@ -387,7 +387,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
     udata.common.dxpl_id = dxpl_id;
     udata.common.fheap = fheap;
     udata.common.name = lnk->name;
-    udata.common.name_hash = H5_checksum_lookup3(lnk->name, HDstrlen(lnk->name));
+    udata.common.name_hash = H5_checksum_lookup3(lnk->name, HDstrlen(lnk->name), 0);
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     /* udata.id already set in H5HF_insert() call */
@@ -491,7 +491,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
     udata.name = name;
-    udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name));
+    udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.found_op = H5G_dense_lookup_cb;       /* v2 B-tree comparison callback */
     udata.found_op_data = lnk;
 
@@ -1275,7 +1275,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.common.dxpl_id = dxpl_id;
     udata.common.fheap = fheap;
     udata.common.name = name;
-    udata.common.name_hash = H5_checksum_lookup3(name, HDstrlen(name));
+    udata.common.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     udata.adj_link = TRUE;

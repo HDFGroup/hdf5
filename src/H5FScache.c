@@ -236,7 +236,7 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(f, p, fspace->alloc_sect_size);
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -350,7 +350,7 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         H5F_ENCODE_LENGTH(f, p, fspace->alloc_sect_size);
 
         /* Compute checksum */
-        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
@@ -671,7 +671,7 @@ HDfprintf(stderr, "%s: fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, sect_typ
     } /* end if */
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -892,7 +892,7 @@ HDfprintf(stderr, "%s: Serializing section bins\n", FUNC);
         } /* end for */
 
         /* Compute checksum */
-        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf));
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);

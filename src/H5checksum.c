@@ -359,7 +359,7 @@ use a bitmask.  For example, if you need only 10 bits, do
 In which case, the hash table should have hashsize(10) elements.
 
 If you are hashing n strings (uint8_t **)k, do it like this:
-  for (i=0, h=0; i<n; ++i) h = hashlittle( k[i], len[i], h);
+  for (i=0, h=0; i<n; ++i) h = H5_checksum_lookup( k[i], len[i], h);
 
 By Bob Jenkins, 2006.  bob_jenkins@burtleburtle.net.  You may use this
 code any way you wish, private, educational, or commercial.  It's free.
@@ -370,7 +370,7 @@ acceptable.  Do NOT use for cryptographic purposes.
 */
 
 uint32_t
-H5_checksum_lookup3(const void *key, size_t length /*, uint32_t initval */)
+H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
 {
     const uint8_t *k = (const uint8_t *)key;
     uint32_t a, b, c;           /* internal state */
@@ -382,7 +382,7 @@ H5_checksum_lookup3(const void *key, size_t length /*, uint32_t initval */)
     HDassert(length > 0);
 
     /* Set up the internal state */
-    a = b = c = 0xdeadbeef + ((uint32_t)length) /* + initval */;
+    a = b = c = 0xdeadbeef + ((uint32_t)length) + initval;
 
     /*--------------- all but the last block: affect some 32 bits of (a,b,c) */
     while (length > 12)
@@ -445,7 +445,7 @@ done:
  *-------------------------------------------------------------------------
  */
 uint32_t
-H5_checksum_metadata(const void *data, size_t len)
+H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_checksum_metadata)
 
@@ -455,6 +455,6 @@ H5_checksum_metadata(const void *data, size_t len)
 
     /* Choose the appropriate checksum routine */
     /* (use Bob Jenkin's "lookup3" algorithm for all buffer sizes) */
-    FUNC_LEAVE_NOAPI(H5_checksum_lookup3(data, len))
+    FUNC_LEAVE_NOAPI(H5_checksum_lookup3(data, len, initval))
 } /* end H5_checksum_metadata() */
 

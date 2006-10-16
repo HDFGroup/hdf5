@@ -57,7 +57,7 @@ test_chksum_size_one(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xfa2568b7, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0xa209c931, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
@@ -68,7 +68,7 @@ test_chksum_size_one(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xfa60fb57, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x8ba9414b, "H5_checksum_lookup3");
 } /* test_chksum_size_one() */
 
@@ -91,7 +91,7 @@ test_chksum_size_two(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xfc856608, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x8ba7a6c9, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
@@ -102,7 +102,7 @@ test_chksum_size_two(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xfc7e9b20, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x62cd61b3, "H5_checksum_lookup3");
 } /* test_chksum_size_two() */
 
@@ -125,7 +125,7 @@ test_chksum_size_three(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xfebc5d70, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0xcebdf4f0, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
@@ -136,7 +136,7 @@ test_chksum_size_three(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xf9cc4c7a, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x6bd0060f, "H5_checksum_lookup3");
 } /* test_chksum_size_three() */
 
@@ -159,7 +159,7 @@ test_chksum_size_four(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xff398a46, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x2c88bb51, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
@@ -170,7 +170,7 @@ test_chksum_size_four(void)
     chksum = H5_checksum_crc(buf, sizeof(buf));
     VERIFY(chksum, 0xff117081, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(buf, sizeof(buf));
+    chksum = H5_checksum_lookup3(buf, sizeof(buf), 0);
     VERIFY(chksum, 0x049396b8, "H5_checksum_lookup3");
 } /* test_chksum_size_four() */
 
@@ -197,7 +197,7 @@ test_chksum_large(void)
     chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
     VERIFY(chksum, 0xfbd0f7c0, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf));
+    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf), 0);
     VERIFY(chksum, 0x1bd2ee7b, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
@@ -208,7 +208,7 @@ test_chksum_large(void)
     chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
     VERIFY(chksum, 0xfac8b4c4, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf));
+    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf), 0);
     VERIFY(chksum, 0x930c7afc, "H5_checksum_lookup3");
 } /* test_chksum_large() */
 
