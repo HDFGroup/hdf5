@@ -15,24 +15,29 @@
 /*
  * Generate the binary hdf5 file for the h5copy tests
  */
-
+#include <stdlib.h>
 #include "hdf5.h"
-#define FILENAME         "h5copytst.h5"
-#define DATASET_SIMPLE   "simple"
-#define DATASET_CHUNK    "chunk"
-#define DATASET_COMPACT  "compact"
-#define DATASET_COMPOUND "compound"
+
+#define FILENAME           "h5copytst.h5"
+#define DATASET_SIMPLE     "simple"
+#define DATASET_CHUNK      "chunk"
+#define DATASET_COMPACT    "compact"
+#define DATASET_COMPOUND   "compound"
+#define DATASET_COMPRESSED "compressed"
+#define DATASET_NAMED_VL   "named_vl"
+#define DATASET_NESTED_VL  "nested_vl"
+
 
 
 
 /*-------------------------------------------------------------------------
- * Function:    gent_simple_dataset
+ * Function:    gent_simple
  *
  * Purpose:     Generate a simple dataset in FID
  *
  *-------------------------------------------------------------------------
  */
-static void gent_simple_dataset(hid_t fid)
+static void gent_simple(hid_t fid)
 {
  hid_t   sid, did;
  hsize_t dims[1] = {6};
@@ -53,13 +58,13 @@ static void gent_simple_dataset(hid_t fid)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    gent_chunked_dataset
+ * Function:    gent_chunked
  *
  * Purpose:     Generate a chunked dataset in FID
  *
  *-------------------------------------------------------------------------
  */
-static void gent_chunked_dataset(hid_t fid)
+static void gent_chunked(hid_t fid)
 {
  hid_t   sid, did, pid;
  hsize_t dims[1] = {6};
@@ -69,7 +74,7 @@ static void gent_chunked_dataset(hid_t fid)
  /* create dataspace */
  sid = H5Screate_simple(1, dims, NULL);
 
- /* create property plist for chunk*/
+ /* create property plist */
  pid = H5Pcreate(H5P_DATASET_CREATE);
  H5Pset_chunk(pid, 1, chunk_dims);
  
@@ -87,13 +92,13 @@ static void gent_chunked_dataset(hid_t fid)
 
 
 /*-------------------------------------------------------------------------
- * Function:    gent_compact_dataset
+ * Function:    gent_compact
  *
  * Purpose:     Generate a compact dataset in FID
  *
  *-------------------------------------------------------------------------
  */
-static void gent_compact_dataset(hid_t fid)
+static void gent_compact(hid_t fid)
 {
  hid_t   sid, did, pid;
  hsize_t dims[1] = {6};
@@ -102,7 +107,7 @@ static void gent_compact_dataset(hid_t fid)
  /* create dataspace */
  sid = H5Screate_simple(1, dims, NULL);
 
- /* create property plist for chunk*/
+ /* create property plist  */
  pid = H5Pcreate(H5P_DATASET_CREATE);
  H5Pset_layout (pid,H5D_COMPACT);
  
@@ -120,13 +125,13 @@ static void gent_compact_dataset(hid_t fid)
 
 
 /*-------------------------------------------------------------------------
- * Function:    gent_compound_dataset
+ * Function:    gent_compound
  *
  * Purpose:     Generate a compound dataset in FID
  *
  *-------------------------------------------------------------------------
  */
-static void gent_compound_dataset(hid_t fid)
+static void gent_compound(hid_t fid)
 {
  typedef struct s_t
  {
@@ -161,7 +166,144 @@ static void gent_compound_dataset(hid_t fid)
  H5Tclose(tid_s);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_compressed
+ *
+ * Purpose:     Generate a compressed dataset in FID
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_compressed(hid_t fid)
+{
+ hid_t   sid, did, pid;
+ hsize_t dims[1] = {6};
+ hsize_t chunk_dims[1] = {2};
+ int     buf[6]  = {1,2,3,4,5,6};
 
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+
+ /* create property plist for chunk*/
+ pid = H5Pcreate(H5P_DATASET_CREATE);
+ H5Pset_chunk(pid, 1, chunk_dims);
+
+ /* set the deflate filter */
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ H5Pset_deflate(pid, 1);
+#endif
+ 
+ /* create dataset */
+ did = H5Dcreate(fid, DATASET_COMPRESSED, H5T_NATIVE_INT, sid, pid);
+ 
+ /* write */
+ H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ 
+ /* close */
+ H5Sclose(sid);
+ H5Dclose(did);
+ H5Pclose(pid);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_named_vl
+ *
+ * Purpose:     Generate a variable lenght named datatype for a dataset in FID
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_named_vl(hid_t fid)
+{
+ hid_t   sid, did, tid;
+ hsize_t dims[1] = {2};
+ hvl_t   buf[2];                        
+
+ /* allocate and initialize VL dataset to write */
+ buf[0].len = 1;
+ buf[0].p = malloc( 1 * sizeof(int));
+ ((int *)buf[0].p)[0]=1;
+ buf[1].len = 2;
+ buf[1].p = malloc( 2 * sizeof(int));
+ ((int *)buf[1].p)[0]=2;
+ ((int *)buf[1].p)[1]=3;
+
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+ 
+ /* create datatype */
+ tid = H5Tvlen_create(H5T_NATIVE_INT);
+  
+ /* create named datatype */
+ H5Tcommit(fid, "vl", tid);
+ 
+ /* create dataset */
+ did = H5Dcreate(fid, DATASET_NAMED_VL, tid, sid, H5P_DEFAULT);
+ 
+ /* write */
+ H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ 
+ /* close */
+ H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+ H5Sclose(sid);
+ H5Dclose(did);
+ H5Tclose(tid);
+ 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_nested_vl
+ *
+ * Purpose:     Generate a nested variable lenght dataset in FID
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_nested_vl(hid_t fid)
+{
+ hid_t   sid, did, tid1, tid2;
+ hsize_t dims[1] = {2};
+ hvl_t   buf[2];
+ hvl_t   *tvl;                                 
+
+ /* allocate and initialize VL dataset to write */
+ buf[0].len = 1;
+ buf[0].p = malloc( 1 * sizeof(hvl_t));
+ tvl = buf[0].p;
+ tvl->p = malloc( 1 * sizeof(int) );
+ tvl->len = 1;
+ ((int *)tvl->p)[0]=1;
+
+ buf[1].len = 1;
+ buf[1].p = malloc( 1 * sizeof(hvl_t));
+ tvl = buf[1].p;
+ tvl->p = malloc( 2 * sizeof(int) );
+ tvl->len = 2;
+ ((int *)tvl->p)[0]=2;
+ ((int *)tvl->p)[1]=3;
+
+ /* create dataspace */
+ sid = H5Screate_simple(1, dims, NULL);
+ 
+ /* create datatype */
+ tid1 = H5Tvlen_create(H5T_NATIVE_INT);
+
+ /* create nested VL datatype */
+ tid2 = H5Tvlen_create(tid1);
+ 
+ /* create dataset */
+ did = H5Dcreate(fid, DATASET_NESTED_VL, tid2, sid, H5P_DEFAULT);
+ 
+ /* write */
+ H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ 
+ /* close */
+ H5Dvlen_reclaim(tid2,sid,H5P_DEFAULT,buf);
+ H5Sclose(sid);
+ H5Dclose(did);
+ H5Tclose(tid1);
+ H5Tclose(tid2);
+ 
+}
 
 
 /*-------------------------------------------------------------------------
@@ -177,10 +319,13 @@ int main(void)
  
  fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
- gent_simple_dataset(fid);
- gent_chunked_dataset(fid);
- gent_compact_dataset(fid);
- gent_compound_dataset(fid);
+ gent_simple(fid);
+ gent_chunked(fid);
+ gent_compact(fid);
+ gent_compound(fid);
+ gent_compressed(fid);
+ gent_named_vl(fid);
+ gent_nested_vl(fid);
  
  H5Fclose(fid);
  return 0;
