@@ -139,6 +139,13 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 *p++ = 0; /*reserved*/
                 *p++ = 0; /*reserved*/
             } /* end for */
+            HDassert(p == curr_msg->raw);
+
+#ifndef NDEBUG
+            /* Make certain that null messages aren't in chunks w/gaps */
+            if(H5O_NULL_ID == curr_msg->type->id)
+                HDassert(oh->chunk[curr_msg->chunkno].gap == 0);
+#endif /* NDEBUG */
 
             /* Encode the message itself */
             if(curr_msg->native) {
@@ -154,7 +161,7 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image);
                 HDassert(curr_msg->raw_size == H5O_ALIGN_OH(oh, curr_msg->raw_size));
                 HDassert(curr_msg->raw + curr_msg->raw_size <=
-                       oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size);
+                       oh->chunk[curr_msg->chunkno].image + (oh->chunk[curr_msg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
                 if(curr_msg->flags & H5O_FLAG_SHARED)
                     encode = H5O_MSG_SHARED->encode;
                 else
@@ -162,6 +169,8 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 if((encode)(f, curr_msg->raw, curr_msg->native) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
             } /* end if */
+
+            /* Pass "modifiedness" from message to chunk */
             curr_msg->dirty = FALSE;
             oh->chunk[curr_msg->chunkno].dirty = TRUE;
         } /* end if */
@@ -208,7 +217,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     size_t	chunk_size;     /* Size of first chunk */
     haddr_t     abs_eoa;	/* Absolute end of file address	*/
     haddr_t     rel_eoa;	/* Relative end of file address	*/
-    uint32_t    prefix_chksum = 0;     /* Checksum of object header prefix */
     H5O_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_load, NULL)
@@ -275,10 +283,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Determine object header prefix length */
     prefix_size = (size_t)(p - read_buf);
 
-    /* Compute partial checksum, for later versions of the format */
-    if(oh->version > H5O_VERSION_1)
-        prefix_chksum = H5_checksum_lookup3(read_buf, prefix_size, 0);
-
     /* Compute first chunk address */
     chunk_addr = addr + (hsize_t)prefix_size;
 
@@ -290,6 +294,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Read each chunk from disk */
     while(H5F_addr_defined(chunk_addr)) {
         unsigned chunkno;       /* Current chunk's index */
+#ifndef NDEBUG
+        unsigned nullcnt;       /* Count of null messages (for sanity checking gaps in chunks) */
+#endif /* NDEBUG */
+        uint8_t *eom_ptr;       /* Pointer to end of messages for a chunk */
 
 	/* Increase chunk array size, if necessary */
 	if(oh->nchunks >= oh->alloc_nchunks) {
@@ -305,6 +313,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	/* Init the chunk data info */
 	chunkno = oh->nchunks++;
 	oh->chunk[chunkno].dirty = FALSE;
+	oh->chunk[chunkno].gap = 0;
         if(chunkno == 0) {
             /* First chunk's 'image' includes room for the object header prefix */
             oh->chunk[0].addr = addr;
@@ -354,7 +363,11 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         } /* end if */
 
 	/* Decode messages from this chunk */
-	while(p < (oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)))) {
+        eom_ptr = oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh));
+#ifndef NDEBUG
+        nullcnt = 0;
+#endif /* NDEBUG */
+	while(p < eom_ptr) {
             unsigned    mesgno;         /* Current message to operate on */
             size_t	mesg_size;      /* Size of message read in */
             unsigned	id;             /* ID (type) of current message */
@@ -368,8 +381,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             if(oh->version == H5O_VERSION_1)
                 p += 3; /*reserved*/
 
-            /* Try to detect invalidly formatted object header messages */
-	    if(p + mesg_size > oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)))
+            /* Try to detect invalidly formatted object header message that
+             *  extends past end of chunk.
+             */
+	    if(p + mesg_size > eom_ptr)
 		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header")
 
             /* Skip header messages we don't know about */
@@ -377,42 +392,58 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
                 /* Increment skipped messages counter */
                 skipped_msgs++;
-
-                /* Advance decode pointer past message */
-                p += mesg_size;
-
-                /* Go get next message */
-                continue;
             } /* end if */
-
-            /* Check for combining two adjacent 'null' messages */
-            if((H5F_get_intent(f) & H5F_ACC_RDWR) &&
-	            H5O_NULL_ID == id && oh->nmesgs > 0 &&
-                    H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
-                    oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
-
-		/* Combine adjacent null messages */
-		mesgno = oh->nmesgs - 1;
-		oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
-		oh->mesg[mesgno].dirty = TRUE;
-                merged_null_msgs++;
-	    } /* end if */
             else {
-		/* New message */
-		if(oh->nmesgs >= nmesgs)
-		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages")
-		mesgno = oh->nmesgs++;
-		oh->mesg[mesgno].type = H5O_msg_class_g[id];
-		oh->mesg[mesgno].dirty = FALSE;
-		oh->mesg[mesgno].flags = flags;
-		oh->mesg[mesgno].native = NULL;
-		oh->mesg[mesgno].raw = p;
-		oh->mesg[mesgno].raw_size = mesg_size;
-		oh->mesg[mesgno].chunkno = chunkno;
-	    } /* end else */
+#ifndef NDEBUG
+                /* Increment count of null messages */
+                if(H5O_NULL_ID == id)
+                    nullcnt++;
+#endif /* NDEBUG */
+
+                /* Check for combining two adjacent 'null' messages */
+                if((H5F_get_intent(f) & H5F_ACC_RDWR) &&
+                        H5O_NULL_ID == id && oh->nmesgs > 0 &&
+                        H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+                        oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+
+                    /* Combine adjacent null messages */
+                    mesgno = oh->nmesgs - 1;
+                    oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
+                    oh->mesg[mesgno].dirty = TRUE;
+                    merged_null_msgs++;
+                } /* end if */
+                else {
+                    /* New message */
+                    if(oh->nmesgs >= nmesgs)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages")
+                    mesgno = oh->nmesgs++;
+                    oh->mesg[mesgno].type = H5O_msg_class_g[id];
+                    oh->mesg[mesgno].dirty = FALSE;
+                    oh->mesg[mesgno].flags = flags;
+                    oh->mesg[mesgno].native = NULL;
+                    oh->mesg[mesgno].raw = p;
+                    oh->mesg[mesgno].raw_size = mesg_size;
+                    oh->mesg[mesgno].chunkno = chunkno;
+                } /* end else */
+            } /* end else */
 
             /* Advance decode pointer past message */
             p += mesg_size;
+
+            /* Check for 'gap' at end of chunk */
+            if((eom_ptr - p) > 0 && (eom_ptr - p) < H5O_SIZEOF_MSGHDR_OH(oh)) {
+                /* Gaps can only occur in later versions of the format */
+                HDassert(oh->version > H5O_VERSION_1);
+
+                /* Gaps should only occur in chunks with no null messages */
+                HDassert(nullcnt == 0);
+
+                /* Set gap information for chunk */
+                oh->chunk[chunkno].gap = (eom_ptr - p);
+
+                /* Increment location in chunk */
+                p += oh->chunk[chunkno].gap;
+            } /* end if */
 	} /* end while */
 
         /* Check for correct checksum on chunks, in later versions of the format */
@@ -423,11 +454,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             /* Metadata checksum */
             UINT32DECODE(p, stored_chksum);
 
-            /* Compute checksum on entire header */
-            if(chunkno == 0)
-                computed_chksum = H5_checksum_metadata(oh->chunk[chunkno].image + prefix_size, chunk_size, prefix_chksum);
-            else
-                computed_chksum = H5_checksum_metadata(oh->chunk[chunkno].image, (chunk_size - H5O_SIZEOF_CHKSUM), 0);
+            /* Compute checksum on chunk */
+            computed_chksum = H5_checksum_metadata(oh->chunk[chunkno].image, (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM), 0);
 
             /* Verify checksum */
             if(stored_chksum != computed_chksum)
@@ -509,10 +537,6 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
         uint8_t	*p;             /* Pointer to object header prefix buffer */
         unsigned u;             /* Local index variable */
 
-	/* Encode any dirty messages */
-        if(H5O_flush_msgs(f, oh) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
-
         /* Point to raw data 'image' for first chunk, which has room for the prefix */
         p = oh->chunk[0].image;
 
@@ -521,13 +545,8 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
          * on the entire block of memory needs to be updated if anything is
          * modified */
         if(oh->version > H5O_VERSION_1) {
-            size_t prefix_size;         /* Length of object header prefix */
-            uint32_t prefix_chksum;     /* Prefix checksum value */
-            uint32_t full_chksum;       /* Full checksum value */
-            size_t raw_size;            /* Size of raw data in first chunk */
-
             /* Verify magic number */
-            HDassert(!HDmemcmp(oh->chunk[u].image, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
+            HDassert(!HDmemcmp(oh->chunk[0].image, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
             p += H5O_SIZEOF_MAGIC;
 
             /* Version */
@@ -541,24 +560,6 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
 
             /* Chunk size */
             UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh)));
-
-            /* Determine object header prefix length */
-            prefix_size = (size_t)(p - oh->chunk[0].image);
-
-            /* Compute partial checksum for later */
-            /* (checksum performed in this odd way in order to accomodate
-             *  reading in the header & first chunk in reasonable way)
-             */
-            prefix_chksum = H5_checksum_lookup3(oh->chunk[0].image, prefix_size, 0);
-
-            /* Finish full checksum, over chunk data */
-            raw_size = oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh);
-            full_chksum = H5_checksum_metadata(p, raw_size, prefix_chksum);
-            p += raw_size;
-
-            /* Metadata checksum */
-            UINT32ENCODE(p, full_chksum);
-            HDassert((size_t)(p - oh->chunk[0].image) == oh->chunk[0].size);
         } /* end if */
         else {
             /* Version */
@@ -578,26 +579,42 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
 
             /* Zero to alignment */
             HDmemset(p, 0, (size_t)(H5O_SIZEOF_HDR_OH(oh) - 12));
+            p += (size_t)(H5O_SIZEOF_HDR_OH(oh) - 12);
         } /* end else */
+        HDassert((size_t)(p - oh->chunk[0].image) == (size_t)(H5O_SIZEOF_HDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
         /* Mark chunk 0 as dirty, since the object header prefix has been updated */
         /* (this could be more sophisticated and track whether any prefix fields
-         *      have been changed, which could save I/O accesses - QAK)
+         *      have been changed, which could save I/O accesses if the 
+         *      messages in chunk 0 haven't changed - QAK)
          */
         HDassert(H5F_addr_eq(addr, oh->chunk[0].addr));
         oh->chunk[0].dirty = TRUE;
 
+	/* Encode any dirty messages */
+        if(H5O_flush_msgs(f, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
+
 	/* Write each chunk to disk, if it's dirty */
 	for(u = 0; u < oh->nchunks; u++) {
-            /* Sanity check - make certain the magic # is present */
+            /* Sanity checks */
             if(oh->version > H5O_VERSION_1)
+                /* Make certain the magic # is present */
                 HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5O_SIZEOF_MAGIC));
+            else
+                /* Gaps should never occur in version 1 of the format */
+                HDassert(oh->chunk[u].gap == 0);
 
             /* Write out chunk, if it's dirty */
 	    if(oh->chunk[u].dirty) {
-                /* Compute checksum, for chunks > 0 & later versions of format */
-                if(u > 0 && oh->version > H5O_VERSION_1) {
-                    uint32_t metadata_chksum; /* Computed metadata checksum value */
+                /* Extra work, for later versions of the format */
+                if(oh->version > H5O_VERSION_1) {
+                    uint32_t metadata_chksum;   /* Computed metadata checksum value */
+
+                    /* Check for gap in chunk & zero it out */
+                    if(oh->chunk[u].gap)
+                        HDmemset((oh->chunk[u].image + oh->chunk[u].size) -
+                            (H5O_SIZEOF_CHKSUM + oh->chunk[u].gap), 0, oh->chunk[u].gap);
 
                     /* Compute metadata checksum */
                     metadata_chksum = H5_checksum_metadata(oh->chunk[u].image, (oh->chunk[u].size - H5O_SIZEOF_CHKSUM), 0);
@@ -704,28 +721,28 @@ H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy)
     unsigned	u;      /* Local index variable */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_clear);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_clear)
 
     /* check args */
-    assert(oh);
+    HDassert(oh);
 
     /* Mark chunks as clean */
-    for (u = 0; u < oh->nchunks; u++)
-        oh->chunk[u].dirty=FALSE;
+    for(u = 0; u < oh->nchunks; u++)
+        oh->chunk[u].dirty = FALSE;
 
     /* Mark messages as clean */
-    for (u = 0; u < oh->nmesgs; u++)
-        oh->mesg[u].dirty=FALSE;
+    for(u = 0; u < oh->nmesgs; u++)
+        oh->mesg[u].dirty = FALSE;
 
     /* Mark whole header as clean */
-    oh->cache_info.is_dirty=FALSE;
+    oh->cache_info.is_dirty = FALSE;
 
-    if (destroy)
-        if (H5O_dest(f, oh) < 0)
+    if(destroy)
+        if(H5O_dest(f, oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_clear() */
 
 
@@ -755,11 +772,9 @@ H5O_size(const H5F_t UNUSED *f, const H5O_t *oh, size_t *size_ptr)
     HDassert(oh);
     HDassert(size_ptr);
 
-    /* Size of object header "prefix" */
-    size = H5O_SIZEOF_HDR_OH(oh);
-
     /* Add sizes of all the chunks */
-    for(u = 0; u < oh->nchunks; u++)
+    /* (includes size of prefix, in chunk 0) */
+    for(u = 0, size = 0; u < oh->nchunks; u++)
         size += oh->chunk[u].size;
 
     *size_ptr = size;

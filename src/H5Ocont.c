@@ -94,25 +94,27 @@ H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     H5O_cont_t             *cont = NULL;
     void                   *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_cont_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cont_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
-    /* decode */
-    if (NULL==(cont = H5FL_MALLOC(H5O_cont_t)))
+    /* Allocate space for the message */
+    if(NULL == (cont = H5FL_MALLOC(H5O_cont_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Decode */
     H5F_addr_decode(f, &p, &(cont->addr));
     H5F_DECODE_LENGTH(f, p, cont->size);
-    cont->chunkno=0;
+    cont->chunkno = 0;
 
     /* Set return value */
-    ret_value=cont;
+    ret_value = cont;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_cont_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -264,7 +266,7 @@ static void *
 H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t UNUSED *file_dst,
     hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void *udata)
 {
-    H5O_cont_t  *cont_src = (H5O_cont_t *) mesg_src;
+    H5O_cont_t  *cont_src = (H5O_cont_t *)mesg_src;
     H5O_chunk_t *chunk = (H5O_chunk_t *)udata;
     H5O_cont_t  *cont_dst = NULL;
     void        *ret_value;          /* Return value */
@@ -273,13 +275,15 @@ H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t UNUSED *file_ds
 
     /* check args */
     HDassert(cont_src);
-    HDassert(file_dst);
 
     /* Allocate space for the destination cont */
     if(NULL == (cont_dst = H5FL_MALLOC(H5O_cont_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    HDmemcpy(cont_dst, cont_src, sizeof(H5O_cont_t));
+    /* Shallow copy all the fields */
+    *cont_dst = *cont_src;
+
+    /* Update the destination address to point to correct address in dest. file */
     cont_dst->addr = chunk[cont_src->chunkno].addr;
 
     /* Set return value */

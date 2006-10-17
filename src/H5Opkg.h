@@ -107,7 +107,8 @@
                    3)	/*reserved		*/			      \
         :								      \
                 (2 +	/*message type		*/			      \
-                    2) 	/*sizeof message data	*/			      \
+                   2 + 	/*sizeof message data	*/			      \
+                   1)	/*flags              	*/			      \
     )
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
      H5O_SIZEOF_MSGHDR_VERS((O)->version)
@@ -174,6 +175,7 @@ typedef struct H5O_chunk_t {
     hbool_t	dirty;			/*dirty flag			     */
     haddr_t	addr;			/*chunk file address		     */
     size_t	size;			/*chunk size			     */
+    size_t	gap;			/*space at end of chunk too small for null message */
     uint8_t	*image;			/*image of file			     */
 } H5O_chunk_t;
 
