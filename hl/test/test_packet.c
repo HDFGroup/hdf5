@@ -1026,7 +1026,9 @@ static int test_packet_table(hid_t fid)
     test_read(fid);
     test_get_next(fid);
     test_big_table(fid);
+#ifdef VLPT_REMOVED
     test_varlen(fid);
+#endif /* VLPT_REMOVED */
     test_opaque(fid);
     test_compress();
     test_error(fid);

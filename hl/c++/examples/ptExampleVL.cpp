@@ -25,6 +25,7 @@
 
 int main(void)
 {
+#ifdef VLPT_REMOVED
     herr_t err;     /* Return value from function calls */
     hid_t fileID;   /* HDF5 identifier for file */
     hsize_t count;  /* Number of records in table */
@@ -104,6 +105,7 @@ int main(void)
     if( err < 0 )
         fprintf(stderr, "Failed to close file.\n");
 
+#endif /* VLPT_REMOVED */
     return 0;
 }
 

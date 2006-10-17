@@ -33,9 +33,11 @@ H5_HLDLL hid_t H5PTcreate_fl ( hid_t loc_id,
                       hsize_t chunk_size,
                       int compression );
 
+#ifdef VLPT_REMOVED
 H5_HLDLL hid_t H5PTcreate_vl ( hid_t loc_id,
                       const char *dset_name,
                       hsize_t chunk_size );
+#endif /* VLPT_REMOVED */
 
 H5_HLDLL hid_t H5PTopen( hid_t loc_id,
                 const char *dset_name );
@@ -84,7 +86,9 @@ H5_HLDLL herr_t  H5PTget_num_packets( hid_t table_id,
 
 H5_HLDLL herr_t  H5PTis_valid( hid_t table_id );
 
+#ifdef VLPT_REMOVED
 H5_HLDLL herr_t  H5PTis_varlen( hid_t table_id );
+#endif /* VLPT_REMOVED */
 
 /*-------------------------------------------------------------------------
  *
@@ -108,9 +112,11 @@ H5_HLDLL herr_t  H5PTget_index( hid_t table_id,
  *-------------------------------------------------------------------------
  */
 
+#ifdef VLPT_REMOVED
 H5_HLDLL herr_t  H5PTfree_vlen_readbuff( hid_t table_id,
                                size_t bufflen,
                                void * buff );
+#endif /* VLPT_REMOVED */
 
 #ifdef __cplusplus
 }

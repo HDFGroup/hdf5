@@ -49,7 +49,9 @@ int main(void)
 
             num_errors += SystemTest();
 
+#ifdef VLPT_REMOVED
             num_errors += VariableLengthTest();
+#endif /* VLPT_REMOVED */
 
         /* Terminate access to the file. */
         err = H5Fclose(fileID);

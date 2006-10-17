@@ -162,6 +162,7 @@ public:
     int GetNextPackets(size_t numPackets, void * data);
 };
 
+#ifdef VLPT_REMOVED
 class H5_HLCPPDLL  VL_PacketTable : virtual public PacketTable
 {
 public:
@@ -235,5 +236,6 @@ public:
      */
     int FreeReadbuff(size_t numStructs, hvl_t * buffer);
 };
+#endif /* VLPT_REMOVED */
 
 #endif /* H5PTWRAP_H */

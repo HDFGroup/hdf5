@@ -27,6 +27,7 @@
 
 int main(void)
 {
+#ifdef VLPT_REMOVED
  hid_t          fid;        /* File identifier */
  hid_t          ptable;     /* Packet table identifier */
 
@@ -110,12 +111,15 @@ int main(void)
 
     /* Close the file */
  H5Fclose(fid);
+#endif /* VLPT_REMOVED */
 
  return 0;
 
+#ifdef VLPT_REMOVED
  out: /* An error has occurred.  Clean up and exit. */
     fprintf(stderr, "An error has occurred!\n");
     H5PTclose(ptable);
     H5Fclose(fid);
     return -1;
+#endif /* VLPT_REMOVED */
 }
