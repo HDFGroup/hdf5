@@ -59,6 +59,7 @@
             return false;
     }
 
+#ifdef VLPT_REMOVED
     /* IsVariableLength
      * Return 1 if this packet table is a Variable Length packet table,
      * return 0 if it is Fixed Length.  Returns -1 if the table is
@@ -68,6 +69,7 @@
     {
         return H5PTis_varlen(table_id);
     }
+#endif /* VLPT_REMOVED */
 
     /* ResetIndex
      * Sets the index to point to the first packet in the packet table
@@ -135,11 +137,13 @@
      */
     FL_PacketTable::FL_PacketTable(hid_t fileID, char* name) : PacketTable(fileID, name)
     {
+#ifdef VLPT_REMOVED
         if( H5PTis_varlen(table_id) != 0 )    // If this is not a fixed-length table
         {
             H5PTclose(table_id);
             table_id = -1;
         }
+#endif /* VLPT_REMOVED */
     }
 
     /* AppendPacket
@@ -211,6 +215,7 @@
     }
 
 
+#ifdef VLPT_REMOVED
     /********************************/
     /* Variable-Length Packet Table */
     /********************************/
@@ -324,3 +329,4 @@
     {
         return H5PTfree_vlen_readbuff( table_id, numStructs, buffer);
     }
+#endif /* VLPT_REMOVED */

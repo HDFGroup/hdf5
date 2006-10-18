@@ -55,12 +55,14 @@ public:
      */
     bool IsValid();
 
+#ifdef VLPT_REMOVED
     /* IsVariableLength
      * Return 1 if this packet table is a Variable Length packet table,
      * return 0 if it is Fixed Length.  Returns -1 if the table is
      * invalid (not open).
      */
     int IsVariableLength();
+#endif /* VLPT_REMOVED */
 
     /* ResetIndex
      * Sets the "current packet" index to point to the first packet in the

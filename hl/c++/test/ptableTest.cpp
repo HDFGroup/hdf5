@@ -518,6 +518,7 @@ out:
     return 1;
 }
 
+#ifdef VLPT_REMOVED
 int VariableLengthTest(void)
 {
     long test_long;
@@ -586,3 +587,4 @@ out:
     H5_FAILED();
     return 1;
 }
+#endif /* VLPT_REMOVED */
