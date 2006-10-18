@@ -126,7 +126,7 @@ static void *H5HG_peek(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj);
 static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1,
 			      void *udata2);
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-			 H5HG_heap_t *heap);
+			 H5HG_heap_t *heap, unsigned UNUSED * flags_ptr);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
 static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
 static herr_t H5HG_compute_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_ptr);
@@ -506,10 +506,17 @@ done:
  *	Quincey Koziol, 2002-7-180
  *	Added dxpl parameter to allow more control over I/O from metadata
  *      cache.
+ *
+ *      JRM -- 8/21/06
+ *      Added the flags_ptr parameter.  This parameter exists to
+ *      allow the flush routine to report to the cache if the
+ *      entry is resized or renamed as a result of the flush.
+ *      *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_flush (H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
+H5HG_flush (H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 

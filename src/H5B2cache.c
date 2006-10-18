@@ -62,15 +62,15 @@
 
 /* Metadata cache callbacks */
 static H5B2_t *H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
-static herr_t H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *b);
+static herr_t H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *b, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_hdr_clear(H5F_t *f, H5B2_t *b, hbool_t destroy);
 static herr_t H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t *bt, size_t *size_ptr);
 static H5B2_internal_t *H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_shared);
-static herr_t H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i);
+static herr_t H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
 static herr_t H5B2_cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
 static H5B2_leaf_t *H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_shared);
-static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l);
+static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
 static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
 
@@ -248,11 +248,16 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *bt2)
+H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *bt2, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -579,11 +584,16 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 3 2005
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal)
+H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -909,10 +919,17 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf)
+H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 

@@ -63,7 +63,7 @@
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 		       void *_udata2);
-static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
+static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh, unsigned UNUSED * flags_ptr);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
@@ -518,10 +518,16 @@ done:
  *		matzke@llnl.gov
  *		Aug  5 1997
  *
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *oh)
+H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *oh, unsigned UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 

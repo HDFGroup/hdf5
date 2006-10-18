@@ -42,6 +42,17 @@
 /* Get needed headers */
 #include "H5SLprivate.h"        /* Skip lists */
 
+/* With the introduction of the fractal heap, it is now possible for 
+ * entries to be dirtied, resized, and/or renamed in the flush callbacks.
+ * As a result, on flushes, it may be necessary to make multiple passes
+ * through the slist before it is empty.  The H5C__MAX_PASSES_ON_FLUSH
+ * #define is used to set an upper limit on the number of passes.
+ * The current value was obtained via personal communication with 
+ * Quincey.  I have applied a fudge factor of 2.
+ */
+
+#define H5C__MAX_PASSES_ON_FLUSH	4
+
 
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 
@@ -86,6 +97,9 @@
  *
  * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  This
  *		field is used to validate pointers to instances of H5C_t.
+ *
+ * flush_in_progress: Boolean flag indicating whether a flush is in 
+ * 		progress.
  *
  * trace_file_ptr:  File pointer pointing to the trace file, which is used
  *              to record cache operations for use in simulations and design
@@ -221,6 +235,19 @@
  *                 attempting to evict entries from the cache.  While we
  *                 don't use this at present, I hope that this will allow
  *                 some optimizations when I get to it.
+ *
+ * With the addition of the fractal heap, the cache must now deal with
+ * the case in which entries may be dirtied, renamed, or have their sizes
+ * changed during a flush.  To allow sanity checks in this situation, the
+ * following two fields have been added.  They are only compiled in when
+ * H5C_DO_SANITY_CHECKS is TRUE.
+ *
+ * slist_len_increase: Number of entries that have been added to the 
+ * 		slist since the last time this field was set to zero.
+ *
+ * slist_size_increase: Total size of all entries that have been added
+ * 		to the slist since the last time this field was set to
+ * 		zero.
  *
  *
  * When a cache entry is protected, it must be removed from the LRU
@@ -570,6 +597,16 @@
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
+ * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
+ * 		The cells are used to record the number of times an entry 
+ * 		with type id equal to the array index has been renamed
+ * 		during its flush callback in the current epoch.
+ *
+ * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
+ * 		The cells are used to record the number of times an entry 
+ * 		with type id equal to the array index has been renamed
+ * 		during a cache flush in the current epoch.
+ *
  * pins:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
  *		are used to record the number of times an entry with type
  *		id equal to the array index has been pinned in the current
@@ -595,7 +632,6 @@
  * 		with type id equal to the array index has been cleared while
  * 		pinned in the current epoch.
  *
- *
  * size_increases:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.
  *		The cells are used to record the number of times an entry
  *		with type id equal to the array index has increased in
@@ -605,6 +641,16 @@
  *		The cells are used to record the number of times an entry
  *		with type id equal to the array index has decreased in
  *		size in the current epoch.
+ *
+ * entry_flush_size_changes:  Array of int64 of length 
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
+ * 		the number of times an entry with type id equal to the 
+ * 		array index has changed size while in its flush callback.
+ *
+ * cache_flush_size_changes:  Array of int64 of length 
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
+ * 		the number of times an entry with type id equal to the 
+ * 		array index has changed size during a cache flush
  *
  * total_ht_insertions: Number of times entries have been inserted into the
  *		hash table in the current epoch.
@@ -719,6 +765,8 @@ struct H5C_t
 {
     uint32_t			magic;
 
+    hbool_t			flush_in_progress;
+
     FILE *			trace_file_ptr;
 
     void *			aux_ptr;
@@ -742,7 +790,10 @@ struct H5C_t
     int32_t                     slist_len;
     size_t                      slist_size;
     H5SL_t *                    slist_ptr;
-
+#if H5C_DO_SANITY_CHECKS
+    int64_t			slist_len_increase;
+    int64_t			slist_size_increase;
+#endif /* H5C_DO_SANITY_CHECKS */
 
     int32_t                     pl_len;
     size_t                      pl_size;
@@ -798,6 +849,8 @@ struct H5C_t
     int64_t                     flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     renames[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     entry_flush_renames[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     cache_flush_renames[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     pins[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     unpins[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     dirty_pins[H5C__MAX_NUM_TYPE_IDS + 1];
@@ -805,6 +858,10 @@ struct H5C_t
     int64_t                     pinned_clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_increases[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_decreases[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     entry_flush_size_changes
+	    				[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     cache_flush_size_changes
+	    				[H5C__MAX_NUM_TYPE_IDS + 1];
 
     int64_t			total_ht_insertions;
     int64_t			total_ht_deletions;

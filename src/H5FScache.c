@@ -75,11 +75,11 @@ static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *
 
 /* Metadata cache callbacks */
 static H5FS_t *H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
-static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace);
+static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr);
 static herr_t H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy);
 static herr_t H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr);
 static H5FS_sinfo_t *H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
-static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo);
+static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr);
 static herr_t H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy);
 static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr);
 
@@ -271,10 +271,17 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace)
+H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -823,10 +830,15 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		July 31 2006
  *
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo)
+H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

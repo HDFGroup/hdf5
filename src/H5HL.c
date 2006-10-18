@@ -66,7 +66,7 @@ static herr_t H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap);
 /* Metadata cache callbacks */
 static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1,
 			 void *udata2);
-static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
+static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap, unsigned UNUSED * flags_ptr);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
 static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
 static herr_t H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
@@ -550,10 +550,16 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
  *	Instead, disk space allocation/deallocation is now done at
  *	insert/remove time.
  *
+ *	John Mainzer, 2006-08-21
+ *	Added the flags_ptr parameter.  This parameter exists to
+ *	allow the flush routine to report to the cache if the
+ *	entry is resized or renamed as a result of the flush.
+ *	*flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
+H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap, unsigned UNUSED * flags_ptr)
 {
     herr_t  ret_value = SUCCEED;    /* Return value */
 

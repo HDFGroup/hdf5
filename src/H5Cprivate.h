@@ -60,7 +60,7 @@
  */
 #if H5C_COLLECT_CACHE_STATS
 
-#define H5C_COLLECT_CACHE_ENTRY_STATS	0
+#define H5C_COLLECT_CACHE_ENTRY_STATS	1
 
 #else
 
@@ -116,6 +116,10 @@ typedef struct H5C_t H5C_t;
  *		Note that the space allocated on disk may not be contiguous.
  */
 
+#define H5C_CALLBACK__NO_FLAGS_SET		0x0
+#define H5C_CALLBACK__SIZE_CHANGED_FLAG		0x1
+#define H5C_CALLBACK__RENAMED_FLAG		0x2
+
 typedef void *(*H5C_load_func_t)(H5F_t *f,
                                  hid_t dxpl_id,
                                  haddr_t addr,
@@ -125,7 +129,8 @@ typedef herr_t (*H5C_flush_func_t)(H5F_t *f,
                                    hid_t dxpl_id,
                                    hbool_t dest,
                                    haddr_t addr,
-                                   void *thing);
+                                   void *thing,
+				   unsigned * flags_ptr);
 typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
                                   void *thing);
 typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
@@ -312,6 +317,13 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		the unprotect, the entry's is_dirty flag is reset by flushing
  *		it with the H5C__FLUSH_CLEAR_ONLY_FLAG.
  *
+ * flush_in_progress:  Boolean flag that is set to true iff the entry
+ * 		is in the process of being flushed.  This allows the cache
+ * 		to detect when a call is the result of a flush callback.
+ *
+ * destroy_in_progress:  Boolean flag that is set to true iff the entry 
+ * 		is in the process of being flushed and destroyed.
+ *
  *
  * Fields supporting the hash table:
  *
@@ -425,6 +437,8 @@ typedef struct H5C_cache_entry_t
 #ifdef H5_HAVE_PARALLEL
     hbool_t		clear_on_unprotect;
 #endif /* H5_HAVE_PARALLEL */
+    hbool_t		flush_in_progress;
+    hbool_t		destroy_in_progress;
 
     /* fields supporting the hash table: */
 

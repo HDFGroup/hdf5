@@ -54,7 +54,7 @@ static herr_t H5B_serialize(const H5F_t *f, const H5B_t *bt);
 
 /* Metadata cache callbacks */
 static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
-static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
+static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
 static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
 static herr_t H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr);
 
@@ -258,10 +258,16 @@ done:
  *		matzke@llnl.gov
  *		Jun 23 1997
  *
+ * Changes:     JRM -- 8/21/06
+ *              Added the flags_ptr parameter.  This parameter exists to
+ *              allow the flush routine to report to the cache if the
+ *              entry is resized or renamed as a result of the flush.
+ *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
+H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, unsigned UNUSED * flags_ptr)
 {
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     herr_t      ret_value = SUCCEED;    /* Return value */

@@ -114,6 +114,10 @@ typedef enum {
  *		Note that the space allocated on disk may not be contiguous.
  */
 
+#define H5AC_CALLBACK__NO_FLAGS_SET             H5C_CALLBACK__NO_FLAGS_SET
+#define H5AC_CALLBACK__SIZE_CHANGED_FLAG	H5C_CALLBACK__SIZE_CHANGED_FLAG
+#define H5AC_CALLBACK__RENAMED_FLAG             H5C_CALLBACK__RENAMED_FLAG
+
 typedef H5C_load_func_t		H5AC_load_func_t;
 typedef H5C_flush_func_t	H5AC_flush_func_t;
 typedef H5C_dest_func_t		H5AC_dest_func_t;

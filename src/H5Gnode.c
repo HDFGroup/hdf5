@@ -75,7 +75,7 @@ static herr_t H5G_node_shared_free(void *shared);
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 				 void *_udata2);
 static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-			     H5G_node_t *sym);
+			     H5G_node_t *sym, unsigned UNUSED * flags_ptr);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
 static herr_t H5G_compute_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
@@ -446,10 +446,16 @@ done:
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
  *      Added `id to name' support.
  *
+ *      JRM -- 8/21/06
+ *      Added the flags_ptr parameter.  This parameter exists to
+ *      allow the flush routine to report to the cache if the
+ *      entry is resized or renamed as a result of the flush.
+ *      *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
+H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned UNUSED * flags_ptr)
 {
     uint8_t	*buf = NULL;
     size_t	size;
