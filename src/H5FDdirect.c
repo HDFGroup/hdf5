@@ -48,6 +48,13 @@ static hid_t H5FD_DIRECT_g = 0;
 #define OP_READ		1
 #define OP_WRITE	2
 
+/* Driver-specific file access properties */
+typedef struct H5FD_direct_fapl_t {
+    hsize_t	mboundary;	/* Memory boundary for alignment		*/
+    hsize_t	fbsize;		/* File system block size			*/
+    hsize_t	cbsize;		/* Maximal buffer size for copying user data	*/
+} H5FD_direct_fapl_t;
+
 /*
  * The description of a file belonging to this driver. The `eoa' and `eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -67,6 +74,7 @@ typedef struct H5FD_direct_t {
     haddr_t	eof;			/*end of file; current file size*/
     haddr_t	pos;			/*current file I/O position	*/
     int		op;			/*last operation		*/
+    H5FD_direct_fapl_t	fa;		/*file access properties	*/
 #ifndef WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -144,13 +152,9 @@ typedef struct H5FD_direct_t {
                                  HADDR_UNDEF==(A)+(Z) ||		      \
 				 (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
-/* Global variables for memory boundary, file block size, and maximal copy buffer size.
- * They can be changed through function H5Pset_fapl_direct. */
-hsize_t	_boundary = 4096;
-hsize_t	_fbsize	= 4096;
-hsize_t _cbsize = 128*1024*1024;
-
 /* Prototypes */
+static void *H5FD_direct_fapl_get(H5FD_t *file);
+static void *H5FD_direct_fapl_copy(const void *_old_fa);
 static H5FD_t *H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_direct_close(H5FD_t *_file);
@@ -173,10 +177,10 @@ static const H5FD_class_t H5FD_direct_g = {
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
-    0, 						/*fapl_size		*/
-    NULL,					/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
+    sizeof(H5FD_direct_fapl_t),                 /*fapl_size		*/
+    H5FD_direct_fapl_get,		        /*fapl_get		*/
+    H5FD_direct_fapl_copy,		        /*fapl_copy		*/
+    NULL,		        		/*fapl_free		*/
     0,						/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
@@ -304,8 +308,9 @@ H5FD_direct_term(void)
 herr_t
 H5Pset_fapl_direct(hid_t fapl_id, hsize_t boundary, hsize_t block_size, hsize_t cbuf_size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    H5P_genplist_t    	*plist;      /* Property list pointer */
+    H5FD_direct_fapl_t	fa;
+    herr_t 		ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_direct, FAIL)
     H5TRACE1("e","i",fapl_id);
@@ -314,17 +319,145 @@ H5Pset_fapl_direct(hid_t fapl_id, hsize_t boundary, hsize_t block_size, hsize_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     if(boundary != 0)
-    	_boundary = boundary;
+    	fa.mboundary = boundary;
+    else 
+	fa.mboundary = MBOUNDARY_DEF;
     if(block_size != 0)
-    	_fbsize = block_size;
+    	fa.fbsize = block_size;
+    else
+	fa.fbsize = FBSIZE_DEF;
     if(cbuf_size != 0)
-    	_cbsize = cbuf_size;
+    	fa.cbsize = cbuf_size;
+    else
+	fa.cbsize = CBSIZE_DEF;
 
-    ret_value= H5P_set_driver(plist, H5FD_DIRECT, NULL);
+    /* Copy buffer size must be a multiple of file block size */
+    if(fa.cbsize % fa.fbsize != 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "copy buffer size must be a multiple of block size")
+
+    ret_value= H5P_set_driver(plist, H5FD_DIRECT, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_fapl_direct
+ *
+ * Purpose:	Returns information about the direct file access property
+ *		list though the function arguments.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, October 18, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fapl_direct(hid_t fapl_id, hsize_t *boundary/*out*/, hsize_t *block_size/*out*/, 
+		hsize_t *cbuf_size/*out*/)
+{
+    H5FD_direct_fapl_t	*fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pget_fapl_direct, FAIL)
+
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+    if (H5FD_DIRECT!=H5P_get_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+    if (NULL==(fa=H5P_get_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+    if (boundary)
+        *boundary = fa->mboundary;
+    if (block_size)
+	*block_size = fa->fbsize;
+    if (cbuf_size)
+	*cbuf_size = fa->cbsize;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_direct_fapl_get
+ *
+ * Purpose:	Returns a file access property list which indicates how the
+ *		specified file is being accessed. The return list could be
+ *		used to access another file the same way.
+ *
+ * Return:	Success:	Ptr to new file access property list with all
+ *				members copied from the file struct.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, 18 October 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_direct_fapl_get(H5FD_t *_file)
+{
+    H5FD_direct_t	*file = (H5FD_direct_t*)_file;
+    void *ret_value;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_direct_fapl_get, NULL)
+
+    /* Set return value */
+    ret_value= H5FD_direct_fapl_copy(&(file->fa));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_direct_fapl_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_direct_fapl_copy
+ *
+ * Purpose:	Copies the direct-specific file access properties.
+ *
+ * Return:	Success:	Ptr to a new property list
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, 18 October 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_direct_fapl_copy(const void *_old_fa)
+{
+    const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
+    H5FD_direct_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    void *ret_value;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_direct_fapl_copy, NULL)
+
+    assert(new_fa);
+
+    /* Copy the general information */
+    HDmemcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
+
+    /* Set return value */
+    ret_value=new_fa;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_direct_fapl_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -346,17 +479,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_direct_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
-	       haddr_t maxaddr)
+H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     int			o_flags;
     int			fd=(-1);
     H5FD_direct_t	*file=NULL;
+    H5FD_direct_fapl_t	*fa;
 #ifdef WIN32
     HFILE 		filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t		sb;
+    H5P_genplist_t 	*plist;      /* Property list */
     H5FD_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_direct_open, NULL)
@@ -392,6 +526,11 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (NULL==(file=H5FL_CALLOC(H5FD_direct_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
+    /* Get the driver specific information */
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    fa = H5P_get_driver_info(plist);
+
     file->fd = fd;
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
     file->pos = HADDR_UNDEF;
@@ -410,8 +549,10 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 #else
     file->inode = sb.st_ino;
 #endif /*H5_VMS*/
-
-#endif
+#endif /*WIN32*/
+    file->fa.mboundary = fa->mboundary;
+    file->fa.fbsize = fa->fbsize;
+    file->fa.cbsize = fa->cbsize;
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -719,8 +860,11 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     ssize_t		nbytes;
-    size_t		alloc_size, mem_page_size;
+    size_t		alloc_size;
     void		*copy_buf, *p1, *p2;
+    hsize_t		_boundary;
+    hsize_t		_fbsize;
+    hsize_t		_cbsize;
     herr_t      	ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_direct_read, FAIL)
@@ -736,7 +880,17 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
-    if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_fbsize==0)) {
+    /* Get the memory boundary for alignment, file system block size, and maximal 
+     * copy buffer size.
+     */
+    _boundary = file->fa.mboundary;
+    _fbsize = file->fa.fbsize;
+    _cbsize = file->fa.cbsize;
+
+    /* if the data is aligned, read it directly from the file.  If not, read a bigger 
+     * and aligned data first, then copy the data into memory buffer.
+     */
+    if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_boundary==0)) {
 	    while (size>0) {
 		do {
 		    nbytes = HDread(file->fd, buf, size);
@@ -844,8 +998,11 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     ssize_t		nbytes;
-    size_t		alloc_size, mem_page_size, dup_size;
+    size_t		alloc_size, dup_size;
     void		*copy_buf, *p1, *p2;
+    hsize_t		_boundary;
+    hsize_t		_fbsize;
+    hsize_t		_cbsize;
     herr_t      	ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_direct_write, FAIL)
@@ -861,7 +1018,18 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
-    if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_fbsize==0)) {
+    /* Get the memory boundary for alignment, file system block size, and maximal 
+     * copy buffer size.
+     */
+    _boundary = file->fa.mboundary;
+    _fbsize = file->fa.fbsize;
+    _cbsize = file->fa.cbsize;
+
+    /* if the data is aligned, write it directly to the file.  If not, read in
+     * the aligned data first, update buffer with user data, then write the
+     * data out.
+     */
+    if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_boundary==0)) {
 	    while (size>0) {
 		do {
 		    nbytes = HDwrite(file->fd, buf, size);

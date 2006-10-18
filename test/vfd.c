@@ -27,6 +27,9 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
+#define MBOUNDARY	512
+#define FBSIZE		4096
+#define CBSIZE		64*1024*1024
 
 const char *FILENAME[] = {
     "sec2_file",
@@ -142,6 +145,9 @@ test_direct(void)
     char        filename[1024];
     int         *fhandle=NULL;
     hsize_t     file_size;
+    hsize_t	mbound;
+    hsize_t	fbsize;
+    hsize_t	cbsize;
 #endif /*H5_HAVE_DIRECT*/
 
     TESTING("Direct I/O file driver");
@@ -154,9 +160,15 @@ test_direct(void)
     /* Set property list and file name for Direct driver.  Set memory alignment boundary
      * and file block size to 512 which is the minimum for Linux 2.6. */
     fapl = h5_fileaccess();
-    if(H5Pset_fapl_direct(fapl, 512, 4096, 64*1024*1024)<0)
+    if(H5Pset_fapl_direct(fapl, MBOUNDARY, FBSIZE, CBSIZE)<0)
         TEST_ERROR;
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+    /* Verify the file access properties */
+    if(H5Pget_fapl_direct(fapl, &mbound, &fbsize, &cbsize)<0)
+        TEST_ERROR;
+    if(mbound != MBOUNDARY || fbsize != FBSIZE || cbsize != CBSIZE)
+	TEST_ERROR;
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         TEST_ERROR;
