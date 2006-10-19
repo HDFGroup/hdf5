@@ -28,6 +28,9 @@ class H5_DLLCPP DataType : public H5Object {
 	// Copy constructor: makes a copy of the original object
 	DataType( const DataType& original );
 
+	// Creates a datatype by way of dereference.
+	DataType(IdComponent& obj, void* ref);
+
 	// Closes this datatype.
 	virtual void close();
 
@@ -96,16 +99,16 @@ class H5_DLLCPP DataType : public H5Object {
 	// Checks whether this datatype is a variable-length string.
 	bool isVariableStr() const;
 
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-	void* Reference(const H5std_string& name) const;
-
-	// Creates a reference to a named Hdf5 object or to a dataset region
+	// Creates a reference to a named HDF5 object or to a dataset region
 	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const; // will be obsolete
+
+	// Creates a reference to a named HDF5 object in this object.
+	void* Reference(const char* name) const; // will be obsolete
+	void* Reference(const H5std_string& name) const; // will be obsolete
 
 	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;

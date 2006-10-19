@@ -67,7 +67,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const;
 
 	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
@@ -84,13 +84,13 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void reOpen();	// added for better name
 	void reopen();
 
-	// Creates a reference to a named Hdf5 object or to a dataset region
+	// Creates a reference to a named HDF5 object or to a dataset region
 	// in this object.
 	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-	void* Reference(const H5std_string& name) const;
+	void* Reference(const char* name) const; // will be obsolete
+	void* Reference(const H5std_string& name) const; // will be obsolete
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("H5File"); }

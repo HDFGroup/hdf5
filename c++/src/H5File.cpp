@@ -503,14 +503,9 @@ H5std_string H5File::getFileName() const
 
 //--------------------------------------------------------------------------
 // Function:	H5File::Reference
-///\brief	Creates a reference to an Hdf5 object or a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::FileIException
-///\par Description
-///		Note that name must be an absolute path to the object in the file.
+///\brief	Important!!! - This functions does not work correctly, it 
+///		will be removed in the near future.  Please use 
+///		H5File::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -525,19 +520,9 @@ void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_t
 
 //--------------------------------------------------------------------------
 // Function:	H5File::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it only creates
-///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\return	A reference
-///\exception	H5::FileIException
-///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected
-//		function for it to pass to the C API H5Rcreate
-//		to create a reference to the named object.
-///\par
-///		Note that, for H5File, name must be an absolute path to the
-///		object in the file.
+///\brief	Important!!! - This functions does not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		H5File::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name) const
@@ -552,10 +537,9 @@ void* H5File::Reference(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:	H5File::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it takes an
-///		\c std::string for the object's name.
-///\param	name - IN: Name of the object to be referenced - \c std::string
+///\brief	Important!!! - This functions does not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		H5File::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* H5File::Reference(const H5std_string& name) const
@@ -567,7 +551,9 @@ void* H5File::Reference(const H5std_string& name) const
 // Function:	H5File::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref      - IN: Reference to query
-///\param	ref_type - IN: Type of reference to query
+///\param	ref_type - IN: Type of reference, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
 ///\return	Object type, which can be one of the following:
 ///		\li \c H5G_LINK    - Object is a symbolic link.
 ///		\li \c H5G_GROUP   - Object is a group.

@@ -18,6 +18,7 @@
 #include "H5Exception.h"
 #include "H5Library.h"
 #include "H5IdComponent.h"
+#include "H5DataSpace.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -307,19 +308,121 @@ H5std_string IdComponent::p_get_file_name() const
 //		name - IN: Name of the object to be referenced
 //		dataspace - IN: Dataspace with selection
 //		ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+// Exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void IdComponent::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
+{
+   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, space_id);
+   if (ret_value < 0)
+   {
+      throw IdComponentException("", "H5Rcreate failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    IdComponent::reference
+///\brief       Creates a reference to an HDF5 object or a dataset region.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced
+///\param       dataspace - IN: Dataspace with selection
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT \tReference is an object reference.
+///             \li \c H5R_DATASET_REGION \tReference is a dataset region
+///                     reference. - this is the default
+///\exception   H5::IdComponentException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void IdComponent::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   try {
+      p_reference(ref, name, dataspace.getId(), ref_type);
+   }
+   catch (IdComponentException E) {
+      throw IdComponentException("IdComponent::reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    IdComponent::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it only creates
+///             a reference to an HDF5 object, not to a dataset region.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced - \c char pointer
+///\exception   H5::IdComponentException
+///\par Description
+//              This function passes H5R_OBJECT and -1 to the protected
+//              function for it to pass to the C API H5Rcreate
+//              to create a reference to the named object.
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void IdComponent::reference(void* ref, const char* name) const
+{
+   try {
+      p_reference(ref, name, -1, H5R_OBJECT);
+   }
+   catch (IdComponentException E) {
+      throw IdComponentException("IdComponent::reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    IdComponent::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it takes an
+///             \c std::string for the object's name.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced - \c std::string
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void IdComponent::reference(void* ref, const H5std_string& name) const
+{
+   reference(ref, name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::p_reference (protected)
+// Purpose	Creates a reference to an HDF5 object or a dataset region.
+// Parameters
+//		name - IN: Name of the object to be referenced
+//		dataspace - IN: Dataspace with selection
+//		ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 // Return	A reference
 // Exception	H5::IdComponentException
+// Notes	This function is incorrect, and will be removed in the near
+//		future after notifying users of the new APIs ::reference's.
+//		BMR - Oct 8, 2006
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const
 {
-   void *ref=NULL;
+   hobj_ref_t ref;
    herr_t ret_value = H5Rcreate(&ref, id, name, ref_type, space_id);
    if (ret_value < 0)
    {
       throw IdComponentException("", "H5Rcreate failed");
    }
-   return(ref);
+   return (reinterpret_cast<void*>(ref));
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::dereference
+// Purpose	Opens the HDF5 object referenced.
+// Parameters
+//		obj - IN: Dataset reference object is in or location of
+//                            object that the dataset is located within.
+//		ref - IN: Reference pointer
+// Exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
+void IdComponent::dereference(IdComponent& obj, void* ref)
+{
+   id = H5Rdereference(obj.getId(), H5R_OBJECT, ref);
+   if (id < 0)
+   {
+      throw IdComponentException("", "H5Rdereference failed");
+   }
 }
 
 //--------------------------------------------------------------------------
@@ -338,10 +441,19 @@ void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_
 //--------------------------------------------------------------------------
 H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 {
+#ifdef H5_WANT_H5_V1_4_COMPAT
+   H5G_obj_t obj_type = H5Rget_object_type(id, ref);
+#else
    H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
+#endif
+
    if (obj_type == H5G_UNKNOWN)
    {
-      throw IdComponentException("", "H5R_get_obj_type failed");
+#ifdef H5_WANT_H5_V1_4_COMPAT
+      throw IdComponentException("", "H5Rget_object_type failed");
+#else
+      throw IdComponentException("", "H5Rget_obj_type failed");
+#endif
    }
    return(obj_type);
 }
