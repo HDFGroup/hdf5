@@ -184,8 +184,10 @@ static int test_create_close(hid_t fid)
     H5Tclose(part_t);
     if( H5PTis_valid(table) < 0)
       goto out;
+#ifdef VLPT_REMOVED
     if( H5PTis_varlen(table) != 0)
       goto out;
+#endif /* VLPT_REMOVED */
 
     /* Close the table */
     err = H5PTclose(table);
@@ -218,8 +220,10 @@ static int test_open(hid_t fid)
     table = H5PTopen(fid, PT_NAME);
     if( H5PTis_valid(table) < 0)
       goto out;
+#ifdef VLPT_REMOVED
     if( H5PTis_varlen(table) != 0)
       goto out;
+#endif /* VLPT_REMOVED */
 
     /* Close the table */
     err = H5PTclose(table);
@@ -504,6 +508,7 @@ static int    test_big_table(hid_t fid)
         return -1;
 }
 
+#ifdef VLPT_REMOVED
 /*-------------------------------------------------------------------------
  * test_varlen
  *
@@ -679,6 +684,8 @@ static int    test_varlen(hid_t fid)
     H5E_END_TRY
     return -1;
 }
+#endif /* VLPT_REMOVED */
+
 /*-------------------------------------------------------------------------
  * test_opaque
  *
@@ -925,8 +932,10 @@ static int test_error(hid_t fid)
   H5E_BEGIN_TRY
   if(H5PTis_valid(id) >= 0)
     goto out;
+#ifdef VLPT_REMOVED
   if(H5PTis_varlen(id) >= 0)
     goto out;
+#endif /* VLPT_REMOVED */
   if(H5PTclose(id) >= 0)
     goto out;
   if(H5PTappend(id, (size_t)1, testPart) >= 0)
@@ -950,8 +959,10 @@ static int test_error(hid_t fid)
   H5E_BEGIN_TRY
   if(H5PTis_valid(id) >= 0)
     goto out;
+#ifdef VLPT_REMOVED
   if(H5PTis_varlen(id) >= 0)
     goto out;
+#endif /* VLPT_REMOVED */
   if(H5PTclose(id) >= 0)
     goto out;
   if(H5PTappend(id, (size_t)1, testPart) >= 0)
@@ -980,8 +991,10 @@ static int test_error(hid_t fid)
   H5E_BEGIN_TRY
   if(H5PTis_valid(id) >= 0)
     goto out;
+#ifdef VLPT_REMOVED
   if(H5PTis_varlen(id) >= 0)
     goto out;
+#endif /* VLPT_REMOVED */
   if(H5PTclose(id) >= 0)
     goto out;
   if(H5PTappend(id, (size_t)1, testPart) >= 0)

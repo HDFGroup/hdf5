@@ -17,6 +17,15 @@
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
 
+# Disabling Dependency Tracking
+# ---------------------
+#
+# The Cray X1 machines that THG tests on seem to have trouble doing
+# dependency tracking (probably because they use Cray's C++ compiler,
+# which autoconf may not recognize).  Until this is fixed by autoconf
+# or a user complains, disable dependency tracking on Crays.
+enable_dependency_tracking="no"
+
 # Choosing a C Compiler
 # ---------------------
 #
