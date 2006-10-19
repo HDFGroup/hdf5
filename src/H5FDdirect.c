@@ -160,7 +160,6 @@ static H5FD_t *H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id,
 static herr_t H5FD_direct_close(H5FD_t *_file);
 static int H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_direct_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_direct_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static haddr_t H5FD_direct_get_eoa(const H5FD_t *_file);
 static herr_t H5FD_direct_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_direct_get_eof(const H5FD_t *_file);
@@ -189,7 +188,7 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_close,		                /*close			*/
     H5FD_direct_cmp,			        /*cmp			*/
     H5FD_direct_query,		                /*query			*/
-    H5FD_direct_alloc,				/*alloc			*/
+    NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_direct_get_eoa,			/*get_eoa		*/
     H5FD_direct_set_eoa, 			/*set_eoa		*/
@@ -700,51 +699,6 @@ H5FD_direct_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_direct_alloc
- *
- * Purpose:	Allocate file aligned space set through H5Pset_alignment. 
- *
- * Return:	Success:	Address of new space
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Raymond Lu
- *              Wednesday, 18 October 2006
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static haddr_t
-H5FD_direct_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t size)
-{
-    H5FD_direct_t	*file = (H5FD_direct_t*)_file;
-    haddr_t		addr;
-    haddr_t ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_direct_alloc, HADDR_UNDEF)
-
-    /* Compute the address for the block to allocate */
-    addr = file->eoa;
-
-    /* Check if we need to align this block */
-    if(size>=file->pub.threshold) {
-        /* Check for an already aligned block */
-        if(addr%file->pub.alignment!=0)
-            addr=((addr/file->pub.alignment)+1)*file->pub.alignment;
-    } /* end if */
-
-    file->eoa = addr+size;
-
-    /* Set return value */
-    ret_value=addr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5FD_direct_alloc() */
 
 
 /*-------------------------------------------------------------------------
