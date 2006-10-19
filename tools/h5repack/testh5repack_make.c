@@ -17,11 +17,14 @@
 #include "h5repack.h"
 #include "testh5repack.h"
 
-#define DIM1  40
-#define DIM2  20
-#define CDIM1 DIM1/2
-#define CDIM2 DIM2/2
-#define RANK  2
+#define DIM1    40
+#define DIM2    20
+#define CDIM1   DIM1/2
+#define CDIM2   DIM2/2
+#define RANK    2
+#define GBLL	   ((unsigned long_long) 1024*1024*1024)
+
+
 
 int make_all_objects(hid_t loc_id);
 int make_attributes(hid_t loc_id);
@@ -38,6 +41,8 @@ int make_nbit(hid_t loc_id);
 int make_scaleoffset(hid_t loc_id);
 int make_all(hid_t loc_id);
 int make_fill(hid_t loc_id);
+int make_big(hid_t loc_id);
+
 
 
 /*-------------------------------------------------------------------------
@@ -161,6 +166,17 @@ int make_testfiles(void)
   return -1;
 
 /*-------------------------------------------------------------------------
+ * create a file with all the filters
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_all(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
  * create a file with the nbit filter
  *-------------------------------------------------------------------------
  */
@@ -183,18 +199,17 @@ int make_testfiles(void)
   return -1;
 
 /*-------------------------------------------------------------------------
- * create a file with all the filters
+ * create a big file 
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- if (make_all(loc_id)<0)
+ if (make_big(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
-
-
  PASSED();
+
  return 0;
 
 out:
@@ -737,12 +752,14 @@ int make_nbit(hid_t loc_id)
 #endif
 
 /*-------------------------------------------------------------------------
- * close space and dcpl
+ * close 
  *-------------------------------------------------------------------------
  */
  if(H5Sclose(sid)<0)
   goto out;
  if(H5Pclose(dcpl)<0)
+  goto out;
+ if (H5Tclose(dtid)<0)
   goto out;
 
  return 0;
@@ -1226,10 +1243,6 @@ out:
  return -1;
 }
 
-
-
-
-
 /*-------------------------------------------------------------------------
  * Function: make a file with an integer dataset with a fill value
  *
@@ -1250,17 +1263,128 @@ int make_fill(hid_t loc_id)
  * H5T_INTEGER, write a fill value
  *-------------------------------------------------------------------------
  */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+	if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue)<0)
+  goto out;
+	if ((sid = H5Screate_simple(2,dims,NULL))<0)
+  goto out;
+	if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl))<0)
+  goto out;
+	if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  goto out;
 
- dcpl = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue);
-	sid = H5Screate_simple(2,dims,NULL);
-	did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl);
-	H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-	H5Pclose(dcpl);
-	H5Dclose(did);
- H5Sclose(sid);
+ /* close */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ if(H5Dclose(did)<0)
+  goto out;
 
  return 0;
+
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+  H5Dclose(did);
+ } H5E_END_TRY;
+ return -1;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function: make a big file 
+ *
+ * Purpose: used in test read by hyperslabs. writes a 1GB file by iterating 
+ *  trough 1MB hyperslabs 
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_big(hid_t loc_id)
+{
+ hid_t   did;
+ hid_t   f_sid;
+ hid_t   m_sid;
+ hid_t   tid;
+ hid_t   dcpl;
+ hsize_t dims[1]={GBLL};               /* dataset dimensions */
+ hsize_t hs_size[1]={GBLL/1024};       /* hyperslab dimensions */
+ hsize_t chunk_dims[1]={hs_size[0]};   /* chunk dimensions */
+ hsize_t hs_start[1];
+ size_t  size;
+ size_t  nelmts=(size_t)hs_size[0];
+ char    fillvalue=-1;
+ char    *buf=NULL;
+ int     i, j, s;
+ char    c;
+
+ /* create */ 
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+	if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+  goto out;
+ if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
+  goto out;
+	if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
+  goto out;
+	if ((did = H5Dcreate(loc_id,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+  goto out;
+ if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
+  goto out;
+ if ((tid = H5Dget_type(did))<0) 
+  goto out;
+ if ((size = H5Tget_size(tid))<=0)
+  goto out;
+ 
+ /* create a evenly divided buffer from 0 to 127  */
+ buf=(char *) HDmalloc((unsigned)(nelmts*size));
+ s = 1024 / 127;
+ for (i=0, j=0, c=0; i<1024; j++, i++) 
+ {
+  if ( j==s)
+  {
+   c++;
+   j=0;
+  };
+
+  HDmemset(buf, c, nelmts);
+  
+  hs_start[0] = i * GBLL/1024;
+  if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
+   goto out;
+  if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+   goto out;
+
+  /* write only one hyperslab, for space considerations */
+  if (i==0) 
+   break;
+  
+ }
+ free(buf);
+ buf=NULL;
+
+ /* close */
+ if(H5Sclose(f_sid)<0)
+  goto out;
+ if(H5Sclose(m_sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ if(H5Dclose(did)<0)
+  goto out;
+
+ return 0;
+
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(f_sid);
+  H5Sclose(m_sid);
+  H5Dclose(did);
+ } H5E_END_TRY;
+ return -1;
 
 }
 

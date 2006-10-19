@@ -35,8 +35,10 @@ static void usage(void);
  *
  * Comments:
  *
- * Modifications: July 2004
- *  Introduced the extra EC or NN option for SZIP
+ * Modifications: 
+ *  July 2004: Introduced the extra EC or NN option for SZIP
+ *  October 2006: Added a new switch -n, that allows to write the dataset 
+ *                using a native type. The default to write is the file type.
  *
  *-------------------------------------------------------------------------
  */
@@ -103,6 +105,9 @@ int main(int argc, char **argv)
 
   else if (strcmp(argv[i], "-e") == 0) {
    read_info(argv[++i],&options);
+  }
+  else if (strcmp(argv[i], "-n") == 0) {
+   options.use_native = 1;
   }
 
   else if (argv[i][0] == '-') {
@@ -194,6 +199,7 @@ void usage(void)
  printf("       <dim_1 x dim_2 x ... dim_n>\n");
  printf("\n");
  printf("-e file           File with the -f and -l options (only filter and layout flags)\n");
+ printf("-n                Use a native type when repacking. Default is the file type\n");
  printf("-m size           Do not apply the filter to objects which size in bytes\n");
  printf("                   is smaller than number. If no size is specified a minimum of\n");
  printf("                   1024 bytes is assumed.\n");

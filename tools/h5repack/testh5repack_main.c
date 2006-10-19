@@ -1171,6 +1171,25 @@ if (szip_can_encode) {
 #endif
 
 /*-------------------------------------------------------------------------
+ * test a big file
+ *-------------------------------------------------------------------------
+ */
+ 
+ TESTING("    big file");
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME14,FNAME14OUT,&pack_options) < 0)
+  TEST_ERROR;
+ if (h5diff(FNAME14,FNAME14OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME14OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
  * end
  *-------------------------------------------------------------------------
  */

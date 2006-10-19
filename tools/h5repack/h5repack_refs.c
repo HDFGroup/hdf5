@@ -61,9 +61,9 @@ int do_copy_refobjs(hid_t fidin,
  hid_t     type_in;           /* named type ID */
  hid_t     dcpl_id;           /* dataset creation property list ID */
  hid_t     space_id;          /* space ID */
- hid_t     ftype_id;          /* file data type ID */
- hid_t     mtype_id;          /* memory data type ID */
- size_t    msize;             /* memory size of memory type */
+ hid_t     ftype_id;          /* file type ID */
+ hid_t     wtype_id;          /* read/write type ID */
+ size_t    msize;             /* size of type */
  hsize_t   nelmts;            /* number of elements in dataset */
  int       rank;              /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
@@ -124,11 +124,13 @@ int do_copy_refobjs(hid_t fidin,
    nelmts=1;
    for (j=0; j<rank; j++)
     nelmts*=dims[j];
+   
+   if (options->use_native==1)
+    wtype_id = h5tools_get_native_type(ftype_id);
+   else
+    wtype_id = H5Tcopy(ftype_id); 
 
-   if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
-    goto error;
-
-   if ((msize=H5Tget_size(mtype_id))==0)
+   if ((msize=H5Tget_size(wtype_id))==0)
     goto error;
 
 /*-------------------------------------------------------------------------
@@ -157,7 +159,7 @@ int do_copy_refobjs(hid_t fidin,
  * we cannot just copy the buffers, but instead we recreate the reference
  *-------------------------------------------------------------------------
  */
-   if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
+   if (H5Tequal(wtype_id, H5T_STD_REF_OBJ))
    {
     H5G_obj_t        obj_type;
     hid_t            refobj_id;
@@ -178,7 +180,7 @@ int do_copy_refobjs(hid_t fidin,
       error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
-     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+     if (H5Dread(dset_in,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
 
      if ((obj_type = H5Rget_obj_type(dset_in,H5R_OBJECT,buf))<0)
@@ -214,10 +216,10 @@ int do_copy_refobjs(hid_t fidin,
      * create/write dataset/close
      *-------------------------------------------------------------------------
      */
-    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
+    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,space_id,dcpl_id))<0)
      goto error;
     if (nelmts) {
-     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
+     if (H5Dwrite(dset_out,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
       goto error;
     }
 
@@ -232,7 +234,7 @@ int do_copy_refobjs(hid_t fidin,
  * dataset region references
  *-------------------------------------------------------------------------
  */
-   else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
+   else if (H5Tequal(wtype_id, H5T_STD_REF_DSETREG))
    {
     H5G_obj_t        obj_type;
     hid_t            refobj_id;
@@ -252,7 +254,7 @@ int do_copy_refobjs(hid_t fidin,
       error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
-     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+     if (H5Dread(dset_in,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
      if ((obj_type = H5Rget_obj_type(dset_in,H5R_DATASET_REGION,buf))<0)
       goto error;
@@ -299,10 +301,10 @@ int do_copy_refobjs(hid_t fidin,
      * create/write dataset/close
      *-------------------------------------------------------------------------
      */
-    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
+    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,space_id,dcpl_id))<0)
      goto error;
     if (nelmts) {
-     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
+     if (H5Dwrite(dset_out,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
       goto error;
     }
 
@@ -359,7 +361,7 @@ int do_copy_refobjs(hid_t fidin,
 
    if (H5Tclose(ftype_id)<0)
     goto error;
-   if (H5Tclose(mtype_id)<0)
+   if (H5Tclose(wtype_id)<0)
     goto error;
    if (H5Pclose(dcpl_id)<0)
     goto error;
@@ -437,7 +439,7 @@ error:
   H5Dclose(dset_in);
   H5Dclose(dset_out);
   H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
+  H5Tclose(wtype_id);
   H5Tclose(type_in);
  } H5E_END_TRY;
  return -1;
@@ -473,9 +475,9 @@ static int copy_refs_attr(hid_t loc_in,
  hid_t      attr_id;      /* attr ID */
  hid_t      attr_out;     /* attr ID */
  hid_t      space_id;     /* space ID */
- hid_t      ftype_id;     /* file data type ID */
- hid_t      mtype_id;     /* memory data type ID */
- size_t     msize;        /* memory size of type */
+ hid_t      ftype_id;     /* file type ID */
+ hid_t      wtype_id;     /* read/write type ID */
+ size_t     msize;        /* size of type */
  hsize_t    nelmts;       /* number of elements in dataset */
  int        rank;         /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
@@ -522,10 +524,12 @@ static int copy_refs_attr(hid_t loc_in,
   for (j=0; j<rank; j++)
    nelmts*=dims[j];
 
-  if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
-   goto error;
+  if (options->use_native==1)
+   wtype_id = h5tools_get_native_type(ftype_id);
+  else
+   wtype_id = H5Tcopy(ftype_id); 
 
-  if ((msize=H5Tget_size(mtype_id))==0)
+  if ((msize=H5Tget_size(wtype_id))==0)
    goto error;
 
 /*-------------------------------------------------------------------------
@@ -533,7 +537,7 @@ static int copy_refs_attr(hid_t loc_in,
  * we cannot just copy the buffers, but instead we recreate the reference
  *-------------------------------------------------------------------------
  */
-   if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
+   if (H5Tequal(wtype_id, H5T_STD_REF_OBJ))
    {
     H5G_obj_t   obj_type;
     hid_t       refobj_id;
@@ -554,7 +558,7 @@ static int copy_refs_attr(hid_t loc_in,
       error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
-     if (H5Aread(attr_id,mtype_id,buf)<0)
+     if (H5Aread(attr_id,wtype_id,buf)<0)
       goto error;
 
      if ((obj_type = H5Rget_obj_type(attr_id,H5R_OBJECT,buf))<0)
@@ -592,7 +596,7 @@ static int copy_refs_attr(hid_t loc_in,
     if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
      goto error;
     if (nelmts) {
-     if(H5Awrite(attr_out,mtype_id,refbuf)<0)
+     if(H5Awrite(attr_out,wtype_id,refbuf)<0)
       goto error;
     }
 
@@ -610,7 +614,7 @@ static int copy_refs_attr(hid_t loc_in,
  * dataset region references
  *-------------------------------------------------------------------------
  */
-   else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
+   else if (H5Tequal(wtype_id, H5T_STD_REF_DSETREG))
    {
     H5G_obj_t        obj_type;
     hid_t            refobj_id;
@@ -631,7 +635,7 @@ static int copy_refs_attr(hid_t loc_in,
       error_msg(progname, "cannot read into memory\n" );
       goto error;
      }
-     if (H5Aread(attr_id,mtype_id,buf)<0)
+     if (H5Aread(attr_id,wtype_id,buf)<0)
       goto error;
      if ((obj_type = H5Rget_obj_type(attr_id,H5R_DATASET_REGION,buf))<0)
       goto error;
@@ -679,7 +683,7 @@ static int copy_refs_attr(hid_t loc_in,
     if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
      goto error;
     if (nelmts) {
-     if(H5Awrite(attr_out,mtype_id,refbuf)<0)
+     if(H5Awrite(attr_out,wtype_id,refbuf)<0)
       goto error;
     }
     if (H5Aclose(attr_out)<0)
@@ -696,7 +700,7 @@ static int copy_refs_attr(hid_t loc_in,
  */
 
   if (H5Tclose(ftype_id)<0) goto error;
-  if (H5Tclose(mtype_id)<0) goto error;
+  if (H5Tclose(wtype_id)<0) goto error;
   if (H5Sclose(space_id)<0) goto error;
   if (H5Aclose(attr_id)<0) goto error;
  } /* u */
@@ -706,7 +710,7 @@ static int copy_refs_attr(hid_t loc_in,
 error:
  H5E_BEGIN_TRY {
   H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
+  H5Tclose(wtype_id);
   H5Sclose(space_id);
   H5Aclose(attr_id);
   H5Aclose(attr_out);
@@ -715,9 +719,9 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	close_obj
+ * Function: close_obj
  *
- * Purpose:	Auxiliary function to close an object
+ * Purpose: Auxiliary function to close an object
  *
  *-------------------------------------------------------------------------
  */
@@ -744,9 +748,9 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	MapIdToName
+ * Function: MapIdToName
  *
- * Purpose:	map an object ID to a name
+ * Purpose: map an object ID to a name
  *
  *-------------------------------------------------------------------------
  */

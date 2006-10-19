@@ -99,8 +99,9 @@ typedef struct {
  filter_info_t   filter_g;    /*global filter INFO for the ALL case */
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
- int verbose;                 /*verbose mode */
- hsize_t threshold;               /*minimum size to compress, in bytes */
+ int             verbose;     /*verbose mode */
+ hsize_t         threshold;   /*minimum size to compress, in bytes */
+ int             use_native;  /*use a native type in write */  
 } pack_opt_t;
 
 

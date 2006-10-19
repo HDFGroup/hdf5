@@ -29,17 +29,6 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
-/*
- * The output functions need a temporary buffer to hold a piece of the
- * dataset while it's being printed. This constant sets the limit on the
- * size of that temporary buffer in bytes. For efficiency's sake, choose the
- * largest value suitable for your machine (for testing use a small value).
- */
-#if 1
-#define H5TOOLS_BUFSIZE         (1024 * 1024)
-#else
-#define H5TOOLS_BUFSIZE         (1024)
-#endif  /* 1 */
 
 #define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
 

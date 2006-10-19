@@ -16,13 +16,15 @@
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5repack.h"
+
 
 extern char  *progname;
 
 
-#define PER(A,B) { per = 0;                                      \
+#define PER(A,B) { per = 0;                                       \
                    if (A!=0)                                      \
                     per = (float)fabs(1-( (float)B / (float)A )); \
                  }
@@ -254,8 +256,16 @@ out:
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: October, 23, 2003
-	*   Modified: December, 03, 2004 - added a check for H5Dcreate; if the dataset
-	*    cannot be created with the requested filter, use the input one
+ *
+ * Modifications: 
+ *
+ *  July 2004:     Introduced the extra EC or NN option for SZIP
+ *
+ *  December 2004: Added a check for H5Dcreate; if the dataset cannot be created
+ *                  with the requested filter, use the input one
+ *
+ *  October 2006:  Read/write using the file type by default.
+ *                 Read/write by hyperslabs for big datasets.
  *
  *-------------------------------------------------------------------------
  */
@@ -265,31 +275,30 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in=-1;       /* group ID */
- hid_t     grp_out=-1;      /* group ID */
- hid_t     dset_in=-1;      /* read dataset ID */
- hid_t     dset_out=-1;     /* write dataset ID */
- hid_t     type_in=-1;      /* named type ID */
- hid_t     type_out=-1;     /* named type ID */
- hid_t     dcpl_id=-1;      /* dataset creation property list ID */
- hid_t     dcpl_out=-1;     /* dataset creation property list ID */
- hid_t     space_id=-1;     /* space ID */
- hid_t     ftype_id=-1;     /* file data type ID */
- hid_t     mtype_id=-1;     /* memory data type ID */
- size_t    msize;        /* memory size of memory type */
- void      *buf=NULL;    /* data buffer */
- hsize_t   nelmts;       /* number of elements in dataset */
- int       rank;         /* rank of dataset */
- hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
- hsize_t   dsize_in;     /* input dataset size before filter */
- hsize_t   dsize_out;    /* output dataset size after filter */
- int       next;         /* external files */
- int       apply_s;      /* flag for apply filter to small dataset sizes */
- int       apply_f;      /* flag for apply filter to return error on H5Dcreate with filter */
- float     per;          /* percent utilization of storage */
- int       i, j;
-
-
+ hid_t    grp_in;         /* group ID */
+ hid_t    grp_out;        /* group ID */
+ hid_t    dset_in;        /* read dataset ID */
+ hid_t    dset_out;       /* write dataset ID */
+ hid_t    type_in;        /* named type ID */
+ hid_t    type_out;       /* named type ID */
+ hid_t    dcpl_id;        /* dataset creation property list ID */
+ hid_t    dcpl_out;       /* dataset creation property list ID */
+ hid_t    f_space_id;     /* file space ID */
+ hid_t    ftype_id;       /* file type ID */
+ hid_t    wtype_id;       /* read/write type ID */
+ size_t   msize;          /* size of type */
+ hsize_t  nelmts;         /* number of elements in dataset */
+ int      rank;           /* rank of dataset */
+ hsize_t  dims[H5S_MAX_RANK];/* dimensions of dataset */
+ hsize_t  dsize_in;       /* input dataset size before filter */
+ hsize_t  dsize_out;      /* output dataset size after filter */
+ int      next;           /* external files */
+ int      apply_s;        /* flag for apply filter to small dataset sizes */
+ int      apply_f;        /* flag for apply filter to return error on H5Dcreate */
+ float    per;            /* percent utilization of storage */
+ void     *buf=NULL;      /* buffer for raw data */
+ void     *sm_buf=NULL;   /* buffer for raw data */
+ int      i, j;
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -305,7 +314,7 @@ int do_copy_objects(hid_t fidin,
  for ( i = 0; i < travt->nobjs; i++)
  {
 
-  buf=NULL;
+  buf = NULL;
   switch ( travt->objs[i].type )
   {
 /*-------------------------------------------------------------------------
@@ -345,27 +354,29 @@ int do_copy_objects(hid_t fidin,
 
    if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
     goto error;
-   if ((space_id=H5Dget_space(dset_in))<0)
+   if ((f_space_id=H5Dget_space(dset_in))<0)
     goto error;
    if ((ftype_id=H5Dget_type (dset_in))<0)
     goto error;
    if ((dcpl_id=H5Dget_create_plist(dset_in))<0)
     goto error;
-			if ((dcpl_out = H5Pcopy (dcpl_id))<0)
-				goto error;
-   if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
+   if ((dcpl_out = H5Pcopy (dcpl_id))<0)
+    goto error;
+   if ( (rank=H5Sget_simple_extent_ndims(f_space_id))<0)
     goto error;
    HDmemset(dims, 0, sizeof dims);
-   if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
+   if ( H5Sget_simple_extent_dims(f_space_id,dims,NULL)<0)
     goto error;
    nelmts=1;
    for (j=0; j<rank; j++)
     nelmts*=dims[j];
 
-		 if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
-    goto error;
+   if (options->use_native==1)
+    wtype_id = h5tools_get_native_type(ftype_id);
+   else
+    wtype_id = H5Tcopy(ftype_id); 
 
-   if ((msize=H5Tget_size(mtype_id))==0)
+   if ((msize=H5Tget_size(wtype_id))==0)
     goto error;
 
 /*-------------------------------------------------------------------------
@@ -397,79 +408,160 @@ int do_copy_objects(hid_t fidin,
  * in a second traversal of the output file
  *-------------------------------------------------------------------------
  */
-   if ( (H5T_REFERENCE!=H5Tget_class(mtype_id)))
+   if ( (H5T_REFERENCE!=H5Tget_class(wtype_id)))
    {
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
 
+    /* check for datasets too small */
+    if (nelmts*msize < options->threshold )
+     apply_s=0;
+    
+    /* apply the filter */
+    if (apply_s){
+     if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options)<0)
+      goto error;
+    }
+    
+   /*-------------------------------------------------------------------------
+    * create the output dataset;
+    * disable error checking in case the dataset cannot be created with the
+    * modified dcpl; in that case use the original instead
+    *-------------------------------------------------------------------------
+    */
+    H5E_BEGIN_TRY {
+     dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_out);
+    } H5E_END_TRY;
+    if (dset_out==FAIL)
+    {
+     if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_id))<0)
+      goto error;
+     apply_f=0;
+    }
+
   /*-------------------------------------------------------------------------
-   * read
+   * read/write
    *-------------------------------------------------------------------------
    */
     if (nelmts)
     {
-     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-     if ( buf==NULL){
-      error_msg(progname, "cannot read into memory\n" );
-      goto error;
-     }
-     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-      goto error;
+     size_t need = (size_t)(nelmts*msize);  /* bytes needed */
+     if ( need < H5TOOLS_MALLOCSIZE )
+      buf = HDmalloc(need);
 
-     /*-------------------------------------------------------------------------
-      * check for datasets too small
-      *-------------------------------------------------------------------------
-      */
-
-     if (nelmts*msize < options->threshold )
-      apply_s=0;
-
-    /*-------------------------------------------------------------------------
-     * apply the filter
-     *-------------------------------------------------------------------------
-     */
-     if (apply_s){
-      if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options)<0)
+     if (buf != NULL )
+     {
+      if (H5Dread(dset_in,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
        goto error;
-     }
+      if (H5Dwrite(dset_out,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+       goto error;
+     }      
+     
+     else /* possibly not enough memory, read/write by hyperslabs */
+      
+     {
+      size_t        p_type_nbytes = msize; /*size of memory type */
+      hsize_t       p_nelmts = nelmts;     /*total selected elmts */
+      hsize_t       elmtno;                /*counter  */
+      int           carry;                 /*counter carry value */
+      unsigned int  vl_data = 0;           /*contains VL datatypes */
+      
+      /* stripmine info */
+      hsize_t       sm_size[H5S_MAX_RANK]; /*stripmine size */
+      hsize_t       sm_nbytes;             /*bytes per stripmine */
+      hsize_t       sm_nelmts;             /*elements per stripmine*/
+      hid_t         sm_space;              /*stripmine data space */
+      
+      /* hyperslab info */
+      hsize_t       hs_offset[H5S_MAX_RANK];/*starting offset */
+      hsize_t       hs_size[H5S_MAX_RANK];  /*size this pass */
+      hsize_t       hs_nelmts;              /*elements in request */
+      hsize_t       zero[8];                /*vector of zeros */
+      
+      /* check if we have VL data in the dataset's datatype */
+      if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
+       vl_data = TRUE;
 
+     /*
+      * determine the strip mine size and allocate a buffer. The strip mine is
+      * a hyperslab whose size is manageable.
+      */
+      sm_nbytes = p_type_nbytes;
+      
+      for (i = rank; i > 0; --i) {
+       sm_size[i - 1] = MIN(dims[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+       sm_nbytes *= sm_size[i - 1];
+       assert(sm_nbytes > 0);
+      }
+      sm_buf = HDmalloc((size_t)sm_nbytes);
+
+      sm_nelmts = sm_nbytes / p_type_nbytes;
+      sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+      
+      /* the stripmine loop */
+      memset(hs_offset, 0, sizeof hs_offset);
+      memset(zero, 0, sizeof zero);
+
+      for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) 
+      {
+       /* calculate the hyperslab size */
+       if (rank > 0) 
+       {
+        for (i = 0, hs_nelmts = 1; i < rank; i++) 
+        {
+         hs_size[i] = MIN(dims[i] - hs_offset[i], sm_size[i]);
+         hs_nelmts *= hs_size[i];
+        }
+        
+        if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL)<0)
+         goto error;
+        if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL)<0)
+         goto error;
+       } 
+       else 
+       {
+        H5Sselect_all(f_space_id);
+        H5Sselect_all(sm_space);
+        hs_nelmts = 1;
+       } /* rank */
+       
+       /* read/write */
+       if (H5Dread(dset_in, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf) < 0) 
+        goto error;
+       if (H5Dwrite(dset_out, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf) < 0) 
+        goto error;
+       
+       /* reclaim any VL memory, if necessary */
+       if(vl_data)
+        H5Dvlen_reclaim(wtype_id, sm_space, H5P_DEFAULT, sm_buf);
+       
+       /* calculate the next hyperslab offset */
+       for (i = rank, carry = 1; i > 0 && carry; --i) 
+       {
+        hs_offset[i - 1] += hs_size[i - 1];
+        if (hs_offset[i - 1] == dims[i - 1])
+         hs_offset[i - 1] = 0;
+        else
+         carry = 0;
+       } /* i */
+      } /* elmtno */
+      
+      H5Sclose(sm_space);
+      /* free */
+      if (sm_buf!=NULL)
+      {
+       HDfree(sm_buf);
+       sm_buf=NULL;
+      }
+     } /* hyperslab read */
     }/*nelmts*/
-
-    /*-------------------------------------------------------------------------
-     * create;
-					* disable error checking in case the dataset cannot be created with the
-					* modified dcpl; in that case use the original instead
-     *-------------------------------------------------------------------------
-     */
-
-				H5E_BEGIN_TRY {
-					 dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_out);
-				} H5E_END_TRY;
-
-
-				if (dset_out==FAIL)
-				{
-     if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
-						goto error;
-
-     apply_f=0;
-				}
-
-				/*-------------------------------------------------------------------------
-     * write dataset
-     *-------------------------------------------------------------------------
-     */
-
-    if (dsize_in && nelmts) {
-     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-      goto error;
-    }
 
    /*-------------------------------------------------------------------------
     * amount of compression used
     *-------------------------------------------------------------------------
     */
-    if (options->verbose) {
+    if (options->verbose) 
+    {
      if (apply_s && apply_f)
      {
       /* get the storage size of the input dataset */
@@ -487,7 +579,7 @@ int do_copy_objects(hid_t fidin,
        (int)options->threshold);
 
     if (apply_f==0 && options->verbose)
-						printf(" <warning: could not apply the filter to %s>\n",
+      printf(" <warning: could not apply the filter to %s>\n",
       travt->objs[i].name);
 
     /*-------------------------------------------------------------------------
@@ -500,11 +592,8 @@ int do_copy_objects(hid_t fidin,
     /*close */
     if (H5Dclose(dset_out)<0)
      goto error;
-
-    if (buf)
-     free(buf);
-
-   }/*H5T_STD_REF_OBJ*/
+    
+    }/*H5T_STD_REF_OBJ*/
    }/*can_read*/
 
 
@@ -514,13 +603,13 @@ int do_copy_objects(hid_t fidin,
  */
    if (H5Tclose(ftype_id)<0)
     goto error;
-   if (H5Tclose(mtype_id)<0)
+   if (H5Tclose(wtype_id)<0)
     goto error;
    if (H5Pclose(dcpl_id)<0)
     goto error;
-			if (H5Pclose(dcpl_out)<0)
+   if (H5Pclose(dcpl_out)<0)
     goto error;
-   if (H5Sclose(space_id)<0)
+   if (H5Sclose(f_space_id)<0)
     goto error;
    if (H5Dclose(dset_in)<0)
     goto error;
@@ -581,18 +670,18 @@ int do_copy_objects(hid_t fidin,
    }
    break;
 
-/*-------------------------------------------------------------------------
- *-------------------------------------------------------------------------
- */
-  {
-
-  }
-  break;
-
   default:
    goto error;
+  } /* switch */
+
+  /* free */
+  if (buf!=NULL)
+  {
+   HDfree(buf);
+   buf=NULL;
   }
- }
+
+ } /* i */
 
 /*-------------------------------------------------------------------------
  * the root is a special case, we get an ID for the root group
@@ -623,15 +712,24 @@ error:
   H5Gclose(grp_in);
   H5Gclose(grp_out);
   H5Pclose(dcpl_id);
-  H5Sclose(space_id);
+  H5Sclose(f_space_id);
   H5Dclose(dset_in);
   H5Dclose(dset_out);
   H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
+  H5Tclose(wtype_id);
   H5Tclose(type_in);
   H5Tclose(type_out);
-  if (buf)
-   free(buf);
+  /* free */
+  if (buf!=NULL)
+  {
+   HDfree(buf);
+   buf=NULL;
+  }
+  if (sm_buf!=NULL)
+  {
+   HDfree(sm_buf);
+   sm_buf=NULL;
+  }
  } H5E_END_TRY;
  return -1;
 
@@ -663,9 +761,9 @@ int copy_attr(hid_t loc_in,
  hid_t      attr_id;      /* attr ID */
  hid_t      attr_out;     /* attr ID */
  hid_t      space_id;     /* space ID */
- hid_t      ftype_id;     /* file data type ID */
- hid_t      mtype_id;     /* memory data type ID */
- size_t     msize;        /* memory size of type */
+ hid_t      ftype_id;     /* file type ID */
+ hid_t      wtype_id;     /* read/write type ID */
+ size_t     msize;        /* size of type */
  void       *buf=NULL;    /* data buffer */
  hsize_t    nelmts;       /* number of elements in dataset */
  int        rank;         /* rank of dataset */
@@ -712,10 +810,12 @@ int copy_attr(hid_t loc_in,
   for (j=0; j<rank; j++)
    nelmts*=dims[j];
 
-  if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
-   goto error;
+  if (options->use_native==1)
+   wtype_id = h5tools_get_native_type(ftype_id);
+  else
+   wtype_id = H5Tcopy(ftype_id); 
 
-  if ((msize=H5Tget_size(mtype_id))==0)
+  if ((msize=H5Tget_size(wtype_id))==0)
    goto error;
 
 /*-------------------------------------------------------------------------
@@ -725,7 +825,7 @@ int copy_attr(hid_t loc_in,
  * the referenced objects
  *-------------------------------------------------------------------------
  */
-  if ( ! H5Tequal(mtype_id, H5T_STD_REF_OBJ))
+  if ( ! H5Tequal(wtype_id, H5T_STD_REF_OBJ))
   {
 
 
@@ -739,7 +839,7 @@ int copy_attr(hid_t loc_in,
     error_msg(progname, "cannot read into memory\n" );
     goto error;
    }
-   if (H5Aread(attr_id,mtype_id,buf)<0)
+   if (H5Aread(attr_id,wtype_id,buf)<0)
     goto error;
 
    /*-------------------------------------------------------------------------
@@ -749,7 +849,7 @@ int copy_attr(hid_t loc_in,
 
    if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
     goto error;
-   if(H5Awrite(attr_out,mtype_id,buf)<0)
+   if(H5Awrite(attr_out,wtype_id,buf)<0)
     goto error;
 
    /*close*/
@@ -773,7 +873,7 @@ int copy_attr(hid_t loc_in,
  */
 
   if (H5Tclose(ftype_id)<0) goto error;
-  if (H5Tclose(mtype_id)<0) goto error;
+  if (H5Tclose(wtype_id)<0) goto error;
   if (H5Sclose(space_id)<0) goto error;
   if (H5Aclose(attr_id)<0) goto error;
 
@@ -784,7 +884,7 @@ int copy_attr(hid_t loc_in,
 error:
  H5E_BEGIN_TRY {
   H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
+  H5Tclose(wtype_id);
   H5Sclose(space_id);
   H5Aclose(attr_id);
   H5Aclose(attr_out);

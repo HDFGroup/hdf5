@@ -49,6 +49,8 @@
 #define FNAME12OUT "test_nbitout.h5"
 #define FNAME13    "test_scaleoffset.h5"
 #define FNAME13OUT "test_scaleoffsetout.h5"
+#define FNAME14    "test_big.h5"
+#define FNAME14OUT "test_bigout.h5"
 
 int make_testfiles(void);
 

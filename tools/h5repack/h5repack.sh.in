@@ -409,6 +409,10 @@ TOOLTEST $arg7
 TOOLTEST $arg8
 TOOLTEST $arg9
 
+#native option
+arg="test1.h5 -n"
+TOOLTEST $arg
+
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
