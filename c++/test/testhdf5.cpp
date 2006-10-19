@@ -73,12 +73,12 @@ main(int argc, char *argv[])
     AddTest("file", test_file, cleanup_file, "File I/O Operations", NULL);
     // testing dataspace functionalities in th5s.cpp
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
+    AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
 
 /* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
-    AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
     AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
     AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
     AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
