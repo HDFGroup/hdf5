@@ -860,11 +860,13 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     ssize_t		nbytes;
-    size_t		alloc_size;
-    void		*copy_buf, *p1, *p2;
+    size_t		alloc_size, tmp_size;
+    void		*copy_buf, *p1, *p2, *p3;
     hsize_t		_boundary;
     hsize_t		_fbsize;
     hsize_t		_cbsize;
+    haddr_t		copy_addr = addr;
+    hsize_t		copy_size = size;
     herr_t      	ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_direct_read, FAIL)
@@ -891,6 +893,11 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
      * and aligned data first, then copy the data into memory buffer.
      */
     if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_boundary==0)) {
+	    /* Seek to the correct location */
+	    if ((addr!=file->pos || OP_READ!=file->op) &&
+		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+
 	    while (size>0) {
 		do {
 		    nbytes = HDread(file->fd, buf, size);
@@ -911,48 +918,76 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
 		buf = (char*)buf + nbytes;
 	    }
     } else {
-	    /* allocate memory needed for the Direct IO option. Make a bigger
-	     * buffer for aligned I/O. */
-	    alloc_size = (size / _fbsize + 1) * _fbsize + _fbsize;
+	    /* allocate memory needed for the Direct IO option up to the maximal 
+	     * copy buffer size. Make a bigger buffer for aligned I/O if size is 
+	     * smaller than maximal copy buffer. */
+	    if(size < _cbsize)
+	    	alloc_size = (size / _fbsize + 1) * _fbsize + _fbsize;
+	    else
+	    	alloc_size = _cbsize;
 	    if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
-	    memset(copy_buf, 0, alloc_size);
 
 	    /* look for the aligned position for reading the data */
-	    if(file_seek(file->fd, (file_offset_t)(addr - addr % _fbsize), SEEK_SET) < 0)	
+	    if(file_seek(file->fd, (file_offset_t)(copy_addr - copy_addr % _fbsize), SEEK_SET) < 0)
 		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
 	    /*
-	     * Read the aligned data in file first, being careful of interrupted system calls, 
-	     * partial results, and the end of the file.
+	     * Read the aligned data in file into aligned buffer first, then copy the data 
+	     * into the final buffer.  If the data size is bigger than maximal copy buffer
+	     * size, do the reading by segment (the outer while loop).  If not, do one step
+	     * reading.  
 	     */
-	    p1 = copy_buf;
-	    while(alloc_size > 0) {
-		do {
-		    nbytes = HDread(file->fd, p1, alloc_size);
-		} while(-1==nbytes && EINTR==errno);
+	    p3 = buf;
+	    do {
+ 	    	/* Read the aligned data in file first, being careful of interrupted system calls, 
+	    	 * partial results, and the end of the file. */
+	    	memset(copy_buf, 0, alloc_size);
+	    	p1 = copy_buf;
+	    	tmp_size = alloc_size;
+	    	while(tmp_size > 0) {
+		    do {
+		    	nbytes = HDread(file->fd, p1, tmp_size);
+		    } while(-1==nbytes && EINTR==errno);
 
-		if (-1==nbytes) /* error */
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-		if (0==nbytes) {
-		    /* end of file but not end of format address space */
-		    break;
-		} else {
-		    assert(nbytes>0);
-		    assert((size_t)nbytes<=alloc_size);
-		    H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
-		    H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
-		    alloc_size -= (size_t)nbytes;
-		    p1 = (unsigned char*)p1 + nbytes;
-		}
-	    }
+		    if (-1==nbytes) /* error */
+		    	HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+		    if (0==nbytes) {
+		    	/* end of file but not end of format address space */
+		    	break;
+		    } else {
+		    	assert(nbytes>0);
+		    	assert((size_t)nbytes<=tmp_size);
+		    	H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
+		    	H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
+		    	tmp_size -= (size_t)nbytes;
+		    	p1 = (unsigned char*)p1 + nbytes;
+		    }
+	    	}
 
-	    /*look for the right position to copy the data and copy the data 
-	     *to the original buffer.*/
-	    p2 = (unsigned char*)copy_buf + addr % _fbsize;
-	    memcpy(buf, p2, size);
+	    	/* look for the right position and copy the data to the original buffer.
+		 * Consider all possible situations here: file address is not aligned on 
+		 * file block size; the end of data address is not aligned; the end of data
+		 * address is aligned; data size is smaller or bigger than maximal copy size.*/
+	    	p2 = (unsigned char*)copy_buf + copy_addr % _fbsize;
+	    	if(size < _cbsize)
+	    	    memcpy(p3, p2, size);
+	    	else if(size >= _cbsize && copy_size <= alloc_size)
+	    	    memcpy(p3, p2, copy_size);
+	    	else if(size >= _cbsize && copy_size > alloc_size) {
+	    	    memcpy(p3, p2, (alloc_size - copy_addr % _fbsize));
+	    	   p3 = (unsigned char*)p3 + (alloc_size - copy_addr % _fbsize); 
+	    	}
 
-	    /*update address and buffer*/
+		/* update the size and address of data being read. */
+	    	if(copy_size > (alloc_size - copy_addr % _fbsize))
+	    	    copy_size -= (alloc_size - copy_addr % _fbsize);
+	    	else
+		    copy_size = 0;
+	    	copy_addr += (alloc_size - copy_addr % _fbsize);
+	    } while (copy_size > 0);
+
+	    /*Final step: update address and buffer*/
 	    addr += (haddr_t)size;
 	    buf = (unsigned char*)buf + size;
 
@@ -1030,6 +1065,11 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
      * data out.
      */
     if((addr%_fbsize==0) && (size%_fbsize==0) && ((haddr_t)buf%_boundary==0)) {
+	    /* Seek to the correct location */
+	    if ((addr!=file->pos || OP_WRITE!=file->op) &&
+		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+
 	    while (size>0) {
 		do {
 		    nbytes = HDwrite(file->fd, buf, size);
