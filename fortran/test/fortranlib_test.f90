@@ -237,19 +237,15 @@
      write(*, fmt = e_format) error_string
      total_error = total_error + external_total_error 
 
-!DEC$ if defined(H5_VMS)
-      goto 200
-!DEC$ else    
-     error_string = failure
+!     error_string = failure
+     error_string = skip
      cleanup = .FALSE.
-     CALL multi_file_test(cleanup, multi_file_total_error)
-     IF (multi_file_total_error == 0) error_string = success
+!     CALL multi_file_test(cleanup, multi_file_total_error)
+!     IF (multi_file_total_error == 0) error_string = success
      write(*, fmt = '(23a)', advance = 'no') ' Multi file driver test'     
      write(*, fmt = '(47x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + multi_file_total_error 
-!DEC$ endif
-200  continue
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing ATTRIBUTE interface              ' 
