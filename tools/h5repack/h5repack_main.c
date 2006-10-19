@@ -54,6 +54,12 @@ int main(int argc, char **argv)
  /* initialize options  */
  h5repack_init (&options,0);
 
+ if (argc<2)
+ {
+  usage();
+  exit(1);
+ }
+
  for ( i = 1; i < argc; i++)
  {
   if (strcmp(argv[i], "-h") == 0) {
@@ -149,14 +155,19 @@ int main(int argc, char **argv)
 static
 void usage(void)
 {
- printf("h5repack -i input -o output [-h] [-v] [-f 'filter'] [-l 'layout'][-m number][-e file] \n");
+ printf("usage: h5repack -i input -o output [-h] [-v] [-f FILTER] [-l LAYOUT] [-n] [-m size] [-e file]\n");
  printf("\n");
- printf("-i input          Input HDF5 File\n");
- printf("-o output         Output HDF5 File\n");
- printf("[-h]              Print usage message\n");
- printf("[-v]              Verbose mode. Print more output (list of objects,\n");
- printf("                   filters, warnings)\n");
- printf("[-f 'filter']     Filter type: 'filter' is a string with the format\n");
+ printf("-i input       Input HDF5 File\n");
+ printf("-o output      Output HDF5 File\n");
+ printf("[-h]           Print this message\n");
+ printf("[-v]           Verbose mode\n");
+ printf("[-n]           Use a native HDF5 type when repacking. Default is the file type\n");
+ printf("[-m size]      Do not apply the filter to objects smaller than size\n");
+ printf("[-e file]      Name of file with the -f and -l options\n");
+ printf("[-f FILTER]    Filter type\n");
+ printf("[-l LAYOUT]    Layout type\n");
+ printf("\n");
+ printf("FILTER is a string with the format:\n");
  printf("\n");
  printf("     <list of objects> : <name of filter> = <filter parameters>\n");
  printf("\n");
@@ -183,7 +194,8 @@ void usage(void)
  printf("            (scale_factor is an integer and scale_type is either 'IN'\n");
  printf("             for integer type, or 'DS', for floating point type\n");
  printf("             using the D-scaling method)\n");
- printf("[-l 'layout']     Layout type. 'layout' is a string with the format\n");
+ printf("\n");
+ printf("LAYOUT is a string with the format:\n");
  printf("\n");
  printf("     <list of objects> : <layout type>\n");
  printf("\n");
@@ -197,12 +209,6 @@ void usage(void)
  printf("     <layout parameters> is present for the chunk case only\n");
  printf("       it is the chunk size of each dimension:\n");
  printf("       <dim_1 x dim_2 x ... dim_n>\n");
- printf("\n");
- printf("-e file           File with the -f and -l options (only filter and layout flags)\n");
- printf("-n                Use a native type when repacking. Default is the file type\n");
- printf("-m size           Do not apply the filter to objects which size in bytes\n");
- printf("                   is smaller than number. If no size is specified a minimum of\n");
- printf("                   1024 bytes is assumed.\n");
  printf("\n");
  printf("Examples of use:\n");
  printf("\n");
