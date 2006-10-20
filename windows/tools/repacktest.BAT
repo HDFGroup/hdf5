@@ -168,14 +168,14 @@ call %tooltest% %test0% %nodiff%
 :: call ..\..\tooltest ..\..\testfiles\test1.h5 ..\..\temptest\notcomp.txt
 
 set flag=-i %test1% -o %output1%
-call %tooltest% %test1% %notcomp% 
+call %tooltest% %test1% %nodiff% 
 
 
 ::--------------
 :: test2.h5
 ::--------------
 set flag=-i %test2% -o %output2%
-call %tooltest% %test2% %notcomp%  
+call %tooltest% %test2% %nodiff%  
 
 ::--------------
 :: test3.h5
@@ -467,6 +467,9 @@ set flag=-i %test4% -o %output4% -l dset_chunk:CHUNK=18x13
 call %tooltest% %test4% %nodiff%
 
 set flag=-i %test4% -o %output4% -l dset_chunk:CONTI
+call %tooltest% %test4% %nodiff%
+
+set flag=-i %test1% -o %output1% -n
 call %tooltest% %test4% %nodiff%
 
 cd ..\..

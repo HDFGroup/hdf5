@@ -18,8 +18,11 @@
 ::---importtest.bat
 ::---lstest.bat
 ::---repacktest.bat
+::---stattest.bat
 :: Written By: Fang GUO
 :: Date      : Jan. 12, 2006
+:: Modified By: MuQun Yang
+:: Date      : Oct. 19, 2006
 
    
      :: Setting the starting column number for "PASSED/FAILED/SKIPED"
@@ -35,6 +38,7 @@
      if %test_exefile%==h5diff goto COMMON
      if %test_exefile%==h5dump goto DUMP
      if %test_exefile%==h5ls goto COMMON
+     if %test_exefile%==h5stat goto COMMON
      if %test_exefile%==h5import goto IMPORT
 
 :: This block is for Repack test 
@@ -177,11 +181,10 @@
          :: Call tooltest with the following parameters set in difftest.bat
 	       :: 1. expected_outputfile.txt 
 	       :: 2. flags
-
+       
          ::Set a flaghandle for output tests results
 		     set flagout=%flag:..\..\testfiles\=%
-		     set flagout=%flagout:..\..\temptest\=%
-		     
+		     set flagout=%flagout:..\..\temptest\=%	     
          if "%2%"=="SKIP" goto SKIP
          ::Set the file name and path for the expected and actual outputs
      		 set exp_file=..\..\temptest\%1 
@@ -193,8 +196,12 @@
          if "%2%"=="MASK" goto MASK
                       
          more /e +%ln% ..\..\temptest\temp.txt > %actual_output%
-         more /e +%ln_exp% ..\..\testfiles\%1 > %exp_file%
-                 
+	
+	 if %test_exefile%==h5stat (
+         	more /e +%ln_exp% ..\..\misc\testfiles\%1 > %exp_file%
+         )	else (
+      		more /e +%ln_exp% ..\..\testfiles\%1 > %exp_file%
+	 )
          ::Clean up temporary file
 		     del ..\..\temptest\temp.txt
          goto RESULTS
