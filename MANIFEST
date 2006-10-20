@@ -1787,6 +1787,7 @@
 ./windows/tools/testhdf5tools.BAT
 ./windows/tools/tooltest.bat
 ./windows/tools/jamtest.bat
+./windows/tools/stattest.bat
 
 #windows batchfile
 ./windows/hdf5bt.BAT
