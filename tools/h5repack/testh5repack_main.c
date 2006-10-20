@@ -18,23 +18,10 @@
 #include "testh5repack.h"
 #include "h5diff.h"
 
-const char *FILENAME[] = {
-    FNAME1OUT,
-    FNAME2OUT,
-    FNAME3OUT,
-    FNAME4OUT,
-    FNAME5OUT,
-    FNAME7OUT,
-    FNAME8OUT,
-    FNAME9OUT,
-    FNAME10OUT,
-    FNAME11OUT,
-    FNAME12OUT,
-    FNAME13OUT,
-    FNAME14OUT,
+const char *H5REPACK_FILENAMES[] = {
+   "test_bigout",
     NULL
 };
-
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -70,6 +57,7 @@ int main (int argc, const char *argv[])
  puts("Testing h5repack:");
 
  /* setup */
+ h5_reset();
  fapl = h5_fileaccess();
 
 
@@ -1219,7 +1207,7 @@ if (szip_can_encode) {
 
  puts("All h5repack tests passed.");
 
- h5_cleanup(FILENAME, fapl); 
+ h5_cleanup(H5REPACK_FILENAMES, fapl); 
 
  return 0;
 
