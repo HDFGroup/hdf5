@@ -25,7 +25,6 @@
 #define GBLL	   ((unsigned long_long) 1024*1024*1024)
 
 
-
 int make_all_objects(hid_t loc_id);
 int make_attributes(hid_t loc_id);
 int make_hlinks(hid_t loc_id);
@@ -1311,10 +1310,10 @@ int make_big(hid_t loc_id)
  hid_t   dcpl;
  hsize_t dims[1]={GBLL};               /* dataset dimensions */
  hsize_t hs_size[1]={GBLL/1024};       /* hyperslab dimensions */
- hsize_t chunk_dims[1]={hs_size[0]};   /* chunk dimensions */
+ hsize_t chunk_dims[1]={GBLL/1024};    /* chunk dimensions */
  hsize_t hs_start[1];
  size_t  size;
- size_t  nelmts=(size_t)hs_size[0];
+ size_t  nelmts=(size_t)GBLL/1024;
  char    fillvalue=-1;
  char    *buf=NULL;
  int     i, j, s;

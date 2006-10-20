@@ -35,8 +35,8 @@ SCRIPT_DEPEND=h5repack$(EXEEXT)
 # Our main target, h5repack tool
 bin_PROGRAMS=h5repack
 
-# All programs depend on the hdf5 library and the tools library
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+# Depend on the hdf5 library, the tools library, the test library
+LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 # Source files
 COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \

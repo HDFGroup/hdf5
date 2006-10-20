@@ -80,21 +80,24 @@ am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
-am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
-h5repack_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
+am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
+h5repack_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 am_h5repacktst_OBJECTS = $(am__objects_1) testh5repack_attr.$(OBJEXT) \
 	testh5repack_dset.$(OBJEXT) testh5repack_main.$(OBJEXT) \
 	testh5repack_make.$(OBJEXT) testh5repack_util.$(OBJEXT)
 h5repacktst_OBJECTS = $(am_h5repacktst_OBJECTS)
 h5repacktst_LDADD = $(LDADD)
-h5repacktst_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+h5repacktst_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 am_testh5repack_detect_szip_OBJECTS =  \
 	testh5repack_detect_szip.$(OBJEXT)
 testh5repack_detect_szip_OBJECTS =  \
 	$(am_testh5repack_detect_szip_OBJECTS)
 testh5repack_detect_szip_LDADD = $(LDADD)
 testh5repack_detect_szip_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -357,8 +360,8 @@ TEST_PROG = h5repacktst
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repack$(EXEEXT)
 
-# All programs depend on the hdf5 library and the tools library
-LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+# Depend on the hdf5 library, the tools library, the test library
+LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 # Source files
 COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \

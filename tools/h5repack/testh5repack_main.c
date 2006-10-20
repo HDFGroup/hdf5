@@ -18,6 +18,23 @@
 #include "testh5repack.h"
 #include "h5diff.h"
 
+const char *FILENAME[] = {
+    FNAME1OUT,
+    FNAME2OUT,
+    FNAME3OUT,
+    FNAME4OUT,
+    FNAME5OUT,
+    FNAME7OUT,
+    FNAME8OUT,
+    FNAME9OUT,
+    FNAME10OUT,
+    FNAME11OUT,
+    FNAME12OUT,
+    FNAME13OUT,
+    FNAME14OUT,
+    NULL
+};
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -43,11 +60,18 @@ int main (int argc, const char *argv[])
 #if defined (H5_HAVE_FILTER_SZIP)
  int szip_can_encode = 0;
 #endif
+ hid_t       fapl;
+
+ /* initialize */
  memset(&diff_options, 0, sizeof (diff_opt_t));
  memset(&pack_options, 0, sizeof (pack_opt_t));
 
  /* run tests  */
  puts("Testing h5repack:");
+
+ /* setup */
+ fapl = h5_fileaccess();
+
 
  /* make the test files */
  if (make_testfiles()<0)
@@ -1174,7 +1198,6 @@ if (szip_can_encode) {
  * test a big file
  *-------------------------------------------------------------------------
  */
- 
  TESTING("    big file");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -1195,6 +1218,8 @@ if (szip_can_encode) {
  */
 
  puts("All h5repack tests passed.");
+
+ h5_cleanup(FILENAME, fapl); 
 
  return 0;
 

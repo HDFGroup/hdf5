@@ -173,7 +173,7 @@ int copy_objects(const char* fnamein,
                  pack_opt_t *options)
 {
  hid_t         fidin;
- hid_t         fidout;
+ hid_t         fidout=-1;
  trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
@@ -275,17 +275,17 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t    grp_in;         /* group ID */
- hid_t    grp_out;        /* group ID */
- hid_t    dset_in;        /* read dataset ID */
- hid_t    dset_out;       /* write dataset ID */
- hid_t    type_in;        /* named type ID */
- hid_t    type_out;       /* named type ID */
- hid_t    dcpl_id;        /* dataset creation property list ID */
- hid_t    dcpl_out;       /* dataset creation property list ID */
- hid_t    f_space_id;     /* file space ID */
- hid_t    ftype_id;       /* file type ID */
- hid_t    wtype_id;       /* read/write type ID */
+ hid_t    grp_in=-1;         /* group ID */
+ hid_t    grp_out=-1;        /* group ID */
+ hid_t    dset_in=-1;        /* read dataset ID */
+ hid_t    dset_out=-1;       /* write dataset ID */
+ hid_t    type_in=-1;        /* named type ID */
+ hid_t    type_out=-1;       /* named type ID */
+ hid_t    dcpl_id=-1;        /* dataset creation property list ID */
+ hid_t    dcpl_out=-1;       /* dataset creation property list ID */
+ hid_t    f_space_id=-1;     /* file space ID */
+ hid_t    ftype_id=-1;       /* file type ID */
+ hid_t    wtype_id=-1;       /* read/write type ID */
  size_t   msize;          /* size of type */
  hsize_t  nelmts;         /* number of elements in dataset */
  int      rank;           /* rank of dataset */
@@ -758,11 +758,11 @@ int copy_attr(hid_t loc_in,
               pack_opt_t *options
               )
 {
- hid_t      attr_id;      /* attr ID */
- hid_t      attr_out;     /* attr ID */
- hid_t      space_id;     /* space ID */
- hid_t      ftype_id;     /* file type ID */
- hid_t      wtype_id;     /* read/write type ID */
+ hid_t      attr_id=-1;      /* attr ID */
+ hid_t      attr_out=-1;     /* attr ID */
+ hid_t      space_id=-1;     /* space ID */
+ hid_t      ftype_id=-1;     /* file type ID */
+ hid_t      wtype_id=-1;     /* read/write type ID */
  size_t     msize;        /* size of type */
  void       *buf=NULL;    /* data buffer */
  hsize_t    nelmts;       /* number of elements in dataset */
