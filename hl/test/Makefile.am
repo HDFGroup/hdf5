@@ -33,6 +33,7 @@ check_PROGRAMS=$(TEST_PROG)
 
 # Temporary files.  These files are the ones created by running `make test'.
 CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-6].h5 test_image[1-3].h5 \
-        test_lite[1-2].h5 test_table.h5 test_packet_table.h5
+        test_lite[1-2].h5 test_table.h5 test_packet_table.h5                \
+        test_packet_compress.h5
 
 include $(top_srcdir)/config/conclude.am
