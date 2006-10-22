@@ -83,9 +83,6 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	void* Reference(const char* name) const; // will be obsolete
 	void* Reference(const H5std_string& name) const; // will be obsolete
 
-	// Opens a referenced dataset.
-	DataSet dereference(void* ref) const;
-
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("DataSet"); }
 
