@@ -79,13 +79,25 @@ hid_t Group::getLocId() const
 Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 
 //--------------------------------------------------------------------------
+// Function:	Group overload constructor - dereference
+///\brief	Given a reference to some object, returns that group
+///             obj - IN: Location reference object is in
+///\param	ref - IN: Reference pointer
+///\parDescription
+///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		is a datatype that has been named by DataType::commit.
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
+Group::Group(IdComponent& obj, void* ref) : H5Object()
+{
+   IdComponent::dereference(obj, ref);
+}
+
+//--------------------------------------------------------------------------
 // Function:	Group::Reference
-///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::GroupIException
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		Group::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -100,16 +112,9 @@ void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_ty
 
 //--------------------------------------------------------------------------
 // Function:	Group::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it only creates
-///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\return	A reference
-///\exception	H5::GroupIException
-///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected
-//		function for it to pass to the C API H5Rcreate
-//		to create a reference to the named object.
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		Group::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const char* name) const
@@ -124,10 +129,9 @@ void* Group::Reference(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:	Group::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it takes an
-///		\c std::string for the object's name.
-///\param	name - IN: Name of the object to be referenced
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		Group::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* Group::Reference(const H5std_string& name) const
@@ -138,8 +142,10 @@ void* Group::Reference(const H5std_string& name) const
 //--------------------------------------------------------------------------
 // Function:	Group::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
+///\param	ref      - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
 ///\return	An object type, which can be one of the following:
 ///			H5G_LINK Object is a symbolic link.
 ///			H5G_GROUP Object is a group.
@@ -225,8 +231,10 @@ void Group::throwException(const H5std_string& func_name, const H5std_string& ms
 ///\brief	Properly terminates access to this group.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//		Replaced resetIdComponent with decRefCount to use C library
-//		ID reference counting mechanism - BMR, Jun 1, 2004
+//		- Replaced resetIdComponent() with decRefCount() to use C
+//		library ID reference counting mechanism - BMR, Feb 20, 2005
+//		- Replaced decRefCount with close() to let the C library
+//		handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 Group::~Group()
 {

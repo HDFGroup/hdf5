@@ -163,9 +163,9 @@ H5T_cset_t StrType::getCset() const
 //--------------------------------------------------------------------------
 // Function:	StrType::setCset
 ///\brief	Sets character set to be used.
-///\param	cset - IN: character set type
-///\exception	H5::DataTypeIException
+///\param	cset - IN: character set type, which can be:
 ///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setCset( H5T_cset_t cset ) const

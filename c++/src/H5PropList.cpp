@@ -128,10 +128,8 @@ void PropList::copy( const PropList& like_plist )
 PropList& PropList::operator=( const PropList& rhs )
 {
     if (this != &rhs)
-    {
 	copy(rhs);
-	return(*this);
-    }
+    return(*this);
 }
 
 //--------------------------------------------------------------------------

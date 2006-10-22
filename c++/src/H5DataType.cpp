@@ -76,6 +76,21 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataType overload constructor - dereference
+///\brief	Given a reference to some object, returns that datatype
+///\param       obj - IN: Location reference object is in
+///\param	ref - IN: Reference pointer
+///\parDescription
+///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		is a datatype that has been named by DataType::commit.
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
+DataType::DataType(IdComponent& obj, void* ref) : H5Object()
+{
+   IdComponent::dereference(obj, ref);
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataType default constructor
 ///\brief	Default constructor: Creates a stub datatype
 // Programmer	Binh-Minh Ribler - 2000
@@ -108,7 +123,7 @@ void DataType::copy( const DataType& like_type )
 	close();
     }
     catch (Exception close_error) {
-	throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
     // call C routine to copy the datatype
@@ -131,10 +146,8 @@ void DataType::copy( const DataType& like_type )
 DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
-    {
 	copy(rhs);
-	return(*this);
-    }
+    return(*this);
 }
 
 //--------------------------------------------------------------------------
@@ -532,12 +545,9 @@ bool DataType::isVariableStr() const
 
 //--------------------------------------------------------------------------
 // Function:	DataType::Reference
-///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::DataTypeIException
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		DataType::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -552,16 +562,9 @@ void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref
 
 //--------------------------------------------------------------------------
 // Function:	DataType::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it only creates
-///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\return	A reference
-///\exception	H5::DataTypeIException
-///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected
-//		function for it to pass to the C API H5Rcreate
-//		to create a reference to the named object.
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		DataType::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const char* name) const
@@ -576,10 +579,9 @@ void* DataType::Reference(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:	DataType::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it takes an
-///		\c std::string for the object's name.
-///\param	name - IN: Name of the object to be referenced - \c std::string
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		DataType::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataType::Reference(const H5std_string& name) const

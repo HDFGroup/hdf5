@@ -65,6 +65,23 @@ DataSet::DataSet(const hid_t existing_id) : AbstractDs(existing_id) {}
 DataSet::DataSet( const DataSet& original ) : AbstractDs( original ) {}
 
 //--------------------------------------------------------------------------
+// Function:	DataSet overload constructor - dereference
+///\brief	Given a reference to some object, returns that dataset
+///             obj - IN: Dataset reference object is in or location of
+///                   object that the dataset is located within.
+///\param	ref - IN: Reference pointer
+///\exception	H5::DataSetIException
+///\parDescription
+///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		is a datatype that has been named by DataType::commit.
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
+DataSet::DataSet(IdComponent& obj, void* ref) : AbstractDs()
+{
+   IdComponent::dereference(obj, ref);
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataSet::getSpace
 ///\brief	Gets a copy of the dataspace of this dataset.
 ///\return	DataSpace instance
@@ -413,12 +430,9 @@ void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::Reference
-///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::DataSetIException
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use 
+///		DataSet::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -433,16 +447,9 @@ void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it only creates
-///		a reference to an HDF5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced - \c char pointer
-///\return	A reference
-///\exception	H5::DataSetIException
-///\par Description
-//		This function passes H5R_OBJECT and -1 to the protected
-//		function for it to pass to the C API H5Rcreate
-//		to create a reference to the named object.
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		DataSet::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataSet::Reference(const char* name) const
@@ -457,10 +464,9 @@ void* DataSet::Reference(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::Reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it takes an
-///		\c std::string for the object's name.
-///\param	name - IN: Name of the object to be referenced - \c std::string
+///\brief	Important!!! - This functions may not work correctly, it 
+///		will be removed in the near future.  Please use similar
+///		DataSet::reference instead!
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* DataSet::Reference(const H5std_string& name) const
@@ -471,13 +477,15 @@ void* DataSet::Reference(const H5std_string& name) const
 //--------------------------------------------------------------------------
 // Function:	DataSet::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref_type - IN: Type of reference to query
-///\param		ref      - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///\param	ref      - IN: Reference to query
 ///\return	An object type, which can be one of the following:
-///		\li \c H5G_LINK Object is a symbolic link.
-///		\li \c H5G_GROUP Object is a group.
-///		\li \c H5G_DATASET   Object is a dataset.
-///		\li \c H5G_TYPE Object is a named datatype
+///		\li \c H5G_LINK (0) \tObject is a symbolic link.
+///		\li \c H5G_GROUP (1) \tObject is a group.
+///		\li \c H5G_DATASET (2) \tObject is a dataset.
+///		\li \c H5G_TYPE Object (3) \tis a named datatype
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

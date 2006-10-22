@@ -26,18 +26,18 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	virtual void close();
 
 	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const; // will be obsolete
 
 	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-	void* Reference(const H5std_string& name) const;
+	void* Reference(const char* name) const; // will be obsolete
+	void* Reference(const H5std_string& name) const; // will be obsolete
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Group"); }
@@ -47,6 +47,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;
+
+	// Creates a group by way of dereference.
+	Group(IdComponent& obj, void* ref);
 
 	// default constructor
 	Group();
