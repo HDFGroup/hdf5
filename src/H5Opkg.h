@@ -41,7 +41,7 @@
 
 /* The latest version of the format.  Look through the 'flush' 
  *      and 'size' callback for places to change when updating this. */
-#define H5O_VERSION_LATEST	H5O_VERSION_1
+#define H5O_VERSION_LATEST	H5O_VERSION_2
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -332,6 +332,9 @@ H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
+#ifdef H5O_DEBUG
+H5_DLL herr_t H5O_assert(const H5O_t *oh);
+#endif /* H5O_DEBUG */
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
 /* Shared object operators */

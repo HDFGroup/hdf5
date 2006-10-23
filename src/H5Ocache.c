@@ -357,7 +357,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* Check for magic # on chunks > 0 in later versions of the format */
         if(chunkno > 0 && oh->version > H5O_VERSION_1) {
             /* Magic number */
-            if(!HDmemcmp(p, H5O_CHK_MAGIC, (size_t)H5O_SIZEOF_MAGIC))
+            if(HDmemcmp(p, H5O_CHK_MAGIC, (size_t)H5O_SIZEOF_MAGIC))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "wrong object header chunk signature")
             p += H5O_SIZEOF_MAGIC;
         } /* end if */
@@ -493,15 +493,18 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
 
+#ifdef H5O_DEBUG
+H5O_assert(oh);
+#endif /* H5O_DEBUG */
+
     /* Set return value */
     ret_value = oh;
 
 done:
     /* Release the [possibly partially initialized] object header on errors */
-    if(!ret_value && oh) {
+    if(!ret_value && oh)
         if(H5O_dest(f,oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_load() */
@@ -543,6 +546,10 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
         uint8_t	*p;             /* Pointer to object header prefix buffer */
         unsigned u;             /* Local index variable */
 
+#ifdef H5O_DEBUG
+H5O_assert(oh);
+#endif /* H5O_DEBUG */
+
         /* Point to raw data 'image' for first chunk, which has room for the prefix */
         p = oh->chunk[0].image;
 
@@ -552,7 +559,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *
          * modified */
         if(oh->version > H5O_VERSION_1) {
             /* Verify magic number */
-            HDassert(!HDmemcmp(oh->chunk[0].image, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
+            HDassert(!HDmemcmp(p, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
             p += H5O_SIZEOF_MAGIC;
 
             /* Version */
