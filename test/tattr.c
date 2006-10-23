@@ -189,7 +189,7 @@ test_attr_basic_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Verify new attribute name */
-    attr_name_size = H5Aget_name(attr, 0, NULL);
+    attr_name_size = H5Aget_name(attr, (size_t)0, NULL);
     CHECK(attr_name_size, FAIL, "H5Aget_name");
 
     if(attr_name_size>0)
@@ -222,7 +222,7 @@ test_attr_basic_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Verify new attribute name */
-    attr_name_size = H5Aget_name(attr2, 0, NULL);
+    attr_name_size = H5Aget_name(attr2, (size_t)0, NULL);
     CHECK(attr_name_size, FAIL, "H5Aget_name");
 
     if(attr_name_size>0)
@@ -784,7 +784,7 @@ test_attr_compound_read(hid_t fapl)
              } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR4_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR4_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR4_NAME);
@@ -1131,7 +1131,7 @@ test_attr_mult_read(hid_t fapl)
             TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
@@ -1187,13 +1187,13 @@ test_attr_mult_read(hid_t fapl)
                 TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR2_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR2_NAME);
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,HDstrlen(ATTR2_NAME), attr_name);
+    name_len=H5Aget_name(attr, HDstrlen(ATTR2_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     HDstrcpy(temp_name,ATTR2_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR2_NAME)-1]='\0';   /* truncate it to match the one retrieved */
@@ -1246,13 +1246,13 @@ test_attr_mult_read(hid_t fapl)
                     TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,HDstrlen(ATTR3_NAME), attr_name);
+    name_len=H5Aget_name(attr, HDstrlen(ATTR3_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     HDstrcpy(temp_name,ATTR3_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR3_NAME)-1]='\0';   /* truncate it to match the one retrieved */
@@ -1431,7 +1431,7 @@ test_attr_delete(hid_t fapl)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN,attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN,attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
@@ -1445,7 +1445,7 @@ test_attr_delete(hid_t fapl)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
@@ -1467,7 +1467,7 @@ test_attr_delete(hid_t fapl)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
+    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);

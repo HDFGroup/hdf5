@@ -215,7 +215,7 @@ test_array_funcs(void)
     norm=H5Tget_norm(type);
     CHECK(norm, FAIL, "H5Tget_norm");
 
-    ret=H5Tset_offset(type, 16);
+    ret=H5Tset_offset(type, (size_t)16);
     CHECK(ret, FAIL, "H5Tset_offset");
 
     H5E_BEGIN_TRY {
@@ -1579,7 +1579,7 @@ test_array_bkg(void)
     /* Initialize the names of data members */
     /* ------------------------------------ */
     for (i = 0; i < dtsinfo.nsubfields; i++)
-      dtsinfo.name[i] = (char *)calloc(20, sizeof(char));
+      dtsinfo.name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
 
 	strcpy(dtsinfo.name[0], "One");
 	strcpy(dtsinfo.name[1], "Two");

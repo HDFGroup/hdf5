@@ -84,6 +84,16 @@ H5E_t		H5E_stack_g[1];
 #endif /* H5_HAVE_THREADSAFE */
 
 
+/******************/
+/* Local Typedefs */
+/******************/
+
+/* Some syntactic sugar to make the compiler happy with two different kinds of callbacks */
+typedef union {
+    H5E_auto_stack_t stack_efunc;       /* New-style callback, with error stack param. */
+    H5E_auto_t efunc;           /* Old-style callback, NO error stack param. */
+} H5E_auto_op_t;
+
 #ifdef H5_HAVE_PARALLEL
 /*
  * variables used for MPI error reporting
@@ -112,8 +122,8 @@ static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5
                             H5E_walk_stack_t stack_func, hbool_t bk_compatible, void *client_data);
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
 static herr_t  H5E_walk_stack_cb(unsigned n, const H5E_error_stack_t *err_desc, void *client_data);
-static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void **func, void **client_data);
-static herr_t  H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data);
+static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **client_data);
+static herr_t  H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void *client_data);
 
 /* Declare a free list to manage the H5E_t struct */
 H5FL_DEFINE_STATIC(H5E_t);
@@ -204,7 +214,7 @@ H5E_init_interface(void)
     assert(H5E_ERR_CLS_g==(-1));
     HDsnprintf(lib_vers,sizeof(lib_vers),"%u.%u.%u%s",H5_VERS_MAJOR,H5_VERS_MINOR,H5_VERS_RELEASE,(HDstrlen(H5_VERS_SUBRELEASE)>0 ? "-"H5_VERS_SUBRELEASE : ""));
     if((cls = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, lib_vers))==NULL)
-        HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "class initialization failed")
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "class initialization failed")
     if((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, cls))<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error class")
 
@@ -408,15 +418,15 @@ H5E_register_class(const char *cls_name, const char *lib_name, const char *versi
 
     /* Allocate space for new error class */
     if((cls = H5FL_MALLOC(H5E_cls_t))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Duplicate string information */
-    if((cls->cls_name = HDstrdup(cls_name))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if((cls->lib_name = HDstrdup(lib_name))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if((cls->lib_vers = HDstrdup(version))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if((cls->cls_name = H5MM_xstrdup(cls_name))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if((cls->lib_name = H5MM_xstrdup(lib_name))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if((cls->lib_vers = H5MM_xstrdup(version))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the return value */
     ret_value=cls;
@@ -757,13 +767,13 @@ H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 
     /* Allocate new message object */
     if((msg = H5FL_MALLOC(H5E_msg_t))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Fill new message object */
     msg->cls = cls;
     msg->type = msg_type;
-    if((msg->msg = HDstrdup(msg_str))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if((msg->msg = H5MM_xstrdup(msg_str))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set return value */
     ret_value = msg;
@@ -805,10 +815,10 @@ H5Eget_major(H5E_major_t maj)
 
     /* Get the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
-	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     if(type != H5E_MAJOR)
-	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one");
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one")
 
     /* Don't know who is going to free it */
     msg_str = (char*)H5MM_malloc((size_t)(++size)*sizeof(char));
@@ -855,10 +865,10 @@ H5Eget_minor(H5E_minor_t min)
 
     /* Get the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
-	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text");
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     if(type != H5E_MINOR)
-	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one");
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one")
 
     /* Don't know who is going to free it */
     msg_str = (char*)H5MM_malloc((size_t)(++size)*sizeof(char));
@@ -1022,7 +1032,7 @@ H5E_get_current_stack(void)
 
     /* Allocate a new error stack */
     if((estack_copy = H5FL_MALLOC(H5E_t))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make a copy of current error stack */
     estack_copy->nused = current_stack->nused;
@@ -1043,13 +1053,13 @@ H5E_get_current_stack(void)
         if(H5I_inc_ref(current_error->min_num)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->min_num = current_error->min_num;
-        if((new_error->func_name = HDstrdup(current_error->func_name))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        if((new_error->file_name = HDstrdup(current_error->file_name))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        if((new_error->func_name = H5MM_xstrdup(current_error->func_name))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        if((new_error->file_name = H5MM_xstrdup(current_error->file_name))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         new_error->line = current_error->line;
-        if((new_error->desc = HDstrdup(current_error->desc))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        if((new_error->desc = H5MM_xstrdup(current_error->desc))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end for */
 
     /* Empty current error stack */
@@ -1157,13 +1167,13 @@ H5E_set_current_stack(H5E_t *estack)
         if(H5I_inc_ref(new_error->min_num)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to decrement ref count on error class")
         current_error->min_num = new_error->min_num;
-        if((current_error->func_name = HDstrdup(new_error->func_name))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if((current_error->file_name = HDstrdup(new_error->file_name))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        if((current_error->func_name = H5MM_xstrdup(new_error->func_name))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        if((current_error->file_name = H5MM_xstrdup(new_error->file_name))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         current_error->line = new_error->line;
-        if((current_error->desc = HDstrdup(new_error->desc))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        if((current_error->desc = H5MM_xstrdup(new_error->desc))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end for */
 
 done:
@@ -1521,12 +1531,12 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
 #ifdef H5_HAVE_VASPRINTF
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if(HDvasprintf(&tmp,fmt,ap)<0)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 #else /* H5_HAVE_VASPRINTF */
     /* Allocate space for the formatted description buffer */
     tmp_len=128;
     if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len=HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))
@@ -1554,7 +1564,7 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
         tmp_len = 2 * tmp_len;
 #endif /* H5_VSNPRINTF_WORKS */
         if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end while */
 #endif /* H5_HAVE_VASPRINTF */
 
@@ -1649,12 +1659,12 @@ H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
         if(H5I_inc_ref(min_id)<0)
             HGOTO_DONE(FAIL)
 	estack->slot[estack->nused].min_num = min_id;
-	if((estack->slot[estack->nused].func_name = HDstrdup(func))==NULL)
+	if((estack->slot[estack->nused].func_name = H5MM_xstrdup(func))==NULL)
             HGOTO_DONE(FAIL)
-	if((estack->slot[estack->nused].file_name = HDstrdup(file))==NULL)
+	if((estack->slot[estack->nused].file_name = H5MM_xstrdup(file))==NULL)
             HGOTO_DONE(FAIL)
 	estack->slot[estack->nused].line = line;
-	if((estack->slot[estack->nused].desc = HDstrdup(desc))==NULL)
+	if((estack->slot[estack->nused].desc = H5MM_xstrdup(desc))==NULL)
             HGOTO_DONE(FAIL)
 	estack->nused++;
     }
@@ -1785,11 +1795,11 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
 
         /* Release strings */
         if(error->func_name)
-            H5MM_xfree((void*)error->func_name);
+            H5MM_xfree((void*)error->func_name);        /* Casting away const OK - QAK */
         if(error->file_name)
-            H5MM_xfree((void*)error->file_name);
+            H5MM_xfree((void*)error->file_name);        /* Casting away const OK - QAK */
         if(error->desc)
-            H5MM_xfree((void*)error->desc);
+            H5MM_xfree((void*)error->desc);     /* Casting away const OK - QAK */
     } /* end for */
 
     /* Decrement number of errors on stack */
@@ -2152,54 +2162,48 @@ H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
     if(bk_compatible && func) {
         H5E_error_t old_err;
 
-        status=SUCCEED;
-        if (H5E_WALK_UPWARD==direction) {
-            for (i=0; i<(int)estack->nused && status>=0; i++) {
+        status = SUCCEED;
+        if(H5E_WALK_UPWARD == direction) {
+            for(i = 0; i < (int)estack->nused && status >= 0; i++) {
                 /*Copy each error record on the stack and pass it to callback function.*/
                 old_err.maj_num = estack->slot[i].maj_num;
                 old_err.min_num = estack->slot[i].min_num;
-                old_err.func_name = HDstrdup(estack->slot[i].func_name);
-                old_err.file_name = HDstrdup(estack->slot[i].file_name);
-                old_err.desc = HDstrdup(estack->slot[i].desc);
+                old_err.func_name = estack->slot[i].func_name;
+                old_err.file_name = estack->slot[i].file_name;
+                old_err.desc = estack->slot[i].desc;
                 old_err.line = estack->slot[i].line;
 
                 status = (func)((unsigned)i, &old_err, client_data);
-
-                HDfree(old_err.func_name);
-                HDfree(old_err.file_name);
-                HDfree(old_err.desc);
-            }
-        } else {
-            H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
-            for (i=(int)(estack->nused-1); i>=0 && status>=0; i--) {
+            } /* end for */
+        } /* end if */
+        else {
+            H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
+            for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--) {
                 /*Copy each error record on the stack and pass it to callback function.*/
                 old_err.maj_num = estack->slot[i].maj_num;
                 old_err.min_num = estack->slot[i].min_num;
-                old_err.func_name = HDstrdup(estack->slot[i].func_name);
-                old_err.file_name = HDstrdup(estack->slot[i].file_name);
-                old_err.desc = HDstrdup(estack->slot[i].desc);
+                old_err.func_name = estack->slot[i].func_name;
+                old_err.file_name = estack->slot[i].file_name;
+                old_err.desc = estack->slot[i].desc;
                 old_err.line = estack->slot[i].line;
 
-                status = (func)((unsigned)(estack->nused-(size_t)(i+1)), &old_err, client_data);
-
-                HDfree(old_err.func_name);
-                HDfree(old_err.file_name);
-                HDfree(old_err.desc);
-            }
-        }
+                status = (func)((unsigned)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+            } /* end for */
+        } /* end else */
 
         if(status<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
     } else if(!bk_compatible && stack_func) {
-        status=SUCCEED;
-        if (H5E_WALK_UPWARD==direction) {
-            for (i=0; i<(int)estack->nused && status>=0; i++)
+        status = SUCCEED;
+        if(H5E_WALK_UPWARD == direction) {
+            for(i = 0; i < (int)estack->nused && status >= 0; i++)
                 status = (stack_func)((unsigned)i, estack->slot+i, client_data);
-        } else {
-            H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
-            for (i=(int)(estack->nused-1); i>=0 && status>=0; i--)
+        } /* end if */
+        else {
+            H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
+            for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--)
                 status = (stack_func)((unsigned)(estack->nused-(size_t)(i+1)), estack->slot+i, client_data);
-        }
+        } /* end else */
 
         if(status<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
@@ -2452,30 +2456,31 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_auto_op_t f;            /* Error stack function */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto, FAIL)
     H5TRACE2("e","*xx",func,client_data);
 
     /* Retrieve default error stack */
-    if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Get the automatic error reporting information */
-    if(H5E_get_auto_stack(estack, FALSE, (void **)func, client_data)<0)
+    if(H5E_get_auto_stack(estack, FALSE, &f, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+    if(func)
+        *func = f.efunc;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Eget_auto() */
 
 
 /*-------------------------------------------------------------------------
@@ -2491,38 +2496,35 @@ done:
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
  *
- * Modifications:
- *              Raymond Lu
- *              July 18, 2003
- *              Added error stack in the parameters.  It returns the
- *              traversal function and data for that error stack.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_auto_op_t f;            /* Error stack function */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto_stack, FAIL)
     H5TRACE3("e","i*xx",estack_id,func,client_data);
 
     if(estack_id == H5E_DEFAULT) {
-    	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    	if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if((estack = H5I_object_verify(estack_id, H5I_ERROR_STACK))==NULL)
+        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
-    if(H5E_get_auto_stack(estack, TRUE, (void **)func, client_data)<0)
+    if(H5E_get_auto_stack(estack, TRUE, &f, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+    if(func)
+        *func = f.stack_efunc;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Eget_auto_stack() */
 
 
 /*-------------------------------------------------------------------------
@@ -2538,25 +2540,27 @@ done:
  * Programmer:	Raymond Lu
  *              July 18, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **client_data)
+H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **client_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto_stack)
 
-    assert (estack);
+    HDassert(estack);
 
     /* Retrieve the requested information */
-    if(func)
-        *func = new_api ? (void *)estack->u.func_stack : (void *)estack->u.func;
+    if(func) {
+        if(new_api)
+            func->stack_efunc = estack->u.func_stack;
+        else
+            func->efunc = estack->u.func;
+    } /* end if */
     if(client_data)
         *client_data = estack->auto_data;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5E_get_auto_stack() */
 
 
 /*-------------------------------------------------------------------------
@@ -2582,30 +2586,30 @@ H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **cl
  * Programmer:	Raymond Lu
  *              Sep 16, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Eset_auto(H5E_auto_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_auto_op_t f;            /* Error stack function */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eset_auto, FAIL)
     H5TRACE2("e","xx",func,client_data);
 
-    if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Set the automatic error reporting information */
-    if(H5E_set_auto_stack(estack, FALSE, (void *)func, client_data)<0)
+    f.efunc = func;
+    if(H5E_set_auto_stack(estack, FALSE, &f, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Eset_auto() */
 
 
 /*-------------------------------------------------------------------------
@@ -2630,35 +2634,35 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_auto_op_t f;            /* Error stack function */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eset_auto_stack, FAIL)
     H5TRACE3("e","ixx",estack_id,func,client_data);
 
     if(estack_id == H5E_DEFAULT) {
-    	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    	if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if((estack = H5I_object_verify(estack_id, H5I_ERROR_STACK))==NULL)
+        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Set the automatic error reporting information */
-    if(H5E_set_auto_stack(estack, TRUE, (void *)func, client_data)<0)
+    f.stack_efunc = func;
+    if(H5E_set_auto_stack(estack, TRUE, &f, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Eset_auto_stack() */
 
 
 /*-------------------------------------------------------------------------
@@ -2684,27 +2688,25 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data)
+H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void *client_data)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_auto_stack)
 
-    assert(estack);
+    HDassert(estack);
 
     /* Set the automatic error reporting info */
     estack->new_api = new_api;
     if(new_api)
-        estack->u.func_stack = (H5E_auto_stack_t)func;
+        estack->u.func_stack = func->stack_efunc;
     else
-        estack->u.func = (H5E_auto_t)func;
+        estack->u.func = func->efunc;
     estack->auto_data = client_data;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5E_set_auto_stack() */
 
 
 /*-------------------------------------------------------------------------

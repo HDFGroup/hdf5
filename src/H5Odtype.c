@@ -1361,7 +1361,7 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
     /* If the user data is non-NULL, assume we are copying a dataset
      * and check if we need to make a copy of the datatype for later in
      * the object copying process.  (We currently only need to make a copy
-     * of the datatype if it's a vlen datatype)
+     * of the datatype if it's a vlen or reference datatype)
      */
     if(udata) {
         if((H5T_detect_class(dt_src, H5T_VLEN) > 0)  || 

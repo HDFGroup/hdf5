@@ -2836,7 +2836,7 @@ H5O_move_msgs_forward(H5O_t *oh)
                             /* (We'll merge them together later, in another routine) */
                             if(H5O_NULL_ID != nonnull_msg->type->id) {
                                 /* Copy raw data for non-null message to new location */
-                                HDmemcpy(curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
+                                HDmemmove(curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
                                     nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), nonnull_msg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh));
 
                                 /* Adjust non-null message's offset in chunk */
@@ -2929,9 +2929,13 @@ H5O_move_msgs_forward(H5O_t *oh)
                                 null_msg->dirty = TRUE;
 
                                 /* Create new null message for previous location of non-null message */
-                                if(oh->nmesgs >= oh->alloc_nmesgs)
+                                if(oh->nmesgs >= oh->alloc_nmesgs) {
                                     if(H5O_alloc_msgs(oh, (size_t)1) < 0)
                                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
+
+                                    /* "Retarget" 'curr_msg' pointer into newly re-allocated array of messages */
+                                    curr_msg = &oh->mesg[u];
+                                } /* end if */
 
                                 /* Get message # for new null message */
                                 new_null_msg = oh->nmesgs++;
@@ -3837,10 +3841,9 @@ H5O_add_gap(H5O_t *oh, unsigned chunkno, unsigned idx,
             H5O_mesg_t *null_msg;       /* Pointer to new null message */
 
             /* Check if we need to extend message table to hold the new null message */
-            if(oh->nmesgs >= oh->alloc_nmesgs) {
+            if(oh->nmesgs >= oh->alloc_nmesgs)
                 if(H5O_alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "can't allocate more space for messages")
-            } /* end if */
 
             /* Increment new gap size */
             oh->chunk[chunkno].gap += new_gap_size;

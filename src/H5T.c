@@ -412,7 +412,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 /* Define the code templates for opaque for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_OPAQ_CORE {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_OPAQUE)				      \
-    dt->shared->u.opaque.tag = H5MM_strdup("");					      \
+    dt->shared->u.opaque.tag = H5MM_xstrdup("");					      \
 }
 
 /* Define the code templates for strings for the "GUTS" in the H5T_INIT_TYPE macro */
@@ -3260,7 +3260,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             /*
              * Copy the tag name.
              */
-            new_dt->shared->u.opaque.tag = HDstrdup(new_dt->shared->u.opaque.tag);
+            new_dt->shared->u.opaque.tag = H5MM_xstrdup(new_dt->shared->u.opaque.tag);
             break;
 
         case H5T_ARRAY:

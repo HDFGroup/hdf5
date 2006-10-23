@@ -626,14 +626,16 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     }
 
     /* Create dataset */
-    if ((fspace=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
-    if (datatype==H5T_INTEGER && (dset1=H5Dcreate(file, dname, H5T_NATIVE_INT,
-	fspace, dcpl))<0) goto error;
-    if (datatype==H5T_COMPOUND && (dset2=H5Dcreate(file, dname, ctype_id,
-        fspace, dcpl))<0) goto error;
+    if((fspace = H5Screate_simple(5, cur_size, cur_size)) < 0)
+        goto error;
+    if(datatype == H5T_INTEGER && (dset1 = H5Dcreate(file, dname, H5T_NATIVE_INT, fspace, dcpl)) < 0)
+        goto error;
+    if(datatype == H5T_COMPOUND && (dset2 = H5Dcreate(file, dname, ctype_id, fspace, dcpl)) < 0)
+        goto error;
 
     /* Read some data and make sure it's the fill value */
-    if ((mspace=H5Screate_simple(5, one, NULL))<0) goto error;
+    if((mspace = H5Screate_simple(5, one, NULL)) < 0)
+        goto error;
     for (i=0; i<1000; i++) {
 	for (j=0; j<5; j++) {
 	    hs_offset[j] = rand() % cur_size[j];
@@ -689,25 +691,25 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     /* case for atomic datatype */
     if(datatype==H5T_INTEGER) {
         /*check for overflow*/
-        assert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int))));
-        buf = malloc((size_t)(nelmts*sizeof(int)));
-        for (u=0; u<nelmts; u++) buf[u] = 9999;
+        HDassert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int))));
+        buf = HDmalloc((size_t)(nelmts * sizeof(int)));
+        for(u = 0; u < nelmts; u++)
+            buf[u] = 9999;
         if (H5Dwrite(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 	    buf)<0) goto error;
     }
     /* case for compound datatype */
     else if(datatype==H5T_COMPOUND) {
-        assert((nelmts*sizeof(comp_datatype))==
-	    (hsize_t)((size_t)(nelmts*sizeof(comp_datatype))));
-	buf_c = (comp_datatype*)calloc((size_t)nelmts,sizeof(comp_datatype));
+        HDassert((nelmts*sizeof(comp_datatype))==
+                (hsize_t)((size_t)(nelmts*sizeof(comp_datatype))));
+	buf_c = (comp_datatype*)HDcalloc((size_t)nelmts,sizeof(comp_datatype));
         for (u=0; u<nelmts; u++) {
 	    buf_c[u].a = (float)1111.11;
  	    buf_c[u].x = 2222;
 	    buf_c[u].y = 3333.3333;
 	    buf_c[u].z = 'd';
 	}
-        if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT,
-            buf_c)<0) goto error;
+        if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c)<0) goto error;
     }
 
     /* Check if space is allocated */
@@ -721,24 +723,25 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         printf("    Got %d\n", allocation);
         goto error;
     }
-    free(buf);
+    HDfree(buf);
     buf = NULL;
     H5Sclose(mspace);
 
     /* Read some data and make sure it's the right value */
-    if ((mspace=H5Screate_simple(5, one, NULL))<0) goto error;
-    for (i=0; i<1000; i++) {
-	for (j=0, odd=0; j<5; j++) {
+    if((mspace = H5Screate_simple(5, one, NULL)) < 0)
+        goto error;
+    for(i = 0; i < 1000; i++) {
+	for(j = 0, odd = 0; j < 5; j++) {
 	    hs_offset[j] = rand() % cur_size[j];
 	    odd += (int)(hs_offset[j]%2);
-	}
-	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-				one, NULL)<0) goto error;
+	} /* end for */
+	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
+            goto error;
 
 	/* case for atomic datatype */
-        if (datatype==H5T_INTEGER) {
-	    if (H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-		    &val_rd)<0) goto error;
+        if(datatype==H5T_INTEGER) {
+	    if(H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd) < 0)
+                goto error;
             if(fill_time == H5D_FILL_TIME_ALLOC) {
                 should_be = odd ? fillval : 9999;
                 if (val_rd!=should_be) {
@@ -769,9 +772,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	    }
 	} /* end for datatype==H5T_INTEGER */
 	/* case for compound datatype */
-	else if (datatype==H5T_COMPOUND) {
-            if (H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT,
-                    &rd_c)<0) goto error;
+	else if(datatype==H5T_COMPOUND) {
+            if(H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, &rd_c) < 0)
+                goto error;
             if(fill_time == H5D_FILL_TIME_ALLOC) {
 		if(odd) {
 		    should_be_c.a=fill_c.a;
@@ -822,6 +825,10 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
             }
 	} /* end for datatype==H5T_COMPOUND */
     }
+    if(datatype == H5T_COMPOUND) {
+        HDfree(buf_c);
+        buf_c = NULL;
+    } /* end if */
 
     if (H5Sclose(mspace)<0) goto error;
     if (datatype==H5T_INTEGER && H5Dclose(dset1)<0) goto error;

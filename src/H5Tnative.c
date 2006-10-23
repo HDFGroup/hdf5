@@ -200,7 +200,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
             if(H5T_IS_VL_STRING(dtype->shared)) {
                 /* Update size, offset and compound alignment for parent. */
-                if(H5T_cmp_offset(comp_size, offset, sizeof(char *), 1, H5T_POINTER_COMP_ALIGN_g, struct_align)<0)
+                if(H5T_cmp_offset(comp_size, offset, sizeof(char *), (size_t)1, H5T_POINTER_COMP_ALIGN_g, struct_align)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             } else {
                 /* Update size, offset and compound alignment for parent. */
@@ -249,7 +249,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                     ref_size = sizeof(hdset_reg_ref_t);
                 }
 
-                if(H5T_cmp_offset(comp_size, offset, ref_size, 1, align, struct_align)<0)
+                if(H5T_cmp_offset(comp_size, offset, ref_size, (size_t)1, align, struct_align)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             }
             break;
@@ -368,7 +368,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
                     HDmemcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
 
-                    if(H5Tconvert(super_type_id, nat_super_type_id, 1, memb_value, NULL, H5P_DEFAULT)<0)
+                    if(H5Tconvert(super_type_id, nat_super_type_id, (size_t)1, memb_value, NULL, H5P_DEFAULT)<0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
 
                     if(H5T_enum_insert(new_type, memb_name, memb_value)<0)
@@ -468,7 +468,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 vl_align = H5T_HVL_COMP_ALIGN_g;
                 vl_size  = sizeof(hvl_t);
 
-                if(H5T_cmp_offset(comp_size, offset, vl_size, 1, vl_align, struct_align)<0)
+                if(H5T_cmp_offset(comp_size, offset, vl_size, (size_t)1, vl_align, struct_align)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
 
                 ret_value = new_type;
@@ -660,7 +660,7 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy type")
 
     /* compute size and offset of compound type member. */
-    if(H5T_cmp_offset(comp_size, offset, native_size, 1, align, struct_align)<0)
+    if(H5T_cmp_offset(comp_size, offset, native_size, (size_t)1, align, struct_align)<0)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
 
 done:
@@ -810,7 +810,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
 
     /* compute offset of compound type member. */
-    if(H5T_cmp_offset(comp_size, offset, native_size, 1, align, struct_align)<0)
+    if(H5T_cmp_offset(comp_size, offset, native_size, (size_t)1, align, struct_align)<0)
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
 
 done:

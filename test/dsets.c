@@ -1651,7 +1651,7 @@ error:
  */
 #ifdef H5_HAVE_FILTER_SZIP
 static herr_t
-test_filter_noencoder(const char *dset_name)
+test_filter_noencoder(const char *dset_name, hid_t fapl)
 {
     hid_t file_id = -1;
     hid_t dset_id = -1;
@@ -1677,7 +1677,7 @@ test_filter_noencoder(const char *dset_name)
     }
     HDstrcat(testfile, NOENCODER_FILENAME);
 
-    file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id = H5Fopen(testfile, H5F_ACC_RDWR, fapl);
     if (file_id < 0) goto error;
 
     dset_id = H5Dopen(file_id, dset_name);
@@ -1749,15 +1749,15 @@ test_filter_noencoder(const char *dset_name)
 error:
     H5_FAILED();
     if (dset_id != -1)
-            H5Dclose(dset_id);
+        H5Dclose(dset_id);
     if (test_dset_id != -1)
-            H5Dclose(test_dset_id);
+        H5Dclose(test_dset_id);
     if (space_id != -1)
-            H5Sclose(space_id);
+        H5Sclose(space_id);
     if (dcpl_id != -1)
-            H5Pclose(dcpl_id);
+        H5Pclose(dcpl_id);
     if (file_id != -1)
-            H5Fclose(file_id);
+        H5Fclose(file_id);
     return -1;
 }
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -1868,7 +1868,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters(hid_t file)
+test_filters(hid_t file, hid_t 
+#ifndef H5_HAVE_FILTER_SZIP
+UNUSED
+#endif /* H5_HAVE_FILTER_SZIP */
+    fapl)
 {
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
@@ -2006,7 +2010,7 @@ test_filters(hid_t file)
 
     if ( h5_szip_can_encode() != 1) {
 	puts("");
-	if(test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0) goto error;
+	if(test_filter_noencoder(NOENCODER_SZIP_DATASET, fapl) < 0) goto error;
     } else {
 	SKIPPED();
     }
@@ -5696,12 +5700,10 @@ error:
  * Programmer: Pedro Vicente
  *              Monday, March 8, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters_endianess(void)
+test_filters_endianess(hid_t fapl)
 {
     hid_t     fid=-1;                   /* file ID */
     hid_t     dsid=-1;                  /* dataset ID */
@@ -5727,7 +5729,7 @@ test_filters_endianess(void)
     *-------------------------------------------------------------------------
     */
     /* create a file using default properties */
-    fid=H5Fcreate("test_filters.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+    if((fid = H5Fcreate("test_filters.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) goto error;
 
     /* create a data space */
     if ((sid = H5Screate_simple(rank,dims,NULL))<0) goto error;
@@ -5756,17 +5758,15 @@ test_filters_endianess(void)
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    strcpy(data_file, "");
-    if ( srcdir )
-    {
-     strcpy(data_file, srcdir);
-     strcat(data_file, "/");
+    HDstrcpy(data_file, "");
+    if ( srcdir ) {
+        HDstrcpy(data_file, srcdir);
+        HDstrcat(data_file, "/");
     }
-	   strcat( data_file, "test_filters_le.hdf5");
+   strcat( data_file, "test_filters_le.hdf5");
 
     /* open */
-    if ((fid=H5Fopen(data_file,H5F_ACC_RDONLY,H5P_DEFAULT))<0)
-     goto error;
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) goto error;
 
     /* read */
     if (auxread_fdata(fid,"dset")<0) goto error;
@@ -5780,17 +5780,15 @@ test_filters_endianess(void)
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    strcpy(data_file, "");
-    if ( srcdir )
-    {
-     strcpy(data_file, srcdir);
-     strcat(data_file, "/");
+    HDstrcpy(data_file, "");
+    if ( srcdir ) {
+        HDstrcpy(data_file, srcdir);
+        HDstrcat(data_file, "/");
     }
-	   strcat( data_file, "test_filters_be.hdf5");
+    HDstrcat( data_file, "test_filters_be.hdf5");
 
     /* open */
-    if ((fid=H5Fopen(data_file,H5F_ACC_RDONLY,H5P_DEFAULT))<0)
-     goto error;
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) goto error;
 
     /* read */
     if (auxread_fdata(fid,"dset")<0) goto error;
@@ -5982,92 +5980,125 @@ error:
 int
 main(void)
 {
-    hid_t		file, grp, fapl;
-    int mdc_nelmts;
-    size_t rdcc_nelmts;
-    size_t rdcc_nbytes;
-    double rdcc_w0;
-    int			nerrors=0;
-    char		filename[1024];
-    const char *envval = NULL;
+    int	nerrors = 0;
+    const char *envval;
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
+    if(envval == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+        char		filename[1024];
+        hid_t		file, grp, fapl, fapl2;
+        hbool_t new_format;
+        int mdc_nelmts;
+        size_t rdcc_nelmts;
+        size_t rdcc_nbytes;
+        double rdcc_w0;
+
+	/* Testing setup */
 	h5_reset();
 	fapl = h5_fileaccess();
 
 	/* Set the random # seed */
 	HDsrandom((unsigned long)HDtime(NULL));
 
+        /* Copy the file access property list */
+        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+
+        /* Set the "use the latest version of the format" flag for creating objects in the file */
+        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+
 	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-	/* Turn off the chunk cache, so all the chunks are immediately written to disk */
-	if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0)<0) goto error;
-	rdcc_nbytes=0;
-	if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0)<0) goto error;
+        /* Test with old & new format groups */
+        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
 
-	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	    goto error;
-	}
+            /* Set the FAPL for the type of format */
+            if(new_format) {
+                puts("\nTesting with new file format:");
+                my_fapl = fapl2;
+            } /* end if */
+            else {
+                puts("Testing with old file format:");
+                my_fapl = fapl;
+            } /* end else */
 
-	/* Cause the library to emit initial messages */
-	if ((grp = H5Gcreate (file, "emit diagnostics", 0))<0) goto error;
-	if (H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted")<0)
-	    goto error;
-	if (H5Gclose (grp)<0) goto error;
+            /* Turn off the chunk cache, so all the chunks are immediately written to disk */
+            if(H5Pget_cache(my_fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+                goto error;
+            rdcc_nbytes = 0;
+            if(H5Pset_cache(my_fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+                goto error;
 
-	nerrors += test_create(file)<0 	?1:0;
-	nerrors += test_simple_io(fapl)<0	?1:0;
-	nerrors += test_compact_io(fapl)<0  ?1:0;
-	nerrors += test_max_compact(fapl)<0  ?1:0;
-	nerrors += test_conv_buffer(file)<0	?1:0;
-	nerrors += test_tconv(file)<0	?1:0;
-	nerrors += test_filters(file)<0	?1:0;
-	nerrors += test_onebyte_shuffle(file)<0 ?1:0;
-	nerrors += test_nbit_int(file)<0 ?1:0;
-	nerrors += test_nbit_float(file)<0         ?1:0;
-	nerrors += test_nbit_double(file)<0         ?1:0;
-	nerrors += test_nbit_array(file)<0 ?1:0;
-	nerrors += test_nbit_compound(file)<0 ?1:0;
-	nerrors += test_nbit_compound_2(file)<0 ?1:0;
-	nerrors += test_nbit_compound_3(file)<0 ?1:0;
-	nerrors += test_scaleoffset_int(file)<0 ?1:0;
-	nerrors += test_scaleoffset_int_2(file)<0 ?1:0;
-	nerrors += test_scaleoffset_float(file)<0 ?1:0;
-	nerrors += test_scaleoffset_float_2(file)<0 ?1:0;
-	nerrors += test_scaleoffset_double(file)<0 ?1:0;
-	nerrors += test_scaleoffset_double_2(file)<0 ?1:0;
-	nerrors += test_multiopen (file)<0	?1:0;
-	nerrors += test_types(file)<0       ?1:0;
-	nerrors += test_userblock_offset(fapl)<0     ?1:0;
-	nerrors += test_missing_filter(file)<0	?1:0;
-	nerrors += test_can_apply(file)<0	?1:0;
-	nerrors += test_set_local(fapl)<0	?1:0;
-	nerrors += test_can_apply_szip(file)<0	?1:0;
-	nerrors += test_compare_dcpl(file)<0	?1:0;
-	nerrors += test_filter_delete(file)<0	?1:0;
-	nerrors += test_filters_endianess()<0	?1:0;
-	nerrors += test_zero_dims(file)<0	?1:0;
-	nerrors += test_missing_chunk(file)<0	?1:0;
+            /* Create the file for this test */
+            if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
+                goto error;
 
-	if (H5Fclose(file)<0) goto error;
+            /* Cause the library to emit initial messages */
+            if((grp = H5Gcreate(file, "emit diagnostics", 0)) < 0)
+                goto error;
+            if(H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted") < 0)
+                goto error;
+            if(H5Gclose(grp) < 0)
+                goto error;
 
-	if (nerrors) goto error;
+            nerrors += (test_create(file) < 0 			? 1: 0);
+            nerrors += (test_simple_io(my_fapl) < 0		? 1: 0);
+            nerrors += (test_compact_io(my_fapl) < 0  		? 1: 0);
+            nerrors += (test_max_compact(my_fapl) < 0  		? 1: 0);
+            nerrors += (test_conv_buffer(file) < 0		? 1: 0);
+            nerrors += (test_tconv(file) < 0			? 1: 0);
+            nerrors += (test_filters(file, my_fapl) < 0		? 1: 0);
+            nerrors += (test_onebyte_shuffle(file) < 0 		? 1: 0);
+            nerrors += (test_nbit_int(file) < 0 		? 1: 0);
+            nerrors += (test_nbit_float(file) < 0         	? 1: 0);
+            nerrors += (test_nbit_double(file) < 0         	? 1: 0);
+            nerrors += (test_nbit_array(file) < 0 		? 1: 0);
+            nerrors += (test_nbit_compound(file) < 0 		? 1: 0);
+            nerrors += (test_nbit_compound_2(file) < 0 		? 1: 0);
+            nerrors += (test_nbit_compound_3(file) < 0 		? 1: 0);
+            nerrors += (test_scaleoffset_int(file) < 0 		? 1: 0);
+            nerrors += (test_scaleoffset_int_2(file) < 0 	? 1: 0);
+            nerrors += (test_scaleoffset_float(file) < 0 	? 1: 0);
+            nerrors += (test_scaleoffset_float_2(file) < 0 	? 1: 0);
+            nerrors += (test_scaleoffset_double(file) < 0 	? 1: 0);
+            nerrors += (test_scaleoffset_double_2(file) < 0 	? 1: 0);
+            nerrors += (test_multiopen (file) < 0		? 1: 0);
+            nerrors += (test_types(file) < 0       		? 1: 0);
+            nerrors += (test_userblock_offset(my_fapl) < 0     	? 1: 0);
+            nerrors += (test_missing_filter(file) < 0		? 1: 0);
+            nerrors += (test_can_apply(file) < 0		? 1: 0);
+            nerrors += (test_set_local(my_fapl) < 0		? 1: 0);
+            nerrors += (test_can_apply_szip(file) < 0		? 1: 0);
+            nerrors += (test_compare_dcpl(file) < 0		? 1: 0);
+            nerrors += (test_filter_delete(file) < 0		? 1: 0);
+            nerrors += (test_filters_endianess(my_fapl) < 0	? 1: 0);
+            nerrors += (test_zero_dims(file) < 0		? 1: 0);
+            nerrors += (test_missing_chunk(file) < 0		? 1: 0);
+
+            if(H5Fclose(file) < 0)
+                goto error;
+        } /* end for */
+
+        /* Close 2nd FAPL */
+	H5Pclose(fapl2);
+
+	if(nerrors)
+            goto error;
 	printf("All dataset tests passed.\n");
 	h5_cleanup(FILENAME, fapl);
-    }
+    } /* end if */
     else
-    {
 	puts("All dataset tests skipped - Incompatible with current Virtual File Driver");
-    }
+
     return 0;
 
-    error:
-	nerrors = MAX(1, nerrors);
-	printf("***** %d DATASET TEST%s FAILED! *****\n",
-		nerrors, 1 == nerrors ? "" : "S");
-	return 1;
+error:
+    nerrors = MAX(1, nerrors);
+    printf("***** %d DATASET TEST%s FAILED! *****\n",
+            nerrors, 1 == nerrors ? "" : "S");
+    return 1;
 }
+

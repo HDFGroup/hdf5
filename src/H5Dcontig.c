@@ -1110,9 +1110,14 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             is_vlen = TRUE;
         }
         /* Check for reference datatype */
-        else if((H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) && (f_src != f_dst)) {
-            /* need to fix values of reference */
-            fix_ref = TRUE; 
+        else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
+            /* Create datatype ID for src datatype, so it gets freed */
+            if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
+            /* Need to fix values of references when copying across files */
+            if(f_src != f_dst)
+                fix_ref = TRUE; 
 
             /* Set the number of bytes to read & write to the buffer size */
             src_nbytes = dst_nbytes = mem_nbytes = buf_size;

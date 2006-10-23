@@ -586,8 +586,10 @@ int test_set(void)
     {
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Data transform get before set succeeded (it shouldn't have)\n");
+        free(ptrgetTest);
 	goto error;
     }
+    free(ptrgetTest);
 
     TESTING("H5Pset_data_transform (set with NULL transform)");
     INVALID_SET_TEST(NULL);

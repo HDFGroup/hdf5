@@ -1594,16 +1594,16 @@ test_file_getname(void)
     CHECK(file_id, FAIL, "H5Fcreate");
 
     /* Get and verify file name */
-    name_len = H5Fget_name(file_id, name, TESTA_NAME_BUF_SIZE);
+    name_len = H5Fget_name(file_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create a group in the root group */
-    group_id = H5Gcreate(file_id, TESTA_GROUPNAME, 0);
+    group_id = H5Gcreate(file_id, TESTA_GROUPNAME, (size_t)0);
     CHECK(group_id, FAIL, "H5Gcreate");
 
     /* Get and verify file name */
-    name_len = H5Fget_name(group_id, name, TESTA_NAME_BUF_SIZE);
+    name_len = H5Fget_name(group_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
@@ -1614,7 +1614,7 @@ test_file_getname(void)
     /* Try get file name from data space.  Supposed to fail because
      * it's illegal operation. */
     H5E_BEGIN_TRY {
-        name_len = H5Fget_name(space_id, name, TESTA_NAME_BUF_SIZE);
+        name_len = H5Fget_name(space_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     } H5E_END_TRY;
     VERIFY(name_len, FAIL, "H5Fget_name");
 
@@ -1623,7 +1623,7 @@ test_file_getname(void)
     CHECK(dataset_id, FAIL, "H5Dcreate");
 
     /* Get and verify file name */
-    name_len = H5Fget_name(dataset_id, name, TESTA_NAME_BUF_SIZE);
+    name_len = H5Fget_name(dataset_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
@@ -1632,7 +1632,7 @@ test_file_getname(void)
     CHECK(attr_id, FAIL, "H5Acreate");
 
     /* Get and verify file name */
-    name_len = H5Fget_name(attr_id, name, TESTA_NAME_BUF_SIZE);
+    name_len = H5Fget_name(attr_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
@@ -1652,7 +1652,7 @@ test_file_getname(void)
     CHECK(ret, FAIL, "H5Tcommit");
 
     /* Get and verify file name */
-    name_len = H5Fget_name(type_id, name, TESTA_NAME_BUF_SIZE);
+    name_len = H5Fget_name(type_id, name, (size_t)TESTA_NAME_BUF_SIZE);
     CHECK(name_len, FAIL, "H5Fget_name");
     VERIFY_STR(name, FILE1, "H5Fget_name");
 

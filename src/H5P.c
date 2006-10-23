@@ -5782,7 +5782,7 @@ H5P_open_class_path(const char *path)
     assert(path);
 
     /* Duplicate the path to use */
-    tmp_path=HDstrdup(path);
+    tmp_path=H5MM_xstrdup(path);
     assert(tmp_path);
 
     /* Find the generic property class with this full path */

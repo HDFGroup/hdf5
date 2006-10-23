@@ -39,12 +39,12 @@ typedef hid_t   H5E_minor_t;
 
 /* Information about an error; element of error stack.  For backward compatibility with v1.6. */
 typedef struct H5E_error_t {
-        H5E_major_t maj_num;                /*major error number                 */
-        H5E_minor_t min_num;                /*minor error number                 */
-        const char  *func_name;             /*function in which error occurred   */
-        const char  *file_name;             /*file in which error occurred       */
-        unsigned    line;                   /*line in file where error occurs    */
-        const char  *desc;                  /*optional supplied description      */
+    H5E_major_t maj_num;                /*major error number                 */
+    H5E_minor_t min_num;                /*minor error number                 */
+    const char  *func_name;             /*function in which error occurred   */
+    const char  *file_name;             /*file in which error occurred       */
+    unsigned    line;                   /*line in file where error occurs    */
+    const char  *desc;                  /*optional supplied description      */
 } H5E_error_t;
 
 /* Information about an error; element of error stack */

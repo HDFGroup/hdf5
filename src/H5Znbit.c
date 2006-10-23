@@ -106,7 +106,7 @@ H5Z_class_t H5Z_NBIT[1] = {{
  * parms_index: index of array parms used by compression/decompression functions
  */
 static unsigned cd_values_index = 0;
-static unsigned cd_values_actual_nparms = 0;
+static size_t cd_values_actual_nparms = 0;
 static unsigned char need_not_compress = FALSE;
 static unsigned parms_index = 0;
 
@@ -717,26 +717,26 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype needs too many nbit parameters")
 
     /* Allocate memory space for cd_values[] */
-    if(NULL==(cd_values = H5MM_malloc(cd_values_actual_nparms*sizeof(unsigned))))
+    if(NULL == (cd_values = H5MM_malloc(cd_values_actual_nparms * sizeof(unsigned))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values[]")
 
     /* Get the filter's current parameters */
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_NBIT,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_NBIT, &flags, &cd_nelmts, cd_values, (size_t)0, NULL) < 0)
 #else
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_NBIT,&flags,&cd_nelmts, cd_values,0,NULL,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_NBIT, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
 #endif
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get nbit parameters")
 
     /* Get total number of elements in the chunk */
-    if ((npoints=H5Sget_simple_extent_npoints(space_id))<0)
+    if((npoints = H5Sget_simple_extent_npoints(space_id)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
 
     /* Initialize index for cd_values array starting from the third entry */
     cd_values_index = 2;
 
     /* Set "local" parameter for number of elements in the chunk */
-    H5_ASSIGN_OVERFLOW(cd_values[cd_values_index++],npoints,hssize_t,unsigned);
+    H5_ASSIGN_OVERFLOW(cd_values[cd_values_index++], npoints, hssize_t, unsigned);
 
     /* Assume no need to compress now, will be changed to FALSE later if not */
     need_not_compress = TRUE;
@@ -745,35 +745,40 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     switch(dtype_class) {
         case H5T_INTEGER:
         case H5T_FLOAT:
-            if(H5Z_set_parms_atomic(type_id, cd_values)==FAIL)
+            if(H5Z_set_parms_atomic(type_id, cd_values) < 0)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
+
         case H5T_ARRAY:
-            if(H5Z_set_parms_array(type_id, cd_values)==FAIL)
+            if(H5Z_set_parms_array(type_id, cd_values) < 0)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
+
         case H5T_COMPOUND:
-            if(H5Z_set_parms_compound(type_id, cd_values)==FAIL)
+            if(H5Z_set_parms_compound(type_id, cd_values) < 0)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
+
         default: /* no need to set parameters for other datatypes at top level */
              break;
     } /* end switch */
 
     /* Check if calculation of parameters matches with setting of parameters */
-    assert(cd_values_actual_nparms==cd_values_index);
+    HDassert(cd_values_actual_nparms == cd_values_index);
 
     /* Finally set the first two entries of cd_values[] */
     cd_values[0] = cd_values_actual_nparms;
     cd_values[1] = need_not_compress;
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, cd_values)<0)
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, cd_values) < 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    if(cd_values)
+	H5MM_xfree(cd_values);
 
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_set_local_nbit() */
 
 

@@ -288,7 +288,7 @@ H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, unsigned filter,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[],
-       unsigned int *filter_config /*out*/);
+       unsigned *filter_config /*out*/);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 #ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
@@ -302,7 +302,7 @@ H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]/*out*/,
-       unsigned int *filter_config/*out*/);
+       unsigned *filter_config/*out*/);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);

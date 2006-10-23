@@ -405,7 +405,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
     file->fd = fd;
     if (name && *name)
-        file->name = HDstrdup(name);
+        file->name = H5MM_xstrdup(name);
 
     /*
      * The increment comes from either the file access property list or the

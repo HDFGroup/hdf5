@@ -363,7 +363,7 @@ test_h5s_null(void)
         hsize_t	coord[1][1]; /* Coordinates for point selection */
 
         coord[0][0]=0;
-	ret = H5Sselect_elements(sid, H5S_SELECT_SET, 1, (const hsize_t **)coord);
+	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t **)coord);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
@@ -559,7 +559,7 @@ test_h5s_encode(void)
     CHECK(ret, FAIL, "H5Sencode");
 
     if(sbuf_size>0)
-        sbuf = (unsigned char*)calloc(1, sbuf_size);
+        sbuf = (unsigned char*)HDcalloc((size_t)1, sbuf_size);
 
     /* Try decoding bogus buffer */
     H5E_BEGIN_TRY {
@@ -614,7 +614,7 @@ test_h5s_encode(void)
     CHECK(ret, FAIL, "H5Sencode");
 
     if(null_size>0)
-        null_sbuf = (unsigned char*)calloc(1, null_size);
+        null_sbuf = (unsigned char*)HDcalloc((size_t)1, null_size);
 
     ret = H5Sencode(sid2, null_sbuf, &null_size);
     CHECK(ret, FAIL, "H5Sencode");
@@ -646,7 +646,7 @@ test_h5s_encode(void)
     CHECK(ret, FAIL, "H5Sencode");
 
     if(scalar_size>0)
-        scalar_buf = (unsigned char*)calloc(1, scalar_size);
+        scalar_buf = (unsigned char*)HDcalloc((size_t)1, scalar_size);
 
     ret = H5Sencode(sid3, scalar_buf, &scalar_size);
     CHECK(ret, FAIL, "H5Sencode");
@@ -674,9 +674,9 @@ test_h5s_encode(void)
     ret = H5Sclose(decoded_sid3);
     CHECK(ret, FAIL, "H5Sclose");
 
-    free(sbuf);
-    free(null_sbuf);
-    free(scalar_buf);
+    HDfree(sbuf);
+    HDfree(null_sbuf);
+    HDfree(scalar_buf);
 }				/* test_h5s_encode() */
 
 /****************************************************************

@@ -2315,7 +2315,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_enum_struct_t	*priv=NULL;	/*private conversion data	*/
     int		n;		/*src value cast as native int	*/
-    int		domain[2];	/*min and max source values	*/
+    int		domain[2] = {0, 0};	/*min and max source values	*/
     int		*map=NULL;	/*map from src value to dst idx	*/
     unsigned	length;		/*nelmts in map array		*/
     unsigned	i, j;		/*counters			*/

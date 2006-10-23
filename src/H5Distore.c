@@ -1034,6 +1034,14 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         /* Re-allocate memory for copying the chunk */
         if(NULL == (udata->buf = H5MM_realloc(udata->buf, nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed for raw data chunk")
+        if(udata->bkg) {
+            if(NULL == (udata->bkg = H5MM_realloc(udata->bkg, nbytes)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed for raw data chunk")
+            if(!udata->cpy_info->expand_ref)
+                HDmemset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
+
+            bkg = udata->bkg;
+        } /* end if */
 
         buf = udata->buf;
         udata->buf_size = buf_size = nbytes;
@@ -1044,7 +1052,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         HGOTO_ERROR(H5E_IO, H5E_READERROR, H5B_ITER_ERROR, "unable to read raw data chunk")
 
     /* Need to uncompress variable-length & reference data elements */
-    if(is_compressed && (is_vlen | fix_ref)) {
+    if(is_compressed && (is_vlen || fix_ref)) {
         unsigned filter_mask = lt_key->filter_mask;
 
         if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &nbytes, &buf_size, &buf) < 0)
@@ -3651,6 +3659,13 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
         } /* end if */
         else {
+            /* Create datatype ID for source datatype, so it gets freed */
+            if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
+                /* Create datatype ID for src datatype */
+                if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+            } /* end if */
+
             buf_size = layout_src->u.chunk.size;
             reclaim_buf_size = 0;
         } /* end else */
@@ -3700,8 +3715,9 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     if(H5B_iterate(f_src, dxpl_id, H5B_ISTORE, H5D_istore_iter_copy, layout_src->u.chunk.addr, &udata) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
 
-    /* I/O buffer may have been re-allocated */
+    /* I/O buffers may have been re-allocated */
     buf = udata.buf;
+    bkg = udata.bkg;
 
 done:
     if(sid_buf > 0)

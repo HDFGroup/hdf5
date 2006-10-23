@@ -45,7 +45,7 @@ static herr_t H5Z_scaleoffset_set_parms_fillval(hid_t dcpl_id, hid_t type_id,
 static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
-static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size);
+static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size);
 static unsigned H5Z_scaleoffset_log2(unsigned long_long num);
 static void H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts,
     enum H5Z_scaleoffset_type type, unsigned filavail, const void *filval_buf,
@@ -632,7 +632,7 @@ done:
 static enum H5Z_scaleoffset_type
 H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dtype_sign)
 {
-    enum H5Z_scaleoffset_type type; /* integer type */
+    enum H5Z_scaleoffset_type type = t_bad; /* integer type */
     enum H5Z_scaleoffset_type ret_value;             /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5Z_scaleoffset_get_type)
@@ -1182,21 +1182,22 @@ done:
 /* change byte order of input buffer either from little-endian to big-endian
  * or from big-endian to little-endian  2/21/2005
  */
-static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size)
+static void
+H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size)
 {
-   unsigned i, j;
-   unsigned char *buffer, temp;
+   if(dtype_size > 1) {
+       unsigned i, j;
+       unsigned char *buffer, temp;
 
-   if(dtype_size == 1) return;
-
-   buffer = buf;
-   for(i = 0; i < d_nelmts * dtype_size; i += dtype_size)
-      for(j = 0; j < dtype_size/2; j++) {
-         /* swap pair of bytes */
-         temp = buffer[i+j];
-         buffer[i+j] = buffer[i+dtype_size-1-j];
-         buffer[i+dtype_size-1-j] = temp;
-      }
+       buffer = buf;
+       for(i = 0; i < d_nelmts * dtype_size; i += dtype_size)
+          for(j = 0; j < dtype_size/2; j++) {
+             /* swap pair of bytes */
+             temp = buffer[i+j];
+             buffer[i+j] = buffer[i+dtype_size-1-j];
+             buffer[i+dtype_size-1-j] = temp;
+          }
+    } /* end if */
 }
 
 /* Round a floating-point value to the nearest integer value 4/19/05 */

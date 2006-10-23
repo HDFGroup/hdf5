@@ -60,7 +60,7 @@ herr_t H5Pset_data_transform(hid_t plist_id, const char* expression)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Create data transform info from expression */
-    if((data_xform_prop=H5Z_xform_create(expression))==NULL)
+    if(NULL == (data_xform_prop = H5Z_xform_create(expression)))
         HGOTO_ERROR (H5E_PLINE, H5E_NOSPACE, FAIL, "unable to create data transform info")
 
     /* Update property list */
