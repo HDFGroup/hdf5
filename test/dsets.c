@@ -2105,7 +2105,7 @@ UNUSED
 
     if ( h5_szip_can_encode() != 1) {
 	puts("");
-	if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0) goto error;
+	if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET,fapl) < 0) goto error;
     } else {
 		SKIPPED();
     }
