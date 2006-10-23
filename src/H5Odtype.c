@@ -17,8 +17,8 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Fprivate.h"		/* Files				*/
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
@@ -161,7 +161,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              * Opaque types...
              */
             z = flags & (H5T_OPAQUE_TAG_MAX - 1);
-            HDassert(0==(z&0x7)); /*must be aligned*/
+            HDassert(0 == (z & 0x7)); /*must be aligned*/
             if(NULL == (dt->shared->u.opaque.tag = H5MM_malloc(z + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             HDmemcpy(dt->shared->u.opaque.tag, *pp, z);
@@ -949,7 +949,7 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
     /* Perform actual decode of message */
     if(H5O_dtype_decode_helper(f, &p, dt) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type")
 
     /* Set return value */
     ret_value = dt;
@@ -1030,28 +1030,28 @@ H5O_dtype_copy(const void *_src, void *_dst, unsigned UNUSED update_flags)
     H5T_t		   *dst = NULL;
     void 		   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy)
 
     /* check args */
-    assert(src);
+    HDassert(src);
 
-    /* copy */
-    if (NULL == (dst = H5T_copy(src, H5T_COPY_ALL)))
+    /* Copy */
+    if(NULL == (dst = H5T_copy(src, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't copy type")
 
-    /* was result already allocated? */
-    if (_dst) {
+    /* Was result already allocated? */
+    if(_dst) {
         *((H5T_t *) _dst) = *dst;
-        H5FL_FREE(H5T_t,dst);
+        H5FL_FREE(H5T_t, dst);
         dst = (H5T_t *) _dst;
-    }
+    } /* end if */
 
     /* Set return value */
-    ret_value=dst;
+    ret_value = dst;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_copy() */
 
 
 /*--------------------------------------------------------------------------
