@@ -787,14 +787,14 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
         /* Check for actual name */
         if(s) {
             HDstrncpy(name, s, namelen);
-            name[namelen] = '\0';
+            name[namelen - 1] = '\0';
         } /* end if */
         else {
             /* Check for unknown library filter */
             /* (probably from a future version of the library) */
             if(filter->id < 256) {
                 HDstrncpy(name, "Unknown library filter", namelen);
-                name[namelen] = '\0';
+                name[namelen - 1] = '\0';
             } /* end if */
             else
                 name[0] = '\0';
