@@ -205,7 +205,7 @@ HDfprintf(stderr, "%s: cparam2->pline.filter[%Zu].name = %s\n", "H5HF_cmp_cparam
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF_get_cparam_test() */
+} /* H5HF_cmp_cparam_test() */
 
 
 /*-------------------------------------------------------------------------

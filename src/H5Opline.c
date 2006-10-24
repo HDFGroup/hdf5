@@ -152,9 +152,22 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
         /* Filter name, if there is one */
 	if(name_length) {
-	    filter->name = H5MM_malloc(name_length);
-	    HDmemcpy(filter->name, p, name_length);
-	    HDassert(filter->name[name_length - 1] == '\0');
+            size_t actual_name_length;          /* Actual length of name */
+
+            /* Determine actual name length (without padding, but with null terminator) */
+	    actual_name_length = HDstrlen((const char *)p) + 1;
+	    HDassert(actual_name_length <= name_length);
+
+            /* Allocate space for the filter name, or use the internal buffer */
+            if(actual_name_length > H5Z_COMMON_NAME_LEN) {
+                filter->name = H5MM_malloc(actual_name_length);
+                if(NULL == filter->name)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name")
+            } /* end if */
+            else
+                filter->name = filter->_name;
+
+	    HDstrcpy(filter->name, (const char *)p);
 	    p += name_length;
 	} /* end if */
 
@@ -162,12 +175,18 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 	if(filter->cd_nelmts) {
             size_t	j;              /* Local index variable */
 
+            /* Allocate space for the client data elements, or use the internal buffer */
+            if(filter->cd_nelmts > H5Z_COMMON_CD_VALUES) {
+                filter->cd_values = H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
+                if(NULL == filter->cd_values)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data")
+            } /* end if */
+            else
+                filter->cd_values = filter->_cd_values;
+
 	    /*
 	     * Read the client data values and the padding
 	     */
-	    filter->cd_values = H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
-	    if(NULL == filter->cd_values)
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data")
 	    for(j = 0; j < filter->cd_nelmts; j++)
 		UINT32DECODE(p, filter->cd_values[j]);
             if(version == H5O_PLINE_VERSION_1)
@@ -181,14 +200,8 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
 
 done:
     if(NULL == ret_value && pline) {
-        if(pline->filter) {
-            for(i = 0; i < pline->nused; i++) {
-                H5MM_xfree(pline->filter[i].name);
-                H5MM_xfree(pline->filter[i].cd_values);
-            } /* end for */
-            H5MM_xfree(pline->filter);
-        } /* end if */
-        H5FL_FREE(H5O_pline_t,pline);
+        H5O_pline_reset(pline);
+        H5O_pline_free(pline);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -346,16 +359,36 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/, unsigned UNUSED update_flags
             dst->filter[i] = src->filter[i];
 
             /* Filter name */
-            if(src->filter[i].name)
-                if(NULL == (dst->filter[i].name = H5MM_xstrdup(src->filter[i].name)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            if(src->filter[i].name) {
+                size_t namelen;         /* Length of source filter name, including null terminator  */
+
+                namelen = HDstrlen(src->filter[i].name) + 1;
+
+                /* Allocate space for the filter name, or use the internal buffer */
+                if(namelen > H5Z_COMMON_NAME_LEN) {
+                    dst->filter[i].name = H5MM_malloc(namelen);
+                    if(NULL == dst->filter[i].name)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name")
+
+                    /* Copy name */
+                    HDstrcpy(dst->filter[i].name, src->filter[i].name);
+                } /* end if */
+                else
+                    dst->filter[i].name = dst->filter[i]._name;
+            } /* end if */
 
             /* Filter parameters */
             if(src->filter[i].cd_nelmts > 0) {
-                if(NULL == (dst->filter[i].cd_values = H5MM_malloc(src->filter[i].cd_nelmts* sizeof(unsigned))))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                HDmemcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
-                          src->filter[i].cd_nelmts * sizeof(unsigned));
+                /* Allocate space for the client data elements, or use the internal buffer */
+                if(src->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES) {
+                    if(NULL == (dst->filter[i].cd_values = H5MM_malloc(src->filter[i].cd_nelmts* sizeof(unsigned))))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+                    HDmemcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
+                            src->filter[i].cd_nelmts * sizeof(unsigned));
+                } /* end if */
+                else
+                    dst->filter[i].cd_values = dst->filter[i]._cd_values;
             } /* end if */
         } /* end for */
     } /* end if */
@@ -367,15 +400,9 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/, unsigned UNUSED update_flags
 
 done:
     if(!ret_value && dst) {
-	if(dst->filter) {
-	    for(i = 0; i < dst->nused; i++) {
-		H5MM_xfree(dst->filter[i].name);
-		H5MM_xfree(dst->filter[i].cd_values);
-	    } /* end for */
-	    H5MM_xfree(dst->filter);
-	} /* end if */
+        H5O_pline_reset(dst);
 	if(!_dst)
-            H5FL_FREE(H5O_pline_t,dst);
+            H5O_pline_free(dst);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -475,8 +502,14 @@ H5O_pline_reset(void *mesg)
 
     /* Free information for each filter */
     for(i = 0; i < pline->nused; i++) {
-        H5MM_xfree(pline->filter[i].name);
-        H5MM_xfree(pline->filter[i].cd_values);
+        if(pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
+            HDassert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
+        if(pline->filter[i].name != pline->filter[i]._name)
+            pline->filter[i].name = H5MM_xfree(pline->filter[i].name);
+        if(pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
+            HDassert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
+        if(pline->filter[i].cd_values != pline->filter[i]._cd_values)
+            pline->filter[i].cd_values = H5MM_xfree(pline->filter[i].cd_values);
     } /* end for */
 
     /* Free filter array */
@@ -499,8 +532,6 @@ H5O_pline_reset(void *mesg)
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 11, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

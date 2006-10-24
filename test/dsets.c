@@ -5620,72 +5620,72 @@ error:
 static herr_t
 auxread_fdata(hid_t fid, const char *name)
 {
- hid_t     dset_id=-1;           /* dataset ID */
- hid_t     dcpl_id=-1;           /* dataset creation property list ID */
- hid_t     space_id=-1;          /* space ID */
- hid_t     ftype_id=-1;          /* file data type ID */
- hid_t     mtype_id=-1;          /* memory data type ID */
- size_t    msize;             /* memory size of memory type */
- void      *buf=NULL;         /* data buffer */
- hsize_t   nelmts;            /* number of elements in dataset */
- int       rank;              /* rank of dataset */
- hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
- int       i;
+    hid_t     dset_id=-1;           /* dataset ID */
+    hid_t     dcpl_id=-1;           /* dataset creation property list ID */
+    hid_t     space_id=-1;          /* space ID */
+    hid_t     ftype_id=-1;          /* file data type ID */
+    hid_t     mtype_id=-1;          /* memory data type ID */
+    size_t    msize;             /* memory size of memory type */
+    void      *buf=NULL;         /* data buffer */
+    hsize_t   nelmts;            /* number of elements in dataset */
+    int       rank;              /* rank of dataset */
+    hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
+    int       i;
 
- if ((dset_id=H5Dopen(fid,name))<0)
-  goto error;
- if ((space_id=H5Dget_space(dset_id))<0)
-  goto error;
- if ((ftype_id=H5Dget_type (dset_id))<0)
-  goto error;
- if ((dcpl_id=H5Dget_create_plist(dset_id))<0)
-  goto error;
- if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
-  goto error;
- HDmemset(dims, 0, sizeof dims);
- if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
-  goto error;
- nelmts=1;
- for (i=0; i<rank; i++)
-  nelmts*=dims[i];
- if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-  goto error;
- if ((msize=H5Tget_size(mtype_id))==0)
-  goto error;
+    if ((dset_id=H5Dopen(fid,name))<0)
+        goto error;
+    if ((space_id=H5Dget_space(dset_id))<0)
+        goto error;
+    if ((ftype_id=H5Dget_type (dset_id))<0)
+        goto error;
+    if ((dcpl_id=H5Dget_create_plist(dset_id))<0)
+        goto error;
+    if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
+        goto error;
+    HDmemset(dims, 0, sizeof dims);
+    if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
+        goto error;
+    nelmts=1;
+    for (i=0; i<rank; i++)
+        nelmts*=dims[i];
+    if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+        goto error;
+    if ((msize=H5Tget_size(mtype_id))==0)
+        goto error;
 
- if (nelmts)
- {
-  buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-  if ( buf==NULL){
-   printf( "cannot read into memory\n" );
-   goto error;
-  }
-  if (H5Dread(dset_id,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-   goto error;
- }
+    if (nelmts)
+    {
+        buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+        if ( buf==NULL){
+            printf( "cannot read into memory\n" );
+            goto error;
+        }
+        if (H5Dread(dset_id,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+            goto error;
+    }
 
- if (H5Pclose(dcpl_id)<0)
-  goto error;
- if (H5Sclose(space_id)<0)
-  goto error;
- if (H5Dclose(dset_id)<0)
-  goto error;
- if (buf)
-  free(buf);
+    if (H5Pclose(dcpl_id)<0)
+        goto error;
+    if (H5Sclose(space_id)<0)
+        goto error;
+    if (H5Dclose(dset_id)<0)
+        goto error;
+    if (buf)
+        free(buf);
 
- return 0;
+    return 0;
 
 error:
- H5E_BEGIN_TRY {
-  H5Pclose(dcpl_id);
-  H5Sclose(space_id);
-  H5Dclose(dset_id);
-  H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
-  if (buf)
-   free(buf);
- } H5E_END_TRY;
- return -1;
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Tclose(ftype_id);
+        H5Tclose(mtype_id);
+        if (buf)
+            free(buf);
+    } H5E_END_TRY;
+    return -1;
 }
 
 

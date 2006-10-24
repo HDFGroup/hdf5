@@ -42,7 +42,13 @@ typedef int H5Z_filter_t;
 
 /* General macros */
 #define H5Z_FILTER_ALL	 	0	/* Symbol to remove all filters in H5Premove_filter */
-#define H5Z_MAX_NFILTERS        32      /* Maximum number of filters allowed in a pipeline (should probably be allowed to be an unlimited amount) */
+#define H5Z_MAX_NFILTERS        32      /* Maximum number of filters allowed in a pipeline */
+                                        /* (should probably be allowed to be an
+                                         * unlimited amount, but currently each
+                                         * filter uses a bit in a 32-bit field,
+                                         * so the format would have to be
+                                         * changed to accomodate that)
+                                         */
 
 /* Flags for filter definition (stored) */
 #define H5Z_FLAG_DEFMASK	0x00ff	/*definition flag mask		*/
