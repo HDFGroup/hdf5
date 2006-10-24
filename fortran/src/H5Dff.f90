@@ -1972,7 +1972,7 @@
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_s_C'::h5dwrite_double_s_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_S_C'::h5dwrite_double_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2344,7 +2344,7 @@
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_6_c'::h5dwrite_double_6_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_6_C'::h5dwrite_double_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2963,7 +2963,7 @@
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_5_c'::h5dread_integer_5_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_5_C'::h5dread_integer_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id

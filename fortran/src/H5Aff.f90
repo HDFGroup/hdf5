@@ -2052,7 +2052,7 @@
               INTEGER FUNCTION h5aread_double_s_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_DOUBLE_s_C'::h5aread_double_s_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_DOUBLE_S_C'::h5aread_double_s_c
               !DEC$ ENDIF
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
               INTEGER(HID_T), INTENT(IN) :: attr_id
