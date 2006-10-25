@@ -3783,8 +3783,10 @@ herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
     FUNC_ENTER_NOAPI(H5FD_get_vfd_handle, FAIL)
 
     assert(file_handle);
-    if(file->cls->get_handle && ((ret_value=file->cls->get_handle(file, fapl, file_handle)) < 0))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
+    if(NULL==file->cls->get_handle)
+	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `get_vfd_handle' method");
+    if((ret_value=file->cls->get_handle(file, fapl, file_handle)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
