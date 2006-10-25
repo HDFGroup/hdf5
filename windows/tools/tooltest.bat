@@ -34,7 +34,8 @@
 :: Find string "dll" inside %exefile% and remove it
      set test_exefile=%exefile:dll=%
 
-     if %test_exefile%==h5repack goto REPACK
+     if %test_exefile%==h5repack goto REPACKCOPY
+     if %test_exefile%==h5copy goto REPACKCOPY
      if %test_exefile%==h5diff goto COMMON
      if %test_exefile%==h5dump goto DUMP
      if %test_exefile%==h5ls goto COMMON
@@ -42,7 +43,8 @@
      if %test_exefile%==h5import goto IMPORT
 
 :: This block is for Repack test 
-:REPACK
+:REPACKCOPY
+
      ::---------------------------------- 
      ::Test for h5repack or h5repackdll
      ::----------------------------------
@@ -119,7 +121,13 @@
      ::Recover "." 
      set var4=%var4:#=.%
      set flagout=%var1% %var4%
-          
+       
+     if %test_exefile%==h5copy (
+	set testoutput=..\..\testfiles\out.h5copytst.h5
+        goto GTEST
+     )
+      
+     if %test_exefile%==h5copy goto GTEST  
      ::Based on the third parameter, we will go to different part.
      :: GTEST means general test, no need to check zlib and szlib
      
@@ -166,9 +174,14 @@
      :GTEST
      %exefile% %flag%
      ..\..\h5diff%p2%\%p1%\h5diff%p2% %testinput% %testoutput% > %actual_output% 2>&1
+     if %test_exefile%==h5copy (
+	del %testoutput%
+     )
      goto RESULTS
      
 :: End of Repack tests
+
+:: h5copy tests
 
 
 ::H5diff and H5ls Tests 

@@ -46,10 +46,16 @@ call importtest %1 %2
 call repacktest %1 %2
 @more repacktest%2_%1.txt >> toolstest_%1%2.txt
 @del repacktest%2_%1.txt
+
+call stattest %1 %2
+@more stattest%2_%1.txt >> toolstest_%1%2.txt
+@del stattest%2_%1.txt
+
 set p2=%2
 if "%2"=="dll" (
-echo "DLL version is not available for h5jam or h5unjam, SKIP the test"
+echo "DLL version is not available for h5copy,h5jam or h5unjam, SKIP the test"
 )	else (
 	call jamtest %1 %2
+	call copytest %1 %2
 )
 
