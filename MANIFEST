@@ -1789,6 +1789,7 @@
 ./windows/tools/tooltest.bat
 ./windows/tools/jamtest.bat
 ./windows/tools/stattest.BAT
+./windows/tools/copytest.BAT
 
 #windows batchfile
 ./windows/hdf5bt.BAT
