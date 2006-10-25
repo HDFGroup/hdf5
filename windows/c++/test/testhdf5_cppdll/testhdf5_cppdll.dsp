@@ -110,6 +110,10 @@ SOURCE="..\..\..\..\c++\test\tfile.cpp"
 
 SOURCE="..\..\..\..\c++\test\th5s.cpp"
 # End Source File
+# Begin Source File
+
+SOURCE="..\..\..\..\c++\test\trefer.cpp"
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
