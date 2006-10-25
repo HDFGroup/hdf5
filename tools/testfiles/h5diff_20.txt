@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff file3.h5 file3.h5 -v dset g1'
+Expected output for 'h5diff h5diff_types.h5 h5diff_types.h5 -v dset g1'
 #############################
 Comparison not possible: </dset> is of type H5G_DATASET and </g1> is of type H5G_GROUP
 --------------------------------

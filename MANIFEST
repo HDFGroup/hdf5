@@ -1236,14 +1236,16 @@
 ./tools/testfiles/tall-2A.h5.xml
 
 #test files for h5diff
-./tools/testfiles/file1.h5
-./tools/testfiles/file2.h5
-./tools/testfiles/file3.h5
-./tools/testfiles/file4.h5
-./tools/testfiles/file5.h5
-./tools/testfiles/file6.h5
-./tools/testfiles/file7.h5
-./tools/testfiles/file8.h5
+./tools/testfiles/h5diff_dtypes.h5
+./tools/testfiles/h5diff_dset1.h5
+./tools/testfiles/h5diff_hyper1.h5
+./tools/testfiles/h5diff_basic1.h5
+./tools/testfiles/h5diff_dset2.h5
+./tools/testfiles/h5diff_attr1.h5
+./tools/testfiles/h5diff_hyper2.h5
+./tools/testfiles/h5diff_basic2.h5
+./tools/testfiles/h5diff_attr2.h5
+./tools/testfiles/h5diff_types.h5
 ./tools/testfiles/h5diff_10.txt
 ./tools/testfiles/h5diff_11.txt
 ./tools/testfiles/h5diff_12.txt
@@ -1306,6 +1308,9 @@
 ./tools/testfiles/h5diff_70.txt
 ./tools/testfiles/h5diff_80.txt
 ./tools/testfiles/h5diff_90.txt
+./tools/testfiles/h5diff_100.txt
+./tools/testfiles/info.h5repack
+
 
 #test files for h5repack
 ./tools/testfiles/test0.h5
@@ -1321,7 +1326,6 @@
 ./tools/testfiles/test_szip.h5
 ./tools/testfiles/test_nbit.h5
 ./tools/testfiles/test_scaleoffset.h5
-./tools/testfiles/h5repack_info.txt
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

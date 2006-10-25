@@ -17,7 +17,6 @@
 #include "ph5diff.h"
 #include "H5private.h"
 
-
 /*-------------------------------------------------------------------------
  * printf formatting
  *-------------------------------------------------------------------------
@@ -43,26 +42,45 @@
 #define ULLI_FORMAT_P "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d %-14f\n"
 #define SPACES        "          "
 
-
+/*-------------------------------------------------------------------------
+ * -p relative error formula
+ *-------------------------------------------------------------------------
+ */
 #define PER(A,B) { per = -1;                                      \
                    if (A!=0)                                      \
                     per = (float)fabs(1-( (float)B / (float)A )); \
                  }
 
-
-/* local functions */
+/*-------------------------------------------------------------------------
+ * local prototypes
+ *-------------------------------------------------------------------------
+ */
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
-static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,
-                           hid_t region1_id, hid_t region2_id, diff_opt_t *options);
+static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t is_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
+static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
+static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 
+
+#ifdef NOT_YET
+#define EPSILON .0000001
+static hbool_t equal_float(float value, float expected);
+#define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
+#endif
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Local functions
+ *
+ *-------------------------------------------------------------------------
+ */
 
 /*-------------------------------------------------------------------------
  * Function: print_data
  *
- * Purpose: print data only in report or verbose modes,
- *  and do not print in quiet mode
+ * Purpose: print data only in report or verbose modes, and do not print in quiet mode
  *-------------------------------------------------------------------------
  */
 static
@@ -148,6 +166,7 @@ void print_pos( int        *ph,       /* print header */
 hsize_t diff_array( void *_mem1,
                     void *_mem2,
                     hsize_t nelmts,
+                    hsize_t hyper_start,
                     int rank,
                     hsize_t *dims,
                     diff_opt_t *options,
@@ -211,33 +230,33 @@ hsize_t diff_array( void *_mem1,
   case H5T_FLOAT:
 
    if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
-    nfound=diff_float(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
-    nfound=diff_double(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    break;
 
   case H5T_INTEGER:
 
    if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
-    nfound=diff_schar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_schar(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
-    nfound=diff_uchar(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_uchar(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
-    nfound=diff_short(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_short(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
-    nfound=diff_ushort(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_ushort(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_INT))
-    nfound=diff_int(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_int(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_UINT))
-    nfound=diff_uint(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_uint(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_LONG))
-    nfound=diff_long(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_long(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
-    nfound=diff_ulong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_ulong(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
-    nfound=diff_llong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_llong(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
    else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
-    nfound=diff_ullong(mem1,mem2,nelmts,rank,acc,pos,options,name1,name2,&ph);
+    nfound=diff_ullong(mem1,mem2,nelmts,hyper_start,rank,acc,pos,options,name1,name2,&ph);
 
    break;
 
@@ -417,7 +436,7 @@ hsize_t diff_datum(void       *_mem1,
    /* check for NULL pointer for string */
    if(s!=NULL)
     for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
-     nfound+=diff_char(
+     nfound+=character_compare(
      mem1 + u,
      mem2 + u, /* offset */
      i,        /* index position */
@@ -440,7 +459,7 @@ hsize_t diff_datum(void       *_mem1,
   {
    /* byte-by-byte comparison */
    for (u=0; u<type_size; u++)
-    nfound+=diff_native_uchar(
+    nfound+=character_compare_opt(
     mem1 + u,
     mem2 + u, /* offset */
     i,        /* index position */
@@ -463,7 +482,7 @@ hsize_t diff_datum(void       *_mem1,
 
   /* byte-by-byte comparison */
   for (u=0; u<type_size; u++)
-   nfound+=diff_native_uchar(
+   nfound+=character_compare_opt(
    mem1 + u,
    mem2 + u, /* offset */
    i,        /* index position */
@@ -513,7 +532,7 @@ hsize_t diff_datum(void       *_mem1,
      else
      {
       for (u=0; u<type_size; u++)
-       nfound+=diff_native_uchar(
+       nfound+=character_compare_opt(
        mem1 + u,
        mem2 + u, /* offset */
        i,        /* index position */
@@ -1619,47 +1638,6 @@ hsize_t diff_datum(void       *_mem1,
 }
 
 
-/*-------------------------------------------------------------------------
- * Function: diff_char
- *
- * Purpose: do a byte-by-byte comparison and print in char format
- *
- * Return: number of differences found
- *
- *-------------------------------------------------------------------------
- */
-
-hsize_t diff_char(unsigned char *mem1,
-                  unsigned char *mem2,
-                  hsize_t       i,
-                  int           rank,
-                  hsize_t       *acc,
-                  hsize_t       *pos,
-                  diff_opt_t    *options,
-                  const char    *obj1,
-                  const char    *obj2,
-                  int           *ph)
-{
- hsize_t            nfound=0;  /* differences found */
- unsigned char      temp1_uchar;
- unsigned char      temp2_uchar;
-
- memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
- memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-
- if (temp1_uchar != temp2_uchar)
- {
-  if ( print_data(options) )
-  {
-   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
-   parallel_print(SPACES);
-   parallel_print(C_FORMAT,temp1_uchar,temp2_uchar);
-  }
-  nfound++;
- }
-
- return nfound;
-}
 
 
 
@@ -1965,7 +1943,51 @@ hsize_t diff_region(hid_t obj1_id,
 
 
 /*-------------------------------------------------------------------------
- * Function: diff_native_uchar
+ * Function: character_compare
+ *
+ * Purpose: do a byte-by-byte comparison and print in char format
+ *
+ * Return: number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+hsize_t character_compare(unsigned char *mem1,
+                  unsigned char *mem2,
+                  hsize_t       i,
+                  int           rank,
+                  hsize_t       *acc,
+                  hsize_t       *pos,
+                  diff_opt_t    *options,
+                  const char    *obj1,
+                  const char    *obj2,
+                  int           *ph)
+{
+ hsize_t            nfound=0;  /* differences found */
+ unsigned char      temp1_uchar;
+ unsigned char      temp2_uchar;
+
+ memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+ memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+
+ if (temp1_uchar != temp2_uchar)
+ {
+  if ( print_data(options) )
+  {
+   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+   parallel_print(SPACES);
+   parallel_print(C_FORMAT,temp1_uchar,temp2_uchar);
+  }
+  nfound++;
+ }
+
+ return nfound;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: character_compare_opt
  *
  * Purpose: do a byte-by-byte comparison and print in numerical format
  *
@@ -1974,7 +1996,7 @@ hsize_t diff_region(hid_t obj1_id,
  *-------------------------------------------------------------------------
  */
 
-hsize_t diff_native_uchar(unsigned char *mem1,
+hsize_t character_compare_opt(unsigned char *mem1,
                           unsigned char *mem2,
                           hsize_t       i,
                           int           rank,
@@ -2071,6 +2093,7 @@ hsize_t diff_native_uchar(unsigned char *mem1,
 hsize_t diff_float(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -2099,7 +2122,7 @@ hsize_t diff_float(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
     }
@@ -2121,11 +2144,25 @@ hsize_t diff_float(unsigned char *mem1,
    memcpy(&temp2_float, mem2, sizeof(float));
 
    PER(temp1_float,temp2_float);
+
+#ifdef NOT_YET
+   if (per==-1) /* not comparable */
+   {
+    print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
+    parallel_print(SPACES);
+    parallel_print(F_FORMAT_P_NOTCOMP,temp1_float,temp2_float,
+      fabs(temp1_float-temp2_float));
+    options->not_cmp=1;
+   }
+
+   else
+#endif
+
    if ( per > options->percent )
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT_P,temp1_float,temp2_float,
       fabs(temp1_float-temp2_float),
@@ -2150,11 +2187,25 @@ hsize_t diff_float(unsigned char *mem1,
    memcpy(&temp2_float, mem2, sizeof(float));
 
    PER(temp1_float,temp2_float);
+
+#ifdef NOT_YET
+   if (per==-1) /* not comparable */
+   {
+    print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
+    parallel_print(SPACES);
+    parallel_print(F_FORMAT_P_NOTCOMP,temp1_float,temp2_float,
+      fabs(temp1_float-temp2_float));
+    options->not_cmp=1;
+   }
+
+   else
+#endif
+
    if ( per > options->percent && fabs(temp1_float-temp2_float) > options->delta )
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT_P,temp1_float,temp2_float,
       fabs(temp1_float-temp2_float),
@@ -2180,7 +2231,7 @@ hsize_t diff_float(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
     }
@@ -2212,6 +2263,7 @@ hsize_t diff_float(unsigned char *mem1,
 hsize_t diff_double(unsigned char *mem1,
                     unsigned char *mem2,
                     hsize_t       nelmts,
+                    hsize_t       hyper_start,
                     int           rank,
                     hsize_t       *acc,
                     hsize_t       *pos,
@@ -2241,7 +2293,7 @@ hsize_t diff_double(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
     }
@@ -2268,7 +2320,7 @@ hsize_t diff_double(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT_P,temp1_double,temp2_double,
       fabs(temp1_double-temp2_double),
@@ -2297,7 +2349,7 @@ hsize_t diff_double(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT_P,temp1_double,temp2_double,
       fabs(temp1_double-temp2_double),
@@ -2323,7 +2375,7 @@ hsize_t diff_double(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(F_FORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
     }
@@ -2353,6 +2405,7 @@ hsize_t diff_double(unsigned char *mem1,
 hsize_t diff_schar(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -2382,7 +2435,7 @@ hsize_t diff_schar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
     }
@@ -2409,7 +2462,7 @@ hsize_t diff_schar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_char,temp2_char,
       abs(temp1_char-temp2_char),
@@ -2438,7 +2491,7 @@ hsize_t diff_schar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_char,temp2_char,
       abs(temp1_char-temp2_char),
@@ -2465,7 +2518,7 @@ hsize_t diff_schar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
     }
@@ -2497,6 +2550,7 @@ hsize_t diff_schar(unsigned char *mem1,
 hsize_t diff_uchar(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -2526,7 +2580,7 @@ hsize_t diff_uchar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
     }
@@ -2554,7 +2608,7 @@ hsize_t diff_uchar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,
       abs(temp1_uchar-temp2_uchar),
@@ -2583,7 +2637,7 @@ hsize_t diff_uchar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,
       abs(temp1_uchar-temp2_uchar),
@@ -2610,7 +2664,7 @@ hsize_t diff_uchar(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
     }
@@ -2640,6 +2694,7 @@ hsize_t diff_uchar(unsigned char *mem1,
 hsize_t diff_short(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -2669,7 +2724,7 @@ hsize_t diff_short(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
     }
@@ -2697,7 +2752,7 @@ hsize_t diff_short(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_short,temp2_short,
       abs(temp1_short-temp2_short),
@@ -2728,7 +2783,7 @@ hsize_t diff_short(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_short,temp2_short,
       abs(temp1_short-temp2_short),
@@ -2755,7 +2810,7 @@ hsize_t diff_short(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
     }
@@ -2786,6 +2841,7 @@ hsize_t diff_short(unsigned char *mem1,
 hsize_t diff_ushort(unsigned char *mem1,
                     unsigned char *mem2,
                     hsize_t       nelmts,
+                    hsize_t       hyper_start,
                     int           rank,
                     hsize_t       *acc,
                     hsize_t       *pos,
@@ -2814,7 +2870,7 @@ hsize_t diff_ushort(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
     }
@@ -2842,7 +2898,7 @@ hsize_t diff_ushort(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,
       abs(temp1_ushort-temp2_ushort),
@@ -2873,7 +2929,7 @@ hsize_t diff_ushort(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,
       abs(temp1_ushort-temp2_ushort),
@@ -2900,7 +2956,7 @@ hsize_t diff_ushort(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
     }
@@ -2932,6 +2988,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 hsize_t diff_int(unsigned char *mem1,
                  unsigned char *mem2,
                  hsize_t       nelmts,
+                 hsize_t       hyper_start,
                  int           rank,
                  hsize_t       *acc,
                  hsize_t       *pos,
@@ -2960,7 +3017,7 @@ hsize_t diff_int(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
     }
@@ -2988,7 +3045,7 @@ hsize_t diff_int(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_int,temp2_int,
       abs(temp1_int-temp2_int),
@@ -3019,7 +3076,7 @@ hsize_t diff_int(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_int,temp2_int,
       abs(temp1_int-temp2_int),
@@ -3046,7 +3103,7 @@ hsize_t diff_int(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
     }
@@ -3078,6 +3135,7 @@ hsize_t diff_int(unsigned char *mem1,
 hsize_t diff_uint(unsigned char *mem1,
                   unsigned char *mem2,
                   hsize_t       nelmts,
+                  hsize_t       hyper_start,
                   int           rank,
                   hsize_t       *acc,
                   hsize_t       *pos,
@@ -3106,7 +3164,7 @@ hsize_t diff_uint(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
     }
@@ -3134,7 +3192,7 @@ hsize_t diff_uint(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,
       abs(temp1_uint-temp2_uint),
@@ -3165,7 +3223,7 @@ hsize_t diff_uint(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,
       abs(temp1_uint-temp2_uint),
@@ -3192,7 +3250,7 @@ hsize_t diff_uint(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(I_FORMAT,temp1_uint,temp2_uint,abs(temp1_uint-temp2_uint));
     }
@@ -3224,6 +3282,7 @@ hsize_t diff_uint(unsigned char *mem1,
 hsize_t diff_long(unsigned char *mem1,
                   unsigned char *mem2,
                   hsize_t       nelmts,
+                  hsize_t       hyper_start,
                   int           rank,
                   hsize_t       *acc,
                   hsize_t       *pos,
@@ -3255,7 +3314,7 @@ hsize_t diff_long(unsigned char *mem1,
     {
      if ( print_data(options) )
      {
-      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
       parallel_print(SPACES);
       parallel_print(LI_FORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
      }
@@ -3283,7 +3342,7 @@ hsize_t diff_long(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT_P,temp1_long,temp2_long,
       labs(temp1_long-temp2_long),
@@ -3314,7 +3373,7 @@ hsize_t diff_long(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT_P,temp1_long,temp2_long,
       labs(temp1_long-temp2_long),
@@ -3341,7 +3400,7 @@ hsize_t diff_long(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
     }
@@ -3374,6 +3433,7 @@ hsize_t diff_long(unsigned char *mem1,
 hsize_t diff_ulong(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -3406,7 +3466,7 @@ hsize_t diff_ulong(unsigned char *mem1,
     {
      if ( print_data(options) )
      {
-      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
       parallel_print(SPACES);
       parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
      }
@@ -3436,7 +3496,7 @@ hsize_t diff_ulong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT_P,temp1_ulong,temp2_ulong,
       labs(temp1_ulong-temp2_ulong),
@@ -3467,7 +3527,7 @@ hsize_t diff_ulong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT_P,temp1_ulong,temp2_ulong,
       labs(temp1_ulong-temp2_ulong),
@@ -3494,7 +3554,7 @@ hsize_t diff_ulong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,labs(temp1_ulong-temp2_ulong));
     }
@@ -3526,6 +3586,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 hsize_t diff_llong(unsigned char *mem1,
                    unsigned char *mem2,
                    hsize_t       nelmts,
+                   hsize_t       hyper_start,
                    int           rank,
                    hsize_t       *acc,
                    hsize_t       *pos,
@@ -3554,7 +3615,7 @@ hsize_t diff_llong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LLI_FORMAT,temp1_llong,temp2_llong,
       (long_long)labs((long)(temp1_llong-temp2_llong)));
@@ -3583,7 +3644,7 @@ hsize_t diff_llong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LLI_FORMAT_P,temp1_llong,temp2_llong,
       (long_long)labs((long)(temp1_llong-temp2_llong)),
@@ -3614,7 +3675,7 @@ hsize_t diff_llong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LLI_FORMAT_P,temp1_llong,temp2_llong,
       (long_long)labs((long)(temp1_llong-temp2_llong)),
@@ -3641,7 +3702,7 @@ hsize_t diff_llong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(LLI_FORMAT,temp1_llong,temp2_llong,
       (long_long)labs((long)(temp1_llong-temp2_llong)));
@@ -3675,6 +3736,7 @@ hsize_t diff_llong(unsigned char *mem1,
 hsize_t diff_ullong(unsigned char *mem1,
                     unsigned char *mem2,
                     hsize_t       nelmts,
+                    hsize_t       hyper_start,
                     int           rank,
                     hsize_t       *acc,
                     hsize_t       *pos,
@@ -3703,7 +3765,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
@@ -3734,7 +3796,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
@@ -3767,7 +3829,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
@@ -3794,7 +3856,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    {
     if ( print_data(options) )
     {
-     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+     print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
      parallel_print(SPACES);
      parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,
       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
@@ -3864,3 +3926,33 @@ error:
 
  return -1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    equal_float
+ *
+ * Purpose:     use a relative error formula to deal with floating point 
+ *              uncertainty 
+ *
+ * Programmer:  pvn
+ *              October 24, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef NOT_YET
+static 
+hbool_t equal_float(float value, float expected)                               
+{
+ if ( fabs( (value-expected) / expected) < EPSILON)
+  return TRUE;
+ else
+  return FALSE;
+ 
+}
+#endif
+
+
+

@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff file1.h5 file1.h5 -v -p 0.02 g1/dset7 g1/dset8'
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 -v -p 0.02 g1/dset7 g1/dset8'
 #############################
 Dataset:     </g1/dset7> and </g1/dset8>
 position        dset7           dset8           difference      relative       

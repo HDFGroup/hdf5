@@ -30,6 +30,9 @@ H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff  tool binary
 H5DETECTSZIP=testh5repack_detect_szip               # The tool name
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    # The path of the tool binary
 
+
+INFO_FILE=../testfiles/info.h5repack
+
 nerrors=0
 verbose=yes
 
@@ -366,7 +369,7 @@ else
 fi
 
 #file
-arg="test4.h5 -e ../testfiles/h5repack_info.txt"
+arg="test4.h5 -e $INFO_FILE"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg 
 else

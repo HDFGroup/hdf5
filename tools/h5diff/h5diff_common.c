@@ -285,7 +285,7 @@ int check_f_input( const char *str )
  */
 void usage(void)
 {
- printf("Usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
+ printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
  printf("\n");
  printf("file1             File name of the first HDF5 file\n");
  printf("file2             File name of the second HDF5 file\n");

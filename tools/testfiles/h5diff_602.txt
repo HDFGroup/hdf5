@@ -1,8 +1,8 @@
 #############################
-Expected output for 'h5diff file1.h5 file2.h5 -d g1/dset3 g1/dset4'
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic2.h5 -d g1/dset3 g1/dset4'
 #############################
 <-d g1/dset3> is not a valid option
-Usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] 
+usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] 
 
 file1             File name of the first HDF5 file
 file2             File name of the second HDF5 file

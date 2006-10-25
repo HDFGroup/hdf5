@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff file7.h5 file8.h5 -v'
+Expected output for 'h5diff h5diff_dset1.h5 h5diff_dset2.h5 -v'
 #############################
 
 file1     file2
@@ -715,7 +715,7 @@ position        vlen3D          vlen3D          difference
 [ 3 2 1 ]          59              0               59             
 59 differences found
 Dataset:     </refreg> and </refreg>
-Referenced dataset      5888            5888
+Referenced dataset      5904            5904
 ------------------------------------------------------------
 Region blocks
 block #0           (2,2)-(7,7)           (0,0)-(2,2)

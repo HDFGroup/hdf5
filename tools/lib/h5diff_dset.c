@@ -395,7 +395,7 @@ hsize_t diff_datasetid( hid_t did1,
  */
 
  need = (size_t)(nelmts1*m_size1);  /* bytes needed */
- if ( need < H5TOOLS_MALLOCSIZE )
+ if ( need < H5TOOLS_MALLOCSIZE)
  {
   buf1 = HDmalloc(need);
   buf2 = HDmalloc(need);
@@ -412,6 +412,7 @@ hsize_t diff_datasetid( hid_t did1,
   nfound = diff_array(buf1,
                       buf2,
                       nelmts1,
+                      0,
                       rank1,
                       dims1,
                       options,
@@ -501,18 +502,20 @@ hsize_t diff_datasetid( hid_t did1,
    if ( H5Dread(did2,m_tid2,sm_space,sid2,H5P_DEFAULT,sm_buf2) < 0 )
     goto error;
    
-   /* array diff */
-   nfound = diff_array(sm_buf1,
-                       sm_buf2,
-                       hs_nelmts,
-                       rank1,
-                       dims1,
-                       options,
-                       name1,
-                       name2,
-                       m_tid1,
-                       did1,
-                       did2);
+   /* get array differences. in the case of hyperslab read, increment the number of differences 
+      found in each hyperslab and pass the position at the beggining for printing */
+   nfound += diff_array(sm_buf1,
+                        sm_buf2,
+                        hs_nelmts,
+                        elmtno,
+                        rank1,
+                        dims1,
+                        options,
+                        name1,
+                        name2,
+                        m_tid1,
+                        did1,
+                        did2);
 
    /* reclaim any VL memory, if necessary */
    if(vl_data)
