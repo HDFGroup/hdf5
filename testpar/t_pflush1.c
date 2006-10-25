@@ -123,7 +123,9 @@ error:
 int
 main(int argc, char* argv[])
 {
-    hid_t file, fapl;
+    hid_t file1, file2, fapl;
+    MPI_File	mpifh=-2;
+    int		*mpifh_p = NULL;
     char	name[1024];
     const char  *envval = NULL;
     int mpi_size, mpi_rank;
@@ -145,13 +147,13 @@ main(int argc, char* argv[])
     if (HDstrcmp(envval, "split")) {
 	/* Create the file */
 	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	file = create_file(name, fapl);
+	file1 = create_file(name, fapl);
 	/* Flush and exit without closing the library */
-	if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) goto error;
+	if (H5Fflush(file1, H5F_SCOPE_GLOBAL)<0) goto error;
 
 	/* Create the other file which will not be flushed */
 	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	file = create_file(name, fapl);
+	file2 = create_file(name, fapl);
 
 
 	if(mpi_rank == 0) 
@@ -165,12 +167,44 @@ main(int argc, char* argv[])
         puts("    Test not compatible with current Virtual File Driver");
     }
  
- /* AIX doesn't like it when you try to call MPI_Finalize without closing all files. */   
-/*    MPI_Finalize();*/
+    /*
+     * Some systems like Linux with mpich, if you just _exit without MPI_Finalize
+     * called, it would terminate but left the launching process waiting forever.
+     * OTHO, some systems like AIX do not like files not closed when MPI_Finalize
+     * is called.  So, we need to get the MPI file handles, close them by hand,
+     * then MPI_Finalize. Then the _exit is still needed to stop at_exit from
+     * happening in some systems.
+     * Note that MPIO VFD returns the address of the file-handle in the VFD struct
+     * because MPI_File_close wants to modify the file-handle variable.
+     */
+     
+    /* close file1 */
+    if (H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p)<0){
+	printf("H5Fget_vfd_handle for file1 failed\n");
+	goto error;
+    }
+    if (MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+	printf("MPI_File_close for file1 failed\n");
+	goto error;
+    }
+    /* close file2 */
+    if (H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p)<0){
+	printf("H5Fget_vfd_handle for file2 failed\n");
+	goto error;
+    }
+    if (MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+	printf("MPI_File_close for file2 failed\n");
+	goto error;
+    }
+
+    fflush(stdout);
+    fflush(stderr);
+    MPI_Finalize();
     HD_exit(0);
 
-    error:
-        HD_exit(1);
-        return 1;
-
+error:
+    fflush(stdout);
+    fflush(stderr);
+    MPI_Finalize();
+    HD_exit(1);
 }
