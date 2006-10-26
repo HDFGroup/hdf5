@@ -284,8 +284,8 @@ TOOLTEST h5diff_14.txt  $FILE1 $FILE2  -r g1/dset1 g1/dset2
 # 1.5 with -d
 TOOLTEST h5diff_15.txt $FILE1 $FILE2 -r -d 5 g1/dset3 g1/dset4
 
-# 1.6 with -p
-TOOLTEST h5diff_16.txt $FILE1 $FILE2 -r -p 0.05 g1/dset3 g1/dset4
+# 1.6 with -p (test divide by zero case)
+TOOLTEST h5diff_16.txt $FILE1 $FILE1 g1/dset9 g1/dset10 -p 0.01 -v
 
 # 1.7 verbose mode
 TOOLTEST h5diff_17.txt $FILE1 $FILE2 -v  

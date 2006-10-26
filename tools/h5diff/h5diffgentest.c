@@ -129,17 +129,31 @@ int test_basic(const char *fname1,
  hid_t   fid1, fid2;
  hid_t   gid1, gid2, gid3;
  herr_t  status;
- hsize_t dims[2] = { 3,2 };
+ hsize_t dims32[2] = { 3,2 };
+ hsize_t dims42[2] = { 4,2 };
 
  /* Test */
  double  data1[3][2] = {{1,1},{1,1},{1,1}};
  double  data2[3][2] = {{1,1.1},{1.01,1.001},{1.0001,1}};
- double  data3[3][2] = {{100,110},{100,100},{100,100}};
- double  data4[3][2] = {{110,100},{90,80},{140,200}};
  int     data5[3][2] = {{100,100},{100,100},{100,100}};
  int     data6[3][2] = {{101,102},{103,104},{150,200}};
  unsigned long_long data7[3][2] = {{100,100},{100,100},{100,100}};
  unsigned long_long data8[3][2] = {{101,102},{103,104},{150,200}};
+ double  data3[3][2] = {{100,100},{100,100},{100,100}}; 
+ double  data4[3][2] = {{105,120},{160,95},{80,40}};
+ double  data9[4][2] = {{100,100},{100,100},{100,100},{1,0}}; /* compare divide by zero */
+ double  data10[4][2] = {{105,120},{160,95},{80,40},{0,1}};
+ /*
+A	  B	  1-B/A	  %
+100	105	0.05	   5
+100	120	0.2	    20
+100	160	0.6	    60
+100	95	 0.05	   5
+100	80	 0.2	    20
+100	40	 0.6	    60
+1	  0	  1	      100
+0	  1	  #DIV/0!	
+*/
 
 /*-------------------------------------------------------------------------
  * Create two files
@@ -154,18 +168,22 @@ int test_basic(const char *fname1,
  gid2 = H5Gcreate(fid2, "g1", 0);
  gid3 = H5Gcreate(fid2, "g2", 0);
 
- write_dset(gid1,2,dims,"dset1",H5T_NATIVE_DOUBLE,data1);
- write_dset(gid2,2,dims,"dset2",H5T_NATIVE_DOUBLE,data2);
- write_dset(gid1,2,dims,"dset3",H5T_NATIVE_DOUBLE,data3);
- write_dset(gid2,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
- write_dset(gid2,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
+ write_dset(gid1,2,dims32,"dset1",H5T_NATIVE_DOUBLE,data1);
+ write_dset(gid2,2,dims32,"dset2",H5T_NATIVE_DOUBLE,data2);
+ write_dset(gid1,2,dims32,"dset3",H5T_NATIVE_DOUBLE,data3);
+ write_dset(gid2,2,dims32,"dset4",H5T_NATIVE_DOUBLE,data4);
+ write_dset(gid2,2,dims32,"dset1",H5T_NATIVE_DOUBLE,data2);
 
  /* relative (int) */
- write_dset(gid1,2,dims,"dset5",H5T_NATIVE_INT,data5);
- write_dset(gid1,2,dims,"dset6",H5T_NATIVE_INT,data6);
+ write_dset(gid1,2,dims32,"dset5",H5T_NATIVE_INT,data5);
+ write_dset(gid1,2,dims32,"dset6",H5T_NATIVE_INT,data6);
  /* relative (unsigned long_long) */
- write_dset(gid1,2,dims,"dset7",H5T_NATIVE_ULLONG,data7);
- write_dset(gid1,2,dims,"dset8",H5T_NATIVE_ULLONG,data8);
+ write_dset(gid1,2,dims32,"dset7",H5T_NATIVE_ULLONG,data7);
+ write_dset(gid1,2,dims32,"dset8",H5T_NATIVE_ULLONG,data8);
+
+ /* test divide by zero in percente case */
+ write_dset(gid1,2,dims42,"dset9",H5T_NATIVE_DOUBLE,data9);
+ write_dset(gid1,2,dims42,"dset10",H5T_NATIVE_DOUBLE,data10);
 
 /*-------------------------------------------------------------------------
  * Close
