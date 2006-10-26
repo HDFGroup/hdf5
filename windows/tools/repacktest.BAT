@@ -413,7 +413,7 @@ call %tooltest% %test4% %nodiff% zlib
 ::-----
 ::file
 ::-----
-set flag=-i %test4% -o %output4% -e ..\..\testfiles\h5repack_info.txt
+set flag=-i %test4% -o %output4% -e ..\..\testfiles\info.h5repack
 call %tooltest% %test4% %nodiff% zlib
 
 echo. *********************************************

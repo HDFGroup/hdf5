@@ -59,8 +59,18 @@
        ::When you add new h5diff tests, check if the .h5 files is inside this for loop.
        ::For example, if you will add a new h5diff test using hdf5\tools\testfiles\file9.h5
        ::You need to add "9" after 8 or somewhere inside the ()
-       for %%v in (1 2 3 4 5 6 7 8) do set file%%v=..\..\testfiles\file%%v.h5     
-
+       ::The testing file names have been renamed. The following lines are not valid.
+       :: for %%v in (1 2 3 4 5 6 7 8) do set file%%v=..\..\testfiles\file%%v.h5     
+       set file1=..\..\testfiles\h5diff_basic1.h5
+       set file2=..\..\testfiles\h5diff_basic2.h5
+       set file3=..\..\testfiles\h5diff_types.h5
+       set file4=..\..\testfiles\h5diff_dtypes.h5
+       set file5=..\..\testfiles\h5diff_attr1.h5
+       set file6=..\..\testfiles\h5diff_attr2.h5
+       set file7=..\..\testfiles\h5diff_dset1.h5
+       set file8=..\..\testfiles\h5diff_dset2.h5
+       set file9=..\..\testfiles\h5diff_hyper1.h5
+       set file10=..\..\testfiles\h5diff_hyper2.h5
        ::Create the file to contain the tests output
        type nul > %tempResults%
        
@@ -415,6 +425,13 @@ call %tooltest% h5diff_80.txt
 
 set flag=%file1% %file1%
 call %tooltest% h5diff_90.txt  
+
+::-----------------------------
+::10. read by hyperslab, print indexes
+::-----------------------------
+
+set flag=%file9% %file10% -v
+call %tooltest% h5diff_100.txt  
 
 ::Change directory to hdf5\tools
 cd ..\..
