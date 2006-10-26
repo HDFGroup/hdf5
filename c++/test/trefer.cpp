@@ -89,7 +89,6 @@ test_reference_obj(void)
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
-    char   read_comment[10];
 
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Reference Functions\n"));
@@ -201,7 +200,7 @@ test_reference_obj(void)
 	// Check information in the referenced dataset
 	sid1 = dset2.getSpace();
 	hssize_t n_elements = sid1.getSimpleExtentNpoints();
-	verify_val(n_elements, 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+	verify_val((long)n_elements, (long)4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
 	// Read from disk
 	dset2.read(tbuf, PredType::NATIVE_UINT);
