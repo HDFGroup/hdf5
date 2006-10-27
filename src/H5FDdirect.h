@@ -38,14 +38,14 @@ extern "C" {
  * Application can set these values through the function H5Pset_fapl_direct. */
 #define MBOUNDARY_DEF		4096
 #define FBSIZE_DEF		4096
-#define CBSIZE_DEF		128*1024*1024
+#define CBSIZE_DEF		16*1024*1024
 
 H5_DLL hid_t H5FD_direct_init(void);
 H5_DLL void H5FD_direct_term(void);
-H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, hsize_t alignment, hsize_t block_size, 
-			hsize_t cbuf_size);
-H5_DLL herr_t H5Pget_fapl_direct(hid_t fapl_id, hsize_t *boundary/*out*/, 
-			hsize_t *block_size/*out*/, hsize_t *cbuf_size/*out*/);
+H5_DLL herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment, size_t block_size, 
+			size_t cbuf_size);
+H5_DLL herr_t H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary/*out*/, 
+			size_t *block_size/*out*/, size_t *cbuf_size/*out*/);
 
 #ifdef __cplusplus
 }

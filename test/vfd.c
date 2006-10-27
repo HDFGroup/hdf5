@@ -29,7 +29,7 @@
 #define CORE_INCREMENT  (4*KB)
 #define MBOUNDARY	512
 #define FBSIZE		4096
-#define CBSIZE		64*1024*1024
+#define CBSIZE		4096
 
 const char *FILENAME[] = {
     "sec2_file",
@@ -145,9 +145,9 @@ test_direct(void)
     char        filename[1024];
     int         *fhandle=NULL;
     hsize_t     file_size;
-    hsize_t	mbound;
-    hsize_t	fbsize;
-    hsize_t	cbsize;
+    size_t	mbound;
+    size_t	fbsize;
+    size_t	cbsize;
 #endif /*H5_HAVE_DIRECT*/
 
     TESTING("Direct I/O file driver");
