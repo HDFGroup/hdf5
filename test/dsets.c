@@ -358,7 +358,7 @@ test_simple_io(hid_t fapl)
     if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
 
     /* Create a small conversion buffer to test strip mining */
-    tconv_buf = malloc (1000);
+    tconv_buf = HDmalloc((size_t)1000);
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
     if (H5Pset_buffer (xfer, (size_t)1000, tconv_buf, NULL)<0) goto error;
@@ -805,7 +805,7 @@ test_conv_buffer(hid_t fid)
 
     TESTING("data type conversion buffer size");
 
-    cf = (CmpField *)calloc(1, sizeof(CmpField));
+    cf = (CmpField *)HDcalloc((size_t)1, sizeof(CmpField));
 
     /* Populate the data members */
     for (j = 0; j < DIM1; j++)
@@ -854,7 +854,7 @@ test_conv_buffer(hid_t fid)
   if(H5Tinsert (ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5)<0) goto error;
 
   /* Read should succeed since library will set conversion buffer big enough */
-  cfrR = (CmpFieldR *)calloc(1, sizeof(CmpFieldR));
+  cfrR = (CmpFieldR *)HDcalloc((size_t)1, sizeof(CmpFieldR));
   if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfrR)<0) goto error;
 
   /* Read should fail since conversion buffer isn't big enough */
@@ -927,10 +927,10 @@ test_tconv(hid_t file)
     hsize_t	dims[1];
     hid_t	space, dataset;
 
-    out = malloc (4*1000000);
-    assert (out);
-    in = malloc (4*1000000);
-    assert (in);
+    out = HDmalloc((size_t)(4 * 1000 * 1000));
+    HDassert(out);
+    in = HDmalloc((size_t)(4 * 1000 * 1000));
+    HDassert(in);
 
     TESTING("data type conversion");
 
@@ -1074,11 +1074,11 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 
     /* Get the filter's current parameters */
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_BOGUS2,&flags,&cd_nelmts,
-            cd_values,0,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts,
+            cd_values, (size_t)0, NULL) < 0)
 #else
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_BOGUS2,&flags,&cd_nelmts,
-            cd_values,0,NULL,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts,
+            cd_values, (size_t)0, NULL, NULL) < 0)
 #endif
         return(FAIL);
 
@@ -1093,8 +1093,8 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     cd_values[3]=add_on;        /* Amount the data was modified by */
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_BOGUS2, flags, BOGUS2_ALL_NPARMS,
-            cd_values)<0)
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_BOGUS2, flags, (size_t)BOGUS2_ALL_NPARMS,
+            cd_values) < 0)
         return(FAIL);
 
     return(SUCCEED);
@@ -1210,17 +1210,17 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts,
     if(offset>nbytes || (offset+length)>nbytes || length<sizeof(unsigned int))
         return 0;
 
-    data = HDmalloc(length);
-    HDmemset(data, (int)value, length);
+    data = HDmalloc((size_t)length);
+    HDmemset(data, (int)value, (size_t)length);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
         dst += offset;
-        if(HDmemcmp(data, dst, length)!=0) return 0;
+        if(HDmemcmp(data, dst, (size_t)length)!=0) return 0;
         *buf_size = nbytes;
         ret_value = nbytes;
     } else { /* Write corrupted data */
         dst += offset;
-        HDmemcpy(dst, data, length);
+        HDmemcpy(dst, data, (size_t)length);
         *buf_size = nbytes;
 	ret_value = *buf_size;
     }
@@ -1324,10 +1324,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      * Create a small conversion buffer to test strip mining. We
      * might as well test all we can!
      */
-    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
-    tconv_buf = malloc (1000);
-    if (H5Pset_buffer (dxpl, (size_t)1000, tconv_buf, NULL)<0) goto error;
-    if ((write_dxpl = H5Pcopy (dxpl))<0) TEST_ERROR;
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER))<0) goto error;
+    tconv_buf = HDmalloc((size_t)1000);
+    if (H5Pset_buffer(dxpl, (size_t)1000, tconv_buf, NULL)<0) goto error;
+    if ((write_dxpl = H5Pcopy(dxpl))<0) TEST_ERROR;
 
     if (if_fletcher32==DISABLE_FLETCHER32) {
         if(H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)<0)
@@ -1912,7 +1912,7 @@ UNUSED
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Zregister (H5Z_BOGUS)<0) goto error;
-    if (H5Pset_filter (dc, H5Z_FILTER_BOGUS, 0, 0, NULL)<0) goto error;
+    if(H5Pset_filter(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0) goto error;
 
     if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0) goto error;
 
@@ -1927,7 +1927,7 @@ UNUSED
     puts("Testing Fletcher32 checksum(enabled for read)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_filter (dc,H5Z_FILTER_FLETCHER32,0,0,NULL)<0) goto error;
+    if(H5Pset_filter(dc, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL) < 0) goto error;
 
     /* Enable checksum during read */
     if(test_filter_internal(file,DSET_FLETCHER32_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&fletcher32_size)<0) goto error;
@@ -1953,7 +1953,7 @@ UNUSED
     data_corrupt[2] = 27;
 
     if (H5Zregister (H5Z_CORRUPT)<0) goto error;
-    if (H5Pset_filter (dc, H5Z_FILTER_CORRUPT, 0, 3, data_corrupt)<0) goto error;
+    if(H5Pset_filter(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0) goto error;
     if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,DISABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size)<0) goto error;
     if(fletcher32_size<=null_size) {
         H5_FAILED();
@@ -2694,13 +2694,13 @@ test_nbit_float(hid_t file)
 #ifdef H5_HAVE_FILTER_NBIT
     /* Define user-defined single-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F32BE);
-    if(H5Tset_fields(datatype, 26, 20, 6, 7, 13)<0) goto error;
+    if(H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
     offset = 7;
     if(H5Tset_offset(datatype,offset)<0) goto error;
     precision = 20;
     if(H5Tset_precision(datatype,precision)<0) goto error;
-    if(H5Tset_size(datatype, 4)<0) goto error;
-    if(H5Tset_ebias(datatype, 31)<0) goto error;
+    if(H5Tset_size(datatype, (size_t)4) < 0) goto error;
+    if(H5Tset_ebias(datatype, (size_t)31) < 0) goto error;
 
     /* Create the data space */
     if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
@@ -2827,13 +2827,13 @@ test_nbit_double(hid_t file)
 #ifdef H5_HAVE_FILTER_NBIT
     /* Define user-defined doule-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F64BE);
-    if(H5Tset_fields(datatype, 55, 46, 9, 5, 41)<0) goto error;
+    if(H5Tset_fields(datatype, (size_t)55, (size_t)46, (size_t)9, (size_t)5, (size_t)41) < 0) goto error;
     offset = 5;
     if(H5Tset_offset(datatype,offset)<0) goto error;
     precision = 51;
     if(H5Tset_precision(datatype,precision)<0) goto error;
-    if(H5Tset_size(datatype, 8)<0) goto error;
-    if(H5Tset_ebias(datatype, 255)<0) goto error;
+    if(H5Tset_size(datatype, (size_t)8) < 0) goto error;
+    if(H5Tset_ebias(datatype, (size_t)255) < 0) goto error;
 
     /* Create the data space */
     if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
@@ -3130,11 +3130,11 @@ test_nbit_compound(hid_t file)
     if(H5Tset_precision(s_tid,precision[2])<0) goto error;
     if(H5Tset_offset(s_tid,offset[2])<0) goto error;
 
-    if(H5Tset_fields(f_tid, 26, 20, 6, 7, 13)<0) goto error;
-    if(H5Tset_offset(f_tid, 7)<0) goto error;
-    if(H5Tset_precision(f_tid, 20)<0) goto error;
-    if(H5Tset_size(f_tid, 4)<0) goto error;
-    if(H5Tset_ebias(f_tid, 31)<0) goto error;
+    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
+    if(H5Tset_offset(f_tid, (size_t)7) < 0) goto error;
+    if(H5Tset_precision(f_tid, (size_t)20) < 0) goto error;
+    if(H5Tset_size(f_tid, (size_t)4) < 0) goto error;
+    if(H5Tset_ebias(f_tid, (size_t)31) < 0) goto error;
 
     /* Create a memory compound datatype before setting the order */
     mem_cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
@@ -3346,11 +3346,11 @@ test_nbit_compound_2(hid_t file)
     if(H5Tset_precision(s_tid,precision[2])<0) goto error;
     if(H5Tset_offset(s_tid,offset[2])<0) goto error;
 
-    if(H5Tset_fields(f_tid, 26, 20, 6, 7, 13)<0) goto error;
-    if(H5Tset_offset(f_tid, 7)<0) goto error;
-    if(H5Tset_precision(f_tid, 20)<0) goto error;
-    if(H5Tset_size(f_tid, 4)<0) goto error;
-    if(H5Tset_ebias(f_tid, 31)<0) goto error;
+    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
+    if(H5Tset_offset(f_tid, (size_t)7) < 0) goto error;
+    if(H5Tset_precision(f_tid, (size_t)20) < 0) goto error;
+    if(H5Tset_size(f_tid, (size_t)4) < 0) goto error;
+    if(H5Tset_ebias(f_tid, (size_t)31) < 0) goto error;
 
     /* Create a memory atomic compound datatype before setting the order */
     mem_cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
@@ -3490,6 +3490,8 @@ test_nbit_compound_2(hid_t file)
     for (i=0; i<size[0]; i++) {
       for (j=0; j<size[1]; j++) {
         b_failed = 0;
+        d_failed = 0;
+
         for(m = 0; m < array_dims[0]; m++)
           for(n = 0; n < array_dims[1]; n++)
              if((new_data[i][j].b[m][n]&b_mask)!=(orig_data[i][j].b[m][n]&b_mask)) {
@@ -3497,7 +3499,6 @@ test_nbit_compound_2(hid_t file)
                 goto out;
              }
 
-        d_failed = 0;
         for(m = 0; m < array_dims[0]; m++)
           for(n = 0; n < array_dims[1]; n++)
              if((new_data[i][j].d[m][n].i & i_mask)!=(orig_data[i][j].d[m][n].i & i_mask)||
@@ -3603,17 +3604,17 @@ test_nbit_compound_3(hid_t file)
 
     /* Define datatypes of members of compound datatype */
     i_tid=H5Tcopy(H5T_NATIVE_INT);
-    if(H5Tset_precision(i_tid, 17)<0) goto error;
+    if(H5Tset_precision(i_tid, (size_t)17) < 0) goto error;
 
     str_tid=H5Tcopy(H5T_C_S1);
-    if(H5Tset_size(str_tid,30)<0) goto error;
+    if(H5Tset_size(str_tid, (size_t)30) < 0) goto error;
 
     vl_str_tid = H5Tcopy(H5T_C_S1);
     if(H5Tset_size(vl_str_tid,H5T_VARIABLE)<0) goto error;
 
     if((v_tid = H5Tvlen_create(H5T_NATIVE_UINT))<0) goto error;
 
-    if((o_tid = H5Tcreate(H5T_OPAQUE, 5))<0) goto error;
+    if((o_tid = H5Tcreate(H5T_OPAQUE, (size_t)5)) < 0) goto error;
     if(H5Tset_tag(o_tid, "testing opaque field")<0) goto error;
 
     /* Create a dataset compound datatype and insert some atomic types */
@@ -3644,8 +3645,8 @@ test_nbit_compound_3(hid_t file)
     /* Initialize data */
     for(i = 0; i < size[0]; i++) {
         orig_data[i].i = HDrandom() % (long)HDpow(2.0, 17.0 - 1.0);
-        strcpy(orig_data[i].str, "fixed-length C string");
-        orig_data[i].vl_str = strdup("variable-length C string");
+        HDstrcpy(orig_data[i].str, "fixed-length C string");
+        orig_data[i].vl_str = HDstrdup("variable-length C string");
 
         orig_data[i].v.p = HDmalloc((size_t)(i+1)*sizeof(unsigned int));
         orig_data[i].v.len = (size_t)i+1;
@@ -4688,7 +4689,7 @@ test_types(hid_t file)
     unsigned char	buf[32];
 
     TESTING("various datatypes");
-    if ((grp=H5Gcreate(file, "typetests", 0))<0) goto error;
+    if((grp = H5Gcreate(file, "typetests", (size_t)0)) < 0) goto error;
 
     /* bitfield_1 */
     nelmts = sizeof(buf);
@@ -4719,28 +4720,28 @@ test_types(hid_t file)
 
     /* opaque_1 */
     nelmts = sizeof(buf);
-    if ((type=H5Tcreate(H5T_OPAQUE, 1))<0 ||
-	H5Tset_tag(type, "testing 1-byte opaque type")<0 ||
-	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
-	(dset=H5Dcreate(grp, "opaque_1", type, space, H5P_DEFAULT))<0)
+    if((type = H5Tcreate(H5T_OPAQUE, (size_t)1)) < 0 ||
+            H5Tset_tag(type, "testing 1-byte opaque type") < 0 ||
+            (space = H5Screate_simple(1, &nelmts, NULL)) < 0 ||
+            (dset = H5Dcreate(grp, "opaque_1", type, space, H5P_DEFAULT)) < 0)
 	goto error;
-    for (i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
-    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-	goto error;
+    for(i = 0; i < sizeof buf; i++)
+        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(type)<0) goto error;
     if (H5Dclose(dset)<0) goto error;
 
     /* opaque_2 */
     nelmts = sizeof(buf)/4;
-    if ((type=H5Tcreate(H5T_OPAQUE, 4))<0 ||
-	H5Tset_tag(type, "testing 4-byte opaque type")<0 ||
-	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
-	(dset=H5Dcreate(grp, "opaque_2", type, space, H5P_DEFAULT))<0)
+    if((type = H5Tcreate(H5T_OPAQUE, (size_t)4)) < 0 ||
+            H5Tset_tag(type, "testing 4-byte opaque type") < 0 ||
+            (space = H5Screate_simple(1, &nelmts, NULL)) < 0 ||
+            (dset = H5Dcreate(grp, "opaque_2", type, space, H5P_DEFAULT)) < 0)
 	goto error;
-    for (i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
-    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-	goto error;
+    for(i = 0; i < sizeof buf; i++)
+        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(type)<0) goto error;
     if (H5Dclose(dset)<0) goto error;
@@ -4815,7 +4816,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
     }
-    if(H5Pset_filter (dcpl, H5Z_FILTER_BOGUS, 0, 0, NULL)<0) {
+    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
         goto error;
@@ -5195,7 +5196,7 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
         goto error;
     }
-    if(H5Pset_filter (dcpl, H5Z_FILTER_BOGUS2, 0, BOGUS2_PERM_NPARMS, cd_values)<0) {
+    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS2, 0, (size_t)BOGUS2_PERM_NPARMS, cd_values) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus2 filter\n",__LINE__);
         goto error;
@@ -5542,9 +5543,9 @@ test_filter_delete(hid_t file)
     /* check if filter was deleted */
     for (i=0; i<nfilters; i++) {
 #ifdef H5_WANT_H5_V1_6_COMPAT
-        filtn = H5Pget_filter(dcpl1,(unsigned)i,0,0,0,0,0);
+        filtn = H5Pget_filter(dcpl1, (unsigned)i, NULL, NULL, NULL, (size_t)0, NULL);
 #else
-        filtn = H5Pget_filter(dcpl1,(unsigned)i,0,0,0,0,0,NULL);
+        filtn = H5Pget_filter(dcpl1, (unsigned)i, NULL, NULL, NULL, (size_t)0, NULL, NULL);
 #endif
         if (H5Z_FILTER_DEFLATE==filtn)
             goto error;
@@ -5655,8 +5656,8 @@ auxread_fdata(hid_t fid, const char *name)
 
     if (nelmts)
     {
-        buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-        if ( buf==NULL){
+        buf = (void *)HDmalloc((size_t)(nelmts * msize));
+        if(buf == NULL) {
             printf( "cannot read into memory\n" );
             goto error;
         }
@@ -6037,7 +6038,7 @@ main(void)
                 goto error;
 
             /* Cause the library to emit initial messages */
-            if((grp = H5Gcreate(file, "emit diagnostics", 0)) < 0)
+            if((grp = H5Gcreate(file, "emit diagnostics", (size_t)0)) < 0)
                 goto error;
             if(H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted") < 0)
                 goto error;

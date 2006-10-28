@@ -3710,7 +3710,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                       H5T_BIT_LSB, TRUE)<0) {
                         /* +0 or -0 */
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
                         H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, FALSE);
                         H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         goto padding;
@@ -3729,14 +3729,14 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                            H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
                             H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                             H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                             /*If the destination no implied mantissa bit, we'll need to set
                              *the 1st bit of mantissa to 1.  The Intel-Linux long double is
                              *this case.*/
                             if (H5T_NORM_NONE==dst.u.f.norm)
-                                H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                                H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
                         } else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
@@ -3765,14 +3765,14 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     }
 
                     if(except_ret == H5T_CONV_UNHANDLED) {
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
                         H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                         H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         /*If the destination no implied mantissa bit, we'll need to set
                          *the 1st bit of mantissa to 1.  The Intel-Linux long double is
                          *this case.*/
                         if (H5T_NORM_NONE==dst.u.f.norm)
-                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
                     } else if(except_ret == H5T_CONV_HANDLED) {
                         /*No need to reverse the order of destination because user handles it*/
                         reverse = FALSE;
@@ -3797,7 +3797,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(except_ret == H5T_CONV_UNHANDLED) {
                         /* There are many NaN values, so we just set all bits of
                          * the significand. */
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
                         H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                         H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
                     } else if(except_ret == H5T_CONV_HANDLED) {
@@ -3834,7 +3834,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE);
+                        H5T_bit_set(s, src.u.f.mpos, (size_t)1, FALSE);
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -3847,7 +3847,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * The sign for the destination is the same as the sign for the
                  * source in all cases.
                  */
-                H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
 
                 /*
                  * Calculate the true source exponent by adjusting according to
@@ -3931,7 +3931,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     bitno = (ssize_t)(mrsh+msize - dst.u.f.msize);
                     assert(bitno>=0 && (size_t)bitno<=msize);
                     /*If the 1st bit being cut off is set and source isn't denormalized.*/
-                    if(H5T_bit_get_d(s, mpos+bitno-1, 1) && !denormalized) {
+                    if(H5T_bit_get_d(s, mpos+bitno-1, (size_t)1) && !denormalized) {
                         /*Don't do rounding if exponent is 111...110 and mantissa is 111...11.
                          *To do rounding and increment exponent in this case will create an infinity value.*/
                         if((H5T_bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
@@ -3939,7 +3939,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             if (carry)
                                 implied = 2;
                         }
-                    } else if(H5T_bit_get_d(s, mpos+bitno-1, 1) && denormalized)
+                    } else if(H5T_bit_get_d(s, mpos+bitno-1, (size_t)1) && denormalized)
                             /*For either source or destination, denormalized value doesn't increment carry.*/
                             H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                 }
@@ -3953,7 +3953,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                 } else if (mrsh==dst.u.f.msize+1) {
                     H5T_bit_set(d, dst.u.f.mpos+1, dst.u.f.msize-1, FALSE);
-                    H5T_bit_set(d, dst.u.f.mpos, 1, TRUE);
+                    H5T_bit_set(d, dst.u.f.mpos, (size_t)1, TRUE);
                 } else if (mrsh==dst.u.f.msize) {
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
@@ -3961,7 +3961,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if (mrsh>0) {
                         H5T_bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
                                     FALSE);
-                        H5T_bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, 2,
+                        H5T_bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, (size_t)2,
                                       (hsize_t)implied);
                     }
                     if (mrsh+msize>=dst.u.f.msize) {
@@ -4019,7 +4019,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (dst.offset>0) {
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
-                    H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                    H5T_bit_set (d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
                 if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
@@ -9634,7 +9634,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /*
                  * Find the sign bit value of the source.
                  */
-                sign = H5T_bit_get_d(s, src.u.f.sign, 1);
+                sign = H5T_bit_get_d(s, src.u.f.sign, (size_t)1);
 
                 /*
                  * Check for special cases: +0, -0, +Inf, -Inf, NaN
@@ -9659,7 +9659,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) {
                                 if (H5T_SGN_2==dst.u.i.sign)
-                                    H5T_bit_set (d, dst.prec-1, 1, TRUE);
+                                    H5T_bit_set (d, dst.prec-1, (size_t)1, TRUE);
                             } else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -9705,7 +9705,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
                             if (H5T_SGN_2==dst.u.i.sign)
-                                H5T_bit_set (d, dst.prec-1, 1, TRUE);
+                                H5T_bit_set (d, dst.prec-1, (size_t)1, TRUE);
                         } else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
@@ -9786,7 +9786,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  *      V       V       V       V
                  *    buf[0]  buf[1]  buf[2]  buf[3]
                  */
-                H5T_bit_copy(int_buf, 0, s, src.u.f.mpos, src.u.f.msize);
+                H5T_bit_copy(int_buf, (size_t)0, s, src.u.f.mpos, src.u.f.msize);
 
                 /*
                  * Restore the implicit bit for mantissa if it's implied.
@@ -9801,13 +9801,13 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * 10...010111, expo=20, expo-msize=-3.  Right-shift the sequence, we get
                  * 00010...10.  The last three bits were dropped.
                  */
-                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), 0, buf_size*8);
+                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), (size_t)0, buf_size*8);
 
                 /*
                  * If expo is less than mantissa size, the frantional value is dropped off
                  * during conversion.  Set exception type to be "truncate"
                  */
-                if (expo < src.u.f.msize && cb_struct.func)
+                if ((size_t)expo < src.u.f.msize && cb_struct.func)
                     truncated = TRUE;
 
                 /*
@@ -9815,7 +9815,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * which is set?  This is checked before converted to negative
                  * integer.
                  */
-                sfirst = H5T_bit_find(int_buf, 0, 8*buf_size, H5T_BIT_MSB, TRUE);
+                sfirst = H5T_bit_find(int_buf, (size_t)0, 8*buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
 
                 if(sfirst < 0) {
@@ -9874,7 +9874,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED)
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T_bit_copy (d, dst.offset, int_buf, 0, first+1);
+                                H5T_bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
                             else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -9895,12 +9895,12 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/
                                 /*Convert to integer representation.  Equivalent to ~(value - 1).*/
-                                H5T_bit_dec(int_buf, 0, 8*buf_size);
-                                H5T_bit_neg(int_buf, 0, 8*buf_size);
+                                H5T_bit_dec(int_buf, (size_t)0, 8*buf_size);
+                                H5T_bit_neg(int_buf, (size_t)0, 8*buf_size);
 
                                 /*copy source value into destination*/
-                                H5T_bit_copy (d, dst.offset, int_buf, 0, dst.prec-1);
-                                H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
+                                H5T_bit_copy(d, dst.offset, int_buf, (size_t)0, dst.prec-1);
+                                H5T_bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9920,7 +9920,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
+                                H5T_bit_set (d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9958,7 +9958,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) {
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T_bit_copy (d, dst.offset, int_buf, 0, first+1);
+                                H5T_bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9976,7 +9976,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (dst.offset>0) {
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
-                    H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                    H5T_bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
                 if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);

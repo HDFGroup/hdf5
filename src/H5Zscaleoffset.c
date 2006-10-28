@@ -775,9 +775,9 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get the filter's current parameters */
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SCALEOFFSET,&flags,&cd_nelmts,cd_values,0,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0, NULL) < 0)
 #else
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SCALEOFFSET,&flags,&cd_nelmts,cd_values,0,NULL,NULL)<0)
+    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
 #endif
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters")
 
@@ -882,7 +882,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     }
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SCALEOFFSET, flags, H5Z_SCALEOFFSET_TOTAL_NPARMS, cd_values)<0)
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS, cd_values) < 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters")
 
 done:
@@ -1069,7 +1069,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         }
 
         /* before postprocess, get memory type */
-        if((type = H5Z_scaleoffset_get_type(dtype_class, p.size, dtype_sign))==0)
+        if((type = H5Z_scaleoffset_get_type(dtype_class, (unsigned)p.size, dtype_sign)) == 0)
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast")
 
         /* postprocess after decompression */
@@ -1097,7 +1097,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             H5Z_scaleoffset_convert(*buf, d_nelmts, p.size);
 
         /* before preprocess, get memory type */
-        if((type = H5Z_scaleoffset_get_type(dtype_class, p.size, dtype_sign))==0)
+        if((type = H5Z_scaleoffset_get_type(dtype_class, (unsigned)p.size, dtype_sign))==0)
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "cannot use C integer datatype for cast")
 
         /* preprocess before compression */

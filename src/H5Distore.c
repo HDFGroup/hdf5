@@ -1056,7 +1056,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         unsigned filter_mask = lt_key->filter_mask;
 
         if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &nbytes, &buf_size, &buf) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_READERROR, H5B_ITER_ERROR, "data pipeline read failed")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5B_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
     /* Perform datatype conversion, if necessary */
@@ -1116,7 +1116,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     if(is_compressed && (is_vlen || fix_ref) ) {
         if(H5Z_pipeline(pline, 0, &(udata_dst.common.key.filter_mask), edc_read,
                 cb_struct, &nbytes, &buf_size, &buf) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_READERROR, H5B_ITER_ERROR, "output pipeline failed")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5B_ITER_ERROR, "output pipeline failed")
         udata_dst.common.key.nbytes = nbytes;
 	udata->buf = buf;
 	udata->buf_size = buf_size;
@@ -1241,7 +1241,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
             }
             if (H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.common.key.filter_mask), io_info->dxpl_cache->err_detect,
                      io_info->dxpl_cache->filter_cb, &(udata.common.key.nbytes), &alloc, &buf)<0)
-                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
         }
 
         /*
@@ -1796,7 +1796,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
             if(pline->nused) {
                 if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->common.key.filter_mask), io_info->dxpl_cache->err_detect,
                         io_info->dxpl_cache->filter_cb, &(udata->common.key.nbytes), &chunk_alloc, &chunk) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed")
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, NULL, "data pipeline read failed")
             } /* end if */
 #ifdef H5D_ISTORE_DEBUG
             rdcc->nmisses++;
@@ -2816,7 +2816,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 
             /* Push the chunk through the filters */
             if (H5Z_pipeline(&pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &buf_size, &chunk)<0)
-                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
+                HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
 
             /* Keep the number of bytes the chunk turned in to */
             chunk_size=nbytes;
