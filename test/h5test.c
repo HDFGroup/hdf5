@@ -581,7 +581,7 @@ h5_fileaccess(void)
 #ifdef H5_HAVE_DIRECT
 	/* Linux direct read() and write() system calls.  Set memory boundary, file block size,
 	 * and copy buffer size to the default values. */
-	if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
+	if (H5Pset_fapl_direct(fapl, 1024, 4096, 7*4096)<0) return -1;
 #endif
     } else {
 	/* Unknown driver */

@@ -27,9 +27,17 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
+
+/*Macros for Direct VFD*/
 #define MBOUNDARY	512
-#define FBSIZE		4096
-#define CBSIZE		4096
+#define FBSIZE		(4*KB)
+#define CBSIZE		(8*KB)
+#define THRESHOLD 	1
+#define DSET1_NAME	"dset1"
+#define DSET1_DIM1      1024
+#define DSET1_DIM2      32
+#define DSET2_NAME	"dset2"
+#define DSET2_DIM       4
 
 const char *FILENAME[] = {
     "sec2_file",
@@ -142,12 +150,18 @@ test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
     hid_t       file=(-1), fapl, access_fapl = -1;
+    hid_t	dset1=-1, dset2=-1, space1=-1, space2=-1;
     char        filename[1024];
     int         *fhandle=NULL;
     hsize_t     file_size;
+    hsize_t	dims1[2], dims2[1];
     size_t	mbound;
     size_t	fbsize;
     size_t	cbsize;
+    int		*points, *check, *p1, *p2;
+    int		wdata2[DSET2_DIM] = {11,12,13,14}; 
+    int		rdata2[DSET2_DIM];
+    int		i, j, n;
 #endif /*H5_HAVE_DIRECT*/
 
     TESTING("Direct I/O file driver");
@@ -170,6 +184,9 @@ test_direct(void)
     if(mbound != MBOUNDARY || fbsize != FBSIZE || cbsize != CBSIZE)
 	TEST_ERROR;
 
+    if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE)<0)
+	TEST_ERROR;
+	
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         TEST_ERROR;
 
@@ -197,8 +214,106 @@ test_direct(void)
     if(file_size<1*KB || file_size>4*KB)
         TEST_ERROR;
 
+    /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
+     * memory address, size of data, and file address. */
+    if(posix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+        TEST_ERROR;
+
+    if(posix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+        TEST_ERROR;
+
+    /* Initialize the dset1 */
+    p1 = points;
+    for (i = n = 0; i < DSET1_DIM1; i++)
+	for (j = 0; j < DSET1_DIM2; j++)
+	    *p1++ = n++;
+
+    /* Create the data space1 */
+    dims1[0] = DSET1_DIM1;
+    dims1[1] = DSET1_DIM2;
+    if ((space1 = H5Screate_simple(2, dims1, NULL))<0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if ((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT))<0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if (H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+
+    if((dset1=H5Dopen(file, DSET1_NAME))<0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if (H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for (i = 0; i < DSET1_DIM1; i++) {
+	for (j = 0; j < DSET1_DIM2; j++) {
+	    if (*p1++ != *p2++) {
+		H5_FAILED();
+		printf("    Read different values than written in data set 1.\n");
+		printf("    At index %d,%d\n", i, j);
+        	TEST_ERROR;
+	    }
+	}
+    }
+
+    /* Create the data space2. For data set 2, memory address and data size are not aligned. */
+    dims2[0] = DSET2_DIM;
+    if ((space2 = H5Screate_simple(1, dims2, NULL))<0)
+        TEST_ERROR;
+
+    /* Create the dset2 */
+    if ((dset2 = H5Dcreate(file, DSET2_NAME, H5T_NATIVE_INT, space2, H5P_DEFAULT))<0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if (H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2)<0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset2)<0)
+        TEST_ERROR;
+
+    if((dset2=H5Dopen(file, DSET2_NAME))<0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if (H5Dread(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2)<0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < DSET2_DIM; i++) {
+	if (wdata2[i] != rdata2[i]) {
+	    H5_FAILED();
+	    printf("    Read different values than written in data set 2.\n");
+	    printf("    At index %d\n", i);
+            TEST_ERROR;
+	}
+    }
+
+    if(H5Sclose(space1)<0)
+        TEST_ERROR;
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+    if(H5Sclose(space2)<0)
+        TEST_ERROR;
+    if(H5Dclose(dset2)<0)
+        TEST_ERROR;
     if(H5Fclose(file)<0)
         TEST_ERROR;
+    if(points)
+	free(points);
+    if(check)
+	free(check);
+
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -206,6 +321,10 @@ test_direct(void)
 error:
     H5E_BEGIN_TRY {
         H5Pclose (fapl);
+        H5Sclose(space1);
+        H5Dclose(dset1);
+        H5Sclose(space2);
+        H5Dclose(dset2);
         H5Fclose(file);
     } H5E_END_TRY;
     return -1;

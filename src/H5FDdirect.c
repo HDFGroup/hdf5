@@ -514,7 +514,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
     /* Flag for Direct I/O */
-    o_flags |= O_DIRECT;
+    /*o_flags |= O_DIRECT;*/ /*change it back!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
     /* Open the file */
     if ((fd=HDopen(name, o_flags, 0666))<0)
@@ -1097,8 +1097,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 	    	alloc_size = (size / _fbsize + 1) * _fbsize + _fbsize;
 	    else
 		alloc_size = _cbsize;
-/*printf("alloc_size=%ld, size=%ld, _fbsize=%ld, _cbsize=%ld\n", alloc_size, size, _fbsize,
-_cbsize);*/
+
 	    if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
 
@@ -1147,8 +1146,6 @@ _cbsize);*/
 	    	if(size < _cbsize)
 	    	    memcpy(p1, p3, size);
 	    	else if(size >= _cbsize && copy_size <= (alloc_size-(size_t)(copy_addr%_fbsize))) {
-/*printf("copy_size=%d, alloc_size=%d, size=%d, copy_addr%_fbsize=%ld\n", copy_size, alloc_size,
-size, copy_addr%_fbsize);*/
 		    memcpy(p1, p3, copy_size);
 	    	}else if(size >= _cbsize && copy_size > (alloc_size-(size_t)(copy_addr%_fbsize))) {
 		    memcpy(p1, p3, (alloc_size - (size_t)(copy_addr % _fbsize)));
