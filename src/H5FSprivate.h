@@ -113,7 +113,7 @@ typedef enum H5FS_section_state_t {
 
 /* Free space section info */
 struct H5FS_section_info_t {
-    haddr_t     addr;                   /* Address of free space section in the address space */
+    haddr_t     addr;                   /* Offset of free space section in the address space */
     hsize_t     size;                   /* Size of free space section */
     unsigned    type;                   /* Type of free space section (i.e. class) */
     H5FS_section_state_t state;         /* Whether the section is in "serialized" or "live" form */

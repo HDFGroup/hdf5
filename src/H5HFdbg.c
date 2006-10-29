@@ -212,6 +212,9 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Print the values.
      */
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Heap is:",
+	      hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	      "Objects stored in 'debugging' format:",
 	      hdr->debug_objs);
@@ -251,7 +254,7 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "ID of next 'huge' object:",
 	      hdr->huge_next_id);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of v2 B-tree for 'huge' objects:",
 	      hdr->huge_bt2_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
@@ -267,6 +270,14 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /* Print information about I/O filters */
     if(hdr->filter_len > 0) {
         HDfprintf(stream, "%*sI/O filter Info...\n", indent, "");
+        if(hdr->man_dtable.curr_root_rows == 0) {
+            HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+                      "Compressed size of root direct block:",
+                      hdr->pline_root_direct_size);
+            HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
+                      "Filter mask for root direct block:",
+                      hdr->pline_root_direct_filter_mask);
+        } /* end if */
         H5O_debug_id(H5O_PLINE_ID, f, dxpl_id, &(hdr->pline), stream,
                              indent + 3, MAX(0, fwidth - 3));
     } /* end if */
@@ -564,7 +575,10 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	      hdr->man_dtable.max_direct_rows);
 
     /* Print the entry tables */
-    HDfprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
+    if(hdr->filter_len > 0)
+        HDfprintf(stream, "%*sDirect Block Entries: (address/compressed size/filter mask)\n", indent, "");
+    else
+        HDfprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
     for(u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
         sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)hdr->man_dtable.row_block_size[u]);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -573,9 +587,16 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
             size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
             sprintf(temp_str, "Col #%u:", (unsigned)v);
-            HDfprintf(stream, "%*s%-*s %9a\n", indent + 6, "", MAX(0, fwidth - 6),
-                    temp_str,
-                    iblock->ents[off].addr);
+            if(hdr->filter_len > 0)
+                HDfprintf(stream, "%*s%-*s %9a/%6Zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
+                        temp_str,
+                        iblock->ents[off].addr,
+                        iblock->filt_ents[off].size,
+                        iblock->filt_ents[off].filter_mask);
+            else
+                HDfprintf(stream, "%*s%-*s %9a\n", indent + 6, "", MAX(0, fwidth - 6),
+                        temp_str,
+                        iblock->ents[off].addr);
         } /* end for */
     } /* end for */
     HDfprintf(stream, "%*sIndirect Block Entries:\n", indent, "");

@@ -96,6 +96,7 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, const void *obj
     H5HF_free_section_t *sec_node;      /* Pointer to free space section */
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to modify */
     haddr_t dblock_addr = HADDR_UNDEF;  /* Direct block address */
+    size_t dblock_size;                 /* Direct block size */
     uint8_t *id = (uint8_t *)_id;       /* Pointer to ID buffer */
     size_t blk_off;                     /* Offset of object within block */
     htri_t node_found;                  /* Whether an existing free list node was found */
@@ -153,7 +154,9 @@ HDfprintf(stderr, "%s: sec_node->u.row.num_entries = %u\n", FUNC, sec_node->u.ro
     } /* end if */
     HDassert(sec_node->sect_info.state == H5FS_SECT_LIVE);
 
-    /* Lock direct block */
+    /* Retrieve direct block address from section */
+    if(H5HF_sect_single_dblock_info(hdr, dxpl_id, sec_node, &dblock_addr, &dblock_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
 #ifdef QAK
 HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
 HDfprintf(stderr, "%s: sec_node->sect_info.size = %Hu\n", FUNC, sec_node->sect_info.size);
@@ -161,11 +164,10 @@ HDfprintf(stderr, "%s: sec_node->u.single.parent = %p\n", FUNC, sec_node->u.sing
 if(sec_node->u.single.parent)
     HDfprintf(stderr, "%s: sec_node->u.single.parent->addr = %a\n", FUNC, sec_node->u.single.parent->addr);
 HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.single.par_entry);
-HDfprintf(stderr, "%s: sec_node->u.single.dblock_addr = %a\n", FUNC, sec_node->u.single.dblock_addr);
-HDfprintf(stderr, "%s: sec_node->u.single.dblock_size = %Zu\n", FUNC, sec_node->u.single.dblock_size);
 #endif /* QAK */
-    dblock_addr = sec_node->u.single.dblock_addr;
-    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, sec_node->u.single.dblock_size, sec_node->u.single.parent, sec_node->u.single.par_entry, H5AC_WRITE)))
+
+    /* Lock direct block */
+    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, sec_node->u.single.parent, sec_node->u.single.par_entry, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
 
     /* Insert object into block */
@@ -470,7 +472,6 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     hsize_t obj_off;                    /* Object's offset in heap */
     size_t obj_len;                     /* Object's length in heap */
-    haddr_t dblock_addr;                /* Direct block address */
     size_t dblock_size;                 /* Direct block size */
     hsize_t dblock_block_off;           /* Offset of the direct block within the heap's address space */
     unsigned dblock_entry;              /* Entry of direct block in parent indirect block */
@@ -516,7 +517,6 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.max_direct_size = %Zu\n", FUNC, hd
 HDfprintf(stderr, "%s: direct root block\n", FUNC);
 #endif /* QAK */
         /* Set direct block info */
-        dblock_addr = hdr->man_dtable.table_addr;
         dblock_size = hdr->man_dtable.cparam.start_block_size;
         dblock_block_off = 0;
         dblock_entry = 0;
@@ -532,13 +532,12 @@ HDfprintf(stderr, "%s: indirect root block\n", FUNC);
 HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[dblock_entry].addr);
 #endif /* QAK */
 
-        /* Set direct block info */
-        dblock_addr =  iblock->ents[dblock_entry].addr;
-        dblock_size =  hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width];
-
         /* Check for offset of invalid direct block */
-        if(!H5F_addr_defined(dblock_addr))
+        if(!H5F_addr_defined(iblock->ents[dblock_entry].addr))
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
+
+        /* Set direct block info */
+        dblock_size =  hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width];
 
         /* Compute the direct block's offset in the heap's address space */
         /* (based on parent indirect block's block offset) */
@@ -547,7 +546,7 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[dblock_entry].a
         dblock_block_off += hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width] * (dblock_entry % hdr->man_dtable.cparam.width);
     } /* end else */
 #ifdef QAK
-HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr, dblock_size);
+HDfprintf(stderr, "%s: dblock_size = %Zu\n", FUNC, dblock_size);
 #endif /* QAK */
 
     /* Compute offset of object within block */
@@ -566,8 +565,7 @@ HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
         HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "object overruns end of direct block")
 
     /* Create free space section node */
-    if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len, iblock,
-            dblock_entry, dblock_addr, dblock_size)))
+    if(NULL == (sec_node = H5HF_sect_single_new(obj_off, obj_len, iblock, dblock_entry)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for direct block's free space")
 #ifdef QAK
 HDfprintf(stderr, "%s: sec_node->sect_info.addr = %a\n", FUNC, sec_node->sect_info.addr);
@@ -576,8 +574,6 @@ HDfprintf(stderr, "%s: sec_node->u.single.parent = %p\n", FUNC, sec_node->u.sing
 if(sec_node->u.single.parent)
     HDfprintf(stderr, "%s: sec_node->u.single.parent->addr = %a\n", FUNC, sec_node->u.single.parent->addr);
 HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.single.par_entry);
-HDfprintf(stderr, "%s: sec_node->u.single.dblock_addr = %a\n", FUNC, sec_node->u.single.dblock_addr);
-HDfprintf(stderr, "%s: sec_node->u.single.dblock_size = %Zu\n", FUNC, sec_node->u.single.dblock_size);
 #endif /* QAK */
 
     /* Unlock indirect block */

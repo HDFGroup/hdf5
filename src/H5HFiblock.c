@@ -441,6 +441,17 @@ HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_bl
         if(H5HF_man_iblock_attach(iblock, 0, hdr->man_dtable.table_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach root direct block to parent indirect block")
 
+        /* Check for I/O filters on this heap */
+        if(hdr->filter_len > 0) {
+            /* Set the pipeline filter information from the header */
+            iblock->filt_ents[0].size = hdr->pline_root_direct_size;
+            iblock->filt_ents[0].filter_mask = hdr->pline_root_direct_filter_mask;
+
+            /* Reset the header's pipeline information */
+            hdr->pline_root_direct_size = 0;
+            hdr->pline_root_direct_filter_mask = 0;
+        } /* end if */
+
         /* Unlock first (previously the root) direct block */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
@@ -862,9 +873,18 @@ HDfprintf(stderr, "%s: Reverting root indirect block\n", FUNC);
     /* Get pointer to last direct block */
     if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, root_iblock, 0, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
+    HDassert(dblock->parent == root_iblock);
+    HDassert(dblock->par_entry == 0);
+
+    /* Check for I/O filters on this heap */
+    if(hdr->filter_len > 0) {
+        /* Set the header's pipeline information from the indirect block */
+        hdr->pline_root_direct_size = root_iblock->filt_ents[0].size;
+        hdr->pline_root_direct_filter_mask = root_iblock->filt_ents[0].filter_mask;
+    } /* end if */
 
     /* Detach direct block from parent */
-    if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
+    if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, 0) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach direct block from parent indirect block")
     dblock->parent = NULL;
     dblock->par_entry = 0;
@@ -1345,7 +1365,7 @@ HDfprintf(stderr, "%s: iblock->block_off = %Hu, iblock->nchildren = %u\n", FUNC,
         /* Compute row for entry */
         row = entry / iblock->hdr->man_dtable.cparam.width;
 
-        /* If this is a direct block, set its initial size */
+        /* If this is a direct block, reset its initial size */
         if(row < iblock->hdr->man_dtable.max_direct_rows) {
             iblock->filt_ents[entry].size = 0;
             iblock->filt_ents[entry].filter_mask = 0;
@@ -1503,8 +1523,16 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 
                 /* Are we in a direct or indirect block row */
                 if(row < hdr->man_dtable.max_direct_rows) {
+                    hsize_t dblock_size;        /* Size of direct block on disk */
+                    
+                    /* Check for I/O filters on this heap */
+                    if(hdr->filter_len > 0)
+                        dblock_size = iblock->filt_ents[entry].size;
+                    else
+                        dblock_size = row_block_size;
+
                     /* Delete child direct block */
-                    if(H5HF_man_dblock_delete(hdr->f, dxpl_id, iblock->ents[entry].addr, row_block_size) < 0)
+                    if(H5HF_man_dblock_delete(hdr->f, dxpl_id, iblock->ents[entry].addr, dblock_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap child direct block")
                 } /* end if */
                 else {

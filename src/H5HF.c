@@ -781,8 +781,24 @@ HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);
 HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable.table_addr);
 #endif /* QAK */
         if(hdr->man_dtable.curr_root_rows == 0) {
+            hsize_t dblock_size;        /* Size of direct block */
+
+            /* Check for I/O filters on this heap */
+            if(hdr->filter_len > 0) {
+                dblock_size = (hsize_t)hdr->pline_root_direct_size;
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_root_direct_size);
+#endif /* QAK */
+
+                /* Reset the header's pipeline information */
+                hdr->pline_root_direct_size = 0;
+                hdr->pline_root_direct_filter_mask = 0;
+            } /* end else */
+            else
+                dblock_size = (hsize_t)hdr->man_dtable.cparam.start_block_size;
+
             /* Delete root direct block */
-            if(H5HF_man_dblock_delete(f, dxpl_id, hdr->man_dtable.table_addr, (hsize_t)hdr->man_dtable.cparam.start_block_size) < 0)
+            if(H5HF_man_dblock_delete(f, dxpl_id, hdr->man_dtable.table_addr, dblock_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root direct block")
         } /* end if */
         else {

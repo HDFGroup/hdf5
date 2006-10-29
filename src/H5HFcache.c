@@ -35,6 +35,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
@@ -1199,14 +1200,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     if(H5HF_hdr_incr(hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
-#ifdef LATER
-    /* Check for I/O filters on this heap */
-    if(hdr->filter_len > 0) {
-HDfprintf(stderr, "%s: I/O filters not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "I/O filters not supported yet")
-    } /* end if */
-#endif /* LATER */
-
     /* Set block's internal information */
     dblock->size = *size;
     dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
@@ -1216,10 +1209,77 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, NULL, "I/O filters not supported yet")
     if((dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Read direct block from disk */
-    if(H5F_block_read(f, H5FD_MEM_FHEAP_DBLOCK, addr, (size_t)dblock->size, dxpl_id, dblock->blk) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "can't read fractal heap direct block")
+    /* Check for I/O filters on this heap */
+    if(hdr->filter_len > 0) {
+        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+        void *read_buf;         /* Pointer to buffer to read in */
+        size_t read_size;       /* Size of filtered direct block to read */
+        unsigned filter_mask;	/* Excluded filters for direct block */
 
+        /* Check for root direct block */
+        if(par_info->iblock == NULL) {
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu, hdr->pline_root_direct_filter_mask = %x\n", FUNC, hdr->pline_root_direct_size, hdr->pline_root_direct_filter_mask);
+HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a, addr = %a\n", FUNC, hdr->man_dtable.table_addr, addr);
+#endif /* QAK */
+            /* Sanity check */
+            HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
+
+            /* Set up parameters to read filtered direct block */
+            read_size = hdr->pline_root_direct_size;
+            filter_mask = hdr->pline_root_direct_filter_mask;
+        } /* end if */
+        else {
+#ifdef QAK
+HDfprintf(stderr, "%s: par_info->iblock = %p, par_info->entry = %u\n", FUNC, par_info->iblock, par_info->entry);
+HDfprintf(stderr, "%s: par_info->iblock->filt_ents[%u].size = %Zu, par_info->iblock->filt_ents[%u].filter_mask = %x\n", FUNC, par_info->entry, par_info->iblock->filt_ents[par_info->entry].size, par_info->entry, par_info->iblock->filt_ents[par_info->entry].filter_mask);
+HDfprintf(stderr, "%s: par_info->iblock->ents[%u].addr = %a, addr = %a\n", FUNC, par_info->entry, par_info->iblock->ents[par_info->entry].addr, addr);
+#endif /* QAK */
+            /* Sanity check */
+            HDassert(H5F_addr_eq(par_info->iblock->ents[par_info->entry].addr, addr));
+
+            /* Set up parameters to read filtered direct block */
+            read_size = par_info->iblock->filt_ents[par_info->entry].size;
+            filter_mask = par_info->iblock->filt_ents[par_info->entry].filter_mask;
+        } /* end else */
+
+        /* Allocate buffer to perform I/O filtering on */
+        if(NULL == (read_buf = H5MM_malloc(read_size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
+#ifdef QAK
+HDfprintf(stderr, "%s: read_size = %Zu, read_buf = %p\n", FUNC, read_size, read_buf);
+#endif /* QAK */
+
+        /* Read filtered direct block from disk */
+        if(H5F_block_read(f, H5FD_MEM_FHEAP_DBLOCK, addr, read_size, dxpl_id, read_buf) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "can't read fractal heap direct block")
+
+        /* Push direct block data through I/O filter pipeline */
+        nbytes = read_size;
+        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC,
+                 filter_cb, &nbytes, &read_size, &read_buf) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
+#ifdef QAK
+HDfprintf(stderr, "%s: nbytes = %Zu, read_size = %Zu, read_buf = %p\n", FUNC, nbytes, read_size, read_buf);
+#endif /* QAK */
+
+        /* Sanity check */
+        HDassert(nbytes == dblock->size);
+
+        /* Copy un-filtered data into block's buffer */
+        HDmemcpy(dblock->blk, read_buf, dblock->size);
+
+        /* Release the read buffer */
+        H5MM_xfree(read_buf);
+    } /* end if */
+    else {
+        /* Read direct block from disk */
+        if(H5F_block_read(f, H5FD_MEM_FHEAP_DBLOCK, addr, dblock->size, dxpl_id, dblock->blk) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "can't read fractal heap direct block")
+    } /* end else */
+
+    /* Start decoding direct block */
     p = dblock->blk;
 
     /* Magic number */
@@ -1358,7 +1418,6 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         /* Sanity check */
         HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
-#ifdef LATER
         /* Check for I/O filters on this heap */
         if(hdr->filter_len > 0) {
             H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
@@ -1376,21 +1435,129 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
             if(H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_ENABLE_EDC,
                      filter_cb, &nbytes, &write_size, &write_buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "output pipeline failed")
+#ifdef QAK
 HDfprintf(stderr, "%s: nbytes = %Zu, write_size = %Zu, write_buf = %p\n", FUNC, nbytes, write_size, write_buf);
+HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 HDfprintf(stderr, "%s: dblock->size = %Zu, dblock->blk = %p\n", FUNC, dblock->size, dblock->blk);
+HDfprintf(stderr, "%s: dblock->parent = %p, dblock->par_entry = %u\n", FUNC, dblock->parent, dblock->par_entry);
+#endif /* QAK */
 
-HDfprintf(stderr, "%s: I/O filters not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "I/O filters not supported yet")
+            /* Use the compressed number of bytes as the size to write */
+            write_size = nbytes;
+
+            /* Check for root direct block */
+            if(dblock->parent == NULL) {
+                hbool_t hdr_changed = FALSE;    /* Whether the header information changed */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu, hdr->pline_root_direct_filter_mask = %x\n", FUNC, hdr->pline_root_direct_size, hdr->pline_root_direct_filter_mask);
+HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a, addr = %a\n", FUNC, hdr->man_dtable.table_addr, addr);
+#endif /* QAK */
+                /* Sanity check */
+                HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
+                HDassert(hdr->pline_root_direct_size > 0);
+
+                /* Check if the filter mask changed */
+                if(hdr->pline_root_direct_filter_mask != filter_mask) {
+                    hdr->pline_root_direct_filter_mask = filter_mask;
+                    hdr_changed = TRUE;
+                } /* end if */
+
+                /* Check if we need to re-size the block on disk */
+                if(hdr->pline_root_direct_size != write_size) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Need to re-allocate root direct block!\n", FUNC);
+#endif /* QAK */
+                    /* Release direct block's current disk space */
+                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+
+                    /* Allocate space for the compressed direct block */
+                    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+
+                    /* Let the metadata cache know, if the block moved */
+                    if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr))
+                        if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+
+                    /* Update information about compressed direct block's location & size */
+                    hdr->man_dtable.table_addr = addr;
+                    hdr->pline_root_direct_size = write_size;
+
+                    /* Note that heap header was modified */
+                    hdr_changed = TRUE;
+                } /* end if */
+
+                /* Check if heap header was modified */
+                if(hdr_changed)
+                    if(H5HF_hdr_dirty(hdr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+            } /* end if */
+            else {
+                hbool_t par_changed = FALSE;    /* Whether the parent's information changed */
+                H5HF_indirect_t *par_iblock;    /* Parent indirect block */
+                unsigned par_entry;             /* Entry in parent indirect block */
+
+                /* Get parent information */
+                par_iblock = dblock->parent;
+                par_entry = dblock->par_entry;
+
+#ifdef QAK
+HDfprintf(stderr, "%s: par_iblock->filt_ents[%u].size = %Zu, par_iblock->filt_ents[%u].filter_mask = %x\n", FUNC, par_entry, par_iblock->filt_ents[par_entry].size, par_entry, par_iblock->filt_ents[par_entry].filter_mask);
+HDfprintf(stderr, "%s: par_iblock->ents[%u].addr = %a, addr = %a\n", FUNC, par_entry, par_iblock->ents[par_entry].addr, addr);
+#endif /* QAK */
+                /* Sanity check */
+                HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
+                HDassert(par_iblock->filt_ents[par_entry].size > 0);
+
+                /* Check if the filter mask changed */
+                if(par_iblock->filt_ents[par_entry].filter_mask != filter_mask) {
+                    par_iblock->filt_ents[par_entry].filter_mask = filter_mask;
+                    par_changed = TRUE;
+                } /* end if */
+
+                /* Check if we need to re-size the block on disk */
+                if(par_iblock->filt_ents[par_entry].size != write_size) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Need to re-allocate non-root direct block!\n", FUNC);
+#endif /* QAK */
+                    /* Release direct block's current disk space */
+                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+
+                    /* Allocate space for the compressed direct block */
+                    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+
+                    /* Let the metadata cache know, if the block moved */
+                    if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr))
+                        if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+
+                    /* Update information about compressed direct block's location & size */
+                    par_iblock->ents[par_entry].addr = addr;
+                    par_iblock->filt_ents[par_entry].size = write_size;
+
+                    /* Note that parent was modified */
+                    par_changed = TRUE;
+                } /* end if */
+
+                /* Check if parent was modified */
+                if(par_changed)
+                    if(H5HF_iblock_dirty(par_iblock) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+            } /* end else */
         } /* end if */
         else {
-#endif /* LATER */
             write_buf = dblock->blk;
             write_size = dblock->size;
-#ifdef LATER
         } /* end else */
-#endif /* LATER */
 
 	/* Write the direct block */
+#ifdef QAK
+HDfprintf(stderr, "%s: addr = %a, write_size = %Zu\n", FUNC, addr, write_size);
+#endif /* QAK */
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_DBLOCK, addr, write_size, dxpl_id, write_buf) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap direct block to disk")
 

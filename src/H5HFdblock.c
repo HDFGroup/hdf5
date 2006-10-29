@@ -147,7 +147,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
 HDmemset(dblock->blk, 0, dblock->size);
 #endif /* H5_USING_PURIFY */
 
-    /* Allocate space for the header on disk */
+    /* Allocate space for the direct block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 #ifdef QAK
@@ -163,7 +163,7 @@ HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, dblock_addr);
 
     /* Create a new 'single' section for the free space in the block */
     if(NULL == (sec_node = H5HF_sect_single_new((dblock->block_off + H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr)),
-            free_space, dblock->parent, dblock->par_entry, dblock_addr, dblock->size)))
+            free_space, dblock->parent, dblock->par_entry)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create section for new direct block's free space")
 
     /* Check what to do with section node */
@@ -218,6 +218,7 @@ herr_t
 H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
     haddr_t dblock_addr)
 {
+    hsize_t dblock_size;                /* Size of direct block on disk */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_destroy)
@@ -232,6 +233,27 @@ HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
      */
     HDassert(hdr);
     HDassert(dblock);
+
+    /* Check for I/O filters on this heap */
+    if(hdr->filter_len > 0) {
+        /* Check for root direct block */
+        if(dblock->parent == NULL)
+            /* Get direct block's actual size */
+            dblock_size = (hsize_t)hdr->pline_root_direct_size;
+        else {
+            H5HF_indirect_t *par_iblock;    /* Parent indirect block */
+            unsigned par_entry;             /* Entry in parent indirect block */
+
+            /* Get parent information */
+            par_iblock = dblock->parent;
+            par_entry = dblock->par_entry;
+
+            /* Get direct block's actual size */
+            dblock_size = (hsize_t)par_iblock->filt_ents[par_entry].size;
+        } /* end else */
+    } /* end if */
+    else
+        dblock_size = (hsize_t)dblock->size;
 
     /* Check for root direct block */
     if(hdr->man_dtable.curr_root_rows == 0) {
@@ -298,11 +320,12 @@ HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
         dblock->par_entry = 0;
     } /* end else */
 
-    /* Release direct block's disk space */
 #ifdef QAK
-HDfprintf(stderr, "%s: Before releasing direct block's space, dblock_addr = %a\n", FUNC, dblock_addr);
+HDfprintf(stderr, "%s: Before releasing direct block's space, dblock_addr = %a, dblock_size = %Hu\n", FUNC, dblock_addr, dblock_size);
 #endif /* QAK */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, (hsize_t)dblock->size) < 0)
+
+    /* Release direct block's disk space */
+    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
     /* Remove direct block from metadata cache */
@@ -381,6 +404,10 @@ HDfprintf(stderr, "%s: root direct block, dblock_addr = %a\n", FUNC, dblock_addr
         /* Point root at new direct block */
         hdr->man_dtable.curr_root_rows = 0;
         hdr->man_dtable.table_addr = dblock_addr;
+        if(hdr->filter_len > 0) {
+            hdr->pline_root_direct_size = hdr->man_dtable.cparam.start_block_size;
+            hdr->pline_root_direct_filter_mask = 0;
+        } /* end if */
 
         /* Extend heap to cover new direct block */
         if(H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size, (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)

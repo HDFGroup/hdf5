@@ -251,11 +251,6 @@ typedef struct H5HF_free_section_t {
         struct {
             H5HF_indirect_t *parent;            /* Indirect block parent for free section's direct block */
             unsigned par_entry;                 /* Entry of free section's direct block in parent indirect block */
-                                                /* (Needed to retrieve direct block) */
-
-            haddr_t     dblock_addr;            /* Address of direct block for free section */
-            size_t      dblock_size;            /* Size of direct block */
-                                                /* (Needed to retrieve root direct block) */
         } single;
         struct {
             struct H5HF_free_section_t *under;  /* Pointer to indirect block underlying row section */
@@ -270,7 +265,7 @@ typedef struct H5HF_free_section_t {
             /* Holds either a pointer to an indirect block (if its "live") or
              *  the block offset of it's indirect block (if its "serialized")
              *  (This allows the indirect block that the section is within to
-             *          be compared with other sections, whether its serialized
+             *          be compared with other sections, whether it's serialized
              *          or not)
              */
             union {
@@ -322,14 +317,14 @@ typedef struct H5HF_hdr_t {
     haddr_t     fs_addr;        /* Address of free space header on disk */
 
     /* "Huge" object support (stored in header) */
-    uint32_t max_man_size;      /* Max. size of object to manage in doubling table */
-    hsize_t  huge_next_id;      /* Next ID to use for indirectly tracked 'huge' object */
-    haddr_t  huge_bt2_addr;     /* Address of v2 B-tree for tracking "huge" object info */
+    uint32_t    max_man_size;   /* Max. size of object to manage in doubling table */
+    hsize_t     huge_next_id;   /* Next ID to use for indirectly tracked 'huge' object */
+    haddr_t     huge_bt2_addr;  /* Address of v2 B-tree for tracking "huge" object info */
 
     /* I/O filter support (stored in header, if any are used) */
     H5O_pline_t pline;          /* I/O filter pipeline for heap objects */
-    size_t pline_root_direct_size;    /* Size of filtered root direct block */
-    unsigned pline_root_direct_filter_mask; /* I/O filter mask for filtered root direct block */
+    size_t      pline_root_direct_size;    /* Size of filtered root direct block */
+    unsigned    pline_root_direct_filter_mask; /* I/O filter mask for filtered root direct block */
 
     /* Statistics for heap (stored in header) */
     hsize_t     man_size;       /* Total amount of 'managed' space in heap */
@@ -698,10 +693,11 @@ H5_DLL herr_t H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id,
 
 /* Free space section routines */
 H5_DLL H5HF_free_section_t *H5HF_sect_single_new(hsize_t sect_off,
-    size_t sect_size, H5HF_indirect_t *parent, unsigned par_entry,
-    haddr_t dblock_addr, size_t dblock_size);
+    size_t sect_size, H5HF_indirect_t *parent, unsigned par_entry);
 H5_DLL herr_t H5HF_sect_single_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
+H5_DLL herr_t H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    H5HF_free_section_t *sect, haddr_t *dblock_addr, size_t *dblock_size);
 H5_DLL herr_t H5HF_sect_single_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, size_t amt);
 H5_DLL herr_t H5HF_sect_row_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
