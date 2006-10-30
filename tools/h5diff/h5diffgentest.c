@@ -41,7 +41,7 @@
 #define FILE10   "h5diff_hyper2.h5"
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
-#define GBLL	   ((unsigned long_long) 1024 * 1024 *1024 )
+#define GBLL    ((unsigned long_long) 1024 * 1024 *1024 )
 
 
 #define MY_LINKCLASS 187
@@ -129,8 +129,7 @@ int test_basic(const char *fname1,
  hid_t   fid1, fid2;
  hid_t   gid1, gid2, gid3;
  herr_t  status;
- hsize_t dims32[2] = { 3,2 };
- hsize_t dims42[2] = { 4,2 };
+ hsize_t dims[2] = { 3,2 };
 
  /* Test */
  double  data1[3][2] = {{1,1},{1,1},{1,1}};
@@ -141,18 +140,18 @@ int test_basic(const char *fname1,
  unsigned long_long data8[3][2] = {{101,102},{103,104},{150,200}};
  double  data3[3][2] = {{100,100},{100,100},{100,100}}; 
  double  data4[3][2] = {{105,120},{160,95},{80,40}};
- double  data9[4][2] = {{100,100},{100,100},{100,100},{1,0}}; /* compare divide by zero */
- double  data10[4][2] = {{105,120},{160,95},{80,40},{0,1}};
+ double  data9[3][2] = {{100,100},{100,0},{0,100}}; 
+ /* compare divide by zero */
+ /* compare both zero */
+ double  data10[3][2] ={{120,80},{0,100},{0,50}};
  /*
-A	  B	  1-B/A	  %
-100	105	0.05	   5
-100	120	0.2	    20
-100	160	0.6	    60
-100	95	 0.05	   5
-100	80	 0.2	    20
-100	40	 0.6	    60
-1	  0	  1	      100
-0	  1	  #DIV/0!	
+A   B   1-B/A   %
+100 120 0.2     20
+100 80  0.2     20
+100 0   1       100
+0   100 #DIV/0! #DIV/0!
+0   0   #DIV/0! #DIV/0!
+100 50  0.5     50
 */
 
 /*-------------------------------------------------------------------------
@@ -168,22 +167,22 @@ A	  B	  1-B/A	  %
  gid2 = H5Gcreate(fid2, "g1", 0);
  gid3 = H5Gcreate(fid2, "g2", 0);
 
- write_dset(gid1,2,dims32,"dset1",H5T_NATIVE_DOUBLE,data1);
- write_dset(gid2,2,dims32,"dset2",H5T_NATIVE_DOUBLE,data2);
- write_dset(gid1,2,dims32,"dset3",H5T_NATIVE_DOUBLE,data3);
- write_dset(gid2,2,dims32,"dset4",H5T_NATIVE_DOUBLE,data4);
- write_dset(gid2,2,dims32,"dset1",H5T_NATIVE_DOUBLE,data2);
+ write_dset(gid1,2,dims,"dset1",H5T_NATIVE_DOUBLE,data1);
+ write_dset(gid2,2,dims,"dset2",H5T_NATIVE_DOUBLE,data2);
+ write_dset(gid1,2,dims,"dset3",H5T_NATIVE_DOUBLE,data3);
+ write_dset(gid2,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
+ write_dset(gid2,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
  /* relative (int) */
- write_dset(gid1,2,dims32,"dset5",H5T_NATIVE_INT,data5);
- write_dset(gid1,2,dims32,"dset6",H5T_NATIVE_INT,data6);
+ write_dset(gid1,2,dims,"dset5",H5T_NATIVE_INT,data5);
+ write_dset(gid1,2,dims,"dset6",H5T_NATIVE_INT,data6);
  /* relative (unsigned long_long) */
- write_dset(gid1,2,dims32,"dset7",H5T_NATIVE_ULLONG,data7);
- write_dset(gid1,2,dims32,"dset8",H5T_NATIVE_ULLONG,data8);
+ write_dset(gid1,2,dims,"dset7",H5T_NATIVE_ULLONG,data7);
+ write_dset(gid1,2,dims,"dset8",H5T_NATIVE_ULLONG,data8);
 
  /* test divide by zero in percente case */
- write_dset(gid1,2,dims42,"dset9",H5T_NATIVE_DOUBLE,data9);
- write_dset(gid1,2,dims42,"dset10",H5T_NATIVE_DOUBLE,data10);
+ write_dset(gid1,2,dims,"dset9",H5T_NATIVE_DOUBLE,data9);
+ write_dset(gid1,2,dims,"dset10",H5T_NATIVE_DOUBLE,data10);
 
 /*-------------------------------------------------------------------------
  * Close
@@ -2387,13 +2386,13 @@ int test_hyperslab(char *fname,
  fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
-	if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
   goto out;
  if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
   goto out;
-	if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
+ if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
   goto out;
-	if ((did = H5Dcreate(fid,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(fid,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
   goto out;
  if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
   goto out;

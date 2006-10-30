@@ -22,7 +22,7 @@
 #define CDIM1   DIM1/2
 #define CDIM2   DIM2/2
 #define RANK    2
-#define GBLL	   ((unsigned long_long) 1024*1024*1024)
+#define GBLL    ((unsigned long_long) 1024*1024*1024)
 
 
 int make_all_objects(hid_t loc_id);
@@ -183,7 +183,7 @@ int make_testfiles(void)
   return -1;
  if (make_nbit(loc_id)<0)
   goto out;
-	if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id)<0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -194,7 +194,7 @@ int make_testfiles(void)
   return -1;
  if (make_scaleoffset(loc_id)<0)
   goto out;
-	if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id)<0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -455,7 +455,7 @@ if (szip_can_encode) {
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
 } else {
-	/* WARNING? SZIP is decoder only, can't generate test files */
+ /* WARNING? SZIP is decoder only, can't generate test files */
 }
 
  if(H5Sclose(sid)<0)
@@ -927,7 +927,7 @@ if (szip_can_encode) {
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
 } else {
-	/* WARNING? SZIP is decoder only, can't generate test data using szip */
+ /* WARNING? SZIP is decoder only, can't generate test data using szip */
 }
 #endif
 
@@ -971,7 +971,7 @@ if (szip_can_encode) {
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
 } else {
-	/* WARNING? SZIP is decoder only, can't generate test dataset */
+ /* WARNING? SZIP is decoder only, can't generate test dataset */
 }
 #endif
 
@@ -1264,13 +1264,13 @@ int make_fill(hid_t loc_id)
  */
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
-	if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue)<0)
   goto out;
-	if ((sid = H5Screate_simple(2,dims,NULL))<0)
+ if ((sid = H5Screate_simple(2,dims,NULL))<0)
   goto out;
-	if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl))<0)
   goto out;
-	if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
   goto out;
 
  /* close */
@@ -1294,13 +1294,14 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: make a big file 
+ * Function: make_big 
  *
- * Purpose: used in test read by hyperslabs. writes a 1GB file by iterating 
- *  trough 1MB hyperslabs 
+ * Purpose: used in test read by hyperslabs. create a dataset with 1GB dimensions
+ *  by iterating trough 1MB hyperslabs 
  *
  *-------------------------------------------------------------------------
  */
+
 int make_big(hid_t loc_id)
 {
  hid_t   did;
@@ -1322,13 +1323,13 @@ int make_big(hid_t loc_id)
  /* create */ 
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
-	if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
   goto out;
  if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
   goto out;
-	if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
+ if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
   goto out;
-	if ((did = H5Dcreate(loc_id,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
   goto out;
  if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
   goto out;
@@ -1356,7 +1357,7 @@ int make_big(hid_t loc_id)
   if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
    goto out;
 
-  /* write only one hyperslab, for space considerations */
+  /* write only one hyperslab */
   if (i==0) 
    break;
   
