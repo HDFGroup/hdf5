@@ -121,6 +121,8 @@ typedef struct {
     H5G_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
     hbool_t     adj_link;               /* Whether to adjust link count on object */
     hbool_t     rem_from_fheap;         /* Whether to remove the link from the fractal heap */
+    hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
 
     /* upward (for application) */
     H5G_obj_t *obj_type;                /* Type of object being removed      */
@@ -135,6 +137,8 @@ typedef struct {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     hbool_t     adj_link;               /* Whether to adjust link count on object */
+    hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
 
     /* upward (for application) */
     H5G_obj_t *obj_type;                /* Type of object being removed      */
@@ -215,12 +219,6 @@ typedef struct {
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* The v2 B-tree class for indexing 'name' field on links */
-H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
-
-/* The v2 B-tree class for indexing 'creation order' field on links */
-H5_DLLVAR const H5B2_class_t H5G_BT2_CORDER[1];
 
 
 /*****************************/
@@ -403,6 +401,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
     udata.common.fheap = fheap;
     udata.common.name = lnk->name;
     udata.common.name_hash = H5_checksum_lookup3(lnk->name, HDstrlen(lnk->name), 0);
+    udata.common.corder = lnk->corder;
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     /* udata.id already set in H5HF_insert() call */
@@ -411,8 +410,13 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
     if(H5B2_insert(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
 
-    /* XXX: Check if we should create a creation order index v2 B-tree record */
-        /* XXX: Insert the record into the creation order index v2 B-tree */
+    /* Check if we should create a creation order index v2 B-tree record */
+    if(linfo->index_corder) {
+        /* Insert the record into the creation order index v2 B-tree */
+        HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
+        if(H5B2_insert(f, dxpl_id, H5G_BT2_CORDER, linfo->corder_bt2_addr, &udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
+    } /* end if */
 
 done:
     /* Release resources */
@@ -619,7 +623,7 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
         /* Sort link table in correct iteration order */
-        /* (XXX: by name, currently) */
+/* (XXX: by name, currently) */
         if(order == H5_ITER_INC)
             HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
         else if(order == H5_ITER_INC)
@@ -785,8 +789,8 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
         udata.op = op;
         udata.op_data = op_data;
 
-        /* Iterate over the records in the v2 B-tree */
-        /* (XXX: by name, currently) */
+        /* Iterate over the records in the v2 B-tree's "native" order */
+        /* (by hash of name) */
         if((ret_value = H5B2_iterate(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
                 H5G_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_SYM, H5E_BADITER, "link iteration failed");
@@ -797,7 +801,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
 
         /* Build the table of links for this group */
         if(H5G_dense_build_table(f, dxpl_id, linfo, order, &ltable) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building iteration table of links")
 
         /* Iterate over link messages */
         for(u = 0, ret_value = H5B_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {
@@ -966,7 +970,7 @@ H5G_dense_get_name_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     udata.name_size = size;
 
     /* Retrieve the name according to the v2 B-tree's index order */
-    /* (XXX: using name index currently) */
+/* (XXX: using name index currently) */
     if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, idx,
             H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
@@ -1120,7 +1124,7 @@ H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     udata.fheap = fheap;
 
     /* Retrieve the name according to the v2 B-tree's index order */
-    /* (XXX: using name index currently) */
+/* (XXX: using name index currently) */
     if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, idx,
             H5G_dense_get_type_by_idx_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
@@ -1163,6 +1167,21 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
     /* Decode link information */
     if(NULL == (lnk = H5O_decode(udata->f, udata->dxpl_id, obj, H5O_LINK_ID)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5B2_ITER_ERROR, "can't decode link")
+
+    /* Check for removing the link from the creation order index */
+    if(udata->rem_from_corder_index) {
+        H5G_bt2_ud_common_t bt2_udata;         /* Info for B-tree callbacks */
+
+        /* Set up the user data for the v2 B-tree 'record remove' callback */
+        HDassert(lnk->corder_valid);
+        bt2_udata.corder = lnk->corder;
+
+        /* Remove the record from the name index v2 B-tree */
+        HDassert(H5F_addr_defined(udata->corder_bt2_addr));
+        if(H5B2_remove(udata->f, udata->dxpl_id, H5G_BT2_CORDER, udata->corder_bt2_addr,
+                &bt2_udata, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5B2_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
+    } /* end if */
 
     /* Retrieve the link's object type & decr. the ref. count on hard links, if requested */
     switch(lnk->type) {
@@ -1233,6 +1252,8 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
     fh_udata.f = bt2_udata->common.f;
     fh_udata.dxpl_id = bt2_udata->common.dxpl_id;
     fh_udata.adj_link = bt2_udata->adj_link;
+    fh_udata.rem_from_corder_index = bt2_udata->rem_from_corder_index;
+    fh_udata.corder_bt2_addr = bt2_udata->corder_bt2_addr;
     fh_udata.obj_type = bt2_udata->obj_type;
 
     /* Call fractal heap 'op' routine, to perform user callback */
@@ -1295,14 +1316,14 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.common.found_op_data = NULL;
     udata.adj_link = TRUE;
     udata.rem_from_fheap = TRUE;
+    udata.rem_from_corder_index = H5F_addr_defined(linfo->corder_bt2_addr);
+    udata.corder_bt2_addr = linfo->corder_bt2_addr;
     udata.obj_type = obj_type;
 
     /* Remove the record from the name index v2 B-tree */
     if(H5B2_remove(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
             &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from name index v2 B-tree")
-
-/* XXX: Remove the link from the creation order index v2 B-tree */
 
 done:
     /* Release resources */
@@ -1359,6 +1380,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.common.found_op_data = NULL;
         udata.adj_link = TRUE;
         udata.rem_from_fheap = FALSE;
+        udata.rem_from_corder_index = FALSE;
         udata.obj_type = NULL;
 
         /* Delete the name index, adjusting the ref. count on links removed */
@@ -1376,7 +1398,13 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     } /* end else */
     linfo->name_bt2_addr = HADDR_UNDEF;
 
-/* XXX: Check if we should delete the creation order index v2 B-tree */
+    /* Check if we should delete the creation order index v2 B-tree */
+    if(linfo->index_corder) {
+        /* Delete the creation order index, without adjusting the ref. count on the links  */
+        HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
+        if(H5B2_delete(f, dxpl_id, H5G_BT2_CORDER, linfo->corder_bt2_addr, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
+    } /* end if */
 
     /* Delete the fractal heap */
     if(H5HF_delete(f, dxpl_id, linfo->link_fheap_addr) < 0)

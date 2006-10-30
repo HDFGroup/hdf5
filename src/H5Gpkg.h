@@ -37,8 +37,27 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 
+/**************************/
+/* Package Private Macros */
+/**************************/
+
 /* Standard length of fractal heap ID for link */
 #define H5G_DENSE_FHEAP_ID_LEN  7
+
+/*
+ * During name lookups (see H5G_traverse()) we sometimes want information about
+ * a symbolic link or a mount point.  The normal operation is to follow the
+ * symbolic link or mount point and return information about its target.
+ */
+#define H5G_TARGET_NORMAL	0x0000
+#define H5G_TARGET_SLINK	0x0001
+#define H5G_TARGET_MOUNT	0x0002
+#define H5G_TARGET_UDLINK	0x0004
+#define H5G_CRT_INTMD_GROUP	0x0008
+
+/****************************/
+/* Package Private Typedefs */
+/****************************/
 
 /*
  * Various types of object header information can be cached in a symbol
@@ -299,22 +318,15 @@ typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk/*in*/, H5G_loc_t *obj_loc/*out*/, void *operator_data/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 
-/*
- * During name lookups (see H5G_traverse()) we sometimes want information about
- * a symbolic link or a mount point.  The normal operation is to follow the
- * symbolic link or mount point and return information about its target.
- */
-#define H5G_TARGET_NORMAL	0x0000
-#define H5G_TARGET_SLINK	0x0001
-#define H5G_TARGET_MOUNT	0x0002
-#define H5G_TARGET_UDLINK	0x0004
-#define H5G_CRT_INTMD_GROUP	0x0008
-
 /* Data structure to hold table of links for a group */
 typedef struct {
     size_t      nlinks;         /* # of links in table */
     H5O_link_t *lnks;           /* Pointer to array of links */
 } H5G_link_table_t;
+
+/*****************************/
+/* Package Private Variables */
+/*****************************/
 
 /*
  * This is the class identifier to give to the B-tree functions.
@@ -323,6 +335,12 @@ H5_DLLVAR H5B_class_t H5B_SNODE[1];
 
 /* The cache subclass */
 H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
+
+/* The v2 B-tree class for indexing 'name' field on links */
+H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
+
+/* The v2 B-tree class for indexing 'creation order' field on links */
+H5_DLLVAR const H5B2_class_t H5G_BT2_CORDER[1];
 
 /*
  * Utility functions
@@ -333,6 +351,10 @@ H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
+
+/******************************/
+/* Package Private Prototypes */
+/******************************/
 
 /*
  * Functions that understand symbol tables but not names.  The
@@ -370,7 +392,6 @@ H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, unsigned n);
-H5_DLL herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 H5_DLL herr_t H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name,
     const H5O_link_t *lnk, H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_ent_debug(H5F_t *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
@@ -475,9 +496,10 @@ H5_DLL htri_t H5G_is_empty_test(hid_t gid);
 H5_DLL htri_t H5G_has_links_test(hid_t gid, unsigned *nmsgs);
 H5_DLL htri_t H5G_has_stab_test(hid_t gid);
 H5_DLL htri_t H5G_is_new_dense_test(hid_t gid);
+H5_DLL herr_t H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count);
 H5_DLL herr_t H5G_lheap_size_test(hid_t gid, size_t *lheap_size);
 H5_DLL herr_t H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *user_path_hidden);
 #endif /* H5G_TESTING */
 
-#endif
+#endif /* _H5Gpkg_H */
 

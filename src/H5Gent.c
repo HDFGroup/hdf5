@@ -31,52 +31,14 @@
 #include "H5MMprivate.h"        /* Memory Management                    */
 
 /* Private macros */
-#define H5G_NO_CHANGE   (-1)            /*see H5G_ent_modified()             */
 
 /* Private prototypes */
-#ifdef NOT_YET
-static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
-#endif /* NOT_YET */
 static herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
 static herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_ent_modified
- *
- * Purpose:     This function should be called after you make any
- *              modifications to a symbol table entry cache.  Supply the new
- *              type for the cache.  If CACHE_TYPE is the constant
- *              H5G_NO_CHANGE then the cache type isn't changed--just the
- *              dirty bit is set.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
-{
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_modified)
-
-    HDassert(ent);
-
-    /* Update cache type, if requested */
-    if (H5G_NO_CHANGE != cache_type)
-        ent->type = cache_type;
-    ent->dirty = TRUE;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_ent_modified */
 
 
 /*-------------------------------------------------------------------------

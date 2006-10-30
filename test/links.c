@@ -74,6 +74,7 @@ const char *FILENAME[] = {
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
+#define CORDER_EST_ENTRY_LEN        9
 
 #ifndef QAK
 
@@ -5180,7 +5181,7 @@ corder_create_empty(hid_t fapl)
     hbool_t     index_corder;   	/* Status of creation order indexing for GCPL */
     char        filename[NAME_BUF_SIZE];/* File name */
 
-    TESTING("creating empty group with creation order tracking")
+    TESTING("creating empty group with creation order indexing")
 
     /* Create file */
     /* (with creation order tracking for the root group) */
@@ -5299,7 +5300,7 @@ corder_create_compact(hid_t fapl)
     char        filename[NAME_BUF_SIZE];/* File name */
     unsigned    u;                      /* Local index variable */
 
-    TESTING("creating compact group with creation order tracking")
+    TESTING("creating compact group with creation order indexing")
 
     /* Create file */
     /* (with creation order tracking for the root group) */
@@ -5416,11 +5417,13 @@ corder_create_dense(hid_t fapl)
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     unsigned	nlinks;		        /* Number of link messages in group's header */
+    hsize_t     name_count;             /* # of records in name index */
+    hsize_t     corder_count;           /* # of records in creation order index */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename[NAME_BUF_SIZE];/* File name */
     unsigned    u;                      /* Local index variable */
 
-    TESTING("creating dense group with creation order tracking")
+    TESTING("creating dense group with creation order indexing")
 
     /* Create file */
     /* (with creation order tracking for the root group) */
@@ -5459,7 +5462,7 @@ corder_create_dense(hid_t fapl)
         if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
     } /* end for */
 
-    /* Create another group, to push group into dense form */
+    /* Create another link, to push group into dense form */
     sprintf(objname, "filler %u", max_compact);
     if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
     if(H5Gclose(group_id2) < 0) TEST_ERROR
@@ -5468,6 +5471,10 @@ corder_create_dense(hid_t fapl)
     if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
     if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
     if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+    /* Retrieve & verify # of records in the name & creation order indices */
+    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(name_count != corder_count) TEST_ERROR
 
     /* Close the group */
     if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -5520,7 +5527,369 @@ error:
         H5Fclose(file_id);
     } H5E_END_TRY;
     return -1;
-} /* end corder_create_compact() */
+} /* end corder_create_dense() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    corder_transition
+ *
+ * Purpose:     Create a group with creation order indices and verify correct
+ *              transitions between compact & dense forms
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, October 30, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+corder_transition(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1), group_id2 = (-1);	/* Group IDs */
+    hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    unsigned    max_compact;            /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
+    unsigned	nlinks;		        /* Number of link messages in group's header */
+    hsize_t     name_count;             /* # of records in name index */
+    hsize_t     corder_count;           /* # of records in creation order index */
+    off_t       empty_size;             /* Size of empty file */
+    off_t       file_size;              /* Size of file after operating on it */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    unsigned    u;                      /* Local index variable */
+
+    TESTING("transitioning group with creation order indexing between dense & compact forms")
+
+    /* Create file */
+    /* (with creation order tracking for the root group) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set creation order tracking & indexing on group */
+    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+
+    /* Query the group creation properties */
+    if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) FAIL_STACK_ERROR
+
+    /* Increase estimated link info, so the group's object header is large
+     *      enough to hold all the link messages in one chunk
+     */
+    if(H5Pset_est_link_info(gcpl_id, max_compact, CORDER_EST_ENTRY_LEN) < 0) TEST_ERROR
+
+    /* Create group with creation order indexing & tracking on */
+    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Close the group creation property list */
+    if(H5Pclose(gcpl_id) < 0) FAIL_STACK_ERROR
+
+    /* Close the group */
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
+
+    /* Get the size of the file with an empty group */
+    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open group created */
+    if((group_id = H5Gopen(file_id, CORDER_GROUP_NAME)) < 0) TEST_ERROR
+
+    /* Create several links, up to limit of compact form */
+    for(u = 0; u < max_compact; u++) {
+        sprintf(objname, "filler %u", u);
+        if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(group_id2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Create another link, to push group into dense form */
+    sprintf(objname, "filler %u", max_compact);
+    if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+    /* Retrieve & verify # of records in the name & creation order indices */
+    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(name_count != corder_count) TEST_ERROR
+
+    /* Delete several links from group, until it resumes compact form */
+    for(u = max_compact; u >= min_dense; u--) {
+        sprintf(objname, "filler %u", u);
+        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify state of group */
+        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+        /* Retrieve & verify # of records in the name & creation order indices */
+        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(name_count != corder_count) TEST_ERROR
+    } /* end for */
+
+    /* Delete another link, to push group into compact form */
+    sprintf(objname, "filler %u", (min_dense - 1));
+    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+    if(nlinks != (min_dense - 1)) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+
+    /* Re-add links to get back into dense form */
+    for(u = (min_dense - 1); u < (max_compact + 1); u++) {
+        sprintf(objname, "filler %u", u);
+        if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(group_id2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+    /* Retrieve & verify # of records in the name & creation order indices */
+    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(name_count != corder_count) TEST_ERROR
+
+    /* Close the group */
+    if(H5Gclose(group_id) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+
+    /* Open group created */
+    if((group_id = H5Gopen(file_id, CORDER_GROUP_NAME)) < 0) TEST_ERROR
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+    /* Retrieve & verify # of records in the name & creation order indices */
+    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(name_count != corder_count) TEST_ERROR
+
+    /* Delete several links from group, until it resumes compact form */
+    for(u = max_compact; u >= min_dense; u--) {
+        sprintf(objname, "filler %u", u);
+        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify state of group */
+        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+        /* Retrieve & verify # of records in the name & creation order indices */
+        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(name_count != corder_count) TEST_ERROR
+    } /* end for */
+
+    /* Delete another link, to push group into compact form */
+    sprintf(objname, "filler %u", (min_dense - 1));
+    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+    if(nlinks != (min_dense - 1)) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+
+    /* Re-add links to get back into dense form */
+    for(u = (min_dense - 1); u < (max_compact + 1); u++) {
+        sprintf(objname, "filler %u", u);
+        if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(group_id2) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify state of group */
+    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+    /* Retrieve & verify # of records in the name & creation order indices */
+    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(name_count != corder_count) TEST_ERROR
+
+    /* Delete all the links */
+    for(u = max_compact; u > 0; u--) {
+        sprintf(objname, "filler %u", u);
+        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+    } /* end for */
+    sprintf(objname, "filler %u", 0);
+    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close the group */
+    if(H5Gclose(group_id) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    /* Get the size of the file now */
+    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if(file_size != empty_size) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl_id);
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+    return -1;
+} /* end corder_transition() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    corder_delete
+ *
+ * Purpose:     Create a group with creation order indices and verify correct
+ *              deletion of creation order index when the group is in dense
+ *              storage form and the group is unlinked
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, October 30, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+corder_delete(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1), group_id2 = (-1);	/* Group IDs */
+    hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    unsigned    max_compact;            /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
+    hsize_t     name_count;             /* # of records in name index */
+    hsize_t     corder_count;           /* # of records in creation order index */
+    hbool_t     reopen_file;            /* Whether to re-open the file before deleting group */
+    off_t       empty_size;             /* Size of empty file */
+    off_t       file_size;              /* Size of file after operating on it */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    unsigned    u;                      /* Local index variable */
+
+    TESTING("deleting group with creation order indexing in dense form")
+
+    /* Loop to leave file open when deleting group, or to close & re-open file
+     *  before deleting group */
+    for(reopen_file = FALSE; reopen_file <= TRUE; reopen_file++) {
+        /* Create file */
+        /* (with creation order tracking for the root group) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+        /* Close file */
+        if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
+
+        /* Get the size of an empty file */
+        if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+
+        /* Re-open the file */
+        if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        /* Create group creation property list */
+        if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) FAIL_STACK_ERROR
+
+        /* Set creation order tracking & indexing on group */
+        if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+        if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+
+        /* Query the group creation properties */
+        if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) FAIL_STACK_ERROR
+
+        /* Increase estimated link info, so the group's object header is large
+         *      enough to hold all the link messages in one chunk
+         */
+        if(H5Pset_est_link_info(gcpl_id, max_compact, CORDER_EST_ENTRY_LEN) < 0) TEST_ERROR
+
+        /* Create group with creation order indexing & tracking on */
+        if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+        /* Close the group creation property list */
+        if(H5Pclose(gcpl_id) < 0) FAIL_STACK_ERROR
+
+        /* Create links until the group is in dense form */
+        for(u = 0; u < max_compact * 2; u++) {
+            sprintf(objname, "filler %u", u);
+            if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) FAIL_STACK_ERROR
+            if(H5Gclose(group_id2) < 0) FAIL_STACK_ERROR
+        } /* end for */
+
+        /* Verify state of group */
+        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+        /* Retrieve & verify # of records in the name & creation order indices */
+        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(name_count != corder_count) TEST_ERROR
+
+        /* Close the group */
+        if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+
+        /* Check for deleting group without re-opening file */
+        if(!reopen_file)
+            /* Delete the group with the creation order index */
+            if(H5Lunlink(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
+
+        /* Check for deleting group after re-opening file */
+        if(reopen_file) {
+            /* Re-open the file */
+            if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+            /* Delete the group with the creation order index */
+            if(H5Lunlink(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+            /* Close the file */
+            if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
+        } /* end if */
+
+        /* Get the size of the file now */
+        if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+        if(file_size != empty_size) TEST_ERROR
+    } /* end for */
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl_id);
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+    return -1;
+} /* end corder_delete() */
 
 
 /*-------------------------------------------------------------------------
@@ -5624,6 +5993,8 @@ main(void)
  */
                 nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
             } /* end if */
         } /* end for */
 #else /* QAK */
@@ -5634,6 +6005,8 @@ main(void)
  */
                 nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
 #endif /* QAK */
 
         /* Close 2nd FAPL */
