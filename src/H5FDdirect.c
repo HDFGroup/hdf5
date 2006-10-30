@@ -514,7 +514,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
     /* Flag for Direct I/O */
-    /*o_flags |= O_DIRECT;*/ /*change it back!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+    o_flags |= O_DIRECT;
 
     /* Open the file */
     if ((fd=HDopen(name, o_flags, 0666))<0)
