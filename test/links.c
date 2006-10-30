@@ -75,7 +75,7 @@ const char *FILENAME[] = {
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
 
-#ifdef QAK
+#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	mklinks
@@ -5435,9 +5435,7 @@ corder_create_dense(hid_t fapl)
     if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
-HDfprintf(stderr, "Before creating group with creation order tracking & index\n");
     if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-HDfprintf(stderr, "After creating group with creation order tracking & index\n");
     if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Check on group's initial status */
@@ -5561,7 +5559,7 @@ main(void)
         /* Set the "use the latest version of the format" flag for creating objects in the file */
         if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
 
-#ifdef QAK
+#ifndef QAK
         /* Loop over using new group format */
         for(new_format = FALSE; new_format <= TRUE; new_format++) {
             /* General tests... (on both old & new format groups */
@@ -5619,6 +5617,13 @@ main(void)
 
             /* Creation order tests */
             if(new_format == TRUE) {
+                nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
+/* XXX: when creation order indexing is fully working, go back and add checks
+ *      to these tests to make certain that the creation order values are
+ *      correct.
+ */
+                nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
             } /* end if */
         } /* end for */
 #else /* QAK */

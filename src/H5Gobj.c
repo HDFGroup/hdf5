@@ -256,7 +256,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
         size_t link_size;                   /* Size of a link message */
 
         /* Calculate message size infomation, for creating group's object header */
-        linfo_size = H5O_mesg_size(H5O_LINFO_ID, f, &linfo, (size_t)0);
+        linfo_size = H5O_mesg_size(H5O_LINFO_ID, f, linfo, (size_t)0);
         HDassert(linfo_size);
 
         ginfo_size = H5O_mesg_size(H5O_GINFO_ID, f, ginfo, (size_t)0);
