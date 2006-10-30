@@ -1295,7 +1295,8 @@ HDfprintf(stderr, "%s: sect->u.single = {%p, %u, %a, %Zu}\n", "H5HF_sect_single_
             HDassert(H5F_addr_defined(iblock->ents[sect->u.single.par_entry].addr));
 
             /* Retrieve direct block address from section */
-            status = H5HF_sect_single_dblock_info(iblock->hdr, H5AC_dxpl_id, sect, &dblock_addr, &dblock_size);
+            /* (Casting away const OK - QAK) */
+            status = H5HF_sect_single_dblock_info(iblock->hdr, H5AC_dxpl_id, (H5HF_free_section_t *)sect, &dblock_addr, &dblock_size);
             HDassert(status >= 0);
             HDassert(H5F_addr_eq(iblock->ents[sect->u.single.par_entry].addr, dblock_addr));
             HDassert(dblock_size > 0);

@@ -3931,7 +3931,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     bitno = (ssize_t)(mrsh+msize - dst.u.f.msize);
                     assert(bitno>=0 && (size_t)bitno<=msize);
                     /*If the 1st bit being cut off is set and source isn't denormalized.*/
-                    if(H5T_bit_get_d(s, mpos+bitno-1, (size_t)1) && !denormalized) {
+                    if(H5T_bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && !denormalized) {
                         /*Don't do rounding if exponent is 111...110 and mantissa is 111...11.
                          *To do rounding and increment exponent in this case will create an infinity value.*/
                         if((H5T_bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
@@ -3939,7 +3939,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             if (carry)
                                 implied = 2;
                         }
-                    } else if(H5T_bit_get_d(s, mpos+bitno-1, (size_t)1) && denormalized)
+                    } else if(H5T_bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && denormalized)
                             /*For either source or destination, denormalized value doesn't increment carry.*/
                             H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                 }
@@ -9815,7 +9815,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * which is set?  This is checked before converted to negative
                  * integer.
                  */
-                sfirst = H5T_bit_find(int_buf, (size_t)0, 8*buf_size, H5T_BIT_MSB, TRUE);
+                sfirst = H5T_bit_find(int_buf, (size_t)0, 8 * buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
 
                 if(sfirst < 0) {
@@ -9895,8 +9895,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/
                                 /*Convert to integer representation.  Equivalent to ~(value - 1).*/
-                                H5T_bit_dec(int_buf, (size_t)0, 8*buf_size);
-                                H5T_bit_neg(int_buf, (size_t)0, 8*buf_size);
+                                H5T_bit_dec(int_buf, (size_t)0, 8 * buf_size);
+                                H5T_bit_neg(int_buf, (size_t)0, 8 * buf_size);
 
                                 /*copy source value into destination*/
                                 H5T_bit_copy(d, dst.offset, int_buf, (size_t)0, dst.prec-1);
@@ -9920,7 +9920,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set (d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
+                                H5T_bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9940,7 +9940,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
+                                H5T_bit_set(d, dst.offset, dst.prec-1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9980,7 +9980,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
                 if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
-                    H5T_bit_set (d, dst.offset+dst.prec,
+                    H5T_bit_set(d, dst.offset+dst.prec,
                                  8*dst_p->shared->size - (dst.offset+ dst.prec),
                                  (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
@@ -10214,25 +10214,25 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 H5T_bit_set (d, dst.offset, dst.prec, FALSE);
 
                 /* Copy source into a temporary buffer */
-                H5T_bit_copy(int_buf, 0, s, src.offset, src.prec);
+                H5T_bit_copy(int_buf, (size_t)0, s, src.offset, src.prec);
 
                 /*
                  * Find the sign bit value of the source.
                  */
-                if (H5T_SGN_2 == src.u.i.sign)
-                    sign = (size_t)H5T_bit_get_d(int_buf, src.prec-1, 1);
+                if(H5T_SGN_2 == src.u.i.sign)
+                    sign = (size_t)H5T_bit_get_d(int_buf, src.prec - 1, (size_t)1);
 
                 /*
                  * What is the bit position(starting from 0 as first one) for the most significant
 		 * bit(MSB) of S which is set?
                  */
                 if(H5T_SGN_2 == src.u.i.sign) {
-                    sfirst = H5T_bit_find(int_buf, 0, src.prec-1, H5T_BIT_MSB, TRUE);
+                    sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     if(sign && sfirst < 0)
 			/* The case 0x80...00, which is negative with maximal value */
                         is_max_neg = 1;
                 } else if(H5T_SGN_NONE == src.u.i.sign)
-                    sfirst = H5T_bit_find(int_buf, 0, src.prec, H5T_BIT_MSB, TRUE);
+                    sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec, H5T_BIT_MSB, TRUE);
 
                 /* Handle special cases here.  Integer is zero */
                 if(!sign && sfirst < 0)
@@ -10241,29 +10241,29 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /*
                  * Convert source integer if it's negative
                  */
-                if (H5T_SGN_2 == src.u.i.sign && sign) {
+                if(H5T_SGN_2 == src.u.i.sign && sign) {
                     if(!is_max_neg) {
                         /* Equivalent to ~(i - 1) */
-                        H5T_bit_dec(int_buf, 0, buf_size*8);
-                        H5T_bit_neg(int_buf, 0, buf_size*8);
-                        sfirst = H5T_bit_find(int_buf, 0, src.prec-1, H5T_BIT_MSB, TRUE);
+                        H5T_bit_dec(int_buf, (size_t)0, buf_size * 8);
+                        H5T_bit_neg(int_buf, (size_t)0, buf_size * 8);
+                        sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     } else {
 			/* If it's maximal negative number 0x80...000, treat it as if it overflowed
 			 * (create a carry) to help conversion.  i.e. a character type number 0x80
 			 * is treated as 0x100.
 			 */
-                        sfirst = (ssize_t)(src.prec-1);
+                        sfirst = (ssize_t)(src.prec - 1);
                         is_max_neg = 0;
                     }
 
                     /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of
                      * sign bit to 0 in the temporary buffer because they're all negated from the previous
 		     * step. */
-                    H5T_bit_set(int_buf, src.prec, buf_size*8-src.prec, 0);
+                    H5T_bit_set(int_buf, src.prec, (buf_size * 8) - src.prec, 0);
 
                     /* Set sign bit in destination */
-                    H5T_bit_set_d(d, dst.u.f.sign, 1, (hsize_t)sign);
-                }
+                    H5T_bit_set_d(d, dst.u.f.sign, (size_t)1, (hsize_t)sign);
+                } /* end if */
 
                 first = (size_t)sfirst;
 
@@ -10282,7 +10282,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /* Handle mantissa part here */
                 if (H5T_NORM_IMPLIED==dst.u.f.norm) {
                     /* Imply first bit */
-                    H5T_bit_set(int_buf, first, 1, 0);
+                    H5T_bit_set(int_buf, first, (size_t)1, 0);
        		} else if (H5T_NORM_NONE==dst.u.f.norm) {
 		    first++;
 		}
@@ -10311,28 +10311,28 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		     */
 
                     /* Check 1st dropoff bit, see if it's set. */
-                    if(H5T_bit_get_d(int_buf, ((first-dst.u.f.msize)-1), 1)) {
+                    if(H5T_bit_get_d(int_buf, ((first - dst.u.f.msize) - 1), (size_t)1)) {
                     	/* Check all bits after 1st dropoff bit, see if any of them is set. */
-                        if(((first-dst.u.f.msize)-1) > 0 && H5T_bit_get_d(int_buf, 0, ((first-dst.u.f.msize)-1)))
+                        if(((first - dst.u.f.msize) - 1) > 0 && H5T_bit_get_d(int_buf, (size_t)0, ((first - dst.u.f.msize) - 1)))
                             do_round = 1;
                         else {  /* The .50...0 case */
                             /* Check if the least significant bit is odd. */
-                            if(H5T_bit_get_d(int_buf, (first-dst.u.f.msize), 1))
+                            if(H5T_bit_get_d(int_buf, (first - dst.u.f.msize), (size_t)1))
                                do_round = 1;
                         }
 		    }
 
                     /* Right shift to drop off extra bits */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, buf_size*8);
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, buf_size * 8);
 
                     if(do_round) {
-                        H5T_bit_inc(int_buf, 0, buf_size*8);
+                        H5T_bit_inc(int_buf, (size_t)0, buf_size * 8);
                         do_round = 0;
 
 			/* If integer is like 0x0ff...fff and we need to round up the
 			 * last f, we get 0x100...000.  Treat this special case here.
 			 */
-                    	if(H5T_bit_get_d(int_buf, dst.u.f.msize, 1)) {
+                    	if(H5T_bit_get_d(int_buf, dst.u.f.msize, (size_t)1)) {
                 	    if (H5T_NORM_IMPLIED==dst.u.f.norm) {
 			        /* The bit at this 1's position was impled already, so this
 			         * number should be 0x200...000.  We need to increment the
@@ -10343,7 +10343,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 				/* Right shift 1 bit to let the carried 1 fit in the mantissa,
 				 * and increment exponent by 1.
 				 */
-                                H5T_bit_shift(int_buf, -1, 0, buf_size*8);
+                                H5T_bit_shift(int_buf, (ssize_t)-1, (size_t)0, buf_size * 8);
 			 	expo++;
 			    }
 			}
@@ -10351,7 +10351,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } else {
                     /* The bit sequence can fit mantissa part.  Left shift to fit in from high-order of
 		     * bit position. */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, dst.u.f.msize);
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, dst.u.f.msize);
                 }
 
 
@@ -10383,22 +10383,22 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, expo);
 
                     /* Copy mantissa into destination */
-                    H5T_bit_copy(d, dst.u.f.mpos, int_buf, 0, buf_size*8 > dst.u.f.msize ? dst.u.f.msize : buf_size*8);
+                    H5T_bit_copy(d, dst.u.f.mpos, int_buf, (size_t)0, (buf_size * 8) > dst.u.f.msize ? dst.u.f.msize : buf_size * 8);
                 }
 
             padding:
                 /*
                  * Set padding areas in destination.
                  */
-                if (dst.offset>0) {
-                    assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
-                    H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                if(dst.offset > 0) {
+                    HDassert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
+                    H5T_bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
-                if (dst.offset+dst.prec!=8*dst_p->shared->size) {
-                    assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
-                    H5T_bit_set (d, dst.offset+dst.prec,
-                                 8*dst_p->shared->size - (dst.offset+ dst.prec),
-                                 (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
+                if(dst.offset + dst.prec != 8 * dst_p->shared->size) {
+                    HDassert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
+                    H5T_bit_set(d, dst.offset + dst.prec,
+                                 8 * dst_p->shared->size - (dst.offset + dst.prec),
+                                 (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
                 }
 
                 /*

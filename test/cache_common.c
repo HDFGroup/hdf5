@@ -711,7 +711,11 @@ herr_t
 flush(H5F_t *f,
       hid_t UNUSED dxpl_id,
       hbool_t dest,
-      haddr_t addr,
+      haddr_t
+#ifdef NDEBUG
+          UNUSED
+#endif /* NDEBUG */
+          addr,
       void *thing,
       unsigned * flags_ptr)
 {
@@ -1336,7 +1340,7 @@ dirty_entry(H5C_t * cache_ptr,
 		    
                 } else {
 
-		    mark_pinned_entry_dirty(cache_ptr, type, idx, FALSE, 0);
+		    mark_pinned_entry_dirty(cache_ptr, type, idx, FALSE, (size_t)0);
 
 		}
 	    }
@@ -1793,7 +1797,7 @@ verify_entry_status(H5C_t * cache_ptr,
 		    struct expected_entry_status expected[])
 {
     static char    msg[128];
-    hbool_t	   in_cache;
+    hbool_t        in_cache = FALSE; /* will set to TRUE if necessary */
     int            i;
     test_entry_t * entry_ptr;
     test_entry_t * base_addr;

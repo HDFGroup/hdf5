@@ -30,51 +30,53 @@
  *
  *-------------------------------------------------------------------------
  */
-main()
+int
+main(void)
 {
-	hid_t file_id;
-	hid_t dset_id;
-	hid_t dcpl_id;
-	hid_t space_id;
-	hsize_t dims, maxdims;
-	int fill = 0;
-	int write_buf[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    hid_t file_id;
+    hid_t dset_id;
+    hid_t dcpl_id;
+    hid_t space_id;
+    hsize_t dims, maxdims;
+    int fill = 0;
+    int write_buf[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-	file_id = H5Fcreate("noencoder.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate("noencoder.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-	dims = 10;
-	maxdims = H5S_UNLIMITED;
-	space_id = H5Screate_simple(1, &dims, &maxdims);
+    dims = 10;
+    maxdims = H5S_UNLIMITED;
+    space_id = H5Screate_simple(1, &dims, &maxdims);
 
-	dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_chunk(dcpl_id, 1, &dims);
-	H5Pset_szip(dcpl_id, H5_SZIP_NN_OPTION_MASK, 4);
-	H5Pset_fill_value(dcpl_id, H5T_NATIVE_INT, &fill);
-	H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_chunk(dcpl_id, 1, &dims);
+    H5Pset_szip(dcpl_id, H5_SZIP_NN_OPTION_MASK, 4);
+    H5Pset_fill_value(dcpl_id, H5T_NATIVE_INT, &fill);
+    H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
 
-    /* Create dataset noencoder_szip_dset.h5 */
-	dset_id = H5Dcreate(file_id, "noencoder_szip_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
+/* Create dataset noencoder_szip_dset.h5 */
+    dset_id = H5Dcreate(file_id, "noencoder_szip_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
 
-	H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
+    H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
 
-	H5Pclose(dcpl_id);
-	H5Dclose(dset_id);
+    H5Pclose(dcpl_id);
+    H5Dclose(dset_id);
 
-	dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_chunk(dcpl_id, 1, &dims);
-	H5Pset_szip(dcpl_id, H5_SZIP_NN_OPTION_MASK, 4);
-	H5Pset_shuffle(dcpl_id);
-	H5Pset_fletcher32(dcpl_id);
-	H5Pset_fill_value(dcpl_id, H5T_NATIVE_INT, &fill);
-	H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_chunk(dcpl_id, 1, &dims);
+    H5Pset_szip(dcpl_id, H5_SZIP_NN_OPTION_MASK, 4);
+    H5Pset_shuffle(dcpl_id);
+    H5Pset_fletcher32(dcpl_id);
+    H5Pset_fill_value(dcpl_id, H5T_NATIVE_INT, &fill);
+    H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
 
-    /* Create dataset noencoder_szip_shuffle_fletcher_dset.h5 */
-	dset_id = H5Dcreate(file_id, "noencoder_szip_shuffle_fletcher_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
+/* Create dataset noencoder_szip_shuffle_fletcher_dset.h5 */
+    dset_id = H5Dcreate(file_id, "noencoder_szip_shuffle_fletcher_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
 
-	H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
+    H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
 
-	H5Pclose(dcpl_id);
-	H5Dclose(dset_id);
-	H5Sclose(space_id);
-	H5Fclose(file_id);
+    H5Pclose(dcpl_id);
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
+    H5Fclose(file_id);
 }
+

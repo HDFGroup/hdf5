@@ -3746,20 +3746,22 @@ done:
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+herr_t
+H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
 {
     herr_t              ret_value;
 
     FUNC_ENTER_API(H5FDget_vfd_handle, FAIL)
 
     /* Check arguments */
-    assert(file);
-    assert(file_handle);
-    ret_value=H5FD_get_vfd_handle(file, fapl, file_handle);
+    HDassert(file);
+    HDassert(file_handle);
+
+    ret_value = H5FD_get_vfd_handle(file, fapl, file_handle);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5FDget_vfd_handle() */
 
 
 /*--------------------------------------------------------------------------
@@ -3776,21 +3778,23 @@ done:
  *
  *--------------------------------------------------------------------------
  */
-herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+herr_t
+H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_get_vfd_handle, FAIL)
 
-    assert(file_handle);
-    if(NULL==file->cls->get_handle)
-	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `get_vfd_handle' method");
-    if((ret_value=file->cls->get_handle(file, fapl, file_handle)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
+    HDassert(file_handle);
+
+    if(NULL == file->cls->get_handle)
+	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no `get_vfd_handle' method")
+    if((ret_value = file->cls->get_handle(file, fapl, file_handle)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_get_vfd_handle() */
 
 
 /*-------------------------------------------------------------------------
