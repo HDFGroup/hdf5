@@ -243,11 +243,11 @@ test_reference_obj(void)
     CHECK(group, FAIL, "H5Rdereference");
 
     /* Get group's comment */
-    ret=H5Gget_comment(group,".",10,read_comment);
+    ret = H5Gget_comment(group, ".", (size_t)10, read_comment);
     CHECK(ret, FAIL, "H5Gget_comment");
 
     /* Check for correct comment value */
-    if(HDstrcmp(write_comment,read_comment)!=0)
+    if(HDstrcmp(write_comment, read_comment) != 0)
         TestErrPrintf("Error! Incorrect group comment, wanted: %s, got: %s\n",write_comment,read_comment);
 
     /* Close group */
@@ -323,10 +323,10 @@ test_reference_region(void)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
+    wbuf = HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    rbuf = HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = HDcalloc(sizeof(uint8_t),(size_t)(SPACE2_DIM1 * SPACE2_DIM2));
 
     /* Create file */
     fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -389,7 +389,7 @@ test_reference_region(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
+    ret = H5Sselect_elements(sid2, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     ret = (int)H5Sget_select_npoints(sid2);
@@ -584,10 +584,10 @@ test_reference_region_1D(void)
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    dwbuf=malloc(sizeof(uint8_t)*SPACE3_DIM1);
-    drbuf=calloc(sizeof(uint8_t),SPACE3_DIM1);
+    wbuf = HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    rbuf = HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    dwbuf = HDmalloc(sizeof(uint8_t) * SPACE3_DIM1);
+    drbuf = HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -650,7 +650,7 @@ test_reference_region_1D(void)
     coord1[7][0]=89;
     coord1[8][0]=97;
     coord1[9][0]=03;
-    ret = H5Sselect_elements(sid3,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
+    ret = H5Sselect_elements(sid3, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     ret = (int)H5Sget_select_npoints(sid3);
@@ -1054,7 +1054,7 @@ test_reference_group(void)
 
     VERIFY(nobjs, 3, "H5Gget_num_objs");
 
-    ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, NAME_SIZE);
+    ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, (size_t)NAME_SIZE);
     CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
     VERIFY_STR(objname, DSETNAME2, "H5Gget_objname_by_idx");

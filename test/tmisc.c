@@ -375,13 +375,13 @@ static hid_t misc2_create_type(void)
     type_tmp = H5Tcopy (H5T_C_S1);
     CHECK(type_tmp, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (type_tmp, H5T_VARIABLE);
+    ret = H5Tset_size(type_tmp, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    type = H5Tcreate (H5T_COMPOUND, sizeof(misc2_struct));
+    type = H5Tcreate(H5T_COMPOUND, sizeof(misc2_struct));
     CHECK(type, FAIL, "H5Tcreate");
 
-    ret = H5Tinsert (type, "string", offsetof(misc2_struct, string), type_tmp);
+    ret = H5Tinsert(type, "string", offsetof(misc2_struct, string), type_tmp);
     CHECK(ret, FAIL, "H5Tinsert");
 
     ret = H5Tclose(type_tmp);
@@ -615,18 +615,18 @@ test_misc4(void)
     CHECK(file1, FAIL, "H5Fcreate");
 
     /* Create the first group */
-    group1 = H5Gcreate(file1, MISC4_GROUP_1, 0);
+    group1 = H5Gcreate(file1, MISC4_GROUP_1, (size_t)0);
     CHECK(group1, FAIL, "H5Gcreate");
 
     /* Create the second group */
-    group2 = H5Gcreate(file1, MISC4_GROUP_2, 0);
+    group2 = H5Gcreate(file1, MISC4_GROUP_2, (size_t)0);
     CHECK(group2, FAIL, "H5Gcreate");
 
     file2 = H5Fcreate(MISC4_FILE_2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file2, FAIL, "H5Fcreate");
 
     /* Create the first group */
-    group3 = H5Gcreate(file2, MISC4_GROUP_1, 0);
+    group3 = H5Gcreate(file2, MISC4_GROUP_1, (size_t)0);
     CHECK(group3, FAIL, "H5Gcreate");
 
     /* Get the stat information for each group */
@@ -677,13 +677,13 @@ create_struct3(void)
     misc5_struct3_hndl *str3hndl;       /* New 'struct3' created */
     herr_t ret;                         /* For error checking */
 
-    str3hndl=malloc(sizeof(misc5_struct3_hndl));
+    str3hndl = HDmalloc(sizeof(misc5_struct3_hndl));
     CHECK(str3hndl,NULL,"malloc");
 
-    str3hndl->st3h_base=H5Tcreate( H5T_COMPOUND, sizeof(misc5_struct3));
-    CHECK(str3hndl->st3h_base,FAIL,"H5Tcreate");
+    str3hndl->st3h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct3));
+    CHECK(str3hndl->st3h_base, FAIL, "H5Tcreate");
 
-    ret=H5Tinsert(str3hndl->st3h_base, "st3_el1", HOFFSET( misc5_struct3, st3_el1), H5T_NATIVE_INT);
+    ret = H5Tinsert(str3hndl->st3h_base, "st3_el1", HOFFSET( misc5_struct3, st3_el1), H5T_NATIVE_INT);
     CHECK(ret,FAIL,"H5Tinsert");
 
     str3hndl->st3h_id=H5Tvlen_create(str3hndl->st3h_base);
@@ -720,14 +720,14 @@ create_struct2(void)
     misc5_struct2_hndl *str2hndl;       /* New 'struct2' created */
     herr_t ret;                         /* For error checking */
 
-    str2hndl=malloc(sizeof(misc5_struct2_hndl));
-    CHECK(str2hndl,NULL,"malloc");
+    str2hndl = HDmalloc(sizeof(misc5_struct2_hndl));
+    CHECK(str2hndl, NULL, "malloc");
 
-    str2hndl->st2h_base=H5Tcreate( H5T_COMPOUND, sizeof(misc5_struct2));
-    CHECK(str2hndl->st2h_base,FAIL,"H5Tcreate");
+    str2hndl->st2h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct2));
+    CHECK(str2hndl->st2h_base, FAIL, "H5Tcreate");
 
-    ret=H5Tinsert(str2hndl->st2h_base, "st2_el1", HOFFSET( misc5_struct2, st2_el1), H5T_NATIVE_INT);
-    CHECK(ret,FAIL,"H5Tinsert");
+    ret = H5Tinsert(str2hndl->st2h_base, "st2_el1", HOFFSET(misc5_struct2, st2_el1), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
 
     str2hndl->st2h_st3hndl=create_struct3();
     CHECK(str2hndl->st2h_st3hndl,NULL,"create_struct3");
@@ -786,14 +786,14 @@ create_struct1(void)
     misc5_struct1_hndl *str1hndl;       /* New 'struct1' created */
     herr_t ret;                         /* For error checking */
 
-    str1hndl=malloc(sizeof(misc5_struct1_hndl));
-    CHECK(str1hndl,NULL,"malloc");
+    str1hndl = HDmalloc(sizeof(misc5_struct1_hndl));
+    CHECK(str1hndl, NULL, "malloc");
 
-    str1hndl->st1h_base=H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
-    CHECK(str1hndl->st1h_base,FAIL,"H5Tcreate");
+    str1hndl->st1h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
+    CHECK(str1hndl->st1h_base, FAIL, "H5Tcreate");
 
-    ret=H5Tinsert(str1hndl->st1h_base, "st1_el1", HOFFSET(misc5_struct1, st1_el1), H5T_NATIVE_INT);
-    CHECK(ret,FAIL,"H5Tinsert");
+    ret = H5Tinsert(str1hndl->st1h_base, "st1_el1", HOFFSET(misc5_struct1, st1_el1), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
 
     str1hndl->st1h_st2hndl=create_struct2();
     CHECK(str1hndl->st1h_st2hndl,NULL,"create_struct2");
@@ -1100,8 +1100,8 @@ test_misc7(void)
     CHECK(sid,FAIL,"H5Screate");
 
     /* Create the compound datatype to commit*/
-    tid=H5Tcreate(H5T_COMPOUND,32);
-    CHECK(tid,FAIL,"H5Tcreate");
+    tid = H5Tcreate(H5T_COMPOUND, (size_t)32);
+    CHECK(tid, FAIL, "H5Tcreate");
 
     /* Attempt to commit an empty compound datatype */
     ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
@@ -1112,8 +1112,8 @@ test_misc7(void)
     VERIFY(ret,FAIL,"H5Dcreate");
 
     /* Add a field to the compound datatype */
-    ret=H5Tinsert(tid,"a",0,H5T_NATIVE_INT);
-    CHECK(ret,FAIL,"H5Tinsert");
+    ret = H5Tinsert(tid, "a", (size_t)0, H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
 
     /* Attempt to commit the compound datatype now - should work */
     ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
@@ -1673,7 +1673,7 @@ test_misc9(void)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    ret=H5Pset_fapl_core(fapl, 1024, 0);
+    ret = H5Pset_fapl_core(fapl, (size_t)1024, 0);
     CHECK(ret, FAIL, "H5Pset_fapl_core");
 
     fid = H5Fopen(MISC9_FILE, H5F_ACC_RDWR, fapl);
@@ -1826,7 +1826,7 @@ test_misc11(void)
     ret=H5Pset_userblock(fcpl,(hsize_t)MISC11_USERBLOCK);
     CHECK(ret, FAIL, "H5Pset_userblock");
 
-    ret=H5Pset_sizes(fcpl,MISC11_SIZEOF_OFF,MISC11_SIZEOF_LEN);
+    ret = H5Pset_sizes(fcpl, (size_t)MISC11_SIZEOF_OFF, (size_t)MISC11_SIZEOF_LEN);
     CHECK(ret, FAIL, "H5Pset_sizes");
 
     ret=H5Pset_sym_k(fcpl,MISC11_SYM_IK,MISC11_SYM_LK);
@@ -1964,13 +1964,13 @@ test_misc12(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid1 = H5Tcopy (H5T_C_S1);
+    tid1 = H5Tcopy(H5T_C_S1);
     CHECK(tid1, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (tid1,H5T_VARIABLE);
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    cparms = H5Pcreate (H5P_DATASET_CREATE);
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(cparms, FAIL, "H5Pcreate");
 
     ret = H5Pset_chunk ( cparms, 1, chkdims1);
@@ -2160,11 +2160,11 @@ create_hdf_file(const char *name)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a group in the root group */
-    gid = H5Gcreate(fid, MISC13_GROUP1_NAME, 0);
+    gid = H5Gcreate(fid, MISC13_GROUP1_NAME, (size_t)0);
     CHECK(gid, FAIL, "H5Gcreate");
 
     /* Create another group in the new group */
-    gid2 = H5Gcreate(gid, MISC13_GROUP2_NAME, 0);
+    gid2 = H5Gcreate(gid, MISC13_GROUP2_NAME, (size_t)0);
     CHECK(gid2, FAIL, "H5Gcreate");
 
     /* Close the second group */
@@ -2214,7 +2214,7 @@ insert_user_block(const char *old_name, const char *new_name,const char *str,siz
     int ret;                    /* Generic status value */
 
     /* Allocate space for the user block */
-    user_block=HDcalloc(size,1);
+    user_block = HDcalloc(size, (size_t)1);
     CHECK(user_block, NULL, "HDcalloc");
 
     /* Copy in the user block data */
@@ -2225,7 +2225,7 @@ insert_user_block(const char *old_name, const char *new_name,const char *str,siz
     CHECK(new_fp, NULL, "HDfopen");
 
     /* Write the user block to the new file */
-    written=HDfwrite(user_block,1,size,new_fp);
+    written = HDfwrite(user_block, (size_t)1, size, new_fp);
     VERIFY(written, size, "HDfwrite");
 
     /* Open the old file */
@@ -2233,13 +2233,13 @@ insert_user_block(const char *old_name, const char *new_name,const char *str,siz
     CHECK(old_fp, NULL, "HDfopen");
 
     /* Allocate space for the copy buffer */
-    copy_buf=malloc(MISC13_COPY_BUF_SIZE);
+    copy_buf = HDmalloc((size_t)MISC13_COPY_BUF_SIZE);
     CHECK(copy_buf, NULL, "HDmalloc");
 
     /* Copy data from the old file to the new file */
-    while((read_in=fread(copy_buf,1,MISC13_COPY_BUF_SIZE,old_fp))>0) {
+    while((read_in = HDfread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
         /* Write the data to the new file */
-        written=fwrite(copy_buf,1,read_in,new_fp);
+        written = HDfwrite(copy_buf, (size_t)1, read_in, new_fp);
         VERIFY(written, read_in, "HDfwrite");
     } /* end while */
 
@@ -2383,7 +2383,7 @@ test_misc13(void)
     verify_file(MISC13_FILE_1,(hsize_t)0,0);
 
     /* Create a new file by inserting a user block in front of the first file */
-    insert_user_block(MISC13_FILE_1,MISC13_FILE_2,"Test String",MISC13_USERBLOCK_SIZE);
+    insert_user_block(MISC13_FILE_1, MISC13_FILE_2, "Test String", (size_t)MISC13_USERBLOCK_SIZE);
 
     /* Verify file contents are still correct */
     verify_file(MISC13_FILE_2,(hsize_t)MISC13_USERBLOCK_SIZE,0);
@@ -2684,13 +2684,13 @@ test_misc16(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid = H5Tcopy (H5T_C_S1);
+    tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size (tid,MISC16_STR_SIZE);
+    ret = H5Tset_size(tid, (size_t)MISC16_STR_SIZE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    /*ret = H5Tset_strpad (tid,H5T_STR_NULLPAD);
+    /*ret = H5Tset_strpad(tid,H5T_STR_NULLPAD);
     CHECK(ret, FAIL, "H5Tset_strpad");*/
 
     /* Create a dataset */
@@ -3062,7 +3062,7 @@ test_misc19(void)
 /* Check H5I operations on datatypes */
 
     /* Create a datatype */
-    tid = H5Tcreate(H5T_OPAQUE,16);
+    tid = H5Tcreate(H5T_OPAQUE, (size_t)16);
     CHECK(tid, FAIL, "H5Tcreate");
 
     /* Check the reference count */
@@ -3234,7 +3234,7 @@ test_misc19(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group */
-    gid = H5Gcreate(fid,MISC19_GROUP_NAME,0);
+    gid = H5Gcreate(fid, MISC19_GROUP_NAME, (size_t)0);
     CHECK(gid, FAIL, "H5Gcreate");
 
     /* Check the reference count */
@@ -3792,7 +3792,7 @@ test_misc23(void)
 
 
     /* Build some infrastructure */
-    group_id = H5Gcreate(file_id, "/A", 0);
+    group_id = H5Gcreate(file_id, "/A", (size_t)0);
     CHECK(group_id, FAIL, "H5Gcreate");
 
     space_id = H5Screate_simple(1, dims, NULL);
@@ -3807,12 +3807,12 @@ test_misc23(void)
     **********************************************************************/
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gcreate(file_id, "/A/B00a/grp", 0);
+        tmp_id = H5Gcreate(file_id, "/A/B00a/grp", (size_t)0);
     } H5E_END_TRY;
     VERIFY(tmp_id, FAIL, "H5Gcreate");
 
 
-    tmp_id = H5Gcreate(file_id, "/A/grp", 0);
+    tmp_id = H5Gcreate(file_id, "/A/grp", (size_t)0);
     CHECK(tmp_id, FAIL, "H5Gcreate");
 
     status = H5Gclose(tmp_id);
@@ -4349,7 +4349,7 @@ test_misc25a(void)
     /* Create dataype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
-    ret = H5Tset_size(tid, MISC25A_ATTR1_LEN);
+    ret = H5Tset_size(tid, (size_t)MISC25A_ATTR1_LEN);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 1st attribute on first group */
@@ -4375,7 +4375,7 @@ test_misc25a(void)
     /* Create dataype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
-    ret = H5Tset_size(tid, MISC25A_ATTR2_LEN);
+    ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 2nd attribute on first group */
@@ -4448,7 +4448,7 @@ test_misc25a(void)
     /* Create dataype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
-    ret = H5Tset_size(tid, MISC25A_ATTR3_LEN);
+    ret = H5Tset_size(tid, (size_t)MISC25A_ATTR3_LEN);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 3rd attribute on first group (smaller than 2nd attribute) */
@@ -4496,7 +4496,7 @@ test_misc25a(void)
     /* Create dataype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
-    ret = H5Tset_size(tid, MISC25A_ATTR2_LEN);
+    ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Re-create 2nd attribute on first group */
@@ -4560,7 +4560,7 @@ test_misc25a(void)
     /* Create dataype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
-    ret = H5Tset_size(tid, MISC25A_ATTR2_LEN);
+    ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Re-create 2nd attribute on first group */

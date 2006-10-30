@@ -164,7 +164,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     /* Create a group and named datatype under root group for testing
      * H5Gget_objtype_by_idx.
      */
-    grp = H5Gcreate(file, "grp", 0);
+    grp = H5Gcreate(file, "grp", (size_t)0);
     CHECK(ret, FAIL, "H5Gcreate");
 
     lnames[NDATASETS] = HDstrdup("grp");
@@ -190,7 +190,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
+    HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
 
     /* Iterate through the datasets in the root group in various ways */
@@ -211,7 +211,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         for(i = 0; i< (int)num_membs; i++) {
             H5G_obj_t obj_type;         /* Type of object in file */
 
-            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, (size_t)NAMELEN);
             CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
             obj_type = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
@@ -219,7 +219,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         } /* end for */
 
         H5E_BEGIN_TRY {
-            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN);
         } H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
 
@@ -239,7 +239,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         for(i = 0; i< (int)num_membs; i++) {
             H5G_obj_t obj_type;         /* Type of object in file */
 
-            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, (size_t)NAMELEN);
             CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
             obj_type = H5Gget_objtype_by_idx(file, (hsize_t)i);
@@ -247,7 +247,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         }
 
         H5E_BEGIN_TRY {
-            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)(NDATASETS + 3), dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)(NDATASETS + 3), dataset_name, (size_t)NAMELEN);
         } H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
     }
@@ -604,7 +604,7 @@ static void test_iter_group_large(hid_t fapl)
         names[i].type = H5G_GROUP;
 
         /* Create a group */
-        group = H5Gcreate(file, gname, 0);
+        group = H5Gcreate(file, gname, (size_t)0);
         CHECK(group, FAIL, "H5Gcreate");
 
         /* Close a group */
@@ -655,7 +655,7 @@ static void test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Need to sort the names in the root group, cause that's what the library does */
-    HDqsort(names, (ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
+    HDqsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
 
     /* Iterate through the file to see members of the root group */
     curr_name = &names[0];
@@ -723,7 +723,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     /* Create a group and named datatype under root group for testing
      * H5Gget_objtype_by_idx.
      */
-    grp = H5Gcreate(file, "grp", 0);
+    grp = H5Gcreate(file, "grp", (size_t)0);
     CHECK(ret, FAIL, "H5Gcreate");
 
     dnames[NDATASETS] = HDstrdup("grp");
@@ -749,7 +749,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(dnames, (NDATASETS + 2), sizeof(char *), iter_strcmp);
+    HDqsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -769,7 +769,7 @@ static void test_grp_memb_funcs(hid_t fapl)
         H5G_obj_t obj_type;         /* Type of object in file */
 
         /* Test with NULL for name, to query length */
-        name_len = H5Gget_objname_by_idx(root_group, (hsize_t)i, NULL, NAMELEN);
+        name_len = H5Gget_objname_by_idx(root_group, (hsize_t)i, NULL, (size_t)NAMELEN);
         CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
 
         ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, (size_t)(name_len + 1));
@@ -794,12 +794,12 @@ static void test_grp_memb_funcs(hid_t fapl)
     } /* end for */
 
     H5E_BEGIN_TRY {
-        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, NAMELEN);
+        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
 
     /* Sort the dataset names */
-    HDqsort(obj_names, (NDATASETS + 2), sizeof(char *), iter_strcmp);
+    HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Compare object names */
     for(i = 0; i< (int)num_membs; i++) {
@@ -845,10 +845,10 @@ static void test_links(hid_t fapl)
     CHECK(file, FAIL, "H5Fcreate");
 
     /* create groups */
-    gid = H5Gcreate (file, "/g1", 0);
+    gid = H5Gcreate(file, "/g1", (size_t)0);
     CHECK(gid, FAIL, "H5Gcreate");
 
-    gid1 = H5Gcreate (file, "/g1/g1.1", 0);
+    gid1 = H5Gcreate(file, "/g1/g1.1", (size_t)0);
     CHECK(gid1, FAIL, "H5Gcreate");
 
     /* create soft and hard links to the group "/g1". */
@@ -865,7 +865,7 @@ static void test_links(hid_t fapl)
     /* Test these two functions, H5Gget_num_objs and H5Gget_objname_by_idx */
     for(i = 0; i < nobjs; i++) {
         /* Get object name */
-        name_len = H5Gget_objname_by_idx(gid, i, obj_name, NAMELEN);
+        name_len = H5Gget_objname_by_idx(gid, i, obj_name, (size_t)NAMELEN);
         CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
 
         obj_type = H5Gget_objtype_by_idx(gid, i);

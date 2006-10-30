@@ -122,195 +122,195 @@ void test_fl_string(hid_t fid, const char *string)
  */
 void test_strpad(hid_t UNUSED fid, const char *string)
 {
-  /* buf is used to hold the data that H5Tconvert operates on. */
-  char     buf[LONG_BUF_SIZE];
+    /* buf is used to hold the data that H5Tconvert operates on. */
+    char     buf[LONG_BUF_SIZE];
 
-  /* cmpbuf holds the output that H5Tconvert should produce,
-   * to compare against the actual output. */
-  char     cmpbuf[LONG_BUF_SIZE];
+    /* cmpbuf holds the output that H5Tconvert should produce,
+     * to compare against the actual output. */
+    char     cmpbuf[LONG_BUF_SIZE];
 
-  /* new_string is a slightly modified version of the UTF-8
-   * string to make the tests run more smoothly. */
-  char     new_string[MAX_STRING_LENGTH + 2];
+    /* new_string is a slightly modified version of the UTF-8
+     * string to make the tests run more smoothly. */
+    char     new_string[MAX_STRING_LENGTH + 2];
 
-  unsigned int length;  /* Length of new_string in bytes */
-  unsigned int small_len;  /* Size of the small datatype */
-  unsigned int big_len;   /* Size of the larger datatype */
-  hid_t    src_type, dst_type;
-  herr_t   ret;
+    size_t   length;  /* Length of new_string in bytes */
+    size_t   small_len;  /* Size of the small datatype */
+    size_t   big_len;   /* Size of the larger datatype */
+    hid_t    src_type, dst_type;
+    herr_t   ret;
 
-  /* The following tests are simpler if the UTF-8 string contains
-   * the right number of bytes (even or odd, depending on the test).
-   * We create a 'new_string' whose length is convenient by prepending
-   * an 'x' to 'string' when necessary. */
-  length = strlen(string);
-  if(length % 2 != 1)
-  {
-    strcpy(new_string, "x");
-    strcat(new_string, string);
-    length++;
-  } else {
-    strcpy(new_string, string);
-  }
-
-
-  /* Convert a null-terminated string to a shorter and longer null
-   * terminated string. */
-
-  /* Create a src_type that holds the UTF-8 string and its final NULL */
-  big_len = length + 1;                     /* +1 byte for final NULL */
-  src_type = mkstr(big_len, H5T_STR_NULLTERM);
-  CHECK(src_type, FAIL, "mkstr");
-  /* Create a dst_type that holds half of the UTF-8 string and a final
-   * NULL */
-  small_len = (length +1) / 2;
-  dst_type = mkstr(small_len, H5T_STR_NULLTERM);
-  CHECK(dst_type, FAIL, "mkstr");
-
-  /* Fill the buffer with two copies of the UTF-8 string, each with a
-   * terminating NULL.  It will look like "abcdefg\0abcdefg\0". */
-  strncpy(buf, new_string, big_len);
-  strncpy(&buf[big_len], new_string, big_len);
-
-  ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
-
-  /* After conversion, the buffer should look like
-   * "abc\0abc\0abcdefg\0".  Note that this is just what the bytes look
-   * like; UTF-8 characters may well have been truncated.
-   * To check that the conversion worked properly, we'll build this
-   * string manually. */
-  strncpy(cmpbuf, new_string, small_len -1);
-  cmpbuf[small_len - 1] = '\0';
-  strncpy(&cmpbuf[small_len], new_string, small_len -1);
-  cmpbuf[2 * small_len - 1] = '\0';
-  strcpy(&cmpbuf[2 * small_len], new_string);
-
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
-
-  /* Now convert from smaller datatype to bigger datatype.  This should
-   * leave our buffer looking like: "abc\0\0\0\0\0abc\0\0\0\0\0" */
-  ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
-
-  /* First fill the buffer with NULLs */
-  HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
-  /* Copy in the characters */
-  strncpy(cmpbuf, new_string, small_len -1);
-  strncpy(&cmpbuf[big_len], new_string, small_len -1);
-
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
-
-  ret = H5Tclose(src_type);
-  CHECK(ret, FAIL, "H5Tclose");
-  ret = H5Tclose(dst_type);
-  CHECK(ret, FAIL, "H5Tclose");
+    /* The following tests are simpler if the UTF-8 string contains
+     * the right number of bytes (even or odd, depending on the test).
+     * We create a 'new_string' whose length is convenient by prepending
+     * an 'x' to 'string' when necessary. */
+    length = HDstrlen(string);
+    if(length % 2 != 1)
+    {
+      HDstrcpy(new_string, "x");
+      HDstrcat(new_string, string);
+      length++;
+    } else {
+      HDstrcpy(new_string, string);
+    }
 
 
-  /* Now test null padding.  Null-padded strings do *not* need
-   * terminating NULLs, so the sizes of the datatypes are slightly
-   * different and we want a string with an even number of characters. */
-  length = strlen(string);
-  if(length % 2 != 0)
-  {
-    strcpy(new_string, "x");
-    strcat(new_string, string);
-    length++;
-  } else {
-    strcpy(new_string, string);
-  }
+    /* Convert a null-terminated string to a shorter and longer null
+     * terminated string. */
 
-  /* Create a src_type that holds the UTF-8 string */
-  big_len = length;
-  src_type = mkstr(big_len, H5T_STR_NULLPAD);
-  CHECK(src_type, FAIL, "mkstr");
-  /* Create a dst_type that holds half of the UTF-8 string */
-  small_len = length / 2;
-  dst_type = mkstr(small_len, H5T_STR_NULLPAD);
-  CHECK(dst_type, FAIL, "mkstr");
+    /* Create a src_type that holds the UTF-8 string and its final NULL */
+    big_len = length + 1;                     /* +1 byte for final NULL */
+    src_type = mkstr(big_len, H5T_STR_NULLTERM);
+    CHECK(src_type, FAIL, "mkstr");
+    /* Create a dst_type that holds half of the UTF-8 string and a final
+     * NULL */
+    small_len = (length + 1) / 2;
+    dst_type = mkstr(small_len, H5T_STR_NULLTERM);
+    CHECK(dst_type, FAIL, "mkstr");
 
-  /* Fill the buffer with two copies of the UTF-8 string.
-   * It will look like "abcdefghabcdefgh". */
-  strncpy(buf, new_string, big_len);
-  strncpy(&buf[big_len], new_string, big_len);
+    /* Fill the buffer with two copies of the UTF-8 string, each with a
+     * terminating NULL.  It will look like "abcdefg\0abcdefg\0". */
+    strncpy(buf, new_string, big_len);
+    strncpy(&buf[big_len], new_string, big_len);
 
-  ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
+    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
 
-  /* After conversion, the buffer should look like
-   * "abcdabcdabcdefgh".  Note that this is just what the bytes look
-   * like; UTF-8 characters may well have been truncated.
-   * To check that the conversion worked properly, we'll build this
-   * string manually. */
-  strncpy(cmpbuf, new_string, small_len);
-  strncpy(&cmpbuf[small_len], new_string, small_len);
-  strncpy(&cmpbuf[2 * small_len], new_string, big_len);
+    /* After conversion, the buffer should look like
+     * "abc\0abc\0abcdefg\0".  Note that this is just what the bytes look
+     * like; UTF-8 characters may well have been truncated.
+     * To check that the conversion worked properly, we'll build this
+     * string manually. */
+    HDstrncpy(cmpbuf, new_string, small_len - 1);
+    cmpbuf[small_len - 1] = '\0';
+    HDstrncpy(&cmpbuf[small_len], new_string, small_len -1);
+    cmpbuf[2 * small_len - 1] = '\0';
+    HDstrcpy(&cmpbuf[2 * small_len], new_string);
 
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
 
-  /* Now convert from smaller datatype to bigger datatype.  This should
-   * leave our buffer looking like: "abcd\0\0\0\0abcd\0\0\0\0" */
-  ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
+    /* Now convert from smaller datatype to bigger datatype.  This should
+     * leave our buffer looking like: "abc\0\0\0\0\0abc\0\0\0\0\0" */
+    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
 
-  /* First fill the buffer with NULLs */
-  HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
-  /* Copy in the characters */
-  strncpy(cmpbuf, new_string, small_len);
-  strncpy(&cmpbuf[big_len], new_string, small_len);
+    /* First fill the buffer with NULLs */
+    HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
+    /* Copy in the characters */
+    HDstrncpy(cmpbuf, new_string, small_len -1);
+    HDstrncpy(&cmpbuf[big_len], new_string, small_len -1);
 
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
 
-  ret = H5Tclose(src_type);
-  CHECK(ret, FAIL, "H5Tclose");
-  ret = H5Tclose(dst_type);
-  CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(src_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(dst_type);
+    CHECK(ret, FAIL, "H5Tclose");
 
 
-  /* Test space padding.  This is very similar to null-padding; we can
-     use the same values of length, small_len, and big_len. */
+    /* Now test null padding.  Null-padded strings do *not* need
+     * terminating NULLs, so the sizes of the datatypes are slightly
+     * different and we want a string with an even number of characters. */
+    length = HDstrlen(string);
+    if(length % 2 != 0)
+    {
+      HDstrcpy(new_string, "x");
+      HDstrcat(new_string, string);
+      length++;
+    } else {
+      HDstrcpy(new_string, string);
+    }
 
-  src_type = mkstr(big_len, H5T_STR_SPACEPAD);
-  CHECK(src_type, FAIL, "mkstr");
-  dst_type = mkstr(small_len, H5T_STR_SPACEPAD);
-  CHECK(src_type, FAIL, "mkstr");
+    /* Create a src_type that holds the UTF-8 string */
+    big_len = length;
+    src_type = mkstr(big_len, H5T_STR_NULLPAD);
+    CHECK(src_type, FAIL, "mkstr");
+    /* Create a dst_type that holds half of the UTF-8 string */
+    small_len = length / 2;
+    dst_type = mkstr(small_len, H5T_STR_NULLPAD);
+    CHECK(dst_type, FAIL, "mkstr");
 
-  /* Fill the buffer with two copies of the UTF-8 string.
-   * It will look like "abcdefghabcdefgh". */
-  strcpy(buf, new_string);
-  strcpy(&buf[big_len], new_string);
+    /* Fill the buffer with two copies of the UTF-8 string.
+     * It will look like "abcdefghabcdefgh". */
+    strncpy(buf, new_string, big_len);
+    strncpy(&buf[big_len], new_string, big_len);
 
-  ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
+    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
 
-  /* After conversion, the buffer should look like
-   * "abcdabcdabcdefgh".  Note that this is just what the bytes look
-   * like; UTF-8 characters may have been truncated.
-   * To check that the conversion worked properly, we'll build this
-   * string manually. */
-  strncpy(cmpbuf, new_string, small_len);
-  strncpy(&cmpbuf[small_len], new_string, small_len);
-  strncpy(&cmpbuf[2 * small_len], new_string, big_len);
+    /* After conversion, the buffer should look like
+     * "abcdabcdabcdefgh".  Note that this is just what the bytes look
+     * like; UTF-8 characters may well have been truncated.
+     * To check that the conversion worked properly, we'll build this
+     * string manually. */
+    HDstrncpy(cmpbuf, new_string, small_len);
+    HDstrncpy(&cmpbuf[small_len], new_string, small_len);
+    HDstrncpy(&cmpbuf[2 * small_len], new_string, big_len);
 
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
 
-  /* Now convert from smaller datatype to bigger datatype.  This should
-   * leave our buffer looking like: "abcd    abcd    " */
-  ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Tconvert");
+    /* Now convert from smaller datatype to bigger datatype.  This should
+     * leave our buffer looking like: "abcd\0\0\0\0abcd\0\0\0\0" */
+    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
 
-  /* First fill the buffer with spaces */
-  HDmemset(cmpbuf, ' ', LONG_BUF_SIZE);
-  /* Copy in the characters */
-  strncpy(cmpbuf, new_string, small_len);
-  strncpy(&cmpbuf[big_len], new_string, small_len);
+    /* First fill the buffer with NULLs */
+    HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
+    /* Copy in the characters */
+    HDstrncpy(cmpbuf, new_string, small_len);
+    HDstrncpy(&cmpbuf[big_len], new_string, small_len);
 
-  VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
 
-  ret = H5Tclose(src_type);
-  CHECK(ret, FAIL, "H5Tclose");
-  ret = H5Tclose(dst_type);
-  CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(src_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(dst_type);
+    CHECK(ret, FAIL, "H5Tclose");
+
+
+    /* Test space padding.  This is very similar to null-padding; we can
+       use the same values of length, small_len, and big_len. */
+
+    src_type = mkstr(big_len, H5T_STR_SPACEPAD);
+    CHECK(src_type, FAIL, "mkstr");
+    dst_type = mkstr(small_len, H5T_STR_SPACEPAD);
+    CHECK(src_type, FAIL, "mkstr");
+
+    /* Fill the buffer with two copies of the UTF-8 string.
+     * It will look like "abcdefghabcdefgh". */
+    HDstrcpy(buf, new_string);
+    HDstrcpy(&buf[big_len], new_string);
+
+    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
+
+    /* After conversion, the buffer should look like
+     * "abcdabcdabcdefgh".  Note that this is just what the bytes look
+     * like; UTF-8 characters may have been truncated.
+     * To check that the conversion worked properly, we'll build this
+     * string manually. */
+    HDstrncpy(cmpbuf, new_string, small_len);
+    HDstrncpy(&cmpbuf[small_len], new_string, small_len);
+    HDstrncpy(&cmpbuf[2 * small_len], new_string, big_len);
+
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+
+    /* Now convert from smaller datatype to bigger datatype.  This should
+     * leave our buffer looking like: "abcd    abcd    " */
+    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tconvert");
+
+    /* First fill the buffer with spaces */
+    HDmemset(cmpbuf, ' ', LONG_BUF_SIZE);
+    /* Copy in the characters */
+    HDstrncpy(cmpbuf, new_string, small_len);
+    HDstrncpy(&cmpbuf[big_len], new_string, small_len);
+
+    VERIFY(HDmemcmp(buf, cmpbuf, 2*big_len), 0, "HDmemcmp");
+
+    ret = H5Tclose(src_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(dst_type);
+    CHECK(ret, FAIL, "H5Tclose");
 }
 
 
