@@ -40,10 +40,7 @@
 #define H5L_ELINK_PREFIX_SIZE        sizeof(char *)
 #define H5L_ELINK_PREFIX_DEF         NULL /*default is no prefix */
 
-/* Functions that understand link messages */
-/* forward reference for later use */
-struct H5HL_t; /* defined in H5HLprivate.h */
-
+/* General operations on links */
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
     H5G_loc_t *obj_loc, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL hid_t H5L_get_default_lcpl(void);
@@ -57,5 +54,5 @@ H5_DLL herr_t H5L_register(const H5L_class_t *cls);
 H5_DLL herr_t H5L_unregister(H5L_type_t id);
 H5_DLL const H5L_class_t *H5L_find_class(H5L_type_t id);
 
-
 #endif /* _H5Lprivate_H */
+

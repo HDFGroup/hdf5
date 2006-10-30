@@ -30,13 +30,27 @@
 #include "H5Ipublic.h"
 #include "H5Tpublic.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*****************/
+/* Public Macros */
+/*****************/
 
 /* Maximum length of a link's name */
 /* (encoded in a 32-bit unsigned integer) */
 #define H5L_MAX_LINK_NAME_LEN   ((uint32_t)(-1))  /* (4GB - 1) */
+
+/* Macro to indicate operation occurs on same location */
+#define H5L_SAME_LOC 0
+
+/* Current version of the H5L_class_t struct */
+#define H5L_LINK_CLASS_T_VERS 0
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*******************/
+/* Public Typedefs */
+/*******************/
 
 /* Link class types.
  * Values less than 64 are reserved for the HDF5 library's internal use.
@@ -68,15 +82,10 @@ typedef struct {
     } u;
 } H5L_linkinfo_t;
 
-#define H5L_SAME_LOC 0
-
 /* The H5L_class_t struct can be used to override the behavior of a
  * "user-defined" link class. Users should populate the struct with callback
  * functions defined below.
  */
-/* Current version of the H5L_class_t struct */
-#define H5L_LINK_CLASS_T_VERS (0)
-
 /* Callback prototypes for user-defined links */
 /* Link creation callback */
 typedef herr_t (*H5L_create_func_t)(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id);
@@ -110,10 +119,14 @@ typedef struct {
     H5L_query_func_t query_func;    /* Callback for queries                 */
 } H5L_class_t;
 
-#define H5L_ELINK_PREFIX_PROP "elink_prefix"
+/********************/
+/* Public Variables */
+/********************/
 
 
-/* Public prototypes */
+/*********************/
+/* Public Prototypes */
+/*********************/
 H5_DLL herr_t H5Llink(hid_t cur_loc_id, const char *cur_name,
                         hid_t obj_id, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
@@ -148,5 +161,5 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Lpublic_H */
 

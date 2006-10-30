@@ -276,6 +276,7 @@ H5FL_DEFINE_STATIC(H5O_addr_map_t);
  *
  *              The opened object should be closed again with H5Oclose
  *              or H5Gclose, H5Tclose, or H5Dclose.
+ *
  * Return:	Success:	An open object identifier
  *		Failure:	Negative
  *
@@ -564,35 +565,38 @@ H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id)
     /* Get the type of the object and open it in the correct way */
     switch(H5O_obj_type(obj_loc->oloc, dxpl_id))
     {
-      case(H5G_GROUP):
-        /* Open the group */
-        if((grp = H5G_open(obj_loc, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-        /* Register an atom for the group */
-        if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-      break;
+        case(H5G_GROUP):
+            /* Open the group */
+            if((grp = H5G_open(obj_loc, dxpl_id)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
-      case(H5G_DATASET):
-        /* Open the group */
-        if((dset = H5D_open(obj_loc, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
-        /* Register an atom for the group */
-        if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
-      break;
+            /* Register an atom for the group */
+            if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+            break;
 
-      case(H5G_TYPE):
-        /* Open the group */
-        if((type = H5T_open(obj_loc, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
-        /* Register an atom for the group */
-        if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-      break;
+        case(H5G_DATASET):
+            /* Open the group */
+            if((dset = H5D_open(obj_loc, dxpl_id)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
-      default:
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "invalid object type")
+            /* Register an atom for the group */
+            if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
+            break;
+
+        case(H5G_TYPE):
+            /* Open the group */
+            if((type = H5T_open(obj_loc, dxpl_id)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
+
+            /* Register an atom for the group */
+            if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "invalid object type")
     }
  
 done:

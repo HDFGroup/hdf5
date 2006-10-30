@@ -76,7 +76,7 @@ H5L_init_extern_interface(void)
  *
  *              Given a filename and path packed into the link udata,
  *              attempts to open an object within an external file.
- *              If the H5L_ELINK_PREFIX_PROP property is set in the
+ *              If the H5L_ELINK_PREFIX_NAME property is set in the
  *              link access property list, appends that prefix to the
  *              filename being opened.
  *

@@ -106,7 +106,7 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
 
     /* Get the current number of links */
     if(H5P_get(plist, H5L_NLINKS_NAME, nlinks) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -187,7 +187,7 @@ H5Pget_elink_prefix(hid_t plist_id, char **prefix)
 
     /* Get the current prefix */
     if(H5P_get(plist, H5L_ELINK_PREFIX_NAME, prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
 
 done:
     FUNC_LEAVE_API(ret_value)
