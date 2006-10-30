@@ -248,9 +248,15 @@ typedef struct H5G_bt_it_ud5_t {
 
 /* Typedef for native 'name' field index records in the v2 B-tree */
 typedef struct H5G_dense_bt2_name_rec_t {
-    uint32_t hash;      /* Hash of 'name' field value */
+    uint32_t hash;                      /* Hash of 'name' field value */
     uint8_t id[H5G_DENSE_FHEAP_ID_LEN]; /* Heap ID for link */
 } H5G_dense_bt2_name_rec_t;
+
+/* Typedef for native 'creation order' field index records in the v2 B-tree */
+typedef struct H5G_dense_bt2_corder_rec_t {
+    uint64_t corder;                    /* 'creation order' field value */
+    uint8_t id[H5G_DENSE_FHEAP_ID_LEN]; /* Heap ID for link */
+} H5G_dense_bt2_corder_rec_t;
 
 /*
  * Common data exchange structure for dense link storage.  This structure is
@@ -261,9 +267,10 @@ typedef struct H5G_bt2_ud_common_t {
     /* downward */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
-    H5HF_t      *fheap;                 /* Fractal heap handle */
+    H5HF_t      *fheap;                 /* Fractal heap handle               */
     const char  *name;                  /* Name of link to compare           */
     uint32_t    name_hash;              /* Hash of name of link to compare   */
+    uint64_t    corder;                 /* Creation order value of link to compare   */
     H5B2_found_t found_op;              /* Callback when correct link is found */
     void        *found_op_data;         /* Callback data when correct link is found */
 } H5G_bt2_ud_common_t;
@@ -427,7 +434,7 @@ H5_DLL int H5G_obj_cmp_name_inc(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_obj_cmp_name_dec(const void *lnk1, const void *lnk2);
 H5_DLL herr_t H5G_obj_release_table(H5G_link_table_t *ltable);
 H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
-    H5O_loc_t *oloc/*out*/);
+    const H5O_linfo_t *linfo, H5O_loc_t *oloc/*out*/);
 H5_DLL herr_t H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name,

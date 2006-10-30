@@ -247,9 +247,11 @@ H5P_init_interface(void)
     /* Group creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
      * - Default value for "group info"
+     * - Default value for "link info"
      */
     H5P_genclass_t  *gcrt_class;    /* Pointer to group creation property list class created */
     H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;
+    H5O_linfo_t linfo = H5G_CRT_LINK_INFO_DEF;
     /* Object creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
      */
@@ -376,6 +378,10 @@ H5P_init_interface(void)
         /* Register group info */
         if(H5P_register(gcrt_class, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE,
                  &ginfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        /* Register link info */
+        if(H5P_register(gcrt_class, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE,
+                 &linfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     } /* end if */
 

@@ -888,6 +888,7 @@ hid_t
 H5Gget_create_plist(hid_t group_id)
 {
     htri_t	        ginfo_exists = 0;
+    htri_t	        linfo_exists = 0;
     H5G_t		*grp = NULL;
     H5P_genplist_t      *gcpl_plist;
     H5P_genplist_t      *new_plist;
@@ -922,6 +923,21 @@ H5Gget_create_plist(hid_t group_id)
         /* Set the group info for the property list */
         if(H5P_set(new_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+    } /* end if */
+
+    /* Check for the group having a link info message */
+    if((linfo_exists = H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(linfo_exists) {
+        H5O_linfo_t linfo;		/* Link info message            */
+
+        /* Read the link info */
+        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
+
+        /* Set the link info for the property list */
+        if(H5P_set(new_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
     } /* end if */
 
     /* Set the return value */
@@ -1378,6 +1394,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
     if (loc == NULL) {
         H5P_genplist_t *fc_plist;       /* File creation property list */
         H5O_ginfo_t     ginfo;          /* Group info parameters */
+        H5O_linfo_t     linfo;          /* Link info parameters */
 
         /* Get the file creation property list */
         /* (Which is a sub-class of the group creation property class) */
@@ -1388,13 +1405,17 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
         if(H5P_get(fc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
+        /* Get the link info property */
+        if(H5P_get(fc_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+
         /* Set up group location for root group */
         new_root_loc.oloc = &new_root_oloc;
         new_root_loc.path = &new_root_path;
         H5G_loc_reset(&new_root_loc);
         loc = &new_root_loc;
 
-	if(H5G_obj_create(f, dxpl_id, &ginfo, loc->oloc/*out*/) < 0)
+	if(H5G_obj_create(f, dxpl_id, &ginfo, &linfo, loc->oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(loc->oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")
@@ -1460,6 +1481,7 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
     H5G_t	*grp = NULL;	/*new group			*/
     H5P_genplist_t  *gc_plist;  /* Property list created */
     H5O_ginfo_t ginfo;          /* Group info */
+    H5O_linfo_t linfo;          /* Link info */
     unsigned    oloc_init = 0;  /* Flag to indicate that the group object location was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
@@ -1486,8 +1508,12 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
     if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get group info")
 
+    /* Get the link info property */
+    if(H5P_get(gc_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get group info")
+
     /* Create the group object header */
-    if(H5G_obj_create(file, dxpl_id, &ginfo, &(grp->oloc)/*out*/) < 0)
+    if(H5G_obj_create(file, dxpl_id, &ginfo, &linfo, &(grp->oloc)/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group object header")
     oloc_init = 1;    /* Indicate that the object location information is valid */
 

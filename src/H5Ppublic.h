@@ -370,6 +370,8 @@ H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, uns
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
 H5_DLL herr_t H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder);
 H5_DLL herr_t H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /* out */);
+H5_DLL herr_t H5Pset_creation_order_index(hid_t plist_id, hbool_t index_corder);
+H5_DLL herr_t H5Pget_creation_order_index(hid_t plist_id, hbool_t *index_corder /* out */);
 
 /* String creation property list (SCPL) routines */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);

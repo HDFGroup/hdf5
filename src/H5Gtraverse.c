@@ -651,6 +651,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             /* If an intermediate group doesn't exist & flag is set, create the group */
             if(target & H5G_CRT_INTMD_GROUP) {
                 H5O_ginfo_t	ginfo;		/* Group info message for parent group */
+                H5O_linfo_t	linfo;		/* Link info message for parent group */
 
                 /* Get the group info for parent group */
                 /* (OK if not found) */
@@ -664,9 +665,21 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     HDmemcpy(&ginfo, &def_ginfo, sizeof(H5O_ginfo_t));
                 } /* end if */
 
+                /* Get the link info for parent group */
+                /* (OK if not found) */
+                if(NULL == H5O_read(grp_loc.oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+                    H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;
+
+                    /* Clear error stack from not finding the link info message */
+                    H5E_clear_stack(NULL);
+
+                    /* Use default link info settings */
+                    HDmemcpy(&linfo, &def_linfo, sizeof(H5O_linfo_t));
+                } /* end if */
+
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
-                if(H5G_obj_create(grp_oloc.file, dxpl_id, &ginfo, obj_loc.oloc/*out*/) < 0)
+                if(H5G_obj_create(grp_oloc.file, dxpl_id, &ginfo, &linfo, obj_loc.oloc/*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */

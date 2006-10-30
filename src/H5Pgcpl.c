@@ -367,11 +367,92 @@ H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /*out*/)
         if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
-        if(track_corder)
-            *track_corder = ginfo.track_corder;
+        *track_corder = ginfo.track_corder;
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_creation_order_tracking() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_creation_order_index
+ *
+ * Purpose:     Set the flag to index creation order of links in a group
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 30, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_creation_order_index(hid_t plist_id, hbool_t index_corder)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5O_linfo_t linfo;                  /* Link information structure */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pset_creation_order_index, FAIL)
+    H5TRACE2("e","ib",plist_id,index_corder);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get link info */
+    if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+
+    /* Update fields */
+    linfo.index_corder = index_corder;
+
+    /* Set link info */
+    if(H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_creation_order_index() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_creation_order_index
+ *
+ * Purpose:     Returns the flag indicating that creation order is indexed
+ *              for links in a group.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 30, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_creation_order_index(hid_t plist_id, hbool_t *index_corder /*out*/)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_creation_order_index, FAIL)
+    H5TRACE2("e","ix",plist_id,index_corder);
+
+    /* Get values */
+    if(index_corder) {
+        H5P_genplist_t *plist;      /* Property list pointer */
+        H5O_linfo_t linfo;          /* Link information structure */
+
+        /* Get the plist structure */
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Get link info */
+        if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+
+        *index_corder = linfo.index_corder;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_creation_order_index() */
 

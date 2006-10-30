@@ -219,9 +219,8 @@ done:
  */
 herr_t
 H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
-    H5O_loc_t *oloc/*out*/)
+    const H5O_linfo_t *linfo, H5O_loc_t *oloc/*out*/)
 {
-    H5O_linfo_t linfo;                  /* Link information */
     size_t hdr_size;                    /* Size of object header to request */
     hbool_t use_latest_format;          /* Flag indicating the new group format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -242,17 +241,19 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     else
         use_latest_format = FALSE;
 
+    /* Make certain that the creation order is being tracked if an index is
+     *  going to be built on it.
+     */
+    if(linfo->index_corder && !ginfo->track_corder)
+	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "must track creation order to create index for it")
+
     /* Check if we should be using the latest version of the group format */
     if(use_latest_format) {
-        H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;  /* Default link info */
         H5O_link_t lnk;                     /* Temporary link message info for computing message size */
         char null_char = '\0';              /* Character for creating null string */
         size_t ginfo_size;                  /* Size of the group info message */
         size_t linfo_size;                  /* Size of the link info message */
         size_t link_size;                   /* Size of a link message */
-
-        /* Initialize message information */
-        HDmemcpy(&linfo, &def_linfo, sizeof(H5O_linfo_t));
 
         /* Calculate message size infomation, for creating group's object header */
         linfo_size = H5O_mesg_size(H5O_LINFO_ID, f, &linfo, (size_t)0);
@@ -287,7 +288,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     /* Check for format of group to create */
     if(use_latest_format) {
         /* Insert link info message */
-        if(H5O_modify(oloc, H5O_LINFO_ID, H5O_NEW_MESG, 0, 0, &linfo, dxpl_id) < 0)
+        if(H5O_modify(oloc, H5O_LINFO_ID, H5O_NEW_MESG, 0, 0, linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert group info message */
