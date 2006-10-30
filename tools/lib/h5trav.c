@@ -521,7 +521,7 @@ static int traverse( hid_t loc_id,
       targbuf = HDmalloc(statbuf.linklen);
       assert(targbuf);
       H5Gget_linkval(loc_id,path,statbuf.linklen,targbuf);
-      H5Lunpack_elink_val(targbuf, NULL, &objname);
+      H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &objname);
       if (print)
         printf(" %-10s %s -> %s %s\n", "ext link", path, targbuf, objname);
       free(targbuf);

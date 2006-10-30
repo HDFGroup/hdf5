@@ -1560,7 +1560,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                     d_status = EXIT_FAILURE;
                     ret = FAIL;
                 } else {
-                    if(H5Lunpack_elink_val(targbuf, &filename, &targname) < 0) {
+                    if(H5Lunpack_elink_val(targbuf, statbuf.linklen, &filename, &targname) < 0) {
                       error_msg(progname, "unable to unpack external link value\n");
                       d_status = EXIT_FAILURE;
                       ret = FAIL;
@@ -3248,7 +3248,7 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
               begin_obj(dump_header_format->extlinkbegin, links,
                         dump_header_format->extlinkblockbegin);
               if (H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
-                  if(H5Lunpack_elink_val(buf, &elink_file, &elink_path)>=0) {
+                  if(H5Lunpack_elink_val(buf, statbuf.linklen, &elink_file, &elink_path)>=0) {
                       indentation(COL);
                       printf("LINKCLASS %d\n", linfo.type);
                       indentation(COL);

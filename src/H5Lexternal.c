@@ -292,7 +292,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Lunpack_elink_path
+ * Function: H5Lunpack_elink_val
  *
  * Purpose: Given a buffer holding the "link value" from an external link,
  *              gets pointers to the filename and object path within the
@@ -315,7 +315,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lunpack_elink_val(char *ext_linkval, char **filename, char **obj_path)
+H5Lunpack_elink_val(char *ext_linkval, size_t link_size, char **filename,
+                    char **obj_path)
 {
     size_t      len;                /* Length of the filename in the linkval*/
     herr_t      ret_value=SUCCEED;  /* Return value */
@@ -325,15 +326,35 @@ H5Lunpack_elink_val(char *ext_linkval, char **filename, char **obj_path)
 
     if(ext_linkval == NULL )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an external link linkval buffer")
+    if(link_size <= 1)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid external link buffer")
 
+    /* Try to do some error checking.  If the last character in the linkval
+     * (the last character of obj_path) isn't NULL, then something's wrong.
+     */
+    if(ext_linkval[link_size-1] != '\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer is not NULL-terminated")
+
+    /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
+     * at least one NULL in it.
+     */
+    len = HDstrlen(ext_linkval);
+
+    /* If the first NULL we found was at the very end of the buffer, then
+     * this external link value has no object name and is invalid.
+     */
+    if(len + 1>= link_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer doesn't contain an object path")
+
+    /* If we got here then the buffer contains (at least) two strings packed
+     * in the correct way.  Assume it's correct and return pointers to the
+     * filename and object path.
+     */
     if(filename != NULL)
         *filename = ext_linkval;
 
     if(obj_path != NULL)
-    {
-        len = HDstrlen(ext_linkval);
         *obj_path = ext_linkval + len + 1;  /* Add one for NULL terminator */
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)

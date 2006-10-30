@@ -1764,7 +1764,7 @@ udlink_open(hid_t location, const char *name)
         if ((buf = HDmalloc(linfo.u.link_size))==NULL) goto error;
         if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) goto error;
 
-        if(H5Lunpack_elink_val(buf, &filename, &path) < 0) goto error;
+        if(H5Lunpack_elink_val(buf, linfo.u.link_size,  &filename, &path) < 0) goto error;
         fputs("file: ", stdout);
         fputs(filename, stdout);
         fputs("    path: ", stdout);

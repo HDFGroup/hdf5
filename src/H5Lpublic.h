@@ -127,7 +127,7 @@ H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
                              const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lunlink(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_linkval(hid_t loc_id, const char *name, size_t size,
-			      char *buf/*out*/, hid_t lapl_id);
+			      void *buf/*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_linkinfo(hid_t loc_id, const char *name,
                               H5L_linkinfo_t *linkbuf /*out*/, hid_t lapl_id);
 
@@ -140,7 +140,7 @@ H5_DLL herr_t H5Lunregister(H5L_type_t id);
 H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
-H5_DLL herr_t H5Lunpack_elink_val(char * ext_linkval/*in*/,
+H5_DLL herr_t H5Lunpack_elink_val(char * ext_linkval/*in*/, size_t link_size,
             char ** filename/*out*/, char** obj_path /*out*/);
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
         hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);

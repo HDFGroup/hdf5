@@ -1602,7 +1602,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 	goto error;
     }
     if(H5Lget_linkval(fid, "ext_link", sizeof(objname), objname, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunpack_elink_val(objname, &file, &path) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(objname, sb.linklen, &file, &path) < 0) TEST_ERROR
     if(HDstrcmp(file, filename1))
     {
 	H5_FAILED();
@@ -2628,7 +2628,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Lget_linkval(fid, "src", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Extract the file and object names from the buffer */
-    if(H5Lunpack_elink_val(query_buf, &file_name, &object_name) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.link_size, &file_name, &object_name) < 0) TEST_ERROR
 
     /* Compare the file and object names */
     if(strcmp(file_name, filename2)) TEST_ERROR
@@ -2646,11 +2646,20 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Make sure that passing in NULLs to H5Lunpack_elink_val works */
-    if(H5Lunpack_elink_val(query_buf, NULL, NULL) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.link_size, NULL, NULL) < 0) TEST_ERROR
 
     /* Make sure that bogus cases trigger errors in H5Lunpack_elink_val */
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(NULL, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(query_buf, li.u.link_size - 1, NULL, NULL) >= 0) TEST_ERROR
+    } H5E_END_TRY
+    H5E_BEGIN_TRY {
+      if(H5Lunpack_elink_val(query_buf, 0, NULL, NULL) >= 0) TEST_ERROR
+    } H5E_END_TRY
+    H5E_BEGIN_TRY {
+      if(H5Lunpack_elink_val(NULL, 0, NULL, NULL) >= 0) TEST_ERROR
+    } H5E_END_TRY
+    H5E_BEGIN_TRY {
+      if(H5Lunpack_elink_val(NULL, 1000, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
 
     PASSED();

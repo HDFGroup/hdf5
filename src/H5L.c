@@ -62,7 +62,7 @@ typedef struct {
 /* User data for path traversal routine for getting soft link value */
 typedef struct {
     size_t size;                              /* Size of user buffer */
-    char *buf;                                /* User buffer */
+    void *buf;                                /* User buffer */
 } H5L_trav_ud5_t;
 
 /* User data for path traversal routine for removing link (i.e. unlink) */
@@ -103,7 +103,7 @@ static herr_t H5L_linkval_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_linkval(H5G_loc_t *loc, const char *name, size_t size,
-    char *buf/*out*/, hid_t lapl_id, hid_t dxpl_id);
+    void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -780,7 +780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/,
+H5Lget_linkval(hid_t loc_id, const char *name, size_t size, void *buf/*out*/,
                hid_t lapl_id)
 {
     H5G_loc_t	loc;
@@ -1496,13 +1496,15 @@ H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H
         if(udata->size > 0 && udata->buf) {
             HDstrncpy(udata->buf, lnk->u.soft.name, udata->size);
             if(HDstrlen(lnk->u.soft.name) >= udata->size)
-                udata->buf[udata->size - 1] = '\0';
+                ((char *) udata->buf)[udata->size - 1] = '\0';
         } /* end if */
     }
     else if(lnk->type >= H5L_TYPE_UD_MIN)
     {
-        /* Get the link class for this type of link.  It's okay if the class isn't registered, though--we
-        * just can't give any more information about it */
+        /* Get the link class for this type of link.  It's okay if the class 
+         * isn't registered, though--we just can't give any more information
+         * about it
+         */
         link_class = H5L_find_class(lnk->type);
 
         if(link_class != NULL && link_class->query_func != NULL) {
@@ -1510,7 +1512,7 @@ H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H
               HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query callback returned failure")
         }
         else if(udata->buf && udata->size > 0)
-            udata->buf[0] = '\0';
+            ((char *)udata->buf)[0] = '\0';
     }
     else
         HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "object is not a symbolic or user-defined link")
@@ -1544,7 +1546,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_linkval(H5G_loc_t *loc, const char *name, size_t size, char *buf/*out*/, hid_t lapl_id, hid_t dxpl_id)
+H5L_linkval(H5G_loc_t *loc, const char *name, size_t size, void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_ud5_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
@@ -1919,7 +1921,6 @@ done:
             udata_out.lnk->u.soft.name = H5MM_xfree(udata_out.lnk->u.soft.name);
         else if(udata_out.lnk->type >= H5L_TYPE_UD_MIN && udata_out.lnk->u.ud.size > 0)
             udata_out.lnk->u.ud.udata = H5MM_xfree(udata_out.lnk->u.ud.udata);
- /* JAMES: the dest_cb already frees the link name.  Hmm. */
         H5MM_xfree(udata_out.lnk);
     }
 

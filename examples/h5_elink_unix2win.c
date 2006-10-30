@@ -54,7 +54,7 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
 
     printf("Converting Unix path to Windows path.\n");
 
-    if(H5Lunpack_elink_val(udata, &file_name, &obj_name) < 0)
+    if(H5Lunpack_elink_val(udata, udata_size, &file_name, &obj_name) < 0)
         goto error;
     fname_len = strlen(file_name);
 
