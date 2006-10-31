@@ -70,7 +70,7 @@ typedef enum {
 #define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT      /* Maximum value link value for "built-in" link types */
 #define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL  /* Link ids at or above this value are "user-defined" link types. */
 
-/* Metadata buffer for user query function */
+/* Buffer for user query function */
 typedef struct {
     H5T_cset_t          cset;           /* Character set of link name     */
     int64_t             corder;         /* Creation order                 */
@@ -80,7 +80,7 @@ typedef struct {
         haddr_t         address;        /* Address hard link points to    */
         size_t          link_size;      /* Size of a soft link or UD link */
     } u;
-} H5L_linkinfo_t;
+} H5L_info_t;
 
 /* The H5L_class_t struct can be used to override the behavior of a
  * "user-defined" link class. Users should populate the struct with callback
@@ -141,8 +141,8 @@ H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
 H5_DLL herr_t H5Lunlink(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_linkval(hid_t loc_id, const char *name, size_t size,
 			      void *buf/*out*/, hid_t lapl_id);
-H5_DLL herr_t H5Lget_linkinfo(hid_t loc_id, const char *name,
-                              H5L_linkinfo_t *linkbuf /*out*/, hid_t lapl_id);
+H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
+                              H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,

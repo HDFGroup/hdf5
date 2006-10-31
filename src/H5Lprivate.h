@@ -44,8 +44,8 @@
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
     H5G_loc_t *obj_loc, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL hid_t H5L_get_default_lcpl(void);
-H5_DLL herr_t H5L_get_linkinfo(const H5G_loc_t *loc, const char *name,
-    H5L_linkinfo_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name,
+    H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_init(void);
 H5_DLL herr_t H5L_register_external(void);
 

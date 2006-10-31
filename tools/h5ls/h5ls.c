@@ -1750,12 +1750,12 @@ slink_open(hid_t location, const char *name)
 static hid_t
 udlink_open(hid_t location, const char *name)
 {
-    H5L_linkinfo_t linfo;
+    H5L_info_t linfo;
     char * buf = NULL;
     char * filename = NULL;
     char * path = NULL;
 
-    if(H5Lget_linkinfo(location, name, &linfo, H5P_DEFAULT) < 0) return -1;
+    if(H5Lget_info(location, name, &linfo, H5P_DEFAULT) < 0) return -1;
 
     switch(linfo.type)
     {

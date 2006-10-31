@@ -1076,12 +1076,12 @@ hsize_t diff (hid_t file1_id,
   {
    char *buf1 = NULL;
    char *buf2 = NULL;
-   H5L_linkinfo_t li1;
-   H5L_linkinfo_t li2;
+   H5L_info_t li1;
+   H5L_info_t li2;
 
-   if (H5Lget_linkinfo (file1_id, path1, &li1, H5P_DEFAULT) < 0)
+   if(H5Lget_info(file1_id, path1, &li1, H5P_DEFAULT) < 0)
     goto out;
-   if (H5Lget_linkinfo (file1_id, path1, &li2, H5P_DEFAULT) < 0)
+   if(H5Lget_info(file1_id, path1, &li2, H5P_DEFAULT) < 0)
     goto out;
 
    /* Only external links will have a query function registered */
@@ -1128,7 +1128,7 @@ hsize_t diff (hid_t file1_id,
    else
    {
       /* If one or both of these links isn't an external link, we can only
-       * compare information from H5Lget_linkinfo since we don't have a query
+       * compare information from H5Lget_info since we don't have a query
        * function registered for them. */
 
       /* If the link classes or the buffer length are not the

@@ -12,6 +12,10 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
@@ -19,24 +23,34 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5L_init_interface
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"          /* Generic Functions                    */
-#include "H5Lpkg.h"             /* Links                                */
-#include "H5Fpkg.h"             /* File access                          */
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Gpkg.h"             /* Groups                               */
+#include "H5Fpkg.h"             /* File access                          */
 #include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* File objects                         */
-#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Gpkg.h"             /* Groups                               */
 
-/* Local typedefs */
-#define H5L_MOVE_OP 1
-#define H5L_RENAME_OP 2
+/****************/
+/* Local Macros */
+/****************/
+
+#define H5L_MIN_TABLE_SIZE 32 /* Minimum size of the user-defined link type table if it is allocated */
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for path traversal routine for getting link metadata */
 typedef struct {
-    H5L_linkinfo_t  *linfo;                  /* Buffer to return to user */
+    H5L_info_t      *linfo;                  /* Buffer to return to user */
     hid_t           dxpl_id;                 /* dxpl to use in callback */
 } H5L_trav_ud1_t;
 
@@ -47,7 +61,7 @@ typedef struct {
     hid_t lcpl_id;                            /* Link creation property list */
     H5G_name_t *path;                         /* Path to object being linked */
     H5O_link_t *lnk;                          /* Pointer to link information to insert */
-} H5L_trav_ud3_t;
+} H5L_trav_ud2_t;
 
 /* User data for path traversal routine for moving and renaming a link */
 typedef struct {
@@ -57,23 +71,18 @@ typedef struct {
     hbool_t copy;                             /* TRUE if this is a copy operation */
     hid_t lapl_id;                            /* lapl to use in callback */
     hid_t dxpl_id;                            /* dxpl to use in callback */
-} H5L_trav_ud4_t;
+} H5L_trav_ud3_t;
 
 /* User data for path traversal routine for getting soft link value */
 typedef struct {
     size_t size;                              /* Size of user buffer */
     void *buf;                                /* User buffer */
-} H5L_trav_ud5_t;
+} H5L_trav_ud4_t;
 
 /* User data for path traversal routine for removing link (i.e. unlink) */
 typedef struct {
     hid_t dxpl_id;                            /* Dataset transfer property list */
-} H5L_trav_ud6_t;
-
-/* User data for path traversal routine for retrieving link creation property list */
-typedef struct {
-    H5P_genplist_t *lcpl;                     /* Copy of default property list to be set */
-} H5L_trav_ud8_t;
+} H5L_trav_ud5_t;
 
 /* User data for path traversal routine for moving and renaming an object */
 typedef struct {
@@ -81,13 +90,12 @@ typedef struct {
     H5O_link_t *lnk;                          /* Pointer to link information to insert */
     hbool_t copy;                             /* TRUE if this is a copy operation */
     hid_t dxpl_id;                            /* Dataset transfer property list */
-} H5L_trav_ud10_t;
+} H5L_trav_ud6_t;
 
-/* Package variables */
+/********************/
+/* Local Prototypes */
+/********************/
 
-/* Local variables */
-
-/* Private prototypes */
 static herr_t H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -118,21 +126,29 @@ static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+static herr_t H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static int H5L_find_class_idx(H5L_type_t id);
 
-
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Information about user-defined links */
 static size_t           H5L_table_alloc_g = 0;
 static size_t           H5L_table_used_g = 0;
 static H5L_class_t      *H5L_table_g = NULL;
-
-
-
-#define H5L_MIN_TABLE_SIZE 32 /* Minimum size of the user-defined link type table if it is allocated */
-
 
 
 /*-------------------------------------------------------------------------
@@ -805,7 +821,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_linkinfo
+ * Function:	H5Lget_info
  *
  * Purpose:	Gets metadata for a link.
  *
@@ -819,12 +835,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_linkinfo(hid_t loc_id, const char *name, H5L_linkinfo_t *linkbuf /*out*/,
+H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linkbuf /*out*/,
     hid_t lapl_id)
 {
     H5G_loc_t	loc;
     herr_t ret_value = SUCCEED;
-    FUNC_ENTER_API(H5Lget_linkinfo, FAIL)
+
+    FUNC_ENTER_API(H5Lget_info, FAIL)
     H5TRACE4("e","isxi",loc_id,name,linkbuf,lapl_id);
 
     /* Check arguments */
@@ -834,7 +851,7 @@ H5Lget_linkinfo(hid_t loc_id, const char *name, H5L_linkinfo_t *linkbuf /*out*/,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Get the creation time */
-    if(H5L_get_linkinfo(&loc, name, linkbuf, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5L_get_info(&loc, name, linkbuf, lapl_id, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
@@ -1086,8 +1103,8 @@ static herr_t
 H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
-    H5L_trav_ud3_t *udata = (H5L_trav_ud3_t *)_udata;   /* User data passed in */
-    H5G_t *grp=NULL;                /* H5G_t for this group, opened to pass to user callback */
+    H5L_trav_ud2_t *udata = (H5L_trav_ud2_t *)_udata;   /* User data passed in */
+    H5G_t *grp = NULL;              /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;            /* Id for this group (passed to user callback */
     H5G_loc_t temp_loc;             /* For UD callback */
     hbool_t temp_loc_init = FALSE;
@@ -1151,10 +1168,11 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
             if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
 
+            /* Make callback */
             if((link_class->create_func)(name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size, H5P_DEFAULT) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "link creation callback failed")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
 done:
     /* Close the location given to the user callback if it was created */
@@ -1206,7 +1224,7 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
     unsigned target_flags = H5G_TARGET_NORMAL; /* Flags to pass to group traversal function */
     H5T_cset_t char_encoding = H5F_CRT_DEFAULT_CSET; /* Character encoding for link */
     H5P_genplist_t* lc_plist;           /* Link creation property list */
-    H5L_trav_ud3_t udata;               /* User data for callback */
+    H5L_trav_ud2_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_create_real)
@@ -1480,7 +1498,7 @@ static herr_t
 H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
     H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
-    H5L_trav_ud5_t *udata = (H5L_trav_ud5_t *)_udata;   /* User data passed in */
+    H5L_trav_ud4_t *udata = (H5L_trav_ud4_t *)_udata;   /* User data passed in */
     const H5L_class_t *link_class;             /* User-defined link class */
     herr_t ret_value = SUCCEED;               /* Return value */
 
@@ -1548,7 +1566,7 @@ done:
 static herr_t
 H5L_linkval(H5G_loc_t *loc, const char *name, size_t size, void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5L_trav_ud5_t udata;           /* User data for callback */
+    H5L_trav_ud4_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_linkval)
@@ -1585,7 +1603,7 @@ H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSE
 {
     H5G_t *grp=NULL;                /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;            /* Id for this group (passed to user callback */
-    H5L_trav_ud6_t *udata = (H5L_trav_ud6_t *)_udata;   /* User data passed in */
+    H5L_trav_ud5_t *udata = (H5L_trav_ud5_t *)_udata;   /* User data passed in */
     H5G_loc_t           temp_loc;   /* For UD callback */
     hbool_t             temp_loc_init = FALSE;
     herr_t ret_value = SUCCEED;
@@ -1670,7 +1688,7 @@ done:
 static herr_t
 H5L_unlink(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5L_trav_ud6_t      udata;                  /* User data for callback */
+    H5L_trav_ud5_t      udata;                  /* User data for callback */
     char		*norm_name = NULL;	/* Pointer to normalized name */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -1718,7 +1736,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
-    H5L_trav_ud10_t *udata = (H5L_trav_ud10_t *)_udata;   /* User data passed in */
+    H5L_trav_ud6_t *udata = (H5L_trav_ud6_t *)_udata;   /* User data passed in */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     H5G_t *grp=NULL;                    /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;                /* Id for this group (passed to user callback */
@@ -1835,13 +1853,13 @@ static herr_t
 H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
-    H5L_trav_ud4_t *udata = (H5L_trav_ud4_t *)_udata;   /* User data passed in */
-    H5L_trav_ud10_t udata_out;    /* User data for H5L_move_dest_cb traversal */
-    H5G_obj_t type;               /* Type of object being moved */
+    H5L_trav_ud3_t *udata = (H5L_trav_ud3_t *)_udata;   /* User data passed in */
+    H5L_trav_ud6_t udata_out;           /* User data for H5L_move_dest_cb traversal */
+    H5G_obj_t type;                     /* Type of object being moved */
     H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     char * orig_name = NULL;            /* The name of the link in this group */
     hbool_t link_copied = FALSE;        /* Has udata_out.lnk been allocated? */
-    herr_t ret_value = SUCCEED;              /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_move_cb)
 
@@ -1961,7 +1979,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     H5T_cset_t char_encoding = H5F_CRT_DEFAULT_CSET; /* Character encoding for link */
     H5P_genplist_t* lc_plist;           /* Link creation property list */
     H5P_genplist_t* la_plist;           /* Link access property list */
-    H5L_trav_ud4_t      udata;          /* User data for traversal */
+    H5L_trav_ud3_t      udata;          /* User data for traversal */
     hid_t               lapl_copy;      /* Copy of lapl for this function */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
@@ -2025,7 +2043,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_linfo_cb
+ * Function:	H5L_get_info_cb
  *
  * Purpose:	Callback for retrieving a link's metadata
  *
@@ -2037,16 +2055,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_linfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
+H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
     H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud1_t *udata = (H5L_trav_ud1_t *)_udata;   /* User data passed in */
-    H5L_linkinfo_t *linfo = udata->linfo;
+    H5L_info_t *linfo = udata->linfo;
     const H5L_class_t *link_class;       /* User-defined link class */
     ssize_t cb_ret;          /* Return value from UD callback */
     herr_t ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_linfo_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_cb)
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL)
@@ -2099,11 +2117,11 @@ done:
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_get_linfo_cb() */
+} /* end H5L_get_info_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_linkinfo
+ * Function:	H5L_get_info
  *
  * Purpose:	Returns metadata about a link.
  *
@@ -2115,23 +2133,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_get_linkinfo(const H5G_loc_t *loc, const char *name, H5L_linkinfo_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id)
+H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_ud1_t udata;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_linkinfo)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info)
 
     udata.linfo = linkbuf;
     udata.dxpl_id = dxpl_id;
 
     /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_linfo_cb, &udata, lapl_id, dxpl_id) < 0)
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5L_get_linkinfo() */
+} /* H5L_get_info() */
 
 
 /*-------------------------------------------------------------------------

@@ -812,7 +812,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     hid_t dset_id=-1;
     hid_t type_id=-1;
     hid_t lcpl_id=-1;
-    H5L_linkinfo_t linfo;
+    H5L_info_t linfo;
     char filename[1024];
     hsize_t dims[2];
 
@@ -835,7 +835,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
-    if(H5Lget_linkinfo(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
 
     /* Create and commit a datatype with the default LCPL */
@@ -845,7 +845,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Tclose(type_id) < 0) TEST_ERROR;    
 
     /* Check that its character encoding is the default */
-    if(H5Lget_linkinfo(file_id, "type", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "type", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
 
     /* Create a dataspace */
@@ -859,7 +859,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
-    if(H5Lget_linkinfo(file_id, "dataset", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "dataset", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
 
     /* Create a link creation property list with the UTF-8 character encoding */
@@ -872,7 +872,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
-    if(H5Lget_linkinfo(file_id, "group2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create and commit a datatype with the new LCPL */
@@ -882,7 +882,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Tclose(type_id) < 0) TEST_ERROR;    
 
     /* Check that its character encoding is UTF-8 */
-    if(H5Lget_linkinfo(file_id, "type2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "type2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create a dataset using the new LCPL */
@@ -891,7 +891,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
-    if(H5Lget_linkinfo(file_id, "dataset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "dataset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create a new link to the dataset with a different character encoding. */
@@ -902,35 +902,35 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_hard(file_id, "/dataset2", file_id, "/dataset2_link", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Check that its character encoding is ASCII */
-    if(H5Lget_linkinfo(file_id, "/dataset2_link", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "/dataset2_link", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_ASCII) TEST_ERROR
 
     /* Check that the first link's encoding hasn't changed */
-    if(H5Lget_linkinfo(file_id, "/dataset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "/dataset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Make sure that LCPLs work properly for other API calls: */
     /* H5Lcreate_soft */
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) < 0) TEST_ERROR
     if(H5Lcreate_soft("dataset2", file_id, "slink_to_dset2", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "slink_to_dset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "slink_to_dset2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* H5Lmove */
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_ASCII) < 0) TEST_ERROR
     if(H5Lmove(file_id, "slink_to_dset2", file_id, "moved_slink", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "moved_slink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "moved_slink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_ASCII) TEST_ERROR
 
     /* H5Lcopy */
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) < 0) TEST_ERROR
     if(H5Lcopy(file_id, "moved_slink", file_id, "copied_slink", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "copied_slink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "copied_slink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* H5Lcreate_external */
     if(H5Lcreate_external("filename", "path", file_id, "extlink", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "extlink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "extlink", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Close open IDs */
@@ -1278,7 +1278,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     hid_t lcpl_id=-1;
     hid_t lcpl2_id=-1;
     H5G_stat_t statbuf;
-    H5L_linkinfo_t linfo;
+    H5L_info_t linfo;
     H5T_cset_t old_cset;
     int64_t old_corder;         /* Creation order value of link */
     time_t old_modification_time;
@@ -1316,7 +1316,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Get the group's link's information */
-    if(H5Lget_linkinfo(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group", TRUE, &statbuf) < 0) TEST_ERROR
     old_cset = linfo.cset;
     if(old_cset != H5T_CSET_UTF8) TEST_ERROR
@@ -1335,7 +1335,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
 
     /* Get the link's character set & modification time .  They should be unchanged */
-    if(H5Lget_linkinfo(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
     if(old_cset != linfo.cset) TEST_ERROR
@@ -1346,7 +1346,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Lcreate_hard(file_id, "group", file_id, "group2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group2", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(old_corder == linfo.corder) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(linfo.corder != 1) TEST_ERROR
@@ -1359,7 +1359,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Lcopy(file_id, "group", file_id, "group_copied", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group_copied", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group_copied", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group_copied", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(linfo.corder != 2) TEST_ERROR
 
@@ -1370,7 +1370,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Lmove(file_id, "group_copied", file_id, "group_copied2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group_copied2", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group_copied2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group_copied2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(linfo.corder != 3) TEST_ERROR
 
@@ -1380,7 +1380,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     /* Check that the original link is unchanged */
     if(H5Gget_objinfo(file_id, "group", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(old_corder != linfo.corder) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
@@ -1391,7 +1391,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Lmove(file_id, "group", file_id, "group_moved", lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group_moved", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group_moved", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group_moved", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(linfo.corder != 4) TEST_ERROR
 
@@ -1402,7 +1402,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Lmove(file_id, "group_moved", file_id, "group_moved_again", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(file_id, "group_moved_again", TRUE, &statbuf) < 0) TEST_ERROR
     if(old_modification_time != statbuf.mtime) TEST_ERROR
-    if(H5Lget_linkinfo(file_id, "group_moved_again", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(file_id, "group_moved_again", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder_valid != TRUE) TEST_ERROR
     if(linfo.corder != 5) TEST_ERROR
 
@@ -2569,7 +2569,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     char       *file_name;                      /* Name of the file the external link points to */
     char       *object_name;                    /* Name of the object the external link points to */
     H5G_stat_t	sb;                             /* Object information */
-    H5L_linkinfo_t li;                          /* Link information */
+    H5L_info_t li;                          /* Link information */
     char	filename1[NAME_BUF_SIZE],
     		filename2[NAME_BUF_SIZE],       /* Names of files to externally link across */
                 query_buf[NAME_BUF_SIZE];       /* Buffer to hold query result */
@@ -2590,7 +2590,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_external(filename2, "/dst", fid, "src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Get size of buffer for external link */
-    if(H5Lget_linkinfo(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
@@ -2616,7 +2616,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if((fid=H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Get size of buffer for external link */
-    if(H5Lget_linkinfo(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
@@ -3311,7 +3311,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     		filename3[NAME_BUF_SIZE],
     		filename4[NAME_BUF_SIZE],       /* Names of files to externally link across */
     		buf[NAME_BUF_SIZE];             /* misc. buffer */
-    H5L_linkinfo_t li;
+    H5L_info_t li;
     H5G_stat_t  sb;
     hobj_ref_t  obj_ref;
 
@@ -3367,8 +3367,8 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Test that getting info works */
-    if(H5Lget_linkinfo(fid1, "elink/elink/elink/type1", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(fid1, "elink/elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid1, "elink/elink/elink/type1", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid1, "elink/elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gget_objinfo(fid1, "elink/elink/elink/type1", TRUE, &sb) < 0) TEST_ERROR 
     if(H5Gget_objinfo(fid1, "elink/elink/elink", TRUE, &sb) < 0) TEST_ERROR 
     if(H5Gget_objinfo(fid1, "elink/elink/elink", FALSE, &sb) < 0) TEST_ERROR 
@@ -3469,13 +3469,13 @@ external_link_closing(hid_t fapl, hbool_t new_format)
      */
     if((gid = H5Gcreate(fid1, "elink/file2group1/file2group2/slink/group3", (size_t)0)) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(fid1, "elink/file2group1/file2group2/slink/group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid1, "elink/file2group1/file2group2/slink/group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Some simpler tests */
     if((gid = H5Gcreate(fid1, "elink/file2group3", (size_t)0)) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(fid1, "elink/file2group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(fid1, "elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid1, "elink/file2group3", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid1, "elink/elink", &li, H5P_DEFAULT) < 0) TEST_ERROR
 
 
     /* Close file1, the only file that should still be open */
@@ -3766,7 +3766,7 @@ ud_hard_links(hid_t fapl)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
-    H5L_linkinfo_t li;                          /* Link information */
+    H5L_info_t li;                          /* Link information */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     ssize_t     name_len;                       /* Length of object name */
     h5_stat_size_t empty_size;                  /* Size of an empty file */
@@ -3800,13 +3800,13 @@ ud_hard_links(hid_t fapl)
     if((gid = H5Gcreate(fid, "group", (size_t)0)) < 0) TEST_ERROR
 
     /* Get address for the group to give to the hard link */
-    if(H5Lget_linkinfo(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
 
     if(H5Gclose(gid) < 0) TEST_ERROR
 
 
     /* Create a user-defined "hard link" to the group using the address we got
-     * from H5Lget_linkinfo */
+     * from H5Lget_info */
     if(H5Lcreate_ud(fid, "ud_link", UD_HARD_TYPE, &(li.u.address), sizeof(haddr_t), H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Close and re-open file to ensure that data is written to disk */
@@ -3838,7 +3838,7 @@ ud_hard_links(hid_t fapl)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Check that H5Lget_objinfo works on the hard link */
-    if(H5Lget_linkinfo(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     /* UD hard links have no query function, thus return a "link length" of 0 */
     if(li.u.link_size != 0) TEST_ERROR
     if(UD_HARD_TYPE != li.type) {
@@ -3932,7 +3932,7 @@ ud_link_reregister(hid_t fapl)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
-    H5L_linkinfo_t	li;                     /* Link information */
+    H5L_info_t	li;                     /* Link information */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     ssize_t     name_len;                       /* Length of object name */
     char	filename[NAME_BUF_SIZE];
@@ -3962,7 +3962,7 @@ ud_link_reregister(hid_t fapl)
 
     /* Point a UD defined hard link to a group in the same way as the previous test */
     if((gid = H5Gcreate(fid, "group", (size_t)0)) < 0) TEST_ERROR
-    if (H5Lget_linkinfo(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if (H5Lget_info(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     if(H5Lcreate_ud(fid, "ud_link", UD_HARD_TYPE, &(li.u.address),
@@ -4204,7 +4204,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     hid_t	gid = (-1);	                /* Group ID */
     hid_t       lcpl = (-1);                   /* Link Creation PL */
     H5G_stat_t sb;                 /* Object information */
-    H5L_linkinfo_t li;                /* Link information */
+    H5L_info_t li;                /* Link information */
     char        ud_target_name[] = UD_CB_TARGET; /* Link target name */
     char	filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
@@ -4250,7 +4250,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Query the link to test its query callback */
-    if (H5Lget_linkinfo(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if (H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != 16) TEST_ERROR
     if (UD_CB_TYPE != li.type) {
 	H5_FAILED();
@@ -4283,7 +4283,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     if(H5Pclose(lcpl) < 0) TEST_ERROR
 
     /* Check its character encoding */
-    if(H5Lget_linkinfo(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Unregister the link class so the library forgets what its callbacks do */
@@ -4299,7 +4299,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY
 
     /* The query callback should NOT fail, but should be unable to give a linklen */
-    if(H5Lget_linkinfo(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != 0) TEST_ERROR
     if(li.type != UD_CB_TYPE) TEST_ERROR
     if(H5Gget_objinfo(fid, UD_CB_LINK_NAME, FALSE, &sb) < 0) TEST_ERROR
@@ -4677,7 +4677,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     char	group_name[NAME_BUF_SIZE];
     char	filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
-    H5L_linkinfo_t li;                         /* Link information */
+    H5L_info_t li;                         /* Link information */
 
     if(new_format)
         TESTING("user-defined link error conditions (w/new group format)")
@@ -4727,7 +4727,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
         /* The deletion callback will always fail */
         if(H5Gunlink(fid, "ud_link") >= 0) TEST_ERROR
         /* The query callback will fail */
-        if(H5Lget_linkinfo(fid, "ud_link", &li, H5P_DEFAULT) >=0) TEST_ERROR
+        if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) >=0) TEST_ERROR
     } H5E_END_TRY
 
     /* Now use a class with different callback functions */
@@ -4740,7 +4740,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     if(H5Lcopy(fid, "ud_link", fid, "copy_succ", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* The query callback will succeed when we only want to get the size of the buffer... */
-    if(H5Lget_linkinfo(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != 0) TEST_ERROR
     /* ...but fail when we try to write data to the buffer itself*/
     H5E_BEGIN_TRY {
@@ -4751,7 +4751,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     if(H5Lregister(UD_cbfail_class3) < 0) TEST_ERROR
 
     /* Now querying should succeed */
-    if(H5Lget_linkinfo(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != 8) TEST_ERROR
     if(H5Lget_linkval(fid, "ud_link", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(query_buf, "succeed") != 0) TEST_ERROR
@@ -4926,9 +4926,9 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     /* H5Lunlink */
     if(H5Lunlink(fid, "soft17/soft_link", plist) < 0) TEST_ERROR
 
-    /* H5Lget_linkval and H5Lget_linkinfo */
+    /* H5Lget_linkval and H5Lget_info */
     if(H5Lget_linkval(fid, "soft17", (size_t)0, NULL, plist) < 0) TEST_ERROR
-    if(H5Lget_linkinfo(fid, "soft17", NULL, plist) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "soft17", NULL, plist) < 0) TEST_ERROR
 
     /* H5Lcreate_external and H5Lcreate_ud */
     if(H5Lcreate_external("filename", "path", fid, "soft17/extlink", H5P_DEFAULT, plist) < 0) TEST_ERROR
@@ -5045,7 +5045,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     hid_t	gid = (-1);	                /* Group ID */
     hid_t       tid = (-1);                     /* Type ID */
     hid_t       sid = (-1), did = -(1);         /* Dataspace and dataset IDs */
-    H5L_linkinfo_t li;                          /* Link information */
+    H5L_info_t li;                          /* Link information */
     char	filename[NAME_BUF_SIZE];
 
     if(new_format)
@@ -5079,22 +5079,22 @@ linkinfo(hid_t fapl, hbool_t new_format)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Make sure that link type is correct when objects are queried */
-    if(H5Lget_linkinfo(fid, "datatype", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "datatype", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5L_TYPE_HARD) TEST_ERROR
-    if(H5Lget_linkinfo(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "group", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5L_TYPE_HARD) TEST_ERROR
-    if(H5Lget_linkinfo(fid, "dataset", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "dataset", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5L_TYPE_HARD) TEST_ERROR
 
-    if(H5Lget_linkinfo(fid, "ext_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ext_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5L_TYPE_EXTERNAL) TEST_ERROR
-    if(H5Lget_linkinfo(fid, "softlink", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "softlink", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5G_LINK_SOFT) TEST_ERROR
-    if(H5Lget_linkinfo(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != UD_PLIST_TYPE) TEST_ERROR
 
     /* Ensure that passing a NULL pointer doesn't cause an error */
-    if(H5Lget_linkinfo(fid, "group", NULL, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "group", NULL, H5P_DEFAULT) < 0) TEST_ERROR
 
     if(H5Fclose(fid) < 0) TEST_ERROR
 
@@ -5373,11 +5373,11 @@ corder_create_compact(hid_t fapl)
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
     for(u = 0; u < max_compact; u++) {
-        H5L_linkinfo_t linfo;           /* Link information */
+        H5L_info_t linfo;           /* Link information */
 
         /* Retrieve information for link */
         sprintf(objname, "filler %u", u);
-        if(H5Lget_linkinfo(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_info(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify creation order of link */
         if(linfo.corder_valid != TRUE) TEST_ERROR
@@ -5509,11 +5509,11 @@ corder_create_dense(hid_t fapl)
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
     for(u = 0; u < (max_compact + 1); u++) {
-        H5L_linkinfo_t linfo;           /* Link information */
+        H5L_info_t linfo;           /* Link information */
 
         /* Retrieve information for link */
         sprintf(objname, "filler %u", u);
-        if(H5Lget_linkinfo(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_info(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify creation order of link */
         if(linfo.corder_valid != TRUE) TEST_ERROR

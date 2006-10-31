@@ -242,7 +242,7 @@ test_h5o_open_by_addr(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5L_linkinfo_t li;                      /* Buffer for H5Lget_linkinfo */
+    H5L_info_t li;                      /* Buffer for H5Lget_info */
     haddr_t grp_addr;                       /* Addresses for objects */
     haddr_t dset_addr;
     haddr_t dtype_addr;
@@ -286,14 +286,14 @@ test_h5o_open_by_addr(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Get address for each object */
-    ret = H5Lget_linkinfo(fid, "group", &li, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Lget_linkinfo");
+    ret = H5Lget_info(fid, "group", &li, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_info");
     grp_addr = li.u.address;
-    ret = H5Lget_linkinfo(fid, "group/datatype", &li, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Lget_linkinfo");
+    ret = H5Lget_info(fid, "group/datatype", &li, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_info");
     dtype_addr = li.u.address;
-    ret = H5Lget_linkinfo(fid, "dataset", &li, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Lget_linkinfo");
+    ret = H5Lget_info(fid, "dataset", &li, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_info");
     dset_addr = li.u.address;
 
     /* Now make sure that H5Oopen_by_addr can open all three types of objects */

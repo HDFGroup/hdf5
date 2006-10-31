@@ -1100,8 +1100,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
         H5G_obj_t objtype2;                     /* Type of object in group */
         H5G_stat_t objstat;                     /* Object info */
         H5G_stat_t objstat2;                    /* Object info */
-        H5L_linkinfo_t linfo;                   /* Link information */
-        H5L_linkinfo_t linfo2;                  /* Link information */
+        H5L_info_t linfo;                   /* Link information */
+        H5L_info_t linfo2;                  /* Link information */
         hid_t oid, oid2;                        /* IDs of objects within group */
 
         /* Loop over contents of groups */
@@ -1127,8 +1127,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
             } /* end if */
 
             /* Get link info */
-            if(H5Lget_linkinfo(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-            if(H5Lget_linkinfo(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Check for object already having been compared */
             if(addr_lookup(&objstat))

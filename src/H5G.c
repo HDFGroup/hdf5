@@ -1935,7 +1935,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
         if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
 
-        /* Info for soft and UD links is gotten by H5L_get_linkinfo. If we have
+        /* Info for soft and UD links is gotten by H5L_get_info. If we have
          *      a hard link, follow it and get info on the object
          */
         if(udata->follow_link || !lnk || (lnk->type == H5L_TYPE_HARD)) {
@@ -2024,29 +2024,27 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     /* If we're pointing at a soft or UD link, get the real link length and type */
     if(statbuf && follow_link == 0)
     {
-        H5L_linkinfo_t linfo;           /* Link information buffer */
+        H5L_info_t linfo;           /* Link information buffer */
         herr_t ret;
 
         /* Get information about link to the object. If this fails, e.g.
          * because the object is ".", just treat the object as a hard link. */
         H5E_BEGIN_TRY {
-            ret = H5L_get_linkinfo(loc, name, &linfo, H5P_DEFAULT, dxpl_id);
+            ret = H5L_get_info(loc, name, &linfo, H5P_DEFAULT, dxpl_id);
         } H5E_END_TRY
 
         if(ret >=0 && linfo.type != H5L_TYPE_HARD)
         {
             statbuf->linklen = linfo.u.link_size;
             if(linfo.type == H5L_TYPE_SOFT)
-            {
                 statbuf->type = H5G_LINK;
-            }
-            else  /* UD link. H5L_get_linkinfo checked for invalid link classes */
+            else  /* UD link. H5L_get_info checked for invalid link classes */
             {
                 HDassert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
                 statbuf->type = H5G_UDLINK;
             }
-        }
-    }
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

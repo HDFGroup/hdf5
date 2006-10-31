@@ -1414,7 +1414,7 @@ dump_all(hid_t group, const char *name, void * op_data)
     hid_t       obj;
     char       *obj_path = NULL;        /* Full path of object */
     H5G_stat_t  statbuf;
-    H5L_linkinfo_t linfo;              /* Link information */
+    H5L_info_t linfo;              /* Link information */
     herr_t      ret = SUCCEED;
 
     /* Stat the object */
@@ -1424,7 +1424,7 @@ dump_all(hid_t group, const char *name, void * op_data)
         ret = FAIL;
         goto done;
     } /* end if */
-    if(H5Lget_linkinfo(group, name, &linfo, H5P_DEFAULT) < 0) {
+    if(H5Lget_info(group, name, &linfo, H5P_DEFAULT) < 0) {
         error_msg(progname, "unable to get object information\n");
         d_status = EXIT_FAILURE;
         ret = FAIL;
@@ -3210,24 +3210,24 @@ static void
 handle_links(hid_t fid, char *links, void UNUSED * data)
 {
     H5G_stat_t  statbuf;
-    H5L_linkinfo_t linfo;
+    H5L_info_t linfo;
     char * elink_file;
     char * elink_path;
 
-    if (H5Gget_objinfo(fid, links, FALSE, &statbuf) < 0) {
+    if(H5Gget_objinfo(fid, links, FALSE, &statbuf) < 0) {
         error_msg(progname, "unable to get obj info from \"%s\"\n", links);
         d_status = EXIT_FAILURE;
-    } else if (H5Lget_linkinfo(fid, links, &linfo, H5P_DEFAULT) < 0) {
+    } else if(H5Lget_info(fid, links, &linfo, H5P_DEFAULT) < 0) {
         error_msg(progname, "unable to get link info from \"%s\"\n", links);
         d_status = EXIT_FAILURE;
-    } else if (statbuf.type == H5G_LINK) {    /* Soft link */
+    } else if(statbuf.type == H5G_LINK) {    /* Soft link */
         char *buf = HDmalloc(statbuf.linklen);
 
         begin_obj(dump_header_format->softlinkbegin, links,
                   dump_header_format->softlinkblockbegin);
         indentation(COL);
 
-        if (H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
+        if(H5Lget_linkval(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
             printf("LINKTARGET \"%s\"\n", buf);
         } else {
             error_msg(progname, "h5dump error: unable to get link value for \"%s\"\n",
@@ -3238,7 +3238,7 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
         end_obj(dump_header_format->softlinkend,
                 dump_header_format->softlinkblockend);
         HDfree(buf);
-    } else if (statbuf.type == H5G_UDLINK) {    /* User-defined link */
+    } else if(statbuf.type == H5G_UDLINK) {    /* User-defined link */
         char *buf = HDmalloc(statbuf.linklen);
         begin_obj(dump_header_format->udlinkbegin, links,
                   dump_header_format->udlinkblockbegin);

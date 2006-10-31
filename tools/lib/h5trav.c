@@ -496,7 +496,7 @@ static int traverse( hid_t loc_id,
 
   case H5G_UDLINK:
   {
-    H5L_linkinfo_t linkbuf;
+    H5L_info_t linkbuf;
 
     /* increment */
     inserted_objs++;
@@ -506,9 +506,8 @@ static int traverse( hid_t loc_id,
 
     /* Get type of link */
     H5E_BEGIN_TRY {
-
-    /* get link class info */
-    H5Lget_linkinfo( loc_id, path, &linkbuf, H5P_DEFAULT);
+        /* get link class info */
+        H5Lget_info( loc_id, path, &linkbuf, H5P_DEFAULT);
     } H5E_END_TRY;
 
     if(linkbuf.type == H5L_TYPE_EXTERNAL)
