@@ -1070,8 +1070,8 @@ check_and_validate_cache_hit_rate(hid_t file_id,
 {
     /* const char * fcn_name = "check_and_validate_cache_hit_rate()"; */
     herr_t result;
-    int64_t cache_hits;
-    int64_t cache_accesses;
+    int64_t cache_hits = 0;
+    int64_t cache_accesses = 0;
     double expected_hit_rate;
     double hit_rate;
     H5F_t * file_ptr = NULL;
@@ -2113,7 +2113,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
   {
     /* 1 -- bad rpt_fcn_enabled */
     /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-    /* hbool_t     rpt_fcn_enabled        = */ -1,
+    /* hbool_t     rpt_fcn_enabled        = */ (hbool_t)-1,
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
@@ -2142,7 +2142,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* 2 -- bad open_trace_file */
     /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-    /* hbool_t     open_trace_file        = */ -1,
+    /* hbool_t     open_trace_file        = */ (hbool_t)-1,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
     /* hbool_t     set_initial_size       = */ TRUE,
@@ -2171,7 +2171,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
-    /* hbool_t     close_trace_file       = */ -1,
+    /* hbool_t     close_trace_file       = */ (hbool_t)-1,
     /* char        trace_file_name[]      = */ "",
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
@@ -2630,7 +2630,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
-    /* hbool_t     apply_max_increment    = */ -1,
+    /* hbool_t     apply_max_increment    = */ (hbool_t)-1,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
     /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,

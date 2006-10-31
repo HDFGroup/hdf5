@@ -491,7 +491,6 @@ error:
 static int
 test_compound_1(void)
 {
-    complex_t           tmp;
     hid_t               complex_id;
     hid_t               super;
     size_t              size;
@@ -507,7 +506,7 @@ test_compound_1(void)
     TESTING("compound data types");
 
     /* Create the empty type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp))<0) goto error;
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t)))<0) goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
     H5E_BEGIN_TRY {

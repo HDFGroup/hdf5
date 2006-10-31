@@ -548,7 +548,7 @@ HDfprintf(stderr, "%s: Load free space sections, addr = %a\n", FUNC, addr);
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect address for free space sections")
 
     /* Allocate space for the buffer to serialize the sections into */
-    old_sect_size = fspace->sect_size;
+    H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->sect_size = %Hu\n", FUNC, fspace->sect_size);
 #endif /* QAK */
@@ -1121,7 +1121,7 @@ H5FS_cache_sinfo_size(const H5F_t UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = sinfo->fspace->sect_size;
+    H5_ASSIGN_OVERFLOW(/* To: */ *size_ptr, /* From: */ sinfo->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_cache_sinfo_size() */

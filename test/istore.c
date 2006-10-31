@@ -254,7 +254,7 @@ test_extend(hid_t f, const char *prefix,
     TESTING(s);
     buf = HDmalloc(nx * ny * nz);
     check = HDmalloc(nx * ny * nz);
-    whole = HDcalloc(1,nx*ny*nz);
+    whole = HDcalloc((size_t)1, nx * ny * nz);
 
     whole_size[0] = nx;
     whole_size[1] = ny;
@@ -612,7 +612,7 @@ main(int argc, char *argv[])
 
 	/* Use larger file addresses... */
 	fcpl = H5Pcreate(H5P_FILE_CREATE);
-	H5Pset_sizes(fcpl, 8, 0);
+	H5Pset_sizes(fcpl, (size_t)8, (size_t)0);
 
 	/* Create the test file */
 	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -649,39 +649,39 @@ main(int argc, char *argv[])
 	nerrors += status < 0 ? 1 : 0;
 
 	if (size_of_test & TEST_SMALL) {
-	    status = test_extend(file, "extend", 10, 0, 0);
+	    status = test_extend(file, "extend", (size_t)10, (size_t)0, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_extend(file, "extend", 10, 10, 0);
+	    status = test_extend(file, "extend", (size_t)10, (size_t)10, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_extend(file, "extend", 10, 10, 10);
+	    status = test_extend(file, "extend", (size_t)10, (size_t)10, (size_t)10);
 	    nerrors += status < 0 ? 1 : 0;
 	}
 	if (size_of_test & TEST_MEDIUM) {
-	    status = test_extend(file, "extend", 10000, 0, 0);
+	    status = test_extend(file, "extend", (size_t)10000, (size_t)0, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_extend(file, "extend", 2500, 10, 0);
+	    status = test_extend(file, "extend", (size_t)2500, (size_t)10, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_extend(file, "extend", 10, 400, 10);
+	    status = test_extend(file, "extend", (size_t)10, (size_t)400, (size_t)10);
 	    nerrors += status < 0 ? 1 : 0;
 	}
 	if (size_of_test & TEST_SMALL) {
-	    status = test_sparse(file, "sparse", 100, 5, 0, 0);
+	    status = test_sparse(file, "sparse", (size_t)100, (size_t)5, (size_t)0, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_sparse(file, "sparse", 100, 3, 4, 0);
+	    status = test_sparse(file, "sparse", (size_t)100, (size_t)3, (size_t)4, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_sparse(file, "sparse", 100, 2, 3, 4);
+	    status = test_sparse(file, "sparse", (size_t)100, (size_t)2, (size_t)3, (size_t)4);
 	    nerrors += status < 0 ? 1 : 0;
 	}
 	if (size_of_test & TEST_MEDIUM) {
-	    status = test_sparse(file, "sparse", 1000, 30, 0, 0);
+	    status = test_sparse(file, "sparse", (size_t)1000, (size_t)30, (size_t)0, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_sparse(file, "sparse", 2000, 7, 3, 0);
+	    status = test_sparse(file, "sparse", (size_t)2000, (size_t)7, (size_t)3, (size_t)0);
 	    nerrors += status < 0 ? 1 : 0;
-	    status = test_sparse(file, "sparse", 2000, 4, 2, 3);
+	    status = test_sparse(file, "sparse", (size_t)2000, (size_t)4, (size_t)2, (size_t)3);
 	    nerrors += status < 0 ? 1 : 0;
 	}
 	if (size_of_test & TEST_LARGE) {
-	    status = test_sparse(file, "sparse", 800, 50, 50, 50);
+	    status = test_sparse(file, "sparse", (size_t)800, (size_t)50, (size_t)50, (size_t)50);
 	    nerrors += status < 0 ? 1 : 0;
 	}
 

@@ -84,7 +84,7 @@ main(void)
      */
     TESTING("object header creation");
     HDmemset(&oh_loc, 0, sizeof(oh_loc));
-    if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_loc/*out*/)<0) {
+    if(H5O_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)64, &oh_loc/*out*/)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;

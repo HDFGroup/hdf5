@@ -187,11 +187,11 @@ test_long(hid_t fapl, hbool_t new_format)
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Group names */
-    name1 = HDmalloc(LONG_NAME_LEN);
+    name1 = HDmalloc((size_t)LONG_NAME_LEN);
     for(i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i%26);
     name1[LONG_NAME_LEN - 1] = '\0';
-    name2 = HDmalloc((2 * LONG_NAME_LEN) + 2);
+    name2 = HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
     sprintf(name2, "%s/%s", name1, name1);
 
     /* Create groups */
@@ -221,8 +221,8 @@ error:
         H5Gclose(g1);
         H5Gclose(g2);
     	H5Fclose(fid);
-        H5MM_xfree(name2);
-        H5MM_xfree(name1);
+        HDfree(name2);
+        HDfree(name1);
     } H5E_END_TRY;
     return 1;
 } /* end test_long() */

@@ -9119,11 +9119,11 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1);
 	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 1, 
-			                 H5C__NO_FLAGS_SET, 0);
+			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2);
 	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 2, 
-			                 H5C__NO_FLAGS_SET, 0);
+			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3);
 	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 3, 
@@ -9142,11 +9142,11 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6);
 	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 6, 
-			                 H5C__NO_FLAGS_SET, 0);
+			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7);
 	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 7, 
-			                 H5C__NO_FLAGS_SET, 0);
+			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 8 ) ||
              ( cache_ptr->index_size != (4 * (VARIABLE_ENTRY_SIZE / 2)) + 
@@ -9190,25 +9190,25 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 *          (VET, 7) dirties (VET, 6)
 	 */
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY, 
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, 0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE, 
                      VARIABLE_ENTRY_TYPE, 0, FALSE, 
 		     3 * VARIABLE_ENTRY_SIZE / 4);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY, 
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, 0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE, 
                      VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RENAME, 
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, 0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY, 
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, 0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__RESIZE, 
                      VARIABLE_ENTRY_TYPE, 3, FALSE, VARIABLE_ENTRY_SIZE);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 7, FLUSH_OP__DIRTY, 
-                     VARIABLE_ENTRY_TYPE, 6, FALSE, 0);
+                     VARIABLE_ENTRY_TYPE, 6, FALSE, (size_t)0);
     }
 
     if ( pass ) {
@@ -9249,14 +9249,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 1; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	/* The cache should now be exactly full */
@@ -9324,7 +9324,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 1);
 	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 1, 
-                                         H5C__DIRTIED_FLAG, 0);
+                                         H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
@@ -9390,7 +9390,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 2);
 	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 2, 
-                                         H5C__DIRTIED_FLAG, 0);
+                                         H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
@@ -9463,11 +9463,11 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3);
 	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 3, 
-                                         H5C__DIRTIED_FLAG, 0);
+                                         H5C__DIRTIED_FLAG, (size_t)0);
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 4);
 	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 4, 
-                                         H5C__DIRTIED_FLAG, 0);
+                                         H5C__DIRTIED_FLAG, (size_t)0);
 
         /* verify cache size */
 	if ( ( cache_ptr->index_len != 41 ) ||
@@ -9504,14 +9504,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 5; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size */
@@ -9571,7 +9571,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size */
@@ -9633,7 +9633,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size */
@@ -9699,7 +9699,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size */
@@ -9735,14 +9735,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 10; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size */
@@ -9846,7 +9846,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size  */
@@ -9879,14 +9879,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < num_large_entries; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	/* update the expected array to mark all these entries dirty again. */
@@ -9973,7 +9973,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
 	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
-			                     H5C__DIRTIED_FLAG, 0);
+			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
         /* verify cache size  */
@@ -12316,7 +12316,7 @@ check_get_entry_status(void)
         }
     }
 
-    mark_pinned_entry_dirty(cache_ptr, 0, 0, FALSE, 0);
+    mark_pinned_entry_dirty(cache_ptr, 0, 0, FALSE, (size_t)0);
 
     if ( pass ) {
 
@@ -14400,7 +14400,7 @@ check_double_pin_err(void)
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
                                entry_ptr->addr, (void *)entry_ptr,
-                               H5C__PIN_ENTRY_FLAG, 0);
+                               H5C__PIN_ENTRY_FLAG, (size_t)0);
 
         if ( result > 0 ) {
 
@@ -14486,7 +14486,7 @@ check_double_unpin_err(void)
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
                                entry_ptr->addr, (void *)entry_ptr,
-                               H5C__UNPIN_ENTRY_FLAG, 0);
+                               H5C__UNPIN_ENTRY_FLAG, (size_t)0);
 
         if ( result > 0 ) {
 
@@ -14781,7 +14781,7 @@ check_double_unprotect_err(void)
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
                                entry_ptr->addr, (void *)entry_ptr,
-                               H5C__NO_FLAGS_SET, 0);
+                               H5C__NO_FLAGS_SET, (size_t)0);
 
         if ( result > 0 ) {
 
@@ -14879,7 +14879,7 @@ check_mark_entry_dirty_errs(void)
     if ( pass ) {
 
 	result = H5C_mark_pinned_entry_dirty(cache_ptr, (void *)entry_ptr,
-			                     FALSE, 0);
+			                     FALSE, (size_t)0);
 
         if ( result > 0 ) {
 
@@ -14896,7 +14896,7 @@ check_mark_entry_dirty_errs(void)
     if ( pass ) {
 
 	result = H5C_mark_pinned_entry_dirty(cache_ptr, (void *)entry_ptr,
-			                     FALSE, 0);
+			                     FALSE, (size_t)0);
 
 
         if ( result > 0 ) {
@@ -15119,7 +15119,7 @@ check_resize_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 1);
+	result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, (size_t)1);
 
         if ( result > 0 ) {
 
@@ -15136,7 +15136,7 @@ check_resize_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 0);
+	result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, (size_t)0);
 
         if ( result > 0 ) {
 

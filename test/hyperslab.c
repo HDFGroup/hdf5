@@ -194,7 +194,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     fflush(stdout);
 
     /* Allocate array */
-    dst = HDcalloc(1,nx*ny*nz);
+    dst = HDcalloc((size_t)1, nx * ny * nz);
     init_full(dst, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -398,8 +398,8 @@ test_copy(int mode,
     /*
      * Allocate arrays
      */
-    src = HDcalloc(1,nx*ny*nz);
-    dst = HDcalloc(1,nx*ny*nz);
+    src = HDcalloc((size_t)1, nx * ny * nz);
+    dst = HDcalloc((size_t)1, nx * ny * nz);
     init_full(src, nx, ny, nz);
 
     for (i=0; i<nx; i+=di) {
@@ -733,8 +733,8 @@ test_endian(size_t nx)
 
     /* Initialize arrays */
     src = HDmalloc(nx * 4);
-    init_full(src, nx, 4, 1);
-    dst = HDcalloc(nx , 4);
+    init_full(src, nx, (size_t)4, (size_t)1);
+    dst = HDcalloc(nx , (size_t)4);
 
     /* Initialize strides */
     src_stride[0] = 0;
@@ -761,9 +761,9 @@ test_endian(size_t nx)
 		    printf("   i=%lu, j=%lu\n",
 			   (unsigned long)i, (unsigned long)j);
 		    printf("   Source array is:\n");
-		    print_array(src, nx, 4, 1);
+		    print_array(src, nx, (size_t)4, (size_t)1);
 		    printf("\n	 Result is:\n");
-		    print_array(dst, nx, 4, 1);
+		    print_array(dst, nx, (size_t)4, (size_t)1);
 		}
 		goto error;
 	    }
@@ -922,9 +922,9 @@ test_sub_super(size_t nx, size_t ny)
 
     /* Initialize */
     full = HDmalloc(4 * nx * ny);
-    init_full(full, 2 * nx, 2 * ny, 1);
-    half = HDcalloc(1,nx*ny);
-    twice = HDcalloc(4,nx*ny);
+    init_full(full, 2 * nx, 2 * ny, (size_t)1);
+    half = HDcalloc((size_t)1, nx * ny);
+    twice = HDcalloc((size_t)4, nx * ny);
 
     /* Setup */
     size[0] = nx;
@@ -951,9 +951,9 @@ test_sub_super(size_t nx, size_t ny)
 			   (unsigned long)i,
 			   (unsigned long)j);
 		    printf("   full is:\n");
-		    print_array(full, 2 * nx, 2 * ny, 1);
+		    print_array(full, 2 * nx, 2 * ny, (size_t)1);
 		    printf("\n	 half is:\n");
-		    print_array(half, nx, ny, 1);
+		    print_array(half, nx, ny, (size_t)1);
 		}
 		goto error;
 	    }
@@ -1023,9 +1023,9 @@ test_sub_super(size_t nx, size_t ny)
 		if (!isatty(1)) {
 		    AT();
 		    printf("   %s\n   Half is:\n", s);
-		    print_array(half, nx, ny, 1);
+		    print_array(half, nx, ny, (size_t)1);
 		    printf("\n	 Twice is:\n");
-		    print_array(twice, 2 * nx, 2 * ny, 1);
+		    print_array(twice, 2 * nx, 2 * ny, (size_t)1);
 		}
 		goto error;
 	    }
@@ -1245,19 +1245,19 @@ main(int argc, char *argv[])
      *------------------------------
      */
     if (size_of_test & TEST_SMALL) {
-	status = test_fill(11, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)11, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_fill(11, 10, 0, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)11, (size_t)10, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_fill(3, 5, 5, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)3, (size_t)5, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_fill(113, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)113, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_fill(15, 11, 0, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)15, (size_t)11, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_fill(5, 7, 7, 1, 1, 1, 1, 1, 1);
+	status = test_fill((size_t)5, (size_t)7, (size_t)7, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*------------------------------
@@ -1267,62 +1267,62 @@ main(int argc, char *argv[])
 
     /* exhaustive, one-dimensional test */
     if (size_of_test & TEST_SMALL) {
-	status = test_copy(VARIABLE_SRC, 11, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)11, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 11, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)11, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 11, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)11, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_copy(VARIABLE_SRC, 179, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)179, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 179, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)179, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 179, 0, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)179, (size_t)0, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     /* exhaustive, two-dimensional test */
     if (size_of_test & TEST_SMALL) {
-	status = test_copy(VARIABLE_SRC, 11, 10, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)11, (size_t)10, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 11, 10, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)11, (size_t)10, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 11, 10, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)11, (size_t)10, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_copy(VARIABLE_SRC, 13, 19, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)13, (size_t)19, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 13, 19, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)13, (size_t)19, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 13, 19, 0, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)13, (size_t)19, (size_t)0, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     /* sparse, two-dimensional test */
     if (size_of_test & TEST_MEDIUM) {
-	status = test_copy(VARIABLE_SRC, 73, 67, 0, 7, 11, 1, 13, 11, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)73, (size_t)67, (size_t)0, (size_t)7, (size_t)11, (size_t)1, (size_t)13, (size_t)11, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 73, 67, 0, 7, 11, 1, 13, 11, 1);
+	status = test_copy(VARIABLE_DST, (size_t)73, (size_t)67, (size_t)0, (size_t)7, (size_t)11, (size_t)1, (size_t)13, (size_t)11, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 73, 67, 0, 7, 11, 1, 13, 11, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)73, (size_t)67, (size_t)0, (size_t)7, (size_t)11, (size_t)1, (size_t)13, (size_t)11, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     /* exhaustive, three-dimensional test */
     if (size_of_test & TEST_SMALL) {
-	status = test_copy(VARIABLE_SRC, 3, 5, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)3, (size_t)5, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 3, 5, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)3, (size_t)5, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 3, 5, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)3, (size_t)5, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_copy(VARIABLE_SRC, 7, 9, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_SRC, (size_t)7, (size_t)9, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_DST, 7, 9, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_DST, (size_t)7, (size_t)9, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_copy(VARIABLE_BOTH, 7, 9, 5, 1, 1, 1, 1, 1, 1);
+	status = test_copy(VARIABLE_BOTH, (size_t)7, (size_t)9, (size_t)5, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*---------------------
@@ -1331,11 +1331,11 @@ main(int argc, char *argv[])
     */
 
     if (size_of_test & TEST_SMALL) {
-	status = test_multifill(10);
+	status = test_multifill((size_t)10);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_multifill(500000);
+	status = test_multifill((size_t)500000);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*---------------------------
@@ -1344,19 +1344,19 @@ main(int argc, char *argv[])
     */
 
     if (size_of_test & TEST_SMALL) {
-	status = test_endian(10);
+	status = test_endian((size_t)10);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_transpose(9, 9);
+	status = test_transpose((size_t)9, (size_t)9);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_transpose(3, 11);
+	status = test_transpose((size_t)3, (size_t)11);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_endian(800000);
+	status = test_endian((size_t)800000);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_transpose(1200, 1200);
+	status = test_transpose((size_t)1200, (size_t)1200);
 	nerrors += status < 0 ? 1 : 0;
-	status = test_transpose(800, 1800);
+	status = test_transpose((size_t)800, (size_t)1800);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*-------------------------
@@ -1365,11 +1365,11 @@ main(int argc, char *argv[])
     */
 
     if (size_of_test & TEST_SMALL) {
-	status = test_sub_super(5, 10);
+	status = test_sub_super((size_t)5, (size_t)10);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_sub_super(480, 640);
+	status = test_sub_super((size_t)480, (size_t)640);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*-------------------------
@@ -1378,11 +1378,11 @@ main(int argc, char *argv[])
     */
 
     if (size_of_test & TEST_SMALL) {
-	status = test_array_fill(1,9);
+	status = test_array_fill((size_t)1, (size_t)9);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_array_fill(9,257);
+	status = test_array_fill((size_t)9, (size_t)257);
 	nerrors += status < 0 ? 1 : 0;
     }
    /*-------------------------
@@ -1391,11 +1391,11 @@ main(int argc, char *argv[])
     */
 
     if (size_of_test & TEST_SMALL) {
-	status = test_array_offset_n_calc(20,7,11,13);
+	status = test_array_offset_n_calc((size_t)20, (size_t)7, (size_t)11, (size_t)13);
 	nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-	status = test_array_offset_n_calc(500,71,193,347);
+	status = test_array_offset_n_calc((size_t)500, (size_t)71, (size_t)193, (size_t)347);
 	nerrors += status < 0 ? 1 : 0;
     }
 

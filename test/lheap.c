@@ -75,17 +75,17 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    if (NULL==(f=H5I_object(file))) {
+    if(NULL == (f = H5I_object(file))) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5HL_create(f, H5P_DATASET_XFER_DEFAULT, 0, &heap_addr/*out*/)<0) {
+    if(H5HL_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)0, &heap_addr/*out*/) < 0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    for (i = 0; i < NOBJS; i++) {
+    for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';

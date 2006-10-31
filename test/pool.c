@@ -68,11 +68,11 @@ test_create(void)
     TESTING("memory pool creation");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Check free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != 0)
         TEST_ERROR
@@ -126,15 +126,15 @@ test_close_one(void)
     TESTING("closing pool with blocks still allocated in one page");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
-    if (NULL == (spc1 = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+    if(NULL == (spc1 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
         TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -178,15 +178,15 @@ test_allocate_first(void)
     TESTING("allocating first block in pool");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
-    if (NULL == (spc = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+    if(NULL == (spc = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
         TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
@@ -235,15 +235,15 @@ test_allocate_first(void)
     TESTING("allocating large first block in pool");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
-    if (NULL == (spc = H5MP_malloc(mp, MPOOL_LARGE_BLOCK)))
+    if(NULL == (spc = H5MP_malloc(mp, (size_t)MPOOL_LARGE_BLOCK)))
         TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != 0)
         TEST_ERROR
@@ -329,15 +329,15 @@ test_allocate_split(void)
     TESTING("splitting block in pool");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
-    if (NULL == (spc1 = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+    if(NULL == (spc1 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
         TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
@@ -347,11 +347,11 @@ test_allocate_split(void)
         TEST_ERROR;
 
     /* Allocate more space in pool */
-    if (NULL == (spc2 = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+    if(NULL == (spc2 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
         TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != MPOOL_PAGE_SIZE - (((H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * 2) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
@@ -431,16 +431,16 @@ test_allocate_many_small(void)
     TESTING("allocating many small blocks");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
-    for (i = 0; i < MPOOL_NUM_SMALL_BLOCKS; i++)
-        if (NULL == (spc[i] = H5MP_malloc(mp, MPOOL_SMALL_BLOCK)))
+    for(i = 0; i < MPOOL_NUM_SMALL_BLOCKS; i++)
+        if(NULL == (spc[i] = H5MP_malloc(mp, (size_t)MPOOL_SMALL_BLOCK)))
             TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != MPOOL_PAGE_SIZE - (((H5MP_BLOCK_ALIGN(MPOOL_SMALL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * MPOOL_NUM_SMALL_BLOCKS) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
@@ -512,16 +512,16 @@ test_allocate_new_page(void)
     TESTING("allocate normal-sized block in new page");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
     for(u = 0; u < MPOOL_NUM_NORMAL_BLOCKS; u++)
-        if (NULL == (spc[u] = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+        if(NULL == (spc[u] = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
             TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
         TEST_ERROR;
     if(free_size != (MPOOL_PAGE_SIZE * 3) - (((H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * MPOOL_NUM_NORMAL_BLOCKS) + (H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t)) * 3)))
         TEST_ERROR
@@ -556,15 +556,15 @@ test_allocate_new_page(void)
     TESTING("allocate large-sized block in new page");
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space in pool */
     /* (Normal sized block) */
-    if (NULL == (spc1 = H5MP_malloc(mp, MPOOL_NORMAL_BLOCK)))
+    if(NULL == (spc1 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
         TEST_ERROR
     /* (Larger sized block) */
-    if (NULL == (spc2 = H5MP_malloc(mp, MPOOL_LARGE_BLOCK)))
+    if(NULL == (spc2 = H5MP_malloc(mp, (size_t)MPOOL_LARGE_BLOCK)))
         TEST_ERROR
 
     /* Check pool's free space */
@@ -648,7 +648,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     HDsrandom((unsigned long)curr_time);
 
     /* Create a memory pool */
-    if (NULL == (mp = H5MP_create(MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
+    if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
         TEST_ERROR
 
     /* Allocate space for the block sizes */
@@ -665,11 +665,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Allocate space in pool */
     for(u = 0; u < MPOOL_NUM_RANDOM; u++)
-        if (NULL == (spc[u] = H5MP_malloc(mp, blk_size[u])))
+        if(NULL == (spc[u] = H5MP_malloc(mp, blk_size[u])))
             TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
         TEST_ERROR;
 
     /* Shuffle pointers to free */
@@ -695,11 +695,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Allocate space in pool (again) */
     /* (Leave allocated to test closing pool with many blocks still allocated) */
     for(u = 0; u < MPOOL_NUM_RANDOM; u++)
-        if (NULL == (spc[u] = H5MP_malloc(mp, blk_size[u])))
+        if(NULL == (spc[u] = H5MP_malloc(mp, blk_size[u])))
             TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
         TEST_ERROR;
 
     /* Close the memory pool */

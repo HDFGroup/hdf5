@@ -198,17 +198,17 @@ test_vltypes_funcs(void)
     ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     CHECK(ret, FAIL, "H5Tset_pad");
 
-    inpad=H5Tget_inpad(type);
+    inpad = H5Tget_inpad(type);
     CHECK(inpad, FAIL, "H5Tget_inpad");
 
-    norm=H5Tget_norm(type);
+    norm = H5Tget_norm(type);
     CHECK(norm, FAIL, "H5Tget_norm");
 
-    ret=H5Tset_offset(type, 16);
+    ret = H5Tset_offset(type, (size_t)16);
     CHECK(ret, FAIL, "H5Tset_offset");
 
     H5E_BEGIN_TRY {
-        cset=H5Tget_cset(type);
+        cset = H5Tget_cset(type);
     } H5E_END_TRY;
     VERIFY(cset, FAIL, "H5Tget_cset");
 
@@ -797,11 +797,11 @@ test_vltypes_vlen_compound(void)
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
-            if( ((s1 *)wdata[i].p)[j].i != ((s1 *)rdata[i].p)[j].i ) {
+            if(((s1 *)wdata[i].p)[j].i != ((s1 *)rdata[i].p)[j].i ) {
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
                 continue;
             } /* end if */
-            if( ((s1 *)wdata[i].p)[j].f != ((s1 *)rdata[i].p)[j].f ) {
+            if(((s1 *)wdata[i].p)[j].f != ((s1 *)rdata[i].p)[j].f ) {
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
                 continue;
             } /* end if */
@@ -1668,7 +1668,7 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
@@ -1677,7 +1677,7 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Make certain the correct amount of memory has been used */
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
+    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2024,7 +2024,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
@@ -2033,7 +2033,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     /* Make certain the correct amount of memory has been used */
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
+    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {

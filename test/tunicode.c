@@ -77,7 +77,7 @@ void test_fl_string(hid_t fid, const char *string)
    */
   dtype_id = H5Tcopy(H5T_C_S1);
   CHECK(dtype_id, FAIL, "H5Tcopy");
-  ret=H5Tset_size(dtype_id, MAX_STRING_LENGTH);
+  ret = H5Tset_size(dtype_id, (size_t)MAX_STRING_LENGTH);
   CHECK(ret, FAIL, "H5Tset_size");
   cset=H5Tget_cset(dtype_id);
   VERIFY(cset, H5T_CSET_ASCII, "H5Tget_cset");
@@ -172,7 +172,7 @@ void test_strpad(hid_t UNUSED fid, const char *string)
     strncpy(buf, new_string, big_len);
     strncpy(&buf[big_len], new_string, big_len);
 
-    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* After conversion, the buffer should look like
@@ -190,11 +190,11 @@ void test_strpad(hid_t UNUSED fid, const char *string)
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abc\0\0\0\0\0abc\0\0\0\0\0" */
-    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with NULLs */
-    HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
+    HDmemset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len -1);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len -1);
@@ -234,7 +234,7 @@ void test_strpad(hid_t UNUSED fid, const char *string)
     strncpy(buf, new_string, big_len);
     strncpy(&buf[big_len], new_string, big_len);
 
-    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* After conversion, the buffer should look like
@@ -250,11 +250,11 @@ void test_strpad(hid_t UNUSED fid, const char *string)
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abcd\0\0\0\0abcd\0\0\0\0" */
-    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with NULLs */
-    HDmemset(cmpbuf, '\0', LONG_BUF_SIZE);
+    HDmemset(cmpbuf, '\0', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len);
@@ -280,7 +280,7 @@ void test_strpad(hid_t UNUSED fid, const char *string)
     HDstrcpy(buf, new_string);
     HDstrcpy(&buf[big_len], new_string);
 
-    ret = H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* After conversion, the buffer should look like
@@ -296,11 +296,11 @@ void test_strpad(hid_t UNUSED fid, const char *string)
 
     /* Now convert from smaller datatype to bigger datatype.  This should
      * leave our buffer looking like: "abcd    abcd    " */
-    ret = H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT);
+    ret = H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
 
     /* First fill the buffer with spaces */
-    HDmemset(cmpbuf, ' ', LONG_BUF_SIZE);
+    HDmemset(cmpbuf, ' ', (size_t)LONG_BUF_SIZE);
     /* Copy in the characters */
     HDstrncpy(cmpbuf, new_string, small_len);
     HDstrncpy(&cmpbuf[big_len], new_string, small_len);
@@ -390,7 +390,7 @@ void test_objnames(hid_t fid, const char* string)
   herr_t ret;
 
   /* Create a group with a UTF-8 name */
-  grp_id = H5Gcreate(fid, string, 0);
+  grp_id = H5Gcreate(fid, string, (size_t)0);
   CHECK(grp_id, FAIL, "H5Gcreate");
 
   /* Set a comment on the group to test that we can access the group
@@ -398,7 +398,7 @@ void test_objnames(hid_t fid, const char* string)
    */
   ret = H5Gset_comment(fid, string, string);
   CHECK(ret, FAIL, "H5Gset_comment");
-  ret = H5Gget_comment(fid, string, MAX_STRING_LENGTH, read_buf);
+  ret = H5Gget_comment(fid, string, (size_t)MAX_STRING_LENGTH, read_buf);
   CHECK(ret, FAIL, "H5Gget_comment");
 
   ret = H5Gclose(grp_id);
@@ -407,7 +407,7 @@ void test_objnames(hid_t fid, const char* string)
   VERIFY(strcmp(string, read_buf), 0, "strcmp");
 
   /* Create a new dataset with a UTF-8 name */
-  grp1_id = H5Gcreate(fid, GROUP1_NAME, 0);
+  grp1_id = H5Gcreate(fid, GROUP1_NAME, (size_t)0);
   CHECK(grp1_id, FAIL, "H5Gcreate");
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
@@ -429,10 +429,10 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Gclose");
 
   /* Do the same for a named datatype */
-  grp2_id = H5Gcreate(fid, GROUP2_NAME, 0);
+  grp2_id = H5Gcreate(fid, GROUP2_NAME, (size_t)0);
   CHECK(grp2_id, FAIL, "H5Gcreate");
 
-  type_id = H5Tcreate(H5T_OPAQUE, 1);
+  type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
   CHECK(type_id, FAIL, "H5Tcreate");
   ret = H5Tcommit(grp2_id, string, type_id);
   CHECK(type_id, FAIL, "H5Tcommit");
@@ -482,7 +482,7 @@ void test_objnames(hid_t fid, const char* string)
    * pointing through the hard link to the datatype.  Give the soft
    * link a name in UTF-8.  Ensure that the soft link works. */
 
-  grp3_id = H5Gcreate(fid, GROUP3_NAME, 0);
+  grp3_id = H5Gcreate(fid, GROUP3_NAME, (size_t)0);
   CHECK(grp3_id, FAIL, "H5Gcreate");
 
   ret = H5Glink2(fid, GROUP2_NAME, H5G_LINK_HARD, grp3_id, GROUP2_NAME);
@@ -518,20 +518,20 @@ void test_attrname(hid_t fid, const char * string)
  /* Create a new group and give it an attribute whose
   * name and value are UTF-8 strings.
   */
-  group_id = H5Gcreate(fid, GROUP4_NAME, 0);
+  group_id = H5Gcreate(fid, GROUP4_NAME, (size_t)0);
   CHECK(group_id, FAIL, "H5Gcreate");
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
   dtype_id = H5Tcopy(H5T_C_S1);
   CHECK(dtype_id, FAIL, "H5Tcopy");
-  ret=H5Tset_size(dtype_id, MAX_STRING_LENGTH);
+  ret = H5Tset_size(dtype_id, (size_t)MAX_STRING_LENGTH);
   CHECK(ret, FAIL, "H5Tset_size");
 
   /* Create the attribute and check that its name is correct */
   attr_id = H5Acreate(group_id, string, dtype_id, space_id, H5P_DEFAULT);
   CHECK(attr_id, FAIL, "H5Acreate");
-  ret = H5Aget_name(attr_id, MAX_STRING_LENGTH, read_buf);
+  ret = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
   CHECK(ret, FAIL, "H5Aget_name");
   ret = strcmp(read_buf, string);
   VERIFY(ret, 0, "strcmp");
@@ -684,7 +684,7 @@ void test_enum(hid_t UNUSED fid, const char * string)
   ret = H5Tenum_valueof(type_id, string, &val);
   CHECK(ret, FAIL, "H5Tenum_valueof");
   VERIFY(val, E1_WHITE, "H5Tenum_valueof");
-  ret = H5Tenum_nameof(type_id, &val, readbuf, MAX_STRING_LENGTH);
+  ret = H5Tenum_nameof(type_id, &val, readbuf, (size_t)MAX_STRING_LENGTH);
   CHECK(ret, FAIL, "H5Tenum_nameof");
   ret = strcmp(readbuf, string);
   VERIFY(ret, 0, "strcmp");
@@ -705,7 +705,7 @@ void test_opaque(hid_t UNUSED fid, const char * string)
   herr_t ret;
 
   /* Create an opaque type and give it a UTF-8 tag */
-  type_id = H5Tcreate(H5T_OPAQUE, 4);
+  type_id = H5Tcreate(H5T_OPAQUE, (size_t)4);
   CHECK(type_id, FAIL, "H5Tcreate");
   ret = H5Tset_tag(type_id, string);
   CHECK(ret, FAIL, "H5Tset_tag");
@@ -730,9 +730,9 @@ void test_opaque(hid_t UNUSED fid, const char * string)
 static hid_t mkstr(size_t len, H5T_str_t strpad)
 {
     hid_t       t;
-    if ((t=H5Tcopy(H5T_C_S1))<0) return -1;
-    if (H5Tset_size(t, len)<0) return -1;
-    if (H5Tset_strpad(t, strpad)<0) return -1;
+    if((t = H5Tcopy(H5T_C_S1)) < 0) return -1;
+    if(H5Tset_size(t, len) < 0) return -1;
+    if(H5Tset_strpad(t, strpad) < 0) return -1;
     return t;
 }
 

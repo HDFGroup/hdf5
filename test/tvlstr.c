@@ -170,8 +170,8 @@ test_vlstrings_basic(void)
     dataset2=H5Dcreate(fid1,"Dataset2",tid1,dataspace,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    wdata2 = (char*)HDcalloc(65534, sizeof(char));
-    HDmemset(wdata2, 'A', 65533);
+    wdata2 = (char*)HDcalloc((size_t)65534, sizeof(char));
+    HDmemset(wdata2, 'A', (size_t)65533);
 
     ret=H5Dwrite(dataset2,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -613,8 +613,8 @@ static void test_write_vl_string_attribute(void)
     att = H5Acreate(root, "test_scalar_large", type, dataspace, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate");
 
-    string_att_write = (char*)HDcalloc(8192, sizeof(char));
-    HDmemset(string_att_write, 'A', 8191);
+    string_att_write = (char*)HDcalloc((size_t)8192, sizeof(char));
+    HDmemset(string_att_write, 'A', (size_t)8191);
 
     ret = H5Awrite(att, type, &string_att_write);
     CHECK(ret, FAIL, "H5Awrite");

@@ -54,15 +54,15 @@ test_find (void)
     TESTING("bit search operations");
 
     /* The zero length buffer */
-    memset (v1, 0xaa, sizeof v1);
-    n = H5T_bit_find (v1, 0, 0, H5T_BIT_LSB, TRUE);
-    if (-1!=n) {
+    HDmemset(v1, 0xaa, sizeof v1);
+    n = H5T_bit_find(v1, (size_t)0, (size_t)0, H5T_BIT_LSB, TRUE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    Zero length test failed (lsb)!");
 	goto failed;
     }
-    n = H5T_bit_find (v1, 0, 0, H5T_BIT_MSB, TRUE);
-    if (-1!=n) {
+    n = H5T_bit_find(v1, (size_t)0, (size_t)0, H5T_BIT_MSB, TRUE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    Zero length test failed (msb)!");
 	goto failed;
@@ -70,32 +70,32 @@ test_find (void)
 
 
     /* The zero buffer */
-    memset (v1, 0, sizeof v1);
-    n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, TRUE);
-    if (-1!=n) {
+    HDmemset(v1, 0, sizeof v1);
+    n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, TRUE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    Zero buffer test failed (lsb)!");
 	goto failed;
     }
-    n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, TRUE);
-    if (-1!=n) {
+    n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_MSB, TRUE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    Zero buffer test failed (msb)!");
 	goto failed;
     }
 
     /* Try all combinations of one byte */
-    for (i=0; i<8*(int)sizeof(v1); i++) {
-	memset (v1, 0, sizeof v1);
-	v1[i/8] = 1<<(i%8);
-	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, TRUE);
-	if ((ssize_t)i!=n) {
+    for(i = 0; i < 8 * (int)sizeof(v1); i++) {
+	HDmemset(v1, 0, sizeof v1);
+	v1[i / 8] = 1 << (i % 8);
+	n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, TRUE);
+	if((ssize_t)i != n) {
 	    H5_FAILED();
 	    printf ("    Test for set bit %d failed (lsb)!\n", i);
 	    goto failed;
 	}
-	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, TRUE);
-	if ((ssize_t)i!=n) {
+	n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_MSB, TRUE);
+	if((ssize_t)i != n) {
 	    H5_FAILED();
 	    printf ("    Test for set bit %d failed (msb)!\n", i);
 	    goto failed;
@@ -103,15 +103,15 @@ test_find (void)
     }
 
     /* The one buffer */
-    memset (v1, 0xff, sizeof v1);
-    n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
-    if (-1!=n) {
+    HDmemset(v1, 0xff, sizeof v1);
+    n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, FALSE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    One buffer test failed (lsb)!");
 	goto failed;
     }
-    n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, FALSE);
-    if (-1!=n) {
+    n = H5T_bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_MSB, FALSE);
+    if(-1 != n) {
 	H5_FAILED();
 	puts ("    One buffer test failed (msb)!");
 	goto failed;

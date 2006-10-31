@@ -789,7 +789,7 @@ static void test_grp_memb_funcs(hid_t fapl)
             VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
         if(!HDstrcmp(dataset_name, "dtype"))
             VERIFY(obj_type, H5G_TYPE, "H5Gget_objname_by_idx");
-        if(!HDstrncmp(dataset_name, "Dataset", 7))
+        if(!HDstrncmp(dataset_name, "Dataset", (size_t)7))
             VERIFY(obj_type, H5G_DATASET, "H5Gget_objname_by_idx");
     } /* end for */
 
