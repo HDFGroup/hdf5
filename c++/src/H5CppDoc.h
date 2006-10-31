@@ -50,7 +50,7 @@
   \endverbatim
  * \section install_sec Installation
  *
- * Please refer to the file release_docs/INSTALL_Windows_withcpp.txt
+ * Please refer to the file release_docs/INSTALL_Windows.txt
  * under the top directory for information about installing, building,
  * and testing the C++ API.
  *
