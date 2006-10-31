@@ -1,4 +1,4 @@
-@REM Copyright by the Board of Trustees of the University of Illinois.
+q@REM Copyright by the Board of Trustees of the University of Illinois.
 @REM All rights reserved.
 @REM
 @REM This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -124,7 +124,7 @@ set flag=%file1% %file2% -r -d 5 g1/dset3 g1/dset4
 call %tooltest% h5diff_15.txt 
  
 ::1.6 with -p
-set flag=%file1% %file2% -r -p 0.05 g1/dset3 g1/dset4
+set flag=%file1% %file1% g1/dset9 g1/dset10 -p 0.01 -v
 call %tooltest% h5diff_16.txt 
  
 ::1.7 verbose mode
