@@ -75,6 +75,7 @@ typedef struct iter_t {
     ohdr_info_t dset_ohdr_info;         /* Object header information for datasets */
     hsize_t dset_storage_size;          /* Size of raw data for datasets */
     unsigned long nexternal;            /* Number of external files for a dataset */
+    int           local;                /* Flag to indicate iteration over the object*/
 } iter_t;
 
 
@@ -98,11 +99,18 @@ static int        display_group = FALSE;
 static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
-#ifdef NOT_YET
 static int        display_dtype = FALSE;
-#endif /* NOT_YET */
+static int        display_object = FALSE;
 
-static const char *s_opts ="FfhGgDdTV";
+/* a structure for handling the order command-line parameters come in */
+struct handler_t {
+    void (*func)(void *);
+    int flag;
+    char *obj;
+};
+
+
+static const char *s_opts ="FfhGgDdTO:V";
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
     {"hel", no_arg, 'h'},
@@ -150,6 +158,11 @@ static struct long_options l_opts[] = {
     {"dtypeme", no_arg, 'T'},
     {"dtypem", no_arg, 'T'},
     {"dtype", no_arg, 'T'},
+    { "object", require_arg, 'O' },
+    { "objec", require_arg, 'O' },
+    { "obje", require_arg, 'O' },
+    { "obj", require_arg, 'O' },
+    { "ob", require_arg, 'O' },
     { "version", no_arg, 'V' },
     { "versio", no_arg, 'V' },
     { "versi", no_arg, 'V' },
@@ -705,10 +718,14 @@ printf("walk: fullname = %s\n", fullname);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static struct handler_t *
 parse_command_line(int argc, const char *argv[])
 {
-    int  opt;
+    int                opt, i;
+    struct handler_t   *hand;
+
+    /* Allocate space to hold the command line info */
+    hand = calloc((size_t)argc, sizeof(struct handler_t));
 
 
     /* parse command line options */
@@ -749,7 +766,15 @@ parse_command_line(int argc, const char *argv[])
             print_version(progname);
             leave(EXIT_SUCCESS);
             break;
-
+        case 'O':
+            display_object = TRUE;
+            for (i = 0; i < argc; i++)
+                if (!hand[i].obj) {
+                    hand[i].obj = HDstrdup(opt_arg);
+                    hand[i].flag = 1;
+                    break;
+                }
+            break;
         default:
             usage(progname);
             leave(EXIT_FAILURE);
@@ -762,7 +787,7 @@ parse_command_line(int argc, const char *argv[])
         usage(progname);
         leave(EXIT_FAILURE);
     }
-    return 0;
+    return hand;
 }
 
 
@@ -829,6 +854,7 @@ iter_init(iter_t * _iter)
         iter->dset_ohdr_info.free_size = 0;
         iter->dset_storage_size = 0;
         iter->nexternal = 0; 
+        iter->local = 0; 
 
         return ret;
 }
@@ -1069,9 +1095,9 @@ print_dataset_info(iter_t * _iter)
 }
 
 /*-------------------------------------------------------------------------
- * Function: print_statistics
+ * Function: print_file_statistics
  *
- * Purpose: Prints statistics
+ * Purpose: Prints file statistics
  *
  * Return: Success: 0
  *
@@ -1084,11 +1110,10 @@ print_dataset_info(iter_t * _iter)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-print_statistics(iter_t * _iter)
+static void
+print_file_statistics(iter_t * _iter)
 {
         iter_t *iter = (iter_t*)_iter;
-        herr_t ret =0;                     /* Generic return value */
 
         if(display_all) {
            display_file = TRUE;
@@ -1099,13 +1124,63 @@ print_statistics(iter_t * _iter)
            display_dtype_metadata = TRUE;
         }
 
+
         if(display_file)          print_file_info(iter);
         if(display_file_metadata) print_file_metadata(iter);
         if(display_group)         print_group_info(iter);
         if(display_dset)          print_dataset_info(iter);
 
-        return ret;
 }
+
+/*-------------------------------------------------------------------------
+ * Function: print_object_statistics
+ *
+ * Purpose: Prints object statistics
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer: Elena Pourmal
+ *             Thursday, August 17, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+print_object_statistics(char *name, iter_t * _iter)
+{
+        iter_t *iter = (iter_t*)_iter;
+        printf("Object name %s\n", name);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: print_statistics
+ *
+ * Purpose: Prints statistics 
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer: Elena Pourmal
+ *             Thursday, August 17, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+print_statistics(char *name, iter_t * _iter)
+{
+        iter_t *iter = (iter_t*)_iter;
+        if(display_object) 
+           print_object_statistics(name, iter);
+        else
+           print_file_statistics(iter);
+}
+
 
 int
 main(int argc, const char *argv[])
@@ -1113,20 +1188,27 @@ main(int argc, const char *argv[])
     iter_t          iter;
     const char     *fname = NULL;
     hid_t           fid;
-    herr_t          status;        /* Return value for parse_command_line function */
+    struct handler_t   *hand;
+    herr_t          status;       
+    char            *root = "/";
+    int             i;
 
     /* Disable error reporting */
     H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
-    status = parse_command_line (argc, argv);
-    if (status < 0) {
+    hand = parse_command_line (argc, argv);
+    if (!hand) {
         error_msg(progname, "unable to parse command line arguments \n");
         leave(EXIT_FAILURE);
     }
 
+
     fname = argv[opt_ind];
+    hand[opt_ind].obj = root;
+    hand[opt_ind].flag = 1;
+    if (display_object) hand[opt_ind].flag = 0;
 
     printf("Filename: %s\n", fname);
 
@@ -1139,19 +1221,23 @@ main(int argc, const char *argv[])
     /* Initialize iter structure */
     status = iter_init(&iter);
     
-    /* Walk the object */
-
-    walk(fid, "/", &iter);
-
+    /* Walk the objects or all file */
+    for (i = 0; i < argc; i++) { 
+         if (hand[i].obj) {
+              if(hand[i].flag) {
+                   walk(fid, hand[i].obj, &iter);
+                   print_statistics(hand[i].obj, &iter);
+              }
+         }
+    
+    }
+    free(hand);
     H5Fclose(fid);
     if (fid < 0) {
         error_msg(progname, "unable to close file \"%s\"\n", fname);
         leave(EXIT_FAILURE);
     }
 
-    /* Print statistics */
-    print_statistics(&iter);
-
-    leave(d_status);
+    leave(EXIT_SUCCESS);
 }
 
