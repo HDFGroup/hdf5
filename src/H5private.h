@@ -726,6 +726,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDlseek(F,O,W)		lseek(F,O,W)
 #endif
 #define HDmalloc(Z)		malloc(Z)
+#define HDposix_memalign(P,A,Z) posix_memalign(P,A,Z)
 #define HDmblen(S,N)		mblen(S,N)
 #define HDmbstowcs(P,S,Z)	mbstowcs(P,S,Z)
 #define HDmbtowc(P,S,Z)		mbtowc(P,S,Z)
