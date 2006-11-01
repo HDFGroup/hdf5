@@ -245,6 +245,9 @@ hid_t H5PTopen( hid_t loc_id,
   if ((table->type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND)) < 0)
     goto out;
 
+  if (H5Tclose(type_id) < 0)
+    goto out;
+
   /* Initialize the current record pointer */
   if((H5PT_create_index(table)) <0)
     goto out;
