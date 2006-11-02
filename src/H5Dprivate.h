@@ -156,6 +156,7 @@ typedef struct H5D_dcpl_cache_t {
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);

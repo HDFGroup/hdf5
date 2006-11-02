@@ -25,16 +25,35 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
+/**************************/
+/* Library Private Macros */
+/**************************/
+
 /* String creation properties */
 #define H5P_CHAR_ENCODING_NAME  "character_encoding"
 #define H5P_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
 #define H5P_CHAR_ENCODING_DEF   H5F_DEFAULT_CSET
 
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
 /* Forward declarations for anonymous H5P objects */
 typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
-/* Private functions, not part of the publicly documented API */
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
+
+/* Package initialization routine */
 H5_DLL herr_t H5P_init(void);
 
 /* Internal versions of API routines */
@@ -76,4 +95,5 @@ H5_DLL hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name);
 H5_DLL void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name);
 H5_DLL size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name);
 
-#endif
+#endif /* _H5Pprivate_H */
+

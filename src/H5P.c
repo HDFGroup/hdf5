@@ -17,13 +17,19 @@
  * Purpose:	Generic Property Functions
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5P_init_interface
 
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -34,10 +40,37 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
-/* Local macros */
+/****************/
+/* Local Macros */
+/****************/
+
 #define H5P_DEFAULT_SKIPLIST_HEIGHT     8
 
-/* Local variables */
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/* Typedef for checking for duplicate class names in parent class */
+typedef struct {
+    const H5P_genclass_t *parent;       /* Pointer to parent class */
+    const char *name;                   /* Pointer to name to check */
+} H5P_check_class_t;
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* General helper routines */
+static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
+static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
+static herr_t H5P_free_prop(H5P_genprop_t *prop);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /*
  * Predefined property list classes. These are initialized at runtime by
@@ -79,10 +112,6 @@ hid_t H5P_LST_ATTRIBUTE_CREATE_g    = FAIL;
 hid_t H5P_LST_OBJECT_COPY_g         = FAIL;
 hid_t H5P_LST_LINK_CREATE_g         = FAIL;
 hid_t H5P_LST_LINK_ACCESS_g         = FAIL;
-
-/* Track the revision count of a class, to make comparisons faster */
-static unsigned H5P_next_rev=0;
-#define H5P_GET_NEXT_REV        (H5P_next_rev++)
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -179,28 +208,67 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
-/* Declare a free list to manage the H5P_genprop_t struct */
-H5FL_DEFINE(H5P_genprop_t);
 
-/* Declare a free list to manage the H5P_genplist_t struct */
-H5FL_DEFINE(H5P_genplist_t);
+/* Library property list classes defined in other code modules */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/* Track the revision count of a class, to make comparisons faster */
+static unsigned H5P_next_rev=0;
+#define H5P_GET_NEXT_REV        (H5P_next_rev++)
+
+/* List of all property list classes in the library */
+/* (order here is not important, they will be initialized in the proper
+ *      order according to their parent class dependencies)
+ */
+static H5P_libclass_t const * const init_class[] = {
+    H5P_CLS_ROOT,       /* Root */
+    H5P_CLS_OCRT,       /* Object create */
+    H5P_CLS_STRCRT,     /* String create */
+    H5P_CLS_LACC,       /* Link access */
+    H5P_CLS_GCRT,       /* Group create */
+    H5P_CLS_OCPY,       /* Object copy */
+    H5P_CLS_GACC,       /* Group access */
+    H5P_CLS_FCRT,       /* File creation */
+    H5P_CLS_FACC,       /* File access */
+    H5P_CLS_DCRT,       /* Dataset creation */
+    H5P_CLS_DACC,       /* Dataset access */
+    H5P_CLS_DXFR,       /* Data transfer */
+    H5P_CLS_FMNT,       /* File mount */
+    H5P_CLS_TCRT,       /* Datatype creation */
+    H5P_CLS_TACC,       /* Datatype access */
+    H5P_CLS_ACRT,       /* Attribute creation */
+    H5P_CLS_LCRT        /* Link creation */
+};
 
 /* Declare a free list to manage the H5P_genclass_t struct */
 H5FL_DEFINE_STATIC(H5P_genclass_t);
 
-/* Local typedefs */
+/* Declare a free list to manage the H5P_genprop_t struct */
+H5FL_DEFINE_STATIC(H5P_genprop_t);
 
-/* Typedef for checking for duplicate class names in parent class */
-typedef struct {
-    const H5P_genclass_t *parent;       /* Pointer to parent class */
-    const char *name;                   /* Pointer to name to check */
-} H5P_check_class_t;
+/* Declare a free list to manage the H5P_genplist_t struct */
+H5FL_DEFINE_STATIC(H5P_genplist_t);
 
-/* Local static functions */
-static herr_t H5P_init_class(const H5P_libclass_t *lib_class);
-static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
-static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
-static herr_t H5P_free_prop(H5P_genprop_t *prop);
 
 
 /*--------------------------------------------------------------------------
@@ -301,63 +369,6 @@ done:
 } /* end H5P_init() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5P_init_class
- *
- * Purpose:     Initialize a library class
- *
- * Return:      Pointer to class created on success/NULL on failure
- *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_init_class(const H5P_libclass_t *lib_class)
-{
-    H5P_genclass_t *par_class = NULL;   /* Parent class of new class */
-    H5P_genclass_t *new_class;          /* New property list class created */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5P_init_class)
-
-    /* Sanity checks */
-    HDassert(lib_class);
-    HDassert(lib_class->par_class_id || lib_class == H5P_CLS_ROOT);
-    HDassert(lib_class->class_id);
-    HDassert(*lib_class->class_id == (-1));
-
-    /* Check for parent class */
-    if(lib_class->par_class_id) {
-        /* Get the pointer to the parent class */
-        if(NULL == (par_class = H5I_object(*lib_class->par_class_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-    } /* end if */
-
-    /* Allocate the object create class */
-    if(NULL == (new_class = H5P_create_class(par_class, lib_class->name, 1, lib_class->create_func, lib_class->create_data, lib_class->copy_func, lib_class->copy_data, lib_class->close_func, lib_class->close_data)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Call routine to register properties for class */
-    if(lib_class->reg_prop_func && (*lib_class->reg_prop_func)(new_class) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register properties")
-
-    /* Register the object create class */
-    if((*lib_class->class_id = H5I_register(H5I_GENPROP_CLS, new_class)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(lib_class->def_plist_id && *lib_class->def_plist_id == (-1)) {
-        /* Register the default property list for the new class*/
-        if((*lib_class->def_plist_id = H5P_create_id(new_class)) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list for class")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init_class() */
-
-
 /*--------------------------------------------------------------------------
 NAME
    H5P_init_interface -- Initialize interface-specific information
@@ -371,7 +382,9 @@ DESCRIPTION
 static herr_t
 H5P_init_interface(void)
 {
-    herr_t      ret_value = SUCCEED;
+    size_t tot_init;                    /* Total # of classes initialized */
+    size_t pass_init;                   /* # of classes initialized in each pass */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_init_interface)
 
@@ -383,99 +396,66 @@ H5P_init_interface(void)
     if(H5I_register_type(H5I_GENPROP_LST, (size_t)H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Create root property list class
-     * 
-     * All other property list classes ultimately inherit from this class.
+    /* Repeatedly pass over the list of property list classes for the library,
+     *  initializing each class if it's parent class is initialized, until no
+     *  more progress is made.
      */
-    if(H5P_init_class(H5P_CLS_ROOT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+    tot_init = 0;
+    do {
+        size_t u;                           /* Local index variable */
 
-    /*
-     * Initialize property list classes for library.
-     */
+        /* Reset pass initialization counter */
+        pass_init = 0;
 
-    /* Create object create property class
-     *
-     * Classes that create objects should inherit from this class
-     * For example: group, dataset and named datatype creation classes...
-     */
-    if(H5P_init_class(H5P_CLS_OCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+        /* Make a pass over all the library's property list classes */
+        for(u = 0; u < NELMTS(init_class); u++) {
+            H5P_libclass_t const *lib_class = init_class[u]; /* Current class to operate on */
 
-    /* Create string creation property class
-     *
-     * Classes that contain strings should inherit from this class 
-     * For example, links and attributes have names associated with them.
-     */
-    if(H5P_init_class(H5P_CLS_STRCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+            /* Check if the current class hasn't been initialized and can be now */
+            HDassert(lib_class->class_id);
+            if(*lib_class->class_id == (-1) && (lib_class->par_class_id == NULL
+                        || *lib_class->par_class_id > 0)) {
+                H5P_genclass_t *par_pclass = NULL;   /* Parent class of new class */
+                H5P_genclass_t *new_pclass;          /* New property list class created */
 
-    /* Create link access property classes (which need to be inherited by later classes */
-    /* Create string creation property class
-     *
-     * Classes that access objects in the file should inherit from this class 
-     * For example: group, dataset and named datatype access classes...
-     */
-    if(H5P_init_class(H5P_CLS_LACC) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Sanity check - only the root class is not allowed to have a parent class */
+                HDassert(lib_class->par_class_id || lib_class == H5P_CLS_ROOT);
 
-    /* Create group creation property class
-     *
-     * (Register the group property classes before file property classes, so
-     *  file creation property class can inherit from group creation property
-     *  class, which is used to allow application to control the group creation
-     *  properties of the root group of a file. -QAK)
-     */
-    if(H5P_init_class(H5P_CLS_GCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Check for parent class */
+                if(lib_class->par_class_id) {
+                    /* Get the pointer to the parent class */
+                    if(NULL == (par_pclass = H5I_object(*lib_class->par_class_id)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
+                } /* end if */
 
-    /* Create object copy property class */
-    if(H5P_init_class(H5P_CLS_OCPY) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Allocate the new class */
+                if(NULL == (new_pclass = H5P_create_class(par_pclass, lib_class->name, 1, lib_class->create_func, lib_class->create_data, lib_class->copy_func, lib_class->copy_data, lib_class->close_func, lib_class->close_data)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
 
-    /* Create group access property class */
-    if(H5P_init_class(H5P_CLS_GACC) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Call routine to register properties for class */
+                if(lib_class->reg_prop_func && (*lib_class->reg_prop_func)(new_pclass) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register properties")
 
-    /* Create file creation property class */
-    if(H5P_init_class(H5P_CLS_FCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Register the new class */
+                if((*lib_class->class_id = H5I_register(H5I_GENPROP_CLS, new_pclass)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
 
-    /* Create file access property class */
-    if(H5P_init_class(H5P_CLS_FACC) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Only register the default property list if it hasn't been created yet */
+                if(lib_class->def_plist_id && *lib_class->def_plist_id == (-1)) {
+                    /* Register the default property list for the new class*/
+                    if((*lib_class->def_plist_id = H5P_create_id(new_pclass)) < 0)
+                         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list for class")
+                } /* end if */
 
-    /* Create dataset creation property class */
-    if(H5P_init_class(H5P_CLS_DCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+                /* Increment class initialization counters */
+                pass_init++;
+                tot_init++;
+            } /* end if */
+        } /* end for */
+    } while(pass_init > 0);
 
-    /* Create dataset access property class */
-    if(H5P_init_class(H5P_CLS_DACC) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create data transfer property class */
-    if(H5P_init_class(H5P_CLS_DXFR) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create file mount property class */
-    if(H5P_init_class(H5P_CLS_FMNT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create datatype creation property class */
-    if(H5P_init_class(H5P_CLS_TCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create datatype access property class */
-    if(H5P_init_class(H5P_CLS_TACC) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create attribute creation property class */
-    if(H5P_init_class(H5P_CLS_ACRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
-
-    /* Create link creation property class */
-    if(H5P_init_class(H5P_CLS_LCRT) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
+    /* Verify that all classes were initialized */
+    HDassert(tot_init == NELMTS(init_class));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

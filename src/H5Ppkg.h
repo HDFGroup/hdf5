@@ -27,18 +27,20 @@
 #ifndef _H5Ppkg_H
 #define _H5Ppkg_H
 
-/*
- * Define this to enable debugging.
- */
-#ifdef NDEBUG
-#  undef H5P_DEBUG
-#endif
-
 /* Get package's private header */
 #include "H5Pprivate.h"
 
 /* Other private headers needed by this file */
 #include "H5SLprivate.h"	/* Skip lists				*/
+
+/**************************/
+/* Package Private Macros */
+/**************************/
+
+
+/****************************/
+/* Package Private Typedefs */
+/****************************/
 
 /* Define enum for type of object that property is within */
 typedef enum {
@@ -135,27 +137,15 @@ typedef struct H5P_libclass_t {
     void *close_data;                   /* Pointer to user data to pass along to close callback */
 } H5P_libclass_t;
 
-/*
- * Library property list classes.
- */
 
-H5_DLLVAR const H5P_libclass_t H5P_CLS_ROOT[1];         /* Root */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_GACC[1];         /* Group access */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_DACC[1];         /* Dataset access */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_TCRT[1];         /* Datatype creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_TACC[1];         /* Datatype access */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+
+
+/******************************/
+/* Package Private Prototypes */
+/******************************/
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
@@ -169,9 +159,6 @@ H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
 H5_DLL int H5P_tbbt_strcmp(const void *k1, const void *k2, int cmparg);
 H5_DLL herr_t H5P_close_class(void *_pclass);
-
-/* Class initialization routines */
-H5_DLL herr_t H5P_ocpy_init(H5P_genclass_t *pclass);
 
 /* Testing functions */
 #ifdef H5P_TESTING

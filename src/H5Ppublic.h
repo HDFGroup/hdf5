@@ -19,8 +19,7 @@
 #ifndef _H5Ppublic_H
 #define _H5Ppublic_H
 
-/* Default Template for creation, access, etc. templates */
-#define H5P_DEFAULT     0
+/* System headers needed by this file */
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -33,17 +32,70 @@
 #include "H5Tpublic.h"
 #include "H5Zpublic.h"
 
-/* Metroworks <sys/types.h> doesn't define off_t. */
-#ifdef __MWERKS__
-typedef long off_t;
-/* Metroworks does not define EINTR in <errno.h> */
-# define EINTR 4
-#endif
-/*__MWERKS__*/
+
+/*****************/
+/* Public Macros */
+/*****************/
+
+/* When this header is included from a private HDF5 header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef _H5private_H
+#define H5OPEN        H5open(),
+#else   /* _H5private_H */
+#define H5OPEN
+#endif  /* _H5private_H */
+
+/* Default value for all property list classes */
+#define H5P_DEFAULT     0
+
+/*
+ * The library's property list classes
+ */
+
+#define H5P_ROOT		   	(H5OPEN H5P_CLS_ROOT_g)
+#define H5P_OBJECT_CREATE 		(H5OPEN H5P_CLS_OBJECT_CREATE_g)
+#define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
+#define H5P_FILE_ACCESS 		(H5OPEN H5P_CLS_FILE_ACCESS_g)
+#define H5P_DATASET_CREATE     		(H5OPEN H5P_CLS_DATASET_CREATE_g)
+#define H5P_DATASET_ACCESS     		(H5OPEN H5P_CLS_DATASET_ACCESS_g)
+#define H5P_DATASET_XFER       		(H5OPEN H5P_CLS_DATASET_XFER_g)
+#define H5P_FILE_MOUNT       		(H5OPEN H5P_CLS_FILE_MOUNT_g)
+#define H5P_GROUP_CREATE 		(H5OPEN H5P_CLS_GROUP_CREATE_g)
+#define H5P_GROUP_ACCESS 		(H5OPEN H5P_CLS_GROUP_ACCESS_g)
+#define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
+#define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
+#define H5P_STRING_CREATE 		(H5OPEN H5P_CLS_STRING_CREATE_g)
+#define H5P_ATTRIBUTE_CREATE 		(H5OPEN H5P_CLS_ATTRIBUTE_CREATE_g)
+#define H5P_OBJECT_COPY	 		(H5OPEN H5P_CLS_OBJECT_COPY_g)
+#define H5P_LINK_CREATE 		(H5OPEN H5P_CLS_LINK_CREATE_g)
+#define H5P_LINK_ACCESS 		(H5OPEN H5P_CLS_LINK_ACCESS_g)
+
+/*
+ * The library's default property lists
+ */
+#define H5P_FILE_CREATE_DEFAULT		(H5OPEN H5P_LST_FILE_CREATE_g)
+#define H5P_FILE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_FILE_ACCESS_g)
+#define H5P_DATASET_CREATE_DEFAULT  	(H5OPEN H5P_LST_DATASET_CREATE_g)
+#define H5P_DATASET_ACCESS_DEFAULT  	(H5OPEN H5P_LST_DATASET_ACCESS_g)
+#define H5P_DATASET_XFER_DEFAULT   	(H5OPEN H5P_LST_DATASET_XFER_g)
+#define H5P_FILE_MOUNT_DEFAULT       	(H5OPEN H5P_LST_FILE_MOUNT_g)
+#define H5P_GROUP_CREATE_DEFAULT	(H5OPEN H5P_LST_GROUP_CREATE_g)
+#define H5P_GROUP_ACCESS_DEFAULT 	(H5OPEN H5P_LST_GROUP_ACCESS_g)
+#define H5P_DATATYPE_CREATE_DEFAULT	(H5OPEN H5P_LST_DATATYPE_CREATE_g)
+#define H5P_DATATYPE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_DATATYPE_ACCESS_g)
+#define H5P_ATTRIBUTE_CREATE_DEFAULT	(H5OPEN H5P_LST_ATTRIBUTE_CREATE_g)
+#define H5P_OBJECT_COPY_DEFAULT		(H5OPEN H5P_LST_OBJECT_COPY_g)
+#define H5P_LINK_CREATE_DEFAULT		(H5OPEN H5P_LST_LINK_CREATE_g)
+#define H5P_LINK_ACCESS_DEFAULT		(H5OPEN H5P_LST_LINK_ACCESS_g)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*******************/
+/* Public Typedefs */
+/*******************/
+
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
@@ -65,38 +117,12 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 /* Define property list iteration function type */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 
-/*
- * The library created property list classes
- *
- * NOTE: When adding H5P_* macros, remember to redefine them in H5Pprivate.h
- *
- */
+/********************/
+/* Public Variables */
+/********************/
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef _H5private_H
-#define H5OPEN        H5open(),
-#else   /* _H5private_H */
-#define H5OPEN
-#endif  /* _H5private_H */
-
-#define H5P_ROOT		   	(H5OPEN H5P_CLS_ROOT_g)
-#define H5P_OBJECT_CREATE 		(H5OPEN H5P_CLS_OBJECT_CREATE_g)
-#define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
-#define H5P_FILE_ACCESS 		(H5OPEN H5P_CLS_FILE_ACCESS_g)
-#define H5P_DATASET_CREATE     		(H5OPEN H5P_CLS_DATASET_CREATE_g)
-#define H5P_DATASET_ACCESS     		(H5OPEN H5P_CLS_DATASET_ACCESS_g)
-#define H5P_DATASET_XFER       		(H5OPEN H5P_CLS_DATASET_XFER_g)
-#define H5P_FILE_MOUNT       		(H5OPEN H5P_CLS_FILE_MOUNT_g)
-#define H5P_GROUP_CREATE 		(H5OPEN H5P_CLS_GROUP_CREATE_g)
-#define H5P_GROUP_ACCESS 		(H5OPEN H5P_CLS_GROUP_ACCESS_g)
-#define H5P_DATATYPE_CREATE 		(H5OPEN H5P_CLS_DATATYPE_CREATE_g)
-#define H5P_DATATYPE_ACCESS 		(H5OPEN H5P_CLS_DATATYPE_ACCESS_g)
-#define H5P_STRING_CREATE 		(H5OPEN H5P_CLS_STRING_CREATE_g)
-#define H5P_ATTRIBUTE_CREATE 		(H5OPEN H5P_CLS_ATTRIBUTE_CREATE_g)
-#define H5P_OBJECT_COPY	 		(H5OPEN H5P_CLS_OBJECT_COPY_g)
-#define H5P_LINK_CREATE 		(H5OPEN H5P_CLS_LINK_CREATE_g)
-#define H5P_LINK_ACCESS 		(H5OPEN H5P_CLS_LINK_ACCESS_g)
+/* Property list class IDs */
+/* (Internal to library, do not use!  Use macros above) */
 H5_DLLVAR hid_t H5P_CLS_ROOT_g;
 H5_DLLVAR hid_t H5P_CLS_OBJECT_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
@@ -115,25 +141,8 @@ H5_DLLVAR hid_t H5P_CLS_OBJECT_COPY_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_g;
 
-/*
- * The library created default property lists
- *
- */
-#define H5P_OBJ_CLASS_DEFAULT  		(H5OPEN H5P_LST_OBJ_CLASS_g)
-#define H5P_FILE_CREATE_DEFAULT		(H5OPEN H5P_LST_FILE_CREATE_g)
-#define H5P_FILE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_FILE_ACCESS_g)
-#define H5P_DATASET_CREATE_DEFAULT  	(H5OPEN H5P_LST_DATASET_CREATE_g)
-#define H5P_DATASET_ACCESS_DEFAULT  	(H5OPEN H5P_LST_DATASET_ACCESS_g)
-#define H5P_DATASET_XFER_DEFAULT   	(H5OPEN H5P_LST_DATASET_XFER_g)
-#define H5P_FILE_MOUNT_DEFAULT       	(H5OPEN H5P_LST_FILE_MOUNT_g)
-#define H5P_GROUP_CREATE_DEFAULT	(H5OPEN H5P_LST_GROUP_CREATE_g)
-#define H5P_GROUP_ACCESS_DEFAULT 	(H5OPEN H5P_LST_GROUP_ACCESS_g)
-#define H5P_DATATYPE_CREATE_DEFAULT	(H5OPEN H5P_LST_DATATYPE_CREATE_g)
-#define H5P_DATATYPE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_DATATYPE_ACCESS_g)
-#define H5P_ATTRIBUTE_CREATE_DEFAULT	(H5OPEN H5P_LST_ATTRIBUTE_CREATE_g)
-#define H5P_OBJECT_COPY_DEFAULT		(H5OPEN H5P_LST_OBJECT_COPY_g)
-#define H5P_LINK_CREATE_DEFAULT		(H5OPEN H5P_LST_LINK_CREATE_g)
-#define H5P_LINK_ACCESS_DEFAULT		(H5OPEN H5P_LST_LINK_ACCESS_g)
+/* Default roperty list IDs */
+/* (Internal to library, do not use!  Use macros above) */
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_CREATE_g;
@@ -149,7 +158,10 @@ H5_DLLVAR hid_t H5P_LST_OBJECT_COPY_g;
 H5_DLLVAR hid_t H5P_LST_LINK_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_g;
 
-/* Public functions */
+/*********************/
+/* Public Prototypes */
+/*********************/
+
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
