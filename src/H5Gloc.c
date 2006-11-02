@@ -378,7 +378,7 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 
     /* Create link object for the object location */
     lnk.type = H5L_TYPE_HARD;
-    lnk.cset = H5F_CRT_DEFAULT_CSET;
+    lnk.cset = H5F_DEFAULT_CSET;
     lnk.corder = 0;     /* Will be reset if the group is tracking creation order */
     lnk.corder_valid = FALSE;   /* Indicate that the creation order isn't valid (yet) */
     /* Casting away const OK -QAK */

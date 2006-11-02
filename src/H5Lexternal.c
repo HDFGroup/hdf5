@@ -322,7 +322,7 @@ H5Lunpack_elink_val(char *ext_linkval, size_t link_size, char **filename,
     herr_t      ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Lunpack_elink_val, FAIL)
-    H5TRACE3("e","s*s*s",ext_linkval,filename,obj_path);
+    H5TRACE4("e","sz*s*s",ext_linkval,link_size,filename,obj_path);
 
     if(ext_linkval == NULL )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an external link linkval buffer")

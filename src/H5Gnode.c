@@ -1976,7 +1976,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             HDassert(0 && "Unknown entry type");
 
         /* Set up common link data */
-        lnk.cset = H5F_CRT_DEFAULT_CSET;          /* XXX: Allow user to set this */
+        lnk.cset = H5F_DEFAULT_CSET;          /* XXX: Allow user to set this */
         lnk.corder = 0;                     /* Creation order is not tracked for old-style links */
         lnk.corder_valid = FALSE;            /* Creation order is not valid */
         /* lnk.name = name; */              /* This will be set in callback */

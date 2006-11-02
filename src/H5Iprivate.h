@@ -67,4 +67,5 @@ H5_DLL int H5I_inc_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
 
-#endif
+#endif /* _H5Iprivate_H */
+

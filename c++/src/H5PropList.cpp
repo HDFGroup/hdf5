@@ -61,7 +61,7 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 // Description
 //		This function calls H5Pcreate to create a new property list
 //		if the given id, plist_id, is that of a property class.  If
-//		the given id is equal to H5P_NO_CLASS, then set this
+//		the given id is equal to H5P_ROOT, then set this
 //		property's id to H5P_DEFAULT, otherwise, to the given id.
 //		Note: someone else added this code without comments and this
 //		description was what I came up with from reading the code.
@@ -78,7 +78,7 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 	}
     }
     else {
-	if(plist_id==H5P_NO_CLASS)
+	if(plist_id==H5P_ROOT)
 	    id=H5P_DEFAULT;
 	else
 	    id=plist_id;
@@ -225,17 +225,17 @@ void PropList::close()
 //--------------------------------------------------------------------------
 // Function:	PropList::getClass
 ///\brief	Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
-///\return	The property list class if it is not equal to \c H5P_NO_CLASS
+///\return	The property list class if it is not equal to \c H5P_ROOT
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 hid_t PropList::getClass() const
 {
    hid_t plist_class = H5Pget_class( id );
-   if( plist_class == H5P_NO_CLASS )
+   if( plist_class == H5P_ROOT )
    {
       throw PropListIException(inMemFunc("getClass"),
-		"H5Pget_class failed - returned H5P_NO_CLASS");
+		"H5Pget_class failed - returned H5P_ROOT");
    }
    return( plist_class );
 }

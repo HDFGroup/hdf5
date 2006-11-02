@@ -312,55 +312,9 @@ done:
 static herr_t
 H5L_init_interface(void)
 {
-    H5P_genclass_t  *crt_pclass;
-    H5P_genclass_t  *acc_pclass;
-    size_t          nprops;                 /* Number of properties */
-    unsigned        intmd_group = H5L_CRT_INTERMEDIATE_GROUP_DEF;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_init_interface)
-
-    /* =========Link Creation Property Class Initialization========= */
-    /* Register the default attribute creation properties */
-    assert(H5P_CLS_LINK_CREATE_g!=(-1));
-
-    /* Get the pointer to the link creation class */
-    if (NULL == (crt_pclass = H5I_object(H5P_CLS_LINK_CREATE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(crt_pclass,&nprops,FALSE)<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
-
-    /* Assume that if there are properties in the class, they are the default ones */
-    if(nprops==0) {
-        /* Register create intermediate groups property */
-        if(H5P_register(crt_pclass,H5L_CRT_INTERMEDIATE_GROUP_NAME,H5L_CRT_INTERMEDIATE_GROUP_SIZE,
-                 &intmd_group,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    }
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_LINK_CREATE_g==(-1)) {
-        /* Register the default link creation property list */
-        if ((H5P_LST_LINK_CREATE_g = H5P_create_id (crt_pclass))<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list")
-    } /* end if */
-
-    /* ========== Link Access Property Class Initialization ============*/
-    assert(H5P_CLS_LINK_ACCESS_g!=-1);
-
-    /* Get the pointer to link access class */
-    if(NULL == (acc_pclass = H5I_object(H5P_CLS_LINK_ACCESS_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_LINK_ACCESS_g == (-1)) {
-        /* Register the default link access property list */
-        if((H5P_LST_LINK_ACCESS_g = H5P_create_id(acc_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default LAPL")
-    } /* end if */
-
 
     /* Initialize user-defined link classes */
     if(H5L_register_external() <0)
@@ -368,7 +322,7 @@ H5L_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5L_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -396,6 +350,7 @@ H5L_term_interface(void)
 
     FUNC_LEAVE_NOAPI(n)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Lmove
@@ -1222,7 +1177,7 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
 {
     char *norm_link_name = NULL;        /* Pointer to normalized link name */
     unsigned target_flags = H5G_TARGET_NORMAL; /* Flags to pass to group traversal function */
-    H5T_cset_t char_encoding = H5F_CRT_DEFAULT_CSET; /* Character encoding for link */
+    H5T_cset_t char_encoding = H5F_DEFAULT_CSET; /* Character encoding for link */
     H5P_genplist_t* lc_plist;           /* Link creation property list */
     H5L_trav_ud2_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1976,7 +1931,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
                 hid_t lapl_id, hid_t dxpl_id)
 {
     unsigned    target_flags = H5G_TARGET_MOUNT|H5G_TARGET_SLINK|H5G_TARGET_UDLINK;
-    H5T_cset_t char_encoding = H5F_CRT_DEFAULT_CSET; /* Character encoding for link */
+    H5T_cset_t char_encoding = H5F_DEFAULT_CSET; /* Character encoding for link */
     H5P_genplist_t* lc_plist;           /* Link creation property list */
     H5P_genplist_t* la_plist;           /* Link access property list */
     H5L_trav_ud3_t      udata;          /* User data for traversal */

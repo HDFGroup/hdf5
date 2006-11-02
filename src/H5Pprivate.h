@@ -28,7 +28,7 @@
 /* String creation properties */
 #define H5P_CHAR_ENCODING_NAME  "character_encoding"
 #define H5P_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
-#define H5P_CHAR_ENCODING_DEF   H5F_CRT_DEFAULT_CSET
+#define H5P_CHAR_ENCODING_DEF   H5F_DEFAULT_CSET
 
 /* Forward declarations for anonymous H5P objects */
 typedef struct H5P_genplist_t H5P_genplist_t;

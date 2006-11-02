@@ -419,7 +419,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 #define H5T_INIT_TYPE_STRING_COMMON {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_STRING)				      \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)				      \
-    dt->shared->u.atomic.u.s.cset = H5F_CRT_DEFAULT_CSET;				      \
+    dt->shared->u.atomic.u.s.cset = H5F_DEFAULT_CSET;				      \
 }
 
 #define H5T_INIT_TYPE_CSTRING_CORE {					      \
@@ -732,58 +732,57 @@ H5T_init_interface(void)
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
     H5P_genclass_t  *crt_pclass;        /* Property list class for datatype creation properties */
-    H5P_genclass_t  *acc_pclass;        /* Property list class for datatype access properties */
     herr_t	ret_value=SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface)
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_register_type(H5I_DATATYPE, (size_t)H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    if(H5I_register_type(H5I_DATATYPE, (size_t)H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Make certain there aren't too many classes of datatypes defined */
     /* Only 16 (numbered 0-15) are supported in the current file format */
-    assert(H5T_NCLASSES<16);
+    HDassert(H5T_NCLASSES < 16);
 
     /* Perform any necessary hardware initializations */
     if(H5T_init_hw()<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /*
      * Initialize pre-defined native data types from code generated during
      * the library configuration by H5detect.
      */
-    if (H5TN_init_interface()<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    if(H5TN_init_interface()<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Get the atomic datatype structures needed by the initialization code below */
-    if (NULL==(native_schar=H5I_object(H5T_NATIVE_SCHAR_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_uchar=H5I_object(H5T_NATIVE_UCHAR_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_short=H5I_object(H5T_NATIVE_SHORT_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_ushort=H5I_object(H5T_NATIVE_USHORT_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_int=H5I_object(H5T_NATIVE_INT_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_uint=H5I_object(H5T_NATIVE_UINT_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_long=H5I_object(H5T_NATIVE_LONG_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_ulong=H5I_object(H5T_NATIVE_ULONG_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_llong=H5I_object(H5T_NATIVE_LLONG_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_ullong=H5I_object(H5T_NATIVE_ULLONG_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_float=H5I_object(H5T_NATIVE_FLOAT_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if (NULL==(native_double=H5I_object(H5T_NATIVE_DOUBLE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if(NULL==(native_schar=H5I_object(H5T_NATIVE_SCHAR_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_uchar=H5I_object(H5T_NATIVE_UCHAR_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_short=H5I_object(H5T_NATIVE_SHORT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_ushort=H5I_object(H5T_NATIVE_USHORT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_int=H5I_object(H5T_NATIVE_INT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_uint=H5I_object(H5T_NATIVE_UINT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_long=H5I_object(H5T_NATIVE_LONG_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_ulong=H5I_object(H5T_NATIVE_ULONG_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_llong=H5I_object(H5T_NATIVE_LLONG_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_ullong=H5I_object(H5T_NATIVE_ULLONG_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_float=H5I_object(H5T_NATIVE_FLOAT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
+    if(NULL==(native_double=H5I_object(H5T_NATIVE_DOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
 #if H5_SIZEOF_LONG_DOUBLE !=0
-    if (NULL==(native_ldouble=H5I_object(H5T_NATIVE_LDOUBLE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if(NULL==(native_ldouble=H5I_object(H5T_NATIVE_LDOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
 #endif
 
     /*------------------------------------------------------------
@@ -1001,13 +1000,13 @@ H5T_init_interface(void)
     fixedpt = native_int;
     floatpt = native_float;
     if (NULL == (compound = H5T_create(H5T_COMPOUND, (size_t)1)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (enum_type = H5T_create(H5T_ENUM, (size_t)1)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (vlen = H5T_vlen_create(native_int)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (array = H5T_array_create(native_int, 1, dim)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     status = 0;
 
     status |= H5T_register(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T_conv_i_i, H5AC_dxpl_id, FALSE);
@@ -1305,7 +1304,7 @@ H5T_init_interface(void)
     status |= H5T_init_inf();
 
     if (status<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)")
 
     /* ========== Datatype Creation Property Class Initialization ============*/
     assert(H5P_CLS_DATATYPE_CREATE_g!=-1);
@@ -1322,20 +1321,6 @@ H5T_init_interface(void)
     if(H5P_LST_DATATYPE_CREATE_g==(-1)) {
         /* Register the default datatype creation property list */
         if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
-    } /* end if */
-
-    /* ========== Datatype Access Property Class Initialization ============*/
-    assert(H5P_CLS_DATATYPE_ACCESS_g!=-1);
-
-    /* Get the pointer to dataset access class */
-    if(NULL == (acc_pclass = H5I_object(H5P_CLS_DATATYPE_ACCESS_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_DATATYPE_ACCESS_g == (-1)) {
-        /* Register the default dataset access property list */
-        if((H5P_LST_DATATYPE_ACCESS_g = H5P_create_id(acc_pclass))<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -1364,8 +1349,8 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_init_interface() */
 
 
 /*-------------------------------------------------------------------------

@@ -94,7 +94,7 @@
 !				  H5P_FILE_ACCESS_F
 !				  H5P_DATASET_CREATE_F
 !				  H5P_DATASET_XFER_F
-!				  H5P_MOUNT_F
+!				  H5P_FILE_MOUNT_F
 ! Outputs:  
 !		prp_id		- property list identifier
 !		hdferr:		- error code		
@@ -127,7 +127,7 @@
                                               !  H5P_FILE_ACCESS_F
                                               !  H5P_DATASET_CREATE_F
                                               !  H5P_DATASET_XFER_F
-                                              !  H5P_MOUNT_F
+                                              !  H5P_FILE_MOUNT_F
             INTEGER(HID_T), INTENT(OUT) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
@@ -284,12 +284,12 @@
 ! Outputs:  
 !		classtype	- property list class
 !				  Possible values are:
-!				  H5P_NO_CLASS
+!				  H5P_ROOT_F
 !				  H5P_FILE_CREATE_F
 !				  H5P_FILE_ACCESS_F
 !				  H5PE_DATASET_CREATE_F
 !				  H5P_DATASET_XFER_F
-!				  H5P_MOUNT_F
+!				  H5P_FILE_MOUNT_F
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -318,12 +318,12 @@
             INTEGER, INTENT(OUT) :: classtype  ! The type of the property list 
                                               ! to be created. Possible values
                                               ! are: 
-                                              !  H5P_NO_CLASS
+                                              !  H5P_ROOT_F
                                               !  H5P_FILE_CREATE_F
                                               !  H5P_FILE_ACCESS_F
                                               !  H5PE_DATASET_CREATE_F 
                                               !  H5P_DATASET_XFER_F
-                                              !  H5P_MOUNT_F
+                                              !  H5P_FILE_MOUNT_F
             INTEGER, INTENT(OUT) :: hdferr    ! Error code
 
 !            INTEGER, EXTERNAL :: h5pget_class_c
@@ -5045,12 +5045,12 @@
 ! Inputs:  
 !		parent		- Property list identifier of the parent class
 !                                 Possible values include:
-!                                 H5P_NO_CLASS_F
+!                                 H5P_ROOT_F
 !                                 H5P_FILE_CREATE_F
 !                                 H5P_FILE_ACCESS_F
 !                                 H5P_DATASET_CREATE_F
 !                                 H5P_DATASET_XFER_F
-!                                 H5P_MOUNT_F
+!                                 H5P_FILE_MOUNT_F
 !		name 		- name of the class we are creating
 ! Outputs:  
 !               class           - porperty list class identifier

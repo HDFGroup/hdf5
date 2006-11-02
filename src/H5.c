@@ -98,7 +98,7 @@ H5_debug_t		H5_debug_g;		/*debugging info	*/
 herr_t
 H5_init_library(void)
 {
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5_init_library, FAIL)
     /*
@@ -151,7 +151,7 @@ H5_init_library(void)
     if (!H5_dont_atexit_g) {
 	(void)HDatexit(H5_term_library);
 	H5_dont_atexit_g = TRUE;
-    }
+    } /* end if */
 
     /*
      * Initialize interfaces that might not be able to initialize themselves
@@ -163,19 +163,19 @@ H5_init_library(void)
      * The link interface needs to be initialized so that link property lists
      * have their properties registered.
      */
-    if (H5E_init()<0)
+    if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
-    if (H5P_init()<0)
+    if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
-    if (H5F_init()<0)
+    if(H5F_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize file interface")
-    if (H5T_init()<0)
+    if(H5T_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
-    if (H5D_init()<0)
+    if(H5D_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
-    if (H5AC_init()<0)
+    if(H5AC_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
-    if (H5L_init()<0)
+    if(H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
 
     /* Debugging? */
@@ -184,7 +184,7 @@ H5_init_library(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5_init_library() */
 
 
 /*-------------------------------------------------------------------------

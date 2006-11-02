@@ -40,152 +40,44 @@
 #  undef H5D_DEBUG
 #endif
 
-/* ========  Dataset creation properties ======== */
-/* Definitions for storage layout property */
-#define H5D_CRT_LAYOUT_NAME        "layout"
-#define H5D_CRT_LAYOUT_SIZE        sizeof(H5D_layout_t)
-#define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS
-/* Definitions for chunk dimensionality property */
-#define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"
-#define H5D_CRT_CHUNK_DIM_SIZE     sizeof(unsigned)
-#define H5D_CRT_CHUNK_DIM_DEF      1
-/* Definitions for chunk size */
-#define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"
-#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(size_t[H5O_LAYOUT_NDIMS])
-#define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
-                                   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-/* Definitions for fill value.  size=0 means fill value will be 0 as
- * library default; size=-1 means fill value is undefined. */
-#define H5D_CRT_FILL_VALUE_NAME    "fill_value"
-#define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
-#define H5D_CRT_FILL_VALUE_DEF     {NULL, 0, NULL}
-#define H5D_CRT_FILL_VALUE_CMP     H5D_crt_fill_value_cmp
-/* Definitions for space allocation time */
-#define H5D_CRT_ALLOC_TIME_NAME   "alloc_time"
-#define H5D_CRT_ALLOC_TIME_SIZE   sizeof(H5D_alloc_time_t)
-#define H5D_CRT_ALLOC_TIME_DEF    H5D_ALLOC_TIME_LATE
-#define H5D_CRT_ALLOC_TIME_STATE_NAME   "alloc_time_state"
-#define H5D_CRT_ALLOC_TIME_STATE_SIZE   sizeof(unsigned)
-#define H5D_CRT_ALLOC_TIME_STATE_DEF    1
-/* Definitions for time of fill value writing */
-#define H5D_CRT_FILL_TIME_NAME     "fill_time"
-#define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
-#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_IFSET
-/* Definitions for external file list */
-#define H5D_CRT_EXT_FILE_LIST_NAME "efl"
-#define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)
-#define H5D_CRT_EXT_FILE_LIST_DEF  {HADDR_UNDEF, 0, 0, NULL}
-#define H5D_CRT_EXT_FILE_LIST_CMP  H5D_crt_ext_file_list_cmp
-/* Definitions for data filter pipeline */
-#define H5D_CRT_DATA_PIPELINE_NAME "pline"
-#define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
-#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL}
-#define H5D_CRT_DATA_PIPELINE_CMP  H5D_crt_data_pipeline_cmp
+/* ========  Dataset creation property names ======== */
+#define H5D_CRT_LAYOUT_NAME        "layout"             /* Storage layout */
+#define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"        /* Chunk dimensionality */
+#define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"         /* Chunk size */
+#define H5D_CRT_FILL_VALUE_NAME    "fill_value"         /* Fill value */
+#define H5D_CRT_ALLOC_TIME_NAME    "alloc_time"         /* Space allocation time */
+#define H5D_CRT_ALLOC_TIME_STATE_NAME "alloc_time_state" /* Space allocation time state */
+#define H5D_CRT_FILL_TIME_NAME     "fill_time"          /* Time of fill value writing */
+#define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */
+#define H5D_CRT_DATA_PIPELINE_NAME "pline"              /* Data filter pipeline */
 
 /* ======== Data transfer properties ======== */
-/* Definitions for maximum temp buffer size property */
-#define H5D_XFER_MAX_TEMP_BUF_NAME       "max_temp_buf"
-#define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
-#define H5D_XFER_MAX_TEMP_BUF_DEF  (1024*1024)
-/* Definitions for type conversion buffer property */
-#define H5D_XFER_TCONV_BUF_NAME       "tconv_buf"
-#define H5D_XFER_TCONV_BUF_SIZE       sizeof(void *)
-#define H5D_XFER_TCONV_BUF_DEF      NULL
-/* Definitions for background buffer property */
-#define H5D_XFER_BKGR_BUF_NAME       "bkgr_buf"
-#define H5D_XFER_BKGR_BUF_SIZE       sizeof(void *)
-#define H5D_XFER_BKGR_BUF_DEF      NULL
-/* Definitions for background buffer type property */
-#define H5D_XFER_BKGR_BUF_TYPE_NAME       "bkgr_buf_type"
-#define H5D_XFER_BKGR_BUF_TYPE_SIZE       sizeof(H5T_bkg_t)
-#define H5D_XFER_BKGR_BUF_TYPE_DEF      H5T_BKG_NO
-/* Definitions for B-tree node splitting ratio property */
-/* (These default B-tree node splitting ratios are also used for splitting
- * group's B-trees as well as chunked dataset's B-trees - QAK)
- */
-#define H5D_XFER_BTREE_SPLIT_RATIO_NAME       "btree_split_ratio"
-#define H5D_XFER_BTREE_SPLIT_RATIO_SIZE       sizeof(double[3])
-#define H5D_XFER_BTREE_SPLIT_RATIO_DEF      {0.1, 0.5, 0.9}
-/* Definitions for vlen allocation function property */
-#define H5D_XFER_VLEN_ALLOC_NAME       "vlen_alloc"
-#define H5D_XFER_VLEN_ALLOC_SIZE       sizeof(H5MM_allocate_t)
-#define H5D_XFER_VLEN_ALLOC_DEF  NULL
-/* Definitions for vlen allocation info property */
-#define H5D_XFER_VLEN_ALLOC_INFO_NAME       "vlen_alloc_info"
-#define H5D_XFER_VLEN_ALLOC_INFO_SIZE       sizeof(void *)
-#define H5D_XFER_VLEN_ALLOC_INFO_DEF  NULL
-/* Definitions for vlen free function property */
-#define H5D_XFER_VLEN_FREE_NAME       "vlen_free"
-#define H5D_XFER_VLEN_FREE_SIZE       sizeof(H5MM_free_t)
-#define H5D_XFER_VLEN_FREE_DEF  NULL
-/* Definitions for vlen free info property */
-#define H5D_XFER_VLEN_FREE_INFO_NAME       "vlen_free_info"
-#define H5D_XFER_VLEN_FREE_INFO_SIZE       sizeof(void *)
-#define H5D_XFER_VLEN_FREE_INFO_DEF  NULL
-/* Definitions for file driver ID property */
-#define H5D_XFER_VFL_ID_NAME       "vfl_id"
-#define H5D_XFER_VFL_ID_SIZE       sizeof(hid_t)
-#define H5D_XFER_VFL_ID_DEF  H5FD_VFD_DEFAULT
-/* Definitions for file driver info property */
-#define H5D_XFER_VFL_INFO_NAME       "vfl_info"
-#define H5D_XFER_VFL_INFO_SIZE       sizeof(void *)
-#define H5D_XFER_VFL_INFO_DEF  NULL
-/* Definitions for hyperslab vector size property */
-/* (Be cautious about increasing the default size, there are arrays allocated
- *      on the stack which depend on it - QAK)
- */
-#define H5D_XFER_HYPER_VECTOR_SIZE_NAME       "vec_size"
-#define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
-#define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
-/* Definitions for I/O transfer mode property */
-#define H5D_XFER_IO_XFER_MODE_NAME       "io_xfer_mode"
-#define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
-#define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
-
-/* Definitions for I/O optimization transfer mode property(using MPI-IO independent IO with file set view) */
-#define H5D_XFER_IO_XFER_OPT_MODE_NAME    "io_xfer_opt_mode"
-#define H5D_XFER_IO_XFER_OPT_MODE_SIZE    sizeof(H5FD_mpio_collective_opt_t)
-#define H5D_XFER_IO_XFER_OPT_MODE_DEF         H5FD_MPIO_COLLECTIVE_IO
-/* Definitions for optimization of MPI-IO transfer mode property */
-#define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME      "mpio_collective_opt"
-#define H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE       sizeof(H5FD_mpio_collective_opt_t)
-#define H5D_XFER_MPIO_COLLECTIVE_OPT_DEF        H5FD_MPIO_COLLECTIVE_IO
-
-#define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME      "mpio_chunk_opt_hard"
-#define H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE       sizeof(H5FD_mpio_chunk_opt_t)
-#define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_CHUNK_DEFAULT
-
-#define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME       "mpio_chunk_opt_num"
-#define H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE        sizeof(unsigned)
-#define H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF         H5D_ONE_LINK_CHUNK_IO_THRESHOLD
-
-#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME     "mpio_chunk_opt_ratio"
-#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE       sizeof(unsigned)
-#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF       H5D_MULTI_CHUNK_IO_COL_THRESHOLD
-/* Definitions for EDC property */
-#define H5D_XFER_EDC_NAME       "err_detect"
-#define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
-#define H5D_XFER_EDC_DEF        H5Z_ENABLE_EDC
-/* Definitions for filter callback function property */
-#define H5D_XFER_FILTER_CB_NAME       "filter_cb"
-#define H5D_XFER_FILTER_CB_SIZE       sizeof(H5Z_cb_t)
-#define H5D_XFER_FILTER_CB_DEF        {NULL,NULL}
-/* Definitions for type conversion callback function property */
-#define H5D_XFER_CONV_CB_NAME       "type_conv_cb"
-#define H5D_XFER_CONV_CB_SIZE       sizeof(H5T_conv_cb_t)
-#define H5D_XFER_CONV_CB_DEF        {NULL,NULL}
-/* Definitions for data transform property */
-#define H5D_XFER_XFORM_NAME         "data_transform"
-#define H5D_XFER_XFORM_SIZE         sizeof(void *)
-#define H5D_XFER_XFORM_DEF          NULL
-#define H5D_XFER_XFORM_DEL          H5D_xfer_xform_del
-#define H5D_XFER_XFORM_COPY         H5D_xfer_xform_copy
-#define H5D_XFER_XFORM_CLOSE        H5D_xfer_xform_close
+#define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */
+#define H5D_XFER_TCONV_BUF_NAME         "tconv_buf"     /* Type conversion buffer */
+#define H5D_XFER_BKGR_BUF_NAME          "bkgr_buf"      /* Background buffer */
+#define H5D_XFER_BKGR_BUF_TYPE_NAME     "bkgr_buf_type" /* Background buffer type */
+#define H5D_XFER_BTREE_SPLIT_RATIO_NAME "btree_split_ratio" /* B-tree node splitting ratio */
+#define H5D_XFER_VLEN_ALLOC_NAME        "vlen_alloc"    /* Vlen allocation function */
+#define H5D_XFER_VLEN_ALLOC_INFO_NAME   "vlen_alloc_info" /* Vlen allocation info */
+#define H5D_XFER_VLEN_FREE_NAME         "vlen_free"     /* Vlen free function */
+#define H5D_XFER_VLEN_FREE_INFO_NAME    "vlen_free_info" /* Vlen free info */
+#define H5D_XFER_VFL_ID_NAME            "vfl_id"        /* File driver ID */
+#define H5D_XFER_VFL_INFO_NAME          "vfl_info"      /* File driver info */
+#define H5D_XFER_HYPER_VECTOR_SIZE_NAME "vec_size"      /* Hyperslab vector size */
+#ifdef H5_HAVE_PARALLEL
+#define H5D_XFER_IO_XFER_MODE_NAME      "io_xfer_mode"  /* I/O transfer mode */
+#define H5D_XFER_IO_XFER_OPT_MODE_NAME  "io_xfer_opt_mode" /* I/O optimization transfer mode (using MPI-IO independent IO with file set view) */
+#define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
+#define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME "mpio_chunk_opt_hard"
+#define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME "mpio_chunk_opt_num"
+#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME "mpio_chunk_opt_ratio"
+#endif /* H5_HAVE_PARALLEL */
+#define H5D_XFER_EDC_NAME               "err_detect"    /* EDC */
+#define H5D_XFER_FILTER_CB_NAME         "filter_cb"     /* Filter callback function */
+#define H5D_XFER_CONV_CB_NAME           "type_conv_cb"  /* Type conversion callback function */
+#define H5D_XFER_XFORM_NAME             "data_transform" /* Data transform */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-/* Definitions for collective chunk I/O property */
-#define H5D_XFER_COLL_CHUNK_NAME       "coll_chunk"
-#define H5D_XFER_COLL_CHUNK_SIZE       sizeof(unsigned)
-#define H5D_XFER_COLL_CHUNK_DEF        1
+#define H5D_XFER_COLL_CHUNK_NAME        "coll_chunk"    /* Collective chunk I/O */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME "coll_chunk_link_hard"
 #define H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME "coll_chunk_multi_hard"
 #define H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME "coll_chunk_link_true"
@@ -193,6 +85,18 @@
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME "coll_chunk_multi_coll"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME "coll_chunk_multi_ind"
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+/* Default temporary buffer size */
+#define H5D_TEMP_BUF_SIZE       (1024 * 1024)
+
+/* Default I/O vector size */
+#define H5D_IO_VECTOR_SIZE      1024
+
+/* Default VL allocation & free info */
+#define H5D_VLEN_ALLOC          NULL
+#define H5D_VLEN_ALLOC_INFO     NULL
+#define H5D_VLEN_FREE           NULL
+#define H5D_VLEN_FREE_INFO      NULL
 
 /****************************/
 /* Library Private Typedefs */
@@ -255,13 +159,6 @@ H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
-H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t,
-                            void *copy_data);
-H5_DLL herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
-H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
-H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
-                             void *copy_data);
-H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);

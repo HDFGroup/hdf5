@@ -41,13 +41,11 @@
 static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
 {
     hid_t         fid;
-    char         *file_name;
-    hbool_t       fname_alloc = 0;  /* Whether file_name has been allocated */
+    char         *file_name = NULL;
     char         *obj_name;
+    char         *elink_prefix;         /* External link prefix */
     char         *new_fname = NULL;     /* Buffer allocated to hold Unix file path */
     size_t        fname_len;
-    htri_t        result;
-    size_t        buf_size;             /* Size prefix buffer */
     size_t        start_pos;            /* Initial position in new_fname buffer */
     size_t        x;                    /* Counter variable */
     hid_t         ret_value = -1;
@@ -59,25 +57,25 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
     fname_len = strlen(file_name);
 
     /* See if the external link prefix property is set */
-    if((result = H5Pexist(lapl_id, H5L_ELINK_PREFIX_PROP)) < 0)
+    if(H5Pget_elink_prefix(lapl_id, &elink_prefix) < 0)
         goto error;
 
     /* If so, prepend it to the filename.  We assume that the prefix
      * is in the correct format for the current file system.
      */
-    if(result > 0)
+    if(elink_prefix != NULL)
     {
-        if(H5Pget_size(lapl_id, H5L_ELINK_PREFIX_PROP, &buf_size) < 0)
-          goto error;
+        size_t        buf_size;             /* Size prefix buffer */
+
+        buf_size = strlen(elink_prefix);
 
         /* Allocate a buffer to hold the filename plus prefix */
         new_fname = malloc(buf_size + fname_len + 1);
 
         /* Copy the prefix into the buffer */
-        if(H5Pget(lapl_id, H5L_ELINK_PREFIX_PROP, new_fname) < 0)
-          goto error;
+        strcpy(new_fname, elink_prefix);
 
-        start_pos = buf_size - 1;
+        start_pos = buf_size;
     }
     else
     {
@@ -105,8 +103,10 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
     if(H5Fclose(fid) < 0)
         goto error;
 
-    /* Free file_name if it's been allocated */
-    if(fname_alloc)
+    /* Free file names if they've been allocated */
+    if(new_fname)
+        free(new_fname);
+    if(file_name)
         free(file_name);
 
     return ret_value;

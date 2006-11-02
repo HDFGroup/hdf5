@@ -96,10 +96,9 @@
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
                                                     H5G_CRT_GINFO_EST_NAME_LEN}
 
-/* definitions for copying objects */
-#define H5G_CPY_OPTION_NAME 			"copy object"
-#define H5G_CPY_OPTION_SIZE			sizeof(unsigned)
-#define H5G_CPY_OPTION_DEF			0
+/* ========= Object Copy properties ============ */
+#define H5G_CPY_OPTION_NAME 			"copy object"   /* Copy options */
+
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {

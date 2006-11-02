@@ -326,9 +326,9 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5p_flags[1] = H5P_FILE_ACCESS;
       h5p_flags[2] = H5P_DATASET_CREATE;
       h5p_flags[3] = H5P_DATASET_XFER;
-      h5p_flags[4] = H5P_MOUNT;
+      h5p_flags[4] = H5P_FILE_MOUNT;
       h5p_flags[5] = H5P_DEFAULT;
-      h5p_flags[6] = H5P_NO_CLASS;
+      h5p_flags[6] = H5P_ROOT;
 
 /*
  *  H5R flags

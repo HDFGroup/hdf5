@@ -12,17 +12,118 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Pgcpl.c
+ *			August 29 2006
+ *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *
+ * Purpose:		Group creation property list class routines
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/****************/
+/* Module Setup */
+/****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
-/* Local datatypes */
 
-/* Static function prototypes */
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* Property class callbacks */
+static herr_t H5P_gcrt_reg_prop(H5P_genclass_t *pclass);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Group creation property list class library initialization object */
+const H5P_libclass_t H5P_CLS_GCRT[1] = {{
+    "group create",		/* Class name for debugging     */
+    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
+    &H5P_CLS_GROUP_CREATE_g,	/* Pointer to class ID          */
+    &H5P_LST_GROUP_CREATE_g,	/* Pointer to default property list ID */
+    H5P_gcrt_reg_prop,		/* Default property registration routine */
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_gcrt_reg_prop
+ *
+ * Purpose:     Initialize the group creation property list class
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 31, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_gcrt_reg_prop(H5P_genclass_t *pclass)
+{
+    H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;     /* Default group info settings */
+    H5O_linfo_t linfo = H5G_CRT_LINK_INFO_DEF;      /* Default link info settings */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5P_gcrt_reg_prop, FAIL)
+
+    /* Register group info property */
+    if(H5P_register(pclass, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE,
+             &ginfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register link info property */
+    if(H5P_register(pclass, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE,
+             &linfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_gcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------

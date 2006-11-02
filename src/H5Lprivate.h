@@ -26,19 +26,15 @@
 #include "H5Gprivate.h"
 #include "H5Oprivate.h"
 
-/* Definitions for creating intermediate groups */
-#define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group"
-#define H5L_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
-#define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
+/* Default number of soft links to traverse */
+#define H5L_NUM_LINKS   16
 
-/* Definitions for accessing links */
-#define H5L_NLINKS_NAME        "max soft links"
-#define H5L_NLINKS_SIZE        sizeof(size_t)
-#define H5L_NLINKS_DEF         16 /*max symlinks to follow per lookup  */
+/* ========  Link creation property names ======== */
+#define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group" /* Create intermediate groups flag */
 
-#define H5L_ELINK_PREFIX_NAME        "external link prefix"
-#define H5L_ELINK_PREFIX_SIZE        sizeof(char *)
-#define H5L_ELINK_PREFIX_DEF         NULL /*default is no prefix */
+/* ========  Link access property names ======== */
+#define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */
+#define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"   /* External link prefix */
 
 /* General operations on links */
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,

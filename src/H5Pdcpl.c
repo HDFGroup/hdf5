@@ -12,10 +12,26 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Pdcpl.c
+ *			February 26 1998
+ *			Robb Matzke <matzke@llnl.gov>
+ *
+ * Purpose:		Dataset creation property list class routines
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/****************/
+/* Module Setup */
+/****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -24,10 +40,512 @@
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
-/* Local datatypes */
 
-/* Static function prototypes */
+/****************/
+/* Local Macros */
+/****************/
+
+/* ========  Dataset creation properties ======== */
+/* Definitions for storage layout property */
+#define H5D_CRT_LAYOUT_SIZE        sizeof(H5D_layout_t)
+#define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS
+/* Definitions for chunk dimensionality property */
+#define H5D_CRT_CHUNK_DIM_SIZE     sizeof(unsigned)
+#define H5D_CRT_CHUNK_DIM_DEF      1
+/* Definitions for chunk size */
+#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(size_t[H5O_LAYOUT_NDIMS])
+#define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
+                                   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+/* Definitions for fill value.  size=0 means fill value will be 0 as
+ * library default; size=-1 means fill value is undefined. */
+#define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
+#define H5D_CRT_FILL_VALUE_DEF     {NULL, 0, NULL}
+#define H5D_CRT_FILL_VALUE_CMP     H5P_dcrt_fill_value_cmp
+/* Definitions for space allocation time */
+#define H5D_CRT_ALLOC_TIME_SIZE   sizeof(H5D_alloc_time_t)
+#define H5D_CRT_ALLOC_TIME_DEF    H5D_ALLOC_TIME_LATE
+#define H5D_CRT_ALLOC_TIME_STATE_NAME   "alloc_time_state"
+#define H5D_CRT_ALLOC_TIME_STATE_SIZE   sizeof(unsigned)
+#define H5D_CRT_ALLOC_TIME_STATE_DEF    1
+/* Definitions for time of fill value writing */
+#define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
+#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_IFSET
+/* Definitions for external file list */
+#define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)
+#define H5D_CRT_EXT_FILE_LIST_DEF  {HADDR_UNDEF, 0, 0, NULL}
+#define H5D_CRT_EXT_FILE_LIST_CMP  H5P_dcrt_ext_file_list_cmp
+/* Definitions for data filter pipeline */
+#define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
+#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL}
+#define H5D_CRT_DATA_PIPELINE_CMP  H5P_dcrt_data_pipeline_cmp
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* General routines */
 static herr_t H5P_set_layout(H5P_genplist_t *plist, H5D_layout_t layout);
+
+/* Property class callbacks */
+static herr_t H5P_dcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P_dcrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_data);
+static herr_t H5P_dcrt_close(hid_t dxpl_id, void *close_data);
+
+/* Property callbacks */
+static int H5P_dcrt_fill_value_cmp(const void *value1, const void *value2, size_t size);
+static int H5P_dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
+static int H5P_dcrt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Dataset creation property list class library initialization object */
+const H5P_libclass_t H5P_CLS_DCRT[1] = {{
+    "dataset create",		/* Class name for debugging     */
+    &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
+    &H5P_CLS_DATASET_CREATE_g,	/* Pointer to class ID          */
+    &H5P_LST_DATASET_CREATE_g,	/* Pointer to default property list ID */
+    H5P_dcrt_reg_prop,		/* Default property registration routine */
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    H5P_dcrt_copy,		/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    H5P_dcrt_close,		/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_dcrt_reg_prop
+ *
+ * Purpose:     Register the dataset creation property list class's properties
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 31, 2006
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_dcrt_reg_prop(H5P_genclass_t *pclass)
+{
+    H5D_layout_t layout = H5D_CRT_LAYOUT_DEF;           /* Default storage layout */
+    unsigned chunk_ndims = H5D_CRT_CHUNK_DIM_DEF;       /* Default rank for chunks */
+    size_t chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;       /* Default chunk size */
+    H5O_fill_t fill = H5D_CRT_FILL_VALUE_DEF;           /* Default fill value */
+    H5D_alloc_time_t alloc_time = H5D_CRT_ALLOC_TIME_DEF;       /* Default allocation time */
+    unsigned alloc_time_state = H5D_CRT_ALLOC_TIME_STATE_DEF;   /* Default allocation time state */
+    H5D_fill_time_t fill_time = H5D_CRT_FILL_TIME_DEF;  /* Default fill time */
+    H5O_efl_t efl = H5D_CRT_EXT_FILE_LIST_DEF;          /* Default external file list */
+    H5O_pline_t pline = H5D_CRT_DATA_PIPELINE_DEF;      /* Default I/O pipeline setting */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5P_dcrt_reg_prop)
+
+    /* Register the storage layout property */
+    if(H5P_register(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &layout, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the chunking dimensionality property */
+    if(H5P_register(pclass, H5D_CRT_CHUNK_DIM_NAME, H5D_CRT_CHUNK_DIM_SIZE, &chunk_ndims, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the chunking size property */
+    if(H5P_register(pclass, H5D_CRT_CHUNK_SIZE_NAME, H5D_CRT_CHUNK_SIZE_SIZE, chunk_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the fill value property */
+    if(H5P_register(pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, H5D_CRT_FILL_VALUE_CMP, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the space allocation time property */
+    if(H5P_register(pclass, H5D_CRT_ALLOC_TIME_NAME, H5D_CRT_ALLOC_TIME_SIZE, &alloc_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the space allocation time state property */
+    if(H5P_register(pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &alloc_time_state, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the fill value writing time property */
+    if(H5P_register(pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the external file list property */
+    if(H5P_register(pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, H5D_CRT_EXT_FILE_LIST_CMP, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the data pipeline property */
+    if(H5P_register(pclass, H5D_CRT_DATA_PIPELINE_NAME, H5D_CRT_DATA_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, H5D_CRT_DATA_PIPELINE_CMP, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_reg_prop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_dcrt_copy
+ *
+ * Purpose:        Callback routine which is called whenever any dataset
+ *                 creation property list is copied.  This routine copies
+ *                 the properties from the old list to the new list.
+ *
+ * Return:         Success:        Non-negative
+ *                 Failure:        Negative
+ *
+ * Programmer:     Raymond Lu
+ *                 Tuesday, October 2, 2001
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
+{
+    H5O_fill_t     src_fill, dst_fill;          /* Source & destination fill values */
+    H5O_efl_t      src_efl, dst_efl;            /* Source & destination external file lists */
+    H5O_pline_t    src_pline, dst_pline;        /* Source & destination I/O pipelines */
+    H5P_genplist_t *src_plist;                  /* Pointer to source property list */
+    H5P_genplist_t *dst_plist;                  /* Pointer to destination property list */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5P_dcrt_copy)
+
+    /* Verify property list IDs */
+    if(NULL == (dst_plist = H5I_object(dst_plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+    if(NULL == (src_plist = H5I_object(src_plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+    /* Get the fill value, external file list, and data pipeline properties
+     * from the old property list */
+    if(H5P_get(src_plist, H5D_CRT_FILL_VALUE_NAME, &src_fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
+    if(H5P_get(src_plist, H5D_CRT_EXT_FILE_LIST_NAME, &src_efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
+    if(H5P_get(src_plist, H5D_CRT_DATA_PIPELINE_NAME, &src_pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+
+    /* Make copies of fill value, external file list, and data pipeline */
+    if(src_fill.buf) {
+        if(NULL == H5O_copy(H5O_FILL_ID, &src_fill, &dst_fill))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value")
+    } /* end if */
+    else {
+	dst_fill.type = dst_fill.buf = NULL;
+	dst_fill.size = src_fill.size;
+    } /* end else */
+    HDmemset(&dst_efl, 0, sizeof(H5O_efl_t));
+    if(NULL == H5O_copy(H5O_EFL_ID, &src_efl, &dst_efl))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list")
+    if(NULL == H5O_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline")
+
+    /* Set the fill value, external file list, and data pipeline property
+     * for the destination property list */
+    if(H5P_set(dst_plist, H5D_CRT_FILL_VALUE_NAME, &dst_fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value")
+    if(H5P_set(dst_plist, H5D_CRT_EXT_FILE_LIST_NAME, &dst_efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set external file list")
+    if(H5P_set(dst_plist, H5D_CRT_DATA_PIPELINE_NAME, &dst_pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_dcrt_close
+ *
+ * Purpose:	Callback routine which is called whenever any dataset create
+ *              property list is closed.  This routine performs any generic
+ *              cleanup needed on the properties the library put into the list.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, July 11, 2001
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_dcrt_close(hid_t dcpl_id, void UNUSED *close_data)
+{
+    H5O_fill_t     fill;                /* Fill value */
+    H5O_efl_t      efl;                 /* External file list */
+    H5O_pline_t    pline;               /* I/O pipeline */
+    H5P_genplist_t *plist;              /* Property list */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5P_dcrt_close)
+
+    /* Check arguments */
+    if(NULL == (plist = H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+    /* Get the fill value, external file list, and data pipeline properties
+     * from the old property list */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+
+    /* Clean up any values set for the fill-value, external file-list and
+     * data pipeline */
+    if(H5O_reset(H5O_FILL_ID, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")
+    if(H5O_reset(H5O_EFL_ID, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release external file list info")
+    if(H5O_reset(H5O_PLINE_ID, &pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release pipeline info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_dcrt_fill_value_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the fill value
+ *                 property in the dataset creation property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_dcrt_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED size)
+{
+    const H5O_fill_t *fill1 = (const H5O_fill_t *)_fill1,     /* Create local aliases for values */
+        *fill2 = (const H5O_fill_t *)_fill2;
+    int cmp_value;              /* Value from comparison */
+    herr_t ret_value = 0;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_dcrt_fill_value_cmp)
+
+    /* Sanity check */
+    HDassert(fill1);
+    HDassert(fill2);
+    HDassert(size == sizeof(H5O_fill_t));
+
+    /* Check the size of fill values */
+    if(fill1->size < fill2->size) HGOTO_DONE(-1);
+    if(fill1->size > fill2->size) HGOTO_DONE(1);
+
+    /* Check the types of the fill values */
+    if(fill1->type == NULL && fill2->type != NULL) HGOTO_DONE(-1);
+    if(fill1->type != NULL && fill2->type == NULL) HGOTO_DONE(1);
+    if(fill1->type != NULL)
+        if((cmp_value = H5T_cmp(fill1->type, fill2->type, FALSE)) != 0)
+            HGOTO_DONE(cmp_value);
+
+    /* Check the fill values in the buffers */
+    if(fill1->buf == NULL && fill2->buf != NULL) HGOTO_DONE(-1);
+    if(fill1->buf != NULL && fill2->buf == NULL) HGOTO_DONE(1);
+    if(fill1->buf != NULL)
+        if((cmp_value = HDmemcmp(fill1->buf, fill2->buf, fill1->size)) != 0)
+            HGOTO_DONE(cmp_value);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_fill_value_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_dcrt_ext_file_list_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the external file
+ *                 list property in the dataset creation property list is
+ *                 compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t UNUSED size)
+{
+    const H5O_efl_t *efl1 = (const H5O_efl_t *)_efl1,     /* Create local aliases for values */
+        *efl2 = (const H5O_efl_t *)_efl2;
+    int cmp_value;              /* Value from comparison */
+    herr_t ret_value = 0;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_dcrt_ext_file_list_cmp)
+
+    /* Sanity check */
+    HDassert(efl1);
+    HDassert(efl2);
+    HDassert(size == sizeof(H5O_efl_t));
+
+    /* Check the heap address of external file lists */
+    if(H5F_addr_defined(efl1->heap_addr) || H5F_addr_defined(efl2->heap_addr)) {
+        if(!H5F_addr_defined(efl1->heap_addr) && H5F_addr_defined(efl2->heap_addr)) HGOTO_DONE(-1);
+        if(H5F_addr_defined(efl1->heap_addr) && !H5F_addr_defined(efl2->heap_addr)) HGOTO_DONE(1);
+        if((cmp_value = H5F_addr_cmp(efl1->heap_addr, efl2->heap_addr)) != 0)
+            HGOTO_DONE(cmp_value);
+    } /* end if */
+
+    /* Check the number of allocated efl entries */
+    if(efl1->nalloc < efl2->nalloc) HGOTO_DONE(-1);
+    if(efl1->nalloc > efl2->nalloc) HGOTO_DONE(1);
+
+    /* Check the number of used efl entries */
+    if(efl1->nused < efl2->nused) HGOTO_DONE(-1);
+    if(efl1->nused > efl2->nused) HGOTO_DONE(1);
+
+    /* Check the efl entry information */
+    if(efl1->slot == NULL && efl2->slot != NULL) HGOTO_DONE(-1);
+    if(efl1->slot != NULL && efl2->slot == NULL) HGOTO_DONE(1);
+    if(efl1->slot != NULL && efl1->nused > 0) {
+        size_t u;       /* Local index variable */
+
+        /* Loop through all entries, comparing them */
+        for(u = 0; u < efl1->nused; u++) {
+            /* Check the name offset of the efl entry */
+            if(efl1->slot[u].name_offset < efl2->slot[u].name_offset) HGOTO_DONE(-1);
+            if(efl1->slot[u].name_offset > efl2->slot[u].name_offset) HGOTO_DONE(1);
+
+            /* Check the name of the efl entry */
+            if(efl1->slot[u].name == NULL && efl2->slot[u].name != NULL) HGOTO_DONE(-1);
+            if(efl1->slot[u].name != NULL && efl2->slot[u].name == NULL) HGOTO_DONE(1);
+            if(efl1->slot[u].name != NULL)
+                if((cmp_value = HDstrcmp(efl1->slot[u].name, efl2->slot[u].name)) != 0)
+                    HGOTO_DONE(cmp_value);
+
+            /* Check the file offset of the efl entry */
+            if(efl1->slot[u].offset < efl2->slot[u].offset) HGOTO_DONE(-1);
+            if(efl1->slot[u].offset > efl2->slot[u].offset) HGOTO_DONE(1);
+
+            /* Check the file size of the efl entry */
+            if(efl1->slot[u].size < efl2->slot[u].size) HGOTO_DONE(-1);
+            if(efl1->slot[u].size > efl2->slot[u].size) HGOTO_DONE(1);
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_ext_file_list_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_dcrt_data_pipeline_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the filter pipeline
+ *                 property in the dataset creation property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_dcrt_data_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED size)
+{
+    const H5O_pline_t *pline1 = (const H5O_pline_t *)_pline1,     /* Create local aliases for values */
+        *pline2 = (const H5O_pline_t *)_pline2;
+    int cmp_value;              /* Value from comparison */
+    herr_t ret_value = 0; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_dcrt_data_pipeline_cmp)
+
+    /* Sanity check */
+    HDassert(pline1);
+    HDassert(pline2);
+    HDassert(size == sizeof(H5O_pline_t));
+
+    /* Check the number of allocated pipeline entries */
+    if(pline1->nalloc < pline2->nalloc) HGOTO_DONE(-1);
+    if(pline1->nalloc > pline2->nalloc) HGOTO_DONE(1);
+
+    /* Check the number of used pipeline entries */
+    if(pline1->nused < pline2->nused) HGOTO_DONE(-1);
+    if(pline1->nused > pline2->nused) HGOTO_DONE(1);
+
+    /* Check the filter entry information */
+    if(pline1->filter == NULL && pline2->filter != NULL) HGOTO_DONE(-1);
+    if(pline1->filter != NULL && pline2->filter == NULL) HGOTO_DONE(1);
+    if(pline1->filter != NULL && pline1->nused > 0) {
+        size_t u;       /* Local index variable */
+
+        /* Loop through all filters, comparing them */
+        for(u = 0; u < pline1->nused; u++) {
+            /* Check the ID of the filter */
+            if(pline1->filter[u].id < pline2->filter[u].id) HGOTO_DONE(-1);
+            if(pline1->filter[u].id > pline2->filter[u].id) HGOTO_DONE(1);
+
+            /* Check the flags for the filter */
+            if(pline1->filter[u].flags < pline2->filter[u].flags) HGOTO_DONE(-1);
+            if(pline1->filter[u].flags > pline2->filter[u].flags) HGOTO_DONE(1);
+
+            /* Check the name of the filter */
+            if(pline1->filter[u].name == NULL && pline2->filter[u].name != NULL) HGOTO_DONE(-1);
+            if(pline1->filter[u].name != NULL && pline2->filter[u].name == NULL) HGOTO_DONE(1);
+            if(pline1->filter[u].name != NULL)
+                if((cmp_value = HDstrcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
+                    HGOTO_DONE(cmp_value);
+
+            /* Check the number of parameters for the filter */
+            if(pline1->filter[u].cd_nelmts < pline2->filter[u].cd_nelmts) HGOTO_DONE(-1);
+            if(pline1->filter[u].cd_nelmts > pline2->filter[u].cd_nelmts) HGOTO_DONE(1);
+
+            /* Check the filter parameter information */
+            if(pline1->filter[u].cd_values == NULL && pline2->filter[u].cd_values != NULL) HGOTO_DONE(-1);
+            if(pline1->filter[u].cd_values != NULL && pline2->filter[u].cd_values == NULL) HGOTO_DONE(1);
+            if(pline1->filter[u].cd_values != NULL && pline1->filter[u].cd_nelmts > 0) {
+                size_t v;       /* Local index variable */
+
+                /* Loop through all parameters, comparing them */
+                for(v = 0; v < pline1->filter[u].cd_nelmts; v++) {
+                    /* Check each parameter for the filter */
+                    if(pline1->filter[u].cd_values[v] < pline2->filter[u].cd_values[v]) HGOTO_DONE(-1);
+                    if(pline1->filter[u].cd_values[v] > pline2->filter[u].cd_values[v]) HGOTO_DONE(1);
+                } /* end for */
+            } /* end if */
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_dcrt_data_pipeline_cmp() */
 
 
 /*-------------------------------------------------------------------------
@@ -866,7 +1384,8 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Check args */
-    if(cd_nelmts || cd_values) {
+    if(cd_nelmts || cd_values)
+{
         /*
          * It's likely that users forget to initialize this on input, so
          * we'll check that it has a reasonable value.  The actual number
@@ -967,7 +1486,8 @@ H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Check args */
-    if(cd_nelmts || cd_values) {
+    if(cd_nelmts || cd_values)
+{
         /*
          * It's likely that users forget to initialize this on input, so
          * we'll check that it has a reasonable value.  The actual number

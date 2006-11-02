@@ -1026,7 +1026,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+    if(target_size == H5D_TEMP_BUF_SIZE) {
         /* If the buffer is too small to hold even one element, make it bigger */
         if(target_size<max_type_size)
             target_size = max_type_size;
@@ -1283,7 +1283,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+    if(target_size == H5D_TEMP_BUF_SIZE) {
         /* If the buffer is too small to hold even one element, make it bigger */
         if(target_size<max_type_size)
             target_size = max_type_size;
@@ -1570,7 +1570,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+    if(target_size == H5D_TEMP_BUF_SIZE) {
         /* If the buffer is too small to hold even one element, make it bigger */
         if(target_size<max_type_size)
             target_size = max_type_size;
@@ -1891,7 +1891,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+    if(target_size == H5D_TEMP_BUF_SIZE) {
         /* If the buffer is too small to hold even one element, make it bigger */
         if(target_size<max_type_size)
             target_size = max_type_size;

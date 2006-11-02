@@ -547,7 +547,7 @@ toomany(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NLINKS_DEF == 16);
+    HDassert(H5L_NUM_LINKS == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -836,7 +836,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
 
     /* Check that its character encoding is the default */
     if(H5Lget_info(file_id, "group", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-    if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
+    if(linfo.cset != H5F_DEFAULT_CSET) TEST_ERROR
 
     /* Create and commit a datatype with the default LCPL */
     if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -846,7 +846,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
 
     /* Check that its character encoding is the default */
     if(H5Lget_info(file_id, "type", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-    if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
+    if(linfo.cset != H5F_DEFAULT_CSET) TEST_ERROR
 
     /* Create a dataspace */
     dims[0] = H5L_DIM1;
@@ -860,7 +860,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
 
     /* Check that its character encoding is the default */
     if(H5Lget_info(file_id, "dataset", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-    if(linfo.cset != H5F_CRT_DEFAULT_CSET) TEST_ERROR
+    if(linfo.cset != H5F_DEFAULT_CSET) TEST_ERROR
 
     /* Create a link creation property list with the UTF-8 character encoding */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
@@ -2296,7 +2296,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NLINKS_DEF == 16);
+    HDassert(H5L_NUM_LINKS == 16);
 
     /* Set up filenames */
     h5_fixname(FILENAME[3], fapl, filename1, sizeof filename1);
@@ -4818,7 +4818,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NLINKS_DEF == 16);
+    HDassert(H5L_NUM_LINKS == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);

@@ -12,18 +12,125 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Plapl.c
+ *			July 14 2006
+ *			James Laird <jlaird@ncsa.uiuc.edu>
+ *
+ * Purpose:		Link access property list class routines
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/****************/
+/* Module Setup */
+/****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
-/* Local datatypes */
 
-/* Static function prototypes */
+/****************/
+/* Local Macros */
+/****************/
+
+/* ========  Link access properties ======== */
+/* Definitions for number of soft links to traverse */
+#define H5L_ACS_NLINKS_SIZE        sizeof(size_t)
+#define H5L_ACS_NLINKS_DEF         H5L_NUM_LINKS /*max symlinks to follow per lookup  */
+/* Definitions for external link prefix */
+#define H5L_ACS_ELINK_PREFIX_SIZE        sizeof(char *)
+#define H5L_ACS_ELINK_PREFIX_DEF         NULL /*default is no prefix */
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* Property class callbacks */
+static herr_t H5P_lacc_reg_prop(H5P_genclass_t *pclass);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Dataset creation property list class library initialization object */
+const H5P_libclass_t H5P_CLS_LACC[1] = {{
+    "link access",		/* Class name for debugging     */
+    &H5P_CLS_ROOT_g,		/* Parent class ID              */
+    &H5P_CLS_LINK_ACCESS_g,	/* Pointer to class ID          */
+    &H5P_LST_LINK_ACCESS_g,	/* Pointer to default property list ID */
+    H5P_lacc_reg_prop,		/* Default property registration routine */
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_lacc_reg_prop
+ *
+ * Purpose:     Register the dataset creation property list class's properties
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 31, 2006
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_lacc_reg_prop(H5P_genclass_t *pclass)
+{
+    size_t nlinks = H5L_ACS_NLINKS_DEF; /* Default number of soft links to traverse */
+    char *elink_prefix = H5L_ACS_ELINK_PREFIX_DEF; /* Default external link prefix string */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5P_lacc_reg_prop, FAIL)
+
+    /* Register property for number of links traversed */
+    if(H5P_register(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE,
+             &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register property for external link prefix */
+    if(H5P_register(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE,
+             &elink_prefix, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_lacc_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -64,7 +171,7 @@ H5Pset_nlinks(hid_t plist_id, size_t nlinks)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set number of links */
-    if(H5P_set(plist, H5L_NLINKS_NAME, &nlinks) < 0)
+    if(H5P_set(plist, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info")
 
 done:
@@ -105,7 +212,7 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the current number of links */
-    if(H5P_get(plist, H5L_NLINKS_NAME, nlinks) < 0)
+    if(H5P_get(plist, H5L_ACS_NLINKS_NAME, nlinks) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
 
 done:
@@ -145,7 +252,7 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set prefix */
-    if(H5P_set(plist, H5L_ELINK_PREFIX_NAME, &prefix) < 0)
+    if(H5P_set(plist, H5L_ACS_ELINK_PREFIX_NAME, &prefix) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
 
 done:
@@ -186,7 +293,7 @@ H5Pget_elink_prefix(hid_t plist_id, char **prefix)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the current prefix */
-    if(H5P_get(plist, H5L_ELINK_PREFIX_NAME, prefix) < 0)
+    if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, prefix) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
 
 done:

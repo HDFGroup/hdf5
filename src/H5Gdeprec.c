@@ -140,6 +140,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *d
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Gmove2, FAIL)
+    H5TRACE4("e","isis",src_loc_id,src_name,dst_loc_id,dst_name);
 
     if((ret_value = H5Lmove(src_loc_id, src_name, dst_loc_id, dst_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
@@ -186,6 +187,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Gget_linkval, FAIL)
+    H5TRACE4("e","iszx",loc_id,name,size,buf);
 
     if((ret_value = H5Lget_linkval(loc_id, name, size, buf, H5P_DEFAULT)) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")

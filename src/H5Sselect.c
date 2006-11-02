@@ -1058,10 +1058,10 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     hsize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t space_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
-    hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
+    hsize_t off[H5D_IO_VECTOR_SIZE];          /* Array to store sequence offsets */
     hsize_t curr_off;           /* Current offset within sequence */
     hsize_t tmp_off;            /* Temporary offset within sequence */
-    size_t len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
+    size_t len[H5D_IO_VECTOR_SIZE];           /* Array to store sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequnce being worked on */
@@ -1112,7 +1112,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     /* Loop, while elements left in selection */
     while(max_elem>0 && user_ret==0) {
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_XFER_HYPER_VECTOR_SIZE_DEF, max_elem, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1438,8 +1438,8 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     uint8_t *buf;               /* Current location in buffer */
     void *fill=_fill;           /* Alias for fill-value buffer */
     hssize_t nelmts;            /* Number of elements in selection */
-    hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
-    size_t len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
+    hsize_t off[H5D_IO_VECTOR_SIZE];          /* Array to store sequence offsets */
+    size_t len[H5D_IO_VECTOR_SIZE];           /* Array to store sequence lengths */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequnce being worked on */
     size_t nelem;               /* Number of elements used in sequences */
@@ -1474,7 +1474,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     /* Loop, while elements left in selection */
     while(max_elem>0) {
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_XFER_HYPER_VECTOR_SIZE_DEF, max_elem, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop over sequences */

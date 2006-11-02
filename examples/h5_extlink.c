@@ -50,7 +50,7 @@
  * Creates two files and uses an external link to access an object in the
  * second file from the first file.
  */
-void extlink_example()
+void extlink_example(void)
 {
     hid_t source_file_id, targ_file_id;
     hid_t group_id, group2_id;
@@ -110,7 +110,7 @@ void extlink_example()
  * where it is run (so to run this example on Unix, first mkdir red and mkdir
  * blue).
  */
-void extlink_prefix_example()
+void extlink_prefix_example(void)
 {
     hid_t source_file_id, red_file_id, blue_file_id;
     hid_t group_id, group2_id;
@@ -210,7 +210,7 @@ void extlink_prefix_example()
  */
 static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
 
-void soft_link_example()
+void soft_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
@@ -308,7 +308,7 @@ static herr_t UD_hard_create(const char *link_name, hid_t loc_group, void *udata
 static herr_t UD_hard_delete(const char *link_name, hid_t loc_group, void *udata, size_t udata_size);
 static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
 
-void hard_link_example()
+void hard_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
@@ -521,7 +521,7 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void * uda
  */
 static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
 
-void plist_link_example()
+void plist_link_example(void)
 {
     hid_t file_id;
     hid_t group_id, group2_id;

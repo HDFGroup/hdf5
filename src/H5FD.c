@@ -113,7 +113,7 @@ static unsigned long file_serial_no;
 static herr_t
 H5FD_init_interface(void)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_init_interface)
 
@@ -121,11 +121,11 @@ H5FD_init_interface(void)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
-    file_serial_no=0;
+    file_serial_no = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -396,36 +396,30 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, August 20, 1999
  *
- * Modifications:
- *
- *		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property
- *		list.
- *
  *-------------------------------------------------------------------------
  */
 H5FD_class_t *
 H5FD_get_class(hid_t id)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5FD_class_t	*ret_value=NULL;
-    hid_t               driver_id = -1;
+    H5FD_class_t	*ret_value = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_get_class, NULL)
 
-    if(H5I_VFL==H5I_get_type(id)) {
+    if(H5I_VFL == H5I_get_type(id))
 	ret_value = H5I_object(id);
-    } else {
+    else {
+        H5P_genplist_t *plist;      /* Property list pointer */
+        hid_t driver_id = -1;
+
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
-        if(TRUE==H5P_isa_class(id,H5P_FILE_ACCESS)) {
+        if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
             if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
             ret_value = H5FD_get_class(driver_id);
-        } else if(TRUE==H5P_isa_class(id,H5P_DATASET_XFER)) {
+        } else if(TRUE == H5P_isa_class(id, H5P_DATASET_XFER)) {
             if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
             ret_value = H5FD_get_class(driver_id);
@@ -436,7 +430,7 @@ H5FD_get_class(hid_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_get_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -609,14 +603,12 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, October 23, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_pl_close)
 
@@ -624,7 +616,8 @@ H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
     if(pl && free_func) {
 	if((free_func)(pl) < 0)
 	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
-    } else
+    } /* end if */
+    else
 	H5MM_xfree(pl);
 
     /* Decrement reference count for driver */
@@ -776,18 +769,18 @@ done:
 herr_t
 H5FD_fapl_close(hid_t driver_id, void *fapl)
 {
-    H5FD_class_t	*driver=NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_class_t	*driver = NULL;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_fapl_close, FAIL)
 
     /* Check args */
-    if(driver_id>0) {
-        if(NULL==(driver=H5I_object(driver_id)))
+    if(driver_id > 0) {
+        if(NULL == (driver = H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
         /* Close the driver for the property list */
-        if(H5FD_pl_close(driver_id,driver->fapl_free,fapl) < 0)
+        if(H5FD_pl_close(driver_id, driver->fapl_free, fapl) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
     } /* end if */
 

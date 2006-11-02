@@ -221,7 +221,7 @@ H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     HDassert(ent);
 
     /* Set (default) common info for link */
-    lnk->cset = H5F_CRT_DEFAULT_CSET;
+    lnk->cset = H5F_DEFAULT_CSET;
     lnk->corder = 0;
     lnk->corder_valid = FALSE;       /* Creation order not valid for this link */
     lnk->name = H5MM_xstrdup(name);

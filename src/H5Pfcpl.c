@@ -12,19 +12,181 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Pfcpl.c
+ *			January  6 1998
+ *			Robb Matzke <matzke@llnl.gov>
+ *
+ * Purpose:		File creation property list class routines
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/****************/
+/* Module Setup */
+/****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"		/* B-tree subclass names	  	*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
-/* Local datatypes */
 
-/* Static function prototypes */
+/****************/
+/* Local Macros */
+/****************/
+
+/* ========= File Creation properties ============ */
+/* Definitions for the size of the file user block in bytes */
+#define H5F_CRT_USER_BLOCK_SIZE      sizeof(hsize_t)
+#define H5F_CRT_USER_BLOCK_DEF       0
+/* Definitions for the 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_SIZE        sizeof(unsigned)
+#define H5F_CRT_SYM_LEAF_DEF         4
+/* Definitions for the 1/2 rank for btree internal nodes    */
+#define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
+#define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_ISTORE_IK_DEF}
+/* Definitions for byte number in an address                */
+#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
+#define H5F_CRT_ADDR_BYTE_NUM_DEF    H5F_OBJ_ADDR_SIZE
+/* Definitions for byte number for object size              */
+#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(size_t)
+#define H5F_CRT_OBJ_BYTE_NUM_DEF      H5F_OBJ_SIZE_SIZE
+/* Definitions for version number of the superblock         */
+#define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
+#define H5F_CRT_SUPER_VERS_DEF        HDF5_SUPERBLOCK_VERSION_DEF
+/* Definitions for free-space version number                */
+#define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(unsigned)
+#define H5F_CRT_FREESPACE_VERS_DEF    HDF5_FREESPACE_VERSION
+/* Definitions for object directory version number          */
+#define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(unsigned)
+#define H5F_CRT_OBJ_DIR_VERS_DEF      HDF5_OBJECTDIR_VERSION
+/* Definitions for shared-header format version             */
+#define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
+#define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* Property class callbacks */
+static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* File creation property list class library initialization object */
+const H5P_libclass_t H5P_CLS_FCRT[1] = {{
+    "file create",		/* Class name for debugging     */
+    &H5P_CLS_GROUP_CREATE_g,	/* Parent class ID              */
+    &H5P_CLS_FILE_CREATE_g,	/* Pointer to class ID          */
+    &H5P_LST_FILE_CREATE_g,	/* Pointer to default property list ID */
+    H5P_fcrt_reg_prop,		/* Default property registration routine */
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_fcrt_reg_prop
+ *
+ * Purpose:     Register the file creation property list class's properties
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 31, 2006
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
+{
+    hsize_t userblock_size = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
+    unsigned sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
+    unsigned btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
+    size_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
+    size_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
+    unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
+    unsigned freespace_ver = H5F_CRT_FREESPACE_VERS_DEF;/* Default free space version # */
+    unsigned objectdir_ver = H5F_CRT_OBJ_DIR_VERS_DEF;  /* Default object directory version # */
+    unsigned sharedheader_ver = H5F_CRT_SHARE_HEAD_VERS_DEF;    /* Default shared header message version # */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
+
+    /* Register the user block size */
+    if(H5P_register(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &userblock_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the 1/2 rank for symbol table leaf nodes */
+    if(H5P_register(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &sym_leaf_k, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the 1/2 rank for btree internal nodes */
+    if(H5P_register(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, btree_k, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the byte number for an address */
+    if(H5P_register(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the byte number for object size */
+    if(H5P_register(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE, &sizeof_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the superblock version number */
+    if(H5P_register(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &superblock_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the free-space version number */
+    if(H5P_register(pclass, H5F_CRT_FREESPACE_VERS_NAME, H5F_CRT_FREESPACE_VERS_SIZE, &freespace_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the object directory version number */
+    if(H5P_register(pclass, H5F_CRT_OBJ_DIR_VERS_NAME, H5F_CRT_OBJ_DIR_VERS_SIZE, &objectdir_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the shared-header version number */
+    if(H5P_register(pclass, H5F_CRT_SHARE_HEAD_VERS_NAME, H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_fcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------

@@ -133,7 +133,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     size_t      npoints;        /* Number of points in space */
     size_t      ptsperbuf;      /* Maximum # of points which fit in the buffer */
     size_t      elmt_size;      /* Size of each element */
-    size_t	bufsize=H5D_XFER_MAX_TEMP_BUF_DEF; /* Size of buffer to write */
+    size_t	bufsize = H5D_TEMP_BUF_SIZE; /* Size of buffer to write */
     size_t	size;           /* Current # of points to write */
     hsize_t	offset;         /* Offset of dataset */
     void       *buf = NULL;     /* Buffer for fill value writing */
@@ -1042,7 +1042,7 @@ H5D_contig_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     /* Set up number of bytes to copy, and initial buffer size */
     total_src_nbytes = layout_src->u.contig.size;
     H5_CHECK_OVERFLOW(total_src_nbytes,hsize_t,size_t);
-    buf_size = MIN(H5D_XFER_MAX_TEMP_BUF_DEF, (size_t)total_src_nbytes);
+    buf_size = MIN(H5D_TEMP_BUF_SIZE, (size_t)total_src_nbytes);
 
     /* If there's a source datatype, set up type conversion information */
     if(dt_src) {

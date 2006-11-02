@@ -54,6 +54,7 @@
     (io_info)->dxpl_id=dxpl_i;                                          \
     (io_info)->store=str
 
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/

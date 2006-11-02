@@ -132,7 +132,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     HDassert(loc);
     HDassert(name && *name);
     HDassert(child);
-    HDassert(TRUE == H5P_isa_class(plist_id,H5P_MOUNT));
+    HDassert(TRUE == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
 
     /* Set up dataset location to fill in */
     mp_loc.oloc = &mp_oloc;
@@ -488,9 +488,9 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     if(NULL == (child = H5I_object_verify(child_id,H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(H5P_DEFAULT == plist_id)
-        plist_id = H5P_MOUNT_DEFAULT;
+        plist_id = H5P_FILE_MOUNT_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
+        if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
     /* Do the mount */

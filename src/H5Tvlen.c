@@ -57,10 +57,10 @@ static herr_t H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_b
 
 /* Default settings for variable-length allocation routines */
 static H5T_vlen_alloc_info_t H5T_vlen_def_vl_alloc_info ={
-    H5D_XFER_VLEN_ALLOC_DEF,
-    H5D_XFER_VLEN_ALLOC_INFO_DEF,
-    H5D_XFER_VLEN_FREE_DEF,
-    H5D_XFER_VLEN_FREE_INFO_DEF
+    H5D_VLEN_ALLOC,
+    H5D_VLEN_ALLOC_INFO,
+    H5D_VLEN_FREE,
+    H5D_VLEN_FREE_INFO
 };
 
 

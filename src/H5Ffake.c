@@ -81,7 +81,7 @@ H5F_fake_alloc(size_t sizeof_size)
 
     /* Only set fields necessary for clients */
     if(sizeof_size == 0)
-        f->shared->sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;
+        f->shared->sizeof_size = H5F_OBJ_SIZE_SIZE;
     else
         f->shared->sizeof_size = sizeof_size;
 

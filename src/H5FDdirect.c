@@ -313,7 +313,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     herr_t 		ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_direct, FAIL)
-    H5TRACE4("e","ihhh",fapl_id,boundary,block_size,cbuf_size);
+    H5TRACE4("e","izzz",fapl_id,boundary,block_size,cbuf_size);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")

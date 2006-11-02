@@ -123,12 +123,12 @@ nh5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f * c_flag)
  * Purpose:     Call H5Pget_class to determine property list class
  * Inputs:      prp_id - identifier of the dataspace
  * Outputs:     classtype - class type; possible values are:
- *              H5P_NO_CLASS_F       -1
+ *              H5P_ROOT_F       -1
  *              H5P_FILE_CREATE_F     0
  *              H5P_FILE_ACCESS_F     1
  *              H5P_DATASET_CREATE_F  2
  *              H5P_DATASET_XFER_F    3
- *              H5P_MOUNT_F           4
+ *              H5P_FILE_MOUNT_F      4
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Saturday, August 14, 1999
@@ -144,8 +144,8 @@ nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype)
 
   c_prp_id = *prp_id;
   c_classtype = H5Pget_class(c_prp_id);
-  if (c_classtype == H5P_NO_CLASS ) {
-      *classtype = H5P_NO_CLASS;
+  if (c_classtype == H5P_ROOT ) {
+      *classtype = H5P_ROOT;
        ret_value = -1;
        return ret_value;
   }

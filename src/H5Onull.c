@@ -20,8 +20,6 @@
  *
  * Purpose:             The null message.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -51,3 +49,4 @@ const H5O_msg_class_t H5O_MSG_NULL[1] = {{
     NULL,		    /*no post copy native value to file    */
     NULL                    /*no debug method               */
 }};
+

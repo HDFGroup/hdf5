@@ -110,13 +110,68 @@ struct H5P_genplist_t {
     H5SL_t *props;      /* Skip list containing properties */
 };
 
+/* Function pointer for library classes with properties to register */
+typedef herr_t (*H5P_init_class_op_t)(H5P_genclass_t *pclass);
+typedef herr_t (*H5P_reg_prop_func_t)(H5P_genclass_t *pclass);
+
+/*
+ * Each library property list class has a variable of this type that contains
+ * class variables and methods used to initialize the class.
+ */
+typedef struct H5P_libclass_t {
+    const char	*name;		        /* Class name */
+
+    hid_t const * const par_class_id;   /* Pointer to global parent class property list class ID */
+    hid_t * const class_id;             /* Pointer to global property list class ID */
+    hid_t * const def_plist_id;         /* Pointer to global default property list ID */
+    H5P_reg_prop_func_t reg_prop_func;  /* Register class's properties */
+
+    /* Class callback function pointers & info */
+    H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
+    void *create_data;                  /* Pointer to user data to pass along to create callback */
+    H5P_cls_copy_func_t copy_func;      /* Function to call when a property list is copied */
+    void *copy_data;                    /* Pointer to user data to pass along to copy callback */
+    H5P_cls_close_func_t close_func;    /* Function to call when a property list is closed */
+    void *close_data;                   /* Pointer to user data to pass along to close callback */
+} H5P_libclass_t;
+
+/*
+ * Library property list classes.
+ */
+
+H5_DLLVAR const H5P_libclass_t H5P_CLS_ROOT[1];         /* Root */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_GACC[1];         /* Group access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DACC[1];         /* Dataset access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_TCRT[1];         /* Datatype creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_TACC[1];         /* Datatype access */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
+
 /* Private functions, not part of the publicly documented API */
+H5_DLL H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
+    const char *name, unsigned internal,
+    H5P_cls_create_func_t cls_create, void *create_data,
+    H5P_cls_copy_func_t cls_copy, void *copy_data,
+    H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL herr_t H5P_add_prop(H5SL_t *props, H5P_genprop_t *prop);
 H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
 H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
 H5_DLL int H5P_tbbt_strcmp(const void *k1, const void *k2, int cmparg);
 H5_DLL herr_t H5P_close_class(void *_pclass);
+
+/* Class initialization routines */
+H5_DLL herr_t H5P_ocpy_init(H5P_genclass_t *pclass);
 
 /* Testing functions */
 #ifdef H5P_TESTING

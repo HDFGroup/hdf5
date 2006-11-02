@@ -594,6 +594,7 @@
 ./src/H5Pdxpl.c
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
+./src/H5Pfmpl.c
 ./src/H5Pgcpl.c
 ./src/H5Plapl.c
 ./src/H5Plcpl.c

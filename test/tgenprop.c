@@ -79,7 +79,7 @@ test_genprop_basic_class(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check class name */
@@ -94,7 +94,7 @@ test_genprop_basic_class(void)
     CHECK_I(cid2, "H5Pget_class_parent");
 
     /* Verify class parent correct */
-    ret = H5Pequal(cid2,H5P_NO_CLASS);
+    ret = H5Pequal(cid2,H5P_ROOT);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Make certain false postives aren't being returned */
@@ -167,7 +167,7 @@ test_genprop_basic_class_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Properties Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check the number of properties in class */
@@ -343,7 +343,7 @@ test_genprop_class_iter(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Property Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -455,7 +455,7 @@ test_genprop_class_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,test_genprop_cls_cb1,&crt_cb_struct,NULL,NULL,test_genprop_cls_cb1,&cls_cb_struct);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,test_genprop_cls_cb1,&crt_cb_struct,NULL,NULL,test_genprop_cls_cb1,&cls_cb_struct);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -570,7 +570,7 @@ test_genprop_basic_list(void)
     MESSAGE(5, ("Testing Basic Generic Property List Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (w/default values) */
@@ -680,7 +680,7 @@ test_genprop_basic_list_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
@@ -852,7 +852,7 @@ test_genprop_list_iter(void)
     MESSAGE(5, ("Testing Generic Property List Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
@@ -1126,7 +1126,7 @@ test_genprop_list_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,test_genprop_cls_cb2,&cop_cb_struct,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,test_genprop_cls_cb2,&cop_cb_struct,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with callbacks) */
@@ -1498,7 +1498,7 @@ test_genprop_equal(void)
     MESSAGE(5, ("Testing Basic Generic Property List Equal Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -1554,7 +1554,7 @@ test_genprop_path(void)
     MESSAGE(5, ("Testing Generic Property List Class Path Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -1633,7 +1633,7 @@ test_genprop_refcount(void)
     MESSAGE(5, ("Testing Generic Property List Reference Count Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_ROOT,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */

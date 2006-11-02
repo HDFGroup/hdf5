@@ -1151,61 +1151,17 @@ done:
 static herr_t
 H5G_init_interface(void)
 {
-    H5P_genclass_t  *crt_pclass, *acc_pclass, *cpy_pclass;
     herr_t          ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface)
 
     /* Initialize the atom group for the group IDs */
-    if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
-		       (H5I_free_t)H5G_close) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
-
-    /* ========== Group Creation Property Class Initialization ============*/
-    assert(H5P_CLS_GROUP_CREATE_g!=-1);
-
-    /* Get the pointer to group creation class */
-    if(NULL == (crt_pclass = H5I_object(H5P_CLS_GROUP_CREATE_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_GROUP_CREATE_g == (-1)) {
-        /* Register the default group creation property list */
-        if((H5P_LST_GROUP_CREATE_g = H5P_create_id(crt_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
-    } /* end if */
-
-    /* ========== Group Access Property Class Initialization ============*/
-    assert(H5P_CLS_GROUP_ACCESS_g!=-1);
-
-    /* Get the pointer to group creation class */
-    if(NULL == (acc_pclass = H5I_object(H5P_CLS_GROUP_ACCESS_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_GROUP_ACCESS_g == (-1)) {
-        /* Register the default group creation property list */
-        if((H5P_LST_GROUP_ACCESS_g = H5P_create_id(acc_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
-    } /* end if */
-
-    /* ========== Object Copy Property Class Initialization ============*/
-    assert(H5P_CLS_OBJECT_COPY_g!=-1);
-
-    /* Get the pointer to group access class */
-    if(NULL == (cpy_pclass = H5I_object(H5P_CLS_OBJECT_COPY_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_OBJECT_COPY_g == (-1)) {
-        /* Register the default group access property list */
-        if((H5P_LST_OBJECT_COPY_g = H5P_create_id(cpy_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
-    } /* end if */
+    if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS, (H5I_free_t)H5G_close) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_init_interface() */
 
 
 /*-------------------------------------------------------------------------

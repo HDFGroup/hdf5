@@ -71,7 +71,6 @@ DESCRIPTION
 static herr_t
 H5A_init_interface(void)
 {
-    H5P_genclass_t  *crt_pclass;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_init_interface)
@@ -82,24 +81,9 @@ H5A_init_interface(void)
     if(H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close) < H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    /* =========Attribute Creation Property Class Initialization========= */
-    /* Register the default attribute creation properties */
-    assert(H5P_CLS_ATTRIBUTE_CREATE_g!=(-1));
-
-    /* Get the pointer to the attribute creation class */
-    if (NULL == (crt_pclass = H5I_object(H5P_CLS_ATTRIBUTE_CREATE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_ATTRIBUTE_CREATE_g==(-1)) {
-        /* Register the default attribute creation property list */
-        if ((H5P_LST_ATTRIBUTE_CREATE_g = H5P_create_id (crt_pclass))<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list")
-    } /* end if */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5A_init_interface() */
 
 
 /*--------------------------------------------------------------------------

@@ -98,4 +98,5 @@ H5_DLL htri_t H5Itype_exists(H5I_type_t type);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Ipublic_H */
+

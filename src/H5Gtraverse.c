@@ -207,7 +207,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
 
     if(NULL == (lapl = H5I_object(lapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
-    if(H5P_set(lapl, H5L_NLINKS_NAME, nlinks) < 0)
+    if(H5P_set(lapl, H5L_ACS_NLINKS_NAME, nlinks) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info")
 
     /* User-defined callback function */
@@ -789,11 +789,11 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Set nlinks value from property list, if it exists */
     if(lapl_id == H5P_DEFAULT)
-        nlinks = H5L_NLINKS_DEF;
+        nlinks = H5L_NUM_LINKS;
     else {
         if(NULL == (lapl = H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_get(lapl, H5L_NLINKS_NAME, &nlinks) < 0)
+        if(H5P_get(lapl, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
     } /* end else */
 

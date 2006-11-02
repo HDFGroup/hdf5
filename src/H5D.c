@@ -75,14 +75,6 @@ static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 
-/* Property list callbacks */
-static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5D_xfer_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5D_xfer_xform_copy(const char* name, size_t size, void* value);
-static herr_t H5D_xfer_xform_close(const char* name, size_t size, void* value);
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -160,77 +152,7 @@ NOTES
 static herr_t
 H5D_init_interface(void)
 {
-    /* Dataset Transfer property class variables.  In sequence, they are,
-     * - Transfer Property list class to modify
-     * - Default value for maximum data transform buffer size
-     * - Default value for maximum temp buffer size
-     * - Default value for type conversion buffer
-     * - Default value for background buffer
-     * - Default value for B-tree node split ratios
-     * - Default value for hyperslab caching
-     * - Default value for hyperslab cache limit
-     * - Default value for vlen allocation function
-     * - Default value for vlen allocation information
-     * - Default value for vlen free function
-     * - Default value for vlen free information
-     * - Default value for file driver ID
-     * - Default value for file driver info
-     * - Default value for 'gather reads' property
-     * - Default value for vector size
-     * - Default value for I/O transfer mode
-     * - Default value for EDC property
-     * - Default value for filter callback
-     * - Default value for datatype conversion callback
-     */
-    H5P_genclass_t  *xfer_pclass;
-    size_t          def_max_temp_buf         = H5D_XFER_MAX_TEMP_BUF_DEF;
-    void            *def_tconv_buf           = H5D_XFER_TCONV_BUF_DEF;
-    void            *def_bkgr_buf            = H5D_XFER_BKGR_BUF_DEF;
-    H5T_bkg_t       def_bkgr_buf_type        = H5D_XFER_BKGR_BUF_TYPE_DEF;
-    double          def_btree_split_ratio[3] = H5D_XFER_BTREE_SPLIT_RATIO_DEF;
-    H5MM_allocate_t def_vlen_alloc           = H5D_XFER_VLEN_ALLOC_DEF;
-    void            *def_vlen_alloc_info     = H5D_XFER_VLEN_ALLOC_INFO_DEF;
-    H5MM_free_t     def_vlen_free            = H5D_XFER_VLEN_FREE_DEF;
-    void            *def_vlen_free_info      = H5D_XFER_VLEN_FREE_INFO_DEF;
-    hid_t           def_vfl_id               = H5D_XFER_VFL_ID_DEF;
-    void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;
-    size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF;
-#ifdef H5_HAVE_PARALLEL
-    H5FD_mpio_xfer_t def_io_xfer_mode          = H5D_XFER_IO_XFER_MODE_DEF;
-    H5FD_mpio_collective_opt_t def_io_xfer_opt_mode  = H5D_XFER_IO_XFER_OPT_MODE_DEF;
-    H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
-    H5FD_mpio_collective_opt_t def_mpio_collective_opt_mode = H5D_XFER_MPIO_COLLECTIVE_OPT_DEF;
-    unsigned def_mpio_chunk_opt_num               = H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF;
-    unsigned def_mpio_chunk_opt_ratio             = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
-#endif /* H5_HAVE_PARALLEL */
-    H5Z_EDC_t       enable_edc               = H5D_XFER_EDC_DEF;
-    H5Z_cb_t        filter_cb                = H5D_XFER_FILTER_CB_DEF;
-    H5T_conv_cb_t   conv_cb                  = H5D_XFER_CONV_CB_DEF;
-    void            *def_xfer_xform          = H5D_XFER_XFORM_DEF;
-
-    /* Dataset creation property class variables.  In sequence, they are,
-     * - Creation property list class to modify
-     * - Default value for storage layout property
-     * - Default value for chunk dimensionality property
-     * - Default value for chunk size
-     * - Default value for fill value
-     * - Default value for external file list
-     * - Default value for data filter pipeline
-     */
-    H5P_genclass_t  *crt_pclass;
-    H5D_layout_t    layout                   = H5D_CRT_LAYOUT_DEF;
-    unsigned        chunk_ndims              = H5D_CRT_CHUNK_DIM_DEF;
-    size_t          chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;
-    H5O_fill_t      fill                     = H5D_CRT_FILL_VALUE_DEF;
-    H5D_alloc_time_t    alloc_time           = H5D_CRT_ALLOC_TIME_DEF;
-    unsigned        alloc_time_state         = H5D_CRT_ALLOC_TIME_STATE_DEF;
-    H5D_fill_time_t     fill_time            = H5D_CRT_FILL_TIME_DEF;
-    H5O_efl_t       efl                      = H5D_CRT_EXT_FILE_LIST_DEF;
-    H5O_pline_t     pline                    = H5D_CRT_DATA_PIPELINE_DEF;
-
     H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
-    size_t          nprops;                 /* Number of properties */
-    H5P_genclass_t  *acc_pclass;
     herr_t          ret_value                = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
@@ -239,173 +161,13 @@ H5D_init_interface(void)
     if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<H5I_FILE)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    /* =========Dataset Transfer Property Class Initialization========= */
-    /* Register the default dataset transfer properties */
-    assert(H5P_CLS_DATASET_XFER_g!=(-1));
-
-    /* Get the pointer to the dataset transfer class */
-    if (NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(xfer_pclass,&nprops,FALSE)<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
-
-    /* Assume that if there are properties in the class, they are the default ones */
-    if(nprops==0) {
-        /* Register the max. temp buffer size property */
-        if(H5P_register(xfer_pclass,H5D_XFER_MAX_TEMP_BUF_NAME,H5D_XFER_MAX_TEMP_BUF_SIZE,&def_max_temp_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the type conversion buffer property */
-        if(H5P_register(xfer_pclass,H5D_XFER_TCONV_BUF_NAME,H5D_XFER_TCONV_BUF_SIZE,&def_tconv_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the background buffer property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_NAME,H5D_XFER_BKGR_BUF_SIZE,&def_bkgr_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the background buffer type property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_TYPE_NAME,H5D_XFER_BKGR_BUF_TYPE_SIZE,&def_bkgr_buf_type,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the B-Tree node splitting ratios property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BTREE_SPLIT_RATIO_NAME,H5D_XFER_BTREE_SPLIT_RATIO_SIZE,def_btree_split_ratio,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the vlen allocation function property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_NAME,H5D_XFER_VLEN_ALLOC_SIZE,&def_vlen_alloc,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the vlen allocation information property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_INFO_NAME,H5D_XFER_VLEN_ALLOC_INFO_SIZE,&def_vlen_alloc_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the vlen free function property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_NAME,H5D_XFER_VLEN_FREE_SIZE,&def_vlen_free,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the vlen free information property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_INFO_NAME,H5D_XFER_VLEN_FREE_INFO_SIZE,&def_vlen_free_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the file driver ID property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VFL_ID_NAME,H5D_XFER_VFL_ID_SIZE,&def_vfl_id,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the file driver info property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VFL_INFO_NAME,H5D_XFER_VFL_INFO_SIZE,&def_vfl_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the vector size property */
-        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-#ifdef H5_HAVE_PARALLEL
-        /* Register the I/O transfer mode property */
-        if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_MODE_NAME,H5D_XFER_IO_XFER_MODE_SIZE,&def_io_xfer_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-        if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_OPT_MODE_NAME,H5D_XFER_IO_XFER_OPT_MODE_SIZE,&def_io_xfer_opt_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-        if(H5P_register(xfer_pclass,H5D_XFER_MPIO_COLLECTIVE_OPT_NAME,H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE,&def_mpio_collective_opt_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-	if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME,H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE,&def_mpio_chunk_opt_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-        if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME,H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE,&def_mpio_chunk_opt_num,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-	if(H5P_register(xfer_pclass,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME,H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE,&def_mpio_chunk_opt_ratio,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-#endif /* H5_HAVE_PARALLEL */
-
-        /* Register the EDC property */
-        if(H5P_register(xfer_pclass,H5D_XFER_EDC_NAME,H5D_XFER_EDC_SIZE,&enable_edc,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the filter callback property */
-        if(H5P_register(xfer_pclass,H5D_XFER_FILTER_CB_NAME,H5D_XFER_FILTER_CB_SIZE,&filter_cb,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the type conversion callback property */
-        if(H5P_register(xfer_pclass,H5D_XFER_CONV_CB_NAME,H5D_XFER_CONV_CB_SIZE,&conv_cb,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the data transform property */
-        if(H5P_register(xfer_pclass,H5D_XFER_XFORM_NAME,H5D_XFER_XFORM_SIZE,&def_xfer_xform,NULL,NULL,NULL,H5D_XFER_XFORM_DEL,H5D_XFER_XFORM_COPY,NULL,H5D_XFER_XFORM_CLOSE)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    } /* end if */
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_DATASET_XFER_g==(-1)) {
-        /* Register the default data transfer property list */
-        if ((H5P_LST_DATASET_XFER_g = H5P_create_id (xfer_pclass))<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list")
-    } /* end if */
-
-    /* =========Dataset Creation Property Class Initialization========== */
-    /* Register the default dataset creation properties */
-    assert(H5P_CLS_DATASET_CREATE_g != -1);
-
-    /* Get the pointer to the dataset creation class */
-    if(NULL == (crt_pclass = H5I_object(H5P_CLS_DATASET_CREATE_g)))
-       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Get the number of properties in the class */
-    if(H5P_get_nprops_pclass(crt_pclass,&nprops,FALSE)<0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties")
-
-    /* Assume that if there are properties in the class, they are the default ones */
-    if(nprops==0) {
-        /* Register the storage layout property */
-        if(H5P_register(crt_pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &layout, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the chunking dimensionality property */
-        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_DIM_NAME, H5D_CRT_CHUNK_DIM_SIZE, &chunk_ndims, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the chunking size property */
-        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_SIZE_NAME, H5D_CRT_CHUNK_SIZE_SIZE, chunk_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the fill value property */
-        if(H5P_register(crt_pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, H5D_CRT_FILL_VALUE_CMP, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the space allocation time property */
-        if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_NAME, H5D_CRT_ALLOC_TIME_SIZE, &alloc_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the space allocation time state property */
-        if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &alloc_time_state, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the fill value writing time property */
-        if(H5P_register(crt_pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the external file list property */
-        if(H5P_register(crt_pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, H5D_CRT_EXT_FILE_LIST_CMP, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-        /* Register the data pipeline property */
-        if(H5P_register(crt_pclass, H5D_CRT_DATA_PIPELINE_NAME, H5D_CRT_DATA_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, H5D_CRT_DATA_PIPELINE_CMP, NULL) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    } /* end if */
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_DATASET_CREATE_g==(-1)) {
-        /* Register the default data transfer property list */
-        if ((H5P_LST_DATASET_CREATE_g = H5P_create_id (crt_pclass))<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list")
-    } /* end if */
-
     /* Reset the "default dataset" information */
-    HDmemset(&H5D_def_dset,0,sizeof(H5D_shared_t));
+    HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
 
-    /* Get the default dataset cretion property list values and initialize the
+    /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
      */
-    if (NULL == (def_dcpl = H5I_object(H5P_LST_DATASET_CREATE_g)))
+    if(NULL == (def_dcpl = H5I_object(H5P_LST_DATASET_CREATE_g)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get default dataset creation property list")
 
     /* Set up the default allocation time information */
@@ -421,37 +183,23 @@ H5D_init_interface(void)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout")
 
     /* Get the default fill value time */
-    if (H5P_get(def_dcpl, H5D_CRT_FILL_TIME_NAME, &H5D_def_dset.fill_time) < 0)
+    if(H5P_get(def_dcpl, H5D_CRT_FILL_TIME_NAME, &H5D_def_dset.fill_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time")
 
     /* Get the default fill value */
-    if (H5P_get(def_dcpl, H5D_CRT_FILL_VALUE_NAME, &H5D_def_dset.fill) < 0)
+    if(H5P_get(def_dcpl, H5D_CRT_FILL_VALUE_NAME, &H5D_def_dset.fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value")
 
     /* Reset the "default DXPL cache" information */
-    HDmemset(&H5D_def_dxpl_cache,0,sizeof(H5D_dxpl_cache_t));
+    HDmemset(&H5D_def_dxpl_cache, 0, sizeof(H5D_dxpl_cache_t));
 
     /* Get the default DXPL cache information */
-    if (H5D_get_dxpl_cache_real(H5P_DATASET_XFER_DEFAULT, &H5D_def_dxpl_cache) < 0)
+    if(H5D_get_dxpl_cache_real(H5P_DATASET_XFER_DEFAULT, &H5D_def_dxpl_cache) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve default DXPL info")
-
-    /* ========== Dataset Access Property Class Initialization ============*/
-    assert(H5P_CLS_DATASET_ACCESS_g!=-1);
-
-    /* Get the pointer to dataset creation class */
-    if(NULL == (acc_pclass = H5I_object(H5P_CLS_DATASET_ACCESS_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
-
-    /* Only register the default property list if it hasn't been created yet */
-    if(H5P_LST_DATASET_ACCESS_g == (-1)) {
-        /* Register the default dataset access property list */
-        if((H5P_LST_DATASET_ACCESS_g = H5P_create_id(acc_pclass))<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -510,606 +258,6 @@ H5D_term_interface(void)
     FUNC_LEAVE_NOAPI(n)
 }
 
-/*-------------------------------------------------------------------------
- * Function: H5D_xfer_xform_del
- *
- * Purpose: Frees memory allocated by H5D_xfer_xform_set
- *
- * Return: Success: SUCCEED, Failure: FAIL
- *
- * Programmer: Leon Arber larber@uiuc.edu
- *
- *
- * Date: April 9, 2004
- *
- * Comments: Private function, calls private H5Z_xform_destroy
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5D_xfer_xform_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5D_xfer_xform_del, FAIL)
-
-    assert(value);
-
-    if(H5Z_xform_destroy(*(H5Z_data_xform_t **)value)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_xfer_xform_copy
- *
- * Purpose: Creates a copy of the user's data transform string and its
- * associated parse tree.
- *
- * Return: Success: SUCCEED, Failure: FAIL
- *
- * Programmer: Leon Arber larber@uiuc.edu
- *
- *
- * Date: April 9, 2004
- *
- * Comments: Public function, calls private H5Z_xform_copy_tree
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5D_xfer_xform_copy(const char UNUSED *name, size_t UNUSED size, void *value)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5D_xfer_xform_copy, FAIL)
-
-    if(H5Z_xform_copy((H5Z_data_xform_t **)value)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error copying the data transform info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_xfer_xform_close
- *
- * Purpose: Frees memory allocated by H5D_xfer_xform_set
- *
- * Return: Success: SUCCEED, Failure: FAIL
- *
- * Programmer: Leon Arber larber@uiuc.edu
- *
- * Date: April 9, 2004
- *
- * Comments: private function, calls H5Z_xform_destroy_parse_tree
- *              Identical to H5D_xfer_xform_del
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5D_xfer_xform_close(const char UNUSED *name, size_t UNUSED size, void *value)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5D_xfer_xform_close, FAIL)
-
-    assert(value);
-
-    if(H5Z_xform_destroy(*(H5Z_data_xform_t **)value)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5D_crt_copy
- *
- * Purpose:        Callback routine which is called whenever any dataset
- *                 creation property list is copied.  This routine copies
- *                 the properties from the old list to the new list.
- *
- * Return:         Success:        Non-negative
- *
- *                 Failure:        Negative
- *
- * Programmer:     Raymond Lu
- *                 Tuesday, October 2, 2001
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
-{
-    H5O_fill_t     src_fill, dst_fill;
-    H5O_efl_t      src_efl, dst_efl;
-    H5O_pline_t    src_pline, dst_pline;
-    H5P_genplist_t *old_plist;
-    H5P_genplist_t *new_plist;
-    herr_t         ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5D_crt_copy, FAIL)
-
-    /* Verify property list ID */
-    if (NULL == (new_plist = H5I_object(new_plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-    if (NULL == (old_plist = H5I_object(old_plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
-    /* Get the fill value, external file list, and data pipeline properties
-     * from the old property list */
-    if(H5P_get(old_plist, H5D_CRT_FILL_VALUE_NAME, &src_fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
-    if(H5P_get(old_plist, H5D_CRT_EXT_FILE_LIST_NAME, &src_efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
-    if(H5P_get(old_plist, H5D_CRT_DATA_PIPELINE_NAME, &src_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
-
-    /* Make copies of fill value, external file list, and data pipeline */
-    if(src_fill.buf) {
-        if(NULL==H5O_copy(H5O_FILL_ID, &src_fill, &dst_fill))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value")
-    } /* end if */
-    else {
-	dst_fill.type = dst_fill.buf = NULL;
-	dst_fill.size = src_fill.size;
-    }
-    HDmemset(&dst_efl,0,sizeof(H5O_efl_t));
-    if(NULL==H5O_copy(H5O_EFL_ID, &src_efl, &dst_efl))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list")
-    if(NULL==H5O_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline")
-
-    /* Set the fill value, external file list, and data pipeline property
-     * for the new property list */
-    if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &dst_fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value")
-    if(H5P_set(new_plist, H5D_CRT_EXT_FILE_LIST_NAME, &dst_efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set external file list")
-    if(H5P_set(new_plist, H5D_CRT_DATA_PIPELINE_NAME, &dst_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_crt_close
- *
- * Purpose:	Callback routine which is called whenever any dataset create
- *              property list is closed.  This routine performs any generic
- *              cleanup needed on the properties the library put into the list.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 11, 2001
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
-{
-    H5O_fill_t     fill;
-    H5O_efl_t      efl;
-    H5O_pline_t    pline;
-    H5P_genplist_t *plist;      /* Property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_crt_close, FAIL)
-
-    /* Check arguments */
-    if (NULL == (plist = H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
-    /* Get the fill value, external file list, and data pipeline properties
-     * from the old property list */
-    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
-    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
-    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
-
-    /* Clean up any values set for the fill-value, external file-list and
-     * data pipeline */
-    if(H5O_reset(H5O_FILL_ID, &fill)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")
-    if(H5O_reset(H5O_EFL_ID, &efl)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release external file list info")
-    if(H5O_reset(H5O_PLINE_ID, &pline)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release pipeline info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_crt_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5D_crt_fill_value_cmp
- *
- * Purpose:        Callback routine which is called whenever the fill value
- *                 property in the dataset creation property list is compared.
- *
- * Return:         positive if VALUE1 is greater than VALUE2, negative if
- *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t UNUSED size)
-{
-    const H5O_fill_t     *fill1=(const H5O_fill_t *)value1,     /* Create local aliases for values */
-        *fill2=(const H5O_fill_t *)value2;
-    int cmp_value;              /* Value from comparison */
-    herr_t         ret_value=0; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_fill_value_cmp)
-
-    /* Sanity check */
-    assert(fill1);
-    assert(fill2);
-    assert(size==sizeof(H5O_fill_t));
-
-    /* Check the size of fill values */
-    if(fill1->size < fill2->size) HGOTO_DONE(-1);
-    if(fill1->size > fill2->size) HGOTO_DONE(1);
-
-    /* Check the types of the fill values */
-    if(fill1->type==NULL && fill2->type!=NULL) HGOTO_DONE(-1);
-    if(fill1->type!=NULL && fill2->type==NULL) HGOTO_DONE(1);
-    if(fill1->type!=NULL)
-        if((cmp_value=H5T_cmp(fill1->type,fill2->type, FALSE))!=0)
-            HGOTO_DONE(cmp_value);
-
-    /* Check the fill values in the buffers */
-    if(fill1->buf==NULL && fill2->buf!=NULL) HGOTO_DONE(-1);
-    if(fill1->buf!=NULL && fill2->buf==NULL) HGOTO_DONE(1);
-    if(fill1->buf!=NULL)
-        if((cmp_value=HDmemcmp(fill1->buf,fill2->buf,fill1->size))!=0)
-            HGOTO_DONE(cmp_value);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_crt_fill_value_cmp() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5D_crt_ext_file_list_cmp
- *
- * Purpose:        Callback routine which is called whenever the external file
- *                 list property in the dataset creation property list is
- *                 compared.
- *
- * Return:         positive if VALUE1 is greater than VALUE2, negative if
- *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t UNUSED size)
-{
-    const H5O_efl_t     *efl1=(const H5O_efl_t *)value1,     /* Create local aliases for values */
-        *efl2=(const H5O_efl_t *)value2;
-    int cmp_value;              /* Value from comparison */
-    herr_t         ret_value=0; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_ext_file_list_cmp)
-
-    /* Sanity check */
-    assert(efl1);
-    assert(efl2);
-    assert(size==sizeof(H5O_efl_t));
-
-    /* Check the heap address of external file lists */
-    if(H5F_addr_defined(efl1->heap_addr) || H5F_addr_defined(efl2->heap_addr)) {
-        if(!H5F_addr_defined(efl1->heap_addr) && H5F_addr_defined(efl2->heap_addr)) HGOTO_DONE(-1);
-        if(H5F_addr_defined(efl1->heap_addr) && !H5F_addr_defined(efl2->heap_addr)) HGOTO_DONE(1);
-        if((cmp_value=H5F_addr_cmp(efl1->heap_addr,efl2->heap_addr))!=0)
-            HGOTO_DONE(cmp_value);
-    } /* end if */
-
-    /* Check the number of allocated efl entries */
-    if(efl1->nalloc < efl2->nalloc) HGOTO_DONE(-1);
-    if(efl1->nalloc > efl2->nalloc) HGOTO_DONE(1);
-
-    /* Check the number of used efl entries */
-    if(efl1->nused < efl2->nused) HGOTO_DONE(-1);
-    if(efl1->nused > efl2->nused) HGOTO_DONE(1);
-
-    /* Check the efl entry information */
-    if(efl1->slot==NULL && efl2->slot!=NULL) HGOTO_DONE(-1);
-    if(efl1->slot!=NULL && efl2->slot==NULL) HGOTO_DONE(1);
-    if(efl1->slot!=NULL && efl1->nused>0) {
-        size_t u;       /* Local index variable */
-
-        /* Loop through all entries, comparing them */
-        for(u=0; u<efl1->nused; u++) {
-            /* Check the name offset of the efl entry */
-            if(efl1->slot[u].name_offset < efl2->slot[u].name_offset) HGOTO_DONE(-1);
-            if(efl1->slot[u].name_offset > efl2->slot[u].name_offset) HGOTO_DONE(1);
-
-            /* Check the name of the efl entry */
-            if(efl1->slot[u].name==NULL && efl2->slot[u].name!=NULL) HGOTO_DONE(-1);
-            if(efl1->slot[u].name!=NULL && efl2->slot[u].name==NULL) HGOTO_DONE(1);
-            if(efl1->slot[u].name!=NULL)
-                if((cmp_value=HDstrcmp(efl1->slot[u].name,efl2->slot[u].name))!=0)
-                    HGOTO_DONE(cmp_value);
-
-            /* Check the file offset of the efl entry */
-            if(efl1->slot[u].offset < efl2->slot[u].offset) HGOTO_DONE(-1);
-            if(efl1->slot[u].offset > efl2->slot[u].offset) HGOTO_DONE(1);
-
-            /* Check the file size of the efl entry */
-            if(efl1->slot[u].size < efl2->slot[u].size) HGOTO_DONE(-1);
-            if(efl1->slot[u].size > efl2->slot[u].size) HGOTO_DONE(1);
-        } /* end for */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_crt_ext_file_list_cmp() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5D_crt_data_pipeline_cmp
- *
- * Purpose:        Callback routine which is called whenever the filter pipeline
- *                 property in the dataset creation property list is compared.
- *
- * Return:         positive if VALUE1 is greater than VALUE2, negative if
- *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *                      VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, January 7, 2004
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t UNUSED size)
-{
-    const H5O_pline_t     *pline1=(const H5O_pline_t *)value1,     /* Create local aliases for values */
-        *pline2=(const H5O_pline_t *)value2;
-    int cmp_value;              /* Value from comparison */
-    herr_t         ret_value=0; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_data_pipeline_cmp)
-
-    /* Sanity check */
-    assert(pline1);
-    assert(pline2);
-    assert(size==sizeof(H5O_pline_t));
-
-    /* Check the number of allocated pipeline entries */
-    if(pline1->nalloc < pline2->nalloc) HGOTO_DONE(-1);
-    if(pline1->nalloc > pline2->nalloc) HGOTO_DONE(1);
-
-    /* Check the number of used pipeline entries */
-    if(pline1->nused < pline2->nused) HGOTO_DONE(-1);
-    if(pline1->nused > pline2->nused) HGOTO_DONE(1);
-
-    /* Check the filter entry information */
-    if(pline1->filter==NULL && pline2->filter!=NULL) HGOTO_DONE(-1);
-    if(pline1->filter!=NULL && pline2->filter==NULL) HGOTO_DONE(1);
-    if(pline1->filter!=NULL && pline1->nused>0) {
-        size_t u;       /* Local index variable */
-
-        /* Loop through all filters, comparing them */
-        for(u=0; u<pline1->nused; u++) {
-            /* Check the ID of the filter */
-            if(pline1->filter[u].id < pline2->filter[u].id) HGOTO_DONE(-1);
-            if(pline1->filter[u].id > pline2->filter[u].id) HGOTO_DONE(1);
-
-            /* Check the flags for the filter */
-            if(pline1->filter[u].flags < pline2->filter[u].flags) HGOTO_DONE(-1);
-            if(pline1->filter[u].flags > pline2->filter[u].flags) HGOTO_DONE(1);
-
-            /* Check the name of the filter */
-            if(pline1->filter[u].name==NULL && pline2->filter[u].name!=NULL) HGOTO_DONE(-1);
-            if(pline1->filter[u].name!=NULL && pline2->filter[u].name==NULL) HGOTO_DONE(1);
-            if(pline1->filter[u].name!=NULL)
-                if((cmp_value=HDstrcmp(pline1->filter[u].name,pline2->filter[u].name))!=0)
-                    HGOTO_DONE(cmp_value);
-
-            /* Check the number of parameters for the filter */
-            if(pline1->filter[u].cd_nelmts < pline2->filter[u].cd_nelmts) HGOTO_DONE(-1);
-            if(pline1->filter[u].cd_nelmts > pline2->filter[u].cd_nelmts) HGOTO_DONE(1);
-
-            /* Check the filter parameter information */
-            if(pline1->filter[u].cd_values==NULL && pline2->filter[u].cd_values!=NULL) HGOTO_DONE(-1);
-            if(pline1->filter[u].cd_values!=NULL && pline2->filter[u].cd_values==NULL) HGOTO_DONE(1);
-            if(pline1->filter[u].cd_values!=NULL && pline1->filter[u].cd_nelmts>0) {
-                size_t v;       /* Local index variable */
-
-                /* Loop through all parameters, comparing them */
-                for(v=0; v<pline1->filter[u].cd_nelmts; v++) {
-                    /* Check each parameter for the filter */
-                    if(pline1->filter[u].cd_values[v] < pline2->filter[u].cd_values[v]) HGOTO_DONE(-1);
-                    if(pline1->filter[u].cd_values[v] > pline2->filter[u].cd_values[v]) HGOTO_DONE(1);
-                } /* end for */
-            } /* end if */
-        } /* end for */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_crt_data_pipeline_cmp() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_xfer_create
- *
- * Purpose:	Callback routine which is called whenever any dataset transfer
- *              property list is created.  This routine performs any generic
- *              initialization needed on the properties the library put into
- *              the list.
- *              Right now, it's just allocating the driver-specific dataset
- *              transfer information.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 2, 2001
- *
- * Notes:       This same routine is currently used for the 'copy' callback.
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
-{
-    hid_t driver_id;            /* VFL driver ID */
-    void *driver_info;          /* VFL driver info */
-    H5P_genplist_t *plist;      /* Property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_xfer_create, FAIL)
-
-    /* Check arguments */
-    if (NULL == (plist = H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-    /* Get the driver information */
-    if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
-    if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info")
-
-    /* Check if we have a valid driver ID */
-    if(driver_id>0) {
-        /* Set the driver for the property list */
-        if(H5FD_dxpl_open(plist, driver_id, driver_info)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_xfer_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5D_xfer_copy
- *
- * Purpose:        Callback routine which is called whenever any dataset
- *                 transfer property list is copied.  This routine copies
- *                 the properties from the old list to the new list.
- *
- * Return:         Success:        Non-negative
- *
- *                 Failure:        Negative
- *
- * Programmer:     Raymond Lu
- *                 Tuesday, October 2, 2001
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5D_xfer_copy(hid_t new_dxpl_id, hid_t old_dxpl_id, void UNUSED *copy_data)
-{
-    hid_t          driver_id;
-    void*          driver_info;
-    H5P_genplist_t *new_plist;              /* New property list */
-    H5P_genplist_t *old_plist;              /* Old property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_xfer_copy, FAIL)
-
-    if(NULL == (new_plist = H5I_object(new_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    if(NULL == (old_plist = H5I_object(old_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-
-    /* Get values from old property list */
-    if(H5P_get(old_plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
-    if(H5P_get(old_plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info")
-
-    if(driver_id > 0) {
-        /* Set the driver for the property list */
-        if(H5FD_dxpl_open(new_plist, driver_id, driver_info)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_xfer_close
- *
- * Purpose:	Callback routine which is called whenever any dataset transfer
- *              property list is closed.  This routine performs any generic
- *              cleanup needed on the properties the library put into the list.
- *              Right now, it's just freeing the driver-specific dataset
- *              transfer information.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, July 11, 2001
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
-{
-    hid_t driver_id;            /* VFL driver ID */
-    void *driver_info;          /* VFL driver info */
-    H5P_genplist_t *plist;      /* Property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_xfer_close, FAIL)
-
-    /* Check arguments */
-    if (NULL == (plist = H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-    if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID")
-    if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info")
-    if(driver_id>0) {
-        /* Close the driver for the property list */
-        if(H5FD_dxpl_close(driver_id, driver_info)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_xfer_close() */
-
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1134,28 +282,28 @@ static herr_t
 H5D_get_dcpl_cache(hid_t dcpl_id, H5D_dcpl_cache_t *cache)
 {
     H5P_genplist_t *dc_plist;   /* Data transfer property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_get_dcpl_cache)
 
     /* Check args */
-    assert(cache);
+    HDassert(cache);
 
     /* Get the dataset transfer property list */
     if (NULL == (dc_plist = H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
 
     /* Get I/O pipeline info */
-    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &cache->pline)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve I/O pipeline info")
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &cache->pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve I/O pipeline info")
 
     /* Get fill value info */
-    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &cache->fill)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill value info")
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &cache->fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill value info")
 
     /* Get fill time info */
-    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &cache->fill_time)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill time")
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &cache->fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill time")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2697,7 +1845,7 @@ done:
 static herr_t
 H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 {
-    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_CRT_FILL_TIME_DEF, TRUE};
+    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_IFSET, TRUE};
     unsigned    alloc_time_state;       /* Allocation time state */
     H5O_fill_t     *fill_prop;          /* Pointer to dataset's fill value area */
     H5O_pline_t  pline;                 /* I/O pipeline information */
@@ -2840,7 +1988,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Set the default fill time */
-        fill.fill_time=H5D_CRT_FILL_TIME_DEF;
+        fill.fill_time = H5D_FILL_TIME_IFSET;
     } /* end if */
     if(fill.fill_defined) {
         if(NULL==H5O_copy(H5O_FILL_ID, &fill, fill_prop))

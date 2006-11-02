@@ -224,13 +224,10 @@ H5FD_sec2_init_interface(void)
  *		library.
  *
  * Return:	Success:	The driver ID for the sec2 driver.
- *
  *		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -241,15 +238,15 @@ H5FD_sec2_init(void)
 
     FUNC_ENTER_NOAPI(H5FD_sec2_init, FAIL)
 
-    if (H5I_VFL!=H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g,sizeof(H5FD_class_t));
+    if(H5I_VFL != H5I_get_type(H5FD_SEC2_g))
+        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t));
 
     /* Set return value */
-    ret_value=H5FD_SEC2_g;
+    ret_value = H5FD_SEC2_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_init() */
 
 
 /*---------------------------------------------------------------------------
