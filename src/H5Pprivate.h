@@ -29,10 +29,8 @@
 /* Library Private Macros */
 /**************************/
 
-/* String creation properties */
-#define H5P_CHAR_ENCODING_NAME  "character_encoding"
-#define H5P_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
-#define H5P_CHAR_ENCODING_DEF   H5F_DEFAULT_CSET
+/* ========  String creation property names ======== */
+#define H5P_STRCRT_CHAR_ENCODING_NAME  "character_encoding"     /* Character set encoding for string */
 
 
 /****************************/

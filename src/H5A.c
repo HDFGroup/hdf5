@@ -252,14 +252,14 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 
     /* If the creation property list is H5P_DEFAULT, use the default character encoding */
     if(acpl_id == H5P_DEFAULT)
-        attr->encoding = H5P_CHAR_ENCODING_DEF;
+        attr->encoding = H5F_DEFAULT_CSET;
     else
     {
         /* Get a local copy of the attribute creation property list */
         if (NULL == (ac_plist = H5I_object(acpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-        if(H5P_get(ac_plist, H5P_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
+        if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
     } /* end else */
 
@@ -1037,7 +1037,7 @@ H5Aget_create_plist(hid_t attr_id)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Set the character encoding on the new property list */
-    if(H5P_set(new_plist, H5P_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
+    if(H5P_set(new_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
 
     ret_value = new_plist_id;

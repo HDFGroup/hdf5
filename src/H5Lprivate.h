@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains private information about the H5DL module
+ * This file contains private information about the H5L module
  * for dealing with links in an HDF5 file.
  */
 #ifndef _H5Lprivate_H
@@ -26,6 +26,10 @@
 #include "H5Gprivate.h"
 #include "H5Oprivate.h"
 
+/**************************/
+/* Library Private Macros */
+/**************************/
+
 /* Default number of soft links to traverse */
 #define H5L_NUM_LINKS   16
 
@@ -35,6 +39,20 @@
 /* ========  Link access property names ======== */
 #define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */
 #define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"   /* External link prefix */
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
 
 /* General operations on links */
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,

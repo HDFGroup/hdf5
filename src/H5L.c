@@ -1210,7 +1210,7 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
           target_flags |= H5G_CRT_INTMD_GROUP;
 
       /* Get character encoding property */
-      if(H5P_get(lc_plist, H5P_CHAR_ENCODING_NAME, &char_encoding) < 0)
+      if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
           HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 
@@ -1963,7 +1963,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
           target_flags |= H5G_CRT_INTMD_GROUP;
 
       /* Get character encoding property */
-      if(H5P_get(lc_plist, H5P_CHAR_ENCODING_NAME, &char_encoding) < 0)
+      if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
           HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 

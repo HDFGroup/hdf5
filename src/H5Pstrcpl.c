@@ -41,6 +41,11 @@
 /* Local Macros */
 /****************/
 
+/* ========  String creation properties ======== */
+/* Definitions for character set encoding property */
+#define H5P_STRCRT_CHAR_ENCODING_SIZE  sizeof(H5T_cset_t)
+#define H5P_STRCRT_CHAR_ENCODING_DEF   H5F_DEFAULT_CSET
+
 
 /******************/
 /* Local Typedefs */
@@ -105,13 +110,13 @@ const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
 herr_t
 H5P_strcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    H5T_cset_t char_encoding = H5P_CHAR_ENCODING_DEF;  /* Default character set encoding */
+    H5T_cset_t char_encoding = H5P_STRCRT_CHAR_ENCODING_DEF;  /* Default character set encoding */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_strcrt_reg_prop, FAIL)
 
     /* Register character encoding */
-    if(H5P_register(pclass, H5P_CHAR_ENCODING_NAME, H5P_CHAR_ENCODING_SIZE,
+    if(H5P_register(pclass, H5P_STRCRT_CHAR_ENCODING_NAME, H5P_STRCRT_CHAR_ENCODING_SIZE,
              &char_encoding, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -152,7 +157,7 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set the character encoding */
-    if(H5P_set(plist, H5P_CHAR_ENCODING_NAME, &encoding) < 0)
+    if(H5P_set(plist, H5P_STRCRT_CHAR_ENCODING_NAME, &encoding) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
 
 done:
@@ -186,7 +191,7 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
 
     /* Get value */
     if(encoding)
-        if(H5P_get(plist, H5P_CHAR_ENCODING_NAME, encoding) < 0)
+        if(H5P_get(plist, H5P_STRCRT_CHAR_ENCODING_NAME, encoding) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
 
 done:
