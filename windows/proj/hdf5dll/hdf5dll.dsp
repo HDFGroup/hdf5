@@ -45,7 +45,7 @@ CFG=hdf5dll - Win32 AlphaDbg
 F90=df.exe
 # ADD BASE F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
 # ADD F90 /compile_only /include:"../../../proj/hdf5dll/Release/" /include:"Release/" /dll /nologo /warn:nofileopt
-CPP=xicl6.exe
+CPP=cl.exe
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /D "ZLIB_DLL" /D "_SZDLL_" /YX /FD /c
 MTL=midl.exe
@@ -57,7 +57,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP) /nologo /subsystem:windows /dll /machine:I386
 
@@ -77,7 +77,7 @@ LINK32=xilink6.exe
 F90=df.exe
 # ADD BASE F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
 # ADD F90 /compile_only /debug:full /include:"../../../proj/hdf5dll/Debug/" /include:"Debug/" /dll /nologo /warn:nofileopt
-CPP=xicl6.exe
+CPP=cl.exe
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /D "ZLIB_DLL" /D "_SZDLL_" /YX /FD /c
 MTL=midl.exe
@@ -89,7 +89,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP) /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../proj/hdf5dll/Debug/hdf5ddll.dll" /pdbtype:sept
 
@@ -107,12 +107,12 @@ LINK32=xilink6.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-F90=df.exe
-# ADD BASE F90 /compile_only /debug:full /include:"hdf5dll_/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /Gt0 /W3 /GX /Zi /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /MTd /c
 # ADD CPP /nologo /Gt0 /W3 /GX /Zi /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /MDd /c
+F90=df.exe
+# ADD BASE F90 /compile_only /debug:full /include:"hdf5dll_/" /dll /nologo /warn:nofileopt
+# ADD F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -138,12 +138,12 @@ LINK32=link.exe
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-F90=df.exe
-# ADD BASE F90 /compile_only /include:"hdf5dll0/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /MT /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /c
 # ADD CPP /nologo /MD /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /c
+F90=df.exe
+# ADD BASE F90 /compile_only /include:"hdf5dll0/" /dll /nologo /warn:nofileopt
+# ADD F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -2125,6 +2125,21 @@ SOURCE=..\..\..\src\H5Pfcpl.c
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
 
 # PROP Intermediate_Dir "../../../proj/hdf5dll/Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Pfmpl.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
 
