@@ -45,6 +45,7 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
     char         *obj_name;
     char         *elink_prefix;         /* External link prefix */
     char         *new_fname = NULL;     /* Buffer allocated to hold Unix file path */
+    ssize_t       prefix_len;           /* External link prefix length */
     size_t        fname_len;
     size_t        start_pos;            /* Initial position in new_fname buffer */
     size_t        x;                    /* Counter variable */
@@ -57,25 +58,22 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
     fname_len = strlen(file_name);
 
     /* See if the external link prefix property is set */
-    if(H5Pget_elink_prefix(lapl_id, &elink_prefix) < 0)
+    if((prefix_len = H5Pget_elink_prefix(lapl_id, NULL, 0)) < 0)
         goto error;
 
     /* If so, prepend it to the filename.  We assume that the prefix
      * is in the correct format for the current file system.
      */
-    if(elink_prefix != NULL)
+    if(prefix_len > 0)
     {
-        size_t        buf_size;             /* Size prefix buffer */
-
-        buf_size = strlen(elink_prefix);
-
         /* Allocate a buffer to hold the filename plus prefix */
-        new_fname = malloc(buf_size + fname_len + 1);
+        new_fname = malloc(prefix_len + fname_len + 1);
 
         /* Copy the prefix into the buffer */
-        strcpy(new_fname, elink_prefix);
+        if(H5Pget_elink_prefix(lapl_id, new_fname, prefix_len + 1) < 0)
+            goto error;
 
-        start_pos = buf_size;
+        start_pos = prefix_len;
     }
     else
     {

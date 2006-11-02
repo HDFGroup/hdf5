@@ -94,7 +94,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     hid_t         fid;
     char         *file_name;
     char         *obj_name;
-    char         *prefix;
+    ssize_t       prefix_len;           /* External link prefix length */
     size_t        fname_len;
     hbool_t       fname_alloc = FALSE;
     unsigned      intent;
@@ -106,22 +106,21 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     obj_name = ((char *) udata) + fname_len + 1;
 
     /* See if the external link prefix property is set */
-    if(H5Pget_elink_prefix(lapl_id, &prefix) < 0)
+    if((prefix_len = H5Pget_elink_prefix(lapl_id, NULL, (size_t)0)) < 0)
         goto error;
 
     /* If so, prepend it to the filename */
-    if(prefix != NULL)
+    if(prefix_len > 0)
     {
-        size_t buf_size;
-
-        buf_size = HDstrlen(prefix);
-
         /* Allocate a buffer to hold the filename plus prefix */
-        file_name = H5MM_malloc(buf_size + fname_len + 1);
+        file_name = H5MM_malloc(prefix_len + fname_len + 1);
         fname_alloc = TRUE;
 
+        /* Copy the prefix into the buffer */
+        if(H5Pget_elink_prefix(lapl_id, file_name, (size_t)(prefix_len + 1)) < 0)
+            goto error;
+
         /* Add the external link's filename to the prefix supplied */
-        HDstrcpy(file_name, prefix);
         HDstrcat(file_name, udata);
     }
 

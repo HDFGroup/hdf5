@@ -35,6 +35,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links		  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
 
@@ -49,6 +50,9 @@
 /* Definitions for external link prefix */
 #define H5L_ACS_ELINK_PREFIX_SIZE        sizeof(char *)
 #define H5L_ACS_ELINK_PREFIX_DEF         NULL /*default is no prefix */
+#define H5L_ACS_ELINK_PREFIX_DEL         H5P_lacc_elink_pref_del
+#define H5L_ACS_ELINK_PREFIX_COPY        H5P_lacc_elink_pref_copy
+#define H5L_ACS_ELINK_PREFIX_CLOSE       H5P_lacc_elink_pref_close
 
 /******************/
 /* Local Typedefs */
@@ -66,6 +70,12 @@
 
 /* Property class callbacks */
 static herr_t H5P_lacc_reg_prop(H5P_genclass_t *pclass);
+
+/* Property list callbacks */
+static herr_t H5P_lacc_elink_pref_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P_lacc_elink_pref_copy(const char* name, size_t size, void* value);
+static herr_t H5P_lacc_elink_pref_close(const char* name, size_t size, void* value);
+
 
 /*********************/
 /* Package Variables */
@@ -125,12 +135,90 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register property for external link prefix */
     if(H5P_register(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE,
-             &elink_prefix, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+             &elink_prefix, NULL, NULL, NULL, H5L_ACS_ELINK_PREFIX_DEL, H5L_ACS_ELINK_PREFIX_COPY, NULL, H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_lacc_reg_prop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_lacc_elink_pref_del
+ *
+ * Purpose:     Frees memory used to store the external link prefix string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 2, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_lacc_elink_pref_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_del)
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_lacc_elink_pref_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_lacc_elink_pref_copy
+ *
+ * Purpose:     Creates a copy of the external link prefix string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 2, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_copy)
+
+    HDassert(value);
+
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_lacc_elink_pref_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_lacc_elink_pref_close
+ *
+ * Purpose:     Frees memory used to store the external link prefix string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 2, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_lacc_elink_pref_close(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_close)
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_lacc_elink_pref_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -227,10 +315,6 @@ done:
  *              traversed.  The prefix is appended to the filename stored
  *              in the external link.
  * 
- *              The prefix is supplied by giving a pointer to a user-
- *              allocated buffer.  This buffer should not be freed
- *              until this property list has been closed.
- *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
@@ -242,6 +326,7 @@ herr_t
 H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
+    char *my_prefix;                    /* Copy of prefix string */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_prefix, FAIL)
@@ -251,8 +336,19 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
+    /* Get current prefix value */
+    if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get prefix info")
+
+    /* Free existing prefix, if there is one */
+    H5MM_xfree(my_prefix);
+
+    /* Make a copy of the user's prefix string */
+    if(NULL == (my_prefix = H5MM_xstrdup(prefix)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy prefix")
+
     /* Set prefix */
-    if(H5P_set(plist, H5L_ACS_ELINK_PREFIX_NAME, &prefix) < 0)
+    if(H5P_set(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
 
 done:
@@ -276,27 +372,42 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Pget_elink_prefix(hid_t plist_id, char **prefix)
+ssize_t
+H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const char *my_prefix;              /* Library's copy of the prefix */
+    size_t	len;                    /* Length of prefix string */
+    ssize_t 	ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Pget_elink_prefix, FAIL)
     H5TRACE2("e","i*s",plist_id,prefix);
-
-    if(!prefix)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer passed in");
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the current prefix */
-    if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, prefix) < 0)
+    if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
+
+    /* Check for prefix being set */
+    if(my_prefix) {
+        /* Copy to user's buffer, if given */
+        len = HDstrlen(my_prefix);
+        if(prefix) {
+            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            if(len >= size)
+                prefix[size - 1] = '\0';
+        } /* end if */
+    } /* end if */
+    else
+        len = 0;
+
+    /* Set return value */
+    ret_value = (ssize_t)len;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_elink_prefix() */
 
