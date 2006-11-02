@@ -116,11 +116,6 @@
 #define H5D_XFER_XFORM_DEL          H5P_dxfr_xform_del
 #define H5D_XFER_XFORM_COPY         H5P_dxfr_xform_copy
 #define H5D_XFER_XFORM_CLOSE        H5P_dxfr_xform_close
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-/* Definitions for collective chunk I/O property */
-#define H5D_XFER_COLL_CHUNK_SIZE       sizeof(unsigned)
-#define H5D_XFER_COLL_CHUNK_DEF        1
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 
 /******************/

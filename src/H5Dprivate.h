@@ -77,13 +77,16 @@
 #define H5D_XFER_CONV_CB_NAME           "type_conv_cb"  /* Type conversion callback function */
 #define H5D_XFER_XFORM_NAME             "data_transform" /* Data transform */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-#define H5D_XFER_COLL_CHUNK_NAME        "coll_chunk"    /* Collective chunk I/O */
+/* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME "coll_chunk_link_hard"
 #define H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME "coll_chunk_multi_hard"
 #define H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME "coll_chunk_link_true"
 #define H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME "coll_chunk_link_false"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME "coll_chunk_multi_coll"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME "coll_chunk_multi_ind"
+/* Definitions for all collective chunk instrumentation properties */
+#define H5D_XFER_COLL_CHUNK_SIZE        sizeof(unsigned)
+#define H5D_XFER_COLL_CHUNK_DEF         1
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */

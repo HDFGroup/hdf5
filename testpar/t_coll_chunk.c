@@ -679,49 +679,49 @@ coll_chunktest(const char* filename,
    
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
   if(facc_type == FACC_MPIO) {
-  switch(api_option){
-	case API_LINK_HARD:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	break;
-	case API_MULTI_HARD:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	break;
-	case API_LINK_TRUE:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	break;
-	case API_LINK_FALSE:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	
-	break;
-	case API_MULTI_COLL:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	
-	break;
-	case API_MULTI_IND:
-           prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-           status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-           VRFY((status >= 0),"testing property list inserted succeeded");
-	
-	break;
-	default:
-	;
-   } 
+      switch(api_option){
+            case API_LINK_HARD:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            break;
+            case API_MULTI_HARD:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            break;
+            case API_LINK_TRUE:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            break;
+            case API_LINK_FALSE:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            
+            break;
+            case API_MULTI_COLL:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            
+            break;
+            case API_MULTI_IND:
+               prop_value = H5D_XFER_COLL_CHUNK_DEF;   
+               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                           NULL,NULL,NULL,NULL,NULL,NULL);
+               VRFY((status >= 0),"testing property list inserted succeeded");
+            
+            break;
+            default:
+            ;
+       } 
    }
 #endif
   
@@ -732,40 +732,40 @@ coll_chunktest(const char* filename,
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
   if(facc_type == FACC_MPIO) {
-  switch(api_option){
-	case API_LINK_HARD:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO without optimization succeeded");
-	break;
-	case API_MULTI_HARD:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO without optimization succeeded");
-	break;
-	case API_LINK_TRUE:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO with true optimization succeeded");
-	break;
-	case API_LINK_FALSE:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set LINK IO transferring to multi-chunk IO succeeded");
-	break;
-	case API_MULTI_COLL:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO with optimization succeeded");
-	break;
-	case API_MULTI_IND:
-           status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,&prop_value);
-           VRFY((status >= 0),"testing property list get succeeded");
-           VRFY((prop_value == 0),"API to set MULTI-CHUNK IO transferring to independent IO  succeeded");
-	break;
-	default:
-	;
-   } 
+      switch(api_option){
+            case API_LINK_HARD:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO without optimization succeeded");
+            break;
+            case API_MULTI_HARD:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO without optimization succeeded");
+            break;
+            case API_LINK_TRUE:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO with true optimization succeeded");
+            break;
+            case API_LINK_FALSE:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set LINK IO transferring to multi-chunk IO succeeded");
+            break;
+            case API_MULTI_COLL:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO with optimization succeeded");
+            break;
+            case API_MULTI_IND:
+               status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,&prop_value);
+               VRFY((status >= 0),"testing property list get succeeded");
+               VRFY((prop_value == 0),"API to set MULTI-CHUNK IO transferring to independent IO  succeeded");
+            break;
+            default:
+            ;
+       } 
    }
 #endif
 

@@ -3023,27 +3023,6 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
                  */
                 io_info->xfer_mode_changed = TRUE;
             } /* end if */
-
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-            /**** Test for collective chunk IO
-                  notice the following code should be removed after
-                  a more general collective chunk IO algorithm is applied.
-                  (This property is only reset for independent I/O)
-            */
-            if(dset->shared->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
-                htri_t check_prop;
-
-                check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
-                if(check_prop < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
-                if(check_prop > 0) {
-                    int prop_value = 0;
-
-                    if(H5Pset(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&prop_value) < 0)
-                        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
-                } /* end if */
-            } /* end if */
-#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
         } /* end else */
     } /* end if */
     else {
