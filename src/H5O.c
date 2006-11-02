@@ -505,7 +505,7 @@ done:
  *              that reference an object by address are deleted, and only
  *              after H5Oincr_refcount has already been used.
  *
- * Return:	Success:	The object's new refcount
+ * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
  * Programmer:	James Laird
