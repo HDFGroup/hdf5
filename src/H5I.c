@@ -124,7 +124,6 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
-static hid_t H5I_get_file_id(hid_t obj_id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -2059,7 +2058,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 H5I_get_file_id(hid_t obj_id)
 {
     H5G_loc_t loc;              /* Location of object */
