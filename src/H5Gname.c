@@ -457,8 +457,8 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size)
 	{
 	    hid_t	  file;
 
-	    if((file = H5I_get_file_id(id))<0)
-		HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID");
+	    if((file = H5I_get_file_id(id)) < 0)
+		HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
 
 	    len = H5G_get_refobj_name((loc.oloc)->addr, file, name, size);
@@ -1129,9 +1129,9 @@ H5G_init_ref_path_table(hid_t fid)
  * Programmer:  Quincey Koziol
  *
  * Modifications:
-  * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
+ * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
  * 		tools lib for looking up path to reference.
-*
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1139,12 +1139,12 @@ H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
     
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_ref_path_table)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_ref_path_table)
 
     H5MM_xfree(node->path);
     H5MM_xfree(node);
 
-    FUNC_LEAVE_NOAPI(0);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 /*-------------------------------------------------------------------------
@@ -1231,7 +1231,7 @@ H5G_refname_iterator(hid_t group, const char *name, void *_iter)
     H5G_loc_t   loc;
     int ret_value = 0, last_obj;
     
-    FUNC_ENTER_NOAPI(H5G_refname_iterator, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_refname_iterator)
     
     if(H5G_loc(group, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1309,7 +1309,8 @@ done:
  *-------------------------------------------------------------------------
  */
 
-static ssize_t H5G_get_refobj_name(haddr_t id, hid_t file, char* name, size_t size)
+static ssize_t
+H5G_get_refobj_name(haddr_t id, hid_t file, char* name, size_t size)
 {
     const char  *oname = "/";
     iter_t iter;
@@ -1329,11 +1330,11 @@ static ssize_t H5G_get_refobj_name(haddr_t id, hid_t file, char* name, size_t si
     else if(ret_value == 0)
 	HGOTO_DONE(ret_value)
     else if(HDstrlen(iter.container) >= size)
-	ret_value = HDstrlen(iter.container)+1;
+	ret_value = HDstrlen(iter.container) + 1;
     else
     {
 	HDstrncpy(name, iter.container, size);
-	ret_value = HDstrlen(iter.container)+1;
+	ret_value = HDstrlen(iter.container) + 1;
     }
    
 done:    
@@ -1342,4 +1343,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-	    
+
