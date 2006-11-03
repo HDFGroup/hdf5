@@ -436,37 +436,40 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size)
 {
     H5G_loc_t     loc;          /* Object location */
     ssize_t       ret_value = FAIL;
-    
 
     FUNC_ENTER_NOAPI(H5G_get_name, FAIL)
 
     /* get object location */
     if(H5G_loc(id, &loc) >= 0) {
-        size_t        len = 0;
+        ssize_t len;
 
         if(loc.path->user_path_r != NULL && loc.path->obj_hidden == 0) {
             len = H5RS_len(loc.path->user_path_r);
 
             if(name) {
-                HDstrncpy(name, H5RS_get_str(loc.path->user_path_r), MIN(len + 1, size));
-                if(len >= size)
-                    name[size-1] = '\0';
+                HDstrncpy(name, H5RS_get_str(loc.path->user_path_r), MIN((size_t)(len + 1), size));
+                if((size_t)len >= size)
+                    name[size - 1] = '\0';
             } /* end if */
-        }
-	else
-	{
+        } /* end if */
+	else {
 	    hid_t	  file;
 
+            /* Retrieve file ID for name search */
 	    if((file = H5I_get_file_id(id)) < 0)
-		HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
+		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
-
-	    len = H5G_get_refobj_name((loc.oloc)->addr, file, name, size);
+            /* Search for name of object */
+	    if((len = H5G_get_refobj_name((loc.oloc)->addr, file, name, size)) < 0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
 	
-	    H5Fclose(file);
-	}
+            /* Close file ID used for search */
+	    if(H5Fclose(file) < 0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
+	} /* end else */
+
         /* Set return value */
-        ret_value = (ssize_t)len;
+        ret_value = len;
     } /* end if */
 
 done: 
@@ -1139,7 +1142,7 @@ H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
     
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_ref_path_table)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_ref_path_info)
 
     H5MM_xfree(node->path);
     H5MM_xfree(node);
@@ -1342,5 +1345,5 @@ done:
     H5MM_xfree(iter.container);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5G_get_refobj_name() */
 
