@@ -26,12 +26,6 @@ echo ============================
 
 lheap%2\%1\lheap%2
 
-echo ============================
-echo Testing fheap 
-echo ============================
-
-fheap%2\%1\fheap%2
-
 echo.
 echo ============================
 echo Testing ohdr 
@@ -245,10 +239,10 @@ getname%2\%1\getname%2
 
 echo.
 echo ============================
-echo Testing file_handle 
+echo Testing vfd 
 echo ============================
 
-file_handle%2\%1\file_handle%2
+vfd%2\%1\vfd%2
 
 echo.
 echo ============================
@@ -285,6 +279,23 @@ echo ============================
 
 cross_read%2\%1\cross_read%2
 
+echo ============================
+echo Testing fheap 
+echo ============================
+
+fheap%2\%1\fheap%2
+
+echo ============================
+echo Testing btree2 
+echo ============================
+
+btree2%2\%1\btree2%2
+
+echo ============================
+echo Testing ref 
+echo ============================
+
+ref%2\%1\ref%2
 echo.
 echo ============================
 echo Testing ./testerror.sh  

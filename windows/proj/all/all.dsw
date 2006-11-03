@@ -210,13 +210,7 @@ Package=<4>
     Project_Dep_Name set_extent
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name file_handle
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name ntypes
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name file_handledll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name getnamedll
@@ -418,6 +412,18 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name h5copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ref
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name refdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name vfd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name vfddll
     End Project Dependency
 }}}
 
@@ -1054,42 +1060,6 @@ Package=<4>
 ###############################################################################
 
 Project: "fheapdll"="..\..\TEST\fheapdll\fheapdll.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtestD
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "file_handle"="..\..\test\file_handle\file_handle.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "file_handledll"="..\..\test\file_handledll\file_handledll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -2985,6 +2955,42 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ref"="..\..\TEST\ref\ref.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "refdll"="..\..\TEST\refdll\refdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "reserved"="..\..\TEST\reserved\reserved.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -3355,6 +3361,42 @@ Package=<4>
 ###############################################################################
 
 Project: "unlinkdll"="..\..\test\unlinkdll\unlinkdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "vfd"="..\..\TEST\vfd\vfd.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "vfddll"="..\..\TEST\vfddll\vfddll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
