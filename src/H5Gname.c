@@ -48,19 +48,18 @@ typedef struct H5G_names_t {
 } H5G_names_t;
 
 /* Info to pass to the iteration functions */
-typedef struct iter_t {
-        char *container;  /* full name of the container object */
-	hid_t file; 		/* File id where it came from */
-	haddr_t obj; 		/* The address what we're looking for */
-} iter_t;
+typedef struct H5G_name_iter_t {
+    char *container;            /* full name of the container object */
+    hid_t file; 		/* File id where it came from */
+    haddr_t obj; 		/* The address what we're looking for */
+} H5G_ref_path_iter_t;
 
 typedef struct {
-    haddr_t objno;      /* Object ID (i.e. address) */
-    const char *path;   /* Object path */
-} ref_path_node_t;
+    haddr_t objno;              /* Object ID (i.e. address) */
+    char *path;                 /* Object path */
+} H5G_ref_path_node_t;
 
-static H5SL_t *ref_path_table = NULL;   /* the "table" (implemented with a skip list) */
-
+H5SL_t *ref_path_table = NULL;  /* the "table" for path nodes */
 
 /* Private macros */
 
@@ -78,12 +77,12 @@ static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 static ssize_t H5G_get_refobj_name(haddr_t id, hid_t file, char* name, size_t size);
-static herr_t H5G_refname_iterator (hid_t group, const char *name, void *_iter);
+static herr_t H5G_refname_iterator(hid_t group, const char *name, void *_iter);
+static herr_t H5G_init_ref_path_table(hid_t fid);
 static hbool_t H5G_ref_path_table_find(haddr_t objno);
-static int H5G_term_ref_path_table(void);
-static int H5G_init_ref_path_table(hid_t fid);
+static herr_t H5G_ref_path_table_put(char *path, haddr_t objno);
 static herr_t H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/);
-static int H5G_ref_path_table_put(const char *path, haddr_t objno);
+static herr_t H5G_term_ref_path_table(void);
 
 
 /*-------------------------------------------------------------------------
@@ -464,7 +463,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
 	
             /* Close file ID used for search */
-	    if(H5Fclose(file) < 0)
+	    if(H5I_dec_ref(file) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 	} /* end else */
 
@@ -1030,7 +1029,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_name_replace() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_ref_path_table_put
  *
@@ -1047,35 +1046,41 @@ done:
  * Programmer:  REMcG
  *
  * Modifications:
-  * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
+ * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
  * 		tools lib for looking up path to reference.
-*
+ *
  *-------------------------------------------------------------------------
  */
-static int
-H5G_ref_path_table_put(const char *path, haddr_t objno)
+static herr_t
+H5G_ref_path_table_put(char *path, haddr_t objno)
 {
-    ref_path_node_t *new_node;
-    int ret_value = 0;
+    H5G_ref_path_node_t *new_node;          /* New path node for table */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
+    FUNC_ENTER_NOAPI_NOINIT(H5G_ref_path_table_put)
+
+    /* Sanity check */
     HDassert(ref_path_table);
+    HDassert(H5F_addr_defined(objno));
     HDassert(path);
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_ref_path_table_put)
-	
-    if((new_node = H5MM_malloc(sizeof(ref_path_node_t))) == NULL)
-	ret_value = -1;
+    /* Allocate new path node */
+    if((new_node = H5MM_malloc(sizeof(H5G_ref_path_node_t))) == NULL)
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path node")
 
+    /* Set node information */
     new_node->objno = objno;
     new_node->path = path;
 
-    ret_value = H5SL_insert(ref_path_table, new_node, &(new_node->objno));
+    /* Insert into skip list */
+    if(H5SL_insert(ref_path_table, new_node, &(new_node->objno)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert path node into table")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5G_ref_path_table_put() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_init_ref_path_table
  *
@@ -1086,18 +1091,18 @@ H5G_ref_path_table_put(const char *path, haddr_t objno)
  * Programmer:  Quincey Koziol
  *
  * Modifications:
-  * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
+ * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
  * 		tools lib for looking up path to reference.
-*
+ *
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 H5G_init_ref_path_table(hid_t fid)
 {
     H5G_stat_t sb;
     haddr_t objno;              /* Compact form of object's location */
     char *root_path;
-    int ret_value = 0;
+    herr_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_init_ref_path_table)
 
@@ -1121,7 +1126,7 @@ H5G_init_ref_path_table(hid_t fid)
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_free_ref_path_info
  *
@@ -1140,7 +1145,7 @@ H5G_init_ref_path_table(hid_t fid)
 static herr_t
 H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
 {
-    ref_path_node_t *node = (ref_path_node_t *)item;
+    H5G_ref_path_node_t *node = (H5G_ref_path_node_t *)item;
     
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_ref_path_info)
 
@@ -1150,6 +1155,7 @@ H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_term_ref_path_table
  *
@@ -1160,12 +1166,12 @@ H5G_free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/
  * Programmer:  Quincey Koziol
  *
  * Modifications:
- * * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
+ * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
  * 		tools lib for looking up path to reference.
-
+ *
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 H5G_term_ref_path_table(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_ref_path_table)
@@ -1174,11 +1180,10 @@ H5G_term_ref_path_table(void)
     if(ref_path_table)
         H5SL_destroy(ref_path_table, H5G_free_ref_path_info, NULL);
 
-    FUNC_LEAVE_NOAPI(0);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_ref_path_table_find
  *
@@ -1190,9 +1195,9 @@ H5G_term_ref_path_table(void)
  * Programmer:  Quincey Koziol
  *
  * Modifications:
-  * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
+ * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
  * 		tools lib for looking up path to reference.
-*
+ *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1212,6 +1217,7 @@ H5G_ref_path_table_find(haddr_t objno)
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_refname_iterator
  *
@@ -1223,14 +1229,14 @@ H5G_ref_path_table_find(haddr_t objno)
  * Programmer:  Leon Arber, Nov 1, 2006.
  *
  * Modifications:
-*
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5G_refname_iterator(hid_t group, const char *name, void *_iter)
 {
     H5G_stat_t sb;
-    iter_t *iter = (iter_t*)_iter;
+    H5G_ref_path_iter_t *iter = (H5G_ref_path_iter_t*)_iter;
     H5G_loc_t   loc;
     int ret_value = 0, last_obj;
     
@@ -1242,10 +1248,9 @@ H5G_refname_iterator(hid_t group, const char *name, void *_iter)
     if(H5G_get_objinfo(&loc, name, 0, &sb, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object")
 
-    if (sb.type<0 || sb.type>=H5G_NTYPES) {
-	/* We hit an unknown type during iteration.  Let's continue anyway */
+    /* We hit an unknown type during iteration.  Let's continue anyway */
+    if(sb.type < 0 || sb.type >= H5G_NTYPES)
 	ret_value = 0;
-    }
     else
     {
 	haddr_t objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
@@ -1290,11 +1295,14 @@ H5G_refname_iterator(hid_t group, const char *name, void *_iter)
 		iter->container[len] = '\0'; 
 	}
     }
+
     /* Close the object. */
+
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5G_get_refobj_name
  *
@@ -1308,41 +1316,41 @@ done:
  * Programmer:  Leon Arber, Nov 1, 2006.
  *
  * Modifications:
-*
+ *
  *-------------------------------------------------------------------------
  */
-
 static ssize_t
 H5G_get_refobj_name(haddr_t id, hid_t file, char* name, size_t size)
 {
     const char  *oname = "/";
-    iter_t iter;
-    ssize_t ret_value=0;
+    H5G_ref_path_iter_t udata;
     int last_obj = 0;
+    ssize_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_refobj_name)
 
+    /* Initialize the ref path table for tracking visited objects */
     H5G_init_ref_path_table(file);
-    iter.container = H5MM_malloc(strlen(oname)+1);
-    HDstrcpy(iter.container, oname);
-    iter.file = file;
-    iter.obj = id;
+
+    udata.container = H5MM_malloc(strlen(oname)+1);
+    HDstrcpy(udata.container, oname);
+    udata.file = file;
+    udata.obj = id;
     
-    if((ret_value = H5G_obj_iterate(file, oname, H5_ITER_INC, 0, &last_obj, H5G_refname_iterator, &iter, H5AC_ind_dxpl_id))< 0)
+    if((ret_value = H5G_obj_iterate(file, oname, H5_ITER_INC, 0, &last_obj, H5G_refname_iterator, &udata, H5AC_ind_dxpl_id))< 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
     else if(ret_value == 0)
 	HGOTO_DONE(ret_value)
-    else if(HDstrlen(iter.container) >= size)
-	ret_value = HDstrlen(iter.container) + 1;
-    else
-    {
-	HDstrncpy(name, iter.container, size);
-	ret_value = HDstrlen(iter.container) + 1;
-    }
+    else if(HDstrlen(udata.container) >= size)
+	ret_value = HDstrlen(udata.container) + 1;
+    else {
+	HDstrncpy(name, udata.container, size);
+	ret_value = HDstrlen(udata.container) + 1;
+    } /* end else */
    
 done:    
     H5G_term_ref_path_table();
-    H5MM_xfree(iter.container);
+    H5MM_xfree(udata.container);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_refobj_name() */
