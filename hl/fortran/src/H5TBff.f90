@@ -226,12 +226,12 @@ subroutine h5tbwrite_field_name_f_int(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbwrite_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_C'::h5tbwrite_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_INT_C'::h5tbwrite_field_name_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -245,13 +245,13 @@ subroutine h5tbwrite_field_name_f_int(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbwrite_field_name_c
+  end function h5tbwrite_field_name_int_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbwrite_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_name_f_int
@@ -301,12 +301,12 @@ subroutine h5tbwrite_field_name_f_float(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbwrite_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_C'::h5tbwrite_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_FL_C'::h5tbwrite_field_name_fl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -320,13 +320,13 @@ subroutine h5tbwrite_field_name_f_float(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbwrite_field_name_c
+  end function h5tbwrite_field_name_fl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbwrite_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_name_f_float
@@ -378,12 +378,12 @@ subroutine h5tbwrite_field_name_f_double(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbwrite_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_C'::h5tbwrite_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_DL_C'::h5tbwrite_field_name_dl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -397,13 +397,13 @@ subroutine h5tbwrite_field_name_f_double(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbwrite_field_name_c
+  end function h5tbwrite_field_name_dl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbwrite_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_name_f_double
@@ -453,12 +453,12 @@ subroutine h5tbwrite_field_name_f_string(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbwrite_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_C'::h5tbwrite_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_NAME_ST_C'::h5tbwrite_field_name_st_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -472,13 +472,13 @@ subroutine h5tbwrite_field_name_f_string(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbwrite_field_name_c
+  end function h5tbwrite_field_name_st_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbwrite_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_name_f_string
@@ -529,12 +529,12 @@ subroutine h5tbread_field_name_f_int(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbread_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_C'::h5tbread_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_INT_C'::h5tbread_field_name_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -548,13 +548,13 @@ subroutine h5tbread_field_name_f_int(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbread_field_name_c
+  end function h5tbread_field_name_int_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbread_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_name_f_int
@@ -604,12 +604,12 @@ subroutine h5tbread_field_name_f_float(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbread_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_C'::h5tbread_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_FL_C'::h5tbread_field_name_fl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -623,13 +623,13 @@ subroutine h5tbread_field_name_f_float(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbread_field_name_c
+  end function h5tbread_field_name_fl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbread_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_name_f_float
@@ -679,12 +679,12 @@ subroutine h5tbread_field_name_f_double(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbread_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_C'::h5tbread_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_DL_C'::h5tbread_field_name_dl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -698,13 +698,13 @@ subroutine h5tbread_field_name_f_double(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbread_field_name_c
+  end function h5tbread_field_name_dl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbread_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_name_f_double
@@ -754,12 +754,12 @@ subroutine h5tbread_field_name_f_string(loc_id,&
  integer :: namelen1                                              ! name length
 
  interface
-  integer function h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbread_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_C'::h5tbread_field_name_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_NAME_ST_C'::h5tbread_field_name_st_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -773,13 +773,13 @@ subroutine h5tbread_field_name_f_string(loc_id,&
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length
-  end function h5tbread_field_name_c
+  end function h5tbread_field_name_st_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbread_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_name_f_string
@@ -829,12 +829,12 @@ subroutine h5tbwrite_field_index_f_int(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbwrite_field_index_int_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_C'::h5tbwrite_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_INT_C'::h5tbwrite_field_index_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -846,12 +846,12 @@ subroutine h5tbwrite_field_index_f_int(loc_id,&
   integer, intent(in), dimension(*) :: buf                         ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbwrite_field_index_c
+  end function h5tbwrite_field_index_int_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbwrite_field_index_int_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_index_f_int
@@ -900,12 +900,12 @@ subroutine h5tbwrite_field_index_f_float(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbwrite_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_C'::h5tbwrite_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_FL_C'::h5tbwrite_field_index_fl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -917,12 +917,12 @@ subroutine h5tbwrite_field_index_f_float(loc_id,&
   real, intent(in), dimension(*) :: buf                            ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbwrite_field_index_c
+  end function h5tbwrite_field_index_fl_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbwrite_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_index_f_float
@@ -973,12 +973,12 @@ subroutine h5tbwrite_field_index_f_double(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbwrite_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_C'::h5tbwrite_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_DL_C'::h5tbwrite_field_index_dl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -990,12 +990,12 @@ subroutine h5tbwrite_field_index_f_double(loc_id,&
   double precision, intent(in), dimension(*) :: buf                ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbwrite_field_index_c
+  end function h5tbwrite_field_index_dl_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbwrite_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_index_f_double
@@ -1044,12 +1044,12 @@ subroutine h5tbwrite_field_index_f_string(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbwrite_field_index_st_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_C'::h5tbwrite_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBWRITE_FIELD_INDEX_ST_C'::h5tbwrite_field_index_st_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1061,12 +1061,12 @@ subroutine h5tbwrite_field_index_f_string(loc_id,&
   character(len=*), intent(in), dimension(*) :: buf                ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbwrite_field_index_c
+  end function h5tbwrite_field_index_st_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbwrite_field_index_st_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbwrite_field_index_f_string
@@ -1116,12 +1116,12 @@ subroutine h5tbread_field_index_f_int(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbread_field_index_int_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_C'::h5tbread_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_INT_C'::h5tbread_field_index_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1133,12 +1133,12 @@ subroutine h5tbread_field_index_f_int(loc_id,&
   integer, intent(in), dimension(*) :: buf                         ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbread_field_index_c
+  end function h5tbread_field_index_int_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbread_field_index_int_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_index_f_int
@@ -1187,12 +1187,12 @@ subroutine h5tbread_field_index_f_float(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbread_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
    start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_C'::h5tbread_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_FL_C'::h5tbread_field_index_fl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1204,12 +1204,12 @@ subroutine h5tbread_field_index_f_float(loc_id,&
   real, intent(in), dimension(*) :: buf                            ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbread_field_index_c
+  end function h5tbread_field_index_fl_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbread_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_index_f_float
@@ -1258,12 +1258,12 @@ subroutine h5tbread_field_index_f_double(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbread_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
    start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_C'::h5tbread_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_DL_C'::h5tbread_field_index_dl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1275,12 +1275,12 @@ subroutine h5tbread_field_index_f_double(loc_id,&
   double precision, intent(in), dimension(*) :: buf                ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbread_field_index_c
+  end function h5tbread_field_index_dl_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbread_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_index_f_double
@@ -1329,12 +1329,12 @@ subroutine h5tbread_field_index_f_string(loc_id,&
  integer :: namelen                                               ! name length
 
  interface
-  integer function h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+  integer function h5tbread_field_index_st_c(loc_id,namelen,dset_name,field_index,&
    start,nrecords,type_size,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_C'::h5tbread_field_index_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBREAD_FIELD_INDEX_ST_C'::h5tbread_field_index_st_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1346,12 +1346,12 @@ subroutine h5tbread_field_index_f_string(loc_id,&
   character(len=*), intent(in), dimension(*) :: buf                ! data buffer 
   integer :: errcode                                               ! error code
   integer :: namelen                                               ! name length
-  end function h5tbread_field_index_c
+  end function h5tbread_field_index_st_c
  end interface
 
  namelen  = len(dset_name)
  
- errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+ errcode = h5tbread_field_index_st_c(loc_id,namelen,dset_name,field_index,&
   start,nrecords,type_size,buf)
 
 end subroutine h5tbread_field_index_f_string
@@ -1400,12 +1400,12 @@ subroutine h5tbinsert_field_f_int(loc_id,&
 
 
  interface
-  integer function h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbinsert_field_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_C'::h5tbinsert_field_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_INT_C'::h5tbinsert_field_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -1417,13 +1417,13 @@ subroutine h5tbinsert_field_f_int(loc_id,&
   integer, intent(in), dimension(*) :: buf                         ! data buffer 
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length length
-  end function h5tbinsert_field_c
+  end function h5tbinsert_field_int_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbinsert_field_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
 
 end subroutine h5tbinsert_field_f_int
@@ -1473,12 +1473,12 @@ subroutine h5tbinsert_field_f_float(loc_id,&
 
 
  interface
-  integer function h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbinsert_field_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_C'::h5tbinsert_field_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_FL_C'::h5tbinsert_field_fl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -1490,13 +1490,13 @@ subroutine h5tbinsert_field_f_float(loc_id,&
   real, intent(in), dimension(*) :: buf                            ! data buffer 
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length length
-  end function h5tbinsert_field_c
+  end function h5tbinsert_field_fl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbinsert_field_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
 
 end subroutine h5tbinsert_field_f_float
@@ -1546,12 +1546,12 @@ subroutine h5tbinsert_field_f_double(loc_id,&
 
 
  interface
-  integer function h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbinsert_field_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_C'::h5tbinsert_field_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_DL_C'::h5tbinsert_field_dl_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -1563,13 +1563,13 @@ subroutine h5tbinsert_field_f_double(loc_id,&
   double precision, intent(in), dimension(*) :: buf                ! data buffer 
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length length
-  end function h5tbinsert_field_c
+  end function h5tbinsert_field_dl_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbinsert_field_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
 
 end subroutine h5tbinsert_field_f_double
@@ -1620,12 +1620,12 @@ subroutine h5tbinsert_field_f_string(loc_id,&
 
 
  interface
-  integer function h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+  integer function h5tbinsert_field_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
  
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_C'::h5tbinsert_field_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5TBINSERT_FIELD_ST_C'::h5tbinsert_field_st_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
@@ -1637,13 +1637,13 @@ subroutine h5tbinsert_field_f_string(loc_id,&
   character(len=*), intent(in), dimension(*) :: buf                ! data buffer 
   integer :: namelen                                               ! name length
   integer :: namelen1                                              ! name length length
-  end function h5tbinsert_field_c
+  end function h5tbinsert_field_st_c
  end interface
 
  namelen  = len(dset_name)
  namelen1 = len(field_name)
  
- errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+ errcode = h5tbinsert_field_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
    field_type,field_index,buf)
 
 end subroutine h5tbinsert_field_f_string
@@ -1652,7 +1652,7 @@ end subroutine h5tbinsert_field_f_string
 
 
 !-------------------------------------------------------------------------
-! Function: h5tbdelete_field_f_int
+! Function: h5tbdelete_field_f
 !
 ! Purpose: Inserts one field
 !

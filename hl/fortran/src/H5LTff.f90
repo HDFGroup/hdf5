@@ -129,10 +129,10 @@ subroutine h5ltmake_dataset_f_int1(loc_id,&
  integer :: namelen                                 ! name length
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT1_C'::h5ltmake_dataset_int1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -142,11 +142,11 @@ subroutine h5ltmake_dataset_f_int1(loc_id,&
   integer,          intent(in) :: rank                    ! rank 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), dimension(*) :: buf                ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_int1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_int1
 
@@ -195,10 +195,10 @@ subroutine h5ltmake_dataset_f_int2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_int2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT2_C'::h5ltmake_dataset_int2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -209,11 +209,11 @@ subroutine h5ltmake_dataset_f_int2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_int2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_int2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_int2
 
@@ -262,10 +262,10 @@ subroutine h5ltmake_dataset_f_int3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_int3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT3_C'::h5ltmake_dataset_int3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -276,11 +276,11 @@ subroutine h5ltmake_dataset_f_int3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_int3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_int3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_int3
 
@@ -329,10 +329,10 @@ subroutine h5ltmake_dataset_f_float1(loc_id,&
  integer :: namelen                                 ! name length
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL1_C'::h5ltmake_dataset_fl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -342,11 +342,11 @@ subroutine h5ltmake_dataset_f_float1(loc_id,&
   integer,          intent(in) :: rank                    ! rank 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), dimension(*) :: buf                   ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_fl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_float1
 
@@ -395,10 +395,10 @@ subroutine h5ltmake_dataset_f_float2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_fl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL2_C'::h5ltmake_dataset_fl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -409,11 +409,11 @@ subroutine h5ltmake_dataset_f_float2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_fl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_fl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_float2
 
@@ -462,10 +462,10 @@ subroutine h5ltmake_dataset_f_float3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_fl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL3_C'::h5ltmake_dataset_fl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -476,11 +476,11 @@ subroutine h5ltmake_dataset_f_float3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_fl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_fl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_float3
 
@@ -528,10 +528,10 @@ subroutine h5ltmake_dataset_f_double1(loc_id,&
  integer :: namelen                                 ! name length
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL1_C'::h5ltmake_dataset_dl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -541,11 +541,11 @@ subroutine h5ltmake_dataset_f_double1(loc_id,&
   integer,          intent(in) :: rank                    ! rank 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), dimension(*) :: buf       ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_dl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_double1
 
@@ -594,10 +594,10 @@ subroutine h5ltmake_dataset_f_double2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_dl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL2_C'::h5ltmake_dataset_dl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -608,11 +608,11 @@ subroutine h5ltmake_dataset_f_double2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_dl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_dl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_double2
 
@@ -661,10 +661,10 @@ subroutine h5ltmake_dataset_f_double3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
  
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_dl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL3_C'::h5ltmake_dataset_dl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -675,11 +675,11 @@ subroutine h5ltmake_dataset_f_double3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_dl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+ errcode = h5ltmake_dataset_dl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
 end subroutine h5ltmake_dataset_f_double3
 
@@ -727,10 +727,10 @@ subroutine h5ltread_dataset_f_int1(loc_id,&
  integer :: namelen                                 ! name length
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_int1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT1_C'::h5ltread_dataset_int1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(HID_T),   intent(IN) :: loc_id                  ! file or group identifier
@@ -739,11 +739,11 @@ subroutine h5ltread_dataset_f_int1(loc_id,&
   character(LEN=*), intent(IN) :: dset_name               ! name of the dataset 
   integer(HSIZE_T), dimension(*), intent(IN) :: dims      ! size of the bufffer buf  
   integer, intent(IN), dimension(*) :: buf                ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_int1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_int1_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_int1
 
@@ -790,10 +790,10 @@ subroutine h5ltread_dataset_f_int2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_int2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT2_C'::h5ltread_dataset_int2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -803,11 +803,11 @@ subroutine h5ltread_dataset_f_int2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_int2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_int2_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_int2
 
@@ -854,10 +854,10 @@ subroutine h5ltread_dataset_f_int3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_int3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT3_C'::h5ltread_dataset_int3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -867,11 +867,11 @@ subroutine h5ltread_dataset_f_int3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_int3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_int3_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_int3
 
@@ -920,10 +920,10 @@ subroutine h5ltread_dataset_f_float1(loc_id,&
  integer :: namelen                                 ! name length
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_fl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL1_C'::h5ltread_dataset_fl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -932,11 +932,11 @@ subroutine h5ltread_dataset_f_float1(loc_id,&
   character(len=*), intent(in) :: dset_name               ! name of the dataset 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), dimension(*) :: buf                   ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_fl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_fl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_float1
 
@@ -984,10 +984,10 @@ subroutine h5ltread_dataset_f_float2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_fl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL2_C'::h5ltread_dataset_fl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -997,11 +997,11 @@ subroutine h5ltread_dataset_f_float2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_fl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_fl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_float2
 
@@ -1048,10 +1048,10 @@ subroutine h5ltread_dataset_f_float3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_fl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL3_C'::h5ltread_dataset_fl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1061,11 +1061,11 @@ subroutine h5ltread_dataset_f_float3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_fl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_fl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_float3
 
@@ -1112,10 +1112,10 @@ subroutine h5ltread_dataset_f_double1(loc_id,&
  integer :: namelen                                 ! name length
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_dl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL1_C'::h5ltread_dataset_dl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1124,11 +1124,11 @@ subroutine h5ltread_dataset_f_double1(loc_id,&
   character(len=*), intent(in) :: dset_name               ! name of the dataset 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), dimension(*) :: buf       ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_dl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_dl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_double1
 
@@ -1175,10 +1175,10 @@ subroutine h5ltread_dataset_f_double2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_dl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL2_C'::h5ltread_dataset_dl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1188,11 +1188,11 @@ subroutine h5ltread_dataset_f_double2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer 
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_dl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_dl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_double2
 
@@ -1239,10 +1239,10 @@ subroutine h5ltread_dataset_f_double3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_dl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL3_C'::h5ltread_dataset_dl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1252,11 +1252,11 @@ subroutine h5ltread_dataset_f_double3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_dl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+ errcode = h5ltread_dataset_dl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
 
 end subroutine h5ltread_dataset_f_double3
 
@@ -1303,10 +1303,10 @@ subroutine h5ltmake_dataset_int_f_1 (loc_id,&
  integer :: namelen                                 ! name length
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT1_C'::h5ltmake_dataset_nint1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1316,11 +1316,11 @@ subroutine h5ltmake_dataset_int_f_1 (loc_id,&
   integer,          intent(in) :: rank                    ! rank 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), dimension(*) :: buf                ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nint1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,h5t_native_integer,buf)
+ errcode = h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,h5t_native_integer,buf)
 
 end subroutine h5ltmake_dataset_int_f_1
 
@@ -1368,10 +1368,10 @@ subroutine h5ltmake_dataset_int_f_2 (loc_id,&
  
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nint2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT2_C'::h5ltmake_dataset_nint2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1382,11 +1382,11 @@ subroutine h5ltmake_dataset_int_f_2 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2)) :: buf                  ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nint2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_INTEGER,buf)
+ errcode = h5ltmake_dataset_nint2_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_INTEGER,buf)
 
 end subroutine h5ltmake_dataset_int_f_2
 
@@ -1435,10 +1435,10 @@ subroutine h5ltmake_dataset_int_f_3 (loc_id,&
  
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nint3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT3_C'::h5ltmake_dataset_nint3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1449,11 +1449,11 @@ subroutine h5ltmake_dataset_int_f_3 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nint3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_INTEGER,buf)
+ errcode = h5ltmake_dataset_nint3_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_INTEGER,buf)
 
 end subroutine h5ltmake_dataset_int_f_3
 
@@ -1501,10 +1501,10 @@ subroutine h5ltmake_dataset_float_f_1 (loc_id,&
  integer :: namelen                                 ! name length
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL1_C'::h5ltmake_dataset_nfl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1514,11 +1514,11 @@ subroutine h5ltmake_dataset_float_f_1 (loc_id,&
   integer,          intent(in) :: rank                    ! rank 
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), dimension(*) :: buf                   ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nfl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
+ errcode = h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
 
 end subroutine h5ltmake_dataset_float_f_1
 
@@ -1565,10 +1565,10 @@ subroutine h5ltmake_dataset_float_f_2 (loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nfl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL2_C'::h5ltmake_dataset_nfl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1579,11 +1579,11 @@ subroutine h5ltmake_dataset_float_f_2 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2)) :: buf                  ! data buffer  
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nfl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
+ errcode = h5ltmake_dataset_nfl2_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
 
 end subroutine h5ltmake_dataset_float_f_2
 
@@ -1630,10 +1630,10 @@ subroutine h5ltmake_dataset_float_f_3 (loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_nfl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL3_C'::h5ltmake_dataset_nfl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1644,11 +1644,11 @@ subroutine h5ltmake_dataset_float_f_3 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_nfl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
+ errcode = h5ltmake_dataset_nfl3_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_REAL,buf)
 
 end subroutine h5ltmake_dataset_float_f_3
 
@@ -1698,10 +1698,10 @@ subroutine h5ltmake_dataset_double_f_1 (loc_id,&
  dimension(dims(1)) :: buf                          ! data buffer 
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_ndl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL1_C'::h5ltmake_dataset_ndl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1712,11 +1712,11 @@ subroutine h5ltmake_dataset_double_f_1 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1)) :: buf                               ! data buffer   
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_ndl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
+ errcode = h5ltmake_dataset_ndl1_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
 
 end subroutine h5ltmake_dataset_double_f_1
 
@@ -1764,10 +1764,10 @@ subroutine h5ltmake_dataset_double_f_2 (loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_ndl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL2_C'::h5ltmake_dataset_ndl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1778,11 +1778,11 @@ subroutine h5ltmake_dataset_double_f_2 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer   
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_ndl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
+ errcode = h5ltmake_dataset_ndl2_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
 
 end subroutine h5ltmake_dataset_double_f_2
 
@@ -1829,10 +1829,10 @@ subroutine h5ltmake_dataset_double_f_3 (loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
             
  interface
-  integer function h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+  integer function h5ltmake_dataset_ndl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_C'::h5ltmake_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL3_C'::h5ltmake_dataset_ndl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1843,11 +1843,11 @@ subroutine h5ltmake_dataset_double_f_3 (loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(in), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer    
-  end function h5ltmake_dataset_c
+  end function h5ltmake_dataset_ndl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
+ errcode = h5ltmake_dataset_ndl3_c(loc_id,namelen,dset_name,rank,dims,H5T_NATIVE_DOUBLE,buf)
 
 end subroutine h5ltmake_dataset_double_f_3
 
@@ -1894,10 +1894,10 @@ subroutine h5ltread_dataset_int_f_1(loc_id,&
  dimension(dims(1)) :: buf                          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nint1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT1_C'::h5ltread_dataset_nint1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1907,11 +1907,11 @@ subroutine h5ltread_dataset_int_f_1(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(inout), &
   dimension(dims(1)) :: buf                               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nint1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
+ errcode = h5ltread_dataset_nint1_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
 
 end subroutine h5ltread_dataset_int_f_1
 
@@ -1957,10 +1957,10 @@ subroutine h5ltread_dataset_int_f_2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nint2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT2_C'::h5ltread_dataset_nint2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1970,11 +1970,11 @@ subroutine h5ltread_dataset_int_f_2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(inout), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer    
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nint2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
+ errcode = h5ltread_dataset_nint2_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
 
 end subroutine h5ltread_dataset_int_f_2
 
@@ -2019,10 +2019,10 @@ subroutine h5ltread_dataset_int_f_3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nint3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT3_C'::h5ltread_dataset_nint3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2032,11 +2032,11 @@ subroutine h5ltread_dataset_int_f_3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   integer, intent(inout), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nint3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
+ errcode = h5ltread_dataset_nint3_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,buf,dims)
 
 end subroutine h5ltread_dataset_int_f_3
 
@@ -2082,10 +2082,10 @@ subroutine h5ltread_dataset_float_f_1(loc_id,&
  dimension(dims(1)) :: buf                          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nfl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL1_C'::h5ltread_dataset_nfl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2095,11 +2095,11 @@ subroutine h5ltread_dataset_float_f_1(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(inout), &
   dimension(dims(1)) :: buf                               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nfl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
+ errcode = h5ltread_dataset_nfl1_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
 
 end subroutine h5ltread_dataset_float_f_1
 
@@ -2145,10 +2145,10 @@ subroutine h5ltread_dataset_float_f_2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nfl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL2_C'::h5ltread_dataset_nfl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2158,11 +2158,11 @@ subroutine h5ltread_dataset_float_f_2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(inout), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer    
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nfl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
+ errcode = h5ltread_dataset_nfl2_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
 
 end subroutine h5ltread_dataset_float_f_2
 
@@ -2207,10 +2207,10 @@ subroutine h5ltread_dataset_float_f_3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_nfl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL3_C'::h5ltread_dataset_nfl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2220,11 +2220,11 @@ subroutine h5ltread_dataset_float_f_3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   real, intent(inout), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_nfl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
+ errcode = h5ltread_dataset_nfl3_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,buf,dims)
 
 end subroutine h5ltread_dataset_float_f_3
 
@@ -2269,10 +2269,10 @@ subroutine h5ltread_dataset_double_f_1(loc_id,&
  dimension(dims(1)) :: buf                          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_ndl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL1_C'::h5ltread_dataset_ndl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2282,11 +2282,11 @@ subroutine h5ltread_dataset_double_f_1(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(inout), &
   dimension(dims(1)) :: buf                               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_ndl1_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
+ errcode = h5ltread_dataset_ndl1_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
 
 end subroutine h5ltread_dataset_double_f_1
 
@@ -2332,10 +2332,10 @@ subroutine h5ltread_dataset_double_f_2(loc_id,&
  dimension(dims(1),dims(2)) :: buf                  ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_ndl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL2_C'::h5ltread_dataset_ndl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2345,11 +2345,11 @@ subroutine h5ltread_dataset_double_f_2(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(inout), &
   dimension(dims(1),dims(2)) :: buf                       ! data buffer    
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_ndl2_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
+ errcode = h5ltread_dataset_ndl2_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
 
 end subroutine h5ltread_dataset_double_f_2
 
@@ -2394,10 +2394,10 @@ subroutine h5ltread_dataset_double_f_3(loc_id,&
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
 
  interface
-  integer function h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims)
+  integer function h5ltread_dataset_ndl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_C'::h5ltread_dataset_c
+  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL3_C'::h5ltread_dataset_ndl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2407,11 +2407,11 @@ subroutine h5ltread_dataset_double_f_3(loc_id,&
   integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
   double precision, intent(inout), &
   dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
-  end function h5ltread_dataset_c
+  end function h5ltread_dataset_ndl3_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
+ errcode = h5ltread_dataset_ndl3_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,buf,dims)
 
 end subroutine h5ltread_dataset_double_f_3
 
