@@ -150,9 +150,6 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(grp_page);
 
-/* Declare extern the free list to manage haddr_t's */
-H5FL_EXTERN(haddr_t);
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_get_shared
