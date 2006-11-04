@@ -1695,8 +1695,6 @@
 ./windows/test/externaldll/externaldll.dsp
 ./windows/test/fheap/fheap.dsp
 ./windows/test/fheapdll/fheapdll.dsp
-./windows/test/file_handle/file_handle.dsp
-./windows/test/file_handledll/file_handledll.dsp
 ./windows/test/fillval/fillval.dsp
 ./windows/test/fillvaldll/fillvaldll.dsp
 ./windows/test/flush1/flush1.dsp
@@ -1734,6 +1732,8 @@
 ./windows/test/overheaddll/overheaddll.dsp
 ./windows/test/pool/pool.dsp
 ./windows/test/pooldll/pooldll.dsp
+./windows/test/ref/ref.dsp
+./windows/test/refdll/refdll.dsp
 ./windows/test/reserved/reserved.dsp
 ./windows/test/reserveddll/reserveddll.dsp
 ./windows/test/set_extent/set_extent.dsp
@@ -1746,6 +1746,8 @@
 ./windows/test/ttsafedll/ttsafedll.dsp
 ./windows/test/unlink/unlink.dsp
 ./windows/test/unlinkdll/unlinkdll.dsp
+./windows/test/vfd/vfd.dsp
+./windows/test/vfddll/vfddll.dsp
 ./windows/test/hdf5test.bat
 ./windows/test/hdf5timingtest.bat
 
