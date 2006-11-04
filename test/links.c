@@ -1756,7 +1756,7 @@ external_link_path(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/C")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -1903,7 +1903,7 @@ external_link_mult(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/C")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -2029,7 +2029,7 @@ external_link_self(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/X")) TEST_ERROR
 
     /* Create object through external link */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -2195,7 +2195,7 @@ external_link_pingpong(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/final")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -2358,7 +2358,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/final")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -2971,7 +2971,7 @@ external_link_move(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -3016,7 +3016,7 @@ external_link_move(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group2", (size_t)0)) < 0) TEST_ERROR
@@ -3052,14 +3052,14 @@ external_link_move(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Move external link back to original location */
     if(H5Gmove(fid, "/group2/src3", "/src") < 0) TEST_ERROR
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group3", (size_t)0)) < 0) TEST_ERROR
@@ -3204,7 +3204,7 @@ external_link_ride(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -3239,7 +3239,7 @@ external_link_ride(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group2", (size_t)0)) < 0) TEST_ERROR
@@ -3818,7 +3818,7 @@ ud_hard_links(hid_t fapl)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/group")) TEST_ERROR
 
     /* Create object in group */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR
@@ -4004,7 +4004,7 @@ ud_link_reregister(hid_t fapl)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/" REREG_TARGET_NAME)) TEST_ERROR
 
     /* Create object in group */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR

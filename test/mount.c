@@ -1438,14 +1438,14 @@ test_mount_after_unmount(hid_t fapl)
         TEST_ERROR
 
     /* Unmount second file */
-    if (H5Funmount(fid1, "/A/M")<0)
+    if(H5Funmount(fid1, "/A/M")<0)
 	TEST_ERROR
 
     /* Check name */
     *objname = '\0';
     if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
-    if(HDstrcmp(objname, ""))
+    if(HDstrcmp(objname, "/X/M/Y"))
         TEST_ERROR
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
@@ -1465,7 +1465,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
 	TEST_ERROR
-    if(HDstrcmp(objname, ""))
+    if(HDstrcmp(objname, "/X/M/Z"))
 	TEST_ERROR
 
     /* Mount fourth file */
@@ -3173,10 +3173,10 @@ test_close_parent(hid_t fapl)
     if(H5Funmount(gidM, "/A") < 0)
         TEST_ERROR
 
-    /* Check the name of "M" is not defined any longer */
+    /* Check the name of "M" is defined in its file */
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len != 0)
+    if(name_len == 0 || HDstrcmp(name, "/M"))
         TEST_ERROR
 
     /* Just file #2's underlying shared file should be open still */
@@ -3547,10 +3547,10 @@ test_cut_graph(hid_t fapl)
     if(H5Gclose(gidO) < 0)
         TEST_ERROR
 
-    /* Check the name of "M" is not defined any longer */
+    /* Check the name of "M" is defined in its file */
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len != 0)
+    if(name_len == 0 || HDstrcmp(name, "/E/M"))
         TEST_ERROR
 
     /* Check the name of "Q" is still defined */
@@ -3580,10 +3580,10 @@ test_cut_graph(hid_t fapl)
     if(H5F_sfile_assert_num(3) != 0)
         TEST_ERROR
 
-    /* Check the name of "Q" is not defined any longer */
+    /* Check the name of "Q" is defined in its file */
     if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len != 0)
+    if(name_len == 0 || HDstrcmp(name, "/I/Q"))
         TEST_ERROR
 
     /* Open object in file #6 from file #7 */

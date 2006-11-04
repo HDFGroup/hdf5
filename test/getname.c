@@ -768,7 +768,7 @@ int main( void )
 
 
     /* Verify */
-    if(check_name(group_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group_id, "/g14/g3/g4", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -793,7 +793,7 @@ int main( void )
     if (H5Funmount(group2_id, "g1")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group_id, "/g14/g3/g4", "") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g14/g3/g4", "/g14/g3/g4") < 0) TEST_ERROR;
 
     /* Close */
@@ -817,7 +817,7 @@ int main( void )
     if (H5Funmount(group2_id, ".")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group_id, "/g14/g3/g4", "") < 0) TEST_ERROR;
     if(check_name(group2_id, "", "") < 0) TEST_ERROR;
 
     /* Close */
@@ -967,7 +967,7 @@ int main( void )
     if(check_name(group_id, "/g15/g1/g2/g3", "/g15/g1/g2/g3") < 0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/g16/g4/g5", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -1028,7 +1028,7 @@ int main( void )
     if((type_id=H5Dget_type(dataset_id))<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(type_id, "", "") < 0) TEST_ERROR;
+    if(check_name(type_id, "/g17/t", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Dclose( dataset_id );
@@ -1314,10 +1314,10 @@ PASSED();
     if(check_name(dataset_id, "/g18/d2", "/g18/d2") < 0) TEST_ERROR;
     if(check_name(type_id, "/g18/t2", "/g18/t2") < 0) TEST_ERROR;
 
-    /* Get name for the IDs of the second file, should be "" */
-    if(check_name(group6_id, "", "") < 0) TEST_ERROR;
-    if(check_name(dataset2_id, "", "") < 0) TEST_ERROR;
-    if(check_name(type2_id, "", "") < 0) TEST_ERROR;
+    /* Get name for the IDs of the second file, should be local names now */
+    if(check_name(group6_id, "/g18/g2", "") < 0) TEST_ERROR;
+    if(check_name(dataset2_id, "/g18/d2", "") < 0) TEST_ERROR;
+    if(check_name(type2_id, "/g18/t2", "") < 0) TEST_ERROR;
 
     H5Tclose( type_id );
     H5Tclose( type2_id );
@@ -1559,7 +1559,7 @@ PASSED();
     if (H5Gunlink( file_id, "/g19/g3")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR;
     if(check_name(group2_id, "/g19/g1", "/g19/g1") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g19/g2", "/g19/g2") < 0) TEST_ERROR;
 
@@ -1579,7 +1579,7 @@ PASSED();
     if (H5Gunlink( group_id, "g3")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR;
     if(check_name(group2_id, "/g19/g1", "/g19/g1") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g19/g2", "/g19/g2") < 0) TEST_ERROR;
 
@@ -1757,11 +1757,11 @@ PASSED();
     /* Open the group */
     if ((group3_id = H5Gopen( file_id, "/g24/g2" ))<0) TEST_ERROR;
 
-    /* Delete group */
+    /* Delete symbolic link */
     if (H5Gunlink( file_id, "/g24/g2")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group3_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group3_id, "/g24/g1", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -1868,7 +1868,7 @@ PASSED();
     if (H5Funmount(file_id, "/g25/g1/g26/g3/g27/g5")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g28/g7/g8", "") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g25/g1/g26/g3/g27/g5/g6", "/g25/g1/g26/g3/g27/g5/g6") < 0) TEST_ERROR;
     if(check_name(group2_id, "", "/g25/g1/g26/g3/g4") < 0) TEST_ERROR;
     if(check_name(group_id, "", "/g25/g1/g2") < 0) TEST_ERROR;
@@ -1880,7 +1880,7 @@ PASSED();
     if (H5Funmount(file_id, "/g25/g1/g26/g3")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group3_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group3_id, "/g27/g5/g6", "") < 0) TEST_ERROR;
     if(check_name(group2_id, "/g25/g1/g26/g3/g4", "/g25/g1/g26/g3/g4") < 0) TEST_ERROR;
     if(check_name(group_id, "", "/g25/g1/g2") < 0) TEST_ERROR;
 
@@ -1891,7 +1891,7 @@ PASSED();
     if (H5Funmount(file_id, "/g25/g1")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/g26/g3/g4", "") < 0) TEST_ERROR;
     if(check_name(group_id, "/g25/g1/g2", "/g25/g1/g2") < 0) TEST_ERROR;
 
     /* Close */
@@ -2046,7 +2046,7 @@ PASSED();
     if (H5Funmount(file_id, "/g30")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g33/g7/g8", "") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g30/g1/g31/g3/g32/g5/g6", "/g30/g1/g31/g3/g32/g5/g6") < 0) TEST_ERROR;
     if(check_name(group2_id, "", "/g30/g1/g31/g3/g4") < 0) TEST_ERROR;
     if(check_name(group_id, "", "/g30/g1/g2") < 0) TEST_ERROR;
@@ -2055,8 +2055,8 @@ PASSED();
     if (H5Funmount(file_id, "/g30/g1/g31/g3")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
-    if(check_name(group3_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g33/g7/g8", "") < 0) TEST_ERROR;
+    if(check_name(group3_id, "/g32/g5/g6", "") < 0) TEST_ERROR;
     if(check_name(group2_id, "/g30/g1/g31/g3/g4", "/g30/g1/g31/g3/g4") < 0) TEST_ERROR;
     if(check_name(group_id, "", "/g30/g1/g2") < 0) TEST_ERROR;
 
@@ -2064,9 +2064,9 @@ PASSED();
     if (H5Funmount(file_id, "/g30/g1")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group4_id, "", "") < 0) TEST_ERROR;
-    if(check_name(group3_id, "", "") < 0) TEST_ERROR;
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group4_id, "/g33/g7/g8", "") < 0) TEST_ERROR;
+    if(check_name(group3_id, "/g32/g5/g6", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/g31/g3/g4", "") < 0) TEST_ERROR;
     if(check_name(group_id, "/g30/g1/g2", "/g30/g1/g2") < 0) TEST_ERROR;
 
     /* Close groups */
@@ -2295,14 +2295,14 @@ PASSED();
     if (H5Funmount(file3_id, "/g40/g5")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/g38/g1/g39/g3/g4", "") < 0) TEST_ERROR;
     if(check_name(group_id, "/g38/g1/g39/g3/g4", "/g38/g1/g39/g3/g4") < 0) TEST_ERROR;
 
     /* Unmount second file */
     if (H5Funmount(file1_id, "/g38/g1")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group_id, "/g39/g3/g4", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -2358,7 +2358,7 @@ PASSED();
     if ((group2_id = H5Gopen( group_id, "g4" ))<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/g42/g3/g4", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -2368,7 +2368,7 @@ PASSED();
 
     PASSED();
 
-/*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * end tests
     *-------------------------------------------------------------------------
     */
