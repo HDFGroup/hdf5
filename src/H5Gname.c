@@ -52,7 +52,7 @@ typedef struct H5G_ref_path_iter_t {
     /* In */
     hid_t file; 		/* File id where it came from */
     hid_t dxpl_id; 		/* DXPL for operations */
-    haddr_t obj; 		/* The address what we're looking for */
+    const H5O_loc_t *loc; 	/* The location of the object we're looking for */
 
     /* In/Out */
     H5SL_t *ref_path_table;     /* Skip list for tracking visited nodes */
@@ -81,8 +81,8 @@ static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_refname_iterator(hid_t group, const char *name, void *_iter);
 static herr_t H5G_free_ref_path_node(void *item, void *key, void *operator_data/*in,out*/);
-static ssize_t H5G_get_refobj_name(haddr_t id, hid_t file, char* name,
-    size_t size, hid_t dxpl_it);
+static ssize_t H5G_get_refobj_name(hid_t fid, hid_t dxpl_id, const H5O_loc_t *loc, 
+    char* name, size_t size);
 
 
 /*-------------------------------------------------------------------------
@@ -440,7 +440,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
 
     /* get object location */
     if(H5G_loc(id, &loc) >= 0) {
-        ssize_t len;
+        ssize_t len = 0;
 
         /* If the user path is available and it's not "hidden", use it */
         if(loc.path->user_path_r != NULL && loc.path->obj_hidden == 0) {
@@ -452,7 +452,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
                     name[size - 1] = '\0';
             } /* end if */
         } /* end if */
-	else {
+	else if(!loc.path->obj_hidden) {
 	    hid_t	  file;
 
             /* Retrieve file ID for name search */
@@ -460,7 +460,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
             /* Search for name of object */
-	    if((len = H5G_get_refobj_name((loc.oloc)->addr, file, name, size, dxpl_id)) < 0)
+	    if((len = H5G_get_refobj_name(file, dxpl_id, loc.oloc, name, size)) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
 	
             /* Close file ID used for search */
@@ -1058,7 +1058,7 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
     
     FUNC_ENTER_NOAPI_NOINIT(H5G_refname_iterator)
     
-    /* Look up group location info */
+    /* Look up group's location */
     if(H5G_loc(group, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
@@ -1068,7 +1068,10 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
     /* Check for finding the object */
-    if(udata->obj == objno) {
+    /* (checks against the file in the location as well, to make certain that
+     *  the correct object is found in a mounted file hierarchy)
+     */
+    if(udata->loc->addr == objno && udata->loc->file == loc.oloc->file) {
         /* Build the object's full name */
         if(NULL == (udata->container = H5MM_realloc(udata->container, HDstrlen(udata->container) + HDstrlen(name) + 2)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
@@ -1172,7 +1175,8 @@ H5G_free_ref_path_node(void *item, void UNUSED *key, void UNUSED *operator_data/
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5G_get_refobj_name(haddr_t addr, hid_t file, char *name, size_t size, hid_t dxpl_id)
+H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
+    char *name, size_t size)
 {
     H5G_ref_path_iter_t udata;  /* User data for iteration */
     int last_obj = 0;           /* Start object for iteration */
@@ -1185,7 +1189,7 @@ H5G_get_refobj_name(haddr_t addr, hid_t file, char *name, size_t size, hid_t dxp
     udata.dxpl_id = dxpl_id;
     if(NULL == (udata.container = H5MM_strdup("/")))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate root group name")
-    udata.obj = addr;
+    udata.loc = loc;
     
     /* Create skip list to store reference path information */
     if((udata.ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
