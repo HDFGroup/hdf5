@@ -343,7 +343,7 @@ H5dont_atexit(void)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_NOINIT(H5dont_atexit)
+    FUNC_ENTER_API_NOINIT_NOFS(H5dont_atexit)
     H5TRACE0("e","");
 
     if(H5_dont_atexit_g)
@@ -351,7 +351,7 @@ H5dont_atexit(void)
     else
         H5_dont_atexit_g = TRUE;
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOFS(ret_value)
 } /* end H5dont_atexit() */
 
 
@@ -611,7 +611,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static int	disable_version_check = 0;      /* Set if the version check should be disabled */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_NOINIT(H5check_version)
+    FUNC_ENTER_API_NOINIT_NOFS(H5check_version)
     H5TRACE3("e","IuIuIu",majnum,minnum,relnum);
 
     /* Don't check again, if we already have */
@@ -694,7 +694,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOFS(ret_value)
 } /* end H5check_version() */
 
 

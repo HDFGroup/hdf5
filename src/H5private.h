@@ -1263,7 +1263,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface or push themselves on the function
  *      stack, just perform tracing, etc.  Examples
- *      are: H5close, etc.
+ *      are: H5close, H5check_version, etc.
  *
  */
 #define FUNC_ENTER_API_NOINIT_NOFS(func_name) {{                              \
