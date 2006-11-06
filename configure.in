@@ -2572,7 +2572,7 @@ if test "$STREAM_VFD" = "yes"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Check if Direct I/O driver is wanted by --enable-direct-vfd
+dnl Check if Direct I/O driver is enabled by --enable-direct-vfd
 dnl
 
 AC_MSG_CHECKING([for Direct Virtual File Driver support])
@@ -2612,6 +2612,46 @@ else
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+dnl ----------------------------------------------------------------------
+dnl Check if Direct I/O driver requires alignment.
+dnl
+
+if test ${hdf5_direct_io} = "yes"; then
+    AC_MSG_CHECKING([for Direct VFD alignment requirement])
+
+    AC_CACHE_VAL([hdf5_direct_align],
+        [AC_TRY_RUN([
+            #include <stdlib.h>
+	    #include <sys/types.h>
+	    #include <sys/stat.h>
+	    #include <fcntl.h>
+            int main(void)
+            {
+                 int *buf;
+                 int fid; 
+                 fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT | O_RDWR, 0755);
+                 buf = (int*)malloc(sizeof(int));
+                 if(write(fid, (void*)buf, sizeof(int))<0) {
+                     close(fid);
+                     free(buf);
+                     remove("tst_file"); 
+		     exit(1);
+                 }
+                 close(fid);  
+                 remove("tst_file"); 
+                 free(buf);
+                 exit (0);
+             }], [hdf5_direct_align=no], [hdf5_direct_align=yes],)])
+
+    if test ${hdf5_direct_align} = "yes"; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_DIRECT_ALIGN], [1],
+                [Define if the direct I/O VFD requires alignment])
+    else
+        AC_MSG_RESULT([no])
+    fi
+fi
  
 dnl ----------------------------------------------------------------------
 dnl Decide whether the presence of user's exception handling functions is
