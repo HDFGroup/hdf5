@@ -1090,12 +1090,12 @@ hsize_t diff (hid_t file1_id,
       buf1 = HDmalloc (li1.u.link_size);
       buf2 = HDmalloc (li2.u.link_size);
 
-      if (H5Lget_linkval (file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
+      if(H5Lget_val(file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
       {
         HDfree (buf1); HDfree (buf2);
         goto out;
       }
-      if (H5Lget_linkval (file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
+      if(H5Lget_val(file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
       {
         HDfree (buf1); HDfree (buf2);
         goto out;
@@ -1104,12 +1104,12 @@ hsize_t diff (hid_t file1_id,
       /* If the buffers are the same size, compare them */
       if(li1.u.link_size == li2.u.link_size)
       {
-        if (H5Lget_linkval (file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
+        if(H5Lget_val(file1_id, path1, li1.u.link_size, buf1, H5P_DEFAULT) < 0)
         {
           HDfree (buf1); HDfree (buf2);
           goto out;
         }
-        if (H5Lget_linkval (file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
+        if(H5Lget_val(file2_id, path2, li2.u.link_size, buf2, H5P_DEFAULT) < 0)
         {
           HDfree (buf1); HDfree (buf2);
           goto out;

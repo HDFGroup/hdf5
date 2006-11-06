@@ -107,11 +107,9 @@ static herr_t H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_create_soft(const char *target_path, H5G_loc_t *cur_loc,
     const char *cur_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
-static herr_t H5L_linkval_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5L_get_val_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_linkval(H5G_loc_t *loc, const char *name, size_t size,
-    void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -732,7 +730,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_linkval
+ * Function:	H5Lget_val
  *
  * Purpose:	Returns the link value of a link whose name is NAME.  For
  *              symbolic links, this is the path to which the link points,
@@ -751,13 +749,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_linkval(hid_t loc_id, const char *name, size_t size, void *buf/*out*/,
+H5Lget_val(hid_t loc_id, const char *name, size_t size, void *buf/*out*/,
                hid_t lapl_id)
 {
     H5G_loc_t	loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Lget_linkval, FAIL)
+    FUNC_ENTER_API(H5Lget_val, FAIL)
     H5TRACE5("e","iszxi",loc_id,name,size,buf,lapl_id);
 
     /* Check arguments */
@@ -767,12 +765,12 @@ H5Lget_linkval(hid_t loc_id, const char *name, size_t size, void *buf/*out*/,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Get the link value */
-    if(H5L_linkval(&loc, name, size, buf, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5L_get_val(&loc, name, size, buf, lapl_id, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lget_linkval() */
+} /* end H5Lget_val() */
 
 
 /*-------------------------------------------------------------------------
@@ -1438,7 +1436,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_linkval_cb
+ * Function:	H5L_get_val_cb
  *
  * Purpose:	Callback for retrieving link value or udata.
  *
@@ -1450,14 +1448,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_linkval_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
+H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
     H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_ud4_t *udata = (H5L_trav_ud4_t *)_udata;   /* User data passed in */
     const H5L_class_t *link_class;             /* User-defined link class */
     herr_t ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_linkval_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val_cb)
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL)
@@ -1496,11 +1494,11 @@ done:
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_linkval_cb() */
+} /* end H5L_get_val_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_linkval
+ * Function:	H5L_get_val
  *
  * Purpose:	Returns the value of a symbolic link or the udata for a
  *              user-defined link.
@@ -1518,25 +1516,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5L_linkval(H5G_loc_t *loc, const char *name, size_t size, void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id)
+herr_t
+H5L_get_val(H5G_loc_t *loc, const char *name, size_t size, void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_ud4_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_linkval)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val)
 
     /* Set up user data for retrieving information */
     udata.size = size;
     udata.buf = buf;
 
     /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L_linkval_cb, &udata, lapl_id, dxpl_id) < 0)
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L_get_val_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5L_linkval() */
+} /* H5L_get_val() */
 
 
 /*-------------------------------------------------------------------------

@@ -306,7 +306,7 @@ cklinks(hid_t fapl, hbool_t new_format)
 	puts("    expected file location.");
 	TEST_ERROR
     }
-    if (H5Lget_linkval(file, "grp1/soft", sizeof linkval, linkval, H5P_DEFAULT) < 0) TEST_ERROR
+    if (H5Lget_val(file, "grp1/soft", sizeof linkval, linkval, H5P_DEFAULT) < 0) TEST_ERROR
     if (HDstrcmp(linkval, "/d1")) {
 	H5_FAILED();
 	puts("    Soft link test failed. Wrong link value");
@@ -1601,7 +1601,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 	puts("    Unexpected object type - should have been an external link");
 	goto error;
     }
-    if(H5Lget_linkval(fid, "ext_link", sizeof(objname), objname, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_val(fid, "ext_link", sizeof(objname), objname, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Lunpack_elink_val(objname, sb.linklen, &file, &path) < 0) TEST_ERROR
     if(HDstrcmp(file, filename1))
     {
@@ -2625,7 +2625,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     }
 
     /* Get information for external link.  It should be two strings right after each other */
-    if(H5Lget_linkval(fid, "src", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_val(fid, "src", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Extract the file and object names from the buffer */
     if(H5Lunpack_elink_val(query_buf, li.u.link_size, &file_name, &object_name) < 0) TEST_ERROR
@@ -4744,7 +4744,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     if(li.u.link_size != 0) TEST_ERROR
     /* ...but fail when we try to write data to the buffer itself*/
     H5E_BEGIN_TRY {
-        if(H5Lget_linkval(fid, "ud_link", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) >=0) TEST_ERROR
+        if(H5Lget_val(fid, "ud_link", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) >=0) TEST_ERROR
     } H5E_END_TRY
 
     /* Register a new class */
@@ -4753,7 +4753,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     /* Now querying should succeed */
     if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.link_size != 8) TEST_ERROR
-    if(H5Lget_linkval(fid, "ud_link", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_val(fid, "ud_link", (size_t)NAME_BUF_SIZE, query_buf, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(query_buf, "succeed") != 0) TEST_ERROR
 
     /* Moving and copying should both succeed */
@@ -4926,8 +4926,8 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     /* H5Lunlink */
     if(H5Lunlink(fid, "soft17/soft_link", plist) < 0) TEST_ERROR
 
-    /* H5Lget_linkval and H5Lget_info */
-    if(H5Lget_linkval(fid, "soft17", (size_t)0, NULL, plist) < 0) TEST_ERROR
+    /* H5Lget_val and H5Lget_info */
+    if(H5Lget_val(fid, "soft17", (size_t)0, NULL, plist) < 0) TEST_ERROR
     if(H5Lget_info(fid, "soft17", NULL, plist) < 0) TEST_ERROR
 
     /* H5Lcreate_external and H5Lcreate_ud */

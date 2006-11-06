@@ -1720,11 +1720,11 @@ slink_open(hid_t location, const char *name)
 {
     char buf[64];
 
-    if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) return -1;
-    if (NULL==HDmemchr(buf, 0, sizeof(buf))) {
- strcpy(buf+sizeof(buf)-4, "...");
-    }
-    fputs(buf, stdout);
+    if(H5Lget_val(location, name, sizeof(buf), buf, H5P_DEFAULT) < 0)
+        return -1;
+    if(NULL == HDmemchr(buf, 0, sizeof(buf)))
+         HDstrcpy(buf + sizeof(buf) - 4, "...");
+    HDfputs(buf, stdout);
 
     return 0;
 }
@@ -1755,30 +1755,33 @@ udlink_open(hid_t location, const char *name)
     char * filename = NULL;
     char * path = NULL;
 
-    if(H5Lget_info(location, name, &linfo, H5P_DEFAULT) < 0) return -1;
+    if(H5Lget_info(location, name, &linfo, H5P_DEFAULT) < 0)
+        return -1;
 
     switch(linfo.type)
     {
-      /* For external links, try to display info for the object it points to */
-      case H5L_TYPE_EXTERNAL:
-        if ((buf = HDmalloc(linfo.u.link_size))==NULL) goto error;
-        if (H5Lget_linkval (location, name, sizeof(buf), buf, H5P_DEFAULT)<0) goto error;
+        /* For external links, try to display info for the object it points to */
+        case H5L_TYPE_EXTERNAL:
+            if((buf = HDmalloc(linfo.u.link_size)) == NULL)
+                goto error;
+            if(H5Lget_val(location, name, sizeof(buf), buf, H5P_DEFAULT) < 0)
+                goto error;
 
-        if(H5Lunpack_elink_val(buf, linfo.u.link_size,  &filename, &path) < 0) goto error;
-        fputs("file: ", stdout);
-        fputs(filename, stdout);
-        fputs("    path: ", stdout);
-        fputs(path, stdout);
-        break;
+            if(H5Lunpack_elink_val(buf, linfo.u.link_size,  &filename, &path) < 0) goto error;
+            HDfputs("file: ", stdout);
+            HDfputs(filename, stdout);
+            HDfputs("    path: ", stdout);
+            HDfputs(path, stdout);
+            break;
 
-      default:
-        fputs("cannot follow UD links", stdout);
+        default:
+            HDfputs("cannot follow UD links", stdout);
     }
     return 0;
 
 error:
     if(buf)
-      HDfree(buf);
+        HDfree(buf);
     return -1;
 }
 

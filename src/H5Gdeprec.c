@@ -29,9 +29,7 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gpublic.h"          /* Public Group APIs                    */
-#include "H5Lpublic.h"          /* Public Link APIs                     */
-#include "H5Ppublic.h"          /* Property lists                       */
+#include "H5Lprivate.h"         /* Links                                */
 
 
 /*-------------------------------------------------------------------------
@@ -177,19 +175,27 @@ done:
  * Function:	H5Gget_linkval
  *
  * Purpose:	Retrieve's a soft link's data.  The new API is
- *              H5Lget_linkval.
+ *              H5Lget_val.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
-    herr_t ret_value;
+    H5G_loc_t	loc;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Gget_linkval, FAIL)
     H5TRACE4("e","iszx",loc_id,name,size,buf);
 
-    if((ret_value = H5Lget_linkval(loc_id, name, size, buf, H5P_DEFAULT)) < 0)
+    /* Check arguments */
+    if(H5G_loc(loc_id, &loc))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+
+    /* Call the new link routine which provides this capability */
+    if(H5L_get_val(&loc, name, size, buf, H5P_DEFAULT, H5P_DEFAULT) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")
 
 done:

@@ -210,7 +210,7 @@ New Features
             H5Lcreate_hard - like H5Glink2 for hard links
             H5Lcreate_soft - like H5Glink2 for soft links
             H5Lunlink - just like H5Gunlink
-            H5Lget_linkval - just link H5Gget_linkval
+            H5Lget_val - just link H5Gget_linkval
             H5Lget_info - gets link-specific info (like H5Gget_objinfo)
 
          In addition, H5Gcreate_expand, H5Tcommit_expand, and H5Dcreate_expand

@@ -29,11 +29,10 @@
 #include <sys/types.h>
 
 /* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5Tpublic.h"
+#include "H5public.h"		/* Generic Functions			*/
+#include "H5Lpublic.h"		/* Links                                */
+#include "H5Opublic.h"		/* Object headers			*/
+#include "H5Tpublic.h"		/* Datatypes				*/
 
 /*****************/
 /* Public Macros */
