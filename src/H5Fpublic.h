@@ -33,8 +33,6 @@
  * We're assuming that these constants are used rather early in the hdf5
  * session.
  *
- * NOTE: When adding H5F_ACC_* macros, remember to redefine them in H5Fprivate.h
- *
  */
 
 /* When this header is included from a private header, don't make calls to H5check() */
@@ -104,20 +102,20 @@ extern "C" {
 #endif
 
 /* Functions in H5F.c */
-H5_DLL htri_t H5Fis_hdf5 (const char *filename);
-H5_DLL hid_t  H5Fcreate (const char *filename, unsigned flags,
+H5_DLL htri_t H5Fis_hdf5(const char *filename);
+H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
-H5_DLL hid_t  H5Fopen (const char *filename, unsigned flags,
+H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags,
 		        hid_t access_plist);
 H5_DLL hid_t  H5Freopen(hid_t file_id);
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
-H5_DLL herr_t H5Fclose (hid_t file_id);
-H5_DLL hid_t  H5Fget_create_plist (hid_t file_id);
-H5_DLL hid_t  H5Fget_access_plist (hid_t file_id);
+H5_DLL herr_t H5Fclose(hid_t file_id);
+H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
+H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned * intent);
 H5_DLL int H5Fget_obj_count(hid_t file_id, unsigned types);
 H5_DLL int H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *obj_id_list);
-H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle);
+H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
@@ -138,4 +136,5 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Fpublic_H */
+

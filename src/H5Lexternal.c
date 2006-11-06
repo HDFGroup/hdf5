@@ -56,7 +56,7 @@ RETURNS
 
 DESCRIPTION
     Initializes any interface-specific data or routines.  (Just calls
-    H5L_init currently).
+    H5L_init() currently).
 
 --------------------------------------------------------------------------*/
 static herr_t

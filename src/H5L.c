@@ -159,21 +159,74 @@ static H5L_class_t      *H5L_table_g = NULL;
  * Programmer:	James Laird
  *              Thursday, July 13, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5L_init(void)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_init, FAIL);
+    FUNC_ENTER_NOAPI(H5L_init, FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_init_interface
+ *
+ * Purpose:	Initialize information specific to H5L interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, January 24, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5L_init_interface(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5L_init_interface)
+
+    /* Initialize user-defined link classes */
+    if(H5L_register_external() < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_init_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_term_interface
+ *
+ * Purpose:	Terminate any resources allocated in H5L_init_interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, January 24, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5L_term_interface(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_term_interface)
+
+    /* Free the table of link types */
+    H5L_table_g = H5MM_xfree(H5L_table_g);
+    H5L_table_used_g = H5L_table_alloc_g = 0;
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5L_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -291,61 +344,6 @@ H5L_find_class(H5L_type_t id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_find_class */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5L_init_interface
- *
- * Purpose:	Initialize information specific to H5L interface.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, January 24, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5L_init_interface(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5L_init_interface)
-
-    /* Initialize user-defined link classes */
-    if(H5L_register_external() <0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_init_interface() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5L_term_interface
- *
- * Purpose:	Terminate any resources allocated in H5L_init_interface.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, January 24, 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5L_term_interface(void)
-{
-    int	n=0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_term_interface)
-
-    /* Free the table of link types */
-    H5L_table_g = H5MM_xfree(H5L_table_g);
-    H5L_table_used_g = H5L_table_alloc_g = 0;
-
-    FUNC_LEAVE_NOAPI(n)
-}
 
 
 /*-------------------------------------------------------------------------
@@ -634,7 +632,6 @@ done:
 } /* end H5Lcreate_hard() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Lcreate_ud
  *
@@ -861,7 +858,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t H5Lis_registered(H5L_type_t id)
+htri_t
+H5Lis_registered(H5L_type_t id)
 {
     size_t i;                   /* Local index variable */
     htri_t ret_value=FALSE;     /* Return value */
@@ -881,8 +879,7 @@ htri_t H5Lis_registered(H5L_type_t id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-/* end H5Lis_registered */
+} /* end H5Lis_registered() */
 
 /*
  *-------------------------------------------------------------------------
@@ -908,28 +905,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_register (const H5L_class_t *cls)
+H5L_register(const H5L_class_t *cls)
 {
-    size_t      i;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    size_t      i;                      /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5L_register, FAIL)
 
-    assert (cls);
-    assert (cls->id>=0 && cls->id<=H5L_TYPE_MAX);
+    HDassert(cls);
+    HDassert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
 
     /* Is the link type already registered? */
-    for (i=0; i<H5L_table_used_g; i++)
-	if (H5L_table_g[i].id==cls->id)
+    for(i = 0; i < H5L_table_used_g; i++)
+	if(H5L_table_g[i].id == cls->id)
             break;
 
     /* Filter not already registered */
-    if (i>=H5L_table_used_g) {
-	if (H5L_table_used_g>=H5L_table_alloc_g) {
-	    size_t n = MAX(H5L_MIN_TABLE_SIZE, 2*H5L_table_alloc_g);
+    if(i >= H5L_table_used_g) {
+	if(H5L_table_used_g >= H5L_table_alloc_g) {
+	    size_t n = MAX(H5L_MIN_TABLE_SIZE, 2 * H5L_table_alloc_g);
 	    H5L_class_t *table = H5MM_realloc(H5L_table_g,
-					      n*sizeof(H5L_class_t));
-            if (!table)
+					      n * sizeof(H5L_class_t));
+            if(!table)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")
 	    H5L_table_g = table;
             H5L_table_alloc_g = n;
@@ -937,13 +934,10 @@ H5L_register (const H5L_class_t *cls)
 
 	/* Initialize */
 	i = H5L_table_used_g++;
-	HDmemcpy(H5L_table_g+i, cls, sizeof(H5L_class_t));
     } /* end if */
-    /* Filter already registered */
-    else {
-	/* Replace old contents */
-	HDmemcpy(H5L_table_g+i, cls, sizeof(H5L_class_t));
-    } /* end else */
+
+    /* Copy link class info into table */
+    HDmemcpy(H5L_table_g + i, cls, sizeof(H5L_class_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -965,7 +959,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_unregister (H5L_type_t id)
+H5L_unregister(H5L_type_t id)
 {
     size_t i;                   /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -2129,4 +2123,4 @@ H5L_get_default_lcpl(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5L_get_default_lcpl */
-
+

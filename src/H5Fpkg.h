@@ -172,11 +172,8 @@ H5FL_EXTERN(H5F_file_t);
 /******************************/
 
 
-#ifdef NOT_YET
-H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
-#endif /* NOT_YET */
-
 /* General routines */
+H5_DLL herr_t H5F_init(void);
 H5_DLL herr_t H5F_try_close(H5F_t *f);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 
@@ -195,5 +192,5 @@ H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
 H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
 H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 
-#endif
+#endif /* _H5Fpkg_H */
 

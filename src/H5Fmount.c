@@ -44,7 +44,7 @@ RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.  (Just calls
-    H5F_init_iterface currently).
+    H5F_init() currently).
 
 --------------------------------------------------------------------------*/
 static herr_t

@@ -60,9 +60,6 @@ typedef struct H5F_olist_t {
 } H5F_olist_t;
 
 /* PRIVATE PROTOTYPES */
-#ifdef NOT_YET
-static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
-#endif /* NOT_YET */
 static unsigned H5F_get_objects(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
@@ -85,27 +82,24 @@ H5FL_DEFINE(H5F_file_t);
  * Purpose:	Initialize the interface from some other layer.
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
  *              Wednesday, December 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_init(void)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_init, FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -180,107 +174,6 @@ H5F_term_interface(void)
     }
     FUNC_LEAVE_NOAPI(n)
 }
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_flush_all_cb
- *
- * Purpose:	Callback function for H5F_flush_all().
- *
- * Return:	Always returns zero.
- *
- * Programmer:	Robb Matzke
- *              Friday, February 19, 1999
- *
- * Modifications:
- *          Bill Wendling, 2003-03-18
- *          Changed H5F_flush to accept H5F_flush_t flags instead of a
- *          series of h5bool_t's.
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5F_flush_all_cb(void *_f, hid_t UNUSED fid, void *_invalidate)
-{
-    H5F_t *f=(H5F_t *)_f;
-    unsigned    invalidate = (*((hbool_t*)_invalidate);
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_flush_all_cb)
-
-    H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5F_FLUSH_INVALIDATE : H5F_FLUSH_NONE));
-
-    FUNC_LEAVE_NOAPI(0)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_flush_all
- *
- * Purpose:	Flush all open files. If INVALIDATE is true then also remove
- *		everything from the cache.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Thursday, February 18, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_flush_all(hbool_t invalidate)
-{
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_flush_all, FAIL)
-
-    H5I_search(H5I_FILE,H5F_flush_all_cb,&invalidate);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-#endif /* NOT_YET */
-
-#ifdef NOT_YET
-
-/*--------------------------------------------------------------------------
- NAME
-       H5F_encode_length_unusual -- encode an unusual length size
- USAGE
-       void H5F_encode_length_unusual(f, p, l)
-       const H5F_t *f;		   IN: pointer to the file record
-       uint8_t **p;		IN: pointer to buffer pointer to encode length in
-       uint8_t *l;		IN: pointer to length to encode
-
- ERRORS
-
- RETURNS
-    none
- DESCRIPTION
-    Encode non-standard (i.e. not 2, 4 or 8-byte) lengths in file meta-data.
---------------------------------------------------------------------------*/
-void
-H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
-{
-    int		    i = (int)H5F_SIZEOF_SIZE(f)-1;
-
-#ifdef WORDS_BIGENDIAN
-    /*
-     * For non-little-endian platforms, encode each byte in memory backwards.
-     */
-    for (/*void*/; i>=0; i--, (*p)++)*(*p) = *(l+i);
-#else
-    /* platform has little-endian integers */
-    HDmemcpy(*p,l,(size_t)(i+1));
-    *p+=(i+1);
-#endif
-
-}
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------

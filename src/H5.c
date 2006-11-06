@@ -167,8 +167,6 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
-    if(H5F_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize file interface")
     if(H5T_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
     if(H5D_init() < 0)
@@ -343,13 +341,13 @@ done:
 herr_t
 H5dont_atexit(void)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API_NOINIT(H5dont_atexit)
     H5TRACE0("e","");
 
-    if (H5_dont_atexit_g)
-        ret_value=FAIL;
+    if(H5_dont_atexit_g)
+        ret_value = FAIL;
     else
         H5_dont_atexit_g = TRUE;
 

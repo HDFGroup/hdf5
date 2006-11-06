@@ -375,12 +375,8 @@ typedef struct H5F_t H5F_t;
 struct H5B_class_t;
 struct H5RC_t;
 
-/* Private functions, not part of the publicly documented API */
-H5_DLL herr_t H5F_init(void);
-#ifdef NOT_YET
-H5_DLL herr_t H5F_flush_all(hbool_t invalidate);
-#endif /* NOT_YET */
-H5_DLL H5F_t * H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
+/* Private functions */
+H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 
 /* Functions than retrieve values from the file struct */
