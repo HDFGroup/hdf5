@@ -74,12 +74,12 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
       noattr      Copy object without copying attributes\n\
       allflags    Switches all flags from the default to the non-default setting\n\n\
       These flag types correspond to the following API symbols\n\n\
-      H5G_COPY_SHALLOW_HIERARCHY_FLAG\n\
-      H5G_COPY_EXPAND_SOFT_LINK_FLAG\n\
-      H5G_COPY_EXPAND_EXT_LINK_FLAG\n\
-      H5G_COPY_EXPAND_REFERENCE_FLAG\n\
-      H5G_COPY_WITHOUT_ATTR_FLAG\n\
-      H5G_COPY_ALL\n");
+      H5O_COPY_SHALLOW_HIERARCHY_FLAG\n\
+      H5O_COPY_EXPAND_SOFT_LINK_FLAG\n\
+      H5O_COPY_EXPAND_EXT_LINK_FLAG\n\
+      H5O_COPY_EXPAND_REFERENCE_FLAG\n\
+      H5O_COPY_WITHOUT_ATTR_FLAG\n\
+      H5O_COPY_ALL\n");
 }
 
 
@@ -91,11 +91,11 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
  *
  * STRING is one of the following (API symbol and description)
  *
- * shallow  H5G_COPY_SHALLOW_HIERARCHY_FLAG:  Copy only immediate members for groups
- * soft     H5G_COPY_EXPAND_SOFT_LINK_FLAG:  Expand soft links into new objects
- * ext      H5G_COPY_EXPAND_EXT_LINK_FLAG: Expand external links into new objects
- * ref      H5G_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
- * noattr   H5G_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
+ * shallow  H5O_COPY_SHALLOW_HIERARCHY_FLAG:  Copy only immediate members for groups
+ * soft     H5O_COPY_EXPAND_SOFT_LINK_FLAG:  Expand soft links into new objects
+ * ext      H5O_COPY_EXPAND_EXT_LINK_FLAG: Expand external links into new objects
+ * ref      H5O_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
+ * noattr   H5O_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
  * allflags Switches all flags from the default to the non-default setting 
  *
  * Return: Success:    SUCCEED
@@ -115,27 +115,27 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 
  if (strcmp(str_flag,"shallow")==0)
  {
-  fla = H5G_COPY_SHALLOW_HIERARCHY_FLAG;
+  fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
  } 
  else  if (strcmp(str_flag,"soft")==0)
  {
-  fla = H5G_COPY_EXPAND_SOFT_LINK_FLAG;
+  fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
  }
  else  if (strcmp(str_flag,"ext")==0)
  {
-  fla = H5G_COPY_EXPAND_EXT_LINK_FLAG;
+  fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
  }
  else  if (strcmp(str_flag,"ref")==0)
  {
-  fla = H5G_COPY_EXPAND_REFERENCE_FLAG;
+  fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
  }
  else  if (strcmp(str_flag,"noattr")==0)
  {
-  fla = H5G_COPY_WITHOUT_ATTR_FLAG;
+  fla = H5O_COPY_WITHOUT_ATTR_FLAG;
  }
  else  if (strcmp(str_flag,"allflags")==0)
  {
-  fla = H5G_COPY_ALL;
+  fla = H5O_COPY_ALL;
  }
  else
  {
@@ -335,7 +335,7 @@ main (int argc, const char *argv[])
  * do the copy
  *-------------------------------------------------------------------------*/
 
-  if (H5Gcopy(fid_src,        /* Source file or group identifier */
+  if (H5Ocopy(fid_src,        /* Source file or group identifier */
               oname_src,      /* Name of the source object to be copied */
               fid_dst,        /* Destination file or group identifier  */
               oname_dst,      /* Name of the destination object  */

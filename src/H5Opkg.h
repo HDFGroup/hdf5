@@ -205,7 +205,17 @@ typedef struct H5O_obj_class_t {
     void       *(*get_copy_file_udata)(void);	/*retrieve user data for 'copy file' operation */
     void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */
     htri_t	(*isa)(H5O_t *);		/*if a header matches an object class */
+    hid_t	(*open)(H5G_loc_t *, hid_t );	/*open an object of this class */
+    H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
 } H5O_obj_class_t;
+
+/* Node in skip list to map addresses from one file to another during object header copy */
+typedef struct H5O_addr_map_t {
+    haddr_t     src_addr;               /* Address of object in source file */
+    haddr_t     dst_addr;               /* Address of object in destination file */
+    hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
+    hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */
+} H5O_addr_map_t;
 
 /* H5O inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];

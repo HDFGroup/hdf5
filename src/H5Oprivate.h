@@ -32,6 +32,7 @@
 
 /* Public headers needed by this file */
 #include "H5Dpublic.h"          /* Dataset functions                    */
+#include "H5Lpublic.h"         /* Link functions                       */
 #include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
@@ -39,7 +40,6 @@
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
-#include "H5Lpublic.h"         /* Link functions                       */
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -59,6 +59,9 @@ typedef struct H5O_t H5O_t;
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
 #define H5O_UPDATE_DATA_ONLY    0x02u
+
+/* ========= Object Copy properties ============ */
+#define H5O_CPY_OPTION_NAME 			"copy object"   /* Copy options */
 
 /* The object location information for an object */
 typedef struct H5O_loc_t {

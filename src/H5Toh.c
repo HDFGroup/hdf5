@@ -23,28 +23,38 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
+
 
 /****************/
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
+
 static htri_t H5O_dtype_isa(H5O_t *loc);
+static hid_t H5O_dtype_open(H5G_loc_t *obj_loc, hid_t dxpl_id);
+static H5O_loc_t *H5O_dtype_get_oloc(hid_t obj_id);
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+
 
 /*******************/
 /* Local Variables */
@@ -56,7 +66,9 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
     "named datatype",		/* object name, for debugging	*/
     NULL,			/* get 'copy file' user data	*/
     NULL,			/* free 'copy file' user data	*/
-    H5O_dtype_isa 		/* "isa" 			*/
+    H5O_dtype_isa, 		/* "isa" 			*/
+    H5O_dtype_open, 		/* open an object of this class */
+    H5O_dtype_get_oloc 		/* get an object header location for an object */
 }};
 
 
@@ -92,4 +104,78 @@ H5O_dtype_isa(struct H5O_t *oh)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_isa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_open
+ *
+ * Purpose:	Open a datatype at a particular location
+ *
+ * Return:	Success:	Open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5O_dtype_open(H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
+    H5T_t       *type = NULL;           /* Datatype opened */
+    hid_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_open)
+
+    HDassert(obj_loc);
+
+    /* Open the datatype */
+    if((type = H5T_open(obj_loc, dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
+
+    /* Register an ID for the datatype */
+    if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+
+done:
+    if(ret_value < 0)
+        if(type != NULL)
+            H5T_close(type);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_get_oloc
+ *
+ * Purpose:	Retrieve the object header location for an open object
+ *
+ * Return:	Success:	Pointer to object header location
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5O_loc_t *
+H5O_dtype_get_oloc(hid_t obj_id)
+{
+    H5T_t       *type;                  /* Datatype opened */
+    H5O_loc_t	*ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_oloc)
+
+    /* Get the datatype */
+    if((type = H5I_object(obj_id)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
+
+    /* Get the datatype's object header location */
+    if((ret_value = H5T_oloc(type)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_get_oloc() */
 

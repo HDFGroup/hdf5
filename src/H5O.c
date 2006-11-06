@@ -18,7 +18,7 @@
  *			Aug  5 1997
  *			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Object header virtual functions.
+ * Purpose:		Object header routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -34,13 +34,10 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"         /* Links			  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
@@ -110,14 +107,6 @@ typedef struct H5O_typeinfo_t {
     char	*desc;			        /*description of object type	     */
 } H5O_typeinfo_t;
 
-/* Node in skip list to map addresses from one file to another during object header copy */
-typedef struct H5O_addr_map_t {
-    haddr_t     src_addr;               /* Address of object in source file */
-    haddr_t     dst_addr;               /* Address of object in destination file */
-    hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
-    hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */
-} H5O_addr_map_t;
-
 
 /********************/
 /* Package Typedefs */
@@ -178,15 +167,14 @@ static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *typ
     unsigned * oh_flags_ptr);
 static herr_t H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
+static const H5O_obj_class_t *H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id);
 static H5G_obj_t H5O_obj_type_real(H5O_t *oh);
-static const H5O_obj_class_t *H5O_obj_class(H5O_t *oh);
+static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 static void * H5O_copy_mesg_file(const H5O_msg_class_t *type, H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_copy_free_addrmap_cb(void *item, void *key, void *op_data);
-static herr_t H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id,
-    H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, H5O_copy_t *cpy_info);
 
 /*********************/
 /* Package Variables */
@@ -259,7 +247,7 @@ H5FL_EXTERN(time_t);
 H5FL_EXTERN(H5O_cont_t);
 
 /* Declare a free list to manage the H5O_addr_map_t struct */
-H5FL_DEFINE_STATIC(H5O_addr_map_t);
+H5FL_EXTERN(H5O_addr_map_t);
 
 
 
@@ -430,7 +418,7 @@ H5Oclose(hid_t object_id)
     FUNC_ENTER_API(H5Oclose, FAIL)
     H5TRACE1("e","i",object_id);
 
-    /* Get the type of the object and open it in the correct way */
+    /* Get the type of the object and close it in the correct way */
     switch(H5I_get_type(object_id))
     {
         case(H5I_GROUP):
@@ -539,9 +527,6 @@ done:
  *
  * Purpose:	Opens an object and returns an ID given its group loction.
  *
- *              This functions simply invokes H5G_open, H5T_open, or
- *              H5D_open depending on the object type.
- *
  * Return:	Success:	Open object identifier
  *		Failure:	Negative
  *
@@ -553,62 +538,23 @@ done:
 static hid_t
 H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
-    H5G_t       *grp = NULL;
-    H5D_t       *dset = NULL;
-    H5T_t       *type = NULL;
-    hid_t      ret_value;
+    const H5O_obj_class_t *obj_class;   /* Class of object for location */
+    hid_t      ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_open_by_loc, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_open_by_loc)
 
     HDassert(obj_loc);
 
-    /* Get the type of the object and open it in the correct way */
-    switch(H5O_obj_type(obj_loc->oloc, dxpl_id))
-    {
-        case(H5G_GROUP):
-            /* Open the group */
-            if((grp = H5G_open(obj_loc, dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+    /* Get the object class for this location */
+    if(NULL == (obj_class = H5O_obj_class(obj_loc->oloc, dxpl_id)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class")
 
-            /* Register an atom for the group */
-            if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-            break;
+    /* Call the object's 'open' routine */
+    HDassert(obj_class->open);
+    if((ret_value = obj_class->open(obj_loc, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
-        case(H5G_DATASET):
-            /* Open the group */
-            if((dset = H5D_open(obj_loc, dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
-
-            /* Register an atom for the group */
-            if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
-            break;
-
-        case(H5G_TYPE):
-            /* Open the group */
-            if((type = H5T_open(obj_loc, dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
-
-            /* Register an atom for the group */
-            if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "invalid object type")
-    }
- 
 done:
-    if(ret_value < 0) {
-        if(grp != NULL)
-            H5G_close(grp);
-        else if(dset != NULL)
-            H5D_close(dset);
-        else if(type != NULL)
-            H5T_close(type);
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_by_loc() */
 
@@ -629,38 +575,29 @@ done:
 static H5O_loc_t *
 H5O_get_oloc(hid_t object_id)
 {
-    H5G_t       *grp = NULL;
-    H5D_t       *dset = NULL;
-    H5T_t       *type = NULL;
-    H5O_loc_t   *ret_value;
+    H5O_loc_t   *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_oloc, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_get_oloc)
 
     switch(H5I_get_type(object_id))
     {
         case(H5I_GROUP):
-            if((grp = H5I_object(object_id)) == NULL)
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get group from ID")
-            if((ret_value = H5G_oloc(grp)) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from group ID")
-        break;
+            if(NULL == (ret_value = H5O_OBJ_GROUP->get_oloc(object_id)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from group ID")
+            break;
 
         case(H5I_DATASET):
-            if((dset = H5I_object(object_id)) == NULL)
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get dataset from ID")
-            if((ret_value = H5D_oloc(dset)) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from dataset ID")
-        break;
+            if(NULL == (ret_value = H5O_OBJ_DATASET->get_oloc(object_id)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from dataset ID")
+            break;
 
         case(H5I_DATATYPE):
-            if((type = H5I_object(object_id)) == NULL)
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "couldn't get type from ID")
-            if((ret_value = H5T_oloc(type)) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location from datatype ID")
-        break;
+            if(NULL == (ret_value = H5O_OBJ_DATATYPE->get_oloc(object_id)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from datatype ID")
+            break;
 
         default:
-            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, NULL, "invalid object type")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "invalid object type")
     } /* end switch */
 
 done:
@@ -1083,7 +1020,7 @@ H5O_free_real(const H5O_msg_class_t *type, void *msg_native)
         if (NULL!=(type->free))
             (type->free)(msg_native);
         else
-            H5MM_xfree (msg_native);
+            H5MM_xfree(msg_native);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(NULL)
@@ -4576,8 +4513,8 @@ done:
 H5G_obj_t
 H5O_obj_type(H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t	*oh = NULL;                     /* Object header for location */
-    H5G_obj_t   ret_value = H5G_UNKNOWN;        /* Return value */
+    H5O_t	*oh = NULL;             /* Object header for location */
+    H5G_obj_t   ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_obj_type, H5G_UNKNOWN)
 
@@ -4602,8 +4539,6 @@ done:
  *
  * Purpose:	Returns the type of object pointed to by `oh'.
  *
- * Note:        Same algorithm as H5O_obj_class()
- *
  * Return:	Success:	An object type defined in H5Gpublic.h
  *		Failure:	H5G_UNKNOWN
  *
@@ -4615,27 +4550,20 @@ done:
 static H5G_obj_t
 H5O_obj_type_real(H5O_t *oh)
 {
-    size_t	i;                              /* Local index variable */
-    H5G_obj_t   ret_value = H5G_UNKNOWN;        /* Return value */
+    const H5O_obj_class_t *obj_class;           /* Class of object for header */
+    H5G_obj_t   ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_obj_type_real)
 
     /* Sanity check */
     HDassert(oh);
 
-    /* Test whether entry qualifies as a particular type of object */
-    /* (Note: loop is in reverse order, to test specific objects first) */
-    for(i = NELMTS(H5O_obj_class_g); i > 0; --i) {
-        htri_t	isa;            /* Is entry a particular type? */
+    /* Look up class for object header */
+    if(NULL == (obj_class = H5O_obj_class_real(oh)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5G_UNKNOWN, "unable to determine object type")
 
-	if((isa = (H5O_obj_class_g[i - 1]->isa)(oh)) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
-	else if(isa)
-	    HGOTO_DONE(H5O_obj_class_g[i - 1]->type)
-    } /* end for */
-
-    if(0 == i)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
+    /* Set return value */
+    ret_value = obj_class->type;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4645,9 +4573,44 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_obj_class
  *
- * Purpose:	Returns the class of object pointed to by `oh'.
+ * Purpose:	Returns the class of object pointed to by `loc'.
  *
- * Note:        Same algorithm as H5O_obj_type_real()
+ * Return:	Success:	An object class
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static const H5O_obj_class_t *
+H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id)
+{
+    H5O_t	*oh = NULL;                     /* Object header for location */
+    const H5O_obj_class_t *ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_obj_class)
+
+    /* Load the object header */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
+
+    /* Test whether entry qualifies as a particular type of object */
+    if(NULL == (ret_value = H5O_obj_class_real(oh)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_obj_class() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_obj_class_real
+ *
+ * Purpose:	Returns the class of object pointed to by `oh'.
  *
  * Return:	Success:	An object class
  *		Failure:	NULL
@@ -4658,12 +4621,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static const H5O_obj_class_t *
-H5O_obj_class(H5O_t *oh)
+H5O_obj_class_real(H5O_t *oh)
 {
     size_t	i;                      /* Local index variable */
     const H5O_obj_class_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_obj_class)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_obj_class_real)
 
     /* Sanity check */
     HDassert(oh);
@@ -4684,7 +4647,7 @@ H5O_obj_class(H5O_t *oh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_obj_class() */
+} /* end H5O_obj_class_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -4922,7 +4885,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Get pointer to object class for this object */
-    if(NULL == (obj_class = H5O_obj_class(oh_src)))
+    if(NULL == (obj_class = H5O_obj_class_real(oh_src)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
     /* Retrieve user data for particular type of object to copy */
@@ -5323,20 +5286,20 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     /* Convert copy flags into copy struct */
     HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
-    if((cpy_option & H5G_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
+    if((cpy_option & H5O_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
         cpy_info.copy_shallow = TRUE;
         cpy_info.max_depth = 1;
     } /* end if */
     else
         cpy_info.max_depth = -1;        /* Current default is for full, recursive hier. copy */
     cpy_info.curr_depth = 0;
-    if((cpy_option & H5G_COPY_EXPAND_SOFT_LINK_FLAG) > 0)
+    if((cpy_option & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0)
         cpy_info.expand_soft_link = TRUE;
-    if((cpy_option & H5G_COPY_EXPAND_EXT_LINK_FLAG) > 0)
+    if((cpy_option & H5O_COPY_EXPAND_EXT_LINK_FLAG) > 0)
         cpy_info.expand_ext_link = TRUE;
-    if((cpy_option & H5G_COPY_EXPAND_REFERENCE_FLAG) > 0)
+    if((cpy_option & H5O_COPY_EXPAND_REFERENCE_FLAG) > 0)
         cpy_info.expand_ref = TRUE;
-    if((cpy_option & H5G_COPY_WITHOUT_ATTR_FLAG) > 0)
+    if((cpy_option & H5O_COPY_WITHOUT_ATTR_FLAG) > 0)
         cpy_info.copy_without_attr = TRUE;
 
     /* Create a skip list to keep track of which objects are copied */
@@ -5353,186 +5316,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_copy_header() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5O_copy_obj_by_ref
- *
- * Purpose:     Copy the object pointed by _src_ref.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao       
- *              Aug 7 2006 
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id, H5O_loc_t *dst_oloc,
-    H5G_loc_t *dst_root_loc, H5O_copy_t *cpy_info)
-{
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5O_copy_obj_by_ref, FAIL)
-
-    HDassert(src_oloc);
-    HDassert(dst_oloc);
-
-    /* Perform the copy, or look up existing copy */
-    if((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-    /* Check if a new valid object is copied to the destination */
-    if(H5F_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
-        char    tmp_obj_name[80];
-        H5G_name_t      new_path;
-        H5O_loc_t       new_oloc;
-        H5G_loc_t       new_loc;
-
-        /* Set up group location for new object */
-        new_loc.oloc = &new_oloc;
-        new_loc.path = &new_path;
-        H5G_loc_reset(&new_loc);
-        new_oloc.file = dst_oloc->file;
-        new_oloc.addr = dst_oloc->addr;
-
-        /* Pick a default name for the new object */
-        sprintf(tmp_obj_name, "~obj_pointed_by_%llu", (unsigned long_long)dst_oloc->addr);
-
-        /* Create a link to the newly copied object */
-        if(H5L_link(dst_root_loc, tmp_obj_name, &new_loc, H5P_DEFAULT, H5P_DEFAULT, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
-
-        H5G_loc_free(&new_loc);
-    } /* if (H5F_addr_defined(dst_oloc.addr)) */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy_obj_by_ref() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_copy_expand_ref
- *
- * Purpose:	Copy the object pointed by _src_ref.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao	
- *		Aug 7 2006 
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
-    H5F_t *file_dst, void *_dst_ref, size_t ref_count, H5R_type_t ref_type,
-    H5O_copy_t *cpy_info)
-{
-    H5O_loc_t 	dst_oloc;         	/* Copied object object location */
-    H5O_loc_t	src_oloc;          	/* Temporary object location for source object */
-    H5G_loc_t   dst_root_loc;           /* The location of root group of the destination file */
-    uint8_t     *p;                     /* Pointer to OID to store */
-    size_t      i;                      /* Local index variable */
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5O_copy_expand_ref, FAIL)
-
-    /* Sanity checks */
-    HDassert(file_src);
-    HDassert(_src_ref);
-    HDassert(file_dst);
-    HDassert(_dst_ref);
-    HDassert(ref_count);
-    HDassert(cpy_info);
-
-    /* Initialize object locations */
-    H5O_loc_reset(&src_oloc);
-    H5O_loc_reset(&dst_oloc);
-    src_oloc.file = file_src;
-    dst_oloc.file = file_dst;
-
-    /* Set up the root group in the destination file */
-    if(NULL == (dst_root_loc.oloc = H5G_oloc(H5G_rootof(file_dst))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
-    if(NULL == (dst_root_loc.path = H5G_nameof(H5G_rootof(file_dst))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
-
-    /* Copy object references */
-    if(H5R_OBJECT == ref_type) {
-        hobj_ref_t *src_ref = (hobj_ref_t *)_src_ref;
-        hobj_ref_t *dst_ref = (hobj_ref_t *)_dst_ref;
-
-        /* Making equivalent references in the destination file */
-        for(i = 0; i < ref_count; i++) {
-            /* Set up for the object copy for the reference */
-            p = (uint8_t *)(&src_ref[i]);
-            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(src_oloc.addr));
-            dst_oloc.addr = HADDR_UNDEF;
-
-            /* Attempt to copy object from source to destination file */
-            if(H5O_copy_obj_by_ref(&src_oloc, dxpl_id, &dst_oloc, &dst_root_loc, cpy_info) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-            /* Set the object reference info for the destination file */
-            p = (uint8_t *)(&dst_ref[i]);
-            H5F_addr_encode(dst_oloc.file, &p, dst_oloc.addr);
-	} /* end for */
-    }  /* end if */
-    /* Copy region references */
-    else if(H5R_DATASET_REGION == ref_type) {
-        hdset_reg_ref_t *src_ref = (hdset_reg_ref_t *)_src_ref;
-        hdset_reg_ref_t *dst_ref = (hdset_reg_ref_t *)_dst_ref;
-        uint8_t *buf;           /* Buffer to store serialized selection in */
-        H5HG_t hobjid;          /* Heap object ID */
-        size_t buf_size;        /* Length of object in heap */
-  
-        /* Making equivalent references in the destination file */
-        for(i = 0; i < ref_count; i++) {
-            /* Get the heap ID for the dataset region */
-            p = (uint8_t *)(&src_ref[i]);
-            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(hobjid.addr));
-            INT32DECODE(p, hobjid.idx);
-
-            /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(src_oloc.file, dxpl_id, &hobjid, NULL, &buf_size)) == NULL)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
-
-            /* Get the object oid for the dataset */
-            p = (uint8_t *)buf;
-            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(src_oloc.addr));
-            dst_oloc.addr = HADDR_UNDEF;
-
-            /* copy the object pointed by the ref to the destination */
-            if(H5O_copy_obj_by_ref(&src_oloc, dxpl_id, &dst_oloc, &dst_root_loc, cpy_info) < 0) {
-                H5MM_xfree(buf);
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-            } /* end if */
-
-            /* Serialize object ID */
-            p = (uint8_t *)buf;
-            H5F_addr_encode(dst_oloc.file, &p, dst_oloc.addr);
-
-            /* Save the serialized buffer to the destination */
-            if(H5HG_insert(dst_oloc.file, dxpl_id, buf_size, buf, &hobjid) < 0) {
-                H5MM_xfree(buf);
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "Unable to write dataset region information")
-            } /* end if */
-
-            /* Set the dataset region reference info for the destination file */
-            p = (uint8_t *)(&dst_ref[i]);
-            H5F_addr_encode(dst_oloc.file, &p, hobjid.addr);
-            INT32ENCODE(p, hobjid.idx);
-
-            /* Free the buffer allocated in H5HG_read() */
-            H5MM_xfree(buf);
-        } /* end for */
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy_expand_ref() */
 
 #ifdef H5O_DEBUG
 

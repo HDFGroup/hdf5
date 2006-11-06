@@ -145,8 +145,6 @@ static int H5G_get_comment(H5G_loc_t *loc, const char *name,
 static herr_t H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
-                       hid_t ocpypl_id, hid_t lcpl_id);
 
 
 /*-------------------------------------------------------------------------
@@ -952,175 +950,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_create_plist() */
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5Gcopy
- *
- * Purpose:     Copy an object (group or dataset) to destination location
- *              within a file or cross files. PLIST_ID is a property list
- *              which is used to pass user options and properties to the
- *              copy. The name, dst_name, must not already be taken by some 
- *              other object in the destination group.
- *
- *              H5Gcopy() will fail if the name of the destination object
- *                  exists in the destination group.  For example,  
- *                  H5Gcopy(fid_src, "/dset", fid_dst, "/dset", ...)
- *                  will fail if "/dset" exists in the destination file
- *
- *              OPTIONS THAT HAVE BEEN IMPLEMENTED.
- *                  H5G_COPY_SHALLOW_HIERARCHY_FLAG
- *                      If this flag is specified, only immediate members of
- *                      the group are copied. Otherwise (default), it will
- *                      recursively copy all objects below the group
- *                  H5G_COPY_EXPAND_SOFT_LINK_FLAG
- *                      If this flag is specified, it will copy the objects 
- *                      pointed by the soft links. Otherwise (default), it 
- *                      will copy the soft link as they are
- *                  H5G_COPY_WITHOUT_ATTR_FLAG
- *                      If this flag is specified, it will copy object without 
- *                      copying attributes. Otherwise (default), it will
- *                      copy object along with all its attributes
- *                  H5G_COPY_EXPAND_REFERENCE_FLAG
- *                      1) Copy object between two different files:
- *                          When this flag is specified, it will copy objects that 
- *                          are pointed by the references and update the values of
- *                          references in the destination file.  Otherwise (default)
- *                          the values of references in the destination will set to
- *                          zero
- *                          The current implementation does not handle references 
- *                          inside of other datatype structure. For example, if
- *                          a member of compound datatype is reference, H5Gcopy()
- *                          will copy that field as it is. It will not set the
- *                          value to zero as default is used nor copy the object
- *                          pointed by that field the flag is set
- *                      2) Copy object within the same file:
- *                          This flag does not have any effect to the H5Gcopy().
- *                          Datasets or attributes of references are copied as they
- *                          are, i.e. values of references of the destination object
- *                          are the same as the values of the source object
- *  
- *              OPTIONS THAT MAY APPLY TO COPY IN THE FUTURE.
- *                  H5G_COPY_EXPAND_EXT_LINK_FLAG
- *                      If this flag is specified, it will expand the external links
- *                      into new objects, Otherwise (default), it will keep external 
- *                      links as they are (default)
- *
- *              PROPERTIES THAT MAY APPLY TO COPY IN FUTURE
- *                  Change data layout such as chunk size
- *                  Add filter such as data compression.
- *                  Add an attribute to the copied object(s) that say the  date/time
- *                      for the copy or other information about the source file.
- *
- *              The intermediate group creation property should be passed in
- *              using the lcpl instead of the ocpypl.
- *
- * Usage:      H5Gcopy(src_loc_id, src_name, dst_loc_id, dst_name, ocpypl_id, lcpl_id)
- *             hid_t src_loc_id         IN: Source file or group identifier.
- *             const char *src_name     IN: Name of the source object to be copied
- *             hid_t dst_loc_id         IN: Destination file or group identifier
- *             const char *dst_name     IN: Name of the destination object
- *             hid_t ocpypl_id          IN: Properties which apply to the copy
- *             hid_t lcpl_id            IN: Properties which apply to the new hard link
- *
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              June 4, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
-{
-    H5G_loc_t	loc;                    /* Source group group location */
-    H5G_loc_t	src_loc;                /* Source object group location */
-    H5G_loc_t	dst_loc;                /* Destination group location */
-
-    /* for opening the destination object */
-    H5G_name_t  src_path;               /* Opened source object hier. path */
-    H5O_loc_t   src_oloc;               /* Opened source object object location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-
-    herr_t      ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_API(H5Gcopy, FAIL)
-    H5TRACE6("e","isisii",src_loc_id,src_name,dst_loc_id,dst_name,ocpypl_id,
-             lcpl_id);
-
-    /* Check arguments */
-    if(H5G_loc(src_loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
-    if(!dst_name || !*dst_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-
-    /* check if destination name already exists */
-    {
-        H5G_name_t  tmp_path;
-        H5O_loc_t   tmp_oloc;
-        H5G_loc_t   tmp_loc;
-
-        /* Set up group location */
-        tmp_loc.oloc = &tmp_oloc;
-        tmp_loc.path = &tmp_path;
-        H5G_loc_reset(&tmp_loc);
-
-        /* Check if object already exists in destination */
-        if(H5G_loc_find(&dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC_dxpl_id) >= 0) {
-            H5G_name_free(&tmp_path);
-            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "destination object already exists")
-        } /* end if */
-    }
-
-    /* Set up opened group location to fill in */
-    src_loc.oloc = &src_oloc;
-    src_loc.path = &src_path;
-    H5G_loc_reset(&src_loc);
-
-    /* Find the source object to copy */
-    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
-    loc_found = TRUE;
-
-    if(H5O_open(&src_oloc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-    obj_open = TRUE;
-
-    /* Get correct property lists */
-    if(H5P_DEFAULT == lcpl_id) {
-        if((lcpl_id = H5L_get_default_lcpl()) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to get default lcpl")
-    } /* end if */
-    else
-        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
-
-    if(H5P_DEFAULT == ocpypl_id)
-        ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
-
-    if(H5G_copy(&src_loc, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-done:
-    if(loc_found) {
-        if(H5G_loc_free(&src_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-    }
-    if (obj_open)
-        H5O_close(&src_oloc);
-
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gcopy() */
-
 /*
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
@@ -1128,6 +957,7 @@ done:
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
  */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_init_interface
@@ -2314,69 +2144,4 @@ H5G_unmount(H5G_t *grp)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_unmount() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_copy
- *
- * Purpose:     Copy an object to destination location
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              June 4, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_copy(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
-         hid_t ocpypl_id, hid_t lcpl_id)
-{
-    H5P_genplist_t  *gcpy_plist=NULL;           /* Group copy property list created */
-    hid_t           dxpl_id=H5AC_dxpl_id;
-    H5G_name_t      new_path;                   /* Copied object group hier. path */
-    H5O_loc_t       new_oloc;                   /* Copied object object location */
-    H5G_loc_t       new_loc;                    /* Group location of object copied */
-    hbool_t         entry_inserted=FALSE;       /* Flag to indicate that the new entry was inserted into a group */
-    unsigned        cpy_option = 0;             /* Copy options */
-    herr_t          ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_copy, FAIL);
-
-    HDassert(src_loc);
-    HDassert(src_loc->oloc->file);
-    HDassert(dst_loc);
-    HDassert(dst_loc->oloc->file);
-    HDassert(dst_name);
-
-    /* Get the copy property list */
-    if(NULL == (gcpy_plist = H5I_object(ocpypl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    /* Retrieve the copy parameters */
-    if(H5P_get(gcpy_plist, H5G_CPY_OPTION_NAME, &cpy_option) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
-
-    /* Set up copied object location to fill in */
-    new_loc.oloc = &new_oloc;
-    new_loc.path = &new_path;
-    H5G_loc_reset(&new_loc);
-    new_oloc.file = dst_loc->oloc->file;
-
-    /* copy the object from the source file to the destination file */
-    if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id, cpy_option) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-    /* Insert the new object in the destination file's group */
-    if(H5L_link(dst_loc, dst_name, &new_loc, lcpl_id, H5P_DEFAULT, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
-    entry_inserted = TRUE;
-
-done:
-    /* Free the ID to name buffers */
-    if(entry_inserted)
-        H5G_loc_free(&new_loc);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_copy() */
 

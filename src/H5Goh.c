@@ -23,28 +23,36 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
 
 /****************/
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
+
 static htri_t H5O_group_isa(H5O_t *loc);
+static hid_t H5O_group_open(H5G_loc_t *obj_loc, hid_t dxpl_id);
+static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+
 
 /*******************/
 /* Local Variables */
@@ -56,7 +64,9 @@ const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
     "group",			/* object name, for debugging	*/
     NULL,			/* get 'copy file' user data	*/
     NULL,			/* free 'copy file' user data	*/
-    H5O_group_isa 		/* "isa" message		*/
+    H5O_group_isa, 		/* "isa" message		*/
+    H5O_group_open, 		/* open an object of this class */
+    H5O_group_get_oloc 		/* get an object header location for an object */
 }};
 
 
@@ -77,7 +87,7 @@ const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+static htri_t
 H5O_group_isa(struct H5O_t *oh)
 {
     htri_t	stab_exists;            /* Whether the 'stab' message is in the object header */
@@ -99,4 +109,78 @@ H5O_group_isa(struct H5O_t *oh)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_group_isa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_group_open
+ *
+ * Purpose:	Open a group at a particular location
+ *
+ * Return:	Success:	Open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5O_group_open(H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
+    H5G_t       *grp = NULL;            /* Group opened */
+    hid_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_group_open)
+
+    HDassert(obj_loc);
+
+    /* Open the group */
+    if((grp = H5G_open(obj_loc, dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+    /* Register an ID for the group */
+    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+done:
+    if(ret_value < 0)
+        if(grp != NULL)
+            H5G_close(grp);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_group_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_group_get_oloc
+ *
+ * Purpose:	Retrieve the object header location for an open object
+ *
+ * Return:	Success:	Pointer to object header location
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5O_loc_t *
+H5O_group_get_oloc(hid_t obj_id)
+{
+    H5G_t       *grp;                   /* Group opened */
+    H5O_loc_t	*ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_oloc)
+
+    /* Get the group */
+    if((grp = H5I_object(obj_id)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
+
+    /* Get the group's object header location */
+    if((ret_value = H5G_oloc(grp)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_group_get_oloc() */
 

@@ -32,6 +32,14 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+/* Flags for object copy (H5Ocopy) */
+#define H5O_COPY_SHALLOW_HIERARCHY_FLAG (0x0001u)   /* Copy only immediate members */
+#define H5O_COPY_EXPAND_SOFT_LINK_FLAG  (0x0002u)   /* Expand soft links into new objects */
+#define H5O_COPY_EXPAND_EXT_LINK_FLAG   (0x0004u)   /* Expand external links into new objects */
+#define H5O_COPY_EXPAND_REFERENCE_FLAG	(0x0008u)   /* Copy objects that are pointed by references */
+#define H5O_COPY_WITHOUT_ATTR_FLAG      (0x0010u)   /* Copy object without copying attributes */
+#define H5O_COPY_ALL                    (0x001Fu)   /* All object copying flags (for internal checking) */
+
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
     hsize_t free;               /* Free space within object header */
@@ -45,9 +53,11 @@ extern "C" {
 
 H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
-H5_DLL herr_t H5Oclose(hid_t object_id);
 H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
+H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
+H5_DLL herr_t H5Oclose(hid_t object_id);
 
 #ifdef __cplusplus
 }

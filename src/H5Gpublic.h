@@ -44,14 +44,6 @@
 #define H5G_NUSERTYPES	(H5G_NTYPES-H5G_NLIBTYPES)
 #define H5G_USERTYPE(X)	(8+(X))		/* User defined types		*/
 
-/* Flags for object copy (H5Gcopy) */
-#define H5G_COPY_SHALLOW_HIERARCHY_FLAG (0x0001u)   /* Copy only immediate members */
-#define H5G_COPY_EXPAND_SOFT_LINK_FLAG  (0x0002u)   /* Expand soft links into new objects */
-#define H5G_COPY_EXPAND_EXT_LINK_FLAG   (0x0004u)   /* Expand external links into new objects */
-#define H5G_COPY_EXPAND_REFERENCE_FLAG	(0x0008u)   /* Copy objects that are pointed by references */
-#define H5G_COPY_WITHOUT_ATTR_FLAG      (0x0010u)   /* Copy object without copying attributes */
-#define H5G_COPY_ALL                    (0x001Fu)   /* All object copying flags (for internal checking) */
-
 /* Deprecated macros, for backward compatibility */
 #define H5G_LINK_ERROR H5L_TYPE_ERROR
 #define H5G_LINK_HARD H5L_TYPE_HARD
@@ -135,8 +127,6 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
     char *buf);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
-H5_DLL herr_t H5Gcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 
 /* Functions and variables defined for compatibility with previous versions
  * of the HDF5 API.
