@@ -58,7 +58,15 @@
 H5_DLL herr_t H5L_init(void);
 H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
     H5G_loc_t *obj_loc, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
+    H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_create_soft(const char *target_path, H5G_loc_t *cur_loc,
+    const char *cur_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL hid_t H5L_get_default_lcpl(void);
+H5_DLL herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,
+    H5G_loc_t *dst_loc, const char *dst_name, hbool_t copy_flag,
+    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name,
     H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id,
