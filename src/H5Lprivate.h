@@ -23,8 +23,8 @@
 #include "H5Lpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Gprivate.h"
-#include "H5Oprivate.h"
+#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Oprivate.h"		/* Object headers			*/
 
 /**************************/
 /* Library Private Macros */
@@ -61,6 +61,8 @@ H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
 H5_DLL hid_t H5L_get_default_lcpl(void);
 H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name,
     H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id,
+    hid_t dxpl_id);
 H5_DLL herr_t H5L_get_val(H5G_loc_t *loc, const char *name, size_t size,
     void *buf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_register_external(void);

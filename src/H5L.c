@@ -110,11 +110,9 @@ static herr_t H5L_create_soft(const char *target_path, H5G_loc_t *cur_loc,
 static herr_t H5L_get_val_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_unlink(H5G_loc_t *loc, const char *name, hid_t lapl_id,
-    hid_t dxpl_id);
 static herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,
     H5G_loc_t *dst_loc, const char *dst_name, hbool_t copy_flag,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
@@ -689,7 +687,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lunlink
+ * Function:	H5Ldelete
  *
  * Purpose:	Removes the specified NAME from the group graph and
  *		decrements the link count for the object to which NAME
@@ -706,12 +704,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lunlink(hid_t loc_id, const char *name, hid_t lapl_id)
+H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5G_loc_t	loc;                    /* Group's location */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Lunlink, FAIL)
+    FUNC_ENTER_API(H5Ldelete, FAIL)
     H5TRACE3("e","isi",loc_id,name,lapl_id);
 
     /* Check arguments */
@@ -721,12 +719,12 @@ H5Lunlink(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Unlink */
-    if(H5L_unlink(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to unlink object")
+    if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delet link")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lunlink() */
+} /* end H5Ldelete() */
 
 
 /*-------------------------------------------------------------------------
@@ -1522,7 +1520,7 @@ H5L_get_val(H5G_loc_t *loc, const char *name, size_t size, void *buf/*out*/, hid
     H5L_trav_ud4_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val)
+    FUNC_ENTER_NOAPI(H5L_get_val, FAIL)
 
     /* Set up user data for retrieving information */
     udata.size = size;
@@ -1538,10 +1536,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_unlink_cb
+ * Function:	H5L_delete_cb
  *
- * Purpose:	Callback for unlinking an object.  This routine
- *              deletes the link
+ * Purpose:	Callback for deleting a link.  This routine
+ *              actually deletes the link
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1551,7 +1549,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
+H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_t *grp=NULL;                /* H5G_t for this group, opened to pass to user callback */
@@ -1561,7 +1559,7 @@ H5L_unlink_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSE
     hbool_t             temp_loc_init = FALSE;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_unlink_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_delete_cb)
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -1623,13 +1621,13 @@ done:
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_unlink_cb() */
+} /* end H5L_delete_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_unlink
+ * Function:	H5L_delete
  *
- * Purpose:	Unlink a name from a group.
+ * Purpose:	Delete a link from a group.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1638,14 +1636,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5L_unlink(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
+herr_t
+H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_ud5_t      udata;                  /* User data for callback */
     char		*norm_name = NULL;	/* Pointer to normalized name */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_unlink)
+    FUNC_ENTER_NOAPI(H5L_delete, FAIL)
 
     /* Sanity check */
     HDassert(loc);
@@ -1658,7 +1656,7 @@ H5L_unlink(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
     /* Set up user data for unlink operation */
     udata.dxpl_id = dxpl_id;
 
-    if(H5G_traverse(loc, norm_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_unlink_cb, &udata, lapl_id, dxpl_id) < 0)
+    if(H5G_traverse(loc, norm_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
 
 done:
@@ -1667,7 +1665,7 @@ done:
         H5MM_xfree(norm_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_unlink() */
+} /* end H5L_delete() */
 
 
 /*-------------------------------------------------------------------------

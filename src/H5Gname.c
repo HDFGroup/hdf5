@@ -823,10 +823,10 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         /*-------------------------------------------------------------------------
-        * H5G_NAME_UNLINK
+        * H5G_NAME_DELETE
         *-------------------------------------------------------------------------
         */
-        case H5G_NAME_UNLINK:
+        case H5G_NAME_DELETE:
             /* Check if the location being unlinked is in the path for the current object */
             if(H5G_common_path(obj_path->full_path_r, names->loc->path->full_path_r)) {
                 /* Free paths for object */

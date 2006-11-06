@@ -370,8 +370,8 @@ void hard_link_example(void)
      * other two links to that group and it won't be deleted until the
      * UD hard link is deleted.
      */
-    H5Lunlink(file_id, TARGET_GROUP, H5P_DEFAULT);
-    H5Lunlink(file_id, HARD_LINK_NAME, H5P_DEFAULT);
+    H5Ldelete(file_id, TARGET_GROUP, H5P_DEFAULT);
+    H5Ldelete(file_id, HARD_LINK_NAME, H5P_DEFAULT);
 
     /* The group is still accessible through the UD hard link. If this were
      * a soft link instead, the object would have been deleted when the last
@@ -382,7 +382,7 @@ void hard_link_example(void)
     H5Gclose(group_id);
 
     /* Removing the user-defined hard link will delete the group. */
-    H5Lunlink(file_id, UD_HARD_LINK_NAME, H5P_DEFAULT);
+    H5Ldelete(file_id, UD_HARD_LINK_NAME, H5P_DEFAULT);
 
     H5Fclose(file_id);
 }

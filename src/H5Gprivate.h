@@ -103,7 +103,7 @@
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
     H5G_NAME_MOVE = 0,          /* H5*move call    */
-    H5G_NAME_UNLINK,            /* H5Lunlink call  */
+    H5G_NAME_DELETE,            /* H5Ldelete call  */
     H5G_NAME_MOUNT,             /* H5Fmount call   */
     H5G_NAME_UNMOUNT            /* H5Funmount call */
 } H5G_names_op_t;

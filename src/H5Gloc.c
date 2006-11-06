@@ -459,7 +459,7 @@ H5G_loc_remove(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc, hid_t d
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
 
     /* Search the open IDs and replace names for unlinked object */
-    if(H5G_name_replace(obj_type, obj_loc, NULL, NULL, H5G_NAME_UNLINK) < 0)
+    if(H5G_name_replace(obj_type, obj_loc, NULL, NULL, H5G_NAME_DELETE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
 
 done:

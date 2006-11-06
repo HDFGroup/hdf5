@@ -139,7 +139,7 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
                         hid_t lapl_id);
 H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
                              const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
-H5_DLL herr_t H5Lunlink(hid_t loc_id, const char *name, hid_t lapl_id);
+H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, size_t size,
 			      void *buf/*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,

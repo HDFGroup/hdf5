@@ -1945,7 +1945,7 @@ external_link_mult(hid_t fapl, hbool_t new_format)
 
     /* Open the other with write access and delete the external link in it */  
     if((fid2=H5Fopen(filename3, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
-    if(H5Lunlink(fid2, "G/H/I", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid2, "G/H/I", H5P_DEFAULT) < 0) TEST_ERROR
       
     if(H5Fclose(fid2) < 0) TEST_ERROR
 
@@ -3429,11 +3429,11 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (-1)) < 0) TEST_ERROR
 
     /* Test unlink */
-    if(H5Lunlink(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunlink(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunlink(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunlink(fid1, "elink/elink/elink_copied", H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunlink(fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid1, "elink/elink/elink_copied", H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT) < 0) TEST_ERROR
 
     /* We've tested that the various functions above don't leave files open.
      * Now test that we can't confuse HDF5 by giving unusual paths with external links
@@ -4923,8 +4923,8 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_hard(fid, "soft17", fid, "soft17/link2_to_group", H5P_DEFAULT, plist) < 0) TEST_ERROR
     if(H5Lcreate_soft("/soft4", fid, "soft17/soft_link", H5P_DEFAULT, plist) < 0) TEST_ERROR
 
-    /* H5Lunlink */
-    if(H5Lunlink(fid, "soft17/soft_link", plist) < 0) TEST_ERROR
+    /* H5Ldelete */
+    if(H5Ldelete(fid, "soft17/soft_link", plist) < 0) TEST_ERROR
 
     /* H5Lget_val and H5Lget_info */
     if(H5Lget_val(fid, "soft17", (size_t)0, NULL, plist) < 0) TEST_ERROR
@@ -5639,7 +5639,7 @@ corder_transition(hid_t fapl)
     /* Delete several links from group, until it resumes compact form */
     for(u = max_compact; u >= min_dense; u--) {
         sprintf(objname, "filler %u", u);
-        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
         if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
@@ -5653,7 +5653,7 @@ corder_transition(hid_t fapl)
 
     /* Delete another link, to push group into compact form */
     sprintf(objname, "filler %u", (min_dense - 1));
-    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
     if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
@@ -5702,7 +5702,7 @@ corder_transition(hid_t fapl)
     /* Delete several links from group, until it resumes compact form */
     for(u = max_compact; u >= min_dense; u--) {
         sprintf(objname, "filler %u", u);
-        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
         if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
@@ -5716,7 +5716,7 @@ corder_transition(hid_t fapl)
 
     /* Delete another link, to push group into compact form */
     sprintf(objname, "filler %u", (min_dense - 1));
-    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
     if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
@@ -5743,10 +5743,10 @@ corder_transition(hid_t fapl)
     /* Delete all the links */
     for(u = max_compact; u > 0; u--) {
         sprintf(objname, "filler %u", u);
-        if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
     } /* end for */
     sprintf(objname, "filler %u", 0);
-    if(H5Lunlink(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Close the group */
     if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -5866,7 +5866,7 @@ corder_delete(hid_t fapl)
         /* Check for deleting group without re-opening file */
         if(!reopen_file)
             /* Delete the group with the creation order index */
-            if(H5Lunlink(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
         /* Close the file */
         if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
@@ -5877,7 +5877,7 @@ corder_delete(hid_t fapl)
             if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
             /* Delete the group with the creation order index */
-            if(H5Lunlink(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
             /* Close the file */
             if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
