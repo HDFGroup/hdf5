@@ -40,8 +40,8 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname vfd ntypes dangle dtransform reserved cross_read \
-	   btree2 fheap ref
+           getname ref vfd ntypes dangle dtransform reserved cross_read \
+	   btree2 fheap
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.

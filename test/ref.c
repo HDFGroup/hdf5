@@ -34,7 +34,7 @@
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK	1
-#define SPACE1_DIM1	7
+#define SPACE1_DIM1	8
 
 int 
 main(void)
@@ -184,6 +184,10 @@ main(void)
     if(H5Rcreate(&wbuf[6], fid1, "/Group1/Group2/Link/Dataset5", H5R_OBJECT, -1) < 0)
         TEST_ERROR
 
+    /* Create reference to root group */
+    if(H5Rcreate(&wbuf[7], fid1, "/", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
     /* Write selection to disk */
     if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR
@@ -239,6 +243,14 @@ main(void)
     TESTING("getting path to dataset created via hard link"); 
     i = H5Iget_name(H5Rdereference(dataset, H5R_OBJECT , &wbuf[6]), (char*)buf, 100);
     if((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 17))
+        PASSED()
+    else
+	TEST_ERROR
+
+    HDmemset(buf, 0, 100);
+    TESTING("getting path to root group"); 
+    i = H5Iget_name(H5Rdereference(dataset, H5R_OBJECT , &wbuf[7]), (char*)buf, 100);
+    if((HDstrcmp(buf, "/") == 0) && (i == 2))
         PASSED()
     else
 	TEST_ERROR

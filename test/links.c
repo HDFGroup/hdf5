@@ -1626,7 +1626,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Check name */
     if((name_len = H5Iget_name( gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
-    if(name_len != 0) TEST_ERROR
+    if(HDstrcmp(objname, "/")) TEST_ERROR
 
     /* Create object in external file */
     if((gid2 = H5Gcreate(gid, "new_group", (size_t)0)) < 0) TEST_ERROR

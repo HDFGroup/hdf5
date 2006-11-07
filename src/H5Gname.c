@@ -52,6 +52,7 @@ typedef struct H5G_ref_path_iter_t {
     /* In */
     hid_t file; 		/* File id where it came from */
     hid_t dxpl_id; 		/* DXPL for operations */
+    hbool_t is_root_group; 	/* Flag to indicate that the root group is being looked at */
     const H5O_loc_t *loc; 	/* The location of the object we're looking for */
 
     /* In/Out */
@@ -1115,7 +1116,10 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
             len = HDstrlen(udata->container);
             if(NULL == (udata->container = H5MM_realloc(udata->container, HDstrlen(udata->container) + HDstrlen(name) + 2)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
-            HDstrcat(udata->container, name); 
+            if(!udata->is_root_group)
+                HDstrcat(udata->container, name); 
+            else
+                udata->is_root_group = FALSE;
             HDstrcat(udata->container, "/"); 
                 
             ret_value = H5G_obj_iterate(udata->file, udata->container, H5_ITER_INC, 0, &last_obj, H5G_refname_iterator, udata, udata->dxpl_id);
@@ -1183,7 +1187,7 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
     char *name, size_t size)
 {
     H5G_ref_path_iter_t udata;  /* User data for iteration */
-    int last_obj = 0;           /* Start object for iteration */
+    herr_t status;              /* Status from iteration */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_refobj_name)
@@ -1191,7 +1195,8 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
     /* Set up user data for iterator */
     udata.file = file;
     udata.dxpl_id = dxpl_id;
-    if(NULL == (udata.container = H5MM_strdup("/")))
+    udata.is_root_group = TRUE;
+    if(NULL == (udata.container = H5MM_strdup("")))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate root group name")
     udata.loc = loc;
     
@@ -1200,9 +1205,9 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for path nodes")
 
     /* Iterate over all the objects in the file */
-    if((ret_value = H5G_obj_iterate(file, "/", H5_ITER_INC, 0, &last_obj, H5G_refname_iterator, &udata, dxpl_id)) < 0)
+    if((status = H5G_refname_iterator(file, "/", &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
-    else if(ret_value > 0) {
+    else if(status > 0) {
         /* Set the length of the full path */
         ret_value = HDstrlen(udata.container) + 1;
 
@@ -1213,6 +1218,8 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
                 name[size - 1] = '\0';
         } /* end if */
     } /* end if */
+    else
+        ret_value = 0;
    
 done:    
     H5MM_xfree(udata.container);

@@ -818,7 +818,7 @@ int main( void )
 
     /* Verify */
     if(check_name(group_id, "/g14/g3/g4", "") < 0) TEST_ERROR;
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group_id );
@@ -860,7 +860,7 @@ int main( void )
     if (H5Funmount(group2_id, ".")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/", "") < 0) TEST_ERROR;
 
     /* Close */
     H5Gclose( group2_id );
@@ -902,7 +902,7 @@ int main( void )
     if (H5Funmount(group2_id, ".")<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(group2_id, "", "") < 0) TEST_ERROR;
+    if(check_name(group2_id, "/", "") < 0) TEST_ERROR;
     if(check_name(group3_id, "/g13/g1", "/g13/g1") < 0) TEST_ERROR;
 
     /* Close */
