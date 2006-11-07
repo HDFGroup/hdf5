@@ -57,6 +57,7 @@ typedef struct H5G_ref_path_iter_t {
 
     /* In/Out */
     H5SL_t *ref_path_table;     /* Skip list for tracking visited nodes */
+    size_t max_container_len;   /* Maximum size of container */
 
     /* Out */
     char *container;            /* full name of the container object */
@@ -1077,9 +1078,15 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
      *  the correct object is found in a mounted file hierarchy)
      */
     if(udata->loc->addr == objno && udata->loc->file == loc.oloc->file) {
+        size_t len_needed;              /* Length of container string needed */
+
         /* Build the object's full name */
-        if(NULL == (udata->container = H5MM_realloc(udata->container, HDstrlen(udata->container) + HDstrlen(name) + 2)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
+        len_needed = HDstrlen(udata->container) + HDstrlen(name) + 2;
+        if(len_needed > udata->max_container_len) {
+            if(NULL == (udata->container = H5MM_realloc(udata->container, len_needed)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
+            udata->max_container_len = len_needed;
+        } /* end if */
         HDstrcat(udata->container, name); 
 
         /* We found a match so we return immediately */
@@ -1110,12 +1117,17 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
         /* If it's a group, we recurse into it */
         if(sb.type == H5G_GROUP) {
             int last_obj;
+            size_t len_needed;          /* Length of container string needed */
             size_t len;
 
             /* Build full path name of group to recurse into */
             len = HDstrlen(udata->container);
-            if(NULL == (udata->container = H5MM_realloc(udata->container, HDstrlen(udata->container) + HDstrlen(name) + 2)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
+            len_needed = len + HDstrlen(name) + 2;
+            if(len_needed > udata->max_container_len) {
+                if(NULL == (udata->container = H5MM_realloc(udata->container, len_needed)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate path string")
+                udata->max_container_len = len_needed;
+            } /* end if */
             if(!udata->is_root_group)
                 HDstrcat(udata->container, name); 
             else
@@ -1198,6 +1210,7 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
     udata.is_root_group = TRUE;
     if(NULL == (udata.container = H5MM_strdup("")))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate root group name")
+    udata.max_container_len = 1;
     udata.loc = loc;
     
     /* Create skip list to store reference path information */
