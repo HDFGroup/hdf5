@@ -1771,6 +1771,21 @@ SOURCE=..\..\..\src\H5Ocont.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Ocopy.c
+
+!IF  "$(CFG)" == "hdf5dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Odtype.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
