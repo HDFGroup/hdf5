@@ -88,7 +88,8 @@ typedef struct {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_link_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
 static herr_t H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id,
-    const H5O_linfo_t *linfo, H5_iter_order_t order, H5G_link_table_t *ltable);
+    const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
+    H5G_link_table_t *ltable);
 
 
 /*-------------------------------------------------------------------------
@@ -120,7 +121,7 @@ H5G_link_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     HDassert(udata->curr_lnk < udata->ltable->nlinks);
 
     /* Copy link message into table */
-    if(H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
+    if(NULL == H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
 
     /* Increment current link entry to operate on */
@@ -147,7 +148,7 @@ done:
  */
 static herr_t
 H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5_iter_order_t order, H5G_link_table_t *ltable)
+    H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -178,13 +179,22 @@ H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
         /* Sort link table in correct iteration order */
-        /* (XXX: by name, currently) */
-        if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
-        else if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
-        else
-            HDassert(order == H5_ITER_NATIVE);
+        if(idx_type == H5L_INDEX_NAME) {
+            if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
+            else if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
+            else
+                HDassert(order == H5_ITER_NATIVE);
+        } /* end if */
+        else {
+            if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
+            else if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_dec);
+            else
+                HDassert(order == H5_ITER_NATIVE);
+        } /* end else */
     } /* end if */
     else
         ltable->lnks = NULL;
@@ -439,7 +449,7 @@ H5G_link_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     HDassert(oloc);
 
     /* Build table of all link messages */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5_ITER_INC, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Check for going out of bounds */
@@ -494,12 +504,12 @@ H5G_link_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linf
     HDassert(oloc);
 
     /* Build table of all link messages */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5_ITER_INC, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "can't create link message table")
 
     /* Check for going out of bounds */
     if(idx >= ltable.nlinks)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5G_UNKNOWN, "index out of bound")
 
     /* Determine type of object */
     if(ltable.lnks[idx].type == H5L_TYPE_SOFT)
@@ -664,7 +674,7 @@ H5G_link_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(op.lib_op);
 
     /* Build table of all link messages */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, order, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Iterate over link messages */
@@ -731,7 +741,7 @@ H5G_link_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     if(HDstrcmp(lnk->name, udata->name) == 0) {
         if(udata->lnk) {
             /* Copy link information */
-            if(H5O_copy(H5O_LINK_ID, lnk, udata->lnk) == NULL)
+            if(NULL == H5O_copy(H5O_LINK_ID, lnk, udata->lnk))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
         } /* end if */
 
@@ -789,4 +799,60 @@ H5G_link_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_lookup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_lookup_by_corder
+ *
+ * Purpose:	Look up an object in a group using link messages, according
+ *              the link's creation order.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
+{
+    H5G_link_table_t    ltable = {0, NULL};     /* Link table */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_link_lookup_by_corder, FAIL)
+
+    /* check arguments */
+    HDassert(oloc && oloc->file);
+    HDassert(linfo);
+    HDassert(lnk);
+
+    /* Build table of all link messages, sorted according to desired order */
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_CORDER, order, &ltable) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
+
+    /* Check for going out of bounds */
+    if(n >= ltable.nlinks)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index out of bound")
+
+    /* Copy link information */
+#ifdef QAK
+HDfprintf(stderr, "%s: ltable.lnks[%Hu].corder = %Hd\n", FUNC, n, ltable.lnks[n].corder);
+HDfprintf(stderr, "%s: ltable.lnks[%Hu].corder_valid = %t\n", FUNC, n, ltable.lnks[n].corder_valid);
+#endif /* QAK */
+    if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+
+done:
+    /* Release link table */
+    if(ltable.lnks) {
+        /* Free link table information */
+        if(H5G_obj_release_table(&ltable) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_link_lookup_by_corder() */
 

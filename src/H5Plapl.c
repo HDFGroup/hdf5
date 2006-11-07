@@ -119,14 +119,14 @@ const H5P_libclass_t H5P_CLS_LACC[1] = {{
  *              October 31, 2006
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_lacc_reg_prop(H5P_genclass_t *pclass)
 {
     size_t nlinks = H5L_ACS_NLINKS_DEF; /* Default number of soft links to traverse */
     char *elink_prefix = H5L_ACS_ELINK_PREFIX_DEF; /* Default external link prefix string */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_lacc_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_reg_prop)
 
     /* Register property for number of links traversed */
     if(H5P_register(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE,

@@ -163,6 +163,76 @@ H5G_obj_cmp_name_dec(const void *lnk1, const void *lnk2)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_obj_cmp_corder_inc
+ *
+ * Purpose:	Callback routine for comparing two link creation orders, in
+ *              increasing order
+ *
+ * Return:	An integer less than, equal to, or greater than zero if the
+ *              first argument is considered to be respectively less than,
+ *              equal to, or greater than the second.  If two members compare
+ *              as equal, their order in the sorted array is undefined.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_obj_cmp_corder_inc(const void *lnk1, const void *lnk2)
+{
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_corder_inc)
+
+    if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
+        ret_value = -1;
+    else if(((const H5O_link_t *)lnk1)->corder > ((const H5O_link_t *)lnk2)->corder)
+        ret_value = 1;
+    else
+        ret_value = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_cmp_corder_inc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_obj_cmp_corder_dec
+ *
+ * Purpose:	Callback routine for comparing two link creation orders, in
+ *              decreasing order
+ *
+ * Return:	An integer less than, equal to, or greater than zero if the
+ *              second argument is considered to be respectively less than,
+ *              equal to, or greater than the first.  If two members compare
+ *              as equal, their order in the sorted array is undefined.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_obj_cmp_corder_dec(const void *lnk1, const void *lnk2)
+{
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_corder_dec)
+
+    if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
+        ret_value = 1;
+    else if(((const H5O_link_t *)lnk1)->corder > ((const H5O_link_t *)lnk2)->corder)
+        ret_value = -1;
+    else
+        ret_value = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_cmp_corder_dec() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_obj_release_table
  *
  * Purpose:     Release table containing a list of links for a group
@@ -1022,7 +1092,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_obj_lookup
  *
- * Purpose:	Look up a link in a group.
+ * Purpose:	Look up a link in a group, using the name as the key.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1071,4 +1141,91 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_lookup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_obj_lookup_by_idx
+ *
+ * Purpose:	Look up a link in a group, according to an order within an
+ *              index.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5O_link_t *lnk, hid_t dxpl_id)
+{
+    H5O_linfo_t linfo;		        /* Link info message */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_obj_lookup_by_idx, FAIL)
+
+    /* check arguments */
+    HDassert(grp_oloc && grp_oloc->file);
+
+    /* Attempt to get the link info message for this group */
+    if(H5O_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+        /* Check for query on the name */
+        if(idx_type == H5L_INDEX_NAME) {
+            /* Check for dense link storage */
+            if(H5F_addr_defined(linfo.link_fheap_addr)) {
+                /* Get the object's info from the dense link storage */
+                if(H5G_dense_lookup(grp_oloc->file, dxpl_id, &linfo, "", lnk) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+            } /* end if */
+            else {
+                /* Get the object's info from the link messages */
+                if(H5G_link_lookup(grp_oloc, "", lnk, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+            } /* end else */
+        } /* end if */
+        else {
+            H5O_ginfo_t ginfo;		        /* Group info message */
+
+            /* Get group info message, to see if creation order is stored for links in this group */
+            if(NULL == H5O_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
+
+            /* Check if creation order is tracked */
+            if(!ginfo.track_corder)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
+
+            /* Check for dense link storage */
+            if(H5F_addr_defined(linfo.link_fheap_addr)) {
+HDfprintf(stderr, "%s: creation order query on dense storage not implemented yet!\n", FUNC);
+HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "creation order query on dense storage not implemented yet")
+            } /* end if */
+            else {
+                /* Get the object's info from the link messages */
+                if(H5G_link_lookup_by_corder(grp_oloc, dxpl_id, &linfo, order, n, lnk) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+            } /* end else */
+        } /* end else */
+    } /* end if */
+    else {
+        /* Clear error stack from not finding the link info message */
+        H5E_clear_stack(NULL);
+
+        /* Can only perform name lookups on groups with symbol tables */
+        if(idx_type != H5L_INDEX_NAME)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
+if(order == H5_ITER_DEC) {
+    HDfprintf(stderr, "%s: decreasing order query on symbol table not implemented yet!\n", FUNC);
+    HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "decreasing order query on symbol table not implemented yet")
+} /* end if */
+
+        /* Get the object's info from the symbol table */
+        if(H5G_stab_lookup(grp_oloc, "", lnk, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_lookup_by_idx() */
 

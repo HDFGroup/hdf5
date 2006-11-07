@@ -193,5 +193,5 @@ H5_DLL herr_t H5G_loc_find(H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_free(H5G_loc_t *loc);
 
-#endif
+#endif /* _H5Gprivate_H */
 

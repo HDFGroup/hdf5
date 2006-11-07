@@ -5902,6 +5902,99 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    corder_info_by_idx
+ *
+ * Purpose:     Create a group with creation order indices and test querying
+ *              info by index.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November  6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+corder_info_by_idx(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1), group_id2 = (-1);	/* Group IDs */
+    hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    unsigned    max_compact;            /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
+    H5L_info_t  linfo;                  /* Link info struct */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    unsigned    u;                      /* Local index variable */
+
+    TESTING("querying info by index")
+
+    /* Create file */
+    /* (with creation order tracking for the root group) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
+
+    /* Set creation order tracking & indexing on group */
+    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
+    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+
+    /* Create group with creation order indexing & tracking on */
+    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Query the group creation properties */
+    if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
+
+    /* Create several links, up to limit of compact form */
+    for(u = 0; u < max_compact; u++) {
+        sprintf(objname, "filler %u", u);
+        if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+        if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+        /* Get the link information for new object */
+        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify the link information for new object */
+#ifdef QAK
+HDfprintf(stderr, "linfo.corder_valid = %t\n", linfo.corder_valid);
+HDfprintf(stderr, "linfo.corder = %Hd\n", linfo.corder);
+HDfprintf(stderr, "u = %u\n", u);
+#endif /* QAK */
+        if(linfo.corder != u) TEST_ERROR
+    } /* end for */
+
+    /* Create another link, to push group into dense form */
+    sprintf(objname, "filler %u", max_compact);
+    if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+    /* Close the group */
+    if(H5Gclose(group_id) < 0) TEST_ERROR
+
+    /* Close the group creation property list */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl_id);
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+    return -1;
+} /* end corder_create_dense() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test links
@@ -6004,6 +6097,7 @@ main(void)
                 nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_info_by_idx(fapl2) < 0 ? 1 : 0;
             } /* end if */
         } /* end for */
 #else /* QAK */
@@ -6016,6 +6110,7 @@ main(void)
                 nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
                 nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
+                nerrors += corder_info_by_idx(fapl2) < 0 ? 1 : 0;
 #endif /* QAK */
 
         /* Close 2nd FAPL */

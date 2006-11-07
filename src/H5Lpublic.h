@@ -120,6 +120,18 @@ typedef struct {
     H5L_query_func_t query_func;    /* Callback for queries                 */
 } H5L_class_t;
 
+/*
+ * The types of indices on links in groups.  Primarily used for "<do> <foo> by
+ * index" routines and for iterating over links in groups.
+ */
+typedef enum H5L_index_t {
+    H5L_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
+    H5L_INDEX_NAME,		/* Index on names of links		*/
+    H5L_INDEX_CORDER,		/* Index on creation order of links	*/
+    H5L_INDEX_N			/* Number of indices defined on links in groups */
+} H5L_index_t;
+
+
 /********************/
 /* Public Variables */
 /********************/
@@ -144,6 +156,9 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, size_t size,
 			      void *buf/*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
                               H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
+H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,

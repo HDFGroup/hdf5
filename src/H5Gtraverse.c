@@ -146,8 +146,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
-    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
+static herr_t
+H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
+    H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t _lapl_id,
     hid_t dxpl_id)
 {
     const H5L_class_t   *link_class;       /* User-defined link class */
@@ -158,7 +159,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     H5O_loc_t          *new_oloc=NULL;
     H5F_t              *temp_file=NULL;
     H5G_t              *grp;
-    H5P_genplist_t     *lapl_default;
+    hid_t               lapl_id = (-1);         /* LAPL local to this routine */
     H5P_genplist_t     *lapl;                   /* LAPL with nlinks set */
     hid_t               cur_grp = (-1);
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -171,6 +172,7 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
     HDassert(lnk->type >= H5L_TYPE_UD_MIN);
     HDassert(obj_loc);
     HDassert(nlinks);
+    HDassert(_lapl_id >= 0);
 
     /* Reset the object's path information, because we can't detect any changes
      * in the "path" the user-defined callback takes */
@@ -196,17 +198,22 @@ static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
 
     /* Record number of soft links left to traverse in the property list.
      * If no property list exists yet, create one. */
-    if(lapl_id == H5P_DEFAULT) {
+    if(_lapl_id == H5P_DEFAULT || _lapl_id == H5P_LINK_ACCESS_DEFAULT) {
         HDassert(H5P_LINK_ACCESS_DEFAULT != -1);
-        if(NULL == (lapl_default = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
+        if(NULL == (lapl = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get default property list")
 
-        if((lapl_id = H5P_copy_plist(lapl_default)) < 0)
+        if((lapl_id = H5P_copy_plist(lapl)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
     } /* end if */
+    else {
+        /* Use the property list passed in */
+        lapl_id = _lapl_id;
 
-    if(NULL == (lapl = H5I_object(lapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
+        if(NULL == (lapl = H5I_object(lapl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
+    } /* end else */
+
     if(H5P_set(lapl, H5L_ACS_NLINKS_NAME, nlinks) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info")
 
@@ -267,6 +274,11 @@ done:
     if(ret_value < 0 && cb_return > 0)
         if(H5I_dec_ref(cb_return) < 0)
               HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+
+    /* Close the LAPL, if we copied the default one */
+    if(lapl_id > 0 && lapl_id != _lapl_id)
+        if(H5I_dec_ref(lapl_id) < 0)
+              HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close copied link access property list")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_ud() */

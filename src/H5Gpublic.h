@@ -92,17 +92,6 @@ typedef struct H5G_stat_t {
 /* Prototype for H5Giterate() operator */
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name, void *op_data);
 
-/*
- * The types of indices on links in groups.  Primarily used for "<do> <foo> by
- * index" routines and for iterating over links in groups.
- */
-typedef enum H5G_index_t {
-    H5G_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
-    H5G_INDEX_NAME,		/* Index on names of links		*/
-    H5G_INDEX_CORDER,		/* Index on creation order of links	*/
-    H5G_INDEX_N			/* Number of indices defined on links in groups */
-} H5G_index_t;
-
 /********************/
 /* Public Variables */
 /********************/
