@@ -121,13 +121,13 @@ test_find (void)
     for (i=0; i<8*(int)sizeof(v1); i++) {
 	memset (v1, 0xff, sizeof v1);
 	v1[i/8] &= ~(1<<(i%8));
-	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
+	n = H5T_bit_find (v1, (size_t)0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
 	if ((ssize_t)i!=n) {
 	    H5_FAILED();
 	    printf ("    Test for clear bit %d failed (lsb)!\n", i);
 	    goto failed;
 	}
-	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, FALSE);
+	n = H5T_bit_find (v1, (size_t)0, 8*sizeof(v1), H5T_BIT_MSB, FALSE);
 	if ((ssize_t)i!=n) {
 	    H5_FAILED();
 	    printf ("    Test for clear bit %d failed (lsb)!\n", i);
@@ -197,7 +197,7 @@ test_copy (void)
 
 
 	/* Look for the zeros and ones */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_LSB, 1);
 	if (size>0 && n!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first copied bit in destination "
@@ -226,7 +226,7 @@ test_copy (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_MSB, 1);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
 	    H5_FAILED();
 	    printf ("    Unable to find last copied bit in destination "
@@ -238,7 +238,7 @@ test_copy (void)
 	    puts ("    Found copied bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
-	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 0);
+	n = H5T_bit_find (v2, (size_t)0, d_offset+size, H5T_BIT_MSB, 0);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find beginning of copied data "
@@ -309,7 +309,7 @@ test_shift (void)
         H5T_bit_shift (vector, shift_dist, offset, size);
 
 	/* Look for the ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if ((size_t)n!=offset+shift_dist) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
@@ -321,7 +321,7 @@ test_shift (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n!=(ssize_t)(offset+size-1)) {
 	    H5_FAILED();
 	    printf ("    Unable to find last bit in destination "
@@ -336,7 +336,7 @@ test_shift (void)
         H5T_bit_shift (vector, -shift_dist, offset, size);
 
 	/* Look for the ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
@@ -348,7 +348,7 @@ test_shift (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n!=(ssize_t)(offset+size-shift_dist-1)) {
 	    H5_FAILED();
 	    printf ("    Unable to find last bit in destination "
@@ -371,7 +371,7 @@ test_shift (void)
         H5T_bit_shift (vector, shift_dist, offset, size);
 
 	/* Supposed to fail to find any ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if (n >= 0) {
 	    H5_FAILED();
 	    printf ("    Unable to verify all bits are zero in destination(LSB) "
@@ -380,7 +380,7 @@ test_shift (void)
 	}
 
         /* Look from the other direction */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n >= 0) {
 	    H5_FAILED();
 	    printf ("    Unable to verify all bits are zero in destination(MSB) "
@@ -444,7 +444,7 @@ test_increment (void)
         H5T_bit_inc (vector, offset, size);
 
 	/* Look for the one */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if (size!=1 && (size_t)n!=offset+size-1) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
@@ -462,7 +462,7 @@ test_increment (void)
 	 * Look for one in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (size!=1 && n!=(ssize_t)(offset+size-1)) {
 	    H5_FAILED();
 	    printf ("    Unable to find last bit in destination "
@@ -528,7 +528,7 @@ test_decrement (void)
         H5T_bit_dec (vector, offset, size);
 
 	/* Look for the ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
@@ -540,7 +540,7 @@ test_decrement (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n!=(ssize_t)(offset+size-1)) {
 	    H5_FAILED();
 	    printf ("    Unable to find last bit in destination "
@@ -600,7 +600,7 @@ test_negate (void)
         H5T_bit_neg (vector, offset, size);
 
 	/* Look for the ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
@@ -612,7 +612,7 @@ test_negate (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n!=(ssize_t)(offset+size-1)) {
 	    H5_FAILED();
 	    printf ("    Unable to find last bit in destination "
@@ -628,7 +628,7 @@ test_negate (void)
         H5T_bit_neg (vector, offset, size);
 
 	/* Look for the ones */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_LSB, 1);
 	if (n>=0) {
 	    H5_FAILED();
 	    printf ("    Unable to verify all-zero bits in destination "
@@ -640,7 +640,7 @@ test_negate (void)
 	 * Look for ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (vector, (size_t)0, 8*sizeof(vector), H5T_BIT_MSB, 1);
 	if (n>=0) {
 	    H5_FAILED();
 	    printf ("    Unable to verify all-zero bits in destination "
@@ -709,7 +709,7 @@ test_set (void)
 
 
 	/* Look for the zeros and ones */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_LSB, 1);
 	if (size>0 && n!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first set bit in destination "
@@ -738,7 +738,7 @@ test_set (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 1);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_MSB, 1);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
 	    H5_FAILED();
 	    printf ("    Unable to find last set bit in destination "
@@ -750,7 +750,7 @@ test_set (void)
 	    puts ("    Found set bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
-	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 0);
+	n = H5T_bit_find (v2, (size_t)0, d_offset+size, H5T_BIT_MSB, 0);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find beginning of set bit region "
@@ -826,7 +826,7 @@ test_clear (void)
 
 
 	/* Look for the zeros and ones */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 0);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_LSB, 0);
 	if (size>0 && n!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first cleared bit in destination "
@@ -855,7 +855,7 @@ test_clear (void)
 	 * Look for zeros and ones in reverse order.  This is only to test
 	 * that reverse searches work as expected.
 	 */
-	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 0);
+	n = H5T_bit_find (v2, (size_t)0, 8*sizeof(v2), H5T_BIT_MSB, 0);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
 	    H5_FAILED();
 	    printf ("    Unable to find last cleared bit in destination "
@@ -867,7 +867,7 @@ test_clear (void)
 	    puts ("    Found cleared bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
-	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 1);
+	n = H5T_bit_find (v2, (size_t)0, d_offset+size, H5T_BIT_MSB, 1);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find beginning of cleared bit region "

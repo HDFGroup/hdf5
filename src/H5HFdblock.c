@@ -129,7 +129,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
         dblock->block_off = par_iblock->block_off;
         dblock->block_off += hdr->man_dtable.row_block_off[par_row];
         dblock->block_off += hdr->man_dtable.row_block_size[par_row] * (par_entry % hdr->man_dtable.cparam.width);
-        dblock->size = hdr->man_dtable.row_block_size[par_row];
+        H5_ASSIGN_OVERFLOW(/* To: */ dblock->size, /* From: */ hdr->man_dtable.row_block_size[par_row], /* From: */ hsize_t, /* To: */ size_t);
     } /* end if */
     else {
         /* Must be the root direct block */
@@ -434,7 +434,7 @@ HDfprintf(stderr, "%s: after updating iterator, hdr->man_iter_off = %Hu\n", FUNC
         if(H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
         HDassert(next_row < iblock->nrows);
-        next_size = hdr->man_dtable.row_block_size[next_row];
+        H5_ASSIGN_OVERFLOW(/* To: */ next_size, /* From: */ hdr->man_dtable.row_block_size[next_row], /* From: */ hsize_t, /* To: */ size_t);
 
         /* Check for skipping over blocks */
         if(min_dblock_size > next_size) {

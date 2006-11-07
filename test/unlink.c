@@ -511,8 +511,8 @@ test_filespace(hid_t fapl)
     hsize_t     attr_dims[FILESPACE_ATTR_NDIMS]= {FILESPACE_ATTR_DIM0, FILESPACE_ATTR_DIM1};        /* Attribute dimensions */
     int        *data = NULL;    /* Pointer to dataset buffer */
     int        *tmp_data;       /* Temporary pointer to dataset buffer */
-    off_t       empty_size;     /* Size of an empty file */
-    off_t       file_size;      /* Size of each file created */
+    h5_stat_size_t       empty_size;     /* Size of an empty file */
+    h5_stat_size_t       file_size;      /* Size of each file created */
     herr_t	status;         /* Function status return value */
     unsigned u,v,w;             /* Local index variables */
 
@@ -2095,8 +2095,8 @@ test_full_group_compact(hid_t fapl)
     char objname[128];          /* Buffer for name of objects to create */
     char objname2[128];         /* Buffer for name of objects to create */
     char filename[1024];        /* Buffer for filename */
-    off_t       keep_size;      /* Size of the file with objects to keep */
-    off_t       file_size;      /* Size of each file created */
+    h5_stat_size_t       keep_size;      /* Size of the file with objects to keep */
+    h5_stat_size_t       file_size;      /* Size of each file created */
     unsigned u;                 /* Local index variable */
 
     TESTING("unlinking non-empty compact group");
@@ -2229,8 +2229,8 @@ test_full_group_dense(hid_t fapl)
     char objname[128];          /* Buffer for name of objects to create */
     char objname2[128];         /* Buffer for name of objects to create */
     char filename[1024];        /* Buffer for filename */
-    off_t       keep_size;      /* Size of the file with objects to keep */
-    off_t       file_size;      /* Size of each file created */
+    h5_stat_size_t       keep_size;      /* Size of the file with objects to keep */
+    h5_stat_size_t       file_size;      /* Size of each file created */
     unsigned u;                 /* Local index variable */
 
     TESTING("unlinking non-empty dense group");

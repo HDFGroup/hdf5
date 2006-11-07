@@ -1333,7 +1333,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu\n", FUNC, fspace->alloc_sec
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
 
         /* Compute new size */
-        new_size = fspace->alloc_sect_size;
+        H5_ASSIGN_OVERFLOW(/* To: */ new_size, /* From: */ fspace->alloc_sect_size, /* From: */ hsize_t, /* To: */ size_t);
         while(new_size < fspace->sect_size)
             new_size *= (double)fspace->expand_percent / 100.0;
         fspace->alloc_sect_size = new_size;
@@ -1369,7 +1369,7 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
         haddr_t old_addr;               /* Old address of serialized sections */
 
         /* Compute the threshold for decreasing the sections' serialized size */
-        decrease_threshold = ((size_t)fspace->alloc_sect_size * (double)fspace->shrink_percent) / 100.0;
+        decrease_threshold = (size_t)(((size_t)fspace->alloc_sect_size * (double)fspace->shrink_percent) / 100.0);
 
         if(fspace->alloc_sect_size > H5FS_SINFO_SIZE_DEFAULT &&
                 fspace->sect_size < decrease_threshold) {

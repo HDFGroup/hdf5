@@ -329,9 +329,9 @@ lifecycle(hid_t fapl)
     H5G_stat_t  obj_stat;               /* Object info */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     char	filename[NAME_BUF_SIZE];
-    off_t       empty_size;             /* Size of an empty file */
+    h5_stat_size_t       empty_size;             /* Size of an empty file */
     unsigned    u;                      /* Local index variable */
-    off_t       file_size;              /* Size of each file created */
+    h5_stat_size_t       file_size;              /* Size of each file created */
 
     TESTING("group lifecycle");
 
@@ -555,8 +555,8 @@ long_compact(hid_t fapl)
     hid_t       fapl2 = (-1);           /* File access property list ID */
     char        *objname;               /* Object name */
     char	filename[NAME_BUF_SIZE];
-    off_t       empty_size;             /* Size of an empty file */
-    off_t       file_size;              /* Size of each file created */
+    h5_stat_size_t       empty_size;             /* Size of an empty file */
+    h5_stat_size_t       file_size;              /* Size of each file created */
 
     TESTING("long link names in compact groups");
 
@@ -811,8 +811,8 @@ no_compact(hid_t fapl)
     hid_t       fapl2 = (-1);           /* File access property list ID */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     char	filename[NAME_BUF_SIZE];
-    off_t       empty_size;             /* Size of an empty file */
-    off_t       file_size;              /* Size of each file created */
+    h5_stat_size_t       empty_size;             /* Size of an empty file */
+    h5_stat_size_t       file_size;              /* Size of each file created */
     unsigned	est_num_entries;	/* Estimated # of entries in group */
     unsigned	est_name_len;		/* Estimated length of entry name */
 

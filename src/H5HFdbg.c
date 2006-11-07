@@ -55,7 +55,7 @@ typedef struct {
     int indent;                 /* Indention amount */
     int fwidth;                 /* Field width mount */
     haddr_t dblock_addr;        /* Direct block's address */
-    haddr_t dblock_size;        /* Direct block's size */
+    hsize_t dblock_size;        /* Direct block's size */
     uint8_t *marker;            /* 'Marker' array for free space */
     size_t sect_count;          /* Number of free space sections in block */
     size_t amount_free;         /* Amount of free space in block */
@@ -340,11 +340,11 @@ H5HF_dblock_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
         if(sect_start < dblock_start)
             start = 0;
         else
-            start = sect_start - dblock_start;
+            H5_ASSIGN_OVERFLOW(/* To: */ start, /* From: */ (sect_start - dblock_start), /* From: */ hsize_t, /* To: */ size_t)
         if(sect_end > dblock_end)
-            end = udata->dblock_size;
+            H5_ASSIGN_OVERFLOW(/* To: */ end, /* From: */ udata->dblock_size, /* From: */ hsize_t, /* To: */ size_t)
         else
-            end = (sect_end - dblock_start) + 1;
+            H5_ASSIGN_OVERFLOW(/* To: */ end, /* From: */ ((sect_end - dblock_start) + 1), /* From: */ hsize_t, /* To: */ size_t)
 
         /* Calculate the length */
         len = end - start;

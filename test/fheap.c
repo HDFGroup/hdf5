@@ -618,7 +618,7 @@ error:
 static int
 open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
     const fheap_test_param_t *tparam, hid_t *file, H5F_t **f, H5HF_t **fh,
-    haddr_t *fh_addr, fheap_heap_state_t *state, off_t *empty_size)
+    haddr_t *fh_addr, fheap_heap_state_t *state, h5_stat_size_t *empty_size)
 {
     size_t      id_len;                 /* Size of fractal heap IDs */
 
@@ -759,9 +759,9 @@ static int
 close_heap(char *filename, hid_t dxpl, fheap_test_param_t *tparam,
     hid_t file, H5F_t *f, H5HF_t **fh, haddr_t fh_addr,
     fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids,
-    off_t empty_size)
+    h5_stat_size_t empty_size)
 {
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       file_size;              /* Size of file currently */
 
     /* Check for closing & re-opening the heap */
     if(reopen_heap(f, dxpl, fh, fh_addr, tparam) < 0)
@@ -1813,8 +1813,8 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     H5HF_create_t test_cparam;          /* Creation parameters for heap */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Heap address in file */
-    off_t       empty_size;             /* File size, w/o heap */
-    off_t       file_size;              /* File size, after deleting heap */
+    h5_stat_size_t       empty_size;             /* File size, w/o heap */
+    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -5862,8 +5862,8 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
     unsigned char obj[SMALL_OBJ_SIZE1]; /* Buffer for object to insert */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    u;                      /* Local index variable */
 
@@ -6018,8 +6018,8 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     unsigned char heap_id2[HEAP_ID_LEN]; /* Heap ID for second object */
     unsigned char obj[SMALL_OBJ_SIZE1]; /* Buffer for object to insert */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    u;                      /* Local index variable */
 
@@ -6203,8 +6203,8 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     unsigned char *obj;                 /* Buffer for object to insert */
     size_t      obj_len;                /* Length of object to insert */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    u;                      /* Local index variable */
 
@@ -6364,8 +6364,8 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     unsigned char *obj;                 /* Buffer for object to insert */
     size_t      obj_len;                /* Length of object to insert */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    u;                      /* Local index variable */
 
@@ -6600,8 +6600,8 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     unsigned char *obj;                 /* Buffer for object to insert */
     size_t      obj_len;                /* Length of object to insert */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    u;                      /* Local index variable */
 
@@ -6892,7 +6892,7 @@ test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from root direct block of absolute heap %s";       /* Test description */
@@ -6966,7 +6966,7 @@ test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from two direct blocks of absolute heap %s";       /* Test description */
@@ -7055,7 +7055,7 @@ test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from first row of direct blocks of absolute heap %s";       /* Test description */
@@ -7126,7 +7126,7 @@ test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from first two rows of direct blocks of absolute heap %s";       /* Test description */
@@ -7199,7 +7199,7 @@ test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from first four rows of direct blocks of absolute heap %s";       /* Test description */
@@ -7276,7 +7276,7 @@ test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from all direct blocks of root group in absolute heap %s";       /* Test description */
@@ -7347,7 +7347,7 @@ test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from 2nd level indirect blocks of absolute heap %s";       /* Test description */
@@ -7422,7 +7422,7 @@ test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "removing all objects from 3rd level indirect blocks of absolute heap %s";       /* Test description */
@@ -7506,7 +7506,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "inserting object that is too large for starting block, then remove all objects %s";       /* Test description */
@@ -7584,7 +7584,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "skipping starting block, then adding object back to first block, then remove all objects %s";       /* Test description */
@@ -7683,7 +7683,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -7793,7 +7793,7 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "insert object to initial block, then add object too large for starting direct blocks, then remove all objects %s";       /* Test description */
@@ -7890,7 +7890,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8035,7 +8035,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8201,7 +8201,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8330,7 +8330,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_direct_rows;        /* Number of rows (of direct blocks) in root indirect block */
     unsigned    row;                    /* Current row */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects %s";       /* Test description */
@@ -8455,7 +8455,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8581,7 +8581,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned    row;                    /* Current row in indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8709,7 +8709,7 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -8856,7 +8856,7 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned    row;                    /* Current row in indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9026,7 +9026,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned    max_dblock_rows;        /* Max. # of rows (of direct blocks) in the root indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9180,7 +9180,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned    max_dblock_rows;        /* Max. # of rows (of direct blocks) in the root indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9358,7 +9358,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9487,7 +9487,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9626,7 +9626,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9778,7 +9778,7 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -9941,7 +9941,7 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -10104,7 +10104,7 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -10271,7 +10271,7 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -10433,7 +10433,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -10613,7 +10613,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -10828,7 +10828,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -11025,7 +11025,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -11252,7 +11252,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "fragmenting small blocks, then backfill and extend, then remove all objects %s";       /* Test description */
@@ -11385,7 +11385,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    root_direct_rows;       /* Number of rows in root indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     fheap_heap_state_t state;           /* State of fractal heap */
     const char *base_desc = "fragmenting direct blocks, then backfill and extend, then remove all objects %s";       /* Test description */
@@ -11557,7 +11557,7 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    num_first_indirect_rows;        /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -11671,7 +11671,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned    root_direct_rows;       /* Number of rows in root indirect block */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */
     size_t      fill_size;              /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -11786,8 +11786,8 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for object */
     size_t      obj_size;               /* Size of object */
     size_t      robj_size;              /* Size of object read */
@@ -11939,8 +11939,8 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for first object */
     unsigned char *heap_id2 = NULL;     /* Heap ID for second object */
     size_t      obj_size;               /* Size of object */
@@ -12172,8 +12172,8 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for first object */
     unsigned char *heap_id2 = NULL;     /* Heap ID for second object */
     unsigned char *heap_id3 = NULL;     /* Heap ID for third object */
@@ -12480,8 +12480,8 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for first object */
     unsigned char *heap_id2 = NULL;     /* Heap ID for second object */
     unsigned char *heap_id3 = NULL;     /* Heap ID for third object */
@@ -12907,8 +12907,8 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for object */
     size_t      obj_size;               /* Size of object */
     size_t      robj_size;              /* Size of object read */
@@ -13118,8 +13118,8 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for object */
     size_t      obj_size;               /* Size of object */
     size_t      robj_size;              /* Size of object read */
@@ -13271,8 +13271,8 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for first object */
     unsigned char *heap_id2 = NULL;     /* Heap ID for second object */
     size_t      obj_size;               /* Size of object */
@@ -13505,8 +13505,8 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     haddr_t     fh_addr;                /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for first object */
     unsigned char *heap_id2 = NULL;     /* Heap ID for second object */
     unsigned char *heap_id3 = NULL;     /* Heap ID for third object */
@@ -14115,8 +14115,8 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     haddr_t     fh_addr;                /* Address of fractal heap */
     H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     unsigned char heap_id[HEAP_ID_LEN]; /* Heap ID for object */
     size_t      obj_size;               /* Size of object */
     size_t      robj_size;              /* Size of object read */
@@ -14282,9 +14282,9 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     haddr_t     fh_addr;                /* Address of fractal heap */
     H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    off_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
 #ifdef NOT_YET
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       file_size;              /* Size of file currently */
 #endif /* NOT_YET */
     unsigned char heap_id1[HEAP_ID_LEN]; /* Heap ID for object #1 */
     unsigned char heap_id2[HEAP_ID_LEN]; /* Heap ID for object #2 */
@@ -14598,8 +14598,8 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned long seed = 0;             /* Random # seed */
     hsize_t     total_obj_added;        /* Size of objects added */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     size_t      obj_size;               /* Size of object */
     size_t      obj_loc;                /* Location of object in buffer */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -14802,8 +14802,8 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     unsigned long seed = 0;             /* Random # seed */
     hsize_t     total_obj_added;        /* Size of objects added */
-    off_t       empty_size;             /* Size of a file with an empty heap */
-    off_t       file_size;              /* Size of file currently */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;              /* Size of file currently */
     size_t      obj_size;               /* Size of object */
     size_t      obj_loc;                /* Location of object in buffer */
     fheap_heap_state_t state;           /* State of fractal heap */

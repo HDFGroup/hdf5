@@ -262,7 +262,7 @@ H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr)
         if(u < hdr->man_dtable.max_direct_rows) {
             hdr->man_dtable.row_tot_dblock_free[u] = hdr->man_dtable.row_block_size[u] -
                     H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
-            hdr->man_dtable.row_max_dblock_free[u] = hdr->man_dtable.row_tot_dblock_free[u];
+            H5_ASSIGN_OVERFLOW(/* To: */ hdr->man_dtable.row_max_dblock_free[u], /* From: */ hdr->man_dtable.row_tot_dblock_free[u], /* From: */ hsize_t, /* To: */ size_t);
         } /* end if */
         else
             if(H5HF_hdr_compute_free_space(hdr, u) < 0)

@@ -591,7 +591,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 {
     void *read_buf;                     /* Pointer to buffer for reading */
     haddr_t obj_addr;                   /* Object's address in the file */
-    hsize_t obj_size = 0;               /* Object's size in the file */
+    size_t obj_size = 0;                /* Object's size in the file */
     unsigned filter_mask = 0;           /* Filter mask for object (only used for filtered objects) */
     herr_t ret_value = SUCCEED;         /* Return value */
 

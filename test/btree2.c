@@ -6750,8 +6750,8 @@ test_delete(hid_t fapl)
     hid_t	file=-1;
     char	filename[1024];
     H5F_t	*f=NULL;
-    off_t       empty_size;             /* Size of an empty file */
-    off_t       file_size;              /* Size of each file created */
+    h5_stat_size_t       empty_size;             /* Size of an empty file */
+    h5_stat_size_t       file_size;              /* Size of each file created */
     hsize_t     record;                 /* Record to insert into tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
