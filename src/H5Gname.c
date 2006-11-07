@@ -1065,7 +1065,11 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
     /* Get information for object in group */
     if(H5G_get_objinfo(&loc, name, 0, &sb, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object")
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+    objno = (haddr_t)sb.objno[0];
+#endif
 
     /* Check for finding the object */
     /* (checks against the file in the location as well, to make certain that

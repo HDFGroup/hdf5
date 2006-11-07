@@ -161,7 +161,11 @@ sym_insert(H5G_stat_t *sb, const char *name)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
     objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
+#else
+    objno = (haddr_t)sb->objno[0];
+#endif
     idtab_g.obj[n].id = objno;
     idtab_g.obj[n].name = HDstrdup(name);
 }
