@@ -490,7 +490,7 @@ done:
  */
 herr_t
 H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
-    hsize_t idx, H5B2_found_t op, void *op_data)
+    H5_iter_order_t order, hsize_t idx, H5B2_found_t op, void *op_data)
 {
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
     H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
@@ -539,6 +539,10 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Check for index greater than the number of records in the tree */
     if(idx >= curr_node_ptr.all_nrec)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree doesn't have that many records")
+
+    /* Check for reverse indexing and map requested index to appropriate forward index */
+    if(order == H5_ITER_DEC)
+        idx = curr_node_ptr.all_nrec - (idx + 1);
 
     /* Walk down B-tree to find record or leaf node where record is located */
     while(depth > 0) {
@@ -618,25 +622,25 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
+        if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Sanity check index */
         HDassert(idx < leaf->nrec);
 
         /* Make callback for correct record */
-        if ((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
+        if((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) < 0) {
             /* Unlock current node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
         } /* end if */
 
         /* Unlock current node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
-    }
+    } /* end block */
 
 done:
     /* Check if we need to decrement the reference count for the B-tree's shared info */

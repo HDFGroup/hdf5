@@ -971,7 +971,7 @@ H5G_dense_get_name_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
     /* Retrieve the name according to the v2 B-tree's index order */
 /* (XXX: using name index currently) */
-    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, idx,
+    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5_ITER_INC, idx,
             H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
 
@@ -1125,7 +1125,7 @@ H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
     /* Retrieve the name according to the v2 B-tree's index order */
 /* (XXX: using name index currently) */
-    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, idx,
+    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5_ITER_INC, idx,
             H5G_dense_get_type_by_idx_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
 
