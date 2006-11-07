@@ -182,7 +182,7 @@ H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
         if(idx_type == H5L_INDEX_NAME) {
             if(order == H5_ITER_INC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
-            else if(order == H5_ITER_INC)
+            else if(order == H5_ITER_DEC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
             else
                 HDassert(order == H5_ITER_NATIVE);
@@ -190,7 +190,7 @@ H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
         else {
             if(order == H5_ITER_INC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
-            else if(order == H5_ITER_INC)
+            else if(order == H5_ITER_DEC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_dec);
             else
                 HDassert(order == H5_ITER_NATIVE);
@@ -830,7 +830,7 @@ H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
     HDassert(lnk);
 
     /* Build table of all link messages, sorted according to desired order */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_CORDER, order, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_CRT_ORDER, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Check for going out of bounds */
@@ -838,10 +838,6 @@ H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index out of bound")
 
     /* Copy link information */
-#ifdef QAK
-HDfprintf(stderr, "%s: ltable.lnks[%Hu].corder = %Hd\n", FUNC, n, ltable.lnks[n].corder);
-HDfprintf(stderr, "%s: ltable.lnks[%Hu].corder_valid = %t\n", FUNC, n, ltable.lnks[n].corder_valid);
-#endif /* QAK */
     if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
 

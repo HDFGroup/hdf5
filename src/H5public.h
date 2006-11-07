@@ -229,11 +229,11 @@ typedef ssize_t			hssize_t;
 
 /* Common iteration orders */
 typedef enum {
-    H5_ITER_UNKNOWN,    /* Unknown order */
-    H5_ITER_INC,        /* Increasing order */
-    H5_ITER_DEC,        /* Decreasing order */
-    H5_ITER_NATIVE,     /* No particular order, whatever is fastest */
-    H5_ITER_N		/* Number of iteration orders */
+    H5_ITER_UNKNOWN = -1,       /* Unknown order */
+    H5_ITER_INC,                /* Increasing order */
+    H5_ITER_DEC,                /* Decreasing order */
+    H5_ITER_NATIVE,             /* No particular order, whatever is fastest */
+    H5_ITER_N		        /* Number of iteration orders */
 } H5_iter_order_t;
 
 /* Functions in H5.c */

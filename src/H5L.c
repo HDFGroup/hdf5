@@ -127,6 +127,7 @@ static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
+static herr_t H5L_get_info_real(const H5O_link_t *lnk, H5L_info_t *linfo);
 static herr_t H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -1248,21 +1249,21 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
     /* Check for flags present in creation property list */
     if(lcpl_id != H5P_DEFAULT)
     {
-      unsigned crt_intmd_group;
+        unsigned crt_intmd_group;
 
-      if(NULL == (lc_plist = H5I_object(lcpl_id)))
-          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        if(NULL == (lc_plist = H5I_object(lcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-      /* Get intermediate group creation property */
-      if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
-          HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
+        /* Get intermediate group creation property */
+        if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
 
-      if (crt_intmd_group > 0)
-          target_flags |= H5G_CRT_INTMD_GROUP;
+        if(crt_intmd_group > 0)
+            target_flags |= H5G_CRT_INTMD_GROUP;
 
-      /* Get character encoding property */
-      if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
-          HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
+        /* Get character encoding property */
+        if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 
     /* Pass the lcpl to the link creation callback */
@@ -2044,42 +2045,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info_cb
+ * Function:	H5L_get_info_real
  *
- * Purpose:	Callback for retrieving a link's metadata
+ * Purpose:	Retrieve information from a link object 
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, April 17 2006
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  7 2006
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
-    H5G_own_loc_t *own_loc/*out*/)
+H5L_get_info_real(const H5O_link_t *lnk, H5L_info_t *linfo)
 {
-    H5L_trav_ud1_t *udata = (H5L_trav_ud1_t *)_udata;   /* User data passed in */
-    H5L_info_t *linfo = udata->linfo;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_real)
 
-    /* Check if the name in this group resolved to a valid link */
-    if(lnk == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+    /* Sanity check */
+    HDassert(lnk);
 
     /* Get information from the link */
-    if(linfo)
-    {
+    if(linfo) {
         linfo->cset = lnk->cset;
         linfo->corder = lnk->corder;
         linfo->corder_valid = lnk->corder_valid;
         linfo->type = lnk->type;
 
-        switch(lnk->type)
-        {
+        switch(lnk->type) {
             case H5L_TYPE_HARD:
                 linfo->u.address = lnk->u.hard.addr;
                 break;
@@ -2115,6 +2109,41 @@ H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
             } /* end case */
         } /* end switch */
     } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_info_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_get_info_cb
+ *
+ * Purpose:	Callback for retrieving a link's metadata
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, April 17 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+    const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
+{
+    H5L_trav_ud1_t *udata = (H5L_trav_ud1_t *)_udata;   /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_cb)
+
+    /* Check if the name in this group resolved to a valid link */
+    if(lnk == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+
+    /* Get information from the link */
+    if(H5L_get_info_real(lnk, udata->linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -2178,26 +2207,10 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 {
     H5L_trav_ud7_t *udata = (H5L_trav_ud7_t *)_udata;   /* User data passed in */
     H5O_link_t grp_lnk;                 /* Link within group */
-    H5L_info_t *linfo = udata->linfo;
+    hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_by_idx_cb)
-
-#ifdef QAK
-HDfprintf(stderr, "%s: grp_loc = %p\n", FUNC, grp_loc);
-HDfprintf(stderr, "%s: name = %p\n", FUNC, name);
-if(name)
-    HDfprintf(stderr, "%s: name = '%s'\n", FUNC, name);
-HDfprintf(stderr, "%s: lnk = %p\n", FUNC, lnk);
-if(lnk && lnk->name)
-    HDfprintf(stderr, "%s: lnk->name = '%s'\n", FUNC, lnk->name);
-HDfprintf(stderr, "%s: obj_loc = %p\n", FUNC, obj_loc);
-if(obj_loc) {
-    HDfprintf(stderr, "%s: obj_loc->oloc = %p\n", FUNC, obj_loc->oloc);
-    if(obj_loc->oloc)
-        HDfprintf(stderr, "%s: obj_loc->oloc->addr = %a\n", FUNC, obj_loc->oloc->addr);
-} /* end if */
-#endif /* QAK */
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2207,52 +2220,17 @@ if(obj_loc) {
     if(H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order,
                 udata->n, &grp_lnk, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
+    lnk_copied = TRUE;
 
     /* Get information from the link */
-    if(linfo) {
-        linfo->cset = grp_lnk.cset;
-        linfo->corder = grp_lnk.corder;
-        linfo->corder_valid = grp_lnk.corder_valid;
-        linfo->type = grp_lnk.type;
-
-        switch(grp_lnk.type) {
-            case H5L_TYPE_HARD:
-                linfo->u.address = grp_lnk.u.hard.addr;
-                break;
-
-            case H5L_TYPE_SOFT:
-                linfo->u.link_size = HDstrlen(grp_lnk.u.soft.name) + 1; /*count the null terminator*/
-                break;
-
-            default:
-            {
-                const H5L_class_t *link_class;      /* User-defined link class */
-
-                if(grp_lnk.type < H5L_TYPE_UD_MIN || grp_lnk.type > H5L_TYPE_MAX)
-                    HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unknown link class")
-
-                /* User-defined link; call its query function to get the link udata size. */
-                /* Get the link class for this type of link.  It's okay if the class
-                 * isn't registered, though--we just can't give any more information
-                 * about it
-                 */
-                link_class = H5L_find_class(grp_lnk.type);
-
-                if(link_class != NULL && link_class->query_func != NULL) {
-                    ssize_t cb_ret;             /* Return value from UD callback */
-
-                    if((cb_ret = (link_class->query_func)(grp_lnk.name, grp_lnk.u.ud.udata, grp_lnk.u.ud.size, NULL, (size_t)0)) < 0)
-                        HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query buffer size callback returned failure")
-
-                    linfo->u.link_size = cb_ret;
-                } /* end if */
-                else
-                    linfo->u.link_size = 0;
-            } /* end case */
-        } /* end switch */
-    } /* end if */
+    if(H5L_get_info_real(&grp_lnk, udata->linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
+    /* Reset the link information, if we have a copy */
+    if(lnk_copied)
+        H5O_reset(H5O_LINK_ID, &grp_lnk);
+
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;

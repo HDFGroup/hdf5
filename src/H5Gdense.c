@@ -206,6 +206,33 @@ typedef struct {
     H5G_obj_t   type;                   /* Type of object                    */
 } H5G_fh_gtbi_ud1_t;
 
+/*
+ * Data exchange structure to pass through the v2 B-tree layer for the
+ * H5B2_index function when retrieving a link by index.
+ */
+typedef struct {
+    /* downward (internal) */
+    H5F_t       *f;                     /* Pointer to file that fractal heap is in */
+    hid_t       dxpl_id;                /* DXPL for operation                */
+    H5HF_t      *fheap;                 /* Fractal heap handle               */
+
+    /* upward */
+    H5O_link_t  *lnk;                   /* Pointer to link                   */
+} H5G_bt2_lbi_ud1_t;
+
+/*
+ * Data exchange structure to pass through the fractal heap layer for the
+ * H5HF_op function when retrieving a link by index.
+ */
+typedef struct {
+    /* downward (internal) */
+    H5F_t       *f;                     /* Pointer to file that fractal heap is in */
+    hid_t       dxpl_id;                /* DXPL for operation                */
+
+    /* upward */
+    H5O_link_t  *lnk;                   /* Pointer to link                   */
+} H5G_fh_lbi_ud1_t;
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -433,7 +460,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_dense_lookup_cb
  *
- * Purpose:	Callback when a link is located in the 'name' index
+ * Purpose:	Callback when a link is located in an index
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -529,6 +556,173 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_dense_lookup_by_idx_fh_cb
+ *
+ * Purpose:	Callback for fractal heap operator, to make copy of link when
+ *              when lookup up a link by index
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+{
+    H5G_fh_lbi_ud1_t *udata = (H5G_fh_lbi_ud1_t *)_udata;       /* User data for fractal heap 'op' callback */
+    H5O_link_t *tmp_lnk = NULL;         /* Temporary pointer to link */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_fh_cb)
+
+    /* Decode link information & keep a copy */
+    if(NULL == (tmp_lnk = H5O_decode(udata->f, udata->dxpl_id, obj, H5O_LINK_ID)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
+
+    /* Copy link information */
+    if(NULL == H5O_copy(H5O_LINK_ID, tmp_lnk, udata->lnk))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
+
+done:
+    if(tmp_lnk)
+        H5O_reset(H5O_LINK_ID, tmp_lnk);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_dense_lookup_by_idx_fh_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_dense_lookup_by_idx_bt2_cb
+ *
+ * Purpose:	v2 B-tree callback for dense link storage lookup by index
+ *
+ * Return:	H5B2_ITER_ERROR/H5B2_ITER_CONT/H5B2_ITER_STOP
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_dense_lookup_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
+{
+    const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
+    H5G_bt2_lbi_ud1_t *bt2_udata = (H5G_bt2_lbi_ud1_t *)_bt2_udata;         /* User data for callback */
+    H5G_fh_lbi_ud1_t fh_udata;          /* User data for fractal heap 'op' callback */
+    int ret_value = H5B2_ITER_CONT;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_bt2_cb)
+
+    /* Prepare user data for callback */
+    /* down */
+    fh_udata.f = bt2_udata->f;
+    fh_udata.dxpl_id = bt2_udata->dxpl_id;
+    fh_udata.lnk = bt2_udata->lnk;
+
+    /* Call fractal heap 'op' routine, to copy the link information */
+    if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, record->id,
+            H5G_dense_lookup_by_idx_fh_cb, &fh_udata) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5B2_ITER_ERROR, "link found callback failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_dense_lookup_by_idx_bt2_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_dense_lookup_by_idx
+ *
+ * Purpose:	Look up a link within a group that uses dense link storage,
+ *              according to the order of an index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
+{
+    H5HF_t *fheap = NULL;               /* Fractal heap handle */
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_dense_lookup_by_idx, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(linfo);
+    HDassert(lnk);
+
+    /* Open the fractal heap */
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+    /* Determine the address of the index to use */
+    if(idx_type == H5L_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            bt2_addr = linfo->name_bt2_addr;
+            bt2_class = H5G_BT2_NAME;
+            HDassert(H5F_addr_defined(bt2_addr));
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
+    } /* end if */
+    else {
+        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it...
+         */
+        bt2_addr = linfo->corder_bt2_addr;
+        bt2_class = H5G_BT2_CORDER;
+    } /* end else */
+
+    /* If there is an index defined for the field, use it */
+    if(H5F_addr_defined(bt2_addr)) {
+        H5G_bt2_lbi_ud1_t udata;          /* User data for v2 B-tree link lookup */
+
+        /* Construct the user data for v2 B-tree callback */
+        udata.f = f;
+        udata.dxpl_id = dxpl_id;
+        udata.fheap = fheap;
+        udata.lnk = lnk;
+
+        /* Find & copy the link in the appropriate index */
+        if(H5B2_index(f, dxpl_id, bt2_class, bt2_addr, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in index")
+    } /* end if */
+    else {      /* Otherwise, we need to build a table of the links and sort it */
+HDfprintf(stderr, "%s: building a table for dense storage not implemented yet!\n", FUNC);
+HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "building a table for dense storage not implemented yet")
+    } /* end else */
+
+done:
+    /* Release resources */
+    if(fheap)
+        if(H5HF_close(fheap, dxpl_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_dense_lookup_by_idx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_dense_build_table_cb
  *
  * Purpose:	Callback routine for building table of links from dense
@@ -587,7 +781,7 @@ done:
  */
 herr_t
 H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5_iter_order_t order, H5G_link_table_t *ltable)
+    H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -623,13 +817,22 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
         /* Sort link table in correct iteration order */
-/* (XXX: by name, currently) */
-        if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
-        else if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
-        else
-            HDassert(order == H5_ITER_NATIVE);
+        if(idx_type == H5L_INDEX_NAME) {
+            if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
+            else if(order == H5_ITER_DEC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
+            else
+                HDassert(order == H5_ITER_NATIVE);
+        } /* end if */
+        else {
+            if(order == H5_ITER_INC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
+            else if(order == H5_ITER_DEC)
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_dec);
+            else
+                HDassert(order == H5_ITER_NATIVE);
+        } /* end else */
     } /* end if */
     else
         ltable->lnks = NULL;
@@ -800,7 +1003,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
         size_t u;                       /* Local index variable */
 
         /* Build the table of links for this group */
-        if(H5G_dense_build_table(f, dxpl_id, linfo, order, &ltable) < 0)
+        if(H5G_dense_build_table(f, dxpl_id, linfo, H5L_INDEX_NAME, order, &ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building iteration table of links")
 
         /* Iterate over link messages */

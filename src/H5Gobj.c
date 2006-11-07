@@ -1005,7 +1005,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                 size_t u;                       /* Local index */
 
                 /* Build the table of links for this group */
-                if(H5G_dense_build_table(oloc->file, dxpl_id, &linfo, H5_ITER_NATIVE, &ltable) < 0)
+                if(H5G_dense_build_table(oloc->file, dxpl_id, &linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
                 /* Inspect links in table for ones that can't be converted back
@@ -1198,11 +1198,12 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
 
             /* Check for dense link storage */
             if(H5F_addr_defined(linfo.link_fheap_addr)) {
-HDfprintf(stderr, "%s: creation order query on dense storage not implemented yet!\n", FUNC);
-HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "creation order query on dense storage not implemented yet")
+                /* Get the link from the dense storage */
+                if(H5G_dense_lookup_by_idx(grp_oloc->file, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
             } /* end if */
             else {
-                /* Get the object's info from the link messages */
+                /* Get the link from the link messages */
                 if(H5G_link_lookup_by_corder(grp_oloc, dxpl_id, &linfo, order, n, lnk) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
             } /* end else */

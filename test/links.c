@@ -5927,6 +5927,7 @@ corder_info_by_idx(hid_t fapl)
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename[NAME_BUF_SIZE];/* File name */
     unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic return value */
 
     TESTING("querying info by index")
 
@@ -5955,22 +5956,72 @@ corder_info_by_idx(hid_t fapl)
         if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
 
-        /* Get the link information for new object */
-        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+        /* Get the link information for new link, in increasing creation order */
+        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
 
-        /* Verify the link information for new object */
-#ifdef QAK
-HDfprintf(stderr, "linfo.corder_valid = %t\n", linfo.corder_valid);
-HDfprintf(stderr, "linfo.corder = %Hd\n", linfo.corder);
-HDfprintf(stderr, "u = %u\n", u);
-#endif /* QAK */
+        /* Verify the link information for new link */
         if(linfo.corder != u) TEST_ERROR
+
+        /* Get the link information for first link, in increasing creation order */
+        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify the link information for first link */
+        if(linfo.corder != 0) TEST_ERROR
+
+        /* Get the link information for new link, in decreasing creation order */
+        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify the link information for new link */
+        if(linfo.corder != u) TEST_ERROR
+
+        /* Get the link information for first link, in decreasing creation order */
+        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify the link information for first link */
+        if(linfo.corder != 0) TEST_ERROR
     } /* end for */
+
+    /* Check for out of bound offset */
+    H5E_BEGIN_TRY {
+        ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
+    H5E_BEGIN_TRY {
+        ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
 
     /* Create another link, to push group into dense form */
     sprintf(objname, "filler %u", max_compact);
     if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
     if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+    /* Get the link information for new link, in increasing creation order */
+    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify the link information for new link */
+    if(linfo.corder != u) TEST_ERROR
+
+    /* Get the link information for first link, in increasing creation order */
+    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify the link information for first link */
+    if(linfo.corder != 0) TEST_ERROR
+
+    /* Get the link information for new link, in decreasing creation order */
+    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify the link information for new link */
+    if(linfo.corder != u) TEST_ERROR
+
+    /* Get the link information for first link, in decreasing creation order */
+    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify the link information for first link */
+    if(linfo.corder != 0) TEST_ERROR
+
+    /* Verify state of group */
+    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Close the group */
     if(H5Gclose(group_id) < 0) TEST_ERROR

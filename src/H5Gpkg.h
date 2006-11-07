@@ -266,15 +266,17 @@ typedef struct H5G_bt_it_ud5_t {
 /* (fractal heap & v2 B-tree info) */
 
 /* Typedef for native 'name' field index records in the v2 B-tree */
+/* (Keep 'id' field first so generic record handling in callbacks works) */
 typedef struct H5G_dense_bt2_name_rec_t {
-    uint32_t hash;                      /* Hash of 'name' field value */
     uint8_t id[H5G_DENSE_FHEAP_ID_LEN]; /* Heap ID for link */
+    uint32_t hash;                      /* Hash of 'name' field value */
 } H5G_dense_bt2_name_rec_t;
 
 /* Typedef for native 'creation order' field index records in the v2 B-tree */
+/* (Keep 'id' field first so generic record handling in callbacks works) */
 typedef struct H5G_dense_bt2_corder_rec_t {
-    uint64_t corder;                    /* 'creation order' field value */
     uint8_t id[H5G_DENSE_FHEAP_ID_LEN]; /* Heap ID for link */
+    uint64_t corder;                    /* 'creation order' field value */
 } H5G_dense_bt2_corder_rec_t;
 
 /*
@@ -435,12 +437,15 @@ H5_DLL herr_t H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id,
 
 /* Functions that understand "dense" link storage */
 H5_DLL herr_t H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5_iter_order_t order, H5G_link_table_t *ltable);
+    H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable);
 H5_DLL herr_t H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo);
 H5_DLL herr_t H5G_dense_insert(H5F_t *f, hid_t dxpl_id,
     const H5O_linfo_t *linfo, const H5O_link_t *lnk);
 H5_DLL herr_t H5G_dense_lookup(H5F_t *f, hid_t dxpl_id,
     const H5O_linfo_t *linfo, const char *name, H5O_link_t *lnk);
+H5_DLL herr_t H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id,
+    const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
+    hsize_t n, H5O_link_t *lnk);
 H5_DLL herr_t H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order,
     hid_t gid, const H5O_linfo_t *linfo, hbool_t lib_internal, int skip,
     int *last_lnk, H5G_link_iterate_t op, void *op_data);

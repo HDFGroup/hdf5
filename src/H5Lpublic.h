@@ -127,7 +127,7 @@ typedef struct {
 typedef enum H5L_index_t {
     H5L_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
     H5L_INDEX_NAME,		/* Index on names of links		*/
-    H5L_INDEX_CORDER,		/* Index on creation order of links	*/
+    H5L_INDEX_CRT_ORDER,	/* Index on creation order of links	*/
     H5L_INDEX_N			/* Number of indices defined on links in groups */
 } H5L_index_t;
 

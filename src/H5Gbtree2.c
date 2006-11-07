@@ -482,7 +482,7 @@ H5G_dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec)
 {
 unsigned u;
 
-HDfprintf(stderr, "%s: bt2_udata = %Hu}\n", "H5G_dense_btree2_corder_compare", (hsize_t)bt2_udata->corder);
+HDfprintf(stderr, "%s: bt2_udata->corder = %Hd\n", "H5G_dense_btree2_corder_compare", (hsize_t)bt2_udata->corder);
 HDfprintf(stderr, "%s: bt2_rec = {%Hu, ", "H5G_dense_btree2_corder_compare", (hsize_t)bt2_rec->corder);
 for(u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
     HDfprintf(stderr, "%02x%s", bt2_rec->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
