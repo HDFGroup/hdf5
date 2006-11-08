@@ -665,7 +665,7 @@ H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
                 new_node->rchild = H5Z_parse_factor(current, dat_val_pointers);
 
                 if (!new_node->rchild) {
-                    H5Z_xform_destroy_parse_tree(term);
+                    H5Z_xform_destroy_parse_tree(new_node);
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
                 }
 
@@ -685,7 +685,7 @@ H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
                 term = new_node;
 
                 if (!new_node->rchild) {
-                    H5Z_xform_destroy_parse_tree(term);
+                    H5Z_xform_destroy_parse_tree(new_node);
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error parsing data transform expression")
                 }
                 break;
@@ -871,16 +871,17 @@ done:
 static H5Z_node *
 H5Z_new_node(H5Z_token_type type)
 {
-    H5Z_node* new_node;
+    H5Z_node* ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5Z_new_node)
+    FUNC_ENTER_NOAPI(H5Z_new_node, NULL);
 
-	new_node = H5MM_calloc(sizeof(H5Z_node));
-    assert(new_node);
+    ret_value = H5MM_calloc(sizeof(H5Z_node));
+    if(ret_value == NULL)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to allocate space for nodes in the parse tree")
 
-    new_node->type = type;
-
-    FUNC_LEAVE_NOAPI(new_node);
+    ret_value->type = type;
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -974,8 +975,9 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 
 	if(H5Z_xform_eval_full(tree, array_size, array_type, &res) < 0)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
-	
-        HDmemcpy(array, res.value.dat_val, array_size * H5Tget_size(array_type));
+
+	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)	
+	    HDmemcpy(array, res.value.dat_val, array_size * H5Tget_size(array_type));
 
         /* Free the temporary arrays we used */
         if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
@@ -1320,7 +1322,6 @@ H5Z_do_op(H5Z_node* tree)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_do_op)
 
-
     if(tree->type == H5Z_XFORM_DIVIDE)
 	H5Z_XFORM_DO_OP3(/)
     else if(tree->type == H5Z_XFORM_MULT)
@@ -1416,6 +1417,10 @@ done:
                 H5Z_xform_destroy_parse_tree(data_xform_prop->parse_root);
             if(data_xform_prop->xform_exp)
                 H5MM_xfree(data_xform_prop->xform_exp);
+	    if(count > 0 && data_xform_prop->dat_val_pointers->ptr_dat_val)
+		H5MM_xfree(data_xform_prop->dat_val_pointers->ptr_dat_val);
+	    if(data_xform_prop->dat_val_pointers)
+		H5MM_xfree(data_xform_prop->dat_val_pointers);
             H5MM_xfree(data_xform_prop);
         } /* end if */
     } /* end if */
@@ -1449,7 +1454,7 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
     FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_destroy)
 
     if(data_xform_prop) {
-        /* Destroy the parse tree */
+	/* Destroy the parse tree */
         H5Z_xform_destroy_parse_tree(data_xform_prop->parse_root);
 
         /* Free the expression */
