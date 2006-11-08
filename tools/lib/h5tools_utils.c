@@ -600,6 +600,26 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->type_table = *type_table;
     info->dset_table = *dset_table;
 
+    {
+     /* add the root group as an object, it may have hard links to it */
+     
+     H5G_stat_t statbuf;
+     haddr_t    objno;    /* compact form of object's location */
+     char*      tmp;
+     
+     if(H5Gget_objinfo(fid, "/", FALSE, &statbuf) < 0)
+         return FAIL;
+     else 
+     {
+         objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+         /* call with an empty string, it appends group separator */
+         tmp = build_obj_path_name(info->prefix, "");
+         add_obj(info->group_table, objno, tmp, TRUE);
+     }
+    }
+
+
+
     /* Find all shared objects */
     return(H5Giterate(fid, "/", NULL, find_objs_cb, (void *)info));
 }

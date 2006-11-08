@@ -474,6 +474,9 @@ static void gent_hardlink(void)
     group = H5Gopen(fid, "/g1");
     H5Glink (group, H5L_TYPE_HARD, "/g2", "g1.1");
     H5Gclose(group);
+
+     /* create a link to the root group */
+    H5Glink (fid, H5L_TYPE_HARD, "/", "g3");
     H5Fclose(fid);
 }
 

@@ -23,5 +23,8 @@ GROUP "/" {
    GROUP "g2" {
       HARDLINK "/g1/g1.1"
    }
+   GROUP "g3" {
+      HARDLINK "/"
+   }
 }
 }
