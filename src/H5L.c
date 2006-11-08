@@ -860,6 +860,7 @@ H5Lis_registered(H5L_type_t id)
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(H5Lis_registered, FAIL)
+    H5TRACE1("t","Ll",id);
 
     /* Check args */
     if(id < 0 || id > H5L_TYPE_MAX)
