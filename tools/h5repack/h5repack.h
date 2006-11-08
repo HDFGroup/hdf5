@@ -102,6 +102,7 @@ typedef struct {
  int             verbose;     /*verbose mode */
  hsize_t         threshold;   /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */  
+ int             have_fc_f;   /*has input to use filter/chunking flag */
 } pack_opt_t;
 
 
@@ -157,13 +158,6 @@ int copy_attr(hid_t loc_in,
               hid_t loc_out,
               pack_opt_t *options
               );
-
-int do_copy_refobjs(hid_t fidin,
-                    hid_t fidout,
-                    trav_table_t *travt,
-                    pack_opt_t *options); /* repack options */
-
-
 
 void read_info(const char *filename,pack_opt_t *options);
 void init_packobject(pack_info_t *obj);
