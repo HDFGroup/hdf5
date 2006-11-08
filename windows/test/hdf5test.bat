@@ -237,6 +237,12 @@ echo ============================
 
 getname%2\%1\getname%2
 
+echo ============================
+echo Testing ref 
+echo ============================
+
+ref%2\%1\ref%2
+
 echo.
 echo ============================
 echo Testing vfd 
@@ -285,17 +291,7 @@ echo ============================
 
 fheap%2\%1\fheap%2
 
-echo ============================
-echo Testing btree2 
-echo ============================
 
-btree2%2\%1\btree2%2
-
-echo ============================
-echo Testing ref 
-echo ============================
-
-ref%2\%1\ref%2
 echo.
 echo ============================
 echo Testing ./testerror.sh  
