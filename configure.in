@@ -316,7 +316,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl Fortran source extention
   dnl
-  FC_SRCEXT=f90
+  AC_FC_SRCEXT([f90])
 
   AC_SUBST([F9XSUFFIXFLAG])
   AC_SUBST([FSEARCH_DIRS])
@@ -741,38 +741,29 @@ dnl Absoft 32bit Fortran 95 9.0
 dnl HP F90 v2.4
 dnl Intel Fortran Compiler 8.1
 dnl If any of these compilers is being used, disable shared libraries for
-dnl Fortran.
-
-dnl Disable shared libraries in Fortran by default (sometimes libtool will
-dnl try to link against other shared libraries even though HDF5 is built
-dnl as a static library).
-H5_FORTRAN_SHARED="no"
-
-if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+dnl Fortran.  This prevents building shared libraries and also prevents
+dnl trying to link against shared libraries.
+if test "X${HDF_FORTRAN}" = "Xyes"; then
   H5_FORTRAN_SHARED="yes"
 
   if (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
-    echo "    warning: shared libraries are not supported for pgf90!"
-    echo "    disabling shared Fortran libraries"
     H5_FORTRAN_SHARED="no"
   fi
 
   if (${FC} -V 2>&1 | grep '^Intel(R) Fortran Compiler') > /dev/null; then
-    echo "    warning: shared libraries are not supported for ifort!"
-    echo "    disabling shared Fortran libraries"
     H5_FORTRAN_SHARED="no"
   fi
 
   if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
-    echo "    warning: shared libraries are not supported for f90!"
-    echo "    disabling shared Fortran libraries"
     H5_FORTRAN_SHARED="no"
   fi
 
   if (${FC} -V 2>&1 | grep '^Absoft') > /dev/null; then
-    echo "    warning: shared libraries are not supported for Absoft f95!"
-    echo "    disabling shared Fortran libraries"
     H5_FORTRAN_SHARED="no"
+  fi
+
+  if test "X${enable_shared}" != "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+    AC_MSG_WARN([shared libraries are not supported; disabling shared Fortran libraries])
   fi
 
   if test "X${enable_static}" = "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then

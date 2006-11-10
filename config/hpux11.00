@@ -19,6 +19,11 @@
 #
 # See BlankForm in this directory for details.
 
+# Shared libraries don't work for all compilers under HPUX11.00.  This is a
+# known bug in libtool (as of June 2006).
+# Disable shared libraries until we can be sure they work.
+enable_shared="${enable_shared:-no}"
+
 # Default compiler is `cc'
 if test "X-" =  "X-$CC"; then
   CC=cc
