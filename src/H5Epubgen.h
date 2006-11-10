@@ -310,6 +310,18 @@ H5_DLLVAR hid_t H5E_CANTNEXT_g;      /* Can't move to next iterator location */
 H5_DLLVAR hid_t H5E_BADSELECT_g;     /* Invalid selection */
 H5_DLLVAR hid_t H5E_CANTCOMPARE_g;   /* Can't compare objects */
 
+/* Argument errors */
+#define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)
+#define H5E_UNSUPPORTED      (H5OPEN H5E_UNSUPPORTED_g)
+#define H5E_BADTYPE          (H5OPEN H5E_BADTYPE_g)
+#define H5E_BADRANGE         (H5OPEN H5E_BADRANGE_g)
+#define H5E_BADVALUE         (H5OPEN H5E_BADVALUE_g)
+H5_DLLVAR hid_t H5E_UNINITIALIZED_g; /* Information is uinitialized */
+H5_DLLVAR hid_t H5E_UNSUPPORTED_g;   /* Feature is unsupported */
+H5_DLLVAR hid_t H5E_BADTYPE_g;       /* Inappropriate type */
+H5_DLLVAR hid_t H5E_BADRANGE_g;      /* Out of range */
+H5_DLLVAR hid_t H5E_BADVALUE_g;      /* Bad value */
+
 /* B-tree related errors */
 #define H5E_NOTFOUND         (H5OPEN H5E_NOTFOUND_g)
 #define H5E_EXISTS           (H5OPEN H5E_EXISTS_g)
@@ -333,18 +345,6 @@ H5_DLLVAR hid_t H5E_CANTINSERT_g;    /* Unable to insert object */
 H5_DLLVAR hid_t H5E_CANTLIST_g;      /* Unable to list node */
 H5_DLLVAR hid_t H5E_CANTMODIFY_g;    /* Unable to modify record */
 H5_DLLVAR hid_t H5E_CANTREMOVE_g;    /* Unable to remove object */
-
-/* Argument errors */
-#define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)
-#define H5E_UNSUPPORTED      (H5OPEN H5E_UNSUPPORTED_g)
-#define H5E_BADTYPE          (H5OPEN H5E_BADTYPE_g)
-#define H5E_BADRANGE         (H5OPEN H5E_BADRANGE_g)
-#define H5E_BADVALUE         (H5OPEN H5E_BADVALUE_g)
-H5_DLLVAR hid_t H5E_UNINITIALIZED_g; /* Information is uinitialized */
-H5_DLLVAR hid_t H5E_UNSUPPORTED_g;   /* Feature is unsupported */
-H5_DLLVAR hid_t H5E_BADTYPE_g;       /* Inappropriate type */
-H5_DLLVAR hid_t H5E_BADRANGE_g;      /* Out of range */
-H5_DLLVAR hid_t H5E_BADVALUE_g;      /* Bad value */
 
 /* Datatype conversion errors */
 #define H5E_CANTCONVERT      (H5OPEN H5E_CANTCONVERT_g)

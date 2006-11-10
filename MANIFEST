@@ -890,7 +890,6 @@
 ./tools/h5repack/h5repack_main.c
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_parse.c
-./tools/h5repack/h5repack_refs.c
 ./tools/h5repack/h5repack_verify.c
 ./tools/h5repack/testh5repack.h
 ./tools/h5repack/testh5repack_attr.c
