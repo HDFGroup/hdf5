@@ -183,6 +183,8 @@ H5_DLL herr_t H5G_name_reset(H5G_name_t *name);
 H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);
 H5_DLL ssize_t H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id);
+H5_DLL ssize_t H5G_get_refobj_name(hid_t fid, hid_t dxpl_id,
+    const struct H5O_loc_t *loc, char* name, size_t size);
 
 /*
  * These functions operate on group "locations"

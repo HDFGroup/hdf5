@@ -83,8 +83,6 @@ static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_refname_iterator(hid_t group, const char *name, void *_iter);
 static herr_t H5G_free_ref_path_node(void *item, void *key, void *operator_data/*in,out*/);
-static ssize_t H5G_get_refobj_name(hid_t fid, hid_t dxpl_id, const H5O_loc_t *loc, 
-    char* name, size_t size);
 
 
 /*-------------------------------------------------------------------------
@@ -462,8 +460,10 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
             /* Search for name of object */
-	    if((len = H5G_get_refobj_name(file, dxpl_id, loc.oloc, name, size)) < 0)
+	    if((len = H5G_get_refobj_name(file, dxpl_id, loc.oloc, name, size)) < 0) {
+                H5I_dec_ref(file);
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
+            } /* end if */
 	
             /* Close file ID used for search */
 	    if(H5I_dec_ref(file) < 0)
@@ -1194,7 +1194,7 @@ H5G_free_ref_path_node(void *item, void UNUSED *key, void UNUSED *operator_data/
  *
  *-------------------------------------------------------------------------
  */
-static ssize_t
+ssize_t
 H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
     char *name, size_t size)
 {
@@ -1202,7 +1202,7 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
     herr_t status;              /* Status from iteration */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_get_refobj_name)
+    FUNC_ENTER_NOAPI(H5G_get_refobj_name, FAIL)
 
     /* Set up user data for iterator */
     udata.file = file;

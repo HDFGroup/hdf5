@@ -72,6 +72,8 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
 H5_DLL hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, const void *ref);
 H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
 H5_DLL H5G_obj_t H5Rget_obj_type(hid_t id, H5R_type_t ref_type, const void *_ref);
+H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref,
+    char *name/*out*/, size_t size);
 
 #ifdef __cplusplus
 }
