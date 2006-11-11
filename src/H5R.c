@@ -808,7 +808,6 @@ H5R_get_name(H5F_t *f, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
 {
     hid_t file_id = (-1);       /* ID for file that the reference is in */
     H5O_loc_t oloc;             /* Object location describing object for reference */
-    const uint8_t *p;           /* Pointer to reference to decode */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_get_name)
@@ -823,15 +822,17 @@ H5R_get_name(H5F_t *f, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
     oloc.file = f;
 
     /* Get address for reference */
-    p = (const uint8_t *)_ref;
     switch(ref_type) {
         case H5R_OBJECT:
-            H5F_addr_decode(oloc.file, &p, &oloc.addr);
+            oloc.addr = *(const hobj_ref_t *)_ref;
             break;
 
         case H5R_DATASET_REGION:
         {
+            const uint8_t *p;           /* Pointer to reference to decode */
+
             /* Skip over the heap ID for the dataset region */
+            p = (const uint8_t *)_ref;
             p += H5F_SIZEOF_ADDR(f);
             p += 4;
 
