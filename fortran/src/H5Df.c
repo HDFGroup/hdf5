@@ -36,7 +36,7 @@ nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hid_t c_loc_id;
      hid_t c_type_id;
      hid_t c_space_id;
@@ -88,7 +88,7 @@ nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     size_t c_namelen;
      hid_t c_loc_id;
      hid_t c_dset_id;
 
@@ -128,9 +128,114 @@ DONE:
  *              Tuesday, May 14, 2002
  * Modifications: This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
+ 
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dwrite_c  function.
+      */
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
 {
      int ret_value = -1;
 
@@ -156,9 +261,15 @@ nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid
  *              Tuesday, May 14, 2002
  * Modifications: This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
+ *
+ *                Added nh5dwrite_integer(real,double)_s,1-7_c functions to eliminate
+ *                complains about wrong parameter types in h5dwrite_c function
+ *                called by Fortran rouitnes
+ *                                           October 10, 2006 EIP
+ * 
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -185,6 +296,230 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
+}
+
+int_f
+nh5dwrite_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+
+int_f
+nh5dwrite_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dwrite_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dwrite_c  function.
+      */
+     return nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
 }
 
 
@@ -339,6 +674,110 @@ nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
      return ret_value;
 }
 
+int_f
+nh5dreadc_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+int_f
+nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+
+     /*
+      * Call h5dread_c  function.
+      */
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
 /*----------------------------------------------------------------------------
  * Name:        h5dread_c
  * Purpose:     Call H5Draed to read a dataset
@@ -353,9 +792,15 @@ nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  *              Wednesday, May 15, 2002
  * Modifications: This function was added to accomodate h5dread_f subroutine
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
+ *
+ *                Added nh5dread_integer(real,double)_s,1-7_c functions to eliminate
+ *                complains about wrong parameter types in h5dwrite_c function
+ *                called by Fortran rouitnes
+ *                                           October 10, 2006 EIP
+ * 
  *---------------------------------------------------------------------------*/
 int_f
-nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -384,6 +829,222 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
      return ret_value;
 }
 
+int_f
+nh5dread_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
+int_f
+nh5dread_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+{
+     /*
+      * Call h5dread_c  function.
+      */
+     return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
+}
+
 /*----------------------------------------------------------------------------
  * Name:        h5dread_ref_obj_c
  * Purpose:     Call H5Dread to read a dataset  of object references
@@ -404,7 +1065,7 @@ int_f
 nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f * buf, hsize_t_f *dims)
 {
     int ret_value = -1;
-    herr_t ret;
+    herr_t ret = -1;
     hid_t c_dset_id;
     hid_t c_mem_type_id;
     hid_t c_mem_space_id;
@@ -463,7 +1124,7 @@ int_f
 nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims)
 {
      int ret_value = -1;
-     herr_t ret;
+     herr_t ret = -1;
      hid_t c_dset_id;
      hid_t c_mem_type_id;
      hid_t c_mem_space_id;
@@ -759,7 +1420,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   hid_t c_file_space_id;
   hid_t c_xfer_prp;
   herr_t status;
-  int *tmp;
+  int_f *tmp;
   size_t max_len;
 
   hvl_t *c_buf;
@@ -777,7 +1438,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
 
   c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t));
   if (c_buf == NULL) return ret_value;
-  tmp = (int *)buf;
+  tmp = (int_f *)buf;
   for (i=0; i < num_elem; i++) {
        c_buf[i].len = (size_t)len[i];
        c_buf[i].p   = tmp;
@@ -849,7 +1510,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
  if ( status < 0 ) goto DONE;
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;
-       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int));
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int_f));
   }
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;
@@ -909,7 +1570,7 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
   if (c_buf == NULL) return ret_value;
 
   /* Copy data to long C string */
-  tmp = (char *)HD5f2cstring(buf, (int)(max_len*num_elem));
+  tmp = (char *)HD5f2cstring(buf, (size_t)(max_len*num_elem));
   if (tmp == NULL) { free(c_buf);
                      return ret_value;
                    }
@@ -1004,7 +1665,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
         len[i] = (size_t_f)strlen(c_buf[i]);
         tmp_p = tmp_p + max_len;
   }
-  HD5packFstring(tmp, _fcdtocp(buf), (int)(max_len*num_elem));
+  HD5packFstring(tmp, _fcdtocp(buf), (size_t)(max_len*num_elem));
   ret_value = 0;
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   free(c_buf);
@@ -1181,6 +1842,78 @@ nh5dfillc_c (_fcd fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, _fcd buf
  *---------------------------------------------------------------------------*/
 int_f
 nh5dfill_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
+
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_fill_type_id;
+     hid_t c_mem_type_id;
+     hid_t c_space_id;
+
+     c_fill_type_id = (hid_t)*fill_type_id;
+     c_mem_type_id = (hid_t)*mem_type_id;
+     c_space_id = (hid_t)*space_id;
+
+     /*
+      * Call H5Dfill function.
+      */
+     ret = H5Dfill(fill_value, c_fill_type_id, buf, c_mem_type_id, c_space_id);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}
+
+int_f
+nh5dfill_integer_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
+
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_fill_type_id;
+     hid_t c_mem_type_id;
+     hid_t c_space_id;
+
+     c_fill_type_id = (hid_t)*fill_type_id;
+     c_mem_type_id = (hid_t)*mem_type_id;
+     c_space_id = (hid_t)*space_id;
+
+     /*
+      * Call H5Dfill function.
+      */
+     ret = H5Dfill(fill_value, c_fill_type_id, buf, c_mem_type_id, c_space_id);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}
+
+int_f
+nh5dfill_real_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
+
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_fill_type_id;
+     hid_t c_mem_type_id;
+     hid_t c_space_id;
+
+     c_fill_type_id = (hid_t)*fill_type_id;
+     c_mem_type_id = (hid_t)*mem_type_id;
+     c_space_id = (hid_t)*space_id;
+
+     /*
+      * Call H5Dfill function.
+      */
+     ret = H5Dfill(fill_value, c_fill_type_id, buf, c_mem_type_id, c_space_id);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}
+
+int_f
+nh5dfill_double_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
 
 {
      int ret_value = -1;

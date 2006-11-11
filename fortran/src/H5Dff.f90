@@ -165,7 +165,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
                                                    ! Dataset creation propertly
                                                    ! list identifier
-            INTEGER :: creation_prp_default
+            INTEGER(HID_T) :: creation_prp_default
             INTEGER :: namelen                     ! Name length
 
 !            INTEGER, EXTERNAL :: h5dcreate_c
@@ -184,7 +184,7 @@
               INTEGER :: namelen
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER :: creation_prp_default
+              INTEGER(HID_T) :: creation_prp_default
               INTEGER(HID_T), INTENT(OUT) :: dset_id
               END FUNCTION h5dcreate_c
             END INTERFACE
@@ -475,17 +475,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_S_C'::h5dwrite_integer_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -494,7 +494,7 @@
               INTEGER(HID_T) :: xfer_prp_default
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_s_c
             END INTERFACE
 
 
@@ -506,7 +506,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_integer_scalar
@@ -536,17 +536,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_1_C'::h5dwrite_integer_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -556,7 +556,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_1_c
             END INTERFACE
 
 
@@ -568,7 +568,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_integer_1
@@ -598,17 +598,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_2_C'::h5dwrite_integer_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -618,7 +618,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_2_c
             END INTERFACE
 
 
@@ -629,8 +629,7 @@
             if (present(xfer_prp)) xfer_prp_default = xfer_prp 
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -661,17 +660,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_3_C'::h5dwrite_integer_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -681,7 +680,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_3_c
             END INTERFACE
 
 
@@ -693,7 +692,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -724,17 +723,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_4_C'::h5dwrite_integer_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -744,7 +743,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_4_c
             END INTERFACE
 
 
@@ -755,7 +754,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -786,17 +785,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_5_C'::h5dwrite_integer_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -806,7 +805,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_5_c
             END INTERFACE
 
 
@@ -819,7 +818,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -850,17 +849,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_6_C'::h5dwrite_integer_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -870,7 +869,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_6_c
             END INTERFACE
 
 
@@ -882,7 +881,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -913,17 +912,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_integer_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_integer_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_INTEGER_7_C'::h5dwrite_integer_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -933,7 +932,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_integer_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -944,7 +943,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_integer_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -975,17 +974,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_S_C'::h5dwritec_s_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -995,7 +994,7 @@
               INTEGER(HID_T) :: xfer_prp_default
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_s_c
             END INTERFACE
 
 
@@ -1007,7 +1006,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_scalar
@@ -1037,17 +1036,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_1_C'::h5dwritec_1_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1058,7 +1057,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_1_c
             END INTERFACE
 
 
@@ -1070,7 +1069,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_1
@@ -1100,17 +1099,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_2_C'::h5dwritec_2_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1121,7 +1120,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_2_c
             END INTERFACE
 
 
@@ -1133,7 +1132,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_2
@@ -1163,17 +1162,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_3_C'::h5dwritec_3_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1184,7 +1183,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_3_c
             END INTERFACE
 
 
@@ -1196,7 +1195,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_3
@@ -1226,17 +1225,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_4_C'::h5dwritec_4_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1247,7 +1246,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_4_c
             END INTERFACE
 
 
@@ -1259,7 +1258,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_4
@@ -1289,17 +1288,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_5_C'::h5dwritec_5_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1310,7 +1309,7 @@
               INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_5_c
             END INTERFACE
 
 
@@ -1322,7 +1321,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_5
@@ -1352,17 +1351,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_6_C'::h5dwritec_6_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1373,7 +1372,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
             DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_6_c
             END INTERFACE
 
 
@@ -1385,7 +1384,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_6
@@ -1415,17 +1414,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwritec_c
+!            INTEGER, EXTERNAL :: h5dwritec_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwritec_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwritec_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_7_C'::h5dwritec_7_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1436,7 +1435,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dwritec_c
+              END FUNCTION h5dwritec_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -1447,7 +1446,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwritec_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwritec_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_char_7
@@ -1475,17 +1474,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_S_C'::h5dwrite_real_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1494,7 +1493,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_s_c
             END INTERFACE
 
 
@@ -1505,7 +1504,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_scalar
@@ -1535,17 +1534,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_1_C'::h5dwrite_real_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1555,7 +1554,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_1_c
             END INTERFACE
 
 
@@ -1567,7 +1566,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_1
@@ -1597,17 +1596,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_2_C'::h5dwrite_real_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1617,7 +1616,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_2_c
             END INTERFACE
 
 
@@ -1629,7 +1628,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_2
@@ -1658,17 +1657,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_3_C'::h5dwrite_real_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1678,7 +1677,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_3_c
             END INTERFACE
 
 
@@ -1690,7 +1689,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_3
@@ -1719,17 +1718,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_4_C'::h5dwrite_real_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1739,7 +1738,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_4_c
             END INTERFACE
 
 
@@ -1751,7 +1750,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_4
@@ -1780,17 +1779,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_5_C'::h5dwrite_real_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1800,7 +1799,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
             DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_5_c
             END INTERFACE
 
 
@@ -1812,7 +1811,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_5
@@ -1841,17 +1840,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_6_C'::h5dwrite_real_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1861,7 +1860,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
             DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_6_c
             END INTERFACE
 
 
@@ -1873,7 +1872,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_6
@@ -1902,17 +1901,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_real_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_real_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REAL_7_C'::h5dwrite_real_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1922,7 +1921,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_real_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -1933,7 +1932,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_real_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_real_7
@@ -1963,17 +1962,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_S_C'::h5dwrite_double_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1982,7 +1981,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_s_c
             END INTERFACE
 
 
@@ -1994,7 +1993,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_scalar
@@ -2024,17 +2023,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_1_C'::h5dwrite_double_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2044,7 +2043,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_1_c
             END INTERFACE
 
 
@@ -2056,7 +2055,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_1
@@ -2086,17 +2085,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_2_C'::h5dwrite_double_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2106,7 +2105,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_2_c
             END INTERFACE
 
 
@@ -2118,7 +2117,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_2
@@ -2148,17 +2147,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_3_C'::h5dwrite_double_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2168,7 +2167,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_3_c
             END INTERFACE
 
 
@@ -2180,7 +2179,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_3
@@ -2210,17 +2209,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_4_C'::h5dwrite_double_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2230,7 +2229,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_4_c
             END INTERFACE
 
 
@@ -2242,7 +2241,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_4
@@ -2272,17 +2271,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_5_C'::h5dwrite_double_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2292,7 +2291,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_5_c
             END INTERFACE
 
 
@@ -2304,7 +2303,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_5
@@ -2335,17 +2334,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_6_C'::h5dwrite_double_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2355,7 +2354,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_6_c
             END INTERFACE
 
 
@@ -2367,7 +2366,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_6
@@ -2398,17 +2397,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dwrite_c
+!            INTEGER, EXTERNAL :: h5dwrite_double_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dwrite_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dwrite_double_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_DOUBLE_7_C'::h5dwrite_double_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2418,7 +2417,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(IN), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dwrite_c
+              END FUNCTION h5dwrite_double_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -2429,7 +2428,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dwrite_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dwrite_double_7
@@ -2642,17 +2641,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_S_C'::h5dread_integer_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2661,7 +2660,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(OUT) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_s_c
             END INTERFACE
 
 
@@ -2673,7 +2672,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_integer_scalar
@@ -2703,17 +2702,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_1_C'::h5dread_integer_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2723,7 +2722,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(OUT), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_1_c
             END INTERFACE
 
 
@@ -2735,7 +2734,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_integer_1
@@ -2765,17 +2764,17 @@
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_2_C'::h5dread_integer_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2785,7 +2784,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(OUT), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_2_c
             END INTERFACE
 
 
@@ -2797,7 +2796,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -2828,17 +2827,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_3_C'::h5dread_integer_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2848,7 +2847,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(OUT), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_3_c
             END INTERFACE
 
 
@@ -2860,7 +2859,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -2891,17 +2890,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_4_C'::h5dread_integer_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2911,7 +2910,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(OUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_4_c
             END INTERFACE
 
 
@@ -2923,7 +2922,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -2954,17 +2953,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_5_C'::h5dread_integer_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2974,7 +2973,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_5_c
             END INTERFACE
 
 
@@ -2986,7 +2985,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -3017,17 +3016,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_6_C'::h5dread_integer_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3037,7 +3036,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_6_c
             END INTERFACE
 
 
@@ -3049,7 +3048,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -3080,17 +3079,17 @@
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_integer_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_integer_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_INTEGER_7_C'::h5dread_integer_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3100,7 +3099,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               INTEGER, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_integer_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -3111,7 +3110,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_integer_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, &
                                 buf, dims)
            
@@ -3141,17 +3140,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_S_C'::h5dreadc_s_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3161,7 +3160,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(OUT) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_s_c
             END INTERFACE
 
 
@@ -3173,7 +3172,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_scalar
@@ -3203,17 +3202,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_1_C'::h5dreadc_1_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3224,7 +3223,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_1_c
             END INTERFACE
 
 
@@ -3236,7 +3235,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_1
@@ -3266,17 +3265,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_2_C'::h5dreadc_2_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3287,7 +3286,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_2_c
             END INTERFACE
 
 
@@ -3299,7 +3298,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_2
@@ -3329,17 +3328,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_3_C'::h5dreadc_3_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3350,7 +3349,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_3_c
             END INTERFACE
 
 
@@ -3362,7 +3361,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_3
@@ -3392,17 +3391,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_4_C'::h5dreadc_4_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3413,7 +3412,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_4_c
             END INTERFACE
 
 
@@ -3425,7 +3424,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_4
@@ -3455,17 +3454,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_5_C'::h5dreadc_5_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3476,7 +3475,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_5_c
             END INTERFACE
 
 
@@ -3488,7 +3487,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_5
@@ -3518,17 +3517,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_6_C'::h5dreadc_6_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3539,7 +3538,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_6_c
             END INTERFACE
 
 
@@ -3551,7 +3550,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_6
@@ -3581,17 +3580,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dreadc_c
+!            INTEGER, EXTERNAL :: h5dreadc_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dreadc_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dreadc_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_7_C'::h5dreadc_7_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -3602,7 +3601,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               CHARACTER(LEN=*), INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dreadc_c
+              END FUNCTION h5dreadc_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -3613,7 +3612,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dreadc_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dreadc_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_char_7
@@ -3641,17 +3640,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_S_C'::h5dread_real_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3660,7 +3659,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(OUT) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_s_c
             END INTERFACE
 
 
@@ -3672,7 +3671,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_scalar
@@ -3701,17 +3700,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_1_C'::h5dread_real_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3721,7 +3720,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_1_c
             END INTERFACE
 
 
@@ -3733,7 +3732,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_1
@@ -3762,17 +3761,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_2_C'::h5dread_real_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3782,7 +3781,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_2_c
             END INTERFACE
 
 
@@ -3794,7 +3793,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_2
@@ -3823,17 +3822,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_3_C'::h5dread_real_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3843,7 +3842,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), & 
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_3_c
             END INTERFACE
 
 
@@ -3855,7 +3854,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_3
@@ -3884,17 +3883,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_4_C'::h5dread_real_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3904,7 +3903,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3), dims(4)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_4_c
             END INTERFACE
 
 
@@ -3916,7 +3915,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_4
@@ -3945,17 +3944,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_5_C'::h5dread_real_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3965,7 +3964,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), & 
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_5_c
             END INTERFACE
 
 
@@ -3977,7 +3976,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_5
@@ -4006,17 +4005,17 @@
             INTEGER(HID_T) :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_6_C'::h5dread_real_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4026,7 +4025,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_6_c
             END INTERFACE
 
 
@@ -4038,7 +4037,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_6
@@ -4068,17 +4067,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_real_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_real_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REAL_7_C'::h5dread_real_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4088,7 +4087,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               REAL, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_real_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -4099,7 +4098,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_real_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_real_7
@@ -4128,17 +4127,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_s_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_s_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_S_C'::h5dread_double_s_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4147,7 +4146,7 @@
               INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(OUT) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_s_c
             END INTERFACE
 
 
@@ -4159,7 +4158,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_scalar
@@ -4189,17 +4188,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_1_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_1_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_1_C'::h5dread_double_1_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4209,7 +4208,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_1_c
             END INTERFACE
 
 
@@ -4221,7 +4220,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_1
@@ -4251,17 +4250,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_2_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_2_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_2_C'::h5dread_double_2_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4271,7 +4270,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), & 
               DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_2_c
             END INTERFACE
 
 
@@ -4283,7 +4282,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_2
@@ -4313,17 +4312,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_3_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_3_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_3_C'::h5dread_double_3_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4333,7 +4332,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_3_c
             END INTERFACE
 
 
@@ -4345,7 +4344,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_3
@@ -4376,17 +4375,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_4_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_4_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_4_C'::h5dread_double_4_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4396,7 +4395,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_4_c
             END INTERFACE
 
 
@@ -4408,7 +4407,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_4
@@ -4438,17 +4437,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_5_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_5_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_5_C'::h5dread_double_5_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4458,7 +4457,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_5_c
             END INTERFACE
 
 
@@ -4470,7 +4469,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_5
@@ -4501,17 +4500,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_6_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_6_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_6_C'::h5dread_double_6_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4521,7 +4520,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_6_c
             END INTERFACE
 
 
@@ -4533,7 +4532,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_6
@@ -4564,17 +4563,17 @@
             INTEGER(HID_T) :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
 
-!            INTEGER, EXTERNAL :: h5dread_c
+!            INTEGER, EXTERNAL :: h5dread_double_7_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dread_c(dset_id, mem_type_id, &
+              INTEGER FUNCTION h5dread_double_7_c(dset_id, mem_type_id, &
                                           mem_space_id_default, & 
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_DOUBLE_7_C'::h5dread_double_7_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -4584,7 +4583,7 @@
             INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
               DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dread_c
+              END FUNCTION h5dread_double_7_c
             END INTERFACE
 
             xfer_prp_default = H5P_DEFAULT_F
@@ -4595,7 +4594,7 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
+            hdferr = h5dread_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_7
@@ -5379,27 +5378,27 @@
             INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
             INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
             
-!            INTEGER, EXTERNAL :: h5dfill_c
+!            INTEGER, EXTERNAL :: h5dfill_integer_c
 ! MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
+              INTEGER FUNCTION h5dfill_integer_c(fill_value, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_INTEGER_C'::h5dfill_integer_c  
               !DEC$ ENDIF
               INTEGER, INTENT(IN) :: fill_value  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
               INTEGER, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
               INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
-              END FUNCTION h5dfill_c
+              END FUNCTION h5dfill_integer_c
             END INTERFACE 
             fill_type_id = H5T_NATIVE_INTEGER
             mem_type_id  = H5T_NATIVE_INTEGER
 
-            hdferr = h5dfill_c(fill_value, fill_type_id, space_id, & 
+            hdferr = h5dfill_integer_c(fill_value, fill_type_id, space_id, & 
                                buf, mem_type_id)
 
           END SUBROUTINE h5dfill_integer
@@ -5443,27 +5442,27 @@
             INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
             INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
             
-!            INTEGER, EXTERNAL :: h5dfill_c
+!            INTEGER, EXTERNAL :: h5dfill_real_c
 ! MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dfill_c(fill_valuer, fill_type_id, space_id, &
+              INTEGER FUNCTION h5dfill_real_c(fill_valuer, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_REAL_C'::h5dfill_real_c  
               !DEC$ ENDIF
               REAL, INTENT(IN) :: fill_valuer  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
               REAL, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
               INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
-              END FUNCTION h5dfill_c
+              END FUNCTION h5dfill_real_c
             END INTERFACE 
             fill_type_id = H5T_NATIVE_REAL
             mem_type_id  = H5T_NATIVE_REAL
 
-            hdferr = h5dfill_c(fill_valuer, fill_type_id, space_id, & 
+            hdferr = h5dfill_real_c(fill_valuer, fill_type_id, space_id, & 
                                buf, mem_type_id)
           END SUBROUTINE h5dfill_real
 
@@ -5506,27 +5505,27 @@
             INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
             INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
             
-!            INTEGER, EXTERNAL :: h5dfill_c
+!            INTEGER, EXTERNAL :: h5dfill_double_c
 ! MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
+              INTEGER FUNCTION h5dfill_double_c(fill_value, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_DOUBLE_C'::h5dfill_double_c  
               !DEC$ ENDIF
               DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
               DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
               INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
-              END FUNCTION h5dfill_c
+              END FUNCTION h5dfill_double_c
             END INTERFACE 
             fill_type_id = H5T_NATIVE_DOUBLE
             mem_type_id  = H5T_NATIVE_DOUBLE
 
-            hdferr = h5dfill_c(fill_value, fill_type_id, space_id, & 
+            hdferr = h5dfill_double_c(fill_value, fill_type_id, space_id, & 
                                buf, mem_type_id)
 
 
