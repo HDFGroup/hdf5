@@ -490,7 +490,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     const char *name;                   /* Pointer to name string in heap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_get_name_by_idx)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_get_name_by_idx_cb)
 
     /* Sanity check */
     HDassert(ent);
@@ -602,7 +602,7 @@ H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     H5G_bt_it_idx2_t	*udata = (H5G_bt_it_idx2_t *)_udata;
     H5O_loc_t tmp_oloc;                 /* Temporary object location */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_stab_get_type_by_idx)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_stab_get_type_by_idx_cb)
 
     /* Sanity check */
     HDassert(ent);
