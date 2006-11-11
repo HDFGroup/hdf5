@@ -1448,20 +1448,17 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
     const H5HL_t        *heap = NULL;
     unsigned		nsyms;                  /* # of symbols in node */
     H5G_entry_t		*ents = NULL;           /* Copy of entries in this node */
-    size_t		n;
-    const char		*name;
-    char		buf[1024], *s;
     unsigned		u;                      /* Local index variable */
     int	                ret_value;
 
-    FUNC_ENTER_NOAPI(H5G_node_iterate, H5B_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_iterate, H5B_ITER_ERROR)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(udata);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(udata);
 
     /*
      * Save information about the symbol table node since we can't lock it
@@ -1478,8 +1475,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
         sn = NULL;
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
     } /* end if */
-
-    sn=NULL;    /* Make certain future references will be caught */
+    sn = NULL;    /* Make certain future references will be caught */
 
     /*
      * Iterate over the symbol table node entries.
@@ -1488,6 +1484,10 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
         if(udata->skip > 0)
             --udata->skip;
         else {
+            size_t		n;      /* Length of link name */
+            const char		*name;  /* Pointer to link name in heap */
+            char		buf[1024], *s;  /* Buffer for link name & pointer to link name */
+
             if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name")
 
@@ -1552,8 +1552,8 @@ done:
     if(ents)
         H5FL_SEQ_FREE(H5G_entry_t, ents);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -1577,27 +1577,27 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
     H5G_node_t		*sn = NULL;
     int                  ret_value = H5B_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_sumup, H5B_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_sumup, H5B_ITER_ERROR)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(num_objs);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(num_objs);
 
     /* Find the object node and add the number of symbol entries. */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node")
 
     *num_objs += sn->nsyms;
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_sumup() */
 
 
 /*-------------------------------------------------------------------------
@@ -1615,125 +1615,50 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
-    H5G_bt_it_ud2_t	*udata = (H5G_bt_it_ud2_t *)_udata;
-    const H5HL_t        *heap = NULL;
-    size_t		name_off;
-    hsize_t             loc_idx;
-    const char		*name;
+    H5G_bt_it_idx_common_t	*udata = (H5G_bt_it_idx_common_t *)_udata;
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_by_idx, H5B_ITER_ERROR);
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(udata);
-
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
-
-    /* Find the node, locate the object symbol table entry and retrieve the name */
-    if(udata->idx >= udata->num_objs && udata->idx < (udata->num_objs + sn->nsyms)) {
-        loc_idx = udata->idx - udata->num_objs;
-        name_off = sn->entry[loc_idx].name_off;
-
-        if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_ITER_ERROR, "unable to protect symbol name");
-
-        name = H5HL_offset_into(f, heap, name_off);
-        assert (name);
-        udata->name = H5MM_strdup (name);
-        assert(udata->name);
-
-        if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
-        heap=NULL; name=NULL;
-
-        ret_value = H5B_ITER_STOP;
-    } else {
-        udata->num_objs += sn->nsyms;
-    }
-
-done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_type
- *
- * Purpose:	This function gets called during a group iterate operation
- *              to return object type by given idx.
- *
- * Return:	0 if object isn't found in this node; 1 if found;
- *              Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
-{
-    H5G_bt_it_ud3_t	*udata = (H5G_bt_it_ud3_t*)_udata;
-    H5G_node_t		*sn = NULL;
-    int                 ret_value = H5B_ITER_CONT;
-
-    FUNC_ENTER_NOAPI(H5G_node_type, H5B_ITER_ERROR)
-
-    /* Check arguments. */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
-    /* Find the node, locate the object symbol table entry and retrieve the type */
+    /* Get a pointer to the symbol table node */
     if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
 
+    /* Find the node, locate the object symbol table entry and retrieve the name */
     if(udata->idx >= udata->num_objs && udata->idx < (udata->num_objs + sn->nsyms)) {
-        H5O_loc_t tmp_oloc;             /* Temporary object location */
-        hsize_t loc_idx;
+        hsize_t ent_idx;                /* Entry index in this node */
 
         /* Compute index of entry */
-        loc_idx = udata->idx - udata->num_objs;
+        ent_idx = udata->idx - udata->num_objs;
 
-        /* Check for a soft link */
-        switch(sn->entry[loc_idx].type) {
-            case H5G_CACHED_SLINK:
-                udata->type = H5G_LINK;
-                break;
+        /* Call 'by index' callback */
+        HDassert(udata->op);
+        if((udata->op)(&sn->entry[ent_idx], udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "'by index' callback failed")
 
-            default:
-                /* Build temporary object location */
-                tmp_oloc.file = f;
-                HDassert(H5F_addr_defined(sn->entry[loc_idx].header));
-                tmp_oloc.addr = sn->entry[loc_idx].header;
-
-                udata->type = H5O_obj_type(&tmp_oloc, dxpl_id);
-                break;
-        }
+        /* Indicate that we found the entry we are interested in */
         ret_value = H5B_ITER_STOP;
-    } else {
+    } /* end if */
+    else
         udata->num_objs += sn->nsyms;
-    } /* end else */
 
 done:
     if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5G_node_type() */
+} /* end H5G_node_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -1876,7 +1801,7 @@ int
 H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
-    H5G_bt_it_ud5_t       *udata = (H5G_bt_it_ud5_t *)_udata;
+    H5G_bt_it_cpy_t       *udata = (H5G_bt_it_cpy_t *)_udata;
     const H5O_loc_t       *src_oloc = udata->src_oloc;
     H5O_copy_t            *cpy_info = udata->cpy_info;
     const H5HL_t          *heap = NULL;

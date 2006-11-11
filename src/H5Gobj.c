@@ -1171,42 +1171,29 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
 
     /* Attempt to get the link info message for this group */
     if(H5O_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
-        /* Check for query on the name */
-        if(idx_type == H5L_INDEX_NAME) {
-            /* Check for dense link storage */
-            if(H5F_addr_defined(linfo.link_fheap_addr)) {
-                /* Get the object's info from the dense link storage */
-                if(H5G_dense_lookup(grp_oloc->file, dxpl_id, &linfo, "", lnk) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
-            } /* end if */
-            else {
-                /* Get the object's info from the link messages */
-                if(H5G_link_lookup(grp_oloc, "", lnk, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
-            } /* end else */
-        } /* end if */
-        else {
+        /* Check for creation order tracking, if creation order index lookup requested */
+        if(idx_type == H5L_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
-            /* Get group info message, to see if creation order is stored for links in this group */
+            /* Get group info message, to see if creation order is tracked for links in this group */
             if(NULL == H5O_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
             /* Check if creation order is tracked */
             if(!ginfo.track_corder)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
+        } /* end if */
 
-            /* Check for dense link storage */
-            if(H5F_addr_defined(linfo.link_fheap_addr)) {
-                /* Get the link from the dense storage */
-                if(H5G_dense_lookup_by_idx(grp_oloc->file, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
-            } /* end if */
-            else {
-                /* Get the link from the link messages */
-                if(H5G_link_lookup_by_corder(grp_oloc, dxpl_id, &linfo, order, n, lnk) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
-            } /* end else */
+        /* Check for dense link storage */
+        if(H5F_addr_defined(linfo.link_fheap_addr)) {
+            /* Get the link from the dense storage */
+            if(H5G_dense_lookup_by_idx(grp_oloc->file, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+        } /* end if */
+        else {
+            /* Get the link from the link messages */
+            if(H5G_link_lookup_by_idx(grp_oloc, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     } /* end if */
     else {
@@ -1216,13 +1203,9 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5L_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
-if(order == H5_ITER_DEC) {
-    HDfprintf(stderr, "%s: decreasing order query on symbol table not implemented yet!\n", FUNC);
-    HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "decreasing order query on symbol table not implemented yet")
-} /* end if */
 
         /* Get the object's info from the symbol table */
-        if(H5G_stab_lookup(grp_oloc, "", lnk, dxpl_id) < 0)
+        if(H5G_stab_lookup_by_idx(grp_oloc, order, n, lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
     } /* end else */
 

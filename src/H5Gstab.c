@@ -443,7 +443,7 @@ herr_t
 H5G_stab_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
 {
     H5O_stab_t		stab;		        /* Info about symbol table */
-    herr_t		ret_value;
+    herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5G_stab_count, FAIL)
 
@@ -459,12 +459,61 @@ H5G_stab_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Iterate over the group members */
-    if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, num_objs)) < 0)
-        HERROR(H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, num_objs) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_get_name_by_idx_cb
+ *
+ * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ *              retrieve the name of a link
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
+{
+    H5G_bt_it_idx1_t	*udata = (H5G_bt_it_idx1_t *)_udata;
+    const H5HL_t *heap = NULL;          /* Pointer to local heap for group */
+    size_t name_off;                    /* Offset of name in heap */
+    const char *name;                   /* Pointer to name string in heap */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_get_name_by_idx)
+
+    /* Sanity check */
+    HDassert(ent);
+    HDassert(udata);
+
+    /* Get name offset in heap */
+    name_off = ent->name_off;
+
+    /* Pin the heap down in memory */
+    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
+
+    name = H5HL_offset_into(udata->common.f, heap, name_off);
+    HDassert(name);
+    udata->name = H5MM_strdup(name);
+    HDassert(udata->name);
+
+done:
+    if(heap && H5HL_unprotect(udata->common.f, udata->common.dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_get_name_by_idx_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -485,7 +534,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
     size_t size, hid_t dxpl_id)
 {
     H5O_stab_t		stab;	        /* Info about local heap & B-tree */
-    H5G_bt_it_ud2_t	udata;          /* Iteration information */
+    H5G_bt_it_idx1_t	udata;          /* Iteration information */
     ssize_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
@@ -498,17 +547,20 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Set iteration information */
-    udata.idx = idx;
-    udata.num_objs = 0;
+    udata.common.f = oloc->file;
+    udata.common.dxpl_id = dxpl_id;
+    udata.common.idx = idx;
+    udata.common.num_objs = 0;
+    udata.common.op = H5G_stab_get_name_by_idx_cb;
     udata.heap_addr = stab.heap_addr;
     udata.name = NULL;
 
     /* Iterate over the group members */
-    if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_name, stab.btree_addr, &udata)) < 0)
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
 
     /* If we don't know the name now, we almost certainly went out of bounds */
-    if(udata.name==NULL)
+    if(udata.name == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
 
     /* Get the length of the name */
@@ -516,17 +568,64 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
 
     /* Copy the name into the user's buffer, if given */
     if(name) {
-        HDstrncpy(name, udata.name, MIN((size_t)(ret_value+1),size));
+        HDstrncpy(name, udata.name, MIN((size_t)(ret_value + 1),size));
         if((size_t)ret_value >= size)
-            name[size-1]='\0';
+            name[size - 1]='\0';
     } /* end if */
 
 done:
     /* Free the duplicated name */
-    if(udata.name!=NULL)
+    if(udata.name != NULL)
         H5MM_xfree(udata.name);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_get_name_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_get_type_by_idx_cb
+ *
+ * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ *              retrieve the type of an object
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov  7, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
+{
+    H5G_bt_it_idx2_t	*udata = (H5G_bt_it_idx2_t *)_udata;
+    H5O_loc_t tmp_oloc;                 /* Temporary object location */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_stab_get_type_by_idx)
+
+    /* Sanity check */
+    HDassert(ent);
+    HDassert(udata);
+
+    /* Check for a soft link */
+    switch(ent->type) {
+        case H5G_CACHED_SLINK:
+            udata->type = H5G_LINK;
+            break;
+
+        default:
+            /* Build temporary object location */
+            tmp_oloc.file = udata->common.f;
+            HDassert(H5F_addr_defined(ent->header));
+            tmp_oloc.addr = ent->header;
+
+            udata->type = H5O_obj_type(&tmp_oloc, udata->common.dxpl_id);
+            break;
+    } /* end switch */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_stab_get_type_by_idx_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -548,7 +647,7 @@ H5G_obj_t
 H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_stab_t		stab;	        /* Info about local heap & B-tree */
-    H5G_bt_it_ud3_t	udata;          /* User data for B-tree callback */
+    H5G_bt_it_idx2_t	udata;          /* User data for B-tree callback */
     H5G_obj_t		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_get_type_by_idx, H5G_UNKNOWN)
@@ -561,12 +660,15 @@ H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "unable to determine local heap address")
 
     /* Set iteration information */
-    udata.idx = idx;
-    udata.num_objs = 0;
+    udata.common.f = oloc->file;
+    udata.common.dxpl_id = dxpl_id;
+    udata.common.idx = idx;
+    udata.common.num_objs = 0;
+    udata.common.op = H5G_stab_get_type_by_idx_cb;
     udata.type = H5G_UNKNOWN;
 
     /* Iterate over the group members */
-    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_type, stab.btree_addr, &udata) < 0)
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed")
 
     /* If we don't know the type now, we almost certainly went out of bounds */
@@ -669,4 +771,144 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_lookup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_lookup_by_idx_cb
+ *
+ * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ *              retrieve the link
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov  9, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
+{
+    H5G_bt_it_idx3_t *udata = (H5G_bt_it_idx3_t *)_udata;
+    const H5HL_t *heap;                 /* Pointer to local heap for group */
+    size_t name_off;                    /* Offset of name in heap */
+    const char *name;                   /* Pointer to name string in heap */
+    size_t name_len;                    /* Length of link name */
+    char buf[1024];                     /* Buffer for name */
+    char *s = NULL;                     /* Pointer to copy of name string */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_lookup_by_idx_cb)
+
+    /* Sanity check */
+    HDassert(ent);
+    HDassert(udata);
+
+    /* Get name offset in heap */
+    name_off = ent->name_off;
+
+    /* Pin the heap down in memory */
+    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
+
+    /* Duplicate the link name */
+    name = H5HL_offset_into(udata->common.f, heap, name_off);
+    HDassert(name);
+    name_len = HDstrlen(name);
+
+    /* Allocate space or point to existing buffer */
+    if((name_len + 1) > sizeof(buf)) {
+        if(NULL == (s = H5MM_malloc(name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    } /* end if */
+    else
+        s = buf;
+
+    /* Make a copy of the name */
+    HDstrcpy(s, name);
+
+    /* Unlock the heap */
+    if(H5HL_unprotect(udata->common.f, udata->common.dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name")
+    heap = NULL; name = NULL;
+
+    /* Convert the entry to a link */
+    if(H5G_link_convert(udata->common.f, udata->common.dxpl_id, udata->lnk, udata->heap_addr, ent, s) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "unable to convert symbol table entry to link")
+    udata->found = TRUE;
+
+done:
+    /* Free the memory for the name, if we used a dynamically allocated buffer */
+    if(s && s != buf)
+        H5MM_xfree(s);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_lookup_by_idx_cb */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_lookup_by_idx
+ *
+ * Purpose:	Look up an object in a group, according to the name index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
+    H5O_link_t *lnk, hid_t dxpl_id)
+{
+    H5G_bt_it_idx3_t udata;             /* Iteration information */
+    H5O_stab_t stab;		        /* Symbol table message */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_stab_lookup_by_idx, FAIL)
+
+    /* check arguments */
+    HDassert(grp_oloc && grp_oloc->file);
+    HDassert(lnk);
+
+    /* Get the B-tree & local heap info */
+    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+
+    /* Remap index for decreasing iteration order */
+    if(order == H5_ITER_DEC) {
+        hsize_t nlinks = 0;           /* Number of links in group */
+
+        /* Iterate over the symbol table nodes, to count the links */
+        if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, &nlinks) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed");
+
+        /* Map decreasing iteration order index to increasing iteration order index */
+        n = nlinks - (n + 1);
+    } /* end if */
+
+    /* Set iteration information */
+    udata.common.f = grp_oloc->file;
+    udata.common.dxpl_id = dxpl_id;
+    udata.common.idx = n;
+    udata.common.num_objs = 0;
+    udata.common.op = H5G_stab_lookup_by_idx_cb;
+    udata.heap_addr = stab.heap_addr;
+    udata.lnk = lnk;
+    udata.found = FALSE;
+
+    /* Iterate over the group members */
+    if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
+
+    /* If we didn't find the link, we almost certainly went out of bounds */
+    if(!udata.found)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_lookup_by_idx() */
 

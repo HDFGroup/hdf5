@@ -651,7 +651,6 @@ herr_t
 H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
-    H5HF_t *fheap = NULL;               /* Fractal heap handle */
     const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
     haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -664,10 +663,6 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(f);
     HDassert(linfo);
     HDassert(lnk);
-
-    /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Determine the address of the index to use */
     if(idx_type == H5L_INDEX_NAME) {
@@ -687,7 +682,8 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         HDassert(idx_type == H5L_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
-         *      there's no index on it...
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
          */
         bt2_addr = linfo->corder_bt2_addr;
         bt2_class = H5G_BT2_CORDER;
@@ -695,7 +691,12 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* If there is an index defined for the field, use it */
     if(H5F_addr_defined(bt2_addr)) {
-        H5G_bt2_lbi_ud1_t udata;          /* User data for v2 B-tree link lookup */
+        H5HF_t *fheap;                  /* Fractal heap handle */
+        H5G_bt2_lbi_ud1_t udata;        /* User data for v2 B-tree link lookup */
+
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Construct the user data for v2 B-tree callback */
         udata.f = f;
@@ -706,18 +707,28 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         /* Find & copy the link in the appropriate index */
         if(H5B2_index(f, dxpl_id, bt2_class, bt2_addr, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in index")
+
+        /* Close heap */
+        if(H5HF_close(fheap, dxpl_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     } /* end if */
     else {      /* Otherwise, we need to build a table of the links and sort it */
-HDfprintf(stderr, "%s: building a table for dense storage not implemented yet!\n", FUNC);
-HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "building a table for dense storage not implemented yet")
+        H5G_link_table_t ltable;        /* Table of links */
+
+        /* Build the table of links for this group */
+        if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
+
+        /* Copy link information */
+        if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
+
+        /* Free link table information */
+        if(H5G_obj_release_table(&ltable) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
 done:
-    /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_lookup_by_idx() */
 
@@ -826,6 +837,7 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
                 HDassert(order == H5_ITER_NATIVE);
         } /* end if */
         else {
+            HDassert(idx_type == H5L_INDEX_CRT_ORDER);
             if(order == H5_ITER_INC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
             else if(order == H5_ITER_DEC)
@@ -1004,7 +1016,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
 
         /* Build the table of links for this group */
         if(H5G_dense_build_table(f, dxpl_id, linfo, H5L_INDEX_NAME, order, &ltable) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building iteration table of links")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
 
         /* Iterate over link messages */
         for(u = 0, ret_value = H5B_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {

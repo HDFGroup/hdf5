@@ -521,7 +521,7 @@ H5G_dense_btree2_corder_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_dense_btree2_corder_encode)
 
     /* Encode the record's fields */
-    UINT64ENCODE(raw, nrecord->corder)
+    INT64ENCODE(raw, nrecord->corder)
     HDmemcpy(raw, nrecord->id, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -549,7 +549,7 @@ H5G_dense_btree2_corder_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_dense_btree2_corder_decode)
 
     /* Decode the record's fields */
-    UINT64DECODE(raw, nrecord->corder)
+    INT64DECODE(raw, nrecord->corder)
     HDmemcpy(nrecord->id, raw, (size_t)H5G_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

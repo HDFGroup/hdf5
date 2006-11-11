@@ -188,6 +188,7 @@ H5G_link_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
                 HDassert(order == H5_ITER_NATIVE);
         } /* end if */
         else {
+            HDassert(idx_type == H5L_INDEX_CRT_ORDER);
             if(order == H5_ITER_INC)
                 HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
             else if(order == H5_ITER_DEC)
@@ -237,38 +238,33 @@ H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     lnk->name = H5MM_xstrdup(name);
 
     /* Object is a symbolic or hard link */
-    switch(ent->type) {
-        case H5G_CACHED_SLINK:
-        {
-            const char *s;          /* Pointer to link value */
-            const H5HL_t *heap;     /* Pointer to local heap for group */
+    if(ent->type == H5G_CACHED_SLINK) {
+        const char *s;          /* Pointer to link value */
+        const H5HL_t *heap;     /* Pointer to local heap for group */
 
-            /* Lock the local heap */
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
+        /* Lock the local heap */
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
 
-            s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
 
-            /* Copy the link value */
-            lnk->u.soft.name = H5MM_xstrdup(s);
+        /* Copy the link value */
+        lnk->u.soft.name = H5MM_xstrdup(s);
 
-            /* Release the local heap */
-            if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
+        /* Release the local heap */
+        if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
-            /* Set link type */
-            lnk->type = H5L_TYPE_SOFT;
-        }
-        break;
+        /* Set link type */
+        lnk->type = H5L_TYPE_SOFT;
+    } /* end if */
+    else {
+        /* Set address of object */
+        lnk->u.hard.addr = ent->header;
 
-        default:
-            /* Set address of object */
-            lnk->u.hard.addr = ent->header;
-
-            /* Set link type */
-            lnk->type = H5L_TYPE_HARD;
-            break;
-    } /* end switch */
+        /* Set link type */
+        lnk->type = H5L_TYPE_HARD;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -802,10 +798,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_lookup_by_corder
+ * Function:	H5G_link_lookup_by_idx
  *
- * Purpose:	Look up an object in a group using link messages, according
- *              the link's creation order.
+ * Purpose:	Look up an object in a group using link messages,
+ *              according to the order of an index
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -816,13 +812,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
+H5G_link_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_lookup_by_corder, FAIL)
+    FUNC_ENTER_NOAPI(H5G_link_lookup_by_idx, FAIL)
 
     /* check arguments */
     HDassert(oloc && oloc->file);
@@ -830,7 +826,7 @@ H5G_link_lookup_by_corder(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
     HDassert(lnk);
 
     /* Build table of all link messages, sorted according to desired order */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_CRT_ORDER, order, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Check for going out of bounds */
@@ -850,5 +846,5 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_lookup_by_corder() */
+} /* end H5G_link_lookup_by_idx() */
 

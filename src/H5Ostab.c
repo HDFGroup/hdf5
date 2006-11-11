@@ -365,7 +365,7 @@ H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc
 {
     const H5O_stab_t    *stab_src = (const H5O_stab_t *)mesg_src;
     H5O_stab_t          *stab_dst = (H5O_stab_t *)mesg_dst;
-    H5G_bt_it_ud5_t     udata;      /* B-tree user data */
+    H5G_bt_it_cpy_t     udata;      /* B-tree user data */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_stab_post_copy_file)
