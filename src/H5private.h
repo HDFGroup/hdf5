@@ -1441,4 +1441,6 @@ H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t init
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
     uint8_t *marker, size_t buf_offset, size_t buf_size);
-#endif
+
+#endif /* _H5private_H */
+

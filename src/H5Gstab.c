@@ -530,8 +530,8 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
-    size_t size, hid_t dxpl_id)
+H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
+    char* name, size_t size, hid_t dxpl_id)
 {
     H5O_stab_t		stab;	        /* Info about local heap & B-tree */
     H5G_bt_it_idx1_t	udata;          /* Iteration information */
@@ -546,10 +546,22 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
     if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
+    /* Remap index for decreasing iteration order */
+    if(order == H5_ITER_DEC) {
+        hsize_t nlinks = 0;           /* Number of links in group */
+
+        /* Iterate over the symbol table nodes, to count the links */
+        if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, &nlinks) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
+
+        /* Map decreasing iteration order index to increasing iteration order index */
+        n = nlinks - (n + 1);
+    } /* end if */
+
     /* Set iteration information */
     udata.common.f = oloc->file;
     udata.common.dxpl_id = dxpl_id;
-    udata.common.idx = idx;
+    udata.common.idx = n;
     udata.common.num_objs = 0;
     udata.common.op = H5G_stab_get_name_by_idx_cb;
     udata.heap_addr = stab.heap_addr;
@@ -568,7 +580,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name,
 
     /* Copy the name into the user's buffer, if given */
     if(name) {
-        HDstrncpy(name, udata.name, MIN((size_t)(ret_value + 1),size));
+        HDstrncpy(name, udata.name, MIN((size_t)(ret_value + 1), size));
         if((size_t)ret_value >= size)
             name[size - 1]='\0';
     } /* end if */
@@ -884,7 +896,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
 
         /* Iterate over the symbol table nodes, to count the links */
         if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, &nlinks) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
         /* Map decreasing iteration order index to increasing iteration order index */
         n = nlinks - (n + 1);

@@ -864,8 +864,8 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size,
-    hid_t dxpl_id)
+H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, char* name, size_t size, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
     ssize_t ret_value;          /* Return value */
@@ -873,18 +873,32 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size,
     FUNC_ENTER_NOAPI(H5G_obj_get_name_by_idx, FAIL)
 
     /* Sanity check */
-    HDassert(oloc);
+    HDassert(oloc && oloc->file);
 
     /* Attempt to get the link info for this group */
     if(H5O_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+        /* Check for creation order tracking, if creation order index lookup requested */
+        if(idx_type == H5L_INDEX_CRT_ORDER) {
+            H5O_ginfo_t ginfo;		        /* Group info message */
+
+            /* Get group info message, to see if creation order is tracked for links in this group */
+            if(NULL == H5O_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
+
+            /* Check if creation order is tracked */
+            if(!ginfo.track_corder)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
+        } /* end if */
+
+        /* Check for dense link storage */
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Get the object's name from the dense link storage */
-            if((ret_value = H5G_dense_get_name_by_idx(oloc->file, dxpl_id, &linfo, idx, name, size)) < 0)
+            if((ret_value = H5G_dense_get_name_by_idx(oloc->file, dxpl_id, &linfo, idx_type, order, n, name, size)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if((ret_value = H5G_link_get_name_by_idx(oloc, dxpl_id, &linfo, idx, name, size)) < 0)
+            if((ret_value = H5G_link_get_name_by_idx(oloc, dxpl_id, &linfo, idx_type, order, n, name, size)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end else */
     } /* end if */
@@ -892,8 +906,12 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, hsize_t idx, char* name, size_t size,
         /* Clear error stack from not finding the link info message */
         H5E_clear_stack(NULL);
 
+        /* Can only perform name lookups on groups with symbol tables */
+        if(idx_type != H5L_INDEX_NAME)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
+
         /* Get the object's name from the symbol table */
-        if((ret_value = H5G_stab_get_name_by_idx(oloc, idx, name, size, dxpl_id)) < 0)
+        if((ret_value = H5G_stab_get_name_by_idx(oloc, order, n, name, size, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
     } /* end else */
 
@@ -1146,7 +1164,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_obj_lookup_by_idx
  *
- * Purpose:	Look up a link in a group, according to an order within an
+ * Purpose:	Look up link info in a group, according to an order within an
  *              index.
  *
  * Return:	Non-negative on success/Negative on failure

@@ -159,6 +159,9 @@ H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
 H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
+H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    char *name /*out*/, size_t size, hid_t lapl_id);
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,

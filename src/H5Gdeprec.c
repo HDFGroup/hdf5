@@ -30,12 +30,18 @@
 /* Module Setup */
 /****************/
 
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5G_init_deprec_interface
+
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Lprivate.h"         /* Links                                */
 
 
@@ -62,6 +68,10 @@ static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name);
 static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
     hid_t dst_loc_id, const char *dst_name);
+static herr_t H5G_set_comment(H5G_loc_t *loc, const char *name,
+    const char *buf, hid_t dxpl_id);
+static int H5G_get_comment(H5G_loc_t *loc, const char *name,
+    size_t bufsize, char *buf, hid_t dxpl_id);
 
 
 /*********************/
@@ -78,6 +88,27 @@ static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
 /* Local Variables */
 /*******************/
 
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5G_init_deprec_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5G_init_deprec_interface()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5G_init() currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5G_init_deprec_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_init_deprec_interface)
+
+    FUNC_LEAVE_NOAPI(H5G_init())
+} /* H5G_init_deprec_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -339,7 +370,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Gunlink
  *
- * Purpose:	Removes a link.  The new API is H5Ldelete.
+ * Purpose:	Removes a link.  The new API is H5Ldelete/H5Ldelete_by_idx.
  *
  *-------------------------------------------------------------------------
  */
@@ -371,7 +402,7 @@ done:
  * Function:	H5Gget_linkval
  *
  * Purpose:	Retrieve's a soft link's data.  The new API is
- *              H5Lget_val.
+ *              H5Lget_val/H5Lget_val_by_idx.
  *
  *-------------------------------------------------------------------------
  */
@@ -397,4 +428,250 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_linkval() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_objname_by_idx
+ *
+ * Purpose:     Returns the name of objects in the group by giving index.
+ *              If `name' is non-NULL then write up to `size' bytes into that
+ *              buffer and always return the length of the entry name.
+ *              Otherwise `size' is ignored and the function does not store the name,
+ *              just returning the number of characters required to store the name.
+ *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
+ *              is unchanged and the function returns a negative value.
+ *              If a zero is returned for the name's length, then there is no name
+ *              associated with the ID.
+ *
+ * Note:	Deprecated in favor of H5Lget_name_by_idx
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
+{
+    H5G_loc_t		loc;            /* Object location */
+    ssize_t		ret_value;
+
+    FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL)
+    H5TRACE4("Zs","ihsz",loc_id,idx,name,size);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
+    if(H5O_obj_type(loc.oloc, H5AC_ind_dxpl_id) != H5G_GROUP)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Call internal function */
+    if((ret_value = H5G_obj_get_name_by_idx(loc.oloc, H5L_INDEX_NAME, H5_ITER_INC, idx, name, size, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object name")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_objname_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gset_comment
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Note:	Deprecated in favor of using attributes on group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
+{
+    H5G_loc_t	loc;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Gset_comment, FAIL)
+    H5TRACE3("e","iss",loc_id,name,comment);
+
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+
+    if(H5G_set_comment(&loc, name, comment, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gset_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_comment
+ *
+ * Purpose:	Return at most BUFSIZE characters of the comment for the
+ *		specified object.  If BUFSIZE is large enough to hold the
+ *		entire comment then the comment string will be null
+ *		terminated, otherwise it will not.  If the object does not
+ *		have a comment value then no bytes are copied to the BUF
+ *		buffer.
+ *
+ * Note:	Deprecated in favor of using attributes on group
+ *
+ * Return:	Success:	Number of characters in the comment counting
+ *				the null terminator.  The value returned may
+ *				be larger than the BUFSIZE argument.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
+{
+    H5G_loc_t	loc;
+    int	ret_value;
+
+    FUNC_ENTER_API(H5Gget_comment, FAIL)
+    H5TRACE4("Is","iszs",loc_id,name,bufsize,buf);
+
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(bufsize > 0 && !buf)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
+
+    if((ret_value = H5G_get_comment(&loc, name, bufsize, buf, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_set_comment
+ *
+ * Purpose:	(Re)sets the comment for an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id)
+{
+    H5G_loc_t   obj_loc;                  /* Object's location */
+    H5G_name_t	path;
+    H5O_loc_t	oloc;
+    hbool_t     loc_valid = FALSE;
+    H5O_name_t	comment;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_set_comment)
+
+    /* Get the symbol table entry for the object */
+    obj_loc.path = &path;
+    obj_loc.oloc = &oloc;
+    H5G_loc_reset(&obj_loc);
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    loc_valid = TRUE;
+
+    /* Remove the previous comment message if any */
+    if(H5O_remove(obj_loc.oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
+        H5E_clear_stack(NULL);
+
+    /* Add the new message */
+    if(buf && *buf) {
+        /* Casting away const OK -QAK */
+	comment.s = (char *)buf;
+	if(H5O_modify(obj_loc.oloc, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message")
+    } /* end if */
+
+done:
+    /* Release obj_loc */
+    if(loc_valid)
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_set_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_comment
+ *
+ * Purpose:	Get the comment value for an object.
+ *
+ * Return:	Success:	Number of bytes in the comment including the
+ *				null terminator.  Zero if the object has no
+ *				comment.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid_t dxpl_id)
+{
+    H5O_name_t	comment;
+    H5G_loc_t	obj_loc;               /* Object's location */
+    H5G_name_t	path;
+    H5O_loc_t	oloc;
+    hbool_t     loc_valid = FALSE;
+    int	ret_value;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_comment)
+
+    /* Get the symbol table entry for the object */
+    obj_loc.path = &path;
+    obj_loc.oloc = &oloc;
+    H5G_loc_reset(&obj_loc);
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    loc_valid = TRUE;
+
+    /* Get the message */
+    comment.s = NULL;
+    if(NULL == H5O_read(obj_loc.oloc, H5O_NAME_ID, 0, &comment, dxpl_id)) {
+	if(buf && bufsize > 0)
+            buf[0] = '\0';
+	ret_value = 0;
+    } else {
+        if(buf && bufsize)
+	   HDstrncpy(buf, comment.s, bufsize);
+	ret_value = (int)HDstrlen(comment.s);
+	H5O_reset(H5O_NAME_ID, &comment);
+    } /* end else */
+
+done:
+    /* Release obj_loc */
+    if(loc_valid)
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_get_comment() */
 

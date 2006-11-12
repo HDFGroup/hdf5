@@ -181,33 +181,6 @@ typedef struct {
 
 /*
  * Data exchange structure to pass through the v2 B-tree layer for the
- * H5B2_index function when retrieving the type of a link by index.
- */
-typedef struct {
-    /* downward (internal) */
-    H5F_t       *f;                     /* Pointer to file that fractal heap is in */
-    hid_t       dxpl_id;                /* DXPL for operation                */
-    H5HF_t      *fheap;                 /* Fractal heap handle               */
-
-    /* upward */
-    H5G_obj_t   type;                   /* Type of object                    */
-} H5G_bt2_gtbi_ud1_t;
-
-/*
- * Data exchange structure to pass through the fractal heap layer for the
- * H5HF_op function when retrieving the type of a link by index.
- */
-typedef struct {
-    /* downward (internal) */
-    H5F_t       *f;                     /* Pointer to file that fractal heap is in */
-    hid_t       dxpl_id;                /* DXPL for operation                */
-
-    /* upward */
-    H5G_obj_t   type;                   /* Type of object                    */
-} H5G_fh_gtbi_ud1_t;
-
-/*
- * Data exchange structure to pass through the v2 B-tree layer for the
  * H5B2_index function when retrieving a link by index.
  */
 typedef struct {
@@ -232,6 +205,7 @@ typedef struct {
     /* upward */
     H5O_link_t  *lnk;                   /* Pointer to link                   */
 } H5G_fh_lbi_ud1_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -705,12 +679,14 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         udata.lnk = lnk;
 
         /* Find & copy the link in the appropriate index */
-        if(H5B2_index(f, dxpl_id, bt2_class, bt2_addr, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_index(f, dxpl_id, bt2_class, bt2_addr, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0) {
+            H5HF_close(fheap, dxpl_id);
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in index")
+        } /* end if */
 
         /* Close heap */
         if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     } /* end if */
     else {      /* Otherwise, we need to build a table of the links and sort it */
         H5G_link_table_t ltable;        /* Table of links */
@@ -719,13 +695,17 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
 
+        /* Check for going out of bounds */
+        if(n >= ltable.nlinks)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
+
         /* Copy link information */
         if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
 
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
 done:
@@ -1042,7 +1022,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
 
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
 done:
@@ -1158,11 +1138,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_dense_get_name_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
-    hsize_t idx, char* name, size_t size)
+H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name,
+    size_t size)
 {
-    H5HF_t *fheap = NULL;       /* Fractal heap handle */
-    H5G_bt2_gnbi_ud1_t udata;   /* User data for v2 B-tree callback */
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_dense_get_name_by_idx, FAIL)
@@ -1173,130 +1154,89 @@ H5G_dense_get_name_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     HDassert(f);
     HDassert(linfo);
 
-    /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+    /* Determine the address of the index to use */
+    if(idx_type == H5L_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            bt2_addr = linfo->name_bt2_addr;
+            bt2_class = H5G_BT2_NAME;
+            HDassert(H5F_addr_defined(bt2_addr));
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
+    } /* end if */
+    else {
+        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
 
-    /* Set up the user data for the v2 B-tree 'record remove' callback */
-    udata.f = f;
-    udata.dxpl_id = dxpl_id;
-    udata.fheap = fheap;
-    udata.name = name;
-    udata.name_size = size;
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
+         */
+        bt2_addr = linfo->corder_bt2_addr;
+        bt2_class = H5G_BT2_CORDER;
+    } /* end else */
 
-    /* Retrieve the name according to the v2 B-tree's index order */
-/* (XXX: using name index currently) */
-    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5_ITER_INC, idx,
-            H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
+    /* If there is an index defined for the field, use it */
+    if(H5F_addr_defined(bt2_addr)) {
+        H5HF_t *fheap;                  /* Fractal heap handle */
+        H5G_bt2_gnbi_ud1_t udata;       /* User data for v2 B-tree callback */
 
-    /* Set return value */
-    ret_value = udata.name_len;
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+        /* Set up the user data for the v2 B-tree 'record remove' callback */
+        udata.f = f;
+        udata.dxpl_id = dxpl_id;
+        udata.fheap = fheap;
+        udata.name = name;
+        udata.name_size = size;
+
+        /* Retrieve the name according to the v2 B-tree's index order */
+        if(H5B2_index(f, dxpl_id, bt2_class, bt2_addr, order, n, H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0) {
+            H5HF_close(fheap, dxpl_id);
+            HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
+        } /* end if */
+
+        /* Close heap */
+        if(H5HF_close(fheap, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+        /* Set return value */
+        ret_value = udata.name_len;
+    } /* end if */
+    else {      /* Otherwise, we need to build a table of the links and sort it */
+        H5G_link_table_t ltable;        /* Table of links */
+
+        /* Build the table of links for this group */
+        if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
+
+        /* Check for going out of bounds */
+        if(n >= ltable.nlinks)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
+
+        /* Get the length of the name */
+        ret_value = (ssize_t)HDstrlen(ltable.lnks[n].name);
+
+        /* Copy the name into the user's buffer, if given */
+        if(name) {
+            HDstrncpy(name, ltable.lnks[n].name, MIN((size_t)(ret_value + 1), size));
+            if((size_t)ret_value >= size)
+                name[size - 1]='\0';
+        } /* end if */
+
+        /* Free link table information */
+        if(H5G_obj_release_table(&ltable) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    } /* end else */
 
 done:
-    /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_get_name_by_idx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_dense_get_type_by_idx_fh_cb
- *
- * Purpose:	Callback for fractal heap operator, to retrieve type according
- *              to an index
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 19 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_dense_get_type_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
-{
-    H5G_fh_gtbi_ud1_t *udata = (H5G_fh_gtbi_ud1_t *)_udata;       /* User data for fractal heap 'op' callback */
-    H5O_link_t *lnk;            /* Pointer to link created from heap object */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_get_type_by_idx_fh_cb)
-
-    /* Decode link information */
-    if(NULL == (lnk = H5O_decode(udata->f, udata->dxpl_id, obj, H5O_LINK_ID)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
-
-    /* Get the type of the link */
-    /* Determine type of object */
-    if(lnk->type == H5L_TYPE_SOFT)
-        udata->type = H5G_LINK;
-    else if(lnk->type >= H5L_TYPE_UD_MIN)
-        udata->type = H5G_UDLINK;
-    else if(lnk->type == H5L_TYPE_HARD) {
-        H5O_loc_t tmp_oloc;             /* Temporary object location */
-
-        /* Build temporary object location */
-        tmp_oloc.file = udata->f;
-        tmp_oloc.addr = lnk->u.hard.addr;
-
-        /* Get the type of the object */
-        if((udata->type = H5O_obj_type(&tmp_oloc, udata->dxpl_id)) == H5G_UNKNOWN)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine object type")
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown link type")
-
-    /* Release the space allocated for the link */
-    H5O_free(H5O_LINK_ID, lnk);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_dense_get_type_by_idx_fh_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_dense_get_type_by_idx_bt2_cb
- *
- * Purpose:	v2 B-tree callback for dense link storage 'get type by idx' call
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 19 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_dense_get_type_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
-{
-    const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
-    H5G_bt2_gtbi_ud1_t *bt2_udata = (H5G_bt2_gtbi_ud1_t *)_bt2_udata;         /* User data for callback */
-    H5G_fh_gtbi_ud1_t fh_udata;         /* User data for fractal heap 'op' callback */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_get_type_by_idx_bt2_cb)
-
-    /* Prepare user data for callback */
-    /* down */
-    fh_udata.f = bt2_udata->f;
-    fh_udata.dxpl_id = bt2_udata->dxpl_id;
-
-    /* Call fractal heap 'op' routine, to perform user callback */
-    if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, record->id,
-            H5G_dense_get_type_by_idx_fh_cb, &fh_udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, FAIL, "link found callback failed")
-
-    /* Set the link's type to return */
-    bt2_udata->type = fh_udata.type;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_dense_get_type_by_idx_bt2_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1304,7 +1244,13 @@ done:
  *
  * Purpose:     Returns the type of objects in the group by giving index.
  *
- * Return:	Success:        Non-negative, length of name
+ * Note:	This routine assumes a lookup on the link name index in
+ *		increasing order and isn't currently set up to be as
+ *		flexible as other routines in this code module, because
+ *		the H5Gget_objtype_by_idx that it's supporting is
+ *		deprecated.
+ *
+ * Return:	Success:        Non-negative, object type
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -1314,14 +1260,13 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_obj_t
-H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
+H5G_dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     hsize_t idx)
 {
-    H5HF_t *fheap = NULL;       /* Fractal heap handle */
-    H5G_bt2_gtbi_ud1_t udata;   /* User data for v2 B-tree callback */
+    H5G_link_table_t ltable = {0, NULL};         /* Table of links */
     H5G_obj_t ret_value;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_get_type_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(H5G_dense_get_type_by_idx, H5G_UNKNOWN)
 
     /*
      * Check arguments.
@@ -1329,29 +1274,38 @@ H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     HDassert(f);
     HDassert(linfo);
 
-    /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+    /* Build the table of links for this group */
+    if(H5G_dense_build_table(f, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "error building table of links")
 
-    /* Set up the user data for the v2 B-tree 'record remove' callback */
-    udata.f = f;
-    udata.dxpl_id = dxpl_id;
-    udata.fheap = fheap;
+    /* Check for going out of bounds */
+    if(idx >= ltable.nlinks)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "index out of bound")
 
-    /* Retrieve the name according to the v2 B-tree's index order */
-/* (XXX: using name index currently) */
-    if(H5B2_index(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5_ITER_INC, idx,
-            H5G_dense_get_type_by_idx_bt2_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
+    /* Determine type of object */
+    if(ltable.lnks[idx].type == H5L_TYPE_SOFT)
+        ret_value = H5G_LINK;
+    else if(ltable.lnks[idx].type >= H5L_TYPE_UD_MIN)
+        ret_value = H5G_UDLINK;
+    else if(ltable.lnks[idx].type == H5L_TYPE_HARD){
+        H5O_loc_t tmp_oloc;             /* Temporary object location */
 
-    /* Set return value */
-    ret_value = udata.type;
+        /* Build temporary object location */
+        tmp_oloc.file = f;
+        tmp_oloc.addr = ltable.lnks[idx].u.hard.addr;
+
+        /* Get the type of the object */
+        if((ret_value = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
+            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
+    } else {
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
+    } /* end else */
 
 done:
-    /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    /* Release link table */
+    if(ltable.lnks)
+        if(H5G_obj_release_table(&ltable) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_get_type_by_idx() */
@@ -1604,7 +1558,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
 
         /* Close the fractal heap */
         if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     } /* end if */
     else {
         /* Delete the name index, without adjusting the ref. count on the links  */

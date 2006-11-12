@@ -434,7 +434,8 @@ done:
  */
 ssize_t
 H5G_link_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
-    const H5O_linfo_t *linfo, hsize_t idx, char* name, size_t size)
+    const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
+    hsize_t idx, char* name, size_t size)
 {
     H5G_link_table_t    ltable = {0, NULL};         /* Link table */
     ssize_t		ret_value;      /* Return value */
@@ -445,30 +446,29 @@ H5G_link_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     HDassert(oloc);
 
     /* Build table of all link messages */
-    if(H5G_link_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
+    if(H5G_link_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Check for going out of bounds */
     if(idx >= ltable.nlinks)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
     /* Get the length of the name */
     ret_value = (ssize_t)HDstrlen(ltable.lnks[idx].name);
 
     /* Copy the name into the user's buffer, if given */
     if(name) {
-        HDstrncpy(name, ltable.lnks[idx].name, MIN((size_t)(ret_value+1),size));
+        HDstrncpy(name, ltable.lnks[idx].name, MIN((size_t)(ret_value + 1), size));
         if((size_t)ret_value >= size)
-            name[size-1]='\0';
+            name[size - 1]='\0';
     } /* end if */
 
 done:
     /* Release link table */
-    if(ltable.lnks) {
+    if(ltable.lnks)
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_get_name_by_idx() */
@@ -521,18 +521,17 @@ H5G_link_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linf
 
         /* Get the type of the object */
         if((ret_value = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
-    } else{
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
-    }/* end else */
+            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
+    } else {
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
+    } /* end else */
 
 done:
     /* Release link table */
-    if(ltable.lnks) {
+    if(ltable.lnks)
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_get_type_by_idx() */
@@ -696,11 +695,10 @@ H5G_link_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
 done:
     /* Release link table */
-    if(ltable.lnks) {
+    if(ltable.lnks)
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_iterate() */
@@ -839,11 +837,10 @@ H5G_link_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
 done:
     /* Release link table */
-    if(ltable.lnks) {
+    if(ltable.lnks)
         /* Free link table information */
         if(H5G_obj_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_lookup_by_idx() */
