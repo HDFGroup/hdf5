@@ -37,6 +37,9 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Lprivate.h"		/* Links                                */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -417,4 +420,67 @@ H5G_link_release_table(H5G_link_table_t *ltable)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_release_table() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_obj_type
+ *
+ * Purpose:	Determine the type of object referred to (for hard links) or
+ *              the link type (for soft links and user-defined links).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 13 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_obj_type(H5F_t *file, hid_t dxpl_id, const H5O_link_t *lnk,
+    H5G_obj_t *obj_type)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_link_obj_type, FAIL)
+
+    /* check arguments */
+    HDassert(file);
+    HDassert(lnk);
+
+    /* Check if we are able to retrieve the object's type */
+    if(obj_type) {
+        /* Look up the object type for each type of link */
+        switch(lnk->type) {
+            case H5L_TYPE_HARD:
+                {
+                    H5O_loc_t tmp_oloc;             /* Temporary object location */
+
+                    /* Build temporary object location */
+                    tmp_oloc.file = file;
+                    tmp_oloc.addr = lnk->u.hard.addr;
+
+                    /* Get the type of the object */
+                    /* Note: no way to check for error :-( */
+                    *obj_type = H5O_obj_type(&tmp_oloc, dxpl_id);
+                }
+                break;
+
+            case H5L_TYPE_SOFT:
+                /* Get the object's type */
+                *obj_type = H5G_LINK;
+                break;
+
+            default:  /* User-defined link */
+                if(lnk->type < H5L_TYPE_UD_MIN)
+                   HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
+
+                /* Get the object's type */
+                *obj_type = H5G_UDLINK;
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_link_obj_type() */
 

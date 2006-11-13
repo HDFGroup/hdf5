@@ -450,4 +450,8 @@ H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_convert(void *_fill, H5T_t *type, hid_t dxpl_id);
 
-#endif
+/* Link operators */
+H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+
+#endif /* _H5Oprivate_H */
+

@@ -38,7 +38,8 @@ static void *H5O_layout_copy(const void *_mesg, void *_dest, unsigned update_fla
 static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
-static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
+    hbool_t adj_link);
 static void *H5O_layout_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
@@ -567,16 +568,17 @@ H5O_layout_free (void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj_link)
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
+    hbool_t UNUSED adj_link)
 {
-    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    const H5O_layout_t *mesg = (const H5O_layout_t *) _mesg;
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_delete);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_delete)
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     /* Perform different actions, depending on the type of storage */
     switch(mesg->type) {
@@ -586,13 +588,13 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj
 
         case H5D_CONTIGUOUS:    /* Contiguous block on disk */
             /* Free the file space for the raw data */
-            if (H5D_contig_delete(f, dxpl_id, mesg)<0)
+            if(H5D_contig_delete(f, dxpl_id, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the raw data */
-            if (H5D_istore_delete(f, dxpl_id, mesg)<0)
+            if(H5D_istore_delete(f, dxpl_id, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -601,7 +603,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_delete() */
 
 

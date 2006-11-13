@@ -1352,39 +1352,14 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5B2_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
-    /* Retrieve the link's object type & decr. the ref. count on hard links, if requested */
-    switch(lnk->type) {
-        case H5L_TYPE_HARD:
-            {
-                H5O_loc_t tmp_oloc;             /* Temporary object location */
+    /* Determine the object's type */
+    if(H5G_link_obj_type(udata->f, udata->dxpl_id, lnk, udata->obj_type) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
 
-                /* Build temporary object location */
-                tmp_oloc.file = udata->f;
-                tmp_oloc.addr = lnk->u.hard.addr;
-
-                /* Get the type of the object */
-                /* Note: no way to check for error :-( */
-                if(udata->obj_type)
-                    *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
-
-                /* Decrement the ref count for the object, if requested */
-                if(udata->adj_link)
-                    if(H5O_link(&tmp_oloc, -1, udata->dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to decrement object link count")
-            }
-            break;
-
-        case H5L_TYPE_SOFT:
-            if(udata->obj_type)
-                *(udata->obj_type) = H5G_LINK;
-            break;
-
-        default:  /* User-defined link */
-            if(lnk->type < H5L_TYPE_UD_MIN)
-                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
-            if(udata->obj_type)
-                *(udata->obj_type) = H5G_UDLINK;
-    } /* end switch */
+    /* Perform the deletion action on the link */
+    /* (call link message "delete" callback directly: *ick* - QAK) */
+    if(H5O_link_delete(udata->f, udata->dxpl_id, lnk, udata->adj_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     /* Release the space allocated for the link */
     H5O_free(H5O_LINK_ID, lnk);

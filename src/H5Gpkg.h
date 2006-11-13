@@ -423,6 +423,8 @@ H5_DLL herr_t H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id,
     const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk,
     H5O_copy_t *cpy_info);
 H5_DLL herr_t H5G_link_release_table(H5G_link_table_t *ltable);
+H5_DLL herr_t H5G_link_obj_type(H5F_t *file, hid_t dxpl_id, const H5O_link_t *lnk,
+    H5G_obj_t *obj_type);
 
 /* Functions that understand "compact" link storage */
 H5_DLL herr_t H5G_compact_insert(H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,

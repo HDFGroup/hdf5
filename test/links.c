@@ -3679,7 +3679,7 @@ done:
 
 /* UD_hard_delete decrements the object's reference count */
 static herr_t
-UD_hard_delete(const char UNUSED * link_name, hid_t loc_group, void * udata, size_t udata_size)
+UD_hard_delete(const char UNUSED * link_name, hid_t file, void * udata, size_t udata_size)
 {
     haddr_t addr;
     hid_t target_obj = -1;
@@ -3694,7 +3694,7 @@ UD_hard_delete(const char UNUSED * link_name, hid_t loc_group, void * udata, siz
     addr = *((haddr_t *) udata);
 
     /* Open the object this link points to */
-    target_obj= H5Oopen_by_addr(loc_group, addr);
+    target_obj= H5Oopen_by_addr(file, addr);
     if(target_obj < 0)
     {
       ret_value = -1;
@@ -4134,8 +4134,8 @@ UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size
     if(new_loc < 0) TEST_ERROR
     if(udata_size > 0 && !udata) TEST_ERROR
 
-    if(strcmp(new_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp(new_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
+    if(HDstrcmp(udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     return 0;
@@ -4146,14 +4146,14 @@ error:
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cb_delete(const char * link_name, hid_t loc_group, void * udata, size_t udata_size)
+UD_cb_delete(const char * link_name, hid_t file, void * udata, size_t udata_size)
 {
     if(!link_name) TEST_ERROR
-    if(loc_group < 0) TEST_ERROR
+    if(file < 0) TEST_ERROR
     if(udata_size > 0 && !udata) TEST_ERROR
 
-    if(strcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
+    if(HDstrcmp(udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     return 0;
@@ -4528,7 +4528,7 @@ UD_cbsucc_move(const char UNUSED * new_name, hid_t UNUSED new_loc,
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbsucc_delete(const char UNUSED * link_name, hid_t UNUSED loc_group,
+UD_cbsucc_delete(const char UNUSED * link_name, hid_t UNUSED file,
     void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This callback will always succeed */
@@ -4537,7 +4537,7 @@ UD_cbsucc_delete(const char UNUSED * link_name, hid_t UNUSED loc_group,
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbfail_delete(const char UNUSED * link_name, hid_t UNUSED loc_group,
+UD_cbfail_delete(const char UNUSED * link_name, hid_t UNUSED file,
     void UNUSED * udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always fail. */

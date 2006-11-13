@@ -4350,8 +4350,8 @@ done:
 static herr_t
 H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
 {
-    const H5O_msg_class_t	*type;  /* Type of object to free */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    const H5O_msg_class_t *type;  /* Type of object to free */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_delete_mesg)
 
@@ -4369,13 +4369,10 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
 
     /* Check if there is a file space deletion callback for this type of message */
     if(type->del) {
-        /*
-         * Decode the message if necessary.
-         */
+        /* Decode the message if necessary. */
         if(NULL == mesg->native) {
             HDassert(type->decode);
-            mesg->native = (type->decode) (f, dxpl_id, mesg->raw);
-            if(NULL == mesg->native)
+            if(NULL == (mesg->native = (type->decode)(f, dxpl_id, mesg->raw)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
         } /* end if */
 
@@ -4955,7 +4952,7 @@ H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth)
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
-        /* If the original entry has holding open the file, this one should
+        /* If the original entry was holding open the file, this one should
          * hold it open, too.
          */
         if(src->holding_file)

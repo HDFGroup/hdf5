@@ -38,7 +38,7 @@
 typedef struct {
     H5G_link_table_t *ltable;   /* Pointer to link table to build */
     size_t curr_lnk;            /* Current link to operate on */
-} H5G_compact_ud1_t;
+} H5G_iter_bt_t;
 
 /* User data for deleting a link in the link messages */
 typedef struct {
@@ -49,20 +49,9 @@ typedef struct {
 
     /* upward */
     H5G_obj_t *obj_type;        /* Type of object deleted */
-} H5G_compact_ud2_t;
+} H5G_iter_rm_t;
 
-/* User data for link message iteration when querying object info */
-typedef struct {
-    /* downward */
-    const char *name;           /* Name to search for */
-    H5F_t       *file;          /* File that object header is located within */
-    hid_t       dxpl_id;        /* DXPL during insertion */
-
-    /* upward */
-    H5G_stat_t *statbuf;        /* Stat buffer for info */
-} H5G_compact_ud3_t;
-
-/* User data for link message iteration when querying object location */
+/* User data for link message iteration when querying link info */
 typedef struct {
     /* downward */
     const char *name;           /* Name to search for */
@@ -70,17 +59,7 @@ typedef struct {
     /* upward */
     H5O_link_t *lnk;            /* Link struct to fill in */
     hbool_t found;              /* Flag to indicate that the object was found */
-} H5G_compact_ud4_t;
-
-/* User data for link message iteration when querying soft link value */
-typedef struct {
-    /* downward */
-    const char *name;           /* Name to search for */
-    size_t size;                /* Buffer size for link value */
-
-    /* upward */
-    char *buf;                  /* Buffer to fill with link value */
-} H5G_compact_ud5_t;
+} H5G_iter_lkp_t;
 
 /* Private macros */
 
@@ -109,7 +88,7 @@ static herr_t
 H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
-    H5G_compact_ud1_t *udata = (H5G_compact_ud1_t *)_udata;     /* 'User data' passed in */
+    H5G_iter_bt_t *udata = (H5G_iter_bt_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value=H5O_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_build_table_cb)
@@ -164,7 +143,7 @@ H5G_compact_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo
 
     /* Allocate space for the table entries */
     if(ltable->nlinks > 0) {
-        H5G_compact_ud1_t udata;               /* User data for iteration callback */
+        H5G_iter_bt_t udata;               /* User data for iteration callback */
 
         if((ltable->lnks = H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -376,7 +355,7 @@ static herr_t
 H5G_compact_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
-    H5G_compact_ud2_t *udata = (H5G_compact_ud2_t *)_udata;     /* 'User data' passed in */
+    H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5O_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_remove_cb)
@@ -387,32 +366,10 @@ H5G_compact_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 
     /* If we've found the right link, get the object type */
     if(HDstrcmp(lnk->name, udata->name) == 0) {
-        switch(lnk->type)
-        {
-            case H5L_TYPE_HARD:
-                {
-                    H5O_loc_t tmp_oloc;             /* Temporary object location */
+        /* Determine the object's type */
+        if(H5G_link_obj_type(udata->file, udata->dxpl_id, lnk, udata->obj_type) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5O_ITER_ERROR, "unable to get object type")
 
-                    /* Build temporary object location */
-                    tmp_oloc.file = udata->file;
-                    tmp_oloc.addr = lnk->u.hard.addr;
-
-                    /* Get the type of the object */
-                    /* Note: no way to check for error :-( */
-                    *(udata->obj_type) = H5O_obj_type(&tmp_oloc, udata->dxpl_id);
-                }
-                break;
-
-            case H5L_TYPE_SOFT:
-                *(udata->obj_type) = H5G_LINK;
-                break;
-
-            default:  /* User-defined link */
-                if(lnk->type < H5L_TYPE_UD_MIN)
-                   HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
-
-                *(udata->obj_type) = H5G_UDLINK;
-        }
         /* Stop the iteration, we found the correct link */
         HGOTO_DONE(H5O_ITER_STOP)
     } /* end if */
@@ -438,7 +395,7 @@ herr_t
 H5G_compact_remove(const H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type,
     hid_t dxpl_id)
 {
-    H5G_compact_ud2_t udata;               /* Data to pass through OH iteration */
+    H5G_iter_rm_t udata;               /* Data to pass through OH iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_remove, FAIL)
@@ -543,7 +500,7 @@ static herr_t
 H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
-    H5G_compact_ud4_t *udata = (H5G_compact_ud4_t *)_udata;     /* 'User data' passed in */
+    H5G_iter_lkp_t *udata = (H5G_iter_lkp_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5O_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_lookup_cb)
@@ -589,7 +546,7 @@ herr_t
 H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
-    H5G_compact_ud4_t udata;               /* User data for iteration callback */
+    H5G_iter_lkp_t udata;               /* User data for iteration callback */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_lookup, FAIL)

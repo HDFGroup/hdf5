@@ -1958,10 +1958,6 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSE
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_rm_t *udata = (H5L_trav_rm_t *)_udata;   /* User data passed in */
-    H5G_t *grp = NULL;              /* H5G_t for this group, opened to pass to user callback */
-    hid_t grp_id = FAIL;            /* ID for this group (passed to user callback) */
-    H5G_loc_t temp_loc;             /* For UD callback */
-    hbool_t temp_loc_init = FALSE;  /* Temporary location has been initialized? */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_delete_cb)
@@ -1974,55 +1970,11 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSE
     if(lnk == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "can't delete self")
 
-    /* If there is a user-defined callback, call it before deleting the link */
-    if(lnk->type >= H5L_TYPE_UD_MIN)
-    {
-        const H5L_class_t   *link_class;         /* User-defined link class */
-
-        /* Get the link class for this type of link. */
-        if(NULL == (link_class = H5L_find_class(lnk->type)))
-            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class not registered")
-
-        if(link_class->del_func != NULL)
-        {
-            H5O_loc_t           temp_oloc;
-            H5G_name_t          temp_path;
-
-            H5G_name_reset(&temp_path);
-
-            /* Get object location for link's parent group */
-            if(H5O_loc_copy(&temp_oloc, grp_loc->oloc, H5_COPY_DEEP) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
-
-            temp_loc.oloc = &temp_oloc;
-            temp_loc.path = &temp_path;
-            temp_loc_init = TRUE;
-
-            /* Set up group for user-defined callback */
-            if((grp = H5G_open(&temp_loc, udata->dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-
-            /* Call user-defined link's 'delete' callback */
-            if((link_class->del_func)(name, grp_id, lnk->u.ud.udata, lnk->u.ud.size) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "link deletion callback returned failure")
-        } /* end if */
-    } /* end if */
-
     /* Remove the link from the group */
     if(H5G_loc_remove(grp_loc, name, obj_loc, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to remove link from group")
 
 done:
-    /* Close the location given to the user callback if it was created */
-    if(grp_id >= 0)
-        H5I_dec_ref(grp_id);
-    else if(grp != NULL)
-        H5G_close(grp);
-    else if(temp_loc_init)
-        H5G_loc_free(&temp_loc);
-
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
