@@ -68,6 +68,10 @@ $ type sys$input
 $ link     h5_reference, -
             [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
+       Creating h5_ref2reg
+$ link     h5_ref2reg, -
+            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$ type sys$input
        Creating h5_drivers
 $ link     h5_drivers, -
             [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib

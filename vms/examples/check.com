@@ -25,5 +25,6 @@ $ run  h5_select
 $ run  h5_attribute
 $ run  h5_mount
 $ run  h5_reference
+$ run  h5_ref2reg
 $ run  h5_drivers
 $ exit
