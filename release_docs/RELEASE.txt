@@ -160,6 +160,9 @@ New Features
 
     Library:
     --------
+       - Added new H5Lget_val_by_idx() routine to query the value of a soft link
+            according to the order within an index.
+            - QAK - 2006/11/13
        - Added new H5Lget_name_by_idx() routine to query the name of a link
             according to the order within an index.
             - QAK - 2006/11/12
@@ -209,7 +212,7 @@ New Features
             H5Lcreate_hard - like H5Glink2 for hard links
             H5Lcreate_soft - like H5Glink2 for soft links
             H5Ldelete - just like H5Gunlink
-            H5Lget_val - just link H5Gget_linkval
+            H5Lget_val - just like H5Gget_linkval
             H5Lget_info - gets link-specific info (like H5Gget_objinfo)
 
          In addition, H5Gcreate_expand, H5Tcommit_expand, and H5Dcreate_expand

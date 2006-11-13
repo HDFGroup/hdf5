@@ -443,7 +443,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_remove(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5G_loc_remove(H5G_loc_t *grp_loc, const char *link_name, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     H5G_obj_t   obj_type;               /* Type of object removed */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -452,10 +452,10 @@ H5G_loc_remove(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc, hid_t d
 
     /* Check args. */
     HDassert(grp_loc);
-    HDassert(name && *name);
+    HDassert(link_name && *link_name);
 
     /* Remove object from group */
-    if(H5G_obj_remove(grp_loc->oloc, name, &obj_type, dxpl_id) < 0)
+    if(H5G_obj_remove(grp_loc->oloc, link_name, &obj_type, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
 
     /* Search the open IDs and replace names for unlinked object */

@@ -993,7 +993,6 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
 {
     H5O_linfo_t	linfo;		/* Link info message            */
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
-    hbool_t     use_new_dense = FALSE;      /* Whether to use "dense" form of 'new format' group */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_remove, FAIL)
@@ -1008,73 +1007,8 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
         /* Using the new format for groups */
         use_old_format = FALSE;
 
-        /* Check for deleting enough links from group to go back to link messages */
+        /* Check for dense or compact storage */
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
-            H5O_ginfo_t ginfo;		/* Group info message            */
-
-            /* Get the group info */
-            if(NULL == H5O_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
-                HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
-
-            /* Check if we should switch from dense storage back to link messages */
-            if(linfo.nlinks <= ginfo.min_dense) {
-                H5G_link_table_t ltable;        /* Table of links */
-                hbool_t can_convert = TRUE;     /* Whether converting to link messages is possible */
-                size_t u;                       /* Local index */
-
-                /* Build the table of links for this group */
-                if(H5G_dense_build_table(oloc->file, dxpl_id, &linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
-
-                /* Inspect links in table for ones that can't be converted back
-                 * into link message form (currently only links which can't fit
-                 * into an object header message)
-                 */
-                for(u = 0; u < linfo.nlinks; u++)
-                    if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
-                        can_convert = FALSE;
-                        break;
-                    } /* end if */
-
-                /* If ok, insert links as link messages */
-                if(can_convert) {
-                    /* Insert link messages into group */
-                    for(u = 0; u < linfo.nlinks; u++)
-                        if(H5O_modify(oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), dxpl_id) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
-
-                    /* Remove the dense storage */
-                    if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
-
-                    use_new_dense = FALSE;
-                } /* end if */
-                else
-                    use_new_dense = TRUE;
-
-                /* Free link table information */
-                if(H5G_obj_release_table(&ltable) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
-            } /* end if */
-            else
-                use_new_dense = TRUE;
-        } /* end if */
-        else
-            use_new_dense = FALSE;
-    } /* end if */
-    else {
-        H5E_clear_stack(NULL);  /* Clear error stack from not finding the link info message */
-        use_old_format = TRUE;
-    } /* end else */
-
-    /* If the symbol table doesn't exist, search link messages */
-    if(use_old_format) {
-        /* Remove object from the symbol table */
-        if(H5G_stab_remove(oloc, name, obj_type, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
-    } /* end if */
-    else {
-        if(use_new_dense) {
             /* Remove object from the dense link storage */
             if(H5G_dense_remove(oloc->file, dxpl_id, &linfo, name, obj_type) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
@@ -1084,6 +1018,17 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
             if(H5G_link_remove(oloc, name, obj_type, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
         } /* end else */
+    } /* end if */
+    else {
+        /* Clear error stack from not finding the link info message */
+        H5E_clear_stack(NULL);
+
+        /* Using the old format for groups */
+        use_old_format = TRUE;
+
+        /* Remove object from the symbol table */
+        if(H5G_stab_remove(oloc, name, obj_type, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
     } /* end else */
 
     /* Update link info for a new-style group */
@@ -1091,10 +1036,58 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
         /* Decrement # of links in group */
         linfo.nlinks--;
 
-        /* Remove the dense link storage, if we are using it and the number of links drops to zero */
-        if(linfo.nlinks == 0 && use_new_dense) {
-            if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
+        /* Check for transitioning out of dense storage, if we are using it */
+        if(H5F_addr_defined(linfo.link_fheap_addr)) {
+            /* If there's no more links, delete the dense storage */
+            if(linfo.nlinks == 0) {
+                if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
+            } /* end if */
+            /* Check for switching back to compact storage */
+            else {
+                H5O_ginfo_t ginfo;		/* Group info message            */
+
+                /* Get the group info */
+                if(NULL == H5O_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                    HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
+
+                /* Check if we should switch from dense storage back to link messages */
+                if(linfo.nlinks < ginfo.min_dense) {
+                    H5G_link_table_t ltable;        /* Table of links */
+                    hbool_t can_convert = TRUE;     /* Whether converting to link messages is possible */
+                    size_t u;                       /* Local index */
+
+                    /* Build the table of links for this group */
+                    if(H5G_dense_build_table(oloc->file, dxpl_id, &linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+
+                    /* Inspect links in table for ones that can't be converted back
+                     * into link message form (currently only links which can't fit
+                     * into an object header message)
+                     */
+                    for(u = 0; u < linfo.nlinks; u++)
+                        if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                            can_convert = FALSE;
+                            break;
+                        } /* end if */
+
+                    /* If ok, insert links as link messages */
+                    if(can_convert) {
+                        /* Insert link messages into group */
+                        for(u = 0; u < linfo.nlinks; u++)
+                            if(H5O_modify(oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), dxpl_id) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+
+                        /* Remove the dense storage */
+                        if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
+                    } /* end if */
+
+                    /* Free link table information */
+                    if(H5G_obj_release_table(&ltable) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+                } /* end if */
+            } /* end else */
         } /* end if */
 
         /* Update link info in the object header */

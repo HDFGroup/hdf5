@@ -422,7 +422,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Call the new link routine which provides this capability */
-    if(H5L_get_val(&loc, name, size, buf, H5P_DEFAULT, H5AC_ind_dxpl_id) < 0)
+    if(H5L_get_val(&loc, name, buf, size, H5P_DEFAULT, H5AC_ind_dxpl_id) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")
 
 done:

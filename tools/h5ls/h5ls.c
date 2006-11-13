@@ -1724,7 +1724,7 @@ slink_open(hid_t location, const char *name)
 {
     char buf[64];
 
-    if(H5Lget_val(location, name, sizeof(buf), buf, H5P_DEFAULT) < 0)
+    if(H5Lget_val(location, name, buf, sizeof(buf), H5P_DEFAULT) < 0)
         return -1;
     if(NULL == HDmemchr(buf, 0, sizeof(buf)))
          HDstrcpy(buf + sizeof(buf) - 4, "...");
@@ -1768,7 +1768,7 @@ udlink_open(hid_t location, const char *name)
         case H5L_TYPE_EXTERNAL:
             if((buf = HDmalloc(linfo.u.link_size)) == NULL)
                 goto error;
-            if(H5Lget_val(location, name, sizeof(buf), buf, H5P_DEFAULT) < 0)
+            if(H5Lget_val(location, name, buf, sizeof(buf), H5P_DEFAULT) < 0)
                 goto error;
 
             if(H5Lunpack_elink_val(buf, linfo.u.link_size,  &filename, &path) < 0) goto error;

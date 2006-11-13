@@ -152,8 +152,13 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
 H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
                              const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
-H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, size_t size,
-			      void *buf/*out*/, hid_t lapl_id);
+H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
+    size_t size, hid_t lapl_id);
+H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    void *buf/*out*/, size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
                               H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,

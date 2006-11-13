@@ -1456,7 +1456,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                 indentation(indent + COL);
             }
 
-            if (H5Lget_val(group, name, statbuf.linklen, targbuf, H5P_DEFAULT) < 0) {
+            if (H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
                 error_msg(progname, "unable to get link value\n");
                 d_status = EXIT_FAILURE;
                 ret = FAIL;
@@ -1555,7 +1555,7 @@ dump_all(hid_t group, const char *name, void * op_data)
                     begin_obj(dump_header_format->extlinkbegin, name,
                             dump_header_format->extlinkblockbegin);
                 }
-                if (H5Lget_val(group, name, statbuf.linklen, targbuf, H5P_DEFAULT) < 0) {
+                if (H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
                     error_msg(progname, "unable to get external link value\n");
                     d_status = EXIT_FAILURE;
                     ret = FAIL;
@@ -3227,7 +3227,7 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
                   dump_header_format->softlinkblockbegin);
         indentation(COL);
 
-        if(H5Lget_val(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
+        if(H5Lget_val(fid, links, buf, statbuf.linklen, H5P_DEFAULT) >= 0) {
             printf("LINKTARGET \"%s\"\n", buf);
         } else {
             error_msg(progname, "h5dump error: unable to get link value for \"%s\"\n",
@@ -3247,7 +3247,7 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
           case H5L_TYPE_EXTERNAL:
               begin_obj(dump_header_format->extlinkbegin, links,
                         dump_header_format->extlinkblockbegin);
-              if(H5Lget_val(fid, links, statbuf.linklen, buf, H5P_DEFAULT) >= 0) {
+              if(H5Lget_val(fid, links, buf, statbuf.linklen, H5P_DEFAULT) >= 0) {
                   if(H5Lunpack_elink_val(buf, statbuf.linklen, &elink_file, &elink_path)>=0) {
                       indentation(COL);
                       printf("LINKCLASS %d\n", linfo.type);

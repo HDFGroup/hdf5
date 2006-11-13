@@ -1144,8 +1144,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                         char linkname2[NAME_BUF_SIZE];           /* Link value */
 
                         /* Check link values */
-                        if(H5Lget_val(gid, objname, (size_t)NAME_BUF_SIZE, linkname, H5P_DEFAULT) < 0) TEST_ERROR
-                        if(H5Lget_val(gid2, objname2, (size_t)NAME_BUF_SIZE, linkname2, H5P_DEFAULT) < 0) TEST_ERROR
+                        if(H5Lget_val(gid, objname, linkname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                        if(H5Lget_val(gid2, objname2, linkname2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                         if(HDstrcmp(linkname, linkname2)) TEST_ERROR
                     }
                     break;
@@ -1199,8 +1199,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                       if(linfo.u.link_size != linfo2.u.link_size) TEST_ERROR
 
                       /* Get link udata */
-                      if(H5Lget_val(gid, objname, (size_t)NAME_BUF_SIZE, linkval, H5P_DEFAULT) < 0) TEST_ERROR
-                      if(H5Lget_val(gid2, objname2, (size_t)NAME_BUF_SIZE, linkval2, H5P_DEFAULT) < 0) TEST_ERROR
+                      if(H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                      if(H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
 
                       /* Compare link udata */
                       if(HDmemcmp(linkval, linkval2, objstat.linklen)) TEST_ERROR
