@@ -30,14 +30,14 @@ endif
 # Use the boilerplate in config/examples.am instead.
 TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
-           h5_extlink h5_elink_unix2win
+           h5_ref2reg h5_extlink h5_elink_unix2win
 
 # Install files
 # List all file that should be installed in examples directory
 INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
-          ph5example.c
+          h5_ref2reg.c ph5example.c
 
 # Additional dependencies for each program are listed below.
 $(EXTRA_PROG): $(LIBHDF5)
@@ -80,6 +80,7 @@ h5_select: $(srcdir)/h5_select.c
 h5_attribute: $(srcdir)/h5_attribute.c
 h5_mount: $(srcdir)/h5_mount.c
 h5_reference: $(srcdir)/h5_reference.c
+h5_ref2reg: $(srcdir)/h5_ref2reg.c
 h5_drivers: $(srcdir)/h5_drivers.c
 ph5example: $(srcdir)/ph5example.c
 h5_dtransform: $(srcdir)/h5_dtransform.c
