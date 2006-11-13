@@ -22,7 +22,7 @@ $ type sys$input
 	Creating h5repack
 $!
 $ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_filters, " +-
-        "h5repack_list, h5repack_opttable, h5repack_parse, h5repack_refs," +-
+        "h5repack_list, h5repack_opttable, h5repack_parse, " +-
         "h5repack_verify,"+-
         "testh5repack_main, testh5repack_attr, testh5repack_dset, "+-
         "testh5repack_make, testh5repack_util "
