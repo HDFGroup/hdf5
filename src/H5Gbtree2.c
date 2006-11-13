@@ -101,7 +101,6 @@ static herr_t H5G_dense_btree2_name_debug(FILE *stream, const H5F_t *f, hid_t dx
 static herr_t H5G_dense_fh_name_cmp(const void *obj, size_t obj_len, void *op_data);
 
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -137,6 +136,7 @@ const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*-------------------------------------------------------------------------

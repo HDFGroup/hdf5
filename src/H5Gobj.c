@@ -88,7 +88,7 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5G_obj_link_to_dense_cb(const void *_mesg, unsigned idx,
+static herr_t H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned idx,
     void *_udata);
 
 
@@ -106,172 +106,6 @@ static herr_t H5G_obj_link_to_dense_cb(const void *_mesg, unsigned idx,
 /* Local Variables */
 /*******************/
 
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_cmp_name_inc
- *
- * Purpose:	Callback routine for comparing two link names, in
- *              increasing alphabetic order
- *
- * Return:	An integer less than, equal to, or greater than zero if the
- *              first argument is considered to be respectively less than,
- *              equal to, or greater than the second.  If two members compare
- *              as equal, their order in the sorted array is undefined.
- *              (i.e. same as strcmp())
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Sep  5 2005
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_obj_cmp_name_inc(const void *lnk1, const void *lnk2)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_name_inc)
-
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
-} /* end H5G_obj_cmp_name_inc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_cmp_name_dec
- *
- * Purpose:	Callback routine for comparing two link names, in
- *              decreasing alphabetic order
- *
- * Return:	An integer less than, equal to, or greater than zero if the
- *              second argument is considered to be respectively less than,
- *              equal to, or greater than the first.  If two members compare
- *              as equal, their order in the sorted array is undefined.
- *              (i.e. opposite strcmp())
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Sep 25 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_obj_cmp_name_dec(const void *lnk1, const void *lnk2)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_name_dec)
-
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
-} /* end H5G_obj_cmp_name_dec() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_cmp_corder_inc
- *
- * Purpose:	Callback routine for comparing two link creation orders, in
- *              increasing order
- *
- * Return:	An integer less than, equal to, or greater than zero if the
- *              first argument is considered to be respectively less than,
- *              equal to, or greater than the second.  If two members compare
- *              as equal, their order in the sorted array is undefined.
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov  6 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_obj_cmp_corder_inc(const void *lnk1, const void *lnk2)
-{
-    int ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_corder_inc)
-
-    if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
-        ret_value = -1;
-    else if(((const H5O_link_t *)lnk1)->corder > ((const H5O_link_t *)lnk2)->corder)
-        ret_value = 1;
-    else
-        ret_value = 0;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_cmp_corder_inc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_cmp_corder_dec
- *
- * Purpose:	Callback routine for comparing two link creation orders, in
- *              decreasing order
- *
- * Return:	An integer less than, equal to, or greater than zero if the
- *              second argument is considered to be respectively less than,
- *              equal to, or greater than the first.  If two members compare
- *              as equal, their order in the sorted array is undefined.
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov  6 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5G_obj_cmp_corder_dec(const void *lnk1, const void *lnk2)
-{
-    int ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_obj_cmp_corder_dec)
-
-    if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
-        ret_value = 1;
-    else if(((const H5O_link_t *)lnk1)->corder > ((const H5O_link_t *)lnk2)->corder)
-        ret_value = -1;
-    else
-        ret_value = 0;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_cmp_corder_dec() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_obj_release_table
- *
- * Purpose:     Release table containing a list of links for a group
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Sep  6, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_obj_release_table(H5G_link_table_t *ltable)
-{
-    size_t      u;                      /* Local index variable */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_obj_release_table)
-
-    /* Sanity check */
-    HDassert(ltable);
-
-    /* Release link info, if any */
-    if(ltable->nlinks > 0) {
-        /* Free link message information */
-        for(u = 0; u < ltable->nlinks; u++)
-            if(H5O_reset(H5O_LINK_ID, &(ltable->lnks[u])) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link message")
-
-        /* Free table of links */
-        H5MM_xfree(ltable->lnks);
-    } /* end if */
-    else
-        HDassert(ltable->lnks == NULL);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_release_table() */
 
 
 /*-------------------------------------------------------------------------
@@ -470,9 +304,9 @@ H5G_obj_ent_encode(H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_obj_link_to_dense_cb
+ * Function:	H5G_obj_compact_to_dense_cb
  *
- * Purpose:	Callback routine for converting 'link' messages to "dense"
+ * Purpose:	Callback routine for converting "compact" to "dense"
  *              link storage form.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -484,13 +318,13 @@ H5G_obj_ent_encode(H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_obj_link_to_dense_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_obj_oh_it_ud1_t *udata = (H5G_obj_oh_it_ud1_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5O_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_obj_link_to_dense_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_obj_compact_to_dense_cb)
 
     /* check arguments */
     HDassert(lnk);
@@ -502,14 +336,14 @@ H5G_obj_link_to_dense_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_link_to_dense_cb() */
+} /* end H5G_obj_compact_to_dense_cb() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_obj_stab_to_new_cb
  *
  * Purpose:	Callback routine for converting "symbol table" link storage to
- *              "new format" storage (either link messages or "dense" storage).
+ *              "new format" storage (either "compact" or "dense" storage).
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -622,7 +456,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.linfo = &linfo;
 
             /* Iterate over the 'link' messages, inserting them into the dense link storage  */
-            if(H5O_iterate(grp_oloc, H5O_LINK_ID, H5G_obj_link_to_dense_cb, &udata, dxpl_id) < 0)
+            if(H5O_iterate(grp_oloc, H5O_LINK_ID, H5G_obj_compact_to_dense_cb, &udata, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
 
             /* Remove all the 'link' messages */
@@ -696,7 +530,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         } /* end if */
         else {
             /* Insert with link message */
-            if(H5G_link_insert(grp_oloc, obj_lnk, dxpl_id) < 0)
+            if(H5G_compact_insert(grp_oloc, obj_lnk, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link as link message")
         } /* end else */
     } /* end else */
@@ -784,7 +618,7 @@ H5G_obj_iterate(hid_t loc_id, const char *name, H5_iter_order_t order,
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if((ret_value = H5G_link_iterate(&(grp->oloc), dxpl_id, &linfo, order, gid, FALSE, skip, last_lnk, lnk_op, op_data)) < 0)
+            if((ret_value = H5G_compact_iterate(&(grp->oloc), dxpl_id, &linfo, order, gid, FALSE, skip, last_lnk, lnk_op, op_data)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over links")
         } /* end else */
     } /* end if */
@@ -898,7 +732,7 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if((ret_value = H5G_link_get_name_by_idx(oloc, dxpl_id, &linfo, idx_type, order, n, name, size)) < 0)
+            if((ret_value = H5G_compact_get_name_by_idx(oloc, dxpl_id, &linfo, idx_type, order, n, name, size)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end else */
     } /* end if */
@@ -955,7 +789,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
         } /* end if */
         else {
             /* Get the object's type from the link messages */
-            if((ret_value = H5G_link_get_type_by_idx(oloc, dxpl_id, &linfo, idx)) < 0)
+            if((ret_value = H5G_compact_get_type_by_idx(oloc, dxpl_id, &linfo, idx)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
         } /* end else */
     } /* end if */
@@ -1015,7 +849,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
         } /* end if */
         else {
             /* Remove object from the link messages */
-            if(H5G_link_remove(oloc, name, obj_type, dxpl_id) < 0)
+            if(H5G_compact_remove(oloc, name, obj_type, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
         } /* end else */
     } /* end if */
@@ -1084,7 +918,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
                     } /* end if */
 
                     /* Free link table information */
-                    if(H5G_obj_release_table(&ltable) < 0)
+                    if(H5G_link_release_table(&ltable) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
                 } /* end if */
             } /* end else */
@@ -1136,7 +970,7 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
         } /* end if */
         else {
             /* Get the object's info from the link messages */
-            if(H5G_link_lookup(grp_oloc, name, lnk, dxpl_id) < 0)
+            if(H5G_compact_lookup(grp_oloc, name, lnk, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     } /* end if */
@@ -1203,7 +1037,7 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
         } /* end if */
         else {
             /* Get the link from the link messages */
-            if(H5G_link_lookup_by_idx(grp_oloc, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
+            if(H5G_compact_lookup_by_idx(grp_oloc, dxpl_id, &linfo, idx_type, order, n, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     } /* end if */

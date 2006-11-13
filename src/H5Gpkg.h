@@ -412,27 +412,34 @@ H5_DLL int H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t
 H5_DLL int H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
 
-/* Functions that understand link messages */
+/* Functions that understand links in groups */
+H5_DLL int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);
+H5_DLL int H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2);
+H5_DLL int H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2);
+H5_DLL int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
 H5_DLL herr_t H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk,
     haddr_t lheap_addr, const H5G_entry_t *ent, const char *name);
 H5_DLL herr_t H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id,
     const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk,
     H5O_copy_t *cpy_info);
-H5_DLL herr_t H5G_link_insert(H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
+H5_DLL herr_t H5G_link_release_table(H5G_link_table_t *ltable);
+
+/* Functions that understand "compact" link storage */
+H5_DLL herr_t H5G_compact_insert(H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
     hid_t dxpl_id);
-H5_DLL ssize_t H5G_link_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
+H5_DLL ssize_t H5G_compact_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
     hsize_t idx, char *name, size_t size);
-H5_DLL H5G_obj_t H5G_link_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
+H5_DLL H5G_obj_t H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, hsize_t idx);
-H5_DLL herr_t H5G_link_remove(const H5O_loc_t *oloc, const char *name,
+H5_DLL herr_t H5G_compact_remove(const H5O_loc_t *oloc, const char *name,
     H5G_obj_t *obj_type, hid_t dxpl_id);
-H5_DLL herr_t H5G_link_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
+H5_DLL herr_t H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
     H5_iter_order_t order, hid_t gid, hbool_t lib_internal, int skip,
     int *last_obj, H5G_link_iterate_t op, void *op_data);
-H5_DLL herr_t H5G_link_lookup(H5O_loc_t *grp_oloc, const char *name,
+H5_DLL herr_t H5G_compact_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
-H5_DLL herr_t H5G_link_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
+H5_DLL herr_t H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
     hsize_t n, H5O_link_t *lnk);
 
@@ -460,12 +467,7 @@ H5_DLL herr_t H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo
 H5_DLL herr_t H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     hbool_t adj_link);
 
-/* Functions that understand objects */
-H5_DLL int H5G_obj_cmp_name_inc(const void *lnk1, const void *lnk2);
-H5_DLL int H5G_obj_cmp_name_dec(const void *lnk1, const void *lnk2);
-H5_DLL int H5G_obj_cmp_corder_inc(const void *lnk1, const void *lnk2);
-H5_DLL int H5G_obj_cmp_corder_dec(const void *lnk1, const void *lnk2);
-H5_DLL herr_t H5G_obj_release_table(H5G_link_table_t *ltable);
+/* Functions that understand group objects */
 H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     const H5O_linfo_t *linfo, H5O_loc_t *oloc/*out*/);
 H5_DLL herr_t H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name,

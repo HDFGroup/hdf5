@@ -704,7 +704,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
 
         /* Free link table information */
-        if(H5G_obj_release_table(&ltable) < 0)
+        if(H5G_link_release_table(&ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
@@ -810,18 +810,18 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         /* Sort link table in correct iteration order */
         if(idx_type == H5L_INDEX_NAME) {
             if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_inc);
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
             else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_name_dec);
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
             else
                 HDassert(order == H5_ITER_NATIVE);
         } /* end if */
         else {
             HDassert(idx_type == H5L_INDEX_CRT_ORDER);
             if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_inc);
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
             else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_obj_cmp_corder_dec);
+                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
             else
                 HDassert(order == H5_ITER_NATIVE);
         } /* end else */
@@ -1021,7 +1021,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
         /* Free link table information */
-        if(H5G_obj_release_table(&ltable) < 0)
+        if(H5G_link_release_table(&ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
@@ -1230,7 +1230,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
         } /* end if */
 
         /* Free link table information */
-        if(H5G_obj_release_table(&ltable) < 0)
+        if(H5G_link_release_table(&ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
     } /* end else */
 
@@ -1304,7 +1304,7 @@ H5G_dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 done:
     /* Release link table */
     if(ltable.lnks)
-        if(H5G_obj_release_table(&ltable) < 0)
+        if(H5G_link_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1531,6 +1531,9 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     HDassert(linfo);
 
     /* Check if we are to adjust the ref. count for all the links */
+    /* (we adjust the ref. count when deleting a group and we _don't_ adjust
+     *  the ref. count when transitioning back to compact storage)
+    */
     if(adj_link) {
         H5HF_t *fheap = NULL;               /* Fractal heap handle */
         H5G_bt2_ud_rem_t udata;          /* User data for v2 B-tree record removal */
@@ -1548,7 +1551,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.common.found_op = NULL;
         udata.common.found_op_data = NULL;
         udata.adj_link = TRUE;
-        udata.rem_from_fheap = FALSE;
+        udata.rem_from_fheap = FALSE;           /* handled in "bulk" below by deleting entire heap */
         udata.rem_from_corder_index = FALSE;
         udata.obj_type = NULL;
 

@@ -260,12 +260,10 @@ H5G_node_encode_key(const H5F_t *f, const H5B_t UNUSED *bt, uint8_t *raw, void *
  * Programmer:	Quincey Koziol
  *              Friday, February 28, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidth,
+H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidth,
 		      const void *_key, const void *_udata)
 {
     const H5G_node_key_t   *key = (const H5G_node_key_t *) _key;
@@ -280,8 +278,7 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:",
         (unsigned)key->offset);
 
-    if(udata->heap_addr != 0)
-    {
+    if(udata->heap_addr != 0) {
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
 
         if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
@@ -292,15 +289,13 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
 
         if (H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
-    }
+    } /* end if */
     else
-    {
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cannot get name; heap address not specified\n");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5G_node_debug_key() */
 
 
 /*-------------------------------------------------------------------------

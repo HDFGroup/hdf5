@@ -50,8 +50,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FDdirect.c H5FDfamily.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c \
-        H5G.c H5Gbtree2.c H5Gdense.c H5Gdeprec.c H5Gent.c H5Glink.c H5Gloc.c \
-        H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Gstab.c H5Gtest.c H5Gtraverse.c \
+        H5G.c H5Gbtree2.c H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c H5Glink.c \
+        H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Gstab.c H5Gtest.c \
+        H5Gtraverse.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
