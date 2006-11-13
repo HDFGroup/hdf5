@@ -145,6 +145,7 @@ void			test_configure(void);
 void			test_misc(void);
 void			test_ids(void);
 void			test_skiplist(void);
+void			test_sohm(void);
 void			test_unicode(void);
 
 /* Prototypes for the cleanup routines */
@@ -163,6 +164,7 @@ void                    cleanup_iterate(void);
 void                    cleanup_array(void);
 void                    cleanup_genprop(void);
 void			cleanup_configure(void);
+void			cleanup_sohm(void);
 void			cleanup_misc(void);
 void			cleanup_unicode(void);
 
@@ -170,4 +172,3 @@ void			cleanup_unicode(void);
 }
 #endif
 #endif /* TESTHDF5_H */
-

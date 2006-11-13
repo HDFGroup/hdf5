@@ -1068,7 +1068,7 @@ test_reference_group(void)
 
     /* Delete dataset object in dereferenced group (with other dataset still open) */
     ret = H5Gunlink(gid, DSETNAME2);
-    assert(ret >= 0);
+    CHECK(ret, FAIL, "H5Gunlink");
 
     /* Close objects */
     ret = H5Dclose(did);

@@ -33,8 +33,8 @@ static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
-static void *H5O_efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static void *H5O_efl_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+    void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
 
@@ -53,6 +53,7 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
     NULL,			/* link method			*/
     NULL,	  	    	/*get share method		*/
     NULL,			/*set share method		*/
+    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     H5O_efl_copy_file,		/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -435,8 +436,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *_udata)
+H5O_efl_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_type,
+    void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info,
+    void UNUSED *_udata)
 {
     H5O_efl_t     *efl_src = (H5O_efl_t *) mesg_src;
     H5O_efl_t     *efl_dst = NULL;

@@ -25,6 +25,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SMprivate.h"        /* Shared Object Header Messages        */
 
 /* PRIVATE PROTOTYPES */
 
@@ -93,6 +94,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     unsigned            obj_dir_vers;       /* Object header info version   */
     unsigned            share_head_vers;    /* Shared header info version   */
     uint8_t             sbuf[H5F_SUPERBLOCK_SIZE];     /* Local buffer                 */
+    unsigned            nindexes;           /* Number of shared message indexes */
     H5P_genplist_t     *c_plist;            /* File creation property list  */
     herr_t              ret_value = SUCCEED;
 
@@ -140,7 +142,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     if (HDF5_FREESPACE_VERSION != freespace_vers)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad free space version number")
     if (H5P_set(c_plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to free space version")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set free space version")
 
     /* Root group version number */
     obj_dir_vers = *p++;
@@ -238,6 +240,10 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
 
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->base_addr/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->freespace_addr/*out*/);
+    /* If the superblock version is greater than 1, read in the shared OH message table address */
+    if(super_vers > 1) {
+        H5F_addr_decode(f, (const uint8_t **)&p, &shared->sohm_addr/*out*/);
+    }
     H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
     if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/) < 0)
@@ -360,6 +366,38 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     if (H5FD_set_eoa(lf, stored_eoa) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
 
+    /* Decode shared object header message information and store it in the
+     * fcpl */
+    if(shared->sohm_addr != HADDR_UNDEF)
+    {
+        unsigned index_flags[H5SM_MAX_NUM_INDEXES];
+        size_t   sohm_l2b;           /* SOHM list-to-btree cutoff    */
+        size_t   sohm_b2l;           /* SOHM btree-to-list cutoff    */
+
+        /* Read in the shared OH message information if there is any */
+        if(H5SM_get_info(f, shared->sohm_addr, &nindexes, index_flags, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read SOHM table information")
+
+        HDassert(nindexes > 0 && nindexes <= H5SM_MAX_NUM_INDEXES);
+
+        /* Set values in the property list */
+        if(H5P_set(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
+        if(H5P_set(c_plist, H5F_CRT_INDEX_TYPES_NAME, index_flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
+        if(H5P_set(c_plist, H5F_CRT_SOHM_L2B_NAME, &sohm_l2b) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list");
+        if(H5P_set(c_plist, H5F_CRT_SOHM_B2L_NAME, &sohm_b2l) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list");
+    }
+    else
+    {
+        /* Shared object header messages are disabled */
+        nindexes = 0;
+        if(H5P_set(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_read_superblock() */
@@ -421,6 +459,7 @@ H5F_init_superblock(const H5F_t *f, hid_t dxpl_id)
         + 16                            /* Length of required fixed-size portion */
         + ((super_vers>0) ? 4 : 0)      /* Version specific fixed-size portion */
         + 4 * H5F_sizeof_addr(f)        /* Variable-sized addresses */
+        + (super_vers>1 ? H5F_sizeof_addr(f) : 0) + /*SOHM table address*/
         + H5G_SIZEOF_ENTRY(f);          /* Size of root group symbol table entry */
 
     /* Compute the size of the driver information block. */
@@ -429,11 +468,12 @@ H5F_init_superblock(const H5F_t *f, hid_t dxpl_id)
 	driver_size += 16; /* Driver block header */
 
     /*
-     * Allocate space for the userblock, superblock, and driver info
-     * block. We do it with one allocation request because the
-     * userblock and superblock need to be at the beginning of the
-     * file and only the first allocation request is required to
-     * return memory at format address zero.
+     * Allocate space for the userblock, superblock, driver info
+     * block, and shared object header message table. We do it with
+     * one allocation request because the userblock and superblock
+     * need to be at the beginning of the file and only the first
+     * allocation request is required to return memory at format 
+     * address zero.
      */
 
     H5_CHECK_OVERFLOW(f->shared->base_addr, haddr_t, hsize_t);
@@ -469,7 +509,8 @@ done:
  * Purpose:     Writes (and optionally allocates) the superblock for the file.
  *              If BUF is non-NULL, then write the serialized superblock
  *              information into it. It should be a buffer of size
- *              H5F_SUPERBLOCK_SIZE + H5F_DRVINFOBLOCK_SIZE or larger.
+ *              H5F_SUPERBLOCK_SIZE + H5F_DRVINFOBLOCK_SIZE
+ *              or larger.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -544,6 +585,9 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
 
     H5F_addr_encode(f, &p, f->shared->base_addr);
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
+    if(super_vers > 1) {
+      H5F_addr_encode(f, &p, f->shared->sohm_addr);
+    }
     H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
     H5F_addr_encode(f, &p, f->shared->driver_addr);
     if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp))<0)

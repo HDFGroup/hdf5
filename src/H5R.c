@@ -903,6 +903,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(H5Rget_name, FAIL)
+    H5TRACE5("Zs","iRtxsz",id,ref_type,_ref,name,size);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)

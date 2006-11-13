@@ -30,6 +30,9 @@
 #define H5S_TESTING
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
+#include "H5Dprivate.h"         /* Datasets (for EFL property name)     */
+
+
 const char *FILENAME[] = {
     "objcopy_src",
     "objcopy_dst",
@@ -104,7 +107,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
 static int
-compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth);
+compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags);
 
 
 /*-------------------------------------------------------------------------
@@ -800,7 +803,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                         break;
 
                     case H5G_GROUP:
-                        if(compare_groups(obj1_id, obj2_id, pid, -1) != TRUE) TEST_ERROR
+                        if(compare_groups(obj1_id, obj2_id, pid, -1, 0) != TRUE) TEST_ERROR
                         break;
 
                     case H5G_TYPE:
@@ -844,7 +847,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                         break;
 
                     case H5G_GROUP:
-                        if(compare_groups(obj1_id, obj2_id, pid, -1) != TRUE) TEST_ERROR
+                        if(compare_groups(obj1_id, obj2_id, pid, -1, 0) != TRUE) TEST_ERROR
                         break;
 
                     case H5G_TYPE:
@@ -906,6 +909,7 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     size_t elmt_size;                           /* Size of datatype */
     htri_t is_committed;                        /* If the datatype is committed */
     htri_t is_committed2;                       /* If the datatype is committed */
+    int ext_count;                              /* Number of external files in plist */
     int nfilters;                               /* Number of filters applied to dataset */
     hssize_t nelmts;                            /* # of elements in dataspace */
     void *rbuf = NULL;                          /* Buffer for reading raw data */
@@ -956,7 +960,43 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Open the dataset creation property list for the destination dataset */
     if((dcpl2 = H5Dget_create_plist(did2)) < 0) TEST_ERROR
 
-    /* Compare the dataset creation property lists */
+    /* If external file storage is being used, the value stored in the
+     * dcpl will be a heap ID, which is not guaranteed to be the same in
+     * source and destination files.
+     * Instead, compare the actual external file values and then
+     * delete this property from the dcpls before comparing them.
+     */
+    if((ext_count = H5Pget_external_count(dcpl)) < 0) TEST_ERROR
+
+    if(ext_count > 0)
+    {
+        unsigned x;  /* Counter varaible */
+        char name1[NAME_BUF_SIZE];
+        char name2[NAME_BUF_SIZE];
+        off_t offset1=0;
+        off_t offset2=0;
+        hsize_t size1=0;
+        hsize_t size2=0;
+
+        if(H5Pget_external_count(dcpl2) != ext_count) TEST_ERROR
+
+        /* Ensure that all external file information is the same */
+        for(x=0; x < (unsigned) ext_count; ++x)
+        {
+            if(H5Pget_external(dcpl, x, NAME_BUF_SIZE, name1, &offset1, &size1) < 0) TEST_ERROR
+            if(H5Pget_external(dcpl2, x, NAME_BUF_SIZE, name2, &offset2, &size2) < 0) TEST_ERROR
+
+            if(offset1 != offset2) TEST_ERROR
+            if(size1 != size2) TEST_ERROR
+            if(strcmp(name1, name2) != 0) TEST_ERROR
+        }
+
+        /* Remove external file information from the dcpls */
+        if(H5Premove(dcpl, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
+        if(H5Premove(dcpl2, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
+    }
+
+    /* Compare the rest of the dataset creation property lists */
     if(H5Pequal(dcpl, dcpl2) != TRUE) TEST_ERROR
 
     /* Get the number of filters on dataset */
@@ -1068,7 +1108,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
+compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
 {
     hsize_t num_objs;           /* Number of objects in group */
     hsize_t num_objs2;          /* Number of objects in group */
@@ -1122,8 +1162,18 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
             if(objstat.type != objstat2.type) TEST_ERROR
             if(objstat.type != H5G_LINK && objstat.type != H5G_UDLINK) {
                 if(objstat.nlink != objstat2.nlink) TEST_ERROR
-                if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs) TEST_ERROR
-                if(objstat.ohdr.nchunks != objstat2.ohdr.nchunks) TEST_ERROR
+
+                /* If NULL messages are preserved, the number of messages
+                 * should be the same in the destination.
+                 * Otherwise, it should simply be true that the number
+                 * of messages hasn't increased.
+                 */
+                 if(H5O_COPY_PRESERVE_NULL_FLAG & copy_flags) {
+                        if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs);
+                    else
+                        if(objstat.ohdr.nmesgs < objstat2.ohdr.nmesgs) TEST_ERROR
+                 }
+                if(1 != objstat2.ohdr.nchunks) TEST_ERROR
             } /* end if */
 
             /* Get link info */
@@ -1156,7 +1206,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth)
                     if((oid2 = H5Gopen(gid2, objname2)) < 0) TEST_ERROR
 
                     /* Compare groups */
-                    if(compare_groups(oid, oid2, pid, depth - 1) != TRUE) TEST_ERROR
+                    if(compare_groups(oid, oid2, pid, depth - 1, copy_flags) != TRUE) TEST_ERROR
 
                     /* Close groups */
                     if(H5Gclose(oid) < 0) TEST_ERROR
@@ -2600,15 +2650,8 @@ test_copy_dataset_external(hid_t fapl)
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
-/* Don't change the address in the destination file for this test, it causes the
- * external file list's heap to be at a different location and generates a false
- * negative for this test.  The test is _slightly_ weaker because of this, but
- * I can't see any easy way around it. -QAK
- */
-#if 0
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
-#endif /* 0 */
 
     /* copy the dataset from SRC to DST */
     if(H5Ocopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -2878,7 +2921,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -3017,7 +3060,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -3151,7 +3194,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -3292,7 +3335,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4061,7 +4104,7 @@ test_copy_group_empty(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4192,7 +4235,7 @@ test_copy_group(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4325,7 +4368,7 @@ test_copy_root_group(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, "/root_from_src")) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4467,7 +4510,7 @@ test_copy_group_deep(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4578,7 +4621,7 @@ test_copy_group_loop(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4707,7 +4750,7 @@ test_copy_group_wide_loop(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -4843,7 +4886,7 @@ test_copy_group_links(hid_t fapl)
     if((gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, H5P_DEFAULT, -1) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
 
     /* close the destination group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -6857,7 +6900,7 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
         /* open the destination group */
         if((gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
 
-    } else if(flag & H5O_COPY_WITHOUT_ATTR_FLAG) {
+    } else if(flag & (H5O_COPY_WITHOUT_ATTR_FLAG | H5O_COPY_PRESERVE_NULL_FLAG)) {
         if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* open the group for copy */
@@ -6890,7 +6933,7 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
     } /* end else */
 
     /* Check if the groups are equal */
-    if(compare_groups(gid, gid2, pid, depth) != TRUE) TEST_ERROR
+    if(compare_groups(gid, gid2, pid, depth, flag) != TRUE) TEST_ERROR
     if(H5Gclose(gid2) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
 
@@ -7026,6 +7069,7 @@ main(void)
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");
             nerrors += test_copy_option(my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Ocopy(): shallow group copy");
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Ocopy(): expand object reference");
+            nerrors += test_copy_option(my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Gcopy(): preserve NULL messages");
 
 /* TODO: not implemented
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");

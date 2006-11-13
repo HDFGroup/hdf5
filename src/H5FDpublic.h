@@ -39,6 +39,7 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_GHEAP      = 4,
     H5FD_MEM_LHEAP      = 5,
     H5FD_MEM_OHDR       = 6,
+    H5FD_MEM_SOHM       = 7,
 
     H5FD_MEM_NTYPES				/*must be last*/
 } H5FD_mem_t;

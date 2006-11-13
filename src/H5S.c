@@ -331,6 +331,9 @@ H5S_create(H5S_class_t type)
 
         /* Reset common selection info pointer */
         ret_value->select.sel_info.hslab=NULL;
+
+        /* Reset "shared" info on extent */
+        ret_value->extent.sh_loc.flags = 0;
     } /* end if */
 
 done:
@@ -638,6 +641,10 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
             assert("unknown data space type" && 0);
             break;
     }
+
+    /* Copy the shared object info */
+    if(NULL == H5O_copy(H5O_SHARED_ID, &(src->sh_loc), &(dst->sh_loc)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1530,6 +1537,13 @@ H5S_extend (H5S_t *space, const hsize_t *size)
         if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
             if(H5S_select_all(space, FALSE)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+
+        /* Mark the dataspace as no longer shared if it was before */
+        /* JAMES: passes in NULL for the file because the file has nothing to do with it.
+         * can I eliminate the file completely from sharing?
+         */
+        if(H5O_reset_share(NULL, H5O_SDSPACE_ID, space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
     }
 
 done:

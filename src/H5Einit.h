@@ -43,6 +43,11 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "File accessability"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FILE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SOHM_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MAJOR, "Shared Object Header Messages"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SOHM_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_SYM_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Symbol table"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -683,33 +688,6 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't compare objects"))==NULL)
 if((H5E_CANTCOMPARE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
-/* Argument errors */
-assert(H5E_UNINITIALIZED_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Information is uinitialized"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_UNINITIALIZED_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_UNSUPPORTED_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Feature is unsupported"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_UNSUPPORTED_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_BADTYPE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Inappropriate type"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_BADTYPE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_BADRANGE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Out of range"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_BADRANGE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_BADVALUE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Bad value"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_BADVALUE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-
 /* B-tree related errors */
 assert(H5E_NOTFOUND_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Object not found"))==NULL)
@@ -765,6 +743,33 @@ assert(H5E_CANTREMOVE_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to remove object"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTREMOVE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+
+/* Argument errors */
+assert(H5E_UNINITIALIZED_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Information is uinitialized"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_UNINITIALIZED_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_UNSUPPORTED_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Feature is unsupported"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_UNSUPPORTED_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_BADTYPE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Inappropriate type"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_BADTYPE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_BADRANGE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Out of range"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_BADRANGE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_BADVALUE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Bad value"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_BADVALUE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Datatype conversion errors */

@@ -2999,7 +2999,7 @@ void gent_family(void)
     H5Pclose(fapl);
 }
 
-static const char *multi_letters = "msbrglo";
+static const char *multi_letters = "msbrgloh";
 
 static
 void gent_multi(void)

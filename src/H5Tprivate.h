@@ -66,6 +66,9 @@ typedef struct H5T_conv_cb_t {
 /* Forward declarations for prototype arguments */
 struct H5O_t;
 
+/* The native endianess of the platform */
+H5_DLLVAR H5T_order_t H5T_native_order_g;
+
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
@@ -93,6 +96,7 @@ H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned ndim, const h
 H5_DLL herr_t H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t **vl_alloc_info);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
+H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

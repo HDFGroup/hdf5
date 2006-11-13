@@ -1,4 +1,4 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * *fs * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -34,6 +34,7 @@
 #include "H5Dpublic.h"          /* Dataset functions                    */
 #include "H5Lpublic.h"         /* Link functions                       */
 #include "H5Spublic.h"		/* Dataspace functions			*/
+#include "H5Lpublic.h"         /* Link functions                       */
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h"		/* File access				*/
@@ -45,20 +46,43 @@
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_t H5O_t;
 
+/* JAMES: should these be in H5SM_private?  or renamed? */
+/* JAMES: causes errors encoding/decoding if this is wrong.  Can't be constant. */
+#define H5SM_FHEAP_ID_LEN 6
+
+/* JAMES: not great? */
+typedef uint64_t H5SM_fheap_id_t;
+
+
+/* JAMES for debugging */
+#define PRINT_BUF(buf, size)                \
+    if(1) { size_t x;               \
+        for(x=0; x<size; ++x) {     \
+            printf("%d ", *(((uint8_t *) buf) + x)); \
+        } printf("\n"); }
+
+
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
 #define H5O_NEW_MESG	(-1)		/*new message			     */
 #define H5O_ALL		(-1)		/* Operate on all messages of type   */
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
 
-/* Flags which are part of a message */
+/* Flags needed when encoding messages */
 #define H5O_FLAG_CONSTANT	0x01u
 #define H5O_FLAG_SHARED		0x02u
-#define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED)
+#define H5O_FLAG_SOHM		0x04u
+#define H5O_FLAG_DONTSOHM	0x08u
+#define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED|H5O_FLAG_SOHM|H5O_FLAG_DONTSOHM)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
 #define H5O_UPDATE_DATA_ONLY    0x02u
+
+/* Hash value constants */
+/* JAMES: undefined hash value may not be great */
+#define H5O_HASH_SIZE 32
+#define H5O_HASH_UNDEF FAIL
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 			"copy object"   /* Copy options */
@@ -78,6 +102,7 @@ typedef struct H5O_copy_t {
     hbool_t expand_ext_link;            /* Flag to expand external links */
     hbool_t expand_ref;                 /* Flag to expand object references */
     hbool_t copy_without_attr;          /* Flag to not copy attributes */
+    hbool_t preserve_null;              /* Flag to not delete NULL messages */
     int curr_depth;                     /* Current depth in hierarchy copied */
     int max_depth;                      /* Maximum depth in hierarchy to copy */
     H5SL_t *map_list;                   /* Skip list to hold address mappings */
@@ -103,6 +128,31 @@ typedef struct H5O_copy_t {
 #define H5O_CONT_ID	0x0010          /* Object header continuation message.  */
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
+
+
+/* Shared object message flags.
+ * Shared objects can be committed, in which case the shared message contains
+ * the location of the object header that holds the message, or shared in the
+ * heap, in which case the shared message holds their heap ID.
+ */
+#define H5O_NOT_SHARED 0
+#define H5O_SHARED_IN_HEAP_FLAG 0x01
+#define H5O_COMMITTED_FLAG 0x02
+
+/*
+ * Shared object message.
+ * This needs to go first because other messages can be shared and
+ * include a H5O_shared_t struct
+ */
+typedef struct H5O_shared_t {
+    unsigned flags;             /* flags describing how message is shared */
+    union {
+        H5O_loc_t	oloc;		/*object location info		     */
+        H5SM_fheap_id_t heap_id;        /* ID within the SOHM heap           */
+    } u;
+    /* JAMES: add hash value? */
+} H5O_shared_t;
+
 
 /*
  * Link Info Message.
@@ -131,8 +181,8 @@ typedef struct H5O_fill_t {
 
 /*
  * New Fill Value Message.  The new fill value message is fill value plus
- * space allocation time and fill value writing time and whether fill
- * value is defined.
+ * space allocation time, fill value writing time, whether fill
+ * value is defined, and the location of the message if it's shared
  */
 
 typedef struct H5O_fill_new_t {
@@ -142,6 +192,7 @@ typedef struct H5O_fill_new_t {
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
+    H5O_shared_t        sh_loc;         /*location of shared message         */
 } H5O_fill_new_t;
 
 /*
@@ -269,6 +320,7 @@ typedef struct H5O_pline_t {
     size_t	nalloc;			/*num elements in `filter' array     */
     size_t	nused;			/*num filters defined		     */
     H5Z_filter_info_t *filter;		/*array of filters		     */
+    H5O_shared_t        sh_loc;         /*location of shared message         */
 } H5O_pline_t;
 
 /*
@@ -279,16 +331,6 @@ typedef struct H5O_pline_t {
 typedef struct H5O_name_t {
     char	*s;			/*ptr to malloc'd memory	     */
 } H5O_name_t;
-
-/*
- * Shared object message.  This message ID never really appears in an object
- * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
- * will be the ID of the pointed-to message.
- */
-
-typedef struct H5O_shared_t {
-    H5O_loc_t	oloc;			/*object location info		     */
-} H5O_shared_t;
 
 /*
  * Object header continuation message.
@@ -342,12 +384,12 @@ H5_DLL htri_t H5O_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
 H5_DLL void *H5O_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 H5_DLL int H5O_modify(H5O_loc_t *loc, unsigned type_id,
-    int overwrite, unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id);
+    int overwrite, unsigned flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL struct H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, struct H5O_t *oh, hid_t dxpl_id,
     unsigned oh_flags);
 H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
-    unsigned flags, const void *mesg, unsigned * oh_flags_ptr);
+    unsigned flags, void *mesg, unsigned * oh_flags_ptr);
 H5_DLL herr_t H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
     hbool_t force, unsigned *oh_flags_ptr);
@@ -371,6 +413,10 @@ H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg,
     size_t extra_raw);
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+H5_DLL htri_t H5O_is_shared(unsigned type_id, const void *mesg);
+H5_DLL herr_t H5O_set_share(H5F_t *f, hid_t dxpl_id, H5O_shared_t *share,
+    unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_reset_share(H5F_t *f, unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
@@ -385,6 +431,7 @@ H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id
     H5O_copy_t *cpy_info);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
+H5_DLL uint32_t H5O_mesg_hash(unsigned type_id, H5F_t *f, const void *mesg);
 
 /*
  * These functions operate on object locations

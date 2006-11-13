@@ -44,8 +44,9 @@ static herr_t H5O_link_free(void *_mesg);
 static herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
-static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static void *H5O_link_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
+    void *udata);
 static herr_t H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_link_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -66,6 +67,7 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
+    NULL, 			/*is shared method		*/
     H5O_link_pre_copy_file,	/* pre copy native value to file */
     H5O_link_copy_file,		/* copy native value to file    */
     H5O_link_post_copy_file,	/* post copy native value to file    */
@@ -572,8 +574,9 @@ H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *typ
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst,
-    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+H5O_link_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_type,
+    void *native_src, H5F_t UNUSED *file_dst, hid_t UNUSED dxpl_id,
+    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_link_t  *link_src = (H5O_link_t *)native_src;
     H5O_link_t  *link_dst = NULL;

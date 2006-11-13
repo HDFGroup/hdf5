@@ -578,8 +578,11 @@ H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
             break;
         }
     }
-    heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
-    heap->obj = H5FL_SEQ_FREE(H5HG_obj_t,heap->obj);
+
+    if(heap->chunk)
+        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+    if(heap->obj)
+        heap->obj = H5FL_SEQ_FREE(H5HG_obj_t,heap->obj);
     H5FL_FREE (H5HG_heap_t,heap);
 
     FUNC_LEAVE_NOAPI(SUCCEED);

@@ -341,6 +341,12 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version" /* Free-space version number            */
 #define H5F_CRT_OBJ_DIR_VERS_NAME     "obj_dir_version" /* Object directory version number      */
 #define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version" /* Shared-header format version         */
+#define H5F_CRT_SOHM_NINDEXES_NAME    "num_sohm_indexes" /* Number of shared object header message indexes */
+#define H5F_CRT_INDEX_TYPES_NAME      "sohm_message_types" /* Types of message in each index */
+#define H5F_CRT_SOHM_L2B_NAME      "sohm_list_to_btree"  /* SOHM list maximum size */
+#define H5F_CRT_SOHM_B2L_NAME      "sohm_btree_to_list"  /* SOHM B-tree minimum size */
+
+
 
 /* ========= File Access properties ============ */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg" /* Initial metadata cache resize configuration */

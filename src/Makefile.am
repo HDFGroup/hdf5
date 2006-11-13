@@ -65,8 +65,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Pgcpl.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pstrcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
-        H5Sselect.c H5Stest.c \
-        H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
+        H5Sselect.c H5Stest.c H5SL.c H5SM.c H5SMbtree2.c \
+        H5SMcache.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c \
@@ -83,7 +83,7 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
+        H5SMpublic.h H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

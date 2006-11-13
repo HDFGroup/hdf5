@@ -27,6 +27,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 /* PRIVATE PROTOTYPES */
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
@@ -224,7 +225,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     H5A_t	    *attr = NULL;
     H5A_iter_cb1     cb;                    /* Iterator callback */
     H5P_genplist_t  *ac_plist=NULL;      /* New Property list */
-    hid_t	    ret_value = FAIL;
+    H5O_shared_t     sh_mesg;
+    htri_t           tri_ret;            /* htri_t return value */
+    hid_t	     ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_create)
 
@@ -233,6 +236,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     HDassert(name);
     HDassert(type);
     HDassert(space);
+
+    /* Reset shared message information */
+    HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
 
     /* Iterate over the existing attributes to check for duplicates */
     cb.name = name;
@@ -287,24 +293,57 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy path")
 
-    /* Compute the size of pieces on disk */
-    if(H5T_committed(attr->dt)) {
-        H5O_shared_t	sh_mesg;
+    /* Check if any of the pieces should be (or are already) shared in the
+     * SOHM table */
+    /* Data type */
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_DTYPE_ID, attr->dt) <0)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed");
 
-        /* Reset shared message information */
-        HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+    /* Data space */
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_SDSPACE_ID, attr->ds) <0)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed");
 
-        /* Get shared message information for datatype */
-        if(H5O_get_share(H5O_DTYPE_ID, attr->oloc.file, type, &sh_mesg/*out*/) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
-        /* Compute shared message size for datatype */
+    /* Compute the size of pieces on disk.  This is either the size of the
+     * datatype and dataspace messages themselves, or the size of the "shared"
+     * messages if either or both of them are shared.
+     */
+    if((tri_ret = H5O_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE)
+    {
+        /* Message wasn't shared after all. Use size of normal datatype
+         * message. */
+        attr->dt_size = H5O_raw_size(H5O_DTYPE_ID, attr->oloc.file, attr->dt);
+    }
+    else if(tri_ret > 0)
+    {
+        /* Message is shared.  Use size of shared message */
+        if(H5O_get_share(H5O_DTYPE_ID, attr->oloc.file, attr->dt, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
+
         attr->dt_size = H5O_raw_size(H5O_SHARED_ID, attr->oloc.file, &sh_mesg);
-    } /* end if */
+    }
     else
-        attr->dt_size = H5O_raw_size(H5O_DTYPE_ID, attr->oloc.file, type);
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if dataspace is shared")
+
+    /* Perform the same test for the dataspace message */
+    if((tri_ret = H5O_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE)
+    {
+        /* Message wasn't shared after all. Use size of normal dataspace
+         * message. */
+        attr->ds_size = H5O_raw_size(H5O_SDSPACE_ID, attr->oloc.file, attr->ds);
+    }
+    else if(tri_ret > 0)
+    {
+        /* Message is shared.  Use size of shared message */
+        if(H5O_get_share(H5O_SDSPACE_ID, attr->oloc.file, attr->ds, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
+
+        attr->ds_size = H5O_raw_size(H5O_SHARED_ID, attr->oloc.file, &sh_mesg);
+    }
+    else
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if datatype is shared")
+
     HDassert(attr->dt_size > 0);
-    attr->ds_size = H5S_raw_size(attr->oloc.file, space);
     HDassert(attr->ds_size > 0);
     H5_ASSIGN_OVERFLOW(attr->data_size, H5S_GET_EXTENT_NPOINTS(attr->ds) * H5T_get_size(attr->dt), hssize_t, size_t);
 
@@ -1617,6 +1656,7 @@ H5A_free(H5A_t *attr)
     /* Free dynamicly allocated items */
     if(attr->name)
         H5MM_xfree(attr->name);
+
     if(attr->dt)
         if(H5T_close(attr->dt) < 0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")

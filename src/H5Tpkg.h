@@ -41,6 +41,7 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5SMprivate.h"	/* Shared Messages			*/
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -327,8 +328,8 @@ typedef struct H5T_shared_t {
 
 struct H5T_t {
     H5T_shared_t   *shared; /* all other information */
-    H5O_loc_t       oloc;   /* object location information if the type is a named type */
     H5G_name_t      path;   /* group hier. path if the type is a named type */
+    H5O_shared_t    sh_loc; /* shared object message if this is a shared type*/
 };
 
 /* A compound datatype member */
@@ -352,9 +353,6 @@ typedef enum H5T_sdir_t {
     H5T_BIT_LSB,			/*search lsb toward msb		     */
     H5T_BIT_MSB				/*search msb toward lsb		     */
 } H5T_sdir_t;
-
-/* The native endianess of the platform */
-H5_DLLVAR H5T_order_t H5T_native_order_g;
 
 /*
  * Alignment information for native types. A value of N indicates that the

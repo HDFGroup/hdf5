@@ -45,6 +45,11 @@ static void  *H5O_fill_copy(const void *_mesg, void *_dest, unsigned update_flag
 static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
+static herr_t H5O_fill_new_get_share (H5F_t *f, const void *_mesg,
+    H5O_shared_t *sh);
+static herr_t H5O_fill_new_set_share (H5F_t *f, void *_mesg,
+    const H5O_shared_t *sh);
+static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
@@ -56,17 +61,18 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_fill_decode,            /*decode message                        */
     H5O_fill_encode,            /*encode message                        */
     H5O_fill_copy,              /*copy the native value                 */
-    H5O_fill_size,              /*raw message size                      */
-    H5O_fill_reset,             /*free internal memory                  */
-    H5O_fill_free,		/* free method			*/
-    NULL,		        /* file delete method		*/
-    NULL,			/* link method			*/
-    NULL,                       /*get share method                      */
-    NULL,                       /*set share method                      */
-    NULL,			/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
-    NULL,			/* post copy native value to file    */
-    H5O_fill_debug              /*debug the message                     */
+    H5O_fill_size,              /*raw message size			*/
+    H5O_fill_reset,             /*free internal memory			*/
+    H5O_fill_free,		/* free method				*/
+    NULL,		        /* file delete method			*/
+    NULL,			/* link method				*/
+    H5O_fill_new_get_share,	/* get share method			*/
+    H5O_fill_new_set_share,	/* set share method			*/
+    H5O_fill_new_is_shared,	/* is shared method			*/
+    NULL,			/* pre copy native value to file	*/
+    NULL,			/* copy native value to file		*/
+    NULL,			/* post copy native value to file	*/
+    H5O_fill_debug              /*debug the message			*/
 }};
 
 /* This message derives from H5O message class, for new fill value after version 1.4  */
@@ -79,14 +85,15 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_fill_new_copy,		/*copy the native value			*/
     H5O_fill_new_size,		/*raw message size			*/
     H5O_fill_new_reset,		/*free internal memory			*/
-    H5O_fill_new_free,		/* free method			*/
-    NULL,		        /* file delete method		*/
-    NULL,			/* link method			*/
-    NULL,			/*get share method			*/
-    NULL,			/*set share method			*/
-    NULL,			/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
-    NULL,			/* post copy native value to file    */
+    H5O_fill_new_free,		/* free method				*/
+    NULL,		        /* file delete method			*/
+    NULL,			/* link method				*/
+    H5O_fill_new_get_share,	/* get share method			*/
+    H5O_fill_new_set_share,	/* set share method			*/
+    H5O_fill_new_is_shared,	/* is shared method			*/
+    NULL,			/* pre copy native value to file	*/
+    NULL,			/* copy native value to file		*/
+    NULL,			/* post copy native value to file	*/
     H5O_fill_new_debug		/*debug the message			*/
 }};
 
@@ -349,6 +356,10 @@ H5O_fill_new_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     if(!dest && NULL == (dest = H5FL_MALLOC(H5O_fill_new_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message")
 
+    /* Copy shared message information */
+    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), &(dest->sh_loc)))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to copy fill value shared info");
+
     /* Copy data type of fill value */
     if(mesg->type) {
         if(NULL == (dest->type = H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
@@ -607,7 +618,7 @@ H5O_fill_reset(void *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -625,6 +636,7 @@ H5O_fill_new_free (void *mesg)
 
     HDassert(mesg);
 
+    /* JAMES: should this free the O_loc? */
     H5FL_FREE(H5O_fill_new_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -634,7 +646,7 @@ H5O_fill_new_free (void *mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -657,6 +669,106 @@ H5O_fill_free (void *mesg)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_new_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_fill_new_get_share
+ *
+ * Purpose:	Gets sharing information from the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 10, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
+		     H5O_shared_t *sh /*out*/)
+{
+    H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
+    herr_t       ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_get_share);
+
+    HDassert (mesg);
+    HDassert (sh);
+
+    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_fill_new_get_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_fill_new_set_share
+ *
+ * Purpose:	Sets sharing information for the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 10, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
+		     const H5O_shared_t *sh)
+{
+    H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
+    herr_t       ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_set_share);
+
+    HDassert (mesg);
+    HDassert (sh);
+
+    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_fill_new_is_shared
+ *
+ * Purpose:	Determines if this fill value is shared (committed or a SOHM)
+ *              or not.
+ *
+ * Return:	TRUE if fill value is shared
+ *              FALSE if fill value is not shared
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Monday, October 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_fill_new_is_shared(const void *_mesg)
+{
+    H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
+    htri_t       ret_value;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_is_shared)
+
+    HDassert(mesg);
+
+    /* Fill values can't currently be committed, but this should let the
+     * library read a "committed fill value" if we ever create one in
+     * the future.
+     */
+    if(mesg->sh_loc.flags & (H5O_COMMITTED_FLAG | H5O_SHARED_IN_HEAP_FLAG))
+        ret_value = TRUE;
+    else
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5O_fill_new_is_shared */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_debug

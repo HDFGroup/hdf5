@@ -31,6 +31,11 @@ static void *H5O_sdspace_copy(const void *_mesg, void *_dest, unsigned update_fl
 static size_t H5O_sdspace_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_reset(void *_mesg);
 static herr_t H5O_sdspace_free (void *_mesg);
+static herr_t H5O_sdspace_get_share (H5F_t *f, const void *_mesg,
+            H5O_shared_t *sh);
+static herr_t H5O_sdspace_set_share (H5F_t *f, void *_mesg,
+            const H5O_shared_t *sh);
+static htri_t H5O_sdspace_is_shared (const void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
@@ -47,8 +52,9 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_sdspace_free,		/* free method				*/
     NULL,		        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/* get share method			*/
-    NULL, 			/* set share method			*/
+    H5O_sdspace_get_share,    	/* get share method			*/
+    H5O_sdspace_set_share,	/* set share method			*/
+    H5O_sdspace_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -440,6 +446,106 @@ H5O_sdspace_free (void *mesg)
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_sdspace_get_share
+ *
+ * Purpose:	Gets sharing information from the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 10, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_sdspace_get_share(H5F_t UNUSED *f, const void *_mesg,
+		     H5O_shared_t *sh /*out*/)
+{
+    H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
+    herr_t       ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_get_share);
+
+    HDassert (mesg);
+    HDassert (sh);
+
+
+    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_sdspace_set_share
+ *
+ * Purpose:	Sets sharing information for the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 10, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_sdspace_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
+		     const H5O_shared_t *sh)
+{
+    H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
+    herr_t       ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_set_share);
+
+    HDassert (mesg);
+    HDassert (sh);
+
+    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_sdspace_is_shared
+ *
+ * Purpose:	Determines if this dataspace is shared (committed or a SOHM)
+ *              or not.
+ *
+ * Return:	TRUE if dataspace is shared
+ *              FALSE if dataspace is not shared
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Monday, October 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_sdspace_is_shared (const void *_mesg)
+{
+    H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
+    htri_t       ret_value;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_is_shared)
+
+    HDassert(mesg);
+
+    /* Dataspaces can't currently be committed, but this should let the
+     * library read a "committed dataspace" if we ever create one in
+     * the future.
+     */
+    if(mesg->sh_loc.flags & (H5O_COMMITTED_FLAG | H5O_SHARED_IN_HEAP_FLAG))
+        ret_value = TRUE;
+    else
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5O_sdspace_is_shared */
 
 /*--------------------------------------------------------------------------
  NAME

@@ -379,7 +379,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  *				letters `s' (H5FD_MEM_SUPER),
  *				`b' (H5FD_MEM_BTREE), `r' (H5FD_MEM_DRAW),
  * 				`g' (H5FD_MEM_GHEAP), 'l' (H5FD_MEM_LHEAP),
- * 				`o' (H5FD_MEM_OHDR).
+ * 				`o' (H5FD_MEM_OHDR), 'h' (H5FD_MEM_SOHM).
  *
  * 		memb_addr:	The value HADDR_UNDEF for each element.
  *
@@ -439,7 +439,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     char		_memb_name[H5FD_MEM_NTYPES][16];
     const char		*_memb_name_ptrs[H5FD_MEM_NTYPES];
     haddr_t		_memb_addr[H5FD_MEM_NTYPES];
-    static const char	*letters = "Xsbrglo";
+    static const char	*letters = "Xsbrglom";
     static const char *func="H5FDset_fapl_multi";  /* Function Name for error reporting */
 
     /*NO TRACE*/
@@ -776,10 +776,9 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     strncpy(name, "NCSAmulti", (size_t)8);
     name[8] = '\0';
 
-    assert(7==H5FD_MEM_NTYPES);
+    assert(8==H5FD_MEM_NTYPES);
     for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m=(H5FD_mem_t)(m+1))
         buf[m-1] = (unsigned char)file->fa.memb_map[m];
-    buf[6] = 0;
     buf[7] = 0;
 
     /*

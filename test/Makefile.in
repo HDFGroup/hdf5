@@ -297,8 +297,9 @@ am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	th5s.$(OBJEXT) theap.$(OBJEXT) tid.$(OBJEXT) \
 	titerate.$(OBJEXT) tmeta.$(OBJEXT) tmisc.$(OBJEXT) \
 	ttime.$(OBJEXT) trefer.$(OBJEXT) trefstr.$(OBJEXT) \
-	tselect.$(OBJEXT) tskiplist.$(OBJEXT) ttst.$(OBJEXT) \
-	tunicode.$(OBJEXT) tvltypes.$(OBJEXT) tvlstr.$(OBJEXT)
+	tselect.$(OBJEXT) tsohm.$(OBJEXT) tskiplist.$(OBJEXT) \
+	ttst.$(OBJEXT) tunicode.$(OBJEXT) tvltypes.$(OBJEXT) \
+	tvlstr.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
@@ -668,7 +669,7 @@ ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       
 # Sources for testhdf5 executable
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c ttime.c \
-    trefer.c trefstr.c  tselect.c tskiplist.c ttst.c tunicode.c tvltypes.c \
+    trefer.c trefstr.c tselect.c tsohm.c tskiplist.c ttst.c tunicode.c tvltypes.c \
     tvlstr.c
 
 
@@ -990,6 +991,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trefstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tselect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tskiplist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsohm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_acreate.Po@am__quote@

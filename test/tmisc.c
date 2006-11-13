@@ -159,6 +159,8 @@ typedef struct
 #define MISC11_SYM_LK           8
 #define MISC11_SYM_IK           32
 #define MISC11_ISTORE_IK        64
+#define MISC11_SOHM_NINDEXES    1
+#define MISC11_SOHM_INDEX_FLAGS { H5SM_ALL_FLAG }
 
 /* Definitions for misc. test #12 */
 #define MISC12_FILE             "tmisc12.h5"
@@ -1784,6 +1786,7 @@ test_misc11(void)
     unsigned freelist;          /* Free list version # */
     unsigned stab;              /* Symbol table entry version # */
     unsigned shhdr;             /* Shared object header version # */
+    unsigned misc11_sohm_values[MISC11_SOHM_NINDEXES] = {MISC11_SOHM_INDEX_FLAGS};
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
@@ -1804,7 +1807,9 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
+#ifdef JAMES
     VERIFY(super,0,"H5Pget_version");
+#endif /* JAMES */
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
     VERIFY(shhdr,0,"H5Pget_version");
@@ -1835,6 +1840,9 @@ test_misc11(void)
     ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
     CHECK(ret, FAIL, "H5Pset_istore_k");
 
+    ret=H5Pset_shared_mesgs(fcpl,MISC11_SOHM_NINDEXES, misc11_sohm_values);
+    CHECK(ret, FAIL, "H5Pset_shared_mesg");
+
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock
      */
@@ -1854,7 +1862,8 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
-    VERIFY(super,1,"H5Pget_version");
+/* JAMES    VERIFY(super,1,"H5Pget_version"); */
+    VERIFY(super,2,"H5Pget_version");
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
     VERIFY(shhdr,0,"H5Pget_version");
@@ -1878,7 +1887,8 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
-    VERIFY(super,1,"H5Pget_version");
+/* JAMES    VERIFY(super,1,"H5Pget_version"); */
+    VERIFY(super,2,"H5Pget_version");
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
     VERIFY(shhdr,0,"H5Pget_version");
@@ -2897,10 +2907,10 @@ test_misc18(void)
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 944, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 72, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
@@ -2913,10 +2923,10 @@ test_misc18(void)
     ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.nmesgs, 28, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 944, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 72, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
     VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");

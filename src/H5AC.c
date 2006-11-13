@@ -488,6 +488,8 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "fractal heap indirect blocks",
     "free space headers",
     "free space sections",
+    "shared OH message master table",
+    "shared OH message index",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

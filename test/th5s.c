@@ -954,6 +954,10 @@ test_h5s_compound_scalar_read(void)
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
 
+    /* Close datatype JAMES
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+*/
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");

@@ -31,6 +31,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5SMprivate.h"        /* Shared Object Header messages        */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/*temporary in-memory files		*/
@@ -921,6 +922,8 @@ static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t	*f = NULL, *ret_value;
+    unsigned    sohm_indexes; /* JAMES: necessary? */
+    unsigned    super_vers = HDF5_SUPERBLOCK_VERSION_DEF;
     H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
@@ -940,6 +943,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
+	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
         f->shared->lf = lf;
 
@@ -963,18 +967,22 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
 
         /* Check for non-default indexed storage B-tree internal 'K' value
-         * and increment the version # of the superblock if it is a non-default
+         * and set the version # of the superblock to 1 if it is a non-default
          * value.
          */
         if(f->shared->btree_k[H5B_ISTORE_ID]!=HDF5_BTREE_ISTORE_IK_DEF) {
-            unsigned super_vers=HDF5_SUPERBLOCK_VERSION_MAX; /* Super block version */
-            H5P_genplist_t *c_plist;              /* Property list */
+            super_vers= HDF5_SUPERBLOCK_VERSION_1 ; /* Super block version 1 */
+        }
 
-            if(NULL == (c_plist = H5I_object(f->shared->fcpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
-            if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
-        } /* end if */
+        /* The shared object header message table gets created later, but if
+         * it is present we should use version 2 of the superblock.
+         */
+        if(H5P_get(plist, H5F_CRT_SOHM_NINDEXES_NAME, &sohm_indexes)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
+
+        if(sohm_indexes > 0) {
+            super_vers= HDF5_SUPERBLOCK_VERSION_2; /* Super block version 2 */
+        }
 
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
@@ -998,6 +1006,17 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+
+        /* If a newer super block version is required, set it here */
+        if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF)
+        {
+            H5P_genplist_t *c_plist;              /* Property list */
+
+            if(NULL == (c_plist = H5I_object(f->shared->fcpl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
+            if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
+        }
 
 	/*
 	 * Create a meta data cache with the specified number of elements.
@@ -1255,7 +1274,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
+    H5P_genplist_t     *c_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    unsigned            num_sohm_indexes;   /*number of SOHM indexes        */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
@@ -1385,14 +1406,29 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(H5F_init_superblock(file, dxpl_id) == 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
+         /* Create the Shared Object Header Message table and register it with the
+          * metadata cache */
+         /* JAMES: hack.  Should check f->shared directly? */
+        if(NULL == (c_plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+        if(H5P_get(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &num_sohm_indexes)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SOHM information")
+
+        if(num_sohm_indexes > 0)
+        {
+          if(H5SM_init(file, c_plist, dxpl_id) <0)
+              HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create SOHM table")
+        }
+
         /* Create and open the root group */
         /* (This must be after the space for the superblock is allocated in
-         *      the file)
+         *      the file and after the SOHM table has been created)
          */
         if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
-        /* Write the superblock to the file */
+         /* Write the superblock to the file */
         /* (This must be after the root group is created, since the root
          *      group's symbol table entry is part of the superblock)
          */

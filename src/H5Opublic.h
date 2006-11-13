@@ -38,7 +38,8 @@
 #define H5O_COPY_EXPAND_EXT_LINK_FLAG   (0x0004u)   /* Expand external links into new objects */
 #define H5O_COPY_EXPAND_REFERENCE_FLAG	(0x0008u)   /* Copy objects that are pointed by references */
 #define H5O_COPY_WITHOUT_ATTR_FLAG      (0x0010u)   /* Copy object without copying attributes */
-#define H5O_COPY_ALL                    (0x001Fu)   /* All object copying flags (for internal checking) */
+#define H5O_COPY_PRESERVE_NULL_FLAG     (0x0020u)   /* Copy NULL messages (empty space) */
+#define H5O_COPY_ALL                    (0x003Fu)   /* All object copying flags (for internal checking) */
 
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */

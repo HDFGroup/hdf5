@@ -41,8 +41,6 @@ static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
 static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_cont_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -61,8 +59,9 @@ const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
+    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
-    H5O_cont_copy_file,  	/* copy native value to file    */
+    NULL,			/* copy native value to file    */
     NULL, 		 	/* post copy native value to file    */
     H5O_cont_debug         	/*debugging                     */
 }};
@@ -246,56 +245,6 @@ H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj_l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cont_delete() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5O_cont_copy_file
- *
- * Purpose:     Copies a continuation block message from _MESG to _DEST in file
- *
- * Return:      Success:        Ptr to _DEST
- *
- *              Failure:        NULL
- *
- * Programmer:  Peter Cao
- *              September 22, 2005
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5O_cont_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t UNUSED *file_dst,
-    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void *udata)
-{
-    H5O_cont_t  *cont_src = (H5O_cont_t *)mesg_src;
-    H5O_chunk_t *chunk = (H5O_chunk_t *)udata;
-    H5O_cont_t  *cont_dst = NULL;
-    void        *ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_cont_copy_file)
-
-    /* check args */
-    HDassert(cont_src);
-
-    /* Allocate space for the destination cont */
-    if(NULL == (cont_dst = H5FL_MALLOC(H5O_cont_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Shallow copy all the fields */
-    *cont_dst = *cont_src;
-
-    /* Update the destination address to point to correct address in dest. file */
-    cont_dst->addr = chunk[cont_src->chunkno].addr;
-
-    /* Set return value */
-    ret_value = cont_dst;
-
-done:
-    if(!ret_value)
-        if(cont_dst)
-            H5FL_FREE(H5O_cont_t, cont_dst);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_cont_copy_file() */
 
 
 /*-------------------------------------------------------------------------

@@ -43,8 +43,8 @@ static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags
 static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static void *H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, 
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -65,6 +65,7 @@ const H5O_msg_class_t H5O_MSG_STAB[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
+    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     H5O_stab_copy_file,		/* copy native value to file    */
     H5O_stab_post_copy_file,	/* post copy native value to file    */
@@ -309,8 +310,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, 
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id,
+    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
     H5O_stab_t          *stab_dst = NULL;

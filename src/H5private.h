@@ -265,7 +265,9 @@
 
 /* Version #'s of the major components of the file format */
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
-#define HDF5_SUPERBLOCK_VERSION_MAX	1	/* The maximum super block format	  */
+#define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
+#define HDF5_SUPERBLOCK_VERSION_2	2	/* Version with implicit shared OH messages */
+#define HDF5_SUPERBLOCK_VERSION_MAX	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format	  */
 #define HDF5_FREESPACE_VERSION	0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION 0	/* of the Shared-Header Info	  */

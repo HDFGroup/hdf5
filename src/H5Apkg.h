@@ -56,6 +56,7 @@ struct H5A_t {
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
     H5T_cset_t  encoding;   /* Character encoding of attribute */
+    H5O_shared_t sh_loc;    /*location of shared message         */
 };
 
 /* Declare extern the free list for H5A_t's */

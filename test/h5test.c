@@ -86,8 +86,9 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  *	g: Global heap
  *	l: local heap (object names)
  *	o: object headers
+ *	h: shared object header message structures
  */
-static const char *multi_letters = "msbrglo";
+static const char *multi_letters = "msbrgloh";
 
 static herr_t h5_errors(void *client_data);
 
@@ -692,7 +693,6 @@ h5_show_hostname(void)
     WSACleanup();
 #endif
 }
-
 
 #ifdef H5_HAVE_PARALLEL
 /*
