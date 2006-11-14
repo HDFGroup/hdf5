@@ -29,10 +29,10 @@
 
 # HDF5 currently uses the following versions of the autotools:
 AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.60"
-AUTOMAKE_VERSION="automake (GNU automake) 1.9.6"
+AUTOMAKE_VERSION="automake (GNU automake) 1.9.5"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.60"
-ACLOCAL_VERSION="aclocal (GNU automake) 1.9.6"
-LIBTOOL_VERSION="(GNU libtool) 1.5.22"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.9.5"
+LIBTOOL_VERSION="(GNU libtool) 1.5.14"
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
@@ -41,9 +41,9 @@ LIBTOOL_VERSION="(GNU libtool) 1.5.22"
 kagiso=`hostname | grep "^kagiso"`
 if test "x${kagiso}" != "x"; then
   AUTOCONF=/home1/packages/autoconf/autoconf-2.60/bin/autoconf
-  AUTOMAKE=/home1/packages/automake/automake-1.9.6/bin/automake-1.9
+  AUTOMAKE=/home1/packages/automake/automake-1.9.5-2/bin/automake-1.9
   AUTOHEADER=/home1/packages/autoconf/autoconf-2.60/bin/autoheader
-  ACLOCAL=/home1/packages/automake/automake-1.9.6/bin/aclocal-1.9
+  ACLOCAL=/home1/packages/automake/automake-1.9.5-2/bin/aclocal-1.9
   # When using the default settings, add the correct version of autoconf
   # binaries to path (otherwise aclocal may find an outdated version of
   # autom4ate and complain about an
@@ -52,7 +52,7 @@ if test "x${kagiso}" != "x"; then
   # Use the latest version of M4
   PATH=/home1/packages/m4/m4-1.4.7/bin:/home1/packages/m4/m4-1.4.7/share:$PATH
   # Libtool is used to supply macros that aclocal uses
-  LIBTOOL=/home1/packages/libtool/libtool-1.5.22/bin/libtool
+  LIBTOOL=/home1/packages/libtool/libtool-1.5.14/bin/libtool
 fi
 
 # If we're on some other machine and automake et. al. aren't specified, guess
@@ -64,16 +64,16 @@ if test -z ${AUTOCONF}; then
   AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf-2.60/bin/autoconf
 fi
 if test -z ${AUTOMAKE}; then
-  AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake-1.9.6/bin/automake-1.9
+  AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9
 fi
 if test -z ${AUTOHEADER}; then
   AUTOHEADER=/afs/ncsa/projects/hdf/packages/autoconf-2.60/bin/autoheader
 fi
 if test -z ${ACLOCAL}; then
-  ACLOCAL=/afs/ncsa/projects/hdf/packages/automake-1.9.6/bin/aclocal-1.9
+  ACLOCAL=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/afs/ncsa/projects/hdf/packages/libtool-1.5.22/bin/libtool
+  LIBTOOL=/afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/bin/libtool
 fi
 
 # Check version numbers of all autotools against the "correct" versions
