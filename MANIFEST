@@ -627,6 +627,12 @@
 ./src/H5Stest.c
 ./src/H5SL.c
 ./src/H5SLprivate.h
+./src/H5SM.c
+./src/H5SMbtree2.c
+./src/H5SMcache.c
+./src/H5SMpkg.h
+./src/H5SMprivate.h
+./src/H5SMpublic.h
 ./src/H5ST.c
 ./src/H5STprivate.h
 ./src/H5T.c
@@ -777,6 +783,7 @@
 ./test/trefstr.c
 ./test/tselect.c
 ./test/tskiplist.c
+./test/tsohm.c
 ./test/ttst.c
 ./test/ttsafe.c
 ./test/ttsafe.h
