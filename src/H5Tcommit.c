@@ -135,7 +135,7 @@ done:
      * before it was committed. */
     if(TRUE == uncommit) {
 #ifdef JAMES
-        // JAMES: I'm not convinced that this really works anyway
+        /* JAMES: I'm not convinced that this really works anyway */
 	if(type->shared->state == H5T_STATE_OPEN && type->sh_loc.flags & H5O_COMMITTED_FLAG)) {
             /* Remove the datatype from the list of opened objects in the file */
             if(H5FO_top_decr(type->oloc.file, type->oloc.addr) < 0)
