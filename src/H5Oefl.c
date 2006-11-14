@@ -88,23 +88,23 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     H5O_efl_t		*mesg = NULL;
     int			version;
     const char		*s = NULL;
-    const H5HL_t        *heap;
+    H5HL_t              *heap;
     size_t		u;      /* Local index variable */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_decode)
 
     /* Check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
-    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_efl_t))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_efl_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
     version = *p++;
-    if (version!=H5O_EFL_VERSION)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for external file list message");
+    if(version != H5O_EFL_VERSION)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for external file list message")
 
     /* Reserved */
     p += 3;
@@ -119,56 +119,58 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
 
 #ifndef NDEBUG
-    assert (H5F_addr_defined(mesg->heap_addr));
+    HDassert(H5F_addr_defined(mesg->heap_addr));
 
-    if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
 
     s = H5HL_offset_into(f, heap, 0);
 
-    assert (s && !*s);
+    HDassert(s && !*s);
 
-    if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
+    heap = NULL;
 #endif
 
     /* Decode the file list */
-    mesg->slot = H5MM_calloc(mesg->nalloc*sizeof(H5O_efl_entry_t));
-    if (NULL==mesg->slot)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    for (u=0; u<mesg->nused; u++) {
+    mesg->slot = H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
+    if(NULL == mesg->slot)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
+    for(u = 0; u < mesg->nused; u++) {
 	/* Name */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].name_offset);
 
-        if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
-
         s = H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
-	assert (s && *s);
+	HDassert(s && *s);
 	mesg->slot[u].name = H5MM_xstrdup (s);
-        assert(mesg->slot[u].name);
-
-        if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
+        HDassert(mesg->slot[u].name);
 
 	/* File offset */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].offset);
 
 	/* Size */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].size);
-	assert (mesg->slot[u].size>0);
-    }
+	HDassert(mesg->slot[u].size > 0);
+    } /* end for */
+
+    if(H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
+    heap = NULL;
 
     /* Set return value */
-    ret_value=mesg;
+    ret_value = mesg;
 
 done:
-    if(ret_value==NULL) {
-        if(mesg!=NULL)
-            H5MM_xfree (mesg);
-    } /* end if */
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    if(ret_value == NULL)
+        if(mesg != NULL)
+            H5MM_xfree(mesg);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_efl_decode() */
 
 
 /*-------------------------------------------------------------------------

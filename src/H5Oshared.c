@@ -590,6 +590,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_shared_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files for shared messages.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Peter Cao
+ *              Saturday, February 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+    void *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    void *udata)
+{
+    H5O_shared_t   *shared_src = (H5O_shared_t *)native_src;
+    void           *mesg_native = NULL;
+    herr_t         ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_pre_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(type);
+
+    if(type->pre_copy_file) {
+        /* Go get the actual shared message */
+        if(NULL == (mesg_native = H5O_shared_read(file_src, H5AC_dxpl_id, shared_src, type, NULL)))
+            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to load object header")
+
+        /* Perform "pre copy" operation on messge */
+        if((type->pre_copy_file)(file_src, type, mesg_native, deleted, cpy_info, udata) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
+    } /* end of if */
+
+done:
+    if(mesg_native)
+        H5O_free_real(type, mesg_native);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_pre_copy_file() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_shared_copy_file
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
@@ -676,54 +724,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_shared_copy_file() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5O_shared_pre_copy_file
- *
- * Purpose:     Perform any necessary actions before copying message between
- *              files for shared messages.
- *
- * Return:      Success:        Non-negative
- *
- *              Failure:        Negative
- *
- * Programmer:  Peter Cao
- *              Saturday, February 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
-    void *udata)
-{
-    H5O_shared_t   *shared_src = (H5O_shared_t *)native_src;
-    void           *mesg_native = NULL;
-    herr_t         ret_value = SUCCEED;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_pre_copy_file)
-
-    /* check args */
-    HDassert(file_src);
-    HDassert(type);
-
-    if(type->pre_copy_file) {
-        /* Go get the actual shared message */
-        if(NULL == (mesg_native = H5O_shared_read(file_src, H5AC_dxpl_id, shared_src, type, NULL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to load object header")
-
-        /* Perform "pre copy" operation on messge */
-        if((type->pre_copy_file)(file_src, type, mesg_native, deleted, cpy_info, udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
-    } /* end of if */
-
-done:
-    if(mesg_native)
-        H5O_free_real(type, mesg_native);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shared_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------

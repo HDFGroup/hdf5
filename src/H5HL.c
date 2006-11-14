@@ -809,27 +809,25 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-const H5HL_t *
+H5HL_t *
 H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    H5HL_t *ret_value = NULL;
+    H5HL_t *ret_value;
 
-    FUNC_ENTER_NOAPI(H5HL_protect, NULL);
+    FUNC_ENTER_NOAPI(H5HL_protect, NULL)
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
 
-    if (NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+    if(NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_protect() */
 
 
 /*-------------------------------------------------------------------------
@@ -876,36 +874,26 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
  *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
- * Modifications:
- *
- *		John Mainzer - 6/8/05/
- *		Modified function to use the new dirtied parmeter of
- *		H5AC_unprotect(), which allows management of the is_dirty
- *		field of the cache info to be moved into the cache code.
- *
- *		This required the addition of the heap_dirtied parameter
- *		to the function's parameter list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr, unsigned heap_flags)
+H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr, unsigned heap_flags)
 {
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5HL_unprotect, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_unprotect, FAIL)
 
     /* check arguments */
-    assert(f);
-    assert(heap);
-    assert(H5F_addr_defined(addr));
+    HDassert(f);
+    HDassert(heap);
+    HDassert(H5F_addr_defined(addr));
 
     if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_flags) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_unprotect() */
 
 
 /*-------------------------------------------------------------------------
@@ -1276,34 +1264,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
+H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size,
+    unsigned *heap_flags)
 {
-    H5HL_t		*heap = NULL;
-    unsigned		heap_flags = H5AC__NO_FLAGS_SET;
-    H5HL_free_t		*fl = NULL, *fl2 = NULL;
+    H5HL_free_t		*fl = NULL;
     herr_t      	ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5HL_remove, FAIL);
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(heap);
     HDassert(size > 0);
     HDassert(offset == H5HL_ALIGN(offset));
 
     if(0 == (f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
-    size = H5HL_ALIGN (size);
-
-    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap")
+    size = H5HL_ALIGN(size);
 
     HDassert(offset < heap->heap_alloc);
     HDassert(offset + size <= heap->heap_alloc);
 
     fl = heap->freelist;
-    heap_flags |= H5AC__DIRTIED_FLAG;
+    *heap_flags |= H5AC__DIRTIED_FLAG;
 
     /*
      * Check if this chunk can be prepended or appended to an already
@@ -1311,6 +1295,8 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
      * that all three chunks can be combined into one.
      */
     while(fl) {
+        H5HL_free_t *fl2 = NULL;
+
 	if((offset + size) == fl->offset) {
 	    fl->offset = offset;
 	    fl->size += size;
@@ -1404,9 +1390,6 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     } /* end if */
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HL_remove() */
 

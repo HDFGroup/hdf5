@@ -123,9 +123,8 @@ typedef struct {
     hbool_t     rem_from_fheap;         /* Whether to remove the link from the fractal heap */
     hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
-
-    /* upward (for application) */
-    H5G_obj_t *obj_type;                /* Type of object being removed      */
+    H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
+    hbool_t     replace_names;          /* Whether to replace the names of open objects */
 } H5G_bt2_ud_rem_t;
 
 /*
@@ -139,9 +138,8 @@ typedef struct {
     hbool_t     adj_link;               /* Whether to adjust link count on object */
     hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
-
-    /* upward (for application) */
-    H5G_obj_t *obj_type;                /* Type of object being removed      */
+    H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
+    hbool_t     replace_names;          /* Whether to replace the names of open objects */
 } H5G_fh_rem_ud1_t;
 
 /*
@@ -1352,9 +1350,10 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5B2_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
-    /* Determine the object's type */
-    if(H5G_link_obj_type(udata->f, udata->dxpl_id, lnk, udata->obj_type) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
+    /* Replace open objects' names, if requested */
+    if(udata->replace_names)
+        if(H5G_link_name_replace(udata->f, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
 
     /* Perform the deletion action on the link */
     /* (call link message "delete" callback directly: *ick* - QAK) */
@@ -1370,7 +1369,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_dense_remove_cb
+ * Function:	H5G_dense_remove_bt2_cb
  *
  * Purpose:	v2 B-tree callback for dense link storage record removal
  *
@@ -1398,7 +1397,8 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
     fh_udata.adj_link = bt2_udata->adj_link;
     fh_udata.rem_from_corder_index = bt2_udata->rem_from_corder_index;
     fh_udata.corder_bt2_addr = bt2_udata->corder_bt2_addr;
-    fh_udata.obj_type = bt2_udata->obj_type;
+    fh_udata.grp_full_path_r = bt2_udata->grp_full_path_r;
+    fh_udata.replace_names = bt2_udata->replace_names;
 
     /* Call fractal heap 'op' routine, to perform user callback */
     if(H5HF_op(bt2_udata->common.fheap, bt2_udata->common.dxpl_id, record->id,
@@ -1430,7 +1430,7 @@ done:
  */
 herr_t
 H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    const char *name, H5G_obj_t *obj_type)
+    H5RS_str_t *grp_full_path_r, const char *name)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5G_bt2_ud_rem_t udata;          /* User data for v2 B-tree record removal */
@@ -1444,7 +1444,6 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(f);
     HDassert(linfo);
     HDassert(name && *name);
-    HDassert(obj_type);
 
     /* Open the fractal heap */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
@@ -1462,7 +1461,8 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.rem_from_fheap = TRUE;
     udata.rem_from_corder_index = H5F_addr_defined(linfo->corder_bt2_addr);
     udata.corder_bt2_addr = linfo->corder_bt2_addr;
-    udata.obj_type = obj_type;
+    udata.grp_full_path_r = grp_full_path_r;
+    udata.replace_names = TRUE;
 
     /* Remove the record from the name index v2 B-tree */
     if(H5B2_remove(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
@@ -1528,7 +1528,8 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.adj_link = TRUE;
         udata.rem_from_fheap = FALSE;           /* handled in "bulk" below by deleting entire heap */
         udata.rem_from_corder_index = FALSE;
-        udata.obj_type = NULL;
+        udata.grp_full_path_r = NULL;
+        udata.replace_names = FALSE;
 
         /* Delete the name index, adjusting the ref. count on links removed */
         if(H5B2_delete(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5G_dense_remove_bt2_cb, &udata) < 0)

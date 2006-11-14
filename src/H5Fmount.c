@@ -204,11 +204,11 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
 
     /* Make room in the table */
-    if(parent->mtab.nmounts>=parent->mtab.nalloc) {
-	unsigned n = MAX(16, 2*parent->mtab.nalloc);
+    if(parent->mtab.nmounts >= parent->mtab.nalloc) {
+	unsigned n = MAX(16, 2 * parent->mtab.nalloc);
 	H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
 				      n * sizeof(parent->mtab.child[0]));
-	if (!x)
+	if(!x)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
 	parent->mtab.child = x;
 	parent->mtab.nalloc = n;
@@ -234,7 +234,8 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
-    if(H5G_name_replace(H5G_UNKNOWN, &mp_loc, NULL, &root_loc, H5G_NAME_MOUNT) < 0)
+    if(H5G_name_replace(H5G_UNKNOWN, mp_loc.oloc->file, mp_loc.path->full_path_r,
+            NULL, root_loc.oloc->file, root_loc.path->full_path_r, H5G_NAME_MOUNT) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
 
 done:
@@ -367,7 +368,8 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
     /* Search the open IDs replace names to reflect unmount operation */
-    if(H5G_name_replace(H5G_UNKNOWN, &mp_loc, NULL, &root_loc, H5G_NAME_UNMOUNT) < 0)
+    if(H5G_name_replace(H5G_UNKNOWN, mp_loc.oloc->file, mp_loc.path->full_path_r,
+            NULL, root_loc.oloc->file, root_loc.path->full_path_r, H5G_NAME_UNMOUNT) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */

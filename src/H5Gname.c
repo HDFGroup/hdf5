@@ -41,10 +41,11 @@
 /* Struct used by change name callback function */
 typedef struct H5G_names_t {
     H5G_names_op_t op;                  /* Operation performed on file */
-    H5G_loc_t	*loc;                   /* [src] Location affected */
-    H5F_t       *top_loc_file;          /* Top file in src location's mounted file hier. */
-    H5G_loc_t	*dst_loc;               /* Destination location */
-    H5RS_str_t  *dst_name;              /* Name of object relative to destination location */
+    H5F_t       *src_file;              /* Top file in src location's mounted file hier. */
+    H5RS_str_t  *src_full_path_r;       /* Source location's full path */
+    H5F_t       *dst_file;              /* Destination location's file */
+    H5RS_str_t  *dst_full_path_r;       /* Destination location's full path */
+    H5RS_str_t  *new_name_r;            /* Name of object relative to destination location */
 } H5G_names_t;
 
 /* Info to pass to the iteration function when building name */
@@ -77,7 +78,6 @@ H5FL_DEFINE_STATIC(haddr_t);
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const char *prefix, const char *name);
 static H5RS_str_t *H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
-static H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char *name);
 static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -222,7 +222,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5RS_str_t *
+H5RS_str_t *
 H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 {
     const char *prefix;         /* Pointer to raw string for path */
@@ -706,14 +706,14 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
     /* Find the top file in object's mount hier. */
     if(oloc->file->mtab.parent) {
         /* Check if object is in child file (for mount & unmount operations) */
-        if(names->dst_loc && oloc->file->shared == names->dst_loc->oloc->file->shared)
+        if(names->dst_file && oloc->file->shared == names->dst_file->shared)
             obj_in_child = TRUE;
 
         /* Find the "top" file in the chain of mounted files */
         top_obj_file = oloc->file->mtab.parent;
         while(top_obj_file->mtab.parent != NULL) {
             /* Check if object is in child mount hier. (for mount & unmount operations) */
-            if(names->dst_loc && top_obj_file->shared == names->dst_loc->oloc->file->shared)
+            if(names->dst_file && top_obj_file->shared == names->dst_file->shared)
                 obj_in_child = TRUE;
 
             top_obj_file = top_obj_file->mtab.parent;
@@ -723,11 +723,11 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         top_obj_file = oloc->file;
 
     /* Check if object is in top of child mount hier. (for mount & unmount operations) */
-    if(names->dst_loc && top_obj_file->shared == names->dst_loc->oloc->file->shared)
+    if(names->dst_file && top_obj_file->shared == names->dst_file->shared)
         obj_in_child = TRUE;
 
     /* Check if the object is in same file mount hier. */
-    if(top_obj_file->shared != names->top_loc_file->shared)
+    if(top_obj_file->shared != names->src_file->shared)
         HGOTO_DONE(SUCCEED)     /* No need to look at object, it's path is already invalid */
 
     switch(names->op) {
@@ -745,7 +745,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
-                src_path = H5RS_get_str(names->loc->path->full_path_r);
+                src_path = H5RS_get_str(names->src_full_path_r);
 
                 /* Build new full path */
 
@@ -768,8 +768,8 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             else {
                 /* Check if the source is along the entry's path */
                 /* (But not actually the entry itself) */
-                if(H5G_common_path(obj_path->full_path_r, names->loc->path->full_path_r) &&
-                        H5RS_cmp(obj_path->full_path_r, names->loc->path->full_path_r)) {
+                if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r) &&
+                        H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Hide the user path */
                     (obj_path->obj_hidden)++;
                 } /* end if */
@@ -789,7 +789,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
-                src_path = H5RS_get_str(names->loc->path->full_path_r);
+                src_path = H5RS_get_str(names->src_full_path_r);
 
                 /* Construct full path suffix */
                 full_suffix = full_path + HDstrlen(src_path);
@@ -816,8 +816,8 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             } /* end if */
             else {
                 /* Check if file being unmounted was hiding the object */
-                if(H5G_common_path(obj_path->full_path_r, names->loc->path->full_path_r) &&
-                        H5RS_cmp(obj_path->full_path_r, names->loc->path->full_path_r)) {
+                if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r) &&
+                        H5RS_cmp(obj_path->full_path_r, names->src_full_path_r)) {
                     /* Un-hide the user path */
                     (obj_path->obj_hidden)--;
                 } /* end if */
@@ -830,7 +830,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         */
         case H5G_NAME_DELETE:
             /* Check if the location being unlinked is in the path for the current object */
-            if(H5G_common_path(obj_path->full_path_r, names->loc->path->full_path_r)) {
+            if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 /* Free paths for object */
                 H5G_name_free(obj_path);
             } /* end if */
@@ -842,7 +842,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         */
         case H5G_NAME_MOVE: /* H5Gmove case, check for relative names case */
             /* Check if the src object moved is in the current object's path */
-            if(H5G_common_path(obj_path->full_path_r, names->loc->path->full_path_r)) {
+            if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 const char *full_path;      /* Full path of current object */
                 const char *full_suffix;    /* Suffix of full path, after src_path */
                 char *new_full_path;        /* New full path of object */
@@ -853,19 +853,19 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 const char *dst_path;       /* Full path of destination object */
 
                 /* Sanity check */
-                HDassert(*(H5RS_get_str(names->loc->path->full_path_r)) == '/');
-                HDassert(names->dst_name);
+                HDassert(*(H5RS_get_str(names->src_full_path_r)) == '/');
+                HDassert(names->new_name_r);
 
                 /* Make certain that the source and destination names are full (not relative) paths */
-                src_path_r = H5RS_dup(names->loc->path->full_path_r);
-                if(*(H5RS_get_str(names->dst_name)) != '/') {
-                    HDassert(names->dst_loc && names->dst_loc->path);
+                src_path_r = H5RS_dup(names->src_full_path_r);
+                if(*(H5RS_get_str(names->new_name_r)) != '/') {
+                    HDassert(names->dst_full_path_r);
                     /* Create reference counted string for full dst path */
-                    if((dst_path_r = H5G_build_fullpath_refstr_refstr(names->dst_loc->path->full_path_r, names->dst_name)) == NULL)
+                    if((dst_path_r = H5G_build_fullpath_refstr_refstr(names->dst_full_path_r, names->new_name_r)) == NULL)
                         HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build destination path name")
                 } /* end if */
                 else
-                    dst_path_r = H5RS_dup(names->dst_name);
+                    dst_path_r = H5RS_dup(names->new_name_r);
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
@@ -916,10 +916,11 @@ done:
  * Function: H5G_name_replace
  *
  * Purpose: Search the list of open IDs and replace names according to a
- *              particular operation.  The operation occured on the LOC
- *              entry.  The new name (if there is one) is DST_NAME.
- *              Additional entry location information (currently only needed
- *              for the 'move' operation) is passed in DST_LOC.
+ *              particular operation.  The operation occured on the
+ *              SRC_FILE/SRC_FULL_PATH_R object.  The new name (if there is
+ *              one) is NEW_NAME_R.  Additional entry location information
+ *              (currently only needed for the 'move' operation) is passed in
+ *              DST_FILE/DST_FULL_PATH_R.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -930,18 +931,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
-    H5RS_str_t *dst_name, H5G_loc_t *dst_loc, H5G_names_op_t op)
+H5G_name_replace(H5G_obj_t type, H5F_t *src_file, H5RS_str_t *src_full_path_r,
+    H5RS_str_t *new_name_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r, H5G_names_op_t op)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5G_name_replace, FAIL)
 
     /* Check arguments */
-    HDassert(loc && loc->path);
+    HDassert(src_file);
 
     /* Check if the object we are manipulating has a path */
-    if(loc->path->full_path_r) {
+    if(src_full_path_r) {
         unsigned search_group = 0;  /* Flag to indicate that groups are to be searched */
         unsigned search_dataset = 0;  /* Flag to indicate that datasets are to be searched */
         unsigned search_datatype = 0; /* Flag to indicate that datatypes are to be searched */
@@ -995,23 +996,17 @@ H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
         /* Check if we need to operate on the objects affected */
         if(search_group || search_dataset || search_datatype) {
             H5G_names_t names;          /* Structure to hold operation information for callback */
-            H5F_t *top_loc_file;        /* Top file in src location's mounted file hier. */
 
             /* Find top file in src location's mount hierarchy */
-            if(loc->oloc->file->mtab.parent) {
-                /* Find the "top" file in the chain of mounted files for the location */
-                top_loc_file = loc->oloc->file->mtab.parent;
-                while(top_loc_file->mtab.parent != NULL)
-                    top_loc_file = top_loc_file->mtab.parent;
-            } /* end if */
-            else
-                top_loc_file = loc->oloc->file;
+            while(src_file->mtab.parent)
+                src_file = src_file->mtab.parent;
 
             /* Set up common information for callback */
-            names.loc = loc;
-            names.top_loc_file = top_loc_file;
-            names.dst_loc = dst_loc;
-            names.dst_name = dst_name;
+            names.src_file = src_file;
+            names.src_full_path_r = src_full_path_r;
+            names.dst_file = dst_file;
+            names.dst_full_path_r = dst_full_path_r;
+            names.new_name_r = new_name_r;
             names.op = op;
 
             /* Search through group IDs */

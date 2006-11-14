@@ -1954,16 +1954,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_rm_t *udata = (H5L_trav_rm_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_delete_cb)
 
+    /* Check if the group resolved to a valid link */
+    if(grp_loc == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group doesn't exist")
+
     /* Check if the name in this group resolved to a valid link */
-    if(obj_loc == NULL)
+    if(name == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
     /* Check for removing '.' */
@@ -1971,7 +1975,7 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSE
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "can't delete self")
 
     /* Remove the link from the group */
-    if(H5G_loc_remove(grp_loc, name, obj_loc, udata->dxpl_id) < 0)
+    if(H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, name, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to remove link from group")
 
 done:
@@ -2139,7 +2143,6 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_mv2_t *udata = (H5L_trav_mv2_t *)_udata;   /* User data passed in */
-    H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     H5G_t *grp=NULL;                    /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;                /* Id for this group (passed to user callback */
     H5G_loc_t temp_loc;                 /* For UD callback */
@@ -2230,8 +2233,6 @@ done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
-    if(dst_name_r)
-        H5RS_decr(dst_name_r);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_move_dest_cb() */
@@ -2258,7 +2259,6 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5L_trav_mv_t *udata = (H5L_trav_mv_t *)_udata;   /* User data passed in */
     H5L_trav_mv2_t udata_out;           /* User data for H5L_move_dest_cb traversal */
     H5G_obj_t type;                     /* Type of object being moved */
-    H5RS_str_t *dst_name_r = NULL;      /* Ref-counted version of dest name */
     char * orig_name = NULL;            /* The name of the link in this group */
     hbool_t link_copied = FALSE;        /* Has udata_out.lnk been allocated? */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2305,7 +2305,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     udata_out.copy = udata->copy;
     udata_out.dxpl_id = udata->dxpl_id;
 
-    /* Remember the link's original name (in case it's changed by H5G_name_replace) */
+    /* Keep a copy of link's name (it's "owned" by the H5G_traverse() routine) */
     orig_name = H5MM_xstrdup(name);
 
     /* Insert the link into its new location */
@@ -2315,15 +2315,24 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
     if(!udata->copy)
     {
+        H5RS_str_t *dst_name_r;      /* Ref-counted version of dest name */
+
         /* Fix names up */
         dst_name_r = H5RS_wrap(udata->dst_name);
         HDassert(dst_name_r);
-        if(H5G_name_replace(type, obj_loc, dst_name_r, udata->dst_loc, H5G_NAME_MOVE) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ")
+        if(H5G_name_replace(type, obj_loc->oloc->file, obj_loc->path->full_path_r,
+                dst_name_r, udata->dst_loc->oloc->file, udata->dst_loc->path->full_path_r,
+                H5G_NAME_MOVE) < 0) {
+            H5RS_decr(dst_name_r);
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
+        } /* end if */
 
         /* Remove the old link */
-        if(H5G_obj_remove(grp_loc->oloc, orig_name, &type, udata->dxpl_id) < 0)
+        if(H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, orig_name, udata->dxpl_id) < 0) {
+            H5RS_decr(dst_name_r);
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to remove old name")
+        } /* end if */
+
         H5RS_decr(dst_name_r);
     } /* end if */
 

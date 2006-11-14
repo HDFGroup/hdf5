@@ -43,12 +43,10 @@ typedef struct {
 /* User data for deleting a link in the link messages */
 typedef struct {
     /* downward */
-    const char *name;           /* Name to search for */
     H5F_t       *file;          /* File that object header is located within */
     hid_t       dxpl_id;        /* DXPL during insertion */
-
-    /* upward */
-    H5G_obj_t *obj_type;        /* Type of object deleted */
+    H5RS_str_t *grp_full_path_r;/* Full path for group of link */
+    const char *name;           /* Link name to search for */
 } H5G_iter_rm_t;
 
 /* User data for link message iteration when querying link info */
@@ -367,7 +365,7 @@ H5G_compact_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     /* If we've found the right link, get the object type */
     if(HDstrcmp(lnk->name, udata->name) == 0) {
         /* Determine the object's type */
-        if(H5G_link_obj_type(udata->file, udata->dxpl_id, lnk, udata->obj_type) < 0)
+        if(H5G_link_name_replace(udata->file, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5O_ITER_ERROR, "unable to get object type")
 
         /* Stop the iteration, we found the correct link */
@@ -392,8 +390,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_compact_remove(const H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type,
-    hid_t dxpl_id)
+H5G_compact_remove(const H5O_loc_t *oloc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
+    const char *name)
 {
     H5G_iter_rm_t udata;               /* Data to pass through OH iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -404,10 +402,10 @@ H5G_compact_remove(const H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type,
     HDassert(name && *name);
 
     /* Initialize data to pass through object header iteration */
-    udata.name = name;
     udata.file = oloc->file;
     udata.dxpl_id = dxpl_id;
-    udata.obj_type = obj_type;
+    udata.grp_full_path_r = grp_full_path_r;
+    udata.name = name;
 
     /* Iterate over the link messages to delete the right one */
     if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_cb, &udata, TRUE, dxpl_id) < 0)

@@ -310,7 +310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, 
+H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type, 
     void *native_src, H5F_t *file_dst, hid_t dxpl_id,
     H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {

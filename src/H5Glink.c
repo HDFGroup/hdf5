@@ -237,7 +237,7 @@ H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     /* Object is a symbolic or hard link */
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
-        const H5HL_t *heap;     /* Pointer to local heap for group */
+        H5HL_t *heap;           /* Pointer to local heap for group */
 
         /* Lock the local heap */
         if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
@@ -437,50 +437,59 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_obj_type(H5F_t *file, hid_t dxpl_id, const H5O_link_t *lnk,
-    H5G_obj_t *obj_type)
+H5G_link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
+    const char *lnk_name, H5L_type_t lnk_type, haddr_t lnk_addr)
 {
+    H5RS_str_t *obj_path_r = NULL;      /* Full path for link being removed */
+    H5G_obj_t obj_type;                 /* Type of link/object being deleted */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_obj_type, FAIL)
+    FUNC_ENTER_NOAPI(H5G_link_name_replace, FAIL)
 
     /* check arguments */
     HDassert(file);
-    HDassert(lnk);
 
-    /* Check if we are able to retrieve the object's type */
-    if(obj_type) {
-        /* Look up the object type for each type of link */
-        switch(lnk->type) {
-            case H5L_TYPE_HARD:
-                {
-                    H5O_loc_t tmp_oloc;             /* Temporary object location */
+    /* Look up the object type for each type of link */
+    switch(lnk_type) {
+        case H5L_TYPE_HARD:
+            {
+                H5O_loc_t tmp_oloc;             /* Temporary object location */
 
-                    /* Build temporary object location */
-                    tmp_oloc.file = file;
-                    tmp_oloc.addr = lnk->u.hard.addr;
+                /* Build temporary object location */
+                tmp_oloc.file = file;
+                tmp_oloc.addr = lnk_addr;
 
-                    /* Get the type of the object */
-                    /* Note: no way to check for error :-( */
-                    *obj_type = H5O_obj_type(&tmp_oloc, dxpl_id);
-                }
-                break;
+                /* Get the type of the object */
+                if(H5G_UNKNOWN == (obj_type = H5O_obj_type(&tmp_oloc, dxpl_id)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine object type")
+            }
+            break;
 
-            case H5L_TYPE_SOFT:
-                /* Get the object's type */
-                *obj_type = H5G_LINK;
-                break;
+        case H5L_TYPE_SOFT:
+            /* Get the object's type */
+            obj_type = H5G_LINK;
+            break;
 
-            default:  /* User-defined link */
-                if(lnk->type < H5L_TYPE_UD_MIN)
-                   HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
+        default:  /* User-defined link */
+            if(lnk_type < H5L_TYPE_UD_MIN)
+               HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
 
-                /* Get the object's type */
-                *obj_type = H5G_UDLINK;
-        } /* end switch */
+            /* Get the object's type */
+            obj_type = H5G_UDLINK;
+    } /* end switch */
+
+    /* Search the open IDs and replace names for unlinked object */
+    if(grp_full_path_r) {
+        obj_path_r = H5G_build_fullpath_refstr_str(grp_full_path_r, lnk_name);
+        if(H5G_name_replace(obj_type, file, obj_path_r,
+                NULL, NULL, NULL, H5G_NAME_DELETE) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
     } /* end if */
 
 done:
+    if(obj_path_r)
+        H5RS_decr(obj_path_r);
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_obj_type() */
+} /* end H5G_link_name_replace() */
 

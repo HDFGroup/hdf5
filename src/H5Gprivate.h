@@ -177,8 +177,9 @@ H5_DLL herr_t H5G_obj_ent_encode(H5F_t *f, uint8_t **pp,
 /*
  * These functions operate on group hierarchy names.
  */
-H5_DLL  herr_t H5G_name_replace(H5G_obj_t type, H5G_loc_t *loc,
-        H5RS_str_t *dst_name, H5G_loc_t *dst_loc, H5G_names_op_t op);
+H5_DLL herr_t H5G_name_replace(H5G_obj_t type, H5F_t *src_file,
+    H5RS_str_t *src_full_path_r, H5RS_str_t *new_name, H5F_t *dst_file,
+    H5RS_str_t *dst_full_path_r, H5G_names_op_t op);
 H5_DLL herr_t H5G_name_reset(H5G_name_t *name);
 H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);

@@ -293,7 +293,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_remove(H5O_loc_t *loc, const char *name, H5G_obj_t *obj_type, hid_t dxpl_id)
+H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
+    const char *name)
 {
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud2_t	udata;		/*data to pass through B-tree	*/
@@ -312,7 +313,7 @@ H5G_stab_remove(H5O_loc_t *loc, const char *name, H5G_obj_t *obj_type, hid_t dxp
     udata.common.name = name;
     udata.common.heap_addr = stab.heap_addr;
     udata.adj_link = TRUE;
-    udata.obj_type = obj_type;
+    udata.grp_full_path_r = grp_full_path_r;
 
     /* Remove from symbol table */
     if(H5B_remove(loc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
@@ -485,7 +486,7 @@ static herr_t
 H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_bt_it_idx1_t	*udata = (H5G_bt_it_idx1_t *)_udata;
-    const H5HL_t *heap = NULL;          /* Pointer to local heap for group */
+    H5HL_t *heap = NULL;                /* Pointer to local heap for group */
     size_t name_off;                    /* Offset of name in heap */
     const char *name;                   /* Pointer to name string in heap */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -803,7 +804,7 @@ static herr_t
 H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_bt_it_idx3_t *udata = (H5G_bt_it_idx3_t *)_udata;
-    const H5HL_t *heap;                 /* Pointer to local heap for group */
+    H5HL_t *heap;                       /* Pointer to local heap for group */
     size_t name_off;                    /* Offset of name in heap */
     const char *name;                   /* Pointer to name string in heap */
     size_t name_len;                    /* Length of link name */

@@ -823,7 +823,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxpl_id)
+H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message            */
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
@@ -834,7 +834,6 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
     /* Sanity check */
     HDassert(oloc);
     HDassert(name && *name);
-    HDassert(obj_type);
 
     /* Attempt to get the link info for this group */
     if(H5O_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
@@ -844,12 +843,12 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
         /* Check for dense or compact storage */
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Remove object from the dense link storage */
-            if(H5G_dense_remove(oloc->file, dxpl_id, &linfo, name, obj_type) < 0)
+            if(H5G_dense_remove(oloc->file, dxpl_id, &linfo, grp_full_path_r, name) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
         } /* end if */
         else {
             /* Remove object from the link messages */
-            if(H5G_compact_remove(oloc, name, obj_type, dxpl_id) < 0)
+            if(H5G_compact_remove(oloc, dxpl_id, grp_full_path_r, name) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
         } /* end else */
     } /* end if */
@@ -861,7 +860,7 @@ H5G_obj_remove(H5O_loc_t *oloc, const char *name, H5G_obj_t *obj_type, hid_t dxp
         use_old_format = TRUE;
 
         /* Remove object from the symbol table */
-        if(H5G_stab_remove(oloc, name, obj_type, dxpl_id) < 0)
+        if(H5G_stab_remove(oloc, dxpl_id, grp_full_path_r, name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
     } /* end else */
 
