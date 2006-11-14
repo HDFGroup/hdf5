@@ -2231,8 +2231,8 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     void *op_data)
 {
     H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
-    haddr_t     leaf_addr=HADDR_UNDEF;  /* Leaf address on disk */
-    unsigned    leaf_flags=H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
+    haddr_t     leaf_addr = HADDR_UNDEF;  /* Leaf address on disk */
+    unsigned    leaf_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
     herr_t	ret_value = SUCCEED;
@@ -2295,7 +2295,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node */
-    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2329,7 +2329,6 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned internal_flags = H5AC__NO_FLAGS_SET;
     haddr_t internal_addr;              /* Address of internal node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    unsigned    idx;                    /* Location of record which matches key */
     size_t      merge_nrec;             /* Number of records to merge node at */
     hbool_t     collapsed_root = FALSE; /* Whether the root was collapsed */
     herr_t	ret_value = SUCCEED;
@@ -2339,7 +2338,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     /* Check arguments. */
     HDassert(f);
     HDassert(bt2_shared);
-    HDassert(depth>0);
+    HDassert(depth > 0);
     HDassert(parent_cache_info);
     HDassert(parent_cache_info_flags_ptr);
     HDassert(curr_node_ptr);
@@ -2391,6 +2390,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     } /* end if */
     /* Merge or redistribute child node pointers, if necessary */
     else {
+        unsigned idx;           /* Location of record which matches key */
         int cmp = 0;            /* Comparison value of records */
         unsigned retries;       /* Number of times to attempt redistribution */
 
@@ -2510,6 +2510,349 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_remove_internal() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_remove_leaf_by_idx
+ *
+ * Purpose:	Removes a record from a B-tree leaf node, according to the
+ *              offset in the B-tree records.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    H5B2_node_ptr_t *curr_node_ptr, unsigned idx, H5B2_remove_t op,
+    void *op_data)
+{
+    H5B2_leaf_t *leaf;                  /* Pointer to leaf node */
+    haddr_t     leaf_addr = HADDR_UNDEF;  /* Leaf address on disk */
+    unsigned    leaf_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_remove_leaf_by_idx)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(bt2_shared);
+    HDassert(curr_node_ptr);
+    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+
+    /* Lock B-tree leaf node */
+    leaf_addr = curr_node_ptr->addr;
+    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
+
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    /* Sanity check number of records */
+    HDassert(curr_node_ptr->all_nrec == curr_node_ptr->node_nrec);
+    HDassert(leaf->nrec == curr_node_ptr->node_nrec);
+    HDassert(idx < leaf->nrec);
+
+    /* Make 'remove' callback if there is one */
+    if(op)
+        if((op)(H5B2_LEAF_NREC(leaf, shared, idx), op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record into leaf node")
+
+    /* Update number of records in node */
+    leaf->nrec--;
+
+    /* Mark leaf node as dirty also */
+    leaf_flags |= H5AC__DIRTIED_FLAG;
+
+    if(leaf->nrec > 0) {
+        /* Pack record out of leaf */
+        if(idx < leaf->nrec)
+            HDmemmove(H5B2_LEAF_NREC(leaf, shared, idx), H5B2_LEAF_NREC(leaf, shared, (idx + 1)), shared->type->nrec_size * (leaf->nrec-idx));
+    } /* end if */
+    else {
+        /* Release space for B-tree node on disk */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
+
+        /* Let the cache know that the object is deleted */
+        leaf_flags |= H5AC__DELETED_FLAG;
+
+        /* Reset address of parent node pointer */
+        curr_node_ptr->addr = HADDR_UNDEF;
+    } /* end else */
+
+    /* Update record count for parent of leaf node */
+    curr_node_ptr->node_nrec--;
+
+done:
+    /* Release the B-tree leaf node */
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_remove_leaf_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_remove_internal_by_idx
+ *
+ * Purpose:	Removes a record from a B-tree node, according to the offset
+ *              in the B-tree records
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth,
+    H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, hsize_t n, H5B2_remove_t op,
+    void *op_data)
+{
+    H5AC_info_t *new_cache_info;        /* Pointer to new cache info */
+    unsigned *new_cache_info_flags_ptr = NULL;
+    H5B2_node_ptr_t *new_node_ptr;      /* Pointer to new node pointer */
+    H5B2_internal_t *internal;          /* Pointer to internal node */
+    unsigned internal_flags = H5AC__NO_FLAGS_SET;
+    haddr_t internal_addr;              /* Address of internal node */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    size_t      merge_nrec;             /* Number of records to merge node at */
+    hbool_t     collapsed_root = FALSE; /* Whether the root was collapsed */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_remove_internal_by_idx)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(bt2_shared);
+    HDassert(depth > 0);
+    HDassert(parent_cache_info);
+    HDassert(parent_cache_info_flags_ptr);
+    HDassert(curr_node_ptr);
+    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+
+    /* Lock current B-tree node */
+    internal_addr = curr_node_ptr->addr;
+    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, internal_addr, curr_node_ptr->node_nrec, depth, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    /* Determine the correct number of records to merge at */
+    merge_nrec = shared->node_info[depth - 1].merge_nrec;
+
+    /* Check for needing to collapse the root node */
+    /* (The root node is the only internal node allowed to have 1 record) */
+    if(internal->nrec == 1 &&
+            ((internal->node_ptrs[0].node_nrec + internal->node_ptrs[1].node_nrec) <= ((merge_nrec * 2) + 1))) {
+
+        /* Merge children of root node */
+        if(H5B2_merge2(f, dxpl_id, depth, curr_node_ptr,
+                parent_cache_info_flags_ptr, internal, &internal_flags, 0) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+
+        /* Release space for root B-tree node on disk */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
+
+        /* Let the cache know that the object is deleted */
+        internal_flags |= H5AC__DELETED_FLAG;
+
+        /* Reset information in header's root node pointer */
+        curr_node_ptr->addr = internal->node_ptrs[0].addr;
+        curr_node_ptr->node_nrec = internal->node_ptrs[0].node_nrec;
+
+        /* Indicate that the level of the B-tree decreased */
+        *depth_decreased = TRUE;
+
+        /* Set pointers for advancing to child node */
+        new_cache_info = parent_cache_info;
+        new_cache_info_flags_ptr = parent_cache_info_flags_ptr;
+        new_node_ptr = curr_node_ptr;
+
+        /* Set flag to indicate root was collapsed */
+        collapsed_root = TRUE;
+    } /* end if */
+    /* Merge or redistribute child node pointers, if necessary */
+    else {
+        unsigned idx;           /* Location of record which matches key */
+        hbool_t found = FALSE;  /* Comparison value of records */
+        unsigned retries;       /* Number of times to attempt redistribution */
+
+        /* Locate node pointer for child */
+        if(swap_loc)
+            idx = 0;
+        else {
+            /* Search for record with correct index */
+            for(idx = 0; idx < internal->nrec; idx++) {
+HDfprintf(stderr, "%s: Check 1.0 - internal->node_ptrs[%u].all_nrec = %Hu\n", FUNC, idx, internal->node_ptrs[idx].all_nrec);
+HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
+                /* Check which child node contains indexed record */
+                if(internal->node_ptrs[idx].all_nrec >= n) {
+                    /* Check if record is in this node */
+                    if(internal->node_ptrs[idx].all_nrec == n) {
+                        found = TRUE;
+                        n = 0;
+                    } /* end if */
+
+                    /* Increment to next record */
+                    idx++;
+
+                    /* Break out of loop early */
+                    break;
+                } /* end if */
+
+                /* Decrement index we are looking for to account for the node we
+                 * just advanced past.
+                 */
+                n -= (internal->node_ptrs[idx].all_nrec + 1);
+            } /* end for */
+        } /* end else */
+HDfprintf(stderr, "%s: Check 1.0 - idx = %u\n", FUNC, idx);
+HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
+
+        /* Set the number of redistribution retries */
+        /* This takes care of the case where a B-tree node needs to be
+         * redistributed, but redistributing the node causes the index
+         * for removal to move to another node, which also needs to be
+         * redistributed.  Now, we loop trying to redistribute and then
+         * eventually force a merge */
+        retries = 2;
+
+        /* Preemptively merge/redistribute a node we will enter */
+        while(internal->node_ptrs[idx].node_nrec == merge_nrec) {
+            /* Attempt to redistribute records among children */
+            /* (NOTE: These 2-node redistributions should actually get the
+             *  record to promote from the node with more records. - QAK)
+             */
+            if(idx == 0) {    /* Left-most child */
+                if(retries > 0 && (internal->node_ptrs[idx + 1].node_nrec > merge_nrec)) {
+                    if(H5B2_redistribute2(f, dxpl_id, depth, internal, idx) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
+                } /* end if */
+                else {
+                    if(H5B2_merge2(f, dxpl_id, depth, curr_node_ptr,
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                } /* end else */
+            } /* end if */
+            else if(idx == internal->nrec) { /* Right-most child */
+                if(retries > 0 && (internal->node_ptrs[idx - 1].node_nrec > merge_nrec)) {
+                    if(H5B2_redistribute2(f, dxpl_id, depth, internal, (idx - 1)) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
+                } /* end if */
+                else {
+                    if(H5B2_merge2(f, dxpl_id, depth, curr_node_ptr,
+                           parent_cache_info_flags_ptr, internal, &internal_flags, (idx - 1)) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                } /* end else */
+            } /* end if */
+            else { /* Middle child */
+                if(retries > 0 && ((internal->node_ptrs[idx + 1].node_nrec > merge_nrec) ||
+                            (internal->node_ptrs[idx - 1].node_nrec > merge_nrec))) {
+                    if(H5B2_redistribute3(f, dxpl_id, depth, internal, &internal_flags, idx) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute child node records")
+                } /* end if */
+                else {
+                    if(H5B2_merge3(f, dxpl_id, depth, curr_node_ptr,
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
+                } /* end else */
+            } /* end else */
+
+            /* Locate node pointer for child (after merge/redistribute) */
+            if(swap_loc)
+                idx = 0;
+            else {
+                /* Search for record with correct index */
+                for(idx = 0; idx < internal->nrec; idx++) {
+HDfprintf(stderr, "%s: Check 2.0 - internal->node_ptrs[%u].all_nrec = %Hu\n", FUNC, idx, internal->node_ptrs[idx].all_nrec);
+HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
+                    /* Check which child node contains indexed record */
+                    if(internal->node_ptrs[idx].all_nrec >= n) {
+                        /* Check if record is in this node */
+                        if(internal->node_ptrs[idx].all_nrec == n) {
+                            found = TRUE;
+                            n = 0;
+                        } /* end if */
+
+                        /* Increment to next record */
+                        idx++;
+
+                        /* Break out of loop early */
+                        break;
+                    } /* end if */
+
+                    /* Decrement index we are looking for to account for the node we
+                     * just advanced past.
+                     */
+                    n -= (internal->node_ptrs[idx].all_nrec + 1);
+                } /* end for */
+            } /* end else */
+HDfprintf(stderr, "%s: Check 2.0 - idx = %u\n", FUNC, idx);
+HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
+
+            /* Decrement the number of redistribution retries left */
+            retries--;
+        } /* end while */
+
+        /* Handle deleting a record from an internal node */
+        if(!swap_loc && found)
+            swap_loc = H5B2_INT_NREC(internal, shared, idx - 1);
+
+        /* Swap record to delete with record from leaf, if we are the last internal node */
+        if(swap_loc && depth == 1)
+            if(H5B2_swap_leaf(f, dxpl_id, depth, internal, &internal_flags, idx, swap_loc) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "can't swap records in B-tree")
+
+        /* Set pointers for advancing to child node */
+        new_cache_info_flags_ptr = &internal_flags;
+        new_cache_info = &internal->cache_info;
+        new_node_ptr = &internal->node_ptrs[idx];
+    } /* end else */
+
+    /* Attempt to remove record from child node */
+    if(depth > 1) {
+        if(H5B2_remove_internal_by_idx(f, dxpl_id, bt2_shared, depth_decreased, swap_loc, depth - 1,
+                new_cache_info, new_cache_info_flags_ptr, new_node_ptr, n, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
+    } /* end if */
+    else {
+        if(H5B2_remove_leaf_by_idx(f, dxpl_id, bt2_shared, new_node_ptr, (unsigned)n, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
+    } /* end else */
+
+    /* Update record count for node pointer to current node */
+    if(!collapsed_root)
+        new_node_ptr->all_nrec--;
+
+    /* Mark node as dirty */
+    internal_flags |= H5AC__DIRTIED_FLAG;
+
+#ifdef H5B2_DEBUG
+    H5B2_assert_internal((!collapsed_root ? (curr_node_ptr->all_nrec-1) : new_node_ptr->all_nrec),shared,internal);
+#endif /* H5B2_DEBUG */
+
+done:
+    /* Release the B-tree internal node */
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, internal, internal_flags) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_remove_internal_by_idx() */
 
 
 /*-------------------------------------------------------------------------

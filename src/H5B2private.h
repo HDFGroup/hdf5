@@ -139,6 +139,9 @@ H5_DLL herr_t H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_modify_t op, void *op_data);
 H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_remove_t op, void *op_data);
+H5_DLL herr_t H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, H5_iter_order_t order, hsize_t idx, H5B2_remove_t op,
+    void *op_data);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t *nrec);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
