@@ -90,6 +90,8 @@ typedef struct {
 /********************/
 static herr_t H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned idx,
     void *_udata);
+static herr_t H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo,
+    hid_t dxpl_id);
 
 
 /*********************/
@@ -808,11 +810,104 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_obj_remove_update_linfo
+ *
+ * Purpose:     Update the link info after removing a link from a group
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov 14, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_obj_remove_update_linfo)
+
+    /* Sanity check */
+    HDassert(oloc);
+    HDassert(linfo);
+
+    /* Decrement # of links in group */
+    linfo->nlinks--;
+
+    /* Reset the creation order min/max if there's no more links in group */
+    if(linfo->nlinks == 0)
+        linfo->min_corder = linfo->max_corder = 0;
+
+    /* Check for transitioning out of dense storage, if we are using it */
+    if(H5F_addr_defined(linfo->link_fheap_addr)) {
+        /* Check if there's no more links */
+        if(linfo->nlinks == 0) {
+            /* Delete the dense storage */
+            if(H5G_dense_delete(oloc->file, dxpl_id, linfo, FALSE) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
+        } /* end if */
+        /* Check for switching back to compact storage */
+        else {
+            H5O_ginfo_t ginfo;		/* Group info message            */
+
+            /* Get the group info */
+            if(NULL == H5O_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
+
+            /* Check if we should switch from dense storage back to link messages */
+            if(linfo->nlinks < ginfo.min_dense) {
+                H5G_link_table_t ltable;        /* Table of links */
+                hbool_t can_convert = TRUE;     /* Whether converting to link messages is possible */
+                size_t u;                       /* Local index */
+
+                /* Build the table of links for this group */
+                if(H5G_dense_build_table(oloc->file, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+
+                /* Inspect links in table for ones that can't be converted back
+                 * into link message form (currently only links which can't fit
+                 * into an object header message)
+                 */
+                for(u = 0; u < linfo->nlinks; u++)
+                    if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                        can_convert = FALSE;
+                        break;
+                    } /* end if */
+
+                /* If ok, insert links as link messages */
+                if(can_convert) {
+                    /* Insert link messages into group */
+                    for(u = 0; u < linfo->nlinks; u++)
+                        if(H5O_modify(oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), dxpl_id) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+
+                    /* Remove the dense storage */
+                    if(H5G_dense_delete(oloc->file, dxpl_id, linfo, FALSE) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
+                } /* end if */
+
+                /* Free link table information */
+                if(H5G_link_release_table(&ltable) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+            } /* end if */
+        } /* end else */
+    } /* end if */
+
+    /* Update link info in the object header */
+    if(H5O_modify(oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_remove_update_linfo() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_obj_remove
  *
- * Purpose:     Remove an object from a group.
- *
- * Note:	Needs to hand up the type of the object removed
+ * Purpose:     Remove a link from a group.
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
@@ -866,66 +961,95 @@ H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, h
 
     /* Update link info for a new-style group */
     if(!use_old_format) {
-        /* Decrement # of links in group */
-        linfo.nlinks--;
+        if(H5G_obj_remove_update_linfo(oloc, &linfo, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
+    } /* end if */
 
-        /* Check for transitioning out of dense storage, if we are using it */
-        if(H5F_addr_defined(linfo.link_fheap_addr)) {
-            /* If there's no more links, delete the dense storage */
-            if(linfo.nlinks == 0) {
-                if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
-            } /* end if */
-            /* Check for switching back to compact storage */
-            else {
-                H5O_ginfo_t ginfo;		/* Group info message            */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_remove() */
 
-                /* Get the group info */
-                if(NULL == H5O_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
-                    HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_obj_remove_by_idx
+ *
+ * Purpose:     Remove a link from a group, according to the order within an index.
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov 14, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
+{
+    H5O_linfo_t	linfo;		/* Link info message            */
+    hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
-                /* Check if we should switch from dense storage back to link messages */
-                if(linfo.nlinks < ginfo.min_dense) {
-                    H5G_link_table_t ltable;        /* Table of links */
-                    hbool_t can_convert = TRUE;     /* Whether converting to link messages is possible */
-                    size_t u;                       /* Local index */
+    FUNC_ENTER_NOAPI(H5G_obj_remove_by_idx, FAIL)
 
-                    /* Build the table of links for this group */
-                    if(H5G_dense_build_table(oloc->file, dxpl_id, &linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+    /* Sanity check */
+    HDassert(grp_oloc && grp_oloc->file);
 
-                    /* Inspect links in table for ones that can't be converted back
-                     * into link message form (currently only links which can't fit
-                     * into an object header message)
-                     */
-                    for(u = 0; u < linfo.nlinks; u++)
-                        if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
-                            can_convert = FALSE;
-                            break;
-                        } /* end if */
+    /* Attempt to get the link info for this group */
+    if(H5O_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+        /* Check for creation order tracking, if creation order index lookup requested */
+        if(idx_type == H5L_INDEX_CRT_ORDER) {
+            H5O_ginfo_t ginfo;		        /* Group info message */
 
-                    /* If ok, insert links as link messages */
-                    if(can_convert) {
-                        /* Insert link messages into group */
-                        for(u = 0; u < linfo.nlinks; u++)
-                            if(H5O_modify(oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), dxpl_id) < 0)
-                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+            /* Get group info message, to see if creation order is tracked for links in this group */
+            if(NULL == H5O_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
-                        /* Remove the dense storage */
-                        if(H5G_dense_delete(oloc->file, dxpl_id, &linfo, FALSE) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
-                    } /* end if */
-
-                    /* Free link table information */
-                    if(H5G_link_release_table(&ltable) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
-                } /* end if */
-            } /* end else */
+            /* Check if creation order is tracked */
+            if(!ginfo.track_corder)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
         } /* end if */
 
-        /* Update link info in the object header */
-        if(H5O_modify(oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
+        /* Using the new format for groups */
+        use_old_format = FALSE;
+
+        /* Check for dense or compact storage */
+        if(H5F_addr_defined(linfo.link_fheap_addr)) {
+            /* Remove object from the dense link storage */
+            if(H5G_dense_remove_by_idx(grp_oloc->file, dxpl_id, &linfo, grp_full_path_r, idx_type, order, n) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
+        } /* end if */
+        else {
+            /* Remove object from compact link storage */
+            if(H5G_compact_remove_by_idx(grp_oloc, dxpl_id, &linfo, grp_full_path_r, idx_type, order, n) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
+        } /* end else */
+    } /* end if */
+    else {
+        /* Clear error stack from not finding the link info message */
+        H5E_clear_stack(NULL);
+HDfprintf(stderr, "%s: Removing by index in symbol table not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "removing by index in symbol table not supported yet")
+
+        /* Can only perform name lookups on groups with symbol tables */
+        if(idx_type != H5L_INDEX_NAME)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
+
+        /* Using the old format for groups */
+        use_old_format = TRUE;
+
+#ifdef QAK
+        /* Remove object from the symbol table */
+        if(H5G_stab_remove_by_idx(grp_oloc, dxpl_id, grp_full_path_r, idx_type, order, n) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
+#endif /* QAK */
+    } /* end else */
+
+    /* Update link info for a new-style group */
+    if(!use_old_format) {
+        if(H5G_obj_remove_update_linfo(grp_oloc, &linfo, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
     } /* end if */
 
 done:

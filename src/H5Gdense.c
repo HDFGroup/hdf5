@@ -1433,7 +1433,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5RS_str_t *grp_full_path_r, const char *name)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
-    H5G_bt2_ud_rem_t udata;          /* User data for v2 B-tree record removal */
+    H5G_bt2_ud_rem_t udata;             /* User data for v2 B-tree record removal */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_dense_remove, FAIL)
@@ -1477,6 +1477,125 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_dense_remove_by_idx
+ *
+ * Purpose:	Remove a link from the dense storage of a group, according to
+ *              to the offset in an indexed order
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 14 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    H5RS_str_t *grp_full_path_r, H5L_index_t idx_type, H5_iter_order_t order,
+    hsize_t n)
+{
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_dense_remove_by_idx, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(linfo);
+
+    /* Determine the address of the index to use */
+    if(idx_type == H5L_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            bt2_addr = linfo->name_bt2_addr;
+            bt2_class = H5G_BT2_NAME;
+            HDassert(H5F_addr_defined(bt2_addr));
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
+    } /* end if */
+    else {
+        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
+         */
+        bt2_addr = linfo->corder_bt2_addr;
+        bt2_class = H5G_BT2_CORDER;
+    } /* end else */
+
+    /* If there is an index defined for the field, use it */
+    if(H5F_addr_defined(bt2_addr)) {
+        H5HF_t *fheap;                      /* Fractal heap handle */
+        H5G_bt2_ud_rem_t udata;             /* User data for v2 B-tree record removal */
+
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+#ifdef NOT_YET
+        /* Set up the user data for the v2 B-tree 'record remove' callback */
+        udata.common.f = f;
+        udata.common.dxpl_id = dxpl_id;
+        udata.common.fheap = fheap;
+        udata.common.name = name;
+        udata.common.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
+        udata.common.found_op = NULL;
+        udata.common.found_op_data = NULL;
+        udata.adj_link = TRUE;
+        udata.rem_from_fheap = TRUE;
+        udata.rem_from_corder_index = H5F_addr_defined(linfo->corder_bt2_addr);
+        udata.corder_bt2_addr = linfo->corder_bt2_addr;
+        udata.grp_full_path_r = grp_full_path_r;
+        udata.replace_names = TRUE;
+
+        /* Remove the record from the name index v2 B-tree */
+        if(H5B2_remove(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
+                &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from name index v2 B-tree")
+#else /* NOT_YET */
+HDfprintf(stderr, "%s: Removing by index in dense storage w/index not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "removing by index in dense storage w/index not supported yet")
+#endif /* NOT_YET */
+
+        /* Close heap */
+        if(H5HF_close(fheap, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    } /* end if */
+    else {      /* Otherwise, we need to build a table of the links and sort it */
+        H5G_link_table_t ltable;        /* Table of links */
+
+        /* Build the table of links for this group */
+        if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
+
+        /* Check for going out of bounds */
+        if(n >= ltable.nlinks)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
+
+        /* Remove the appropriate link from the dense storage */
+        if(H5G_dense_remove(f, dxpl_id, linfo, grp_full_path_r, ltable.lnks[n].name) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from dense storage")
+
+        /* Free link table information */
+        if(H5G_link_release_table(&ltable) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_dense_remove_by_idx() */
 
 
 /*-------------------------------------------------------------------------

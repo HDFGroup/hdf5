@@ -336,10 +336,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_remove_cb
+ * Function:	H5G_compact_remove_common_cb
  *
- * Purpose:	Callback routine for deleting 'link' message for a particular
- *              name.
+ * Purpose:	Common callback routine for deleting 'link' message for a
+ *              particular name.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -350,13 +350,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5O_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_remove_common_cb)
 
     /* check arguments */
     HDassert(lnk);
@@ -374,7 +374,7 @@ H5G_compact_remove_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_remove_cb() */
+} /* end H5G_compact_remove_common_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -408,12 +408,66 @@ H5G_compact_remove(const H5O_loc_t *oloc, hid_t dxpl_id, H5RS_str_t *grp_full_pa
     udata.name = name;
 
     /* Iterate over the link messages to delete the right one */
-    if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_cb, &udata, TRUE, dxpl_id) < 0)
+    if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_compact_remove_by_idx
+ *
+ * Purpose:	Remove link from group, according to an index order.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 14, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
+    const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n)
+{
+    H5G_link_table_t ltable = {0, NULL};/* Link table */
+    H5G_iter_rm_t udata;                /* Data to pass through OH iteration */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_compact_remove_by_idx, FAIL)
+
+    HDassert(oloc && oloc->file);
+    HDassert(linfo);
+
+    /* Build table of all link messages, sorted according to desired order */
+    if(H5G_compact_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
+
+    /* Check for going out of bounds */
+    if(n >= ltable.nlinks)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index out of bound")
+
+    /* Initialize data to pass through object header iteration */
+    udata.file = oloc->file;
+    udata.dxpl_id = dxpl_id;
+    udata.grp_full_path_r = grp_full_path_r;
+    udata.name = ltable.lnks[n].name;
+
+    /* Iterate over the link messages to delete the right one */
+    if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
+
+done:
+    /* Release link table */
+    if(ltable.lnks)
+        if(H5G_link_release_table(&ltable) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_compact_remove_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -589,8 +643,8 @@ herr_t
 H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
-    H5G_link_table_t    ltable = {0, NULL};     /* Link table */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    H5G_link_table_t ltable = {0, NULL};/* Link table */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_lookup_by_idx, FAIL)
 
@@ -614,7 +668,6 @@ H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
 done:
     /* Release link table */
     if(ltable.lnks)
-        /* Free link table information */
         if(H5G_link_release_table(&ltable) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 

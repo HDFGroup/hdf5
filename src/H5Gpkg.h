@@ -435,6 +435,9 @@ H5_DLL H5G_obj_t H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, hsize_t idx);
 H5_DLL herr_t H5G_compact_remove(const H5O_loc_t *oloc, hid_t dxpl_id,
     H5RS_str_t *grp_full_path_r, const char *name);
+H5_DLL herr_t H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
+    const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
     H5_iter_order_t order, hid_t gid, hbool_t lib_internal, int skip,
     int *last_obj, H5G_link_iterate_t op, void *op_data);
@@ -465,6 +468,9 @@ H5_DLL H5G_obj_t H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id,
     H5O_linfo_t *linfo, hsize_t idx);
 H5_DLL herr_t H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5RS_str_t *grp_full_path_r, const char *name);
+H5_DLL herr_t H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id,
+    const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     hbool_t adj_link);
 
@@ -484,6 +490,8 @@ H5_DLL H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
     hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r,
     const char *name, hid_t dxpl_id);
+H5_DLL herr_t H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,

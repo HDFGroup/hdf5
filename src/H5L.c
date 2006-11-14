@@ -2049,8 +2049,6 @@ H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
-    H5O_link_t grp_lnk;                 /* Link within group */
-    hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_delete_by_idx_cb)
@@ -2059,21 +2057,12 @@ H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     if(obj_loc == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group doesn't exist")
 
-    /* Query link */
-    if(H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order,
-                udata->n, &grp_lnk, udata->dxpl_id) < 0)
+    /* Delete link */
+    if(H5G_obj_remove_by_idx(obj_loc->oloc, obj_loc->path->full_path_r,
+            udata->idx_type, udata->order, udata->n, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
-    lnk_copied = TRUE;
-
-    /* Retrieve the value for the link */
-    if(H5L_get_val_real(&grp_lnk, udata->buf, udata->size) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value")
 
 done:
-    /* Reset the link information, if we have a copy */
-    if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &grp_lnk);
-
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
