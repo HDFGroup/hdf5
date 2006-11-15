@@ -23,9 +23,7 @@ $ type sys$input
 $!
 $ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_filters, " +-
         "h5repack_list, h5repack_opttable, h5repack_parse, " +-
-        "h5repack_verify,"+-
-        "testh5repack_main, testh5repack_attr, testh5repack_dset, "+-
-        "testh5repack_make, testh5repack_util "
+        "h5repack_verify"
 
 $!                               
 $ ccc 'cobj 
@@ -37,13 +35,12 @@ $ link/exe=h5repack.exe -
            h5repack_verify, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
-	Created  h5repacktst
+	Created  h5repack
 $
 $ type sys$input
        Creating h5repacktst
 $ link/exe=h5repacktst.exe -
-           testh5repack_main, testh5repack_attr, testh5repack_dset, -
-           testh5repack_make, testh5repack_util, -
+           h5repacktst,  -
            h5repack, h5repack_copy, h5repack_filters, -
            h5repack_list, h5repack_opttable, h5repack_parse, -
            h5repack_verify, -

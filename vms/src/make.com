@@ -53,7 +53,8 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
 $ cobj1= "H5R, H5RC,"+-
         "H5RS, H5S, H5Sall, H5Shyper, H5Smpio, H5Snone, H5Spoint,"+-
         "H5Sselect, H5Stest,"+-
-        "H5SL, H5ST, H5T, H5Tarray, H5Tbit, H5Tcommit,"+-
+        "H5SL, H5SM, H5SMbtree2, H5SMcache," +-
+        "H5ST, H5T, H5Tarray, H5Tbit, H5Tcommit,"+-
         "H5Tcompound, H5Tconv, H5Tcset, H5Tenum, H5Tfields, H5Tfixed,"+-
         "H5Tfloat, H5Tinit, H5Tnative, H5Toffset, H5Toh, H5Topaque, H5Torder,"+-
         "H5Tpad, H5Tprecis, H5Tstrpad, H5Tvlen, H5TS, H5V, H5Z,"+-
