@@ -6354,10 +6354,9 @@ error:
  *
  * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
  *              records in random order, enough to make at a level 4 B-tree
- *              and then removes them all.
+ *              and then removes them all, by record and by index.
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
@@ -6368,9 +6367,12 @@ error:
 static int
 test_remove_lots(hid_t fapl)
 {
-    hid_t	file=-1;
+    hid_t	file = -1;
     char	filename[1024];
-    H5F_t	*f=NULL;
+    H5F_t	*f = NULL;
+    int         fd = -1;                /* File descriptor */
+    h5_stat_t	sb;                     /* Stat buffer for file */
+    void        *file_data = NULL;      /* Copy of file data */
     hsize_t     record;                 /* Record to insert into tree */
     hsize_t     rrecord;                /* Record to remove from tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
@@ -6378,26 +6380,24 @@ test_remove_lots(hid_t fapl)
     time_t      curr_time;              /* Current time, for seeding random number generator */
     hsize_t     *records;               /* Record #'s for random insertion */
     unsigned    u;                      /* Local index variable */
-    unsigned    swap_idx;               /* Location to swap with when shuffling */
-    hsize_t     temp_rec;               /* Temporary record */
+    unsigned    rem_idx;                /* Location to remove */
     H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
     hsize_t     nrec;                   /* Number of records in B-tree */
 
     /* Initialize random number seed */
-    curr_time=HDtime(NULL);
+    curr_time = HDtime(NULL);
 #ifdef QAK
-curr_time=1109170019;
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+curr_time = 1163537969;
+HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif /* QAK */
     HDsrandom((unsigned long)curr_time);
 
     /*
      * Test removing many records into v2 B-tree
      */
-    TESTING("B-tree remove: create random level 4 B-tree and delete all records");
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL)
+    if(NULL == (records = HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR
 
     /* Initialize record #'s */
@@ -6406,6 +6406,9 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Shuffle record #'s */
     for(u = 0; u < INSERT_MANY; u++) {
+        hsize_t     temp_rec;               /* Temporary record */
+        unsigned    swap_idx;               /* Location to swap with when shuffling */
+
         swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
@@ -6445,6 +6448,35 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     if(H5Fclose(file) < 0)
         STACK_ERROR
 
+
+    /* Make a copy of the file in memory, in order to speed up deletion testing */
+
+    /* Open the file just created */
+    if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
+        TEST_ERROR
+
+    /* Retrieve the file's size */
+    if(HDfstat(fd, &sb) < 0)
+        TEST_ERROR
+
+    /* Allocate space for the file data */
+    if(NULL == (file_data = HDmalloc((size_t)sb.st_size)))
+        TEST_ERROR
+
+    /* Read file's data into memory */
+    if(HDread(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+        TEST_ERROR
+
+    /* Close the file */
+    if(HDclose(fd) < 0)
+        TEST_ERROR
+    fd = -1;
+
+
+
+    /* Print banner for this test */
+    TESTING("B-tree remove: create random level 4 B-tree and delete all records in random order");
+
     /* Re-open the file */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         FAIL_STACK_ERROR
@@ -6455,7 +6487,10 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Re-shuffle record #'s */
     for(u = 0; u < INSERT_MANY; u++) {
-        swap_idx = (unsigned)(HDrandom()%(INSERT_MANY - u)) + u;
+        hsize_t     temp_rec;               /* Temporary record */
+        unsigned    swap_idx;               /* Location to swap with when shuffling */
+
+        swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -6495,114 +6530,27 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
 
-    return 0;
 
-error:
-    H5E_BEGIN_TRY {
-	H5Fclose(file);
-    } H5E_END_TRY;
-    HDfree(records);
-    return 1;
-} /* test_remove_lots() */
+    /* Re-write the file's data with the copy in memory */
 
-
-/*-------------------------------------------------------------------------
- * Function:	test_remove_by_idx
- *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
- *              records in random order, enough to make at a level 4 B-tree
- *              and then removes them all, by index.
- *
- * Return:	Success:	0
- *		Failure:	1
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 14, 2006
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_remove_by_idx(hid_t fapl)
-{
-    hid_t	file = -1;
-    char	filename[1024];
-    H5F_t	*f = NULL;
-    hsize_t     record;                 /* Record to insert into tree */
-    hsize_t     rrecord;                /* Record to remove from tree */
-    haddr_t     bt2_addr;               /* Address of B-tree created */
-    haddr_t     root_addr;              /* Address of root of B-tree created */
-    time_t      curr_time;              /* Current time, for seeding random number generator */
-    hsize_t     *records;               /* Record #'s for random insertion */
-    unsigned    u;                      /* Local index variable */
-    unsigned    swap_idx;               /* Location to swap with when shuffling */
-    unsigned    rem_idx;                /* Location to remove */
-    hsize_t     temp_rec;               /* Temporary record */
-    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
-    hsize_t     nrec;                   /* Number of records in B-tree */
-
-    /* Initialize random number seed */
-    curr_time = HDtime(NULL);
-#ifndef QAK
-curr_time = 1163537969;
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
-#endif /* QAK */
-    HDsrandom((unsigned long)curr_time);
-
-    /*
-     * Test removing many records into v2 B-tree
-     */
-    TESTING("B-tree remove: create random level 4 B-tree and delete all records by index");
-
-    /* Allocate space for the records */
-    if(NULL == (records = HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    /* Open the file just created */
+    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
         TEST_ERROR
 
-    /* Initialize record #'s */
-    for(u = 0; u < INSERT_MANY; u++)
-        records[u] = u;
-
-    /* Shuffle record #'s */
-    for(u = 0; u < INSERT_MANY; u++) {
-        swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
-        temp_rec = records[u];
-        records[u] = records[swap_idx];
-        records[swap_idx] = temp_rec;
-    } /* end for */
-
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-
-    /* Create the file to work on */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        STACK_ERROR
-
-    /*
-     * Create v2 B-tree
-     */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/) < 0)
-        FAIL_STACK_ERROR
-
-    /* Insert random records */
-    for(u = 0; u < INSERT_MANY; u++) {
-        record = records[u];
-        if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
-            FAIL_STACK_ERROR
-    } /* end for */
-
-    /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
-        FAIL_STACK_ERROR
-    if(bt2_stat.depth != 4)
+    /* Write file's data from memory */
+    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
         TEST_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        STACK_ERROR
+    /* Close the file */
+    if(HDclose(fd) < 0)
+        TEST_ERROR
+    fd = -1;
+
+
+
+    /* Print banner for this test */
+    TESTING("B-tree remove: create random level 4 B-tree and delete all records by index, in random order");
 
     /* Re-open the file */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -6617,18 +6565,142 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         /* Pick a record index to remove from randomly */
         rem_idx = (unsigned)(HDrandom() % (INSERT_MANY - u));
         rrecord = HSIZET_MAX;
+
+        /* Remove random record */
         if(H5B2_remove_by_idx(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5_ITER_INC, (hsize_t)rem_idx, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
         if(rrecord >= INSERT_MANY)
-{
-HDfprintf(stderr, "u = %u\n", u);
-HDfprintf(stderr, "rem_idx = %u\n", rem_idx);
-HDfprintf(stderr, "rrecord = %Hu\n", rrecord);
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
             TEST_ERROR
-}
+
+        /* Query the number of records in the B-tree */
+        if(H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec) < 0)
+            FAIL_STACK_ERROR
+
+        /* Make certain that the # of records is correct */
+        if(nrec != (INSERT_MANY - (u + 1)))
+            TEST_ERROR
+    } /* end for */
+
+    /* Query the address of the root node in the B-tree */
+    if(H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the address of the root node is defined */
+    if(H5F_addr_defined(root_addr))
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    PASSED();
+
+
+
+    /* Re-write the file's data with the copy in memory */
+
+    /* Open the file just created */
+    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+        TEST_ERROR
+
+    /* Write file's data from memory */
+    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+        TEST_ERROR
+
+    /* Close the file */
+    if(HDclose(fd) < 0)
+        TEST_ERROR
+    fd = -1;
+
+
+
+    /* Print banner for this test */
+    TESTING("B-tree remove: create random level 4 B-tree and delete all records by index, in increasing order");
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Remove all records */
+    for(u = 0; u < INSERT_MANY; u++) {
+        /* Remove first record */
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove_by_idx(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5_ITER_INC, (hsize_t)0, remove_cb, &rrecord) < 0)
+            FAIL_STACK_ERROR
+
+        /* Make certain that the record value is correct */
+        if(rrecord != u)
+            TEST_ERROR
+
+        /* Query the number of records in the B-tree */
+        if(H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec) < 0)
+            FAIL_STACK_ERROR
+
+        /* Make certain that the # of records is correct */
+        if(nrec != (INSERT_MANY - (u + 1)))
+            TEST_ERROR
+    } /* end for */
+
+    /* Query the address of the root node in the B-tree */
+    if(H5B2_get_root_addr_test(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the address of the root node is defined */
+    if(H5F_addr_defined(root_addr))
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    PASSED();
+
+
+
+    /* Re-write the file's data with the copy in memory */
+
+    /* Open the file just created */
+    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+        TEST_ERROR
+
+    /* Write file's data from memory */
+    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+        TEST_ERROR
+
+    /* Close the file */
+    if(HDclose(fd) < 0)
+        TEST_ERROR
+    fd = -1;
+
+
+
+    /* Print banner for this test */
+    TESTING("B-tree remove: create random level 4 B-tree and delete all records by index, in decreasing order");
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Remove all records */
+    for(u = 0; u < INSERT_MANY; u++) {
+        /* Remove last record */
+        rrecord = HSIZET_MAX;
+        if(H5B2_remove_by_idx(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5_ITER_DEC, (hsize_t)0, remove_cb, &rrecord) < 0)
+            FAIL_STACK_ERROR
+
+        /* Make certain that the record value is correct */
+        if(rrecord != (INSERT_MANY - (u + 1)))
+            TEST_ERROR
 
         /* Query the number of records in the B-tree */
         if(H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec) < 0)
@@ -6654,6 +6726,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     PASSED();
 
     HDfree(records);
+    HDfree(file_data);
 
     return 0;
 
@@ -6662,10 +6735,13 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
 
+    if(fd > 0)
+        HDclose(fd);
     HDfree(records);
+    HDfree(file_data);
 
     return 1;
-} /* test_remove_by_idx() */
+} /* test_remove_lots() */
 
 
 /*-------------------------------------------------------------------------
@@ -7431,13 +7507,6 @@ main(void)
 	    printf("***Express test mode on.  test_remove_lots skipped\n");
 	else
 	    nerrors += test_remove_lots(fapl);
-
-#ifdef QAK
-        /* Test removing records by index */
-        nerrors += test_remove_by_idx(fapl);
-#else /* QAK */
-HDfprintf(stderr, "Uncomment tests!\n");
-#endif /* QAK */
 
 	/* Test more complex B-tree queries */
 	nerrors += test_find_neighbor(fapl);

@@ -2417,6 +2417,9 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             /* (NOTE: These 2-node redistributions should actually get the
              *  record to promote from the node with more records. - QAK)
              */
+            /* (NOTE: This code is the same in both H5B2_remove_internal() and
+             *  H5B2_remove_internal_by_idx(), fix bugs in both places! - QAK)
+             */
             if(idx == 0) {    /* Left-most child */
                 if(retries > 0 && (internal->node_ptrs[idx + 1].node_nrec > merge_nrec)) {
                     if(H5B2_redistribute2(f, dxpl_id, depth, internal, idx) < 0)
@@ -2646,10 +2649,12 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     internal_addr = curr_node_ptr->addr;
     if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, internal_addr, curr_node_ptr->node_nrec, depth, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+    HDassert(internal->nrec == curr_node_ptr->node_nrec);
 
     /* Get the pointer to the shared B-tree info */
     shared = H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
+    HDassert(depth == shared->depth || internal->nrec > 1);
 
     /* Determine the correct number of records to merge at */
     merge_nrec = shared->node_info[depth - 1].merge_nrec;
@@ -2658,6 +2663,7 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     /* (The root node is the only internal node allowed to have 1 record) */
     if(internal->nrec == 1 &&
             ((internal->node_ptrs[0].node_nrec + internal->node_ptrs[1].node_nrec) <= ((merge_nrec * 2) + 1))) {
+        HDassert(depth == shared->depth);
 
         /* Merge children of root node */
         if(H5B2_merge2(f, dxpl_id, depth, curr_node_ptr,
@@ -2688,6 +2694,7 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     } /* end if */
     /* Merge or redistribute child node pointers, if necessary */
     else {
+        hsize_t orig_n = n;     /* Original index looked for */
         unsigned idx;           /* Location of record which matches key */
         hbool_t found = FALSE;  /* Comparison value of records */
         unsigned retries;       /* Number of times to attempt redistribution */
@@ -2698,18 +2705,19 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         else {
             /* Search for record with correct index */
             for(idx = 0; idx < internal->nrec; idx++) {
-HDfprintf(stderr, "%s: Check 1.0 - internal->node_ptrs[%u].all_nrec = %Hu\n", FUNC, idx, internal->node_ptrs[idx].all_nrec);
-HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
                 /* Check which child node contains indexed record */
                 if(internal->node_ptrs[idx].all_nrec >= n) {
                     /* Check if record is in this node */
                     if(internal->node_ptrs[idx].all_nrec == n) {
+                        /* Indicate the record was found and that the index
+                         *      in child nodes is zero from now on
+                         */
                         found = TRUE;
                         n = 0;
-                    } /* end if */
 
-                    /* Increment to next record */
-                    idx++;
+                        /* Increment to next record */
+                        idx++;
+                    } /* end if */
 
                     /* Break out of loop early */
                     break;
@@ -2721,8 +2729,6 @@ HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
                 n -= (internal->node_ptrs[idx].all_nrec + 1);
             } /* end for */
         } /* end else */
-HDfprintf(stderr, "%s: Check 1.0 - idx = %u\n", FUNC, idx);
-HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
 
         /* Set the number of redistribution retries */
         /* This takes care of the case where a B-tree node needs to be
@@ -2737,6 +2743,9 @@ HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
             /* Attempt to redistribute records among children */
             /* (NOTE: These 2-node redistributions should actually get the
              *  record to promote from the node with more records. - QAK)
+             */
+            /* (NOTE: This code is the same in both H5B2_remove_internal() and
+             *  H5B2_remove_internal_by_idx(), fix bugs in both places! - QAK)
              */
             if(idx == 0) {    /* Left-most child */
                 if(retries > 0 && (internal->node_ptrs[idx + 1].node_nrec > merge_nrec)) {
@@ -2777,20 +2786,29 @@ HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
             if(swap_loc)
                 idx = 0;
             else {
+                /* Count from the orginal index value again */
+                n = orig_n;
+
+                /* Reset "found" flag - the record may have shifted during the
+                 *      redistribute/merge
+                 */
+                found = FALSE;
+
                 /* Search for record with correct index */
                 for(idx = 0; idx < internal->nrec; idx++) {
-HDfprintf(stderr, "%s: Check 2.0 - internal->node_ptrs[%u].all_nrec = %Hu\n", FUNC, idx, internal->node_ptrs[idx].all_nrec);
-HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
                     /* Check which child node contains indexed record */
                     if(internal->node_ptrs[idx].all_nrec >= n) {
                         /* Check if record is in this node */
                         if(internal->node_ptrs[idx].all_nrec == n) {
+                            /* Indicate the record was found and that the index
+                             *      in child nodes is zero from now on
+                             */
                             found = TRUE;
                             n = 0;
-                        } /* end if */
 
-                        /* Increment to next record */
-                        idx++;
+                            /* Increment to next record */
+                            idx++;
+                        } /* end if */
 
                         /* Break out of loop early */
                         break;
@@ -2802,8 +2820,6 @@ HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
                     n -= (internal->node_ptrs[idx].all_nrec + 1);
                 } /* end for */
             } /* end else */
-HDfprintf(stderr, "%s: Check 2.0 - idx = %u\n", FUNC, idx);
-HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
 
             /* Decrement the number of redistribution retries left */
             retries--;
@@ -2835,7 +2851,7 @@ HDfprintf(stderr, "%s: n = %Hu\n", FUNC, n);
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node")
     } /* end else */
 
-    /* Update record count for node pointer to current node */
+    /* Update record count for node pointer to child node */
     if(!collapsed_root)
         new_node_ptr->all_nrec--;
 
