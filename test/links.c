@@ -6532,7 +6532,6 @@ delete_by_idx(hid_t fapl)
         /* Verify state of group (empty) */
         if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
 
-#ifdef NOT_YET
         /* Create more links, to push group into dense form */
         for(u = 0; u < (max_compact * 2); u++) {
             hid_t group_id2;	        /* Group ID */
@@ -6579,9 +6578,6 @@ delete_by_idx(hid_t fapl)
 
         /* Delete last link in creation order */
         if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-#else /* NOT_YET */
-HDfprintf(stderr, "Finish deletion tests!\n");
-#endif /* NOT_YET */
 
         /* Verify state of group (empty) */
         if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
