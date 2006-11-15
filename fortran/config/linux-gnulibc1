@@ -18,7 +18,6 @@
 # the various compile modes.
 #
 # See BlankForm in this directory for details.
-
 # The default compiler is `gcc'.
 if test -z "$CC"; then
     CC=gcc
@@ -71,8 +70,9 @@ fi
 	    # Try both options.
             tmpfile=/tmp/cmpver.$$
             ( $F9X -v; $F9X -V) >$tmpfile 2>&1
-	    if grep '(g95!)' $tmpfile > /dev/null; then
+	    if grep 'g95' $tmpfile > /dev/null; then
 		F9X_BASENAME=g95
+		CFLAGS="$CFLAGS -DH5_G95" 
 	    elif grep 'Absoft' $tmpfile > /dev/null; then
 		F9X_BASENAME=f95
 	    elif grep 'Portland Group' $tmpfile > /dev/null; then
