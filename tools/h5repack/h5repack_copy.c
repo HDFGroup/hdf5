@@ -24,6 +24,7 @@ extern char  *progname;
 static int do_create_refs;
 
 
+
 #define PER(A,B) { per = 0;                                       \
                    if (A!=0)                                      \
                     per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
