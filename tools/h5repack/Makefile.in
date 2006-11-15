@@ -84,9 +84,7 @@ am__DEPENDENCIES_2 = $(top_builddir)/test/libh5test.la
 am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
 h5repack_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
-am_h5repacktst_OBJECTS = $(am__objects_1) testh5repack_attr.$(OBJEXT) \
-	testh5repack_dset.$(OBJEXT) testh5repack_main.$(OBJEXT) \
-	testh5repack_make.$(OBJEXT) testh5repack_util.$(OBJEXT)
+am_h5repacktst_OBJECTS = $(am__objects_1) h5repacktst.$(OBJEXT)
 h5repacktst_OBJECTS = $(am_h5repacktst_OBJECTS)
 h5repacktst_LDADD = $(LDADD)
 h5repacktst_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -374,9 +372,7 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
         h5repack_verify.c
 
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
-h5repacktst_SOURCES = $(COMMON_SOURCES) testh5repack_attr.c testh5repack_dset.c \
-        testh5repack_main.c testh5repack_make.c testh5repack_util.c
-
+h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
 DISTCLEANFILES = h5repack.sh
 
@@ -497,12 +493,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_opttable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_verify.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_attr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repacktst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_detect_szip.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_dset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_make.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5repack_util.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

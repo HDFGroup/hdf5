@@ -900,12 +900,7 @@
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_parse.c
 ./tools/h5repack/h5repack_verify.c
-./tools/h5repack/testh5repack.h
-./tools/h5repack/testh5repack_attr.c
-./tools/h5repack/testh5repack_dset.c
-./tools/h5repack/testh5repack_main.c
-./tools/h5repack/testh5repack_make.c
-./tools/h5repack/testh5repack_util.c
+./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
 ./tools/h5ls/Makefile.am
@@ -1152,7 +1147,6 @@
 ./tools/testfiles/tbin2.ddl
 ./tools/testfiles/tbin3.ddl
 ./tools/testfiles/tbin4.ddl
-./tools/testfiles/test_big.h5
 
 
 # Expected output from h5ls tests
@@ -1324,19 +1318,21 @@
 
 
 #test files for h5repack
-./tools/testfiles/test0.h5
-./tools/testfiles/test1.h5
-./tools/testfiles/test2.h5
-./tools/testfiles/test3.h5
-./tools/testfiles/test4.h5
-./tools/testfiles/test5.h5
-./tools/testfiles/test_all.h5
-./tools/testfiles/test_deflate.h5
-./tools/testfiles/test_fletcher32.h5
-./tools/testfiles/test_shuffle.h5
-./tools/testfiles/test_szip.h5
-./tools/testfiles/test_nbit.h5
-./tools/testfiles/test_scaleoffset.h5
+./tools/testfiles/h5repack_fill.h5
+./tools/testfiles/h5repack_objs.h5
+./tools/testfiles/h5repack_attr.h5
+./tools/testfiles/h5repack_hlink.h5
+./tools/testfiles/h5repack_layout.h5
+./tools/testfiles/h5repack_early.h5
+./tools/testfiles/h5repack_szip.h5
+./tools/testfiles/h5repack_deflate.h5
+./tools/testfiles/h5repack_shuffle.h5
+./tools/testfiles/h5repack_fletcher.h5
+./tools/testfiles/h5repack_filters.h5
+./tools/testfiles/h5repack_nbit.h5
+./tools/testfiles/h5repack_soffset.h5
+
+
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

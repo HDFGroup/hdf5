@@ -20,9 +20,7 @@
 #include "h5tools_utils.h"
 #include "h5repack.h"
 
-
 extern char  *progname;
-
 static int do_create_refs;
 
 
@@ -31,8 +29,8 @@ static int do_create_refs;
                     per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
                  }
 
-#define FORMAT_OBJ      " %-21s %s\n"  /* obj type, name */
-#define FORMAT_OBJ_ATTR "  %-21s %s\n"  /* obj type, name */
+#define FORMAT_OBJ      " %-27s %s\n"  /* obj type, name */
+#define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
 
 /* local functions */
 static int   do_hardlinks(hid_t fidout,trav_table_t *travt);
@@ -148,9 +146,9 @@ static void print_dataset_info(hid_t dcpl_id,
  else
  {
   char str[255], temp[20];
-  strcpy(str,"dset  ");
+  strcpy(str,"dset     ");
   strcat(str,strfilter);
-  sprintf(temp,"(%.2f%%)",per);
+  sprintf(temp,"  (%.1f%%)",per);
   strcat(str,temp);
   printf(FORMAT_OBJ,str,objname);
  }
@@ -329,7 +327,7 @@ int do_copy_objects(hid_t fidin,
 
  if (options->verbose) {
   printf("-----------------------------------------\n");
-  printf(" Type  Filter (Ratio)  Name\n");
+  printf(" Type     Filter (Ratio)     Name\n");
   printf("-----------------------------------------\n");
  }
 
@@ -337,6 +335,8 @@ int do_copy_objects(hid_t fidin,
  {
 
   buf = NULL;
+  do_create_refs = 0;
+
   switch ( travt->objs[i].type )
   {
 /*-------------------------------------------------------------------------
@@ -629,10 +629,10 @@ int do_copy_objects(hid_t fidin,
        /* get the storage size of the input dataset */
        dsize_out=H5Dget_storage_size(dset_out);
        PER((hssize_t)dsize_in,(hssize_t)dsize_out);
-       print_dataset_info(dcpl_out,travt->objs[i].name,per*(float)100.0);
+       print_dataset_info(dcpl_out,travt->objs[i].name,(float)(per*100.0));
       }
       else
-       print_dataset_info(dcpl_id,travt->objs[i].name,0);
+       print_dataset_info(dcpl_id,travt->objs[i].name,(float)0);
      }
      
      if (apply_s==0 && options->verbose)
@@ -1448,14 +1448,14 @@ static int copy_refs_attr(hid_t loc_in,
                           hid_t fidout         /* for saving references */
                           )
 {
- hid_t      attr_id;      /* attr ID */
- hid_t      attr_out;     /* attr ID */
- hid_t      space_id;     /* space ID */
- hid_t      ftype_id;     /* file type ID */
- hid_t      wtype_id;     /* read/write type ID */
- size_t     msize;        /* size of type */
- hsize_t    nelmts;       /* number of elements in dataset */
- int        rank;         /* rank of dataset */
+ hid_t      attr_id=-1;      /* attr ID */
+ hid_t      attr_out=-1;     /* attr ID */
+ hid_t      space_id=-1;     /* space ID */
+ hid_t      ftype_id=-1;     /* file type ID */
+ hid_t      wtype_id=-1;     /* read/write type ID */
+ size_t     msize;           /* size of type */
+ hsize_t    nelmts;          /* number of elements in dataset */
+ int        rank;            /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
  char       name[255];
  int        n, j;

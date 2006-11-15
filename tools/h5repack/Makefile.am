@@ -45,8 +45,7 @@ COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
 
 h5repack_SOURCES=$(COMMON_SOURCES) h5repack_main.c
 
-h5repacktst_SOURCES=$(COMMON_SOURCES) testh5repack_attr.c testh5repack_dset.c \
-        testh5repack_main.c testh5repack_make.c testh5repack_util.c
+h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c 
 
 testh5repack_detect_szip_SOURCES=testh5repack_detect_szip.c
 
