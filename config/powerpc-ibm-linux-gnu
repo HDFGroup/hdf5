@@ -12,7 +12,7 @@
 # http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 
-
+# Configuration file for building on the IBM BG/L platform.
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
