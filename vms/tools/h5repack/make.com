@@ -23,7 +23,7 @@ $ type sys$input
 $!
 $ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_filters, " +-
         "h5repack_list, h5repack_opttable, h5repack_parse, " +-
-        "h5repack_verify"
+        "h5repack_verify, h5repacktst"
 
 $!                               
 $ ccc 'cobj 
