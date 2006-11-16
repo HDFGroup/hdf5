@@ -23,7 +23,7 @@ $ type sys$input
 $!
 $ cobj= "h5_write.c, h5_read.c, h5_extend_write.c, h5_chunk_read.c, "+-
         "h5_compound.c, h5_group.c, h5_select.c, h5_attribute.c,  "+- 
-        "h5_mount.c, h5_reference.c, h5_drivers.c "
+        "h5_mount.c, h5_ref2reg.c, h5_reference.c, h5_drivers.c "
 $!                               
 $ ccc 'cobj 
 $
