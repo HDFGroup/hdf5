@@ -63,7 +63,7 @@ typedef struct {
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_compact_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
-static herr_t H5G_compact_build_table(H5O_loc_t *oloc, hid_t dxpl_id,
+static herr_t H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
     H5G_link_table_t *ltable);
 
@@ -123,7 +123,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_build_table(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
+H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
