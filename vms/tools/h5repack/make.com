@@ -33,7 +33,8 @@ $ link/exe=h5repack.exe -
            h5repack_main, h5repack, h5repack_copy, h5repack_filters, -
            h5repack_list, h5repack_opttable, h5repack_parse, -
            h5repack_verify, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
+           [-.lib]libh5tools.olb/lib,
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
 	Created  h5repack
 $
@@ -44,8 +45,9 @@ $ link/exe=h5repacktst.exe -
            h5repack, h5repack_copy, h5repack_filters, -
            h5repack_list, h5repack_opttable, h5repack_parse, -
            h5repack_verify, -
-           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-!               sys$clib/lib
+           [-.lib]libh5tools.olb/lib,[-.-.test]libh5test.olb/lib, -
+           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$
 $ type sys$input
 	Created  h5repacktst
 $!

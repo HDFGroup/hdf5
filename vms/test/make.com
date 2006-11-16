@@ -25,7 +25,7 @@ $ cobj= "h5test.c, testframe.c, testhdf5.c, tarray.c, tattr.c, tconfig.c, "+-
         "tchecksum.c,"+- 
         "tfile.c, tgenprop.c, th5o.c, th5s.c, theap.c, tid.c, titerate.c,"+- 
         "tmeta.c, tmisc.c, ttime.c, trefer.c, trefstr.c,"+-
-        "tselect.c, tskiplist.c, ttst.c, tunicode.c, tvltypes.c,"+-
+        "tselect.c, tsohm.c, tskiplist.c, ttst.c, tunicode.c, tvltypes.c,"+-
         "tvlstr.c, cache_common.c"
 $!                              
 $ ccc 'cobj 
@@ -35,7 +35,7 @@ $ type sys$input
 $ link     testhdf5,tarray,tattr,tchecksum,tconfig, -
            tfile,tgenprop,th5o,th5s,theap,tid,titerate, -
            tmeta,tmisc,ttime,trefer,trefstr, -
-           tselect,tskiplist,ttst,tunicode,tvltypes, -
+           tselect,tsohm,tskiplist,ttst,tunicode,tvltypes, -
            tvlstr, -
            libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $
@@ -57,6 +57,7 @@ $!
 $ type sys$input
        Creating ohdr test
 $ ccc  ohdr
+
 $ link ohdr, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
