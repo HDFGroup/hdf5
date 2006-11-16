@@ -40,7 +40,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname ref vfd ntypes dangle dtransform reserved cross_read \
+           getname ref refreg_name vfd ntypes dangle dtransform reserved cross_read \
 	   btree2 fheap
 
 # List programs to be built when testing here. error_test and err_compat are
@@ -116,7 +116,8 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
             unlink_chunked.h5 btree2.h5 \
-            objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5
+            objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5\
+            refreg_name.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
