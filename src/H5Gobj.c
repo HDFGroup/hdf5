@@ -1029,8 +1029,6 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     else {
         /* Clear error stack from not finding the link info message */
         H5E_clear_stack(NULL);
-HDfprintf(stderr, "%s: Removing by index in symbol table not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "removing by index in symbol table not supported yet")
 
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5L_INDEX_NAME)
@@ -1039,11 +1037,9 @@ HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "removing by index in symbol table n
         /* Using the old format for groups */
         use_old_format = TRUE;
 
-#ifdef QAK
         /* Remove object from the symbol table */
-        if(H5G_stab_remove_by_idx(grp_oloc, dxpl_id, grp_full_path_r, idx_type, order, n) < 0)
+        if(H5G_stab_remove_by_idx(grp_oloc, dxpl_id, grp_full_path_r, order, n) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
-#endif /* QAK */
     } /* end else */
 
     /* Update link info for a new-style group */

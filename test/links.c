@@ -6288,11 +6288,10 @@ link_info_by_idx_old(hid_t fapl)
             TESTING("querying info by index in old-style group, using soft links")
 
         /* Create file */
-        /* (with creation order tracking for the root group) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
         if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
-        /* Create group with creation order indexing & tracking on */
+        /* Create group to operate on */
         if((group_id = H5Gcreate(file_id, CORDER_GROUP_NAME, (size_t)0)) < 0) TEST_ERROR
 
         /* Create several links */
@@ -6419,7 +6418,6 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end link_info_by_idx_old() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -6602,7 +6600,7 @@ delete_by_idx(hid_t fapl)
 
                 /* Delete links from dense group, in appropriate order */
                 for(u = 0; u < ((max_compact * 2) - 1); u++) {
-                    /* Delete first link */
+                    /* Delete first link in appropriate order */
                     if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Verify the link information for first link in appropriate order */
@@ -6744,6 +6742,240 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end delete_by_idx() */
+#endif /* QAK */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    delete_by_idx_old
+ *
+ * Purpose:     Create a old-format group and test deleting
+ *              links by index.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, November 15, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+delete_by_idx_old(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1), group_id2 = (-1);	/* Group IDs */
+    H5L_info_t  linfo;                  /* Link info struct */
+    H5_iter_order_t order;              /* Order within in the index */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
+    char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Loop over operating in different orders */
+    for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        /* Print test banner */
+        if(order == H5_ITER_INC)
+            TESTING("deleting links by index in increasing order in old-style group")
+        else
+            TESTING("deleting links by index in decreasing order in old-style group")
+
+        /* Create file */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+        /* Create group to operate on */
+        if((group_id = H5Gcreate(file_id, CORDER_GROUP_NAME, (size_t)0)) < 0) TEST_ERROR
+
+
+        /* Delete links from one end */
+
+
+        /* Check for deletion in empty group */
+        H5E_BEGIN_TRY {
+            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Create several links */
+        for(u = 0; u < CORDER_NLINKS; u++) {
+            H5G_stat_t sb;                  /* Buffer for querying object's info */
+
+            /* Make name for link */
+            sprintf(objname, "filler %02u", u);
+
+            /* Create group */
+            if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+
+            /* Retrieve group's address on disk */
+            if(H5Gget_objinfo(group_id2, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+            objno[u] = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+            objno[u] = (haddr_t)sb.objno[0];
+#endif
+
+            /* Close group */
+            if(H5Gclose(group_id2) < 0) TEST_ERROR
+        } /* end for */
+
+        /* Check for bad index type deletion */
+        H5E_BEGIN_TRY {
+            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)0, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Check for out of bounds deletion */
+        H5E_BEGIN_TRY {
+            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Delete links, in appropriate order */
+        for(u = 0; u < (CORDER_NLINKS - 1); u++) {
+            unsigned dec_u = CORDER_NLINKS - (u + 2);       /* Decreasing mapped index */
+
+            /* Delete first link in appropriate order */
+            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Verify the link information for first link in appropriate order */
+            HDmemset(&linfo, 0, sizeof(linfo));
+            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC) {
+                if(H5F_addr_ne(linfo.u.address, objno[u + 1])) TEST_ERROR
+            } /* end if */
+            else {
+                if(H5F_addr_ne(linfo.u.address, objno[dec_u])) TEST_ERROR
+            } /* end else */
+
+            /* Verify the name for first link in appropriate order */
+            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC)
+                sprintf(objname, "filler %02u", (u + 1));
+            else
+                sprintf(objname, "filler %02u", dec_u);
+            if(HDstrcmp(objname, tmpname)) TEST_ERROR
+        } /* end for */
+
+        /* Delete last link */
+        if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Check for deletion in empty group (again) */
+        H5E_BEGIN_TRY {
+            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Verify state of group */
+        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+
+
+        /* Delete links in middle */
+
+
+        /* Create several links */
+        for(u = 0; u < CORDER_NLINKS; u++) {
+            H5G_stat_t sb;                  /* Buffer for querying object's info */
+
+            /* Make name for link */
+            sprintf(objname, "filler %02u", u);
+
+            /* Create group */
+            if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+
+            /* Retrieve group's address on disk */
+            if(H5Gget_objinfo(group_id2, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+            objno[u] = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+            objno[u] = (haddr_t)sb.objno[0];
+#endif
+
+            /* Close group */
+            if(H5Gclose(group_id2) < 0) TEST_ERROR
+        } /* end for */
+
+        /* Delete every other link from group, in appropriate order */
+        for(u = 0; u < (CORDER_NLINKS / 2); u++) {
+            unsigned dec_u = CORDER_NLINKS - ((u * 2) + 2);       /* Decreasing mapped index */
+
+            /* Delete link */
+            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Verify the link information for current link in appropriate order */
+            HDmemset(&linfo, 0, sizeof(linfo));
+            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC) {
+                if(H5F_addr_ne(linfo.u.address, objno[(u * 2) + 1])) TEST_ERROR
+            } /* end if */
+            else {
+                if(H5F_addr_ne(linfo.u.address, objno[dec_u])) TEST_ERROR
+            } /* end else */
+
+            /* Verify the name for current link in appropriate order */
+            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC)
+                sprintf(objname, "filler %02u", ((u * 2) + 1));
+            else
+                sprintf(objname, "filler %02u", dec_u);
+            if(HDstrcmp(objname, tmpname)) TEST_ERROR
+        } /* end for */
+
+        /* Delete remaining links from group, in appropriate order */
+        for(u = 0; u < ((CORDER_NLINKS / 2) - 1); u++) {
+            unsigned dec_u = CORDER_NLINKS - ((u * 2) + 4);       /* Decreasing mapped index */
+
+            /* Delete link */
+            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Verify the link information for first link in appropriate order */
+            HDmemset(&linfo, 0, sizeof(linfo));
+            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC) {
+                if(H5F_addr_ne(linfo.u.address, objno[(u * 2) + 3])) TEST_ERROR
+            } /* end if */
+            else {
+                if(H5F_addr_ne(linfo.u.address, objno[dec_u])) TEST_ERROR
+            } /* end else */
+
+            /* Verify the name for first link in appropriate order */
+            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(order == H5_ITER_INC)
+                sprintf(objname, "filler %02u", ((u * 2) + 3));
+            else
+                sprintf(objname, "filler %02u", dec_u);
+            if(HDstrcmp(objname, tmpname)) TEST_ERROR
+        } /* end for */
+
+        /* Delete last link */
+        if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Verify state of group */
+        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+
+        /* Close the group */
+        if(H5Gclose(group_id) < 0) TEST_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file_id) < 0) TEST_ERROR
+
+        PASSED();
+    } /* end for */
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end delete_by_idx_old() */
 
 
 /*-------------------------------------------------------------------------
@@ -6855,11 +7087,12 @@ main(void)
             else {
                 /* Test new API calls on old-style groups */
                 nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
+                nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
             }
         } /* end for */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
-                nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
+                nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
 #endif /* QAK */
 
         /* Close 2nd FAPL */

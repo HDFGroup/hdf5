@@ -160,6 +160,9 @@ New Features
 
     Library:
     --------
+       - Added new H5Ldelete_by_idx() routine to delete a link according to
+            the order within an index.
+            - QAK - 2006/11/13
        - Added new H5Lget_val_by_idx() routine to query the value of a soft link
             according to the order within an index.
             - QAK - 2006/11/13

@@ -325,6 +325,60 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_stab_remove_by_idx
+ *
+ * Purpose:	Remove NAME from a symbol table, according to the name index.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, November 15, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
+    H5_iter_order_t order, hsize_t n)
+{
+    H5O_stab_t		stab;		/* Symbol table message		*/
+    H5G_bt_ud2_t	udata;		/* Data to pass through B-tree	*/
+    H5O_link_t          obj_lnk;        /* Object's link within group */
+    hbool_t             lnk_copied = FALSE;         /* Whether the link was copied */
+    herr_t              ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_stab_remove_by_idx, FAIL)
+
+    HDassert(grp_oloc && grp_oloc->file);
+
+    /* Look up name of link to remove, by index */
+    if(H5G_stab_lookup_by_idx(grp_oloc, order, n, &obj_lnk, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get link information")
+    lnk_copied = TRUE;
+
+    /* Read in symbol table message */
+    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+        HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
+
+    /* Initialize data to pass through B-tree */
+    udata.common.name = obj_lnk.name;
+    udata.common.heap_addr = stab.heap_addr;
+    udata.adj_link = TRUE;
+    udata.grp_full_path_r = grp_full_path_r;
+
+    /* Remove link from symbol table */
+    if(H5B_remove(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry")
+
+done:
+    /* Reset the link information, if we have a copy */
+    if(lnk_copied)
+        H5O_reset(H5O_LINK_ID, &obj_lnk);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_remove() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_stab_delete
  *
  * Purpose:	Delete entire symbol table information from file

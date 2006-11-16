@@ -379,6 +379,8 @@ H5_DLL H5G_obj_t H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
     hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_remove(H5O_loc_t *oloc, hid_t dxpl_id,
     H5RS_str_t *grp_full_path_r, const char *name);
+H5_DLL herr_t H5G_stab_remove_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
+    H5RS_str_t *grp_full_path_r, H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order,
