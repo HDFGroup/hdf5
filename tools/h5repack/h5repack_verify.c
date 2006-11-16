@@ -173,7 +173,9 @@ int h5repack_verify(const char *fname,
  hid_t  dset_id=-1;  /* dataset ID */
  hid_t  dcpl_id=-1;  /* dataset creation property list ID */
  hid_t  space_id=-1; /* space ID */
- int    ret=1, i, j;
+ int    ret=1;
+ unsigned int i;
+ int j;
  trav_table_t  *travt=NULL;
 
  /* open the file */
@@ -355,7 +357,8 @@ int h5repack_cmpdcpl(const char *fname1,
  hid_t         dcpl2=-1;      /* dataset creation property list ID */
  trav_table_t  *travt1=NULL;
  trav_table_t  *travt2=NULL;
- int           ret=1, i;
+ int           ret=1;
+ unsigned int  i;
 
 /*-------------------------------------------------------------------------
  * open the files first; if they are not valid, no point in continuing

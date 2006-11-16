@@ -24,7 +24,6 @@ extern char  *progname;
 static int do_create_refs;
 
 
-
 #define PER(A,B) { per = 0;                                       \
                    if (A!=0)                                      \
                     per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
@@ -317,9 +316,12 @@ int do_copy_objects(hid_t fidin,
  float    per;            /* percent utilization of storage */
  void     *buf=NULL;      /* buffer for raw data */
  void     *sm_buf=NULL;   /* buffer for raw data */
- int      i, j;
+ unsigned i;
  int      nfilters;       /* number of filters in DCPL */
  H5D_layout_t layout;
+#if defined(H5REPACK_GETTIME)
+ time_t start_time, finish_time, time_secs;
+#endif
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -411,6 +413,11 @@ int do_copy_objects(hid_t fidin,
        options->all_filter==1 || options->all_layout==1
        )
    {
+    int j;
+
+#if defined(H5REPACK_GETTIME)
+    time( &start_time );  
+#endif
     if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
      goto error;
     if ((f_space_id=H5Dget_space(dset_in))<0)
@@ -540,6 +547,7 @@ int do_copy_objects(hid_t fidin,
         hsize_t       hs_size[H5S_MAX_RANK];  /*size this pass */
         hsize_t       hs_nelmts;              /*elements in request */
         hsize_t       zero[8];                /*vector of zeros */
+        int           k;          
         
         /* check if we have VL data in the dataset's datatype */
         if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
@@ -551,9 +559,9 @@ int do_copy_objects(hid_t fidin,
          */
         sm_nbytes = p_type_nbytes;
         
-        for (i = rank; i > 0; --i) {
-         sm_size[i - 1] = MIN(dims[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
-         sm_nbytes *= sm_size[i - 1];
+        for (k = rank; k > 0; --k) {
+         sm_size[k - 1] = MIN(dims[k - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+         sm_nbytes *= sm_size[k - 1];
          assert(sm_nbytes > 0);
         }
         sm_buf = HDmalloc((size_t)sm_nbytes);
@@ -570,10 +578,10 @@ int do_copy_objects(hid_t fidin,
          /* calculate the hyperslab size */
          if (rank > 0) 
          {
-          for (i = 0, hs_nelmts = 1; i < rank; i++) 
+          for (k = 0, hs_nelmts = 1; k < rank; k++) 
           {
-           hs_size[i] = MIN(dims[i] - hs_offset[i], sm_size[i]);
-           hs_nelmts *= hs_size[i];
+           hs_size[k] = MIN(dims[k] - hs_offset[k], sm_size[k]);
+           hs_nelmts *= hs_size[k];
           }
           
           if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL)<0)
@@ -599,14 +607,14 @@ int do_copy_objects(hid_t fidin,
           H5Dvlen_reclaim(wtype_id, sm_space, H5P_DEFAULT, sm_buf);
          
          /* calculate the next hyperslab offset */
-         for (i = rank, carry = 1; i > 0 && carry; --i) 
+         for (k = rank, carry = 1; k > 0 && carry; --k) 
          {
-          hs_offset[i - 1] += hs_size[i - 1];
-          if (hs_offset[i - 1] == dims[i - 1])
-           hs_offset[i - 1] = 0;
+          hs_offset[k - 1] += hs_size[k - 1];
+          if (hs_offset[k - 1] == dims[k - 1])
+           hs_offset[k - 1] = 0;
           else
            carry = 0;
-         } /* i */
+         } /* k */
         } /* elmtno */
         
         H5Sclose(sm_space);
@@ -677,6 +685,12 @@ int do_copy_objects(hid_t fidin,
     if (H5Dclose(dset_in)<0)
      goto error;
 
+#if defined(H5REPACK_GETTIME)
+    time( &finish_time ); 
+    time_secs = finish_time-start_time;
+    printf("time1=%d secs\n",time_secs);
+#endif
+
     }
   /*-------------------------------------------------------------------------
    * we do not have request for filter/chunking use H5Ocopy instead
@@ -685,6 +699,10 @@ int do_copy_objects(hid_t fidin,
     else 
     {
      hid_t        pid;
+     
+#if defined(H5REPACK_GETTIME)
+     time( &start_time );  
+#endif
      
      /* create property to pass copy options */
      if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
@@ -706,6 +724,13 @@ int do_copy_objects(hid_t fidin,
      /* close property */
      if (H5Pclose(pid)<0)
       goto error;
+     
+#if defined(H5REPACK_GETTIME)
+     time( &finish_time ); 
+     time_secs = finish_time-start_time;
+     printf("time2=%d secs\n",time_secs);
+#endif
+
      
     } /* end do we have request for filter/chunking */
 
@@ -1003,7 +1028,7 @@ error:
 static
 int do_hardlinks(hid_t fidout,trav_table_t *travt)
 {
- int i, j;
+ unsigned int i, j;
 
  for ( i = 0; i < travt->nobjs; i++)
  {
@@ -1093,7 +1118,8 @@ int do_copy_refobjs(hid_t fidin,
  int       rank;              /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  int       next;              /* external files */
- int       i, j;
+ unsigned  i;
+ int j;
 
 /*-------------------------------------------------------------------------
  * browse
@@ -1739,7 +1765,7 @@ static const char* MapIdToName(hid_t refobj_id,
  hid_t fid;
  H5G_stat_t refstat;    /* Stat for the refobj id */
  H5G_stat_t objstat;    /* Stat for objects in the file */
- int   i;
+ unsigned int   i;
 
  /* obtain information to identify the referenced object uniquely */
  if(H5Gget_objinfo(refobj_id, ".", 0, &refstat) <0)

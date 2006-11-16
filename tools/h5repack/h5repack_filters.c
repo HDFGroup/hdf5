@@ -32,7 +32,7 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
 {
  char *pdest;
  int  result;
-	int  i;
+	unsigned int  i;
 
  for ( i=0; i<options->op_tbl->nelems; i++)
  {

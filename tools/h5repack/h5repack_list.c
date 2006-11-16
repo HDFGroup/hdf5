@@ -39,7 +39,7 @@ int check_objects(const char* fname,
                   pack_opt_t *options)
 {
  hid_t         fid;
- int           i;
+ unsigned int  i;
  trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------

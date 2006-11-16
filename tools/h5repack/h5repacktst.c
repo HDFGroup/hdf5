@@ -98,7 +98,7 @@ int make_nbit(hid_t loc_id);
 int make_scaleoffset(hid_t loc_id);
 int make_all(hid_t loc_id);
 int make_fill(hid_t loc_id);
-int make_big(hid_t loc_id);
+int make_big(hid_t loc_id, int set_chunk);
 int make_testfiles(void);
 void write_dset_in(hid_t loc_id,const char* dset_name,hid_t file_id,int make_diffs );
 void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs );
@@ -1448,12 +1448,12 @@ int make_testfiles(void)
   return -1;
 
 /*-------------------------------------------------------------------------
- * create a big file 
+ * create a big dataset
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- if (make_big(loc_id)<0)
+ if (make_big(loc_id, 1)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
@@ -2554,13 +2554,14 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make_big 
  *
- * Purpose: used in test read by hyperslabs. create a dataset with 1GB dimensions
- *  by iterating trough 1MB hyperslabs 
+ * Purpose: used in test read by hyperslabs. Can create 1GB datasets, either with 
+ *  chunk layout or with contiguous layout, by iterating trough 1MB hyperslabs.
+ *  Only 1 hyperslab is written. Only the chunk case is called.
  *
  *-------------------------------------------------------------------------
  */
 
-int make_big(hid_t loc_id)
+int make_big(hid_t loc_id, int set_chunk)
 {
  hid_t   did=-1;
  hid_t   f_sid=-1;
@@ -2577,17 +2578,25 @@ int make_big(hid_t loc_id)
  char    *buf=NULL;
  int     i, j, s;
  char    c;
+ char    name[20];
+
+ strcpy(name,"conti");
 
  /* create */ 
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
  if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
   goto out;
- if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
-  goto out;
+
+ if (set_chunk)
+ {
+  strcpy(name,"chunk");
+  if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
+   goto out;
+ }
  if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
   goto out;
- if ((did = H5Dcreate(loc_id,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,name,H5T_NATIVE_CHAR,f_sid,dcpl))<0)
   goto out;
  if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
   goto out;

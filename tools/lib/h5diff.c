@@ -382,7 +382,7 @@ hsize_t diff_match (hid_t file1_id,
  unsigned infile[2];
  char c1, c2;
  hsize_t nfound = 0;
- int i;
+ unsigned i;
 
 /*-------------------------------------------------------------------------
  * build the list

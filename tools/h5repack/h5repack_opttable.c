@@ -122,7 +122,7 @@ static void aux_tblinsert_layout(pack_opttbl_t *table,
 
 static int aux_inctable(pack_opttbl_t *table, int n_objs )
 {
- int i;
+ unsigned int i;
 
  table->size += n_objs;
  table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
@@ -149,7 +149,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
 
 int options_table_init( pack_opttbl_t **tbl )
 {
- int i;
+ unsigned int i;
  pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
   error_msg(progname, "not enough memory for options table\n");
@@ -206,7 +206,8 @@ int options_add_layout( obj_list_t *obj_list,
                         pack_info_t *pack,
                         pack_opttbl_t *table )
 {
- int i, j, I, added=0, found=0;
+ unsigned int i;
+ int          j, I, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
@@ -304,7 +305,8 @@ int options_add_filter(obj_list_t *obj_list,
                        pack_opttbl_t *table )
 {
 
- int i, j, I, added=0, found=0;
+ unsigned int i;
+ int          j, I, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
@@ -387,7 +389,7 @@ int options_add_filter(obj_list_t *obj_list,
 pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table )
 {
- int i;
+ unsigned int i;
 
  for ( i = 0; i < table->nelems; i++)
  {

@@ -80,9 +80,9 @@ typedef struct {
 
 /* store a table of all objects */
 typedef struct {
- int         size;
- int         nelems;
- pack_info_t *objs;
+ unsigned int size;
+ unsigned int nelems;
+ pack_info_t  *objs;
 } pack_opttbl_t;
 
 
@@ -102,7 +102,6 @@ typedef struct {
  int             verbose;     /*verbose mode */
  hsize_t         threshold;   /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */  
- int             have_fc_f;   /*has input to use filter/chunking flag */
 } pack_opt_t;
 
 

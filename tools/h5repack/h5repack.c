@@ -247,8 +247,9 @@ int h5repack_addlayout(const char* str,
  */
 static int check_options(pack_opt_t *options)
 {
- int   i, k, j, has_cp=0, has_ck=0;
- char  slayout[30];
+ unsigned int   i;
+ int            k, j, has_cp=0, has_ck=0;
+ char           slayout[30];
 
 /*-------------------------------------------------------------------------
  * objects to layout

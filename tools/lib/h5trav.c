@@ -146,15 +146,15 @@ int h5trav_getindex( const char *obj, int nobjs, trav_info_t *info )
 void h5trav_freeinfo( trav_info_t *info, int nobjs )
 {
  int i;
-	if ( info )
-	{
-		for ( i = 0; i < nobjs; i++)
-		{
-			if (info[i].name)
-		 	HDfree( info[i].name );
-		}
-		HDfree(info);
-	}
+    if ( info )
+    {
+        for ( i = 0; i < nobjs; i++)
+        {
+            if (info[i].name)
+            HDfree( info[i].name );
+        }
+        HDfree(info);
+    }
 }
 
 
@@ -625,7 +625,7 @@ void h5trav_printinfo(int nobjs, trav_info_t *travi)
  */
 void h5trav_printtable(trav_table_t *table)
 {
- int i, j;
+ unsigned int i, j;
 
  for ( i = 0; i < table->nobjs; i++)
  {
@@ -678,7 +678,7 @@ int h5trav_getindext(const char *name, trav_table_t *table)
 {
  char *pdest;
  int  result;
- int  i, j;
+ unsigned int  i, j;
 
  for ( i = 0; i < table->nobjs; i++)
  {

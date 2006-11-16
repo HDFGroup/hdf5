@@ -21,16 +21,16 @@
  * public struct to store name and type of an object
  * the TYPE can be:
  *    H5G_UNKNOWN = -1,
- *    H5G_GROUP,		    Object is a group
- *    H5G_DATASET,		    Object is a dataset
- *    H5G_TYPE,			    Object is a named data type
- *    H5G_LINK,		            Object is a symbolic link
+ *    H5G_GROUP,            Object is a group
+ *    H5G_DATASET,          Object is a dataset
+ *    H5G_TYPE,             Object is a named data type
+ *    H5G_LINK,             Object is a symbolic link
  *-------------------------------------------------------------------------
  */
 
 typedef struct trav_info_t {
-	char      *name;
-	H5G_obj_t type;
+    char      *name;
+    H5G_obj_t type;
 } trav_info_t;
 
 
@@ -39,7 +39,7 @@ typedef struct trav_info_t {
  *-------------------------------------------------------------------------
  */
 typedef struct trav_link_t {
-	char      *new_name;
+    char      *new_name;
 } trav_link_t;
 
 
@@ -56,7 +56,7 @@ typedef struct trav_obj_t {
     H5G_obj_t   type;      /* type of object */
     trav_link_t *links;    /* array of possible link names */
     int         sizelinks; /* size of links array */
-    int         nlinks;    /* number of links */
+    unsigned    nlinks;    /* number of links */
 } trav_obj_t;
 
 
@@ -66,9 +66,9 @@ typedef struct trav_obj_t {
  */
 
 typedef struct trav_table_t {
-	int        size;
-	int        nobjs;
-	trav_obj_t *objs;
+    unsigned        size;
+    unsigned        nobjs;
+    trav_obj_t *objs;
 } trav_table_t;
 
 
