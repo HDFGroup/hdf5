@@ -32,9 +32,8 @@
 
 /* Public headers needed by this file */
 #include "H5Dpublic.h"          /* Dataset functions                    */
-#include "H5Lpublic.h"         /* Link functions                       */
+#include "H5Lpublic.h"		/* Link functions                       */
 #include "H5Spublic.h"		/* Dataspace functions			*/
-#include "H5Lpublic.h"         /* Link functions                       */
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h"		/* File access				*/
@@ -82,7 +81,7 @@ typedef uint64_t H5SM_fheap_id_t;
 /* Hash value constants */
 /* JAMES: undefined hash value may not be great */
 #define H5O_HASH_SIZE 32
-#define H5O_HASH_UNDEF FAIL
+#define H5O_HASH_UNDEF ((uint32_t)FAIL)
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 			"copy object"   /* Copy options */
@@ -414,15 +413,13 @@ H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg,
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL htri_t H5O_is_shared(unsigned type_id, const void *mesg);
-H5_DLL herr_t H5O_set_share(H5F_t *f, hid_t dxpl_id, H5O_shared_t *share,
-    unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_set_share(H5F_t *f, H5O_shared_t *share, unsigned type_id,
+    void *mesg);
 H5_DLL herr_t H5O_reset_share(H5F_t *f, unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
 H5_DLL H5G_obj_t H5O_obj_type(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
-    hid_t dxpl_id, unsigned cpy_option);
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth);
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);

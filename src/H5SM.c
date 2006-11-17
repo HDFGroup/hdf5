@@ -714,7 +714,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     }
 
     /* Change the original message passed in to reflect that it's now shared */
-    if(H5O_set_share(f, dxpl_id, &shared, type_id, mesg) < 0)
+    if(H5O_set_share(f, &shared, type_id, mesg) < 0)
         HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "unable to set sharing information")
 
 done:

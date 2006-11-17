@@ -35,9 +35,10 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5Lprivate.h"         /* Links			  	*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"         /* Property lists                       */
@@ -61,6 +62,11 @@
 /* Local Prototypes */
 /********************/
 
+static herr_t H5O_copy_free_addrmap_cb(void *item, void *key, void *op_data);
+static herr_t H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
+    hid_t dxpl_id, H5O_copy_t *cpy_info);
+static herr_t H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
+    hid_t dxpl_id, unsigned cpy_option);
 static herr_t H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 static herr_t H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id,
@@ -255,6 +261,590 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header_real
+ *
+ * Purpose:     Copy header object from one location to another using
+ *              pre-copy, copy, and post-copy callbacks for each message
+ *              type.
+ *
+ *              The source header object is compressed into a single chunk
+ *              (since we know how big it is) and any continuation messages
+ *              are converted into NULL messages.
+ *
+ *              By default, NULL messages are not copied.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              May 30, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
+    hid_t dxpl_id, H5O_copy_t *cpy_info)
+{
+    H5O_addr_map_t         *addr_map = NULL;       /* Address mapping of object copied */
+    H5O_t                  *oh_src = NULL;         /* Object header for source object */
+    H5O_t                  *oh_dst = NULL;         /* Object header for destination object */
+    unsigned               mesgno = 0;
+    haddr_t                addr_new = HADDR_UNDEF;
+    hbool_t                *deleted = NULL;      /* Array of flags indicating whether messages should be copied */
+    size_t                 null_msgs;               /* Number of NULL messages found in each loop */
+    H5O_mesg_t             *mesg_src;               /* Message in source object header */
+    H5O_mesg_t             *mesg_dst;               /* Message in source object header */
+    const H5O_msg_class_t  *copy_type;              /* Type of message to use for copying */
+    const H5O_obj_class_t  *obj_class = NULL;       /* Type of object we are copying */
+    void                   *udata = NULL;           /* User data for passing to message callbacks */
+    size_t                 dst_oh_size;             /* Total size of the destination OH */
+    uint8_t                *current_pos;            /* Current position in destination image */
+    size_t                 msghdr_size;
+    herr_t                 ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header_real)
+
+    HDassert(oloc_src);
+    HDassert(oloc_src->file);
+    HDassert(H5F_addr_defined(oloc_src->addr));
+    HDassert(oloc_dst->file);
+    HDassert(cpy_info);
+
+    /* Get source object header */
+    if(NULL == (oh_src = H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Get pointer to object class for this object */
+    if(NULL == (obj_class = H5O_obj_class_real(oh_src)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+
+    /* Retrieve user data for particular type of object to copy */
+    if(obj_class->get_copy_file_udata &&
+            (NULL == (udata = (obj_class->get_copy_file_udata)())))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to retrieve copy user data")
+
+    /* Flush any dirty messages in source object header to update the header chunks */
+    if(H5O_flush_msgs(oloc_src->file, oh_src) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
+
+    /* Allocate the destination object header and fill in header fields */
+    if(NULL == (oh_dst = H5FL_MALLOC(H5O_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Initialize header information */
+    oh_dst->version = oh_src->version;
+    oh_dst->nlink = 0;
+
+    /* Initialize size of chunk array.  The destination always has only one
+     * chunk.
+     */
+    oh_dst->alloc_nchunks = oh_dst->nchunks = 1;
+
+    /* Allocate memory for the chunk array */
+    if(NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, oh_dst->alloc_nchunks)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Allocate memory for "deleted" array.  This array marks the message in
+     * the source that shouldn't be copied to the destination.
+     */
+     if(NULL == (deleted = HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+     HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+
+    /* "pre copy" pass over messages, to gather information for actual message copy operation
+     * (for messages which depend on information from other messages)
+     * Keep track of how many NULL or deleted messages we find (or create)
+     */
+    null_msgs = 0;
+    for(mesgno = 0; mesgno < oh_src->nmesgs; mesgno++) {
+        /* Set up convenience variables */
+        mesg_src = &(oh_src->mesg[mesgno]);
+        mesg_dst = &(oh_dst->mesg[mesgno]);
+
+        /* Sanity check */
+        HDassert(!mesg_src->dirty);     /* Should be cleared by earlier call to flush messages */
+
+        /* Check for shared message to operate on */
+        if(mesg_src->flags & H5O_FLAG_SHARED)
+            copy_type = H5O_MSG_SHARED;
+        else
+            copy_type = mesg_src->type;
+
+        /* Check for continuation message; these are converted to NULL
+         * messages because the destination OH will have only one chunk
+         */
+        if(H5O_CONT_ID == mesg_src->type->id || H5O_NULL_ID == mesg_src->type->id) {
+            deleted[mesgno] = TRUE;
+            ++null_msgs;
+            copy_type = H5O_MSG_NULL;
+        }
+        HDassert(copy_type);
+
+        if(copy_type->pre_copy_file ) {
+            /*
+             * Decode the message if necessary.  If the message is shared then do
+             * a shared message, ignoring the message type.
+             */
+            if(NULL == mesg_src->native) {
+                /* Decode the message if necessary */
+                HDassert(copy_type->decode);
+                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->raw)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
+            } /* end if (NULL == mesg_src->native) */
+
+            /* Perform "pre copy" operation on message */
+            if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->type, mesg_src->native, &(deleted[mesgno]), cpy_info, udata) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
+
+            /* Check if the message should be deleted in the destination */
+            if(deleted[mesgno]) {
+                /* Mark message as deleted */
+                ++null_msgs;
+            } /* end if(deleted) */
+        } /* end if(copy_type->pre_copy_file) */
+    } /* end for */
+
+    /* Initialize size of message list.  It may or may not include the NULL messages
+     * detected above.
+     */
+    if(cpy_info->preserve_null)
+        oh_dst->alloc_nmesgs = oh_dst->nmesgs = oh_src->nmesgs;
+    else
+        oh_dst->alloc_nmesgs = oh_dst->nmesgs = (oh_src->nmesgs - null_msgs);
+
+    /* Allocate memory for destination message array */
+    if(oh_dst->alloc_nmesgs > 0) {
+        if(NULL == (oh_dst->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh_dst->alloc_nmesgs)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    }
+
+    /* "copy" pass over messages, to perform main message copying */
+    null_msgs = 0;
+    for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
+        /* Skip any deleted or NULL messages in the source unless the
+         * preserve_null flag is set
+         */
+        if(FALSE == cpy_info->preserve_null) {
+            while(deleted[mesgno + null_msgs]) {
+                ++null_msgs;
+                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+            }
+        }
+
+        /* Set up convenience variables */
+        mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
+        mesg_dst = &(oh_dst->mesg[mesgno]);
+
+        /* Initialize on destination message */
+        mesg_dst->chunkno = 0;
+        mesg_dst->dirty = FALSE;
+        mesg_dst->flags = mesg_src->flags;
+        mesg_dst->native = NULL;
+        mesg_dst->raw = NULL;
+        mesg_dst->raw_size = mesg_src->raw_size;
+        mesg_dst->type = mesg_src->type;
+
+        /* If we're preserving deleted messages, set their types to 'NULL'
+         * in the destination.
+         */
+        if(cpy_info->preserve_null && deleted[mesgno]) {
+            mesg_dst->type = H5O_MSG_NULL;
+        }
+
+        /* Check for shared message to operate on */
+        /* (Use destination message, in case the message has been removed (i.e
+            *      converted to a nil message) in the destination -QAK)
+            */
+        if(mesg_dst->flags & H5O_FLAG_SHARED)
+            copy_type = H5O_MSG_SHARED;
+        else
+            copy_type = mesg_dst->type;
+        HDassert(copy_type);
+
+        /* copy this message into destination file */
+        if(copy_type->copy_file) {
+            /*
+                * Decode the message if necessary.  If the message is shared then do
+                * a shared message, ignoring the message type.
+                */
+            if(NULL == mesg_src->native) {
+                /* Decode the message if necessary */
+                HDassert(copy_type->decode);
+                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->raw)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
+            } /* end if (NULL == mesg_src->native) */
+
+            /* Copy the source message */
+            if((mesg_dst->native = H5O_copy_mesg_file(copy_type, mesg_dst->type,
+                    oloc_src->file, mesg_src->native, oloc_dst->file, dxpl_id,
+                    cpy_info, udata)) == NULL)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+
+            /* Mark the message in the destination as dirty, so it'll get encoded when the object header is flushed */
+            mesg_dst->dirty = TRUE;
+        } /* end if (mesg_src->type->copy_file) */
+    } /* end of mesgno loop */
+
+
+    /* Allocate the destination header and copy any messages that didn't have
+     * copy callbacks.  They get copied directly from the source image to the
+     * destination image.
+     */
+
+    /* Calculate how big the destination object header will be on disk.
+     * This isn't necessarily the same size as the original.
+     */
+    dst_oh_size = H5O_SIZEOF_HDR_OH(oh_dst);
+
+    /* Add space for messages. */
+    for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
+        dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
+        dst_oh_size += H5O_ALIGN_OH(oh_dst, oh_dst->mesg[mesgno].raw_size);
+    }
+
+    /* Allocate space for chunk in destination file */
+    if(HADDR_UNDEF == (oh_dst->chunk[0].addr = H5MF_alloc(oloc_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)dst_oh_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
+    addr_new = oh_dst->chunk[0].addr;
+
+    /* Create memory image for the new chunk */
+    if(NULL == (oh_dst->chunk[0].image = H5FL_BLK_MALLOC(chunk_image, dst_oh_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Set dest. chunk information */
+    oh_dst->chunk[0].dirty = TRUE;
+    oh_dst->chunk[0].size = dst_oh_size;
+    oh_dst->chunk[0].gap = 0;
+
+    /* Set up raw pointers and copy messages that didn't need special
+     * treatment.  This has to happen after the destination header has been
+     * allocated.
+     */
+    HDassert(H5O_SIZEOF_HDR_OH(oh_src) == H5O_SIZEOF_HDR_OH(oh_dst));
+    HDassert(H5O_SIZEOF_MSGHDR_OH(oh_src) == H5O_SIZEOF_MSGHDR_OH(oh_dst));
+    msghdr_size = H5O_SIZEOF_MSGHDR_OH(oh_src);
+
+    current_pos = oh_dst->chunk[0].image;
+
+    /* Copy the message header.  Most of this will be overwritten when
+     * the header is flushed to disk, but later versions have a
+     * magic number that isn't.
+     */
+    HDmemcpy(current_pos, oh_src->chunk[0].image,
+            (size_t)(H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst)));
+    current_pos += H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
+
+    /* JAMES: include this in loop above?  Doesn't take deleted messages
+     * into account
+     */
+    /* Copy each message that wasn't dirtied above */
+    null_msgs = 0;
+    for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
+        /* Skip any deleted or NULL messages in the source unless the
+         * preserve_null flag is set
+         */
+        if(FALSE == cpy_info->preserve_null) {
+            while(deleted[mesgno + null_msgs]) {
+                ++null_msgs;
+                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+            }
+        }
+
+        /* Set up convenience variables */
+        mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
+        mesg_dst = &(oh_dst->mesg[mesgno]);
+
+        if(! mesg_dst->dirty) {
+            /* Copy the message header plus the message's raw data. */
+            HDmemcpy(current_pos, mesg_src->raw - msghdr_size,
+                    msghdr_size + mesg_src->raw_size);
+        }
+        mesg_dst->raw = current_pos + msghdr_size;
+        current_pos += mesg_dst->raw_size + msghdr_size;
+    }
+
+    /* Make sure we filled the chunk, except for room at the end for a checksum */
+    HDassert(current_pos + H5O_SIZEOF_CHKSUM_OH(oh_dst) == dst_oh_size + oh_dst->chunk[0].image);
+
+    /* Set the dest. object location to the first chunk address */
+    HDassert(H5F_addr_defined(addr_new));
+    oloc_dst->addr = addr_new;
+
+    /* Allocate space for the address mapping of the object copied */
+    if(NULL == (addr_map = H5FL_MALLOC(H5O_addr_map_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Insert the address mapping for the new object into the copied list */
+    /* (Do this here, because "post copy" possibly checks it) */
+    addr_map->src_addr = oloc_src->addr;
+    addr_map->dst_addr = oloc_dst->addr;
+    addr_map->is_locked = TRUE;                 /* We've locked the object currently */
+    addr_map->inc_ref_count = 0;                /* Start with no additional ref counts to add */
+
+    if(H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_addr)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
+
+    /* "post copy" loop over messages, to fix up any messages which require a complete
+     * object header for destination object
+     */
+    null_msgs = 0;
+    for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
+        /* Skip any deleted or NULL messages in the source unless the
+         * preserve_null flag is set
+         */
+        if(FALSE == cpy_info->preserve_null) {
+            while(deleted[mesgno + null_msgs]) {
+                ++null_msgs;
+                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+            }
+        }
+
+        /* Set up convenience variables */
+        mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
+        mesg_dst = &(oh_dst->mesg[mesgno]);
+
+        /* Check for shared message to operate on */
+        /* (Use destination message, in case the message has been removed (i.e
+         *      converted to a nil message) in the destination -QAK)
+         */
+        if(mesg_dst->flags & H5O_FLAG_SHARED)
+            copy_type = H5O_MSG_SHARED;
+        else
+            copy_type = mesg_dst->type;
+        HDassert(copy_type);
+
+        if(copy_type->post_copy_file && mesg_src->native) {
+            /* Sanity check destination message */
+            HDassert(mesg_dst->type == mesg_src->type);
+            HDassert(mesg_dst->native);
+
+            /* Perform "post copy" operation on message */
+            if((copy_type->post_copy_file)(oloc_src, mesg_src->native, oloc_dst,
+                    mesg_dst->native, dxpl_id, cpy_info) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'post copy' operation on message")
+        } /* end if */
+    } /* end for */
+
+    /* Indicate that the destination address will no longer be locked */
+    addr_map->is_locked = FALSE;
+
+    /* Increment object header's reference count, if any descendents have created links to link to this object */
+    if(addr_map->inc_ref_count) {
+        H5_CHECK_OVERFLOW(addr_map->inc_ref_count, hsize_t, int);
+        oh_dst->nlink += (int)addr_map->inc_ref_count;
+    } /* end if */
+
+    /* Insert destination object header in cache */
+    if(H5AC_set(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__DIRTIED_FLAG) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+
+done:
+    /* Free deleted array */
+    if(deleted) {
+        HDfree(deleted);
+    }
+
+    /* Release pointer to source object header and its derived objects */
+    if(oh_src != NULL) {
+        /* Unprotect the source object header */
+        if(H5AC_unprotect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, oh_src, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    } /* end if */
+
+    /* Release pointer to destination object header */
+    if(ret_value < 0 && oh_dst) {
+        if(H5O_dest(oloc_dst->file, oh_dst) < 0)
+	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+    } /* end if */
+
+    /* Release user data for particular type of object to copy */
+    if(udata) {
+        HDassert(obj_class);
+        HDassert(obj_class->free_copy_file_udata);
+        (obj_class->free_copy_file_udata)(udata);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header_map
+ *
+ * Purpose:     Copy header object from one location to another, detecting
+ *              already mapped objects, etc.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 1, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
+    hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth)
+{
+    H5O_addr_map_t      *addr_map;              /* Address mapping of object copied */
+    hbool_t             inc_link;               /* Whether to increment the link count for the object */
+    herr_t             ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5O_copy_header_map, FAIL)
+
+    /* Sanity check */
+    HDassert(oloc_src);
+    HDassert(oloc_dst);
+    HDassert(oloc_dst->file);
+    HDassert(cpy_info);
+
+    /* Look up the address of the object to copy in the skip list */
+    addr_map = (H5O_addr_map_t *)H5SL_search(cpy_info->map_list, &(oloc_src->addr));
+
+    /* Check if address is already in list of objects copied */
+    if(addr_map == NULL) {
+        /* Copy object for the first time */
+
+        /* Check for incrementing the depth of copy */
+        /* (Can't do this for all copies, since committed datatypes should always be copied) */
+        if(inc_depth)
+            cpy_info->curr_depth++;
+
+        /* Copy object referred to */
+        if(H5O_copy_header_real(oloc_src, oloc_dst, dxpl_id, cpy_info) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+        /* Check for incrementing the depth of copy */
+        if(inc_depth)
+            cpy_info->curr_depth--;
+
+        /* When an object is copied for the first time, increment it's link */
+        inc_link = TRUE;
+
+        /* indicate that a new object is created */
+        ret_value++;
+    } /* end if */
+    else {
+        /* Object has already been copied, set its address in destination file */
+        oloc_dst->addr = addr_map->dst_addr;
+
+        /* If the object is locked currently (because we are copying a group
+         * hierarchy and this is a link to a group higher in the hierarchy),
+         * increment it's deferred reference count instead of incrementing the
+         * reference count now.
+         */
+        if(addr_map->is_locked) {
+            addr_map->inc_ref_count++;
+            inc_link = FALSE;
+        } /* end if */
+        else
+            inc_link = TRUE;
+    } /* end else */
+
+    /* Increment destination object's link count, if allowed */
+    if(inc_link)
+        if(H5O_link(oloc_dst, 1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to increment object link count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header_map() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_copy_free_addrmap_cb
+ PURPOSE
+    Internal routine to free address maps from the skip list for copying objects
+ USAGE
+    herr_t H5O_copy_free_addrmap_cb(item, key, op_data)
+        void *item;             IN/OUT: Pointer to addr
+        void *key;              IN/OUT: (unused)
+        void *op_data;          IN: (unused)
+ RETURNS
+    Returns zero on success, negative on failure.
+ DESCRIPTION
+        Releases the memory for the address.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5O_copy_free_addrmap_cb(void *item, void UNUSED *key, void UNUSED *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_copy_free_addrmap_cb)
+
+    HDassert(item);
+
+    /* Release the item */
+    H5FL_FREE(H5O_addr_map_t, item);
+
+    FUNC_LEAVE_NOAPI(0)
+}   /* H5O_copy_free_addrmap_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy_header
+ *
+ * Purpose:     copy header object from one location to another.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              May 30, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
+    hid_t dxpl_id, unsigned cpy_option)
+{
+    H5O_copy_t  cpy_info;               /* Information for copying object */
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header)
+
+    HDassert(oloc_src);
+    HDassert(oloc_src->file);
+    HDassert(H5F_addr_defined(oloc_src->addr));
+    HDassert(oloc_dst->file);
+
+    /* Convert copy flags into copy struct */
+    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
+    if((cpy_option & H5O_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
+        cpy_info.copy_shallow = TRUE;
+        cpy_info.max_depth = 1;
+    } /* end if */
+    else
+        cpy_info.max_depth = -1;        /* Current default is for full, recursive hier. copy */
+    cpy_info.curr_depth = 0;
+    if((cpy_option & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0)
+        cpy_info.expand_soft_link = TRUE;
+    if((cpy_option & H5O_COPY_EXPAND_EXT_LINK_FLAG) > 0)
+        cpy_info.expand_ext_link = TRUE;
+    if((cpy_option & H5O_COPY_EXPAND_REFERENCE_FLAG) > 0)
+        cpy_info.expand_ref = TRUE;
+    if((cpy_option & H5O_COPY_WITHOUT_ATTR_FLAG) > 0)
+        cpy_info.copy_without_attr = TRUE;
+    if((cpy_option & H5O_COPY_PRESERVE_NULL_FLAG) > 0)
+        cpy_info.preserve_null = TRUE;
+
+    /* Create a skip list to keep track of which objects are copied */
+    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
+
+    /* copy the object from the source file to the destination file */
+    if(H5O_copy_header_real(oloc_src, oloc_dst, dxpl_id, &cpy_info) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    if(cpy_info.map_list)
+        H5SL_destroy(cpy_info.map_list, H5O_copy_free_addrmap_cb, NULL);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy_header() */
 
 
 /*-------------------------------------------------------------------------

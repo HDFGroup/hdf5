@@ -343,13 +343,14 @@ H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
+H5_DLL void * H5O_copy_mesg_file(const H5O_msg_class_t *copy_type,
+    const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 #ifdef H5O_DEBUG
 H5_DLL herr_t H5O_assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
-H5_DLL void * H5O_copy_mesg_file(const H5O_msg_class_t *copy_type,
-    const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
