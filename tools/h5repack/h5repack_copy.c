@@ -399,18 +399,17 @@ int do_copy_objects(hid_t fidin,
    
 /*-------------------------------------------------------------------------
  * check if we should use H5Ocopy or not
- * if the DCPL has filters or a non default layout, we read/write the object
+ * if the DCPL has filters, we read/write the object
  * otherwise we do a copy using H5Ocopy
  *-------------------------------------------------------------------------
  */
- 
-   if (nfilters || layout!=H5D_CONTIGUOUS 
-      /* does the dcpl has filters or non default layout ? */ 
+   if (nfilters 
+      /* does the dcpl has filters ? */ 
        ||
        options->op_tbl->nelems
-       /* do we have input request for filter/chunking */ 
+       /* do we have input request for filter/chunk ? */ 
        ||
-       options->all_filter==1 || options->all_layout==1
+       options->all_filter==1 || options->all_layout==1 
        )
    {
     int j;

@@ -64,7 +64,7 @@
 
 
 const char *H5REPACK_FILENAMES[] = {
-   "test_bigout",
+   "h5repack_big_out",
     NULL
 };
 

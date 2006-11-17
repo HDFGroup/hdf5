@@ -187,20 +187,20 @@ obj_list_t* parse_filter(const char *str,
 
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_SCALEOFFSET
-	* scaleoffset has the format SOFF=<scale_factor,scale_type>
-	* scale_type can be
-	*   integer datatype, H5Z_SO_INT (IN)
-	*   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
-	*   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
-	* for integer datatypes, scale_factor denotes Minimum Bits
-	* for float datatypes, scale_factor denotes decimal scale factor
+    * scaleoffset has the format SOFF=<scale_factor,scale_type>
+    * scale_type can be
+    *   integer datatype, H5Z_SO_INT (IN)
+    *   float datatype using D-scaling method, H5Z_SO_FLOAT_DSCALE  (DS)
+    *   float datatype using E-scaling method, H5Z_SO_FLOAT_ESCALE  (ES) , not yet implemented
+    * for integer datatypes, scale_factor denotes Minimum Bits
+    * for float datatypes, scale_factor denotes decimal scale factor
  *  examples
-	*  SOFF=31,IN
-	*  SOFF=3,DF
+    *  SOFF=31,IN
+    *  SOFF=3,DF
  *-------------------------------------------------------------------------
  */
 
-				else if (strcmp(scomp,"SOFF")==0)
+    else if (strcmp(scomp,"SOFF")==0)
     {
      l=-1; /* mask index check */
      for ( m=0,u=i+1; u<len; u++,m++)
@@ -229,9 +229,9 @@ obj_list_t* parse_filter(const char *str,
         i=len-1; /* end */
         (*n_objs)--; /* we counted an extra ',' */
         if (strcmp(smask,"IN")==0)
-									filt->cd_values[j++]=H5Z_SO_INT;
+                                    filt->cd_values[j++]=H5Z_SO_INT;
         else if (strcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
-									filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
+                                    filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
         else
         {
          error_msg(progname, "scale type must be 'IN' or 'DS' \n");
