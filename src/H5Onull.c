@@ -44,6 +44,7 @@ const H5O_msg_class_t H5O_MSG_NULL[1] = {{
     NULL,		    /*no link method		    */
     NULL,		    /*no get share method	    */
     NULL,	            /*no set share method	    */
+    NULL,	            /*no is_shared method	    */
     NULL,		    /*no pre copy native value to file */
     NULL,		    /*no copy native value to file    */
     NULL,		    /*no post copy native value to file    */
