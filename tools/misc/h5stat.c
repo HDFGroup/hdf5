@@ -99,7 +99,9 @@ static int        display_group = FALSE;
 static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
+/* Not used yet 11/17/06 EIP
 static int        display_dtype = FALSE;
+*/
 static int        display_object = FALSE;
 
 /* a structure for handling the order command-line parameters come in */
@@ -1149,9 +1151,13 @@ print_file_statistics(iter_t * _iter)
  *-------------------------------------------------------------------------
  */
 static void
-print_object_statistics(char *name, iter_t * _iter)
+print_object_statistics(char *name, iter_t UNUSED * _iter)
 {
+/* Comment out for now to eliminate warnings since variable is not used
         iter_t *iter = (iter_t*)_iter;
+                                                            EIP 11/17/06 
+*/
+
         printf("Object name %s\n", name);
 }
 
@@ -1190,7 +1196,7 @@ main(int argc, const char *argv[])
     hid_t           fid;
     struct handler_t   *hand;
     herr_t          status;       
-    char            *root = "/";
+    char            root[] = "/";
     int             i;
 
     /* Disable error reporting */
