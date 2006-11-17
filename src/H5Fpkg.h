@@ -59,7 +59,7 @@
 #endif
 
 /* Maximum size of super-block buffer */
-#define H5F_SUPERBLOCK_SIZE  128
+#define H5F_SUPERBLOCK_SIZE  130
 #define H5F_DRVINFOBLOCK_SIZE  1024
 
 /* Define the HDF5 file signature */
@@ -93,6 +93,8 @@ typedef struct H5F_file_t {
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
+    unsigned	sohm_vers;	/* Version of shared message table on disk */
+    unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     haddr_t	driver_addr;	/* File driver information block address*/
     hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2 */
 

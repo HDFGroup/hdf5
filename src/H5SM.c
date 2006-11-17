@@ -52,9 +52,6 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id);
-/* JAMES
-static herr_t H5SM_write_index(H5F_t *f, haddr_t index_addr, hsize_t sohm_hash, haddr_t sohm_addr, hid_t dxpl_id);
-*/
 static haddr_t H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id);
 static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
      unsigned type_id, void *mesg, unsigned *cache_flags_ptr);
@@ -105,7 +102,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     H5SM_master_table_t *table = NULL;
     haddr_t table_addr = HADDR_UNDEF;
     unsigned num_indexes;
-    size_t list_to_btree, btree_to_list;
+    unsigned list_to_btree, btree_to_list;
     unsigned index_type_flags[H5SM_MAX_NUM_INDEXES];
     ssize_t x;
     hsize_t table_size;
@@ -122,27 +119,31 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for SOHM table")
 
     /* Get information from fcpl */
-    if(H5P_get(fc_plist, H5F_CRT_SOHM_NINDEXES_NAME, &num_indexes)<0)
+    if(H5P_get(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &num_indexes)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
-    if(H5P_get(fc_plist, H5F_CRT_INDEX_TYPES_NAME, &index_type_flags)<0)
+    if(H5P_get(fc_plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, &index_type_flags)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
-    if(H5P_get(fc_plist, H5F_CRT_SOHM_L2B_NAME, &list_to_btree)<0)
+    if(H5P_get(fc_plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &list_to_btree)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
-    if(H5P_get(fc_plist, H5F_CRT_SOHM_B2L_NAME, &btree_to_list)<0)
+    if(H5P_get(fc_plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &btree_to_list)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
 
-    /* Right now we just use one byte to hold the number of indexes */
+    /* Set version and number of indexes in table and in superblock.
+     * Right now we just use one byte to hold the number of indexes.
+     */
     HDassert(num_indexes < 256);
     table->num_indexes = num_indexes;
+    table->version = H5SM_MASTER_TABLE_VERSION;
+
+    f->shared->sohm_nindexes = table->num_indexes;
+    f->shared->sohm_vers = table->version;
 
     /* Check that list and btree cutoffs make sense.  There can't be any
      * values greater than the list max but less than the btree min; the
      * list max has to be greater than or equal to one less than the btree
      * min.
      */
-    if(list_to_btree + 1 < btree_to_list)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "SOHM list max is less than btree min")
-
+    HDassert(list_to_btree + 1 >= btree_to_list);
     HDassert(table->num_indexes > 0 && table->num_indexes <= H5SM_MAX_NUM_INDEXES);
 
     /* Allocate the SOHM indexes as an array. */
@@ -224,19 +225,19 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
     switch(type_id)
     {
     case H5O_SDSPACE_ID:
-        type_flag = H5SM_SDSPACE_FLAG;
+        type_flag = H5O_MESG_SDSPACE_FLAG;
         break;
     case H5O_DTYPE_ID:
-        type_flag = H5SM_DTYPE_FLAG;
+        type_flag = H5O_MESG_DTYPE_FLAG;
         break;
     case H5O_FILL_NEW_ID:
-        type_flag = H5SM_FILL_FLAG;
+        type_flag = H5O_MESG_FILL_FLAG;
         break;
     case H5O_PLINE_ID:
-        type_flag = H5SM_PLINE_FLAG;
+        type_flag = H5O_MESG_PLINE_FLAG;
         break;
     case H5O_ATTR_ID:
-        type_flag = H5SM_ATTR_FLAG;
+        type_flag = H5O_MESG_ATTR_FLAG;
         break;
     default:
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unknown message type ID")
@@ -502,7 +503,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     /* If the message isn't big enough, don't bother sharing it */
     if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) <0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
-    if(mesg_size < 15) /* JAMES: arbitrary value.  Make this per-index, along with index sizes? */
+    if(mesg_size < 50) /* JAMES: arbitrary value.  Make this per-index, along with index sizes? */
         HGOTO_DONE(FALSE);
 
     /* JAMES_HEAP: skip this step if it's already shared--just increment the refcount on the message itself */
@@ -679,7 +680,43 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         if(H5HF_insert(fheap, dxpl_id, mesg_size, key.encoding, &(shared.u.heap_id)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
 
-        /* JAMES: this is where we should check for conversion to B-tree. */
+        /* Check whether the list has grown enough that it needs to become a B-tree */
+        /* JAMES: make this a separate function */
+        if(header->index_type == H5SM_LIST && header->num_messages > header->list_to_btree)
+        {
+            hsize_t     list_size;        /* Size of list on disk */
+            haddr_t     tree_addr;
+
+            if(H5B2_create(f, dxpl_id, H5SM_INDEX, H5SM_B2_NODE_SIZE,
+                  H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
+                  H5SM_B2_MERGE_PERCENT, &tree_addr) <0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
+
+            /* Insert each record into the new B-tree */
+            for(x=0; x<header->list_to_btree; x++)
+            {
+                /* JAMES: I'd like to stop relying on H5O_HASH_UNDEF */
+                if(list->messages[x].hash != H5O_HASH_UNDEF)
+                {
+                    if(H5B2_insert(f, dxpl_id, H5SM_INDEX, tree_addr, &(list->messages[x])) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
+                }
+            }
+
+            /* Delete the old list */
+            HDassert(list);
+            if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG) < 0)
+	        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
+            list = NULL;
+
+            list_size = H5SM_LIST_SIZE(f, header->list_to_btree);
+            if(H5MF_xfree(f, H5FD_MEM_SOHM, dxpl_id, header->index_addr, list_size) < 0)
+	        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "unable to free shared message list")
+
+            header->index_addr = tree_addr;
+            header->index_type = H5SM_BTREE;
+        }
+
 
         /* JAMES: should be H5SM_insert or something */
         /* Find an empty spot in the list for the message JAMES: combine this with the previous traversal */
@@ -928,6 +965,43 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
         /* Update the index header, so set its dirty flag */
         --header->num_messages;
         *cache_flags |= H5AC__DIRTIED_FLAG;
+
+        /* If we've just passed the btree-to-list cutoff, convert this B-tree
+         * into a list
+         */
+        /* JAMES: there's an off-by-one error here */
+        /* JAMES: make this a separate function */
+        if(header->num_messages < header->btree_to_list)
+        {
+            /* Remember the btree address for this index; we'll overwrite the
+             * address in the index header
+             */
+            haddr_t btree_addr = header->index_addr;
+            H5SM_index_header_t temp_header;
+
+            /* The protect callback expects a header corresponding to the list
+             * index.  Create a "temporary" header to hold the old B-tree
+             * index and reset values in the "real" header to point to an
+             * empty list index.
+             */
+            HDmemcpy(&temp_header, header, sizeof(H5SM_index_header_t));
+            header->num_messages = 0;
+            header->index_type = H5SM_LIST;
+
+            /* Create a new list index */
+            if(HADDR_UNDEF == (header->index_addr = H5SM_create_list(f, header, dxpl_id)))
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, FAIL, "unable to create shared message list")
+
+            HDassert(NULL == list);
+            if (NULL == (list = H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+	        HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
+
+            /* Delete the B-tree and have messages copy themselves to the
+             * list as they're deleted
+             */
+            if(H5B2_delete(f, dxpl_id, H5SM_INDEX, temp_header.index_addr, H5SM_convert_to_list_op, list) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
+        }
     }
 
 done:
@@ -961,23 +1035,35 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5SM_get_info(H5F_t *f, haddr_t table_addr, unsigned *nindexes,
-              unsigned *index_flags, size_t *list_to_btree,
+herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, size_t *list_to_btree,
               size_t *btree_to_list, hid_t dxpl_id)
 {
-    H5SM_master_table_t  *table = NULL;
-    unsigned i;
+    H5SM_master_table_t *table = NULL;
+    haddr_t table_addr;
+    uint8_t i;
     herr_t ret_value = SUCCEED;
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
 
-    HDassert(table_addr != HADDR_UNDEF);
+    HDassert(f);
 
-    /* Get the SOHM table from the cache */
-    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
+    /* Convenience variables */
+    table_addr = f->shared->sohm_addr;
+
+    HDassert(table_addr != HADDR_UNDEF);
+    HDassert(f->shared->sohm_nindexes > 0);
+
+    /* Allocate and initialize the master table structure */
+    if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    table->version = f->shared->sohm_vers;
+    table->num_indexes = f->shared->sohm_nindexes;
+
+    /* Read the rest of the SOHM table information from the cache */
+    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, table, H5AC_READ)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Return info */
-    *nindexes = table->num_indexes;
     *list_to_btree = table->indexes[0].list_to_btree;
     *btree_to_list = table->indexes[0].btree_to_list;
 

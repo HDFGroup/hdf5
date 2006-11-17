@@ -36,10 +36,10 @@ const unsigned def_type_flags[MAX_INDEXES] = {0,0,0,0,0,0};
 /* Non-default SOHM values for testing */
 #define TEST_NUM_INDEXES 4
 const unsigned test_type_flags[MAX_INDEXES] =
-                {H5SM_FILL_FLAG,
-                 H5SM_DTYPE_FLAG | H5SM_ATTR_FLAG,
-                 H5SM_SDSPACE_FLAG,
-                 H5SM_PLINE_FLAG,
+                {H5O_MESG_FILL_FLAG,
+                 H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG,
+                 H5O_MESG_SDSPACE_FLAG,
+                 H5O_MESG_PLINE_FLAG,
                  0, 0};
 #define TEST_L2B 65
 #define TEST_B2L 64
@@ -57,34 +57,30 @@ static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
                const unsigned *flags_in, size_t l2b, size_t b2l)
 {
     unsigned    num_indexes;
-    unsigned    index_flags[MAX_INDEXES];
-    size_t      size;
+    unsigned    index_flags, min_mesg_size;
+    size_t      list_size, btree_size;
     unsigned     x;
     herr_t      ret;
 
     /* Verify number of indexes is set to default */
-    ret = H5Pget_shared_nindexes(fcpl_id, &num_indexes);
-    CHECK_I(ret, "H5Pget_shared_nindexes");
-    VERIFY(num_indexes, nindexes_in, "H5Pget_shared_nindexes");
+    ret = H5Pget_shared_mesg_nindexes(fcpl_id, &num_indexes);
+    CHECK_I(ret, "H5Pget_shared_mesg_nindexes");
+    VERIFY(num_indexes, nindexes_in, "H5Pget_shared_mesg_nindexes");
 
     /* Verify index flags are set to default */
-    ret = H5Pget_shared_mesg_types(fcpl_id, MAX_INDEXES, index_flags);
-    CHECK_I(ret, "H5Pget_shared_mesg_types");
-
-    for(x=0; x<num_indexes; ++x)
-        VERIFY(index_flags[x], flags_in[x], "H5Pget_shared_indexes");
-/* JAMES: can other values be undefined?
-    for(x=0; x<MAX_INDEXES; ++x)
-        VERIFY(index_flags[x], flags_in[x], "H5Pget_shared_indexes");
-*/
+    for(x=1; x<=num_indexes; ++x)
+    {
+        ret = H5Pget_shared_mesg_index(fcpl_id, x, &index_flags, &min_mesg_size);
+        CHECK_I(ret, "H5Pget_shared_mesg_index");
+        VERIFY(index_flags, flags_in[x-1], "H5Pget_shared_mesg_index");
+        /* JAMES: check min_mesg_size here */
+    }
 
     /* Check list-to-btree and btree-to-list values */
-    ret = H5Pget_sohm_list_max(fcpl_id, &size);
-    CHECK_I(ret, "H5Pget_sohm_list_max");
-    VERIFY(size, l2b, "H5Pget_sohm_list_max");
-    ret = H5Pget_sohm_btree_min(fcpl_id, &size);
-    CHECK_I(ret, "H5Pget_sohm_btree_min");
-    VERIFY(size, b2l, "H5Pget_sohm_btree_min");
+    ret = H5Pget_shared_mesg_phase_change(fcpl_id, &list_size, &btree_size);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    VERIFY(list_size, l2b, "H5Pset_shared_mesg_phase_change");
+    VERIFY(btree_size, b2l, "H5Pset_shared_mesg_phase_change");
 }
 
 
@@ -151,13 +147,18 @@ static void test_sohm_fcpl(void)
     /* Start over with a non-default fcpl */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     CHECK_I(fcpl_id, "H5Pcreate");
-    ret = H5Pset_shared_mesgs(fcpl_id, TEST_NUM_INDEXES, test_type_flags);
-    CHECK_I(ret, "H5Pset_shared_mesgs");
 
-    ret = H5Pset_sohm_list_max(fcpl_id, TEST_L2B);
-    CHECK_I(ret, "H5Pset_sohm_list_max");
-    ret = H5Pset_sohm_btree_min(fcpl_id, TEST_B2L);
-    CHECK_I(ret, "H5Pset_sohm_btree_min");
+    /* Set up index values */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, TEST_NUM_INDEXES);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    for(x=1; x<=TEST_NUM_INDEXES; ++x)
+    {
+        ret = H5Pset_shared_mesg_index(fcpl_id, x, test_type_flags[x-1], 15 /* JAMES */);
+        CHECK_I(ret, "H5Pset_shared_mesg_index");
+    }
+
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, TEST_L2B, TEST_B2L);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
     check_fcpl_values(fcpl_id, TEST_NUM_INDEXES, test_type_flags, TEST_L2B, TEST_B2L);
 
@@ -195,58 +196,42 @@ static void test_sohm_fcpl(void)
 
     /* Test giving bogus values to H5P* functions */
     H5E_BEGIN_TRY {
-        ret = H5Pset_shared_mesgs(fcpl_id, -1, def_type_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
-        ret = H5Pset_shared_mesgs(fcpl_id, MAX_INDEXES + 1, test_type_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
+        /* Trying to set index 0 or an index higher than the current number
+         * of indexes should fail.
+         */
+        ret = H5Pset_shared_mesg_index(fcpl_id, 0, 0, 15 /* JAMES */);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
+        ret = H5Pset_shared_mesg_index(fcpl_id, MAX_INDEXES + 1, 0, 15);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
+        ret = H5Pset_shared_mesg_index(fcpl_id, TEST_NUM_INDEXES + 1, 0, 15);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
 
-        /* Initialize bad_flags */
-        for(x=0; x<MAX_INDEXES; ++x)
-            bad_flags[x] = H5SM_NONE_FLAG;
+        /* Setting an unknown flag (all flags + 1) should fail */
+        ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG + 1, 15);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
 
-        ret = H5Pset_shared_mesgs(fcpl_id, 1, bad_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
-
-        bad_flags[0]=H5SM_ALL_FLAG + 1;
-        ret = H5Pset_shared_mesgs(fcpl_id, 1, bad_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
-
-        bad_flags[0]=H5SM_DTYPE_FLAG;
-        bad_flags[1]=H5SM_FILL_FLAG;
-        bad_flags[2]=H5SM_ATTR_FLAG | H5SM_DTYPE_FLAG;
-        ret = H5Pset_shared_mesgs(fcpl_id, 3, bad_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
-
-        bad_flags[1] = H5SM_ALL_FLAG;
-        ret = H5Pset_shared_mesgs(fcpl_id, 2, bad_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
-
-        bad_flags[1] = H5SM_FILL_FLAG;
-        bad_flags[2] = H5SM_NONE_FLAG;
-        bad_flags[3] = H5SM_ATTR_FLAG;
-        ret = H5Pset_shared_mesgs(fcpl_id, 4, bad_flags);
-        VERIFY(ret, -1, "H5Pset_shared_mesgs");
+        /* Try setting two different indexes to hold fill messages */
+        ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        CHECK_I(ret, "H5Pset_shared_mesg_index");
+        ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
+        ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
 
         /* Test list/btree cutoffs.  We can set these to any positive value,
          * but if the list max is less than the btree min we'll get an error
          * when the file is created.
          */
-        ret = H5Pset_sohm_list_max(fcpl_id, 10);
-        CHECK_I(ret, "H5Pset_sohm_list_max");
-        ret = H5Pset_sohm_btree_min(fcpl_id, 12);
-        CHECK_I(ret, "H5Pset_sohm_btree_min");
-        fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
-        VERIFY(fid, -1, "H5Fcreate");
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 12);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
     } H5E_END_TRY
 
     /* Actually, the list max can be exactly 1 greater than the
      * btree min, but no more.  Also, the errors above shouldn't
      * have corrupted the fcpl.
      */
-    ret = H5Pset_sohm_list_max(fcpl_id, 10);
-    CHECK_I(ret, "H5Pset_sohm_list_max");
-    ret = H5Pset_sohm_btree_min(fcpl_id, 11);
-    CHECK_I(ret, "H5Pset_sohm_btree_min");
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 11);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
 

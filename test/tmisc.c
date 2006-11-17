@@ -159,8 +159,7 @@ typedef struct
 #define MISC11_SYM_LK           8
 #define MISC11_SYM_IK           32
 #define MISC11_ISTORE_IK        64
-#define MISC11_SOHM_NINDEXES    1
-#define MISC11_SOHM_INDEX_FLAGS { H5SM_ALL_FLAG }
+#define MISC11_NINDEXES         1
 
 /* Definitions for misc. test #12 */
 #define MISC12_FILE             "tmisc12.h5"
@@ -1786,7 +1785,8 @@ test_misc11(void)
     unsigned freelist;          /* Free list version # */
     unsigned stab;              /* Symbol table entry version # */
     unsigned shhdr;             /* Shared object header version # */
-    unsigned misc11_sohm_values[MISC11_SOHM_NINDEXES] = {MISC11_SOHM_INDEX_FLAGS};
+    unsigned nindexes;          /* Shared message number of indexes */
+/* JAMES: add more SOHM properties here */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
@@ -1807,9 +1807,7 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
-#ifdef JAMES
     VERIFY(super,0,"H5Pget_version");
-#endif /* JAMES */
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
     VERIFY(shhdr,0,"H5Pget_version");
@@ -1840,8 +1838,8 @@ test_misc11(void)
     ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
     CHECK(ret, FAIL, "H5Pset_istore_k");
 
-    ret=H5Pset_shared_mesgs(fcpl,MISC11_SOHM_NINDEXES, misc11_sohm_values);
-    CHECK(ret, FAIL, "H5Pset_shared_mesg");
+    ret=H5Pset_shared_mesg_nindexes(fcpl,MISC11_NINDEXES);
+    CHECK(ret, FAIL, "H5Pset_istore_k");
 
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock
@@ -1862,7 +1860,6 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
-/* JAMES    VERIFY(super,1,"H5Pget_version"); */
     VERIFY(super,2,"H5Pget_version");
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
@@ -1887,7 +1884,6 @@ test_misc11(void)
     /* Get the file's version information */
     ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
     CHECK(ret, FAIL, "H5Pget_version");
-/* JAMES    VERIFY(super,1,"H5Pget_version"); */
     VERIFY(super,2,"H5Pget_version");
     VERIFY(freelist,0,"H5Pget_version");
     VERIFY(stab,0,"H5Pget_version");
@@ -1911,6 +1907,10 @@ test_misc11(void)
     ret=H5Pget_istore_k(fcpl,&istore_ik);
     CHECK(ret, FAIL, "H5Pget_istore_k");
     VERIFY(istore_ik, MISC11_ISTORE_IK, "H5Pget_istore_k");
+
+    ret=H5Pget_shared_mesg_nindexes(fcpl,&nindexes);
+    CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
+    VERIFY(nindexes, MISC11_NINDEXES, "H5Pget_shared_mesg_nindexes");
 
     /* Close file */
     ret=H5Fclose(file);

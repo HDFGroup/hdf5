@@ -36,13 +36,15 @@
 #define H5SM_TABLE_MAGIC "SMTB"
 #define H5SM_TABLE_SIZEOF_MAGIC 4
 
+#define H5SM_MASTER_TABLE_VERSION	0	/* Version of the Shared Object Header Message Master Table*/
+
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
-         + 2                      /* reference count*/                       \
+         + 4                      /* reference count*/                       \
          + 8)    /* JAMES: size of hash value on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + 1                                   /* Table version */           \
-         + 1)                                  /* Number of indexes */
+         + 0/* JAMES checksum */)                                  /* Checksum */
 
 #define H5SM_INDEX_HEADER_SIZE(f) (1 /* Whether index is a list or B-tree */ \
          + 2         /* Type of messages stored in the index */              \
@@ -50,7 +52,9 @@
          + H5F_SIZEOF_ADDR(f) /* Location of list or B-tree */               \
          + H5F_SIZEOF_ADDR(f)) /* Address of heap */
 
+/* JAMES: add checksum? */
 #define H5SM_LIST_SIZE(f, num_mesg) H5SM_LIST_SIZEOF_MAGIC                   \
+         + 1        /* List version */                                       \
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)
 
 #define H5SM_MAX_INDEXES 8
@@ -134,8 +138,9 @@ typedef struct {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
-    uint8_t num_indexes;      /* Number of indexes */
-    H5SM_index_header_t *indexes;  /* Array of num_indexes indexes */
+    unsigned version;               /* Version of the table struct */
+    uint8_t num_indexes;            /* Number of indexes */
+    H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
 } H5SM_master_table_t;
 
 
@@ -170,5 +175,8 @@ H5_DLL herr_t H5SM_message_compare(const H5SM_mesg_key_t *rec1,
 /* H5B2_modify_t callbacks to adjust record's refcount. */
 H5_DLL herr_t H5SM_incr_ref(void *record, void *op_data, hbool_t *changed);
 H5_DLL herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
-#endif /*_H5SMpkg_H*/
 
+/* H5B2_remove_t callback to add messages to a list index */
+H5_DLL herr_t H5SM_convert_to_list_op(void * record, void *op_data);
+
+#endif /*_H5SMpkg_H*/

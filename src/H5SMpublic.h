@@ -22,21 +22,5 @@
 #ifndef _H5SMpublic_H
 #define _H5SMpublic_H
 
-/* Flags indicating which kinds of object header messages a given SOHM index
- * holds.
- * Pass these flags in using the mesg_type_flags array in
- * H5P_set_shared_mesgs.
- * (Developers: These flags correspond to object header message type_ids,
- * but we need to assign each kind of message to a different bit so that
- * one index can hold multiple types.)
- */
-#define H5SM_NONE_FLAG     0x0000          /* No shared messages */
-#define H5SM_SDSPACE_FLAG  0x0001          /* Simple Dataspace Message.  */
-#define H5SM_DTYPE_FLAG	   0x0002          /* Datatype Message.  */
-#define H5SM_FILL_FLAG     0x0004          /* Fill Value Message. */
-#define H5SM_PLINE_FLAG	   0x0008          /* Filter pipeline message.  */
-#define H5SM_ATTR_FLAG	   0x0010          /* Attribute Message.  */
-#define H5SM_ALL_FLAG      (H5SM_SDSPACE_FLAG | H5SM_DTYPE_FLAG | H5SM_FILL_FLAG | H5SM_PLINE_FLAG | H5SM_ATTR_FLAG)
-
 #endif /*_H5SMpublic_H*/
 

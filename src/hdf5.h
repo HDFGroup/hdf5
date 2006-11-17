@@ -35,7 +35,6 @@
 #include "H5Ppublic.h"		/* Property lists			*/
 #include "H5Rpublic.h"		/* References				*/
 #include "H5Spublic.h"		/* Dataspaces				*/
-#include "H5SMpublic.h"		/* Shared Object Header Messages	*/
 #include "H5Tpublic.h"		/* Datatypes				*/
 #include "H5Zpublic.h"		/* Data filters				*/
 

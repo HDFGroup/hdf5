@@ -127,7 +127,11 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
 	      "Free list address:", f->shared->freespace_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Shared object header table address:", f->shared->sohm_addr);
+	      "Shared object header message table address:", f->shared->sohm_addr);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Shared object header message version number:", (unsigned) f->shared->sohm_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Number of shared object header message indexes:", (unsigned) f->shared->sohm_nindexes);
 
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
 	      "Address of driver information block:", f->shared->driver_addr);

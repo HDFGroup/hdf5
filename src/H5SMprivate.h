@@ -22,16 +22,12 @@
 #ifndef _H5SMprivate_H
 #define _H5SMprivate_H
 
-#include "H5SMpublic.h"
 #include "H5Oprivate.h"
 #include "H5Pprivate.h"
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
-
-#define HDF5_SOHMTABLE_VERSION	0	/* Version of the Shared Object Header Message Master Table*/
-#define HDF5_SOHMINDEX_VERSION	0	/* Verion of Shared Object Header Message Indexes */
 
 #define H5SM_MAX_NUM_INDEXES 6
 
@@ -50,9 +46,8 @@ H5_DLL herr_t H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, hid_t dxpl_id);
 H5_DLL htri_t H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id,
                   void *mesg);
 H5_DLL herr_t H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *mesg);
-H5_DLL herr_t H5SM_get_info(H5F_t *f, haddr_t table_addr, unsigned *nindexes,
-              unsigned *index_flags, size_t *list_to_btree,
-              size_t *btree_to_list, hid_t dxpl_id);
+H5_DLL herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags,
+                  size_t *list_to_btree, size_t *btree_to_list, hid_t dxpl_id);
 H5_DLL haddr_t H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, hid_t dxpl_id);
 
 #endif /*_H5SMprivate_H*/

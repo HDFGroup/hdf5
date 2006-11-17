@@ -944,6 +944,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
+	f->shared->sohm_vers = 0;
+	f->shared->sohm_nindexes = 0;
 	f->shared->driver_addr = HADDR_UNDEF;
         f->shared->lf = lf;
 
@@ -977,7 +979,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         /* The shared object header message table gets created later, but if
          * it is present we should use version 2 of the superblock.
          */
-        if(H5P_get(plist, H5F_CRT_SOHM_NINDEXES_NAME, &sohm_indexes)<0)
+        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &sohm_indexes)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
 
         if(sohm_indexes > 0) {
@@ -1412,7 +1414,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(NULL == (c_plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
-        if(H5P_get(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &num_sohm_indexes)<0)
+        if(H5P_get(c_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &num_sohm_indexes)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SOHM information")
 
         if(num_sohm_indexes > 0)

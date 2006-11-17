@@ -47,6 +47,8 @@
 /* JAMES: should this change according to address size? */
 #define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5SM_MAX_LIST_ELEMS * 16
 
+#define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -55,7 +57,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_master_table_t *table);
-static H5SM_master_table_t *H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
+static H5SM_master_table_t *H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, H5SM_master_table_t *table);
 static herr_t H5SM_clear_table(H5F_t *f, H5SM_master_table_t *table, hbool_t destroy);
 static herr_t H5SM_dest_table(H5F_t *f, H5SM_master_table_t* table);
 static herr_t H5SM_table_size(const H5F_t *f, const H5SM_master_table_t *table, size_t *size_ptr);
@@ -137,9 +139,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         HDmemcpy(p, H5SM_TABLE_MAGIC, (size_t)H5SM_TABLE_SIZEOF_MAGIC);
         p += H5SM_TABLE_SIZEOF_MAGIC;
 
-        *p++ = HDF5_SOHMTABLE_VERSION; /* Version */
-
-        *p++ = table->num_indexes; /* Number of indexes in the table */
+        *p++ = H5SM_MASTER_TABLE_VERSION; /* Version */
 
         /* Encode each index header */
         for(x=0; x<table->num_indexes; ++x) {
@@ -153,6 +153,8 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
             H5F_addr_encode(f, &p, table->indexes[x].index_addr); /* Address of the actual index */
             H5F_addr_encode(f, &p, table->indexes[x].heap_addr); /* Address of the index's heap */
         }
+
+        /* JAMES: do checksum */
 
         /* Write the table to disk */
         HDassert((size_t)(p - buf) == size);
@@ -186,11 +188,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5SM_master_table_t *
-H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, void UNUSED *udata2)
+H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, H5SM_master_table_t *table)
 {
-    H5SM_master_table_t *table;     /* The SOHM table being read in */
     size_t table_size;              /* Size of SOHM master table on disk */
-    size_t indexes_size;            /* Size of index headers on disk */
     uint8_t *buf=NULL;              /* Reading buffer */
     uint8_t *p;                     /* Pointer into input buffer */
     uint8_t x;                      /* Counter variable for index headers */
@@ -198,12 +198,13 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     FUNC_ENTER_NOAPI(H5SM_load_table, NULL)
 
-    /* Allocate space for the SOHM table data structure */
-    if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    HDassert(table);
+    HDassert(table->num_indexes > 0);
 
-    /* Compute the size of the SOHM table header on disk.  Read in just the table first */
-    table_size = H5SM_TABLE_SIZE(f);
+    /* Compute the size of the SOHM table header on disk.  This is the "table" itself
+     * plus each index within the table
+     */
+    table_size = H5SM_TABLE_SIZE(f) + (table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
 
     /* Allocate temporary buffer */
     if(NULL == (buf = HDmalloc(table_size)))
@@ -221,31 +222,19 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     p += H5SM_TABLE_SIZEOF_MAGIC;
 
     /* Version number */
-    if (HDF5_SOHMTABLE_VERSION != *p++)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unknown SOHM table version number")
+    if (table->version != *p++)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "wrong SOHM table version number")
 
-    table->num_indexes = *p++; /* Number of indexes in the table */
+    /* Don't count the checksum in the table size yet, since it comes after
+     * all of the index headers
+     */
+    HDassert((size_t)(p - buf) == H5SM_TABLE_SIZE(f) /* JAMES: minus checksum size */);
 
-    HDassert((size_t)(p - buf) == table_size);
-
-    /* Allocate space for the index headers */
+    /* Allocate space for the index headers in memory*/
     if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, table->num_indexes)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
 
-    /* Now read in the list of index headers */
-    indexes_size = table->num_indexes * H5SM_INDEX_HEADER_SIZE(f);
-
-    /* Re-allocate temporary buffer */
-    HDassert(buf);
-    HDfree(buf);
-    if(NULL == (buf = HDmalloc(indexes_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-
-    if(H5F_block_read(f, H5FD_MEM_SOHM, addr + table_size, indexes_size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_SOHM, H5E_READERROR, NULL, "can't read SOHM table")
-    p=buf;
-
+    /* Read in the index headers */
     for(x=0; x<table->num_indexes; ++x) {
         table->indexes[x].index_type= *p++;  /* type of the index (list or B-tree) */
 
@@ -257,7 +246,9 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
         H5F_addr_decode(f, &p, &(table->indexes[x].heap_addr));
     }
 
-    HDassert((size_t)(p - buf) == indexes_size);
+    /* Read in checksum */
+
+    HDassert((size_t)(p - buf) == table_size);
     ret_value = table;
 
 done:
@@ -406,6 +397,9 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         HDmemcpy(p, H5SM_LIST_MAGIC, (size_t)H5SM_LIST_SIZEOF_MAGIC);
         p += H5SM_LIST_SIZEOF_MAGIC;
 
+        /* Encode version */
+        *p++ = H5SM_LIST_VERSION;
+
         /* Write messages from the messages array to disk */
         /* JAMES: we have to search the whole array.  not the best way to do it; could go until we've written
          * num_messages */
@@ -413,7 +407,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
             if(list->messages[x].fheap_id != 0 && list->messages[x].hash != H5O_HASH_UNDEF) {
               /* JAMES: use H5SM_message_encode here */
               UINT32ENCODE(p, list->messages[x].hash);  /* Read the hash value for this message */
-              UINT16ENCODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
+              UINT32ENCODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
               UINT64ENCODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
             }
         }
@@ -492,11 +486,15 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
     p += H5SM_LIST_SIZEOF_MAGIC;
 
+    /* Check version JAMES: should be in master table, not list */
+    if (H5SM_LIST_VERSION != *p++)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "wrong shared message list version number")
+
     /* Read messages into the list array */
     for(x=0; x<header->num_messages; x++)
     {
         UINT32DECODE(p, list->messages[x].hash);  /* Read the hash value for this message */
-        UINT16DECODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
+        UINT32DECODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
         UINT64DECODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
     }
 

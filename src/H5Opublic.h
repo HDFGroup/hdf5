@@ -41,6 +41,22 @@
 #define H5O_COPY_PRESERVE_NULL_FLAG     (0x0020u)   /* Copy NULL messages (empty space) */
 #define H5O_COPY_ALL                    (0x003Fu)   /* All object copying flags (for internal checking) */
 
+/* Flags for shared message indexes.
+ * Pass these flags in using the mesg_type_flags parameter in
+ * H5P_set_shared_mesg_index.
+ * (Developers: These flags correspond to object header message type_ids,
+ * but we need to assign each kind of message to a different bit so that
+ * one index can hold multiple types.)
+ */
+#define H5O_MESG_NONE_FLAG     0x0000          /* No shared messages */
+#define H5O_MESG_SDSPACE_FLAG  0x0001          /* Simple Dataspace Message.  */
+#define H5O_MESG_DTYPE_FLAG	   0x0002          /* Datatype Message.  */
+#define H5O_MESG_FILL_FLAG     0x0004          /* Fill Value Message. */
+#define H5O_MESG_PLINE_FLAG	   0x0008          /* Filter pipeline message.  */
+#define H5O_MESG_ATTR_FLAG	   0x0010          /* Attribute Message.  */
+#define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
+
+
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
     hsize_t free;               /* Free space within object header */

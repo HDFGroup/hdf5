@@ -227,13 +227,12 @@ H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
 H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik/*out*/, unsigned *lk/*out*/);
 H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
 H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
-H5_DLL herr_t H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned * mesg_type_flags);
-H5_DLL herr_t H5Pget_shared_nindexes(hid_t plist_id, unsigned *nindexes);
-H5_DLL herr_t H5Pget_shared_mesg_types(hid_t plist_id, unsigned max_nindexes, unsigned * mesg_type_flags);
-H5_DLL herr_t H5Pset_sohm_list_max(hid_t plist_id, size_t max);
-H5_DLL herr_t H5Pget_sohm_list_max(hid_t plist_id, size_t *max);
-H5_DLL herr_t H5Pset_sohm_btree_min(hid_t plist_id, size_t min);
-H5_DLL herr_t H5Pget_sohm_btree_min(hid_t plist_id, size_t *min);
+H5_DLL herr_t H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes);
+H5_DLL herr_t H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes);
+H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size);
+H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size);
+H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree);
+H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
 
 
 /* File access property list (FAPL) routines */

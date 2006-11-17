@@ -341,10 +341,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version" /* Free-space version number            */
 #define H5F_CRT_OBJ_DIR_VERS_NAME     "obj_dir_version" /* Object directory version number      */
 #define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version" /* Shared-header format version         */
-#define H5F_CRT_SOHM_NINDEXES_NAME    "num_sohm_indexes" /* Number of shared object header message indexes */
-#define H5F_CRT_INDEX_TYPES_NAME      "sohm_message_types" /* Types of message in each index */
-#define H5F_CRT_SOHM_L2B_NAME      "sohm_list_to_btree"  /* SOHM list maximum size */
-#define H5F_CRT_SOHM_B2L_NAME      "sohm_btree_to_list"  /* SOHM B-tree minimum size */
+#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes" /* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index */
+#define H5F_CRT_SHMSG_LIST_MAX_NAME    "shmsg_list_max"  /* Shared message list maximum size */
+#define H5F_CRT_SHMSG_BTREE_MIN_NAME   "shmsg_btree_min" /* Shared message B-tree minimum size */
 
 
 

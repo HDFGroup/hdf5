@@ -240,9 +240,11 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
 
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->base_addr/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->freespace_addr/*out*/);
-    /* If the superblock version is greater than 1, read in the shared OH message table address */
+    /* If the superblock version is greater than 1, read in the shared OH message table information */
     if(super_vers > 1) {
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->sohm_addr/*out*/);
+        shared->sohm_vers = *p++;
+        shared->sohm_nindexes = *p++;
     }
     H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
@@ -374,27 +376,27 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
         size_t   sohm_l2b;           /* SOHM list-to-btree cutoff    */
         size_t   sohm_b2l;           /* SOHM btree-to-list cutoff    */
 
+        HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5SM_MAX_NUM_INDEXES);
+
         /* Read in the shared OH message information if there is any */
-        if(H5SM_get_info(f, shared->sohm_addr, &nindexes, index_flags, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)
+        if(H5SM_get_info(f, index_flags, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read SOHM table information")
 
-        HDassert(nindexes > 0 && nindexes <= H5SM_MAX_NUM_INDEXES);
-
         /* Set values in the property list */
-        if(H5P_set(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &(shared->sohm_nindexes)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
-        if(H5P_set(c_plist, H5F_CRT_INDEX_TYPES_NAME, index_flags) < 0)
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, index_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
-        if(H5P_set(c_plist, H5F_CRT_SOHM_L2B_NAME, &sohm_l2b) < 0)
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &sohm_l2b) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list");
-        if(H5P_set(c_plist, H5F_CRT_SOHM_B2L_NAME, &sohm_b2l) < 0)
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &sohm_b2l) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list");
     }
     else
     {
         /* Shared object header messages are disabled */
         nindexes = 0;
-        if(H5P_set(c_plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
     }
 
@@ -459,7 +461,7 @@ H5F_init_superblock(const H5F_t *f, hid_t dxpl_id)
         + 16                            /* Length of required fixed-size portion */
         + ((super_vers>0) ? 4 : 0)      /* Version specific fixed-size portion */
         + 4 * H5F_sizeof_addr(f)        /* Variable-sized addresses */
-        + (super_vers>1 ? H5F_sizeof_addr(f) : 0) + /*SOHM table address*/
+        + (super_vers>1 ? H5F_sizeof_addr(f) + 2: 0) + /*SOHM table info*/
         + H5G_SIZEOF_ENTRY(f);          /* Size of root group symbol table entry */
 
     /* Compute the size of the driver information block. */
@@ -587,6 +589,8 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
     if(super_vers > 1) {
       H5F_addr_encode(f, &p, f->shared->sohm_addr);
+      *p++ = f->shared->sohm_vers;
+      *p++ = f->shared->sohm_nindexes;
     }
     H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
     H5F_addr_encode(f, &p, f->shared->driver_addr);

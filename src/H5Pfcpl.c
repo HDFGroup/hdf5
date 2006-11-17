@@ -73,16 +73,18 @@
 #define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 /* Definitions for shared object header messages */
-#define H5F_CRT_SOHM_NINDEXES_SIZE    sizeof(unsigned)
-#define H5F_CRT_SOHM_NINDEXES_DEF     (0)
-#define H5F_CRT_INDEX_TYPES_SIZE      sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
-#define H5F_CRT_INDEX_TYPES_DEF       { 0,0,0,0,0,0}
-/*#define H5SM_INDEX_TYPES_DEF       { H5SM_FILL_FLAG |H5SM_SDSPACE_FLAG,H5SM_ATTR_FLAG, 0, H5SM_DTYPE_FLAG,0,H5SM_PLINE_FLAG} JAMES */
-/* Definitions for shared object header list/btree cutoffs */
-#define H5F_CRT_SOHM_L2B_SIZE      sizeof(size_t)
-#define H5F_CRT_SOHM_L2B_DEF       (50)    /* JAMES */
-#define H5F_CRT_SOHM_B2L_SIZE      sizeof(size_t)
-#define H5F_CRT_SOHM_B2L_DEF       (40)    /* JAMES */
+#define H5F_CRT_SHMSG_NINDEXES_SIZE    sizeof(unsigned)
+#define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
+#define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
+#define H5F_CRT_SHMSG_INDEX_TYPES_DEF  {0,0,0,0,0,0}
+// JAMES #define H5F_CRT_SHMSG_INDEX_TYPES_DEF       { H5O_MESG_FILL_FLAG |H5O_MESG_SDSPACE_FLAG,H5O_MESG_ATTR_FLAG, 0, H5O_MESG_DTYPE_FLAG,0,H5O_MESG_PLINE_FLAG}
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF {250,250,250,250,250,250}
+/* Definitions for shared object header list/btree phase change cutoffs */
+#define H5F_CRT_SHMSG_LIST_MAX_SIZE     sizeof(unsigned)
+#define H5F_CRT_SHMSG_LIST_MAX_DEF      (50)
+#define H5F_CRT_SHMSG_BTREE_MIN_SIZE    sizeof(unsigned)
+#define H5F_CRT_SHMSG_BTREE_MIN_DEF     (40)
 
 
 /******************/
@@ -108,7 +110,7 @@ static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
 
 /* File creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_FCRT[1] = {{
-    "file create",		/* Class name for debugging     */
+    "file create",		/* Class name for debugging     */ 
     &H5P_CLS_GROUP_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_FILE_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_FILE_CREATE_g,	/* Pointer to default property list ID */
@@ -156,10 +158,11 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned freespace_ver = H5F_CRT_FREESPACE_VERS_DEF;/* Default free space version # */
     unsigned objectdir_ver = H5F_CRT_OBJ_DIR_VERS_DEF;  /* Default object directory version # */
     unsigned sharedheader_ver = H5F_CRT_SHARE_HEAD_VERS_DEF;    /* Default shared header message version # */
-    unsigned        num_sohm_indexes    = H5F_CRT_SOHM_NINDEXES_DEF;
-    unsigned        sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_INDEX_TYPES_DEF;
-    size_t         sohm_list_to_btree  = H5F_CRT_SOHM_L2B_DEF;
-    size_t         sohm_btree_to_list  = H5F_CRT_SOHM_B2L_DEF;
+    unsigned        num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
+    unsigned        sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
+    unsigned        sohm_index_minsizes[H5SM_MAX_NUM_INDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
+    size_t         sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
+    size_t         sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
@@ -201,15 +204,17 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the shared OH message information */
-    if(H5P_register(pclass,H5F_CRT_SOHM_NINDEXES_NAME, H5F_CRT_SOHM_NINDEXES_SIZE, &num_sohm_indexes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register(pclass,H5F_CRT_SHMSG_NINDEXES_NAME, H5F_CRT_SHMSG_NINDEXES_SIZE, &num_sohm_indexes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register(pclass,H5F_CRT_INDEX_TYPES_NAME, H5F_CRT_INDEX_TYPES_SIZE, &sohm_index_flags,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register(pclass,H5F_CRT_SHMSG_INDEX_TYPES_NAME, H5F_CRT_SHMSG_INDEX_TYPES_SIZE, &sohm_index_flags,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    if(H5P_register(pclass,H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE, &sohm_index_minsizes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the shared OH cutoff size information */
-    if(H5P_register(pclass,H5F_CRT_SOHM_L2B_NAME, H5F_CRT_SOHM_L2B_SIZE, &sohm_list_to_btree,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register(pclass,H5F_CRT_SHMSG_LIST_MAX_NAME, H5F_CRT_SHMSG_LIST_MAX_SIZE, &sohm_list_max,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register(pclass,H5F_CRT_SOHM_B2L_NAME, H5F_CRT_SOHM_B2L_SIZE, &sohm_btree_to_list,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register(pclass,H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE, &sohm_btree_min,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -727,12 +732,12 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    flags_used = H5SM_NONE_FLAG;
+    flags_used = H5O_MESG_NONE_FLAG;
 
     for (i=0; i<nindexes; i++) {
-        if (mesg_type_flags[i] == H5SM_NONE_FLAG)
+        if (mesg_type_flags[i] == H5O_MESG_NONE_FLAG)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "at least one flag must be set");
-        if (mesg_type_flags[i] != (mesg_type_flags[i] & H5SM_ALL_FLAG))
+        if (mesg_type_flags[i] != (mesg_type_flags[i] & H5O_MESG_ALL_FLAG))
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid mesg type flag set");
         if (mesg_type_flags[i] & flags_used)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "flag set for two different indexes");
@@ -740,9 +745,9 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
         flags_used |= mesg_type_flags[i]; /* Make sure the user doesn't re-use a flag */
     } /* end for */
 
-    if(H5P_set(plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+    if(H5P_set(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
-    if(H5P_set(plist, H5F_CRT_INDEX_TYPES_NAME, type_flags) < 0)
+    if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
 
 done:
@@ -751,7 +756,49 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_shared_nindexes
+ * Function:	H5Pset_shared_mesg_nindexes
+ *
+ * Purpose:	Set the number of Shared Object Header Message (SOHM)
+ *              indexes specified in this property list.  If this is
+ *              zero then shared object header messages are disabled
+ *              for this file.
+ *
+ *              These indexes can be configured with JAMES
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Monday, October 9, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pset_shared_mesg_nindexes, FAIL);
+    H5TRACE2("e","iIu",plist_id,nindexes);
+
+    /* Check argument */
+    if (nindexes > H5SM_MAX_NUM_INDEXES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is greater than H5SM_MAX_NUM_INDEXES");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(H5P_set(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of indexes");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_shared_imesg_nindexes
  *
  * Purpose:	Get the number of Shared Object Header Message (SOHM)
  *              indexes specified in this property list.
@@ -764,19 +811,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_shared_nindexes(hid_t plist_id, unsigned *nindexes)
+H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_nindexes, FAIL);
+    FUNC_ENTER_API(H5Pget_shared_mesg_nindexes, FAIL);
     H5TRACE2("e","i*Iu",plist_id,nindexes);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if(H5P_get(plist, H5F_CRT_SOHM_NINDEXES_NAME, nindexes) < 0)
+    if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, nindexes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
 done:
@@ -785,15 +832,11 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_shared_mesg_types
+ * Function:	H5Pset_shared_mesg_index
  *
- * Purpose:	Get the mesg_type_flags array for this property list.
- *              At most max_nindexes values will be copied to the
- *              mesg_type_flags array.
- *
- *              Each entry in the array represents the types of messages
- *              to be shared in the corresponding Shared Object Header
- *              Message (SOHM) index.
+ * Purpose:	Configure a given shared message index.  Sets the types of
+ *              message that should be stored in this index and the minimum
+ *              size of a message in the index.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -803,54 +846,69 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_shared_mesg_types(hid_t plist_id, unsigned max_nindexes, unsigned mesg_type_flags[])
+H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    unsigned nindexes;               /* Number of SOHM indexes */
+    unsigned    nindexes;               /* Number of SOHM indexes */
+    unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
+    unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
+    unsigned    x;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_mesg_types, FAIL);
-    H5TRACE3("e","iIu*Iu",plist_id,max_nindexes,mesg_type_flags);
+    FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL);
+    H5TRACE4("e","iIuIuIu",plist_id,index_num,mesg_type_flags,min_mesg_size);
+
+    /* Check arguments */
+    if(index_num == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index_num must be at least 1");
+    if(mesg_type_flags > H5O_MESG_ALL_FLAG)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags");
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if(H5P_get(plist, H5F_CRT_SOHM_NINDEXES_NAME, &nindexes) < 0)
+    /* Read the current number of indexes */
+    if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
-    if(mesg_type_flags) {
-        unsigned	i;
-        unsigned        type_flags[H5SM_MAX_NUM_INDEXES];
+    if(index_num > nindexes)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index_num is greater than number of indexes in property list");
 
-        /* JAMES: make this H5F_CRT_SOHM_IDX_TYPES_NAME or something? */
-        if(H5P_get(plist, H5F_CRT_INDEX_TYPES_NAME, type_flags) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get index types");
+    /* Get arrays of type flags and message sizes */
+    if(H5P_get(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags")
+    if(H5P_get(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes")
 
-        /* Get the flags */
-        for (i=0; i<nindexes && i<max_nindexes; ++i)
-            mesg_type_flags[i] = type_flags[i];
-    } /* end if */
+    /* Set values in arrays */
+    type_flags[index_num - 1] = mesg_type_flags;
+    minsizes[index_num - 1] = min_mesg_size;
+
+    /* Check that type flags does introduce any duplicate values */
+    for(x=0; x < nindexes; ++x) {
+        if(x != (index_num - 1) && (type_flags[index_num - 1] & type_flags[x]) != 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't assign the same flag to different indexes")
+    }
+
+    /* Write arrays back to plist */
+    if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index type flags");
+    if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes");
 
 done:
     FUNC_LEAVE_API(ret_value);
 }
 
 
+
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_sohm_list_max
+ * Function:	H5Pget_shared_mesg_index
  *
- * Purpose:	Sets the maximum size for a list storing Shared Object
- *              Header Messages in this file.  If more than this many
- *              messages are stored in an index, that index will become a
- *              B-tree.
- *
- *              This value must be no greater than the list maximum plus
- *              one (i.e., there cannot be any values which are too many
- *              for a list but too few for a B-tree).
- *
- *              If this is zero then SOHM indexes in this file will never
- *              be lists but will be created as B-trees.
+ * Purpose:	Get information about a given shared message index.  Gets
+ *              the types of message that are stored in the index and the
+ *              minimum size of a message in the index.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -860,21 +918,99 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sohm_list_max(hid_t plist_id, size_t max)
+H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    unsigned    nindexes;               /* Number of SOHM indexes */
+    unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
+    unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pget_shared_mesg_index, FAIL);
+    H5TRACE4("e","iIu*Iu*Iu",plist_id,index_num,mesg_type_flags,min_mesg_size);
+
+    /* Check arguments */
+    if(index_num == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index_num must be at least 1")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Read the current number of indexes */
+    if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
+
+    if(index_num > nindexes)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index_num is greater than number of indexes in property list")
+
+    /* Get arrays of type flags and message sizes */
+    if(H5P_get(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current index type flags")
+    if(H5P_get(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current min sizes")
+
+    /* Get values from arrays */
+    if(mesg_type_flags)
+        *mesg_type_flags = type_flags[index_num - 1];
+    if(min_mesg_size)
+        *min_mesg_size = minsizes[index_num - 1];
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_shared_mesg_phase_change
+ *
+ * Purpose:	Sets the cutoff values for indexes storing shared object
+ *              header messages in this file.  If more than max_list
+ *              messages are in an index, that index will become a B-tree.
+ *              Likewise, a B-tree index containing fewer than min_btree
+ *              messages will be converted to a list.
+ *
+ *              If the max_list is zero then SOHM indexes in this file will
+ *              never be lists but will be created as B-trees.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Wednesday, April 5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_sohm_list_max, FAIL);
-    H5TRACE2("e","iz",plist_id,max);
+    FUNC_ENTER_API(H5Pset_shared_mesg_phase_change, FAIL);
+    H5TRACE3("e","iIuIu",plist_id,max_list,min_btree);
+
+    /* Check that values are sensible.  The min_btree value must be no greater
+     * than the max list plus one.
+     * No need to check values otherwise, since they can't be negative.
+     */
+    if(max_list + 1 < min_btree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "minimum B-tree value is greater than maximum list value")
+
+    /* Avoid the strange case where max_list == 0 and min_btree == 1, so deleting the
+     * last message in a B-tree makes it become an empty list.
+     */
+    if(max_list == 0)
+        min_btree = 0;
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* No need to check value in max, since it cannot be negative */
-    if(H5P_set(plist, H5F_CRT_SOHM_L2B_NAME, &max) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM information");
+    if(H5P_set(plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &max_list) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set list maximum in property list");
+    if(H5P_set(plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &min_btree) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set B-tree minimum in property list");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -895,21 +1031,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sohm_list_max(hid_t plist_id, size_t *max)
+H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_sohm_list_max, FAIL);
-    H5TRACE2("e","i*z",plist_id,max);
+    FUNC_ENTER_API(H5Pget_shared_mesg_phase_change, FAIL);
+    H5TRACE3("e","i*Iu*Iu",plist_id,max_list,min_btree);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
-    if (max) {
-        if(H5P_get(plist, H5F_CRT_SOHM_L2B_NAME, max) < 0)
+    if (max_list) {
+        if(H5P_get(plist, H5F_CRT_SHMSG_LIST_MAX_NAME, max_list) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get list maximum");
+    }
+    if (min_btree) {
+        if(H5P_get(plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, min_btree) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information");
     }
 
@@ -917,80 +1057,3 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_sohm_btree_min
- *
- * Purpose:	Sets the minimum size for a B-tree storing Shared Object
- *              Header Messages in this file.  If fewer than this many
- *              messages are stored in an index, that index will become a
- *              list.
- *
- *              This value must be no greater than the list maximum plus
- *              one (i.e., there cannot be any values which are too many
- *              for a list but too few for a B-tree).
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_sohm_btree_min(hid_t plist_id, size_t min)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Pset_sohm_btree_min, FAIL);
-    H5TRACE2("e","iz",plist_id,min);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* No need to check value in min, since it cannot be negative */
-    if(H5P_set(plist, H5F_CRT_SOHM_B2L_NAME, &min) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM information");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_sohm_btree_min
- *
- * Purpose:	Gets the minimum size of a SOHM B-tree index before it becomes
- *              a list.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		Thursday, May 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_sohm_btree_min(hid_t plist_id, size_t *min)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Pget_sohm_btree_min, FAIL);
-    H5TRACE2("e","i*z",plist_id,min);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Get value */
-    if (min) {
-        if(H5P_get(plist, H5F_CRT_SOHM_B2L_NAME, min) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information");
-    }
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-

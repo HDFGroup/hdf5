@@ -43,6 +43,7 @@
 /* Local Prototypes */
 /********************/
 
+/* JAMES: name these as "H5SM_btree_store", etc? */
 static herr_t H5SM_message_store(void *native, const void *udata);
 static herr_t H5SM_message_retrieve(void *udata, const void *native);
 static herr_t H5SM_message_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
@@ -207,7 +208,7 @@ H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
 
     /* Encode the SOHM's fields */
     UINT32ENCODE(raw, message->hash);
-    UINT16ENCODE(raw, message->ref_count);
+    UINT32ENCODE(raw, message->ref_count);
     UINT64ENCODE(raw, message->fheap_id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -227,6 +228,7 @@ H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
  *
  *-------------------------------------------------------------------------
  */
+/* JAMES: can we combine this with H5SMcache functions? */
 herr_t
 H5SM_message_decode(const H5F_t *f, const uint8_t *raw, void *_nrecord)
 {
@@ -236,7 +238,7 @@ H5SM_message_decode(const H5F_t *f, const uint8_t *raw, void *_nrecord)
 
     /* Encode the SOHM's fields */
     UINT32DECODE(raw, message->hash);
-    UINT16DECODE(raw, message->ref_count);
+    UINT32DECODE(raw, message->ref_count);
     UINT64DECODE(raw, message->fheap_id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -349,3 +351,46 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_convert_to_list_op
+ *
+ * Purpose:	An H5B2_remove_t callback function to convert a SOHM
+ *              B-tree index to a list.
+ *
+ *              Inserts this record into the list passed through op_data.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_convert_to_list_op(void * record, void *op_data)
+{
+    H5SM_sohm_t *message = (H5SM_sohm_t *) record;
+    H5SM_list_t *list = (H5SM_list_t *) op_data;
+    hsize_t      x;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_convert_to_list_op)
+
+    HDassert(record);
+    HDassert(op_data);
+
+    /* Insert this message into the list */
+    for(x=0; x<list->header->list_to_btree; x++)
+    {
+        if(list->messages[x].hash == H5O_HASH_UNDEF) /* JAMES: is this a valid test? */
+        {
+            HDmemcpy(&(list->messages[x]), message, sizeof(H5SM_sohm_t));
+            break;
+        }
+    }
+
+    /* Increment the number of messages in the list */
+    ++list->header->num_messages;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
