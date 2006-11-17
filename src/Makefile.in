@@ -439,7 +439,7 @@ include_HEADERS = H5public.h H5Apublic.h H5ACpublic.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
-        H5SMpublic.h H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
+        H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
 
 # install libhdf5.settings in lib directory
