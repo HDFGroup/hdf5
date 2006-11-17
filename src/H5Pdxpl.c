@@ -557,13 +557,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_data_transform(hid_t plist_id, const char* expression)
+H5Pset_data_transform(hid_t plist_id, const char *expression)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_data_transform, FAIL)
+    H5TRACE2("e","is",plist_id,expression);
 
     /* Check arguments */
     if(expression == NULL)
@@ -620,7 +621,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t size)
+H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
@@ -629,6 +630,7 @@ H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t size)
     ssize_t 	ret_value;   /* return value */
 
     FUNC_ENTER_API(H5Pget_data_transform, FAIL)
+    H5TRACE3("Zs","ixz",plist_id,expression,size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))

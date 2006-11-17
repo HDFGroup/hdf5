@@ -695,6 +695,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Ldelete_by_idx, FAIL)
+    H5TRACE6("e","isLiIohi",loc_id,group_name,idx_type,order,n,lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -796,6 +797,8 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lget_val_by_idx, FAIL)
+    H5TRACE8("e","isLiIohxzi",loc_id,group_name,idx_type,order,n,buf,size,
+             lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -888,6 +891,8 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Lget_info_by_idx, FAIL)
+    H5TRACE7("e","isLiIohxi",loc_id,group_name,idx_type,order,n,linkbuf,
+             lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -1065,6 +1070,8 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Lget_name_by_idx, FAIL)
+    H5TRACE8("Zs","isLiIohxzi",loc_id,group_name,idx_type,order,n,name,size,
+             lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -1123,6 +1130,8 @@ H5Literate(hid_t loc_id, const char *group_name,
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Literate, FAIL)
+    H5TRACE8("e","isLiIo*hxxi",loc_id,group_name,idx_type,order,idx_p,op,
+             op_data,lapl_id);
 
     /* Check arguments */
     if(!group_name || !*group_name)

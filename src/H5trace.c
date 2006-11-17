@@ -605,32 +605,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'G':
 	    switch(type[1]) {
-                case 'l':
-                    if(ptr) {
-                        if(vp)
-                            fprintf (out, "0x%lx", (unsigned long)vp);
-                        else
-                            fprintf(out, "NULL");
-                    } else {
-                        H5L_type_t link_type = va_arg(ap, H5L_type_t); /*lint !e64 Type mismatch not really occuring */
-
-                        switch(link_type) {
-                            case H5L_TYPE_ERROR:
-                                fprintf(out, "H5L_TYPE_ERROR");
-                                break;
-                            case H5L_TYPE_HARD:
-                                fprintf(out, "H5L_TYPE_HARD");
-                                break;
-                            case H5L_TYPE_SOFT:
-                                fprintf(out, "H5L_TYPE_SOFT");
-                                break;
-                            default:
-                                fprintf(out, "%ld", (long)link_type);
-                                break;
-                        }
-                    }
-                    break;
-
                 case 'o':
                     if(ptr) {
                         if(vp)
@@ -921,6 +895,35 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'I':
 	    switch (type[1]) {
+            case 'o':
+		if (ptr) {
+		    if (vp)
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    else
+			fprintf(out, "NULL");
+		} /* end if */
+                else {
+		    H5_iter_order_t order = va_arg (ap, H5_iter_order_t); /*lint !e64 Type mismatch not really occuring */
+		    switch(order) {
+                        case H5_ITER_UNKNOWN:
+                            fprintf(out, "H5_ITER_UNKNOWN");
+                            break;
+                        case H5_ITER_INC:
+                            fprintf(out, "H5_ITER_INC");
+                            break;
+                        case H5_ITER_DEC:
+                            fprintf(out, "H5_ITER_DEC");
+                            break;
+                        case H5_ITER_NATIVE:
+                            fprintf(out, "H5_ITER_NATIVE");
+                            break;
+                        case H5_ITER_N:
+                            fprintf(out, "H5_ITER_N");
+                            break;
+		    } /* end switch */
+		} /* end else */
+		break;
+
 	    case 's':
 		if (ptr) {
 		    if (vp) {
@@ -1033,6 +1036,67 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    default:
 		fprintf (out, "BADTYPE(I%c)", type[1]);
 		goto error;
+	    }
+	    break;
+
+	case 'L':
+	    switch(type[1]) {
+                case 'i':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5L_index_t idx_type = va_arg(ap, H5L_index_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(idx_type) {
+                            case H5L_INDEX_UNKNOWN:
+                                fprintf(out, "H5L_INDEX_UNKNOWN");
+                                break;
+                            case H5L_INDEX_NAME:
+                                fprintf(out, "H5L_INDEX_NAME");
+                                break;
+                            case H5L_INDEX_CRT_ORDER:
+                                fprintf(out, "H5L_INDEX_CRT_ORDER");
+                                break;
+                            case H5L_INDEX_N:
+                                fprintf(out, "H5L_INDEX_N");
+                                break;
+                        }
+                    }
+                    break;
+
+                case 'l':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5L_type_t link_type = va_arg(ap, H5L_type_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(link_type) {
+                            case H5L_TYPE_ERROR:
+                                fprintf(out, "H5L_TYPE_ERROR");
+                                break;
+                            case H5L_TYPE_HARD:
+                                fprintf(out, "H5L_TYPE_HARD");
+                                break;
+                            case H5L_TYPE_SOFT:
+                                fprintf(out, "H5L_TYPE_SOFT");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)link_type);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                default:
+                    fprintf(out, "BADTYPE(G%c)", type[1]);
+                    goto error;
 	    }
 	    break;
 
