@@ -115,8 +115,10 @@ static int basic_test(void)
 
     TESTING("H5Rget_name to get name from region reference (hyperslab)");
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, 10);      
-/*    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR 
-    PASSED()*/
+/* 
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR 
+    PASSED()
+*/
     SKIPPED()
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
@@ -135,9 +137,11 @@ static int basic_test(void)
 
     TESTING("H5Rget_name to get name from region reference (pnt selec)");
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char*)buf1, 10);      
-/*    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR
-    PASSED() */
-    SKIPPED()
+/*
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR
+    PASSED()
+ */
+    SKIPPED() 
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
 
@@ -161,9 +165,18 @@ error:
     return -1;
 }
 
-void main(void) 
+int main(void) 
 {
-    basic_test();
+    int 	nerrors=0;
+    nerrors += basic_test()<0 	?1:0;
+
+    if (nerrors){
+		 printf("***** %d Get name from region reference TEST%s FAILED! *****\n",
+			nerrors, nerrors > 1 ? "S" : "");
+		return 1;
+    }
+    printf("Get name from region reference tests passed\n");
+    return 0;
 }
     
 
