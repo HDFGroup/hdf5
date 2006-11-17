@@ -1766,12 +1766,12 @@ udlink_open(hid_t location, const char *name)
     {
         /* For external links, try to display info for the object it points to */
         case H5L_TYPE_EXTERNAL:
-            if((buf = HDmalloc(linfo.u.link_size)) == NULL)
+            if((buf = HDmalloc(linfo.u.val_size)) == NULL)
                 goto error;
-            if(H5Lget_val(location, name, buf, sizeof(buf), H5P_DEFAULT) < 0)
+            if(H5Lget_val(location, name, buf, linfo.u.val_size, H5P_DEFAULT) < 0)
                 goto error;
 
-            if(H5Lunpack_elink_val(buf, linfo.u.link_size,  &filename, &path) < 0) goto error;
+            if(H5Lunpack_elink_val(buf, linfo.u.val_size,  &filename, &path) < 0) goto error;
             HDfputs("file: ", stdout);
             HDfputs(filename, stdout);
             HDfputs("    path: ", stdout);

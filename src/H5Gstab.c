@@ -26,7 +26,6 @@
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
 /* Private typedefs */
@@ -436,9 +435,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_iterate(H5O_loc_t *oloc, H5_iter_order_t order, hid_t gid,
-    hbool_t lib_internal, int skip, int *last_lnk, H5G_link_iterate_t op,
-    void *op_data, hid_t dxpl_id)
+H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
+    hsize_t skip, hsize_t *last_lnk, hid_t gid,
+    H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5G_bt_it_ud1_t	udata;                  /* User data to pass to B-tree callback */
     H5O_stab_t		stab;		        /* Info about symbol table */
@@ -448,8 +447,7 @@ H5G_stab_iterate(H5O_loc_t *oloc, H5_iter_order_t order, hid_t gid,
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(lib_internal || H5I_GROUP == H5I_get_type(gid));
-    HDassert(op.lib_op);
+    HDassert(lnk_op && lnk_op->u.old_op);
 
     /* Get the B-tree info */
     if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
@@ -460,12 +458,11 @@ H5G_stab_iterate(H5O_loc_t *oloc, H5_iter_order_t order, hid_t gid,
     if(order != H5_ITER_DEC) {
         /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
         udata.group_id = gid;
-        udata.skip = skip;
         udata.heap_addr = stab.heap_addr;
-        udata.lib_internal = lib_internal;
-        udata.op = op;
-        udata.op_data = op_data;
+        udata.skip = skip;
         udata.final_ent = last_lnk;
+        udata.lnk_op = lnk_op;
+        udata.op_data = op_data;
 
         /* Iterate over the group members */
         if((ret_value = H5B_iterate(oloc->file, H5AC_dxpl_id, H5B_SNODE,
@@ -775,7 +772,7 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
     /* Set link info */
     if(udata->lnk) {
         /* Convert the entry to a link */
-        if(H5G_link_convert(udata->file, udata->dxpl_id, udata->lnk, udata->heap_addr,
+        if(H5G_ent_to_link(udata->file, udata->dxpl_id, udata->lnk, udata->heap_addr,
                 ent, udata->name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "unable to convert symbol table entry to link")
     } /* end if */
@@ -901,7 +898,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     heap = NULL; name = NULL;
 
     /* Convert the entry to a link */
-    if(H5G_link_convert(udata->common.f, udata->common.dxpl_id, udata->lnk, udata->heap_addr, ent, s) < 0)
+    if(H5G_ent_to_link(udata->common.f, udata->common.dxpl_id, udata->lnk, udata->heap_addr, ent, s) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, FAIL, "unable to convert symbol table entry to link")
     udata->found = TRUE;
 

@@ -34,8 +34,8 @@
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
-#include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
+#include "H5Tprivate.h"		/* Datatypes         			*/
 
 /**************************/
 /* Package Private Macros */

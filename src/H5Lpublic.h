@@ -73,13 +73,13 @@ typedef enum {
 
 /* Buffer for user query function */
 typedef struct {
-    H5T_cset_t          cset;           /* Character set of link name     */
-    int64_t             corder;         /* Creation order                 */
-    hbool_t             corder_valid;   /* Indicate if creation order is valid */
     H5L_type_t          type;           /* Type of link                   */
+    hbool_t             corder_valid;   /* Indicate if creation order is valid */
+    int64_t             corder;         /* Creation order                 */
+    H5T_cset_t          cset;           /* Character set of link name     */
     union {
         haddr_t         address;        /* Address hard link points to    */
-        size_t          link_size;      /* Size of a soft link or UD link */
+        size_t          val_size;       /* Size of a soft link or UD link value */
     } u;
 } H5L_info_t;
 
@@ -131,6 +131,10 @@ typedef enum H5L_index_t {
     H5L_INDEX_N			/* Number of indices defined on links in groups */
 } H5L_index_t;
 
+/* Prototype for H5Literate() operator */
+typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t *info,
+    void *op_data);
+
 
 /********************/
 /* Public Variables */
@@ -167,6 +171,9 @@ H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
+H5_DLL herr_t H5Literate(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+    H5L_iterate_t op, void *op_data, hid_t lapl_id);
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,

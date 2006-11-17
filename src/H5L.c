@@ -175,7 +175,6 @@ static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_get_info_real(const H5O_link_t *lnk, H5L_info_t *linfo);
 static herr_t H5L_get_info_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -1089,6 +1088,77 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_name_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Literate
+ *
+ * Purpose:	Iterates over links in a group, with user callback routine,
+ *              according to the order within an index.
+ *
+ *              Same pattern of behavior as H5Giterate.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Literate(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
+    H5L_iterate_t op, void *op_data, hid_t lapl_id)
+{
+    H5G_link_iterate_t lnk_op;  /* Link operator */
+    hsize_t     last_lnk;       /* Index of last object looked at */
+    hsize_t	idx;            /* Internal location to hold index */
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(H5Literate, FAIL)
+
+    /* Check arguments */
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!op)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up iteration beginning/end info */
+    idx = (idx_p == NULL ? 0 : *idx_p);
+    last_lnk = 0;
+
+    /* Build link operator info */
+    lnk_op.op_type = H5G_LINK_OP_APP;
+    lnk_op.u.app_op = op;
+
+    /* Iterate over the links */
+    if((ret_value = H5G_obj_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+
+
+    /* Set the index we stopped at */
+    if(idx_p)
+        *idx_p = last_lnk;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Literate() */
 
 /*
  *-------------------------------------------------------------------------
@@ -2442,77 +2512,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info_real
- *
- * Purpose:	Retrieve information from a link object 
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November  7 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5L_get_info_real(const H5O_link_t *lnk, H5L_info_t *linfo)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_real)
-
-    /* Sanity check */
-    HDassert(lnk);
-
-    /* Get information from the link */
-    if(linfo) {
-        linfo->cset = lnk->cset;
-        linfo->corder = lnk->corder;
-        linfo->corder_valid = lnk->corder_valid;
-        linfo->type = lnk->type;
-
-        switch(lnk->type) {
-            case H5L_TYPE_HARD:
-                linfo->u.address = lnk->u.hard.addr;
-                break;
-
-            case H5L_TYPE_SOFT:
-                linfo->u.link_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
-                break;
-
-            default:
-            {
-                const H5L_class_t *link_class;      /* User-defined link class */
-
-                if(lnk->type < H5L_TYPE_UD_MIN || lnk->type > H5L_TYPE_MAX)
-                    HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unknown link class")
-
-                /* User-defined link; call its query function to get the link udata size. */
-                /* Get the link class for this type of link.  It's okay if the class
-                 * isn't registered, though--we just can't give any more information
-                 * about it
-                 */
-                link_class = H5L_find_class(lnk->type);
-
-                if(link_class != NULL && link_class->query_func != NULL) {
-                    ssize_t cb_ret;             /* Return value from UD callback */
-
-                    if((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL, (size_t)0)) < 0)
-                        HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query buffer size callback returned failure")
-
-                    linfo->u.link_size = cb_ret;
-                } /* end if */
-                else
-                    linfo->u.link_size = 0;
-            } /* end case */
-        } /* end switch */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_get_info_real() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5L_get_info_cb
  *
  * Purpose:	Callback for retrieving a link's metadata
@@ -2539,7 +2538,7 @@ H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
     /* Get information from the link */
-    if(H5L_get_info_real(lnk, udata->linfo) < 0)
+    if(H5G_link_to_info(lnk, udata->linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
@@ -2620,7 +2619,7 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     lnk_copied = TRUE;
 
     /* Get information from the link */
-    if(H5L_get_info_real(&grp_lnk, udata->linfo) < 0)
+    if(H5G_link_to_info(&grp_lnk, udata->linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
 
 done:

@@ -29,7 +29,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
 /* Private typedefs */
@@ -263,10 +262,8 @@ H5G_compact_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
 
 done:
     /* Release link table */
-    if(ltable.lnks)
-        /* Free link table information */
-        if(H5G_link_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_get_name_by_idx() */
@@ -326,10 +323,8 @@ H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *l
 
 done:
     /* Release link table */
-    if(ltable.lnks)
-        /* Free link table information */
-        if(H5G_link_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_get_type_by_idx() */
@@ -462,9 +457,8 @@ H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
 
 done:
     /* Release link table */
-    if(ltable.lnks)
-        if(H5G_link_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_remove_by_idx() */
@@ -484,8 +478,8 @@ done:
  */
 herr_t
 H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
-    H5_iter_order_t order, hid_t gid, hbool_t lib_internal, int skip,
-    int *last_obj, H5G_link_iterate_t op, void *op_data)
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_obj,
+    hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
     size_t              u;                      /* Local index variable */
@@ -495,23 +489,42 @@ H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(lib_internal || H5I_GROUP == H5I_get_type(gid));
-    HDassert(op.lib_op);
+    HDassert(linfo);
+    HDassert(lnk_op && lnk_op->u.lib_op);
 
     /* Build table of all link messages */
-    if(H5G_compact_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, order, &ltable) < 0)
+    if(H5G_compact_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Iterate over link messages */
-    for(u = 0, ret_value = H5B_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {
+    for(u = 0, ret_value = H5O_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {
         if(skip > 0)
             --skip;
         else {
-            /* Check for internal callback with link info */
-            if(lib_internal)
-                ret_value = (op.lib_op)(&(ltable.lnks[u]), op_data);
-            else
-                ret_value = (op.app_op)(gid, ltable.lnks[u].name, op_data);
+            /* Check which kind of callback to make */
+            switch(lnk_op->op_type) {
+                case H5G_LINK_OP_OLD:
+                    /* Make the old-type application callback */
+                    ret_value = (lnk_op->u.old_op)(gid, ltable.lnks[u].name, op_data);
+                    break;
+
+                case H5G_LINK_OP_APP:
+                    {
+                        H5L_info_t info;    /* Link info */
+
+                        /* Retrieve the info for the link */
+                        if(H5G_link_to_info(&(ltable.lnks[u]), &info) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
+
+                        /* Make the application callback */
+                        ret_value = (lnk_op->u.app_op)(gid, ltable.lnks[u].name, &info, op_data);
+                    }
+                    break;
+
+                case H5G_LINK_OP_LIB:
+                    /* Call the library's callback */
+                    ret_value = (lnk_op->u.lib_op)(&(ltable.lnks[u]), op_data);
+            } /* end switch */
         } /* end else */
 
         /* Increment the number of entries passed through */
@@ -525,10 +538,8 @@ H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
 done:
     /* Release link table */
-    if(ltable.lnks)
-        /* Free link table information */
-        if(H5G_link_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_iterate() */
@@ -667,9 +678,8 @@ H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
 
 done:
     /* Release link table */
-    if(ltable.lnks)
-        if(H5G_link_release_table(&ltable) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_lookup_by_idx() */

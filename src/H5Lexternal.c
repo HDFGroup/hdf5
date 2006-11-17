@@ -182,21 +182,17 @@ static ssize_t
 H5L_extern_query(const char UNUSED * link_name, void * udata,
     size_t udata_size, void * buf /*out*/, size_t buf_size)
 {
-    size_t        ret_value;
-
-    /* If the buffer is NULL, skip writng anything in it and just return
+    /* If the buffer is NULL, skip writing anything in it and just return
      * the size needed */
     if(buf) {
         if(udata_size < buf_size)
             buf_size = udata_size;
 
-        /* Copy the udata verbatim up to udata_size*/
-        HDmemcpy(buf, udata, udata_size);
+        /* Copy the udata verbatim up to buf_size*/
+        HDmemcpy(buf, udata, buf_size);
     }
 
-    ret_value = udata_size;
-
-    return ret_value;
+    return udata_size;
 }
 
 

@@ -2592,7 +2592,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
 
     /* Get size of buffer for external link */
     if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
+    if(li.u.val_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been an external link");
@@ -2618,7 +2618,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
 
     /* Get size of buffer for external link */
     if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
+    if(li.u.val_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been an external link");
@@ -2629,7 +2629,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Lget_val(fid, "src", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Extract the file and object names from the buffer */
-    if(H5Lunpack_elink_val(query_buf, li.u.link_size, &file_name, &object_name) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.val_size, &file_name, &object_name) < 0) TEST_ERROR
 
     /* Compare the file and object names */
     if(strcmp(file_name, filename2)) TEST_ERROR
@@ -2647,11 +2647,11 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Make sure that passing in NULLs to H5Lunpack_elink_val works */
-    if(H5Lunpack_elink_val(query_buf, li.u.link_size, NULL, NULL) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.val_size, NULL, NULL) < 0) TEST_ERROR
 
     /* Make sure that bogus cases trigger errors in H5Lunpack_elink_val */
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(query_buf, li.u.link_size - 1, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(query_buf, li.u.val_size - 1, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
       if(H5Lunpack_elink_val(query_buf, 0, NULL, NULL) >= 0) TEST_ERROR
@@ -3841,7 +3841,7 @@ ud_hard_links(hid_t fapl)
     /* Check that H5Lget_objinfo works on the hard link */
     if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     /* UD hard links have no query function, thus return a "link length" of 0 */
-    if(li.u.link_size != 0) TEST_ERROR
+    if(li.u.val_size != 0) TEST_ERROR
     if(UD_HARD_TYPE != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been a UD hard link");
@@ -4252,7 +4252,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
 
     /* Query the link to test its query callback */
     if (H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != 16) TEST_ERROR
+    if(li.u.val_size != 16) TEST_ERROR
     if (UD_CB_TYPE != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been a UD hard link");
@@ -4301,7 +4301,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
 
     /* The query callback should NOT fail, but should be unable to give a linklen */
     if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != 0) TEST_ERROR
+    if(li.u.val_size != 0) TEST_ERROR
     if(li.type != UD_CB_TYPE) TEST_ERROR
     if(H5Gget_objinfo(fid, UD_CB_LINK_NAME, FALSE, &sb) < 0) TEST_ERROR
     if(sb.type != H5G_UDLINK) TEST_ERROR
@@ -4742,7 +4742,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
 
     /* The query callback will succeed when we only want to get the size of the buffer... */
     if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != 0) TEST_ERROR
+    if(li.u.val_size != 0) TEST_ERROR
     /* ...but fail when we try to write data to the buffer itself*/
     H5E_BEGIN_TRY {
         if(H5Lget_val(fid, "ud_link", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) >=0) TEST_ERROR
@@ -4753,7 +4753,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
 
     /* Now querying should succeed */
     if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.link_size != 8) TEST_ERROR
+    if(li.u.val_size != 8) TEST_ERROR
     if(H5Lget_val(fid, "ud_link", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(query_buf, "succeed") != 0) TEST_ERROR
 

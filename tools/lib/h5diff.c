@@ -1087,34 +1087,34 @@ hsize_t diff (hid_t file1_id,
    /* Only external links will have a query function registered */
    if(li1.type == H5L_TYPE_EXTERNAL && li2.type == H5L_TYPE_EXTERNAL)
    {
-      buf1 = HDmalloc (li1.u.link_size);
-      buf2 = HDmalloc (li2.u.link_size);
+      buf1 = HDmalloc (li1.u.val_size);
+      buf2 = HDmalloc (li2.u.val_size);
 
-      if(H5Lget_val(file1_id, path1, buf1, li1.u.link_size, H5P_DEFAULT) < 0)
+      if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0)
       {
         HDfree (buf1); HDfree (buf2);
         goto out;
       }
-      if(H5Lget_val(file2_id, path2, buf2, li2.u.link_size, H5P_DEFAULT) < 0)
+      if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0)
       {
         HDfree (buf1); HDfree (buf2);
         goto out;
       }
 
       /* If the buffers are the same size, compare them */
-      if(li1.u.link_size == li2.u.link_size)
+      if(li1.u.val_size == li2.u.val_size)
       {
-        if(H5Lget_val(file1_id, path1, buf1, li1.u.link_size, H5P_DEFAULT) < 0)
+        if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0)
         {
           HDfree (buf1); HDfree (buf2);
           goto out;
         }
-        if(H5Lget_val(file2_id, path2, buf2, li2.u.link_size, H5P_DEFAULT) < 0)
+        if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0)
         {
           HDfree (buf1); HDfree (buf2);
           goto out;
         }
-        ret = HDmemcmp (buf1, buf2, li1.u.link_size);
+        ret = HDmemcmp (buf1, buf2, li1.u.val_size);
       }
       else
         ret = 1;
@@ -1134,7 +1134,7 @@ hsize_t diff (hid_t file1_id,
       /* If the link classes or the buffer length are not the
        * same, the links are "different"
        */
-      if((li1.type != li2.type) || (li1.u.link_size != li2.u.link_size))
+      if((li1.type != li2.type) || (li1.u.val_size != li2.u.val_size))
         nfound = 1;
       else
         nfound = 0;

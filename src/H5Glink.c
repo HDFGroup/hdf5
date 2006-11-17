@@ -203,7 +203,7 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_convert
+ * Function:	H5G_ent_to_link
  *
  * Purpose:     Convert a symbol table entry to a link
  *
@@ -216,12 +216,12 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
+H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     const H5G_entry_t *ent, const char *name)
 {
     herr_t     ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_convert, FAIL)
+    FUNC_ENTER_NOAPI(H5G_ent_to_link, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -265,7 +265,145 @@ H5G_link_convert(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_convert() */
+} /* end H5G_ent_to_link() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_ent_to_info
+ *
+ * Purpose:     Make link info for a symbol table entry
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 16 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
+    const H5G_entry_t *ent)
+{
+    herr_t     ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_ent_to_info, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(info);
+    HDassert(ent);
+
+    /* Set (default) common info for info */
+    info->cset = H5F_DEFAULT_CSET;
+    info->corder = 0;
+    info->corder_valid = FALSE;       /* Creation order not valid for this link */
+
+    /* Object is a symbolic or hard link */
+    if(ent->type == H5G_CACHED_SLINK) {
+        const char *s;          /* Pointer to link value */
+        H5HL_t *heap;           /* Pointer to local heap for group */
+
+        /* Lock the local heap */
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
+
+        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+
+        /* Get the link value size */
+        info->u.val_size = HDstrlen(s) + 1;
+
+        /* Release the local heap */
+        if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to unprotect local heap")
+
+        /* Set link type */
+        info->type = H5L_TYPE_SOFT;
+    } /* end if */
+    else {
+        /* Set address of object */
+        info->u.address = ent->header;
+
+        /* Set link type */
+        info->type = H5L_TYPE_HARD;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_ent_to_link() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_to_info
+ *
+ * Purpose:	Retrieve information from a link object 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_link_to_info, FAIL)
+
+    /* Sanity check */
+    HDassert(lnk);
+
+    /* Get information from the link */
+    if(info) {
+        info->cset = lnk->cset;
+        info->corder = lnk->corder;
+        info->corder_valid = lnk->corder_valid;
+        info->type = lnk->type;
+
+        switch(lnk->type) {
+            case H5L_TYPE_HARD:
+                info->u.address = lnk->u.hard.addr;
+                break;
+
+            case H5L_TYPE_SOFT:
+                info->u.val_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
+                break;
+
+            default:
+            {
+                const H5L_class_t *link_class;      /* User-defined link class */
+
+                if(lnk->type < H5L_TYPE_UD_MIN || lnk->type > H5L_TYPE_MAX)
+                    HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unknown link class")
+
+                /* User-defined link; call its query function to get the link udata size. */
+                /* Get the link class for this type of link.  It's okay if the class
+                 * isn't registered, though--we just can't give any more information
+                 * about it
+                 */
+                link_class = H5L_find_class(lnk->type);
+
+                if(link_class != NULL && link_class->query_func != NULL) {
+                    ssize_t cb_ret;             /* Return value from UD callback */
+
+                    /* Call the link's query routine to retrieve the user-defined link's value size */
+                    /* (in case the query routine packs/unpacks the link value in some way that changes its size) */
+                    if((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL, (size_t)0)) < 0)
+                        HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query buffer size callback returned failure")
+
+                    info->u.val_size = cb_ret;
+                } /* end if */
+                else
+                    info->u.val_size = 0;
+            } /* end case */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_link_to_info() */
 
 
 /*-------------------------------------------------------------------------

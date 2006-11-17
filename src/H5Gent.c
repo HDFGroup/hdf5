@@ -445,7 +445,7 @@ done:
  */
 herr_t
 H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
-	      int indent, int fwidth, haddr_t heap)
+	      int indent, int fwidth, haddr_t heap_addr)
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
@@ -492,15 +492,15 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             HDfprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
-            if(heap > 0 && H5F_addr_defined(heap)) {
-                const H5HL_t *heap_ptr;
+            if(heap_addr > 0 && H5F_addr_defined(heap_addr)) {
+                H5HL_t *heap;
 
-                heap_ptr = H5HL_protect(ent->file, dxpl_id, heap);
-                lval = H5HL_offset_into(ent->file, heap_ptr, ent->cache.slink.lval_offset);
+                heap = H5HL_protect(ent->file, dxpl_id, heap_addr);
+                lval = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);
-                H5HL_unprotect(ent->file, dxpl_id, heap_ptr, heap, H5AC__NO_FLAGS_SET);
+                H5HL_unprotect(ent->file, dxpl_id, heap, heap_addr, H5AC__NO_FLAGS_SET);
             } /* end if */
             else
                 HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");

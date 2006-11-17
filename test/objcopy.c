@@ -1246,7 +1246,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
 
                       /* Check that both links are the same type and the same size */
                       if(linfo.type != linfo2.type) TEST_ERROR
-                      if(linfo.u.link_size != linfo2.u.link_size) TEST_ERROR
+                      if(linfo.u.val_size != linfo2.u.val_size) TEST_ERROR
 
                       /* Get link udata */
                       if(H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR

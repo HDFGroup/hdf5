@@ -42,8 +42,8 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5Tprivate.h"
 #include "H5SMprivate.h"        /* Shared object header messages        */
+#include "H5Tprivate.h"		/* Datatypes         			*/
 
 #ifdef H5_HAVE_GETTIMEOFDAY
 #include <sys/time.h>

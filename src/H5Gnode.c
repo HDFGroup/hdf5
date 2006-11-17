@@ -1483,24 +1483,43 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name")
             heap = NULL; name = NULL;
 
-            /* Check for internal callback with link info */
-            if(udata->lib_internal) {
-                H5O_link_t lnk;         /* Link for entry */
+            /* Check which type of callback to make */
+            switch(udata->lnk_op->op_type) {
+                case H5G_LINK_OP_OLD:
+                    /* Make the old-type application callback */
+                    ret_value = (udata->lnk_op->u.old_op)(udata->group_id, s, udata->op_data);
+                    break;
 
-                /* Convert the entry to a link */
-                if(H5G_link_convert(f, dxpl_id, &lnk, udata->heap_addr, &ents[u], s) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5B_ITER_ERROR, "unable to convert symbol table entry to link")
+                case H5G_LINK_OP_APP:
+                    {
+                        H5L_info_t info;        /* Link info for entry */
 
-                /* Call the library's callback */
-                ret_value = (udata->op.lib_op)(&lnk, udata->op_data);
+                        /* Make a link info for an entry */
+                        if(H5G_ent_to_info(f, dxpl_id, &info, udata->heap_addr, &ents[u]) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_ITER_ERROR, "unable to get info for symbol table entry")
 
-                /* Release memory for link object */
-                if(H5O_reset(H5O_LINK_ID, &lnk) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5B_ITER_ERROR, "unable to release link message")
-            } /* end if */
-            else
-                /* Make the application's callback */
-                ret_value = (udata->op.app_op)(udata->group_id, s, udata->op_data);
+                        /* Make the application callback */
+                        ret_value = (udata->lnk_op->u.app_op)(udata->group_id, s, &info, udata->op_data);
+                    } /* end if */
+                    break;
+
+                case H5G_LINK_OP_LIB:
+                    /* Call the library's callback */
+                    {
+                        H5O_link_t lnk;         /* Link for entry */
+
+                        /* Convert the entry to a link */
+                        if(H5G_ent_to_link(f, dxpl_id, &lnk, udata->heap_addr, &ents[u], s) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5B_ITER_ERROR, "unable to convert symbol table entry to link")
+
+                        /* Call the library's callback */
+                        ret_value = (udata->lnk_op->u.lib_op)(&lnk, udata->op_data);
+
+                        /* Release memory for link object */
+                        if(H5O_reset(H5O_LINK_ID, &lnk) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5B_ITER_ERROR, "unable to release link message")
+                    } /* end if */
+            } /* end switch */
 
             /* Free the memory for the name, if we used a dynamically allocated buffer */
             if(s != buf)

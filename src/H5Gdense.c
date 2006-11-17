@@ -86,14 +86,13 @@ typedef struct {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     H5HF_t      *fheap;                 /* Fractal heap handle */
-    hbool_t     lib_internal;           /* Callback is library internal      */
 
     /* downward (from application) */
     hid_t       gid;                    /* Group ID for application callback */
-    H5G_link_iterate_t op;              /* Callback for each link            */
+    hsize_t     skip;                   /* Number of links to skip           */
+    hsize_t     *last_lnk;              /* Pointer to the last link operated on */
+    H5G_link_iterate_t *lnk_op;         /* Callback for each link            */
     void        *op_data;               /* Callback data for each link       */
-    int         skip;                   /* Number of links to skip           */
-    int         *last_lnk;              /* Pointer to the last link operated on */
 
     /* upward */
     int         op_ret;                 /* Return value from callback        */
@@ -821,10 +820,11 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         udata.curr_lnk = 0;
 
         /* Build iterator operator */
-        lnk_op.lib_op = H5G_dense_build_table_cb;
+        lnk_op.op_type = H5G_LINK_OP_LIB;
+        lnk_op.u.lib_op = H5G_dense_build_table_cb;
 
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5G_dense_iterate(f, dxpl_id, H5_ITER_NATIVE, 0, linfo, TRUE, 0, NULL, lnk_op, &udata) < 0)
+        if(H5G_dense_iterate(f, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
         /* Sort link table in correct iteration order */
@@ -929,13 +929,30 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 H5G_dense_iterate_fh_cb, &fh_udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5B2_ITER_ERROR, "link found callback failed")
 
-        /* Check for internal callback with link info */
-        if(bt2_udata->lib_internal)
-            /* Call the library's callback */
-            ret_value = (bt2_udata->op.lib_op)(fh_udata.lnk, bt2_udata->op_data);
-        else
-            /* Make the application's callback */
-            ret_value = (bt2_udata->op.app_op)(bt2_udata->gid, fh_udata.lnk->name, bt2_udata->op_data);
+        /* Check which type of callback to make */
+        switch(bt2_udata->lnk_op->op_type) {
+            case H5G_LINK_OP_OLD:
+                /* Make the old-type application callback */
+                ret_value = (bt2_udata->lnk_op->u.old_op)(bt2_udata->gid, fh_udata.lnk->name, bt2_udata->op_data);
+                break;
+
+            case H5G_LINK_OP_APP:
+                {
+                    H5L_info_t info;    /* Link info */
+
+                    /* Retrieve the info for the link */
+                    if(H5G_link_to_info(fh_udata.lnk, &info) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
+
+                    /* Make the application callback */
+                    ret_value = (bt2_udata->lnk_op->u.app_op)(bt2_udata->gid, fh_udata.lnk->name, &info, bt2_udata->op_data);
+                }
+                break;
+
+            case H5G_LINK_OP_LIB:
+                /* Call the library's callback */
+                ret_value = (bt2_udata->lnk_op->u.lib_op)(fh_udata.lnk, bt2_udata->op_data);
+        } /* end switch */
 
         /* Release the space allocated for the link */
         H5O_free(H5O_LINK_ID, fh_udata.lnk);
@@ -969,9 +986,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
-    const H5O_linfo_t *linfo, hbool_t lib_internal, int skip, int *last_lnk,
-    H5G_link_iterate_t op, void *op_data)
+H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
+    hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5G_bt2_ud_it_t udata;             /* User data for iterator callback */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -985,7 +1002,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
      */
     HDassert(f);
     HDassert(linfo);
-    HDassert(op.lib_op);
+    HDassert(lnk_op && lnk_op->u.lib_op);
 
     /* Open the fractal heap */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
@@ -998,11 +1015,10 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
         udata.f = f;
         udata.dxpl_id = dxpl_id;
         udata.fheap = fheap;
-        udata.lib_internal = lib_internal;
         udata.gid = gid;
         udata.skip = skip;
         udata.last_lnk = last_lnk;
-        udata.op = op;
+        udata.lnk_op = lnk_op;
         udata.op_data = op_data;
 
         /* Iterate over the records in the v2 B-tree's "native" order */
@@ -1015,7 +1031,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
         size_t u;                       /* Local index variable */
 
         /* Build the table of links for this group */
-        if(H5G_dense_build_table(f, dxpl_id, linfo, H5L_INDEX_NAME, order, &ltable) < 0)
+        if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
 
         /* Iterate over link messages */
@@ -1023,11 +1039,30 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, H5_iter_order_t order, hid_t gid,
             if(skip > 0)
                 --skip;
             else {
-                /* Check for internal callback with link info */
-                if(lib_internal)
-                    ret_value = (op.lib_op)(&(ltable.lnks[u]), op_data);
-                else
-                    ret_value = (op.app_op)(gid, ltable.lnks[u].name, op_data);
+                /* Check which kind of callback to make */
+                switch(lnk_op->op_type) {
+                    case H5G_LINK_OP_OLD:
+                        /* Make the old-type application callback */
+                        ret_value = (lnk_op->u.old_op)(gid, ltable.lnks[u].name, op_data);
+                        break;
+
+                    case H5G_LINK_OP_APP:
+                        {
+                            H5L_info_t info;    /* Link info */
+
+                            /* Retrieve the info for the link */
+                            if(H5G_link_to_info(&(ltable.lnks[u]), &info) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
+
+                            /* Make the application callback */
+                            ret_value = (lnk_op->u.app_op)(gid, ltable.lnks[u].name, &info, op_data);
+                        }
+                        break;
+
+                    case H5G_LINK_OP_LIB:
+                        /* Call the library's callback */
+                        ret_value = (lnk_op->u.lib_op)(&(ltable.lnks[u]), op_data);
+                } /* end switch */
             } /* end else */
 
             /* Increment the number of entries passed through */

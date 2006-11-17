@@ -1060,7 +1060,7 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Get information for object in group */
-    if(H5G_get_objinfo(&loc, name, 0, &sb, udata->dxpl_id) < 0)
+    if(H5G_get_objinfo(&loc, name, FALSE, &sb, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object")
 #if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
@@ -1111,8 +1111,9 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
 
         /* If it's a group, we recurse into it */
         if(sb.type == H5G_GROUP) {
-            int last_obj;
-            size_t len_needed;          /* Length of container string needed */
+            H5G_link_iterate_t lnk_op;          /* Link operator */
+            hsize_t last_obj;
+            size_t len_needed;                  /* Length of container string needed */
             size_t len;
 
             /* Build full path name of group to recurse into */
@@ -1129,7 +1130,11 @@ H5G_refname_iterator(hid_t group, const char *name, void *_udata)
                 udata->is_root_group = FALSE;
             HDstrcat(udata->container, "/"); 
                 
-            ret_value = H5G_obj_iterate(udata->file, udata->container, H5_ITER_INC, 0, &last_obj, H5G_refname_iterator, udata, udata->dxpl_id);
+            /* Build iterator operator */
+            lnk_op.op_type = H5G_LINK_OP_OLD;
+            lnk_op.u.old_op = H5G_refname_iterator;
+
+            ret_value = H5G_obj_iterate(udata->file, udata->container, H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->dxpl_id);
             
             /* If we didn't find the object, truncate the name to not include group name anymore */
             if(!ret_value)

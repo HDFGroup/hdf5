@@ -494,10 +494,11 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.dxpl_id = dxpl_id;
 
             /* Build iterator operator */
-            lnk_op.lib_op = H5G_obj_stab_to_new_cb;
+            lnk_op.op_type = H5G_LINK_OP_LIB;
+            lnk_op.u.lib_op = H5G_obj_stab_to_new_cb;
 
             /* Iterate through all links in "old format" group and insert them into new format */
-            if(H5G_stab_iterate(grp_oloc, H5_ITER_NATIVE, 0, TRUE, 0, NULL, lnk_op, &udata, dxpl_id) < 0)
+            if(H5G_stab_iterate(grp_oloc, dxpl_id, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over old format links")
 
             /* Remove the symbol table message from the group */
@@ -579,11 +580,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_iterate(hid_t loc_id, const char *name, H5_iter_order_t order,
-    int skip, int *last_lnk, H5G_iterate_t op, void *op_data, hid_t dxpl_id)
+H5G_obj_iterate(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
+    H5G_link_iterate_t *lnk_op, void *op_data, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
-    H5G_link_iterate_t lnk_op;  /* Link operator */
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp;                 /* Pointer to group data structure to iterate over */
     herr_t ret_value;           /* Return value */
@@ -591,21 +592,18 @@ H5G_obj_iterate(hid_t loc_id, const char *name, H5_iter_order_t order,
     FUNC_ENTER_NOAPI(H5G_obj_iterate, FAIL)
 
     /* Sanity check */
-    HDassert(name);
+    HDassert(group_name);
     HDassert(last_lnk);
-    HDassert(op);
+    HDassert(lnk_op && lnk_op->u.lib_op);
 
     /*
      * Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if((gid = H5Gopen(loc_id, name)) < 0)
+    if((gid = H5Gopen(loc_id, group_name)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((grp = H5I_object(gid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "bad group ID")
-
-    /* Set up link operator */
-    lnk_op.app_op = op;
 
     /* Attempt to get the link info for this group */
     if(H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
@@ -615,12 +613,12 @@ H5G_obj_iterate(hid_t loc_id, const char *name, H5_iter_order_t order,
 
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Iterate over the links in the group, building a table of the link messages */
-            if((ret_value = H5G_dense_iterate(grp->oloc.file, dxpl_id, order, gid, &linfo, FALSE, skip, last_lnk, lnk_op, op_data)) < 0)
+            if((ret_value = H5G_dense_iterate(grp->oloc.file, dxpl_id, &linfo, idx_type, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if((ret_value = H5G_compact_iterate(&(grp->oloc), dxpl_id, &linfo, order, gid, FALSE, skip, last_lnk, lnk_op, op_data)) < 0)
+            if((ret_value = H5G_compact_iterate(&(grp->oloc), dxpl_id, &linfo, idx_type, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over links")
         } /* end else */
     } /* end if */
@@ -629,7 +627,7 @@ H5G_obj_iterate(hid_t loc_id, const char *name, H5_iter_order_t order,
         H5E_clear_stack(NULL);
 
         /* Iterate over symbol table */
-        if((ret_value = H5G_stab_iterate(&(grp->oloc), order, gid, FALSE, skip, last_lnk, lnk_op, op_data, dxpl_id)) < 0)
+        if((ret_value = H5G_stab_iterate(&(grp->oloc), dxpl_id, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over symbol table")
     } /* end else */
 
