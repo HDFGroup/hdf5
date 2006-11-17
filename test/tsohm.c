@@ -58,8 +58,8 @@ static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
 {
     unsigned    num_indexes;
     unsigned    index_flags, min_mesg_size;
-    size_t      list_size, btree_size;
-    unsigned     x;
+    unsigned    list_size, btree_size;
+    unsigned    x;
     herr_t      ret;
 
     /* Verify number of indexes is set to default */

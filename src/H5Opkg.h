@@ -28,6 +28,7 @@
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
+#define H5O_MIN_SIZE	32		/*min obj header data size	     */
 
 /* Versions of object header structure */
 
@@ -341,12 +342,23 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL void * H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     int sequence, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg,
+    hbool_t adj_link);
 H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL void * H5O_copy_mesg_file(const H5O_msg_class_t *copy_type,
     const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
+
+/* Object header allocation routines */
+H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    const H5O_msg_class_t *type, size_t size, hbool_t * oh_dirtied_ptr);
+H5_DLL herr_t H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
+H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5O_mesg_t *mesg, hbool_t delete_mesg, hbool_t adj_link);
+
+/* Object header debugging routines */
 #ifdef H5O_DEBUG
 H5_DLL herr_t H5O_assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */

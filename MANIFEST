@@ -569,11 +569,13 @@
 ./src/H5MPprivate.h
 ./src/H5MPtest.c
 ./src/H5O.c
+./src/H5Oalloc.c
 ./src/H5Oattr.c
 ./src/H5Obogus.c
 ./src/H5Ocache.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
+./src/H5Odbg.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
