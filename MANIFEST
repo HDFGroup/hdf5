@@ -749,8 +749,6 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/objcopy.c
-./test/ref.c
-./test/refreg_name.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c

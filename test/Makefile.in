@@ -80,8 +80,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
 	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
-	getname$(EXEEXT) ref$(EXEEXT) refreg_name$(EXEEXT) \
-	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -268,14 +267,6 @@ pool_SOURCES = pool.c
 pool_OBJECTS = pool.$(OBJEXT)
 pool_LDADD = $(LDADD)
 pool_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-ref_SOURCES = ref.c
-ref_OBJECTS = ref.$(OBJEXT)
-ref_LDADD = $(LDADD)
-ref_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
-refreg_name_SOURCES = refreg_name.c
-refreg_name_OBJECTS = refreg_name.$(OBJEXT)
-refreg_name_LDADD = $(LDADD)
-refreg_name_DEPENDENCIES = libh5test.la $(am__DEPENDENCIES_1)
 reserved_SOURCES = reserved.c
 reserved_OBJECTS = reserved.$(OBJEXT)
 reserved_LDADD = $(LDADD)
@@ -345,8 +336,8 @@ SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c pool.c ref.c refreg_name.c \
-	reserved.c set_extent.c space_overflow.c stab.c stream_test.c \
+	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
+	set_extent.c space_overflow.c stab.c stream_test.c \
 	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
 	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
@@ -357,8 +348,8 @@ DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c pool.c ref.c refreg_name.c \
-	reserved.c set_extent.c space_overflow.c stab.c stream_test.c \
+	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
+	set_extent.c space_overflow.c stab.c stream_test.c \
 	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
 	vfd.c
 ETAGS = etags
@@ -621,8 +612,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 	new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 \
 	err_compat.h5 dtransform.h5 test_filters.h5 get_file_name.h5 \
 	tstint[1-2].h5 unlink_chunked.h5 btree2.h5 objcopy_src.h5 \
-	objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5 \
-	refreg_name.h5
+	objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
@@ -642,7 +632,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe stream_test \
-           getname ref refreg_name vfd ntypes dangle dtransform reserved cross_read \
+           getname vfd ntypes dangle dtransform reserved cross_read \
 	   btree2 fheap
 
 
@@ -885,12 +875,6 @@ ohdr$(EXEEXT): $(ohdr_OBJECTS) $(ohdr_DEPENDENCIES)
 pool$(EXEEXT): $(pool_OBJECTS) $(pool_DEPENDENCIES) 
 	@rm -f pool$(EXEEXT)
 	$(LINK) $(pool_LDFLAGS) $(pool_OBJECTS) $(pool_LDADD) $(LIBS)
-ref$(EXEEXT): $(ref_OBJECTS) $(ref_DEPENDENCIES) 
-	@rm -f ref$(EXEEXT)
-	$(LINK) $(ref_LDFLAGS) $(ref_OBJECTS) $(ref_LDADD) $(LIBS)
-refreg_name$(EXEEXT): $(refreg_name_OBJECTS) $(refreg_name_DEPENDENCIES) 
-	@rm -f refreg_name$(EXEEXT)
-	$(LINK) $(refreg_name_LDFLAGS) $(refreg_name_OBJECTS) $(refreg_name_LDADD) $(LIBS)
 reserved$(EXEEXT): $(reserved_OBJECTS) $(reserved_DEPENDENCIES) 
 	@rm -f reserved$(EXEEXT)
 	$(LINK) $(reserved_LDFLAGS) $(reserved_OBJECTS) $(reserved_LDADD) $(LIBS)
@@ -974,8 +958,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/objcopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ohdr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ref.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/refreg_name.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@

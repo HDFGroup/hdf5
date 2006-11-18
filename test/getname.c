@@ -43,12 +43,16 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define RANK 2
-#define NX 4
-#define NY 5
-
 #define NAME_BUF_SIZE   64
 #define SMALL_NAME_BUF_SIZE   2
+
+/* Object reference macros */
+#define SPACE1_RANK	1
+#define SPACE1_DIM1	8
+
+/* Dataset region reference macros */
+#define REFREG_DSETNAMEV "MATRIX"
+#define REFREG_DSETNAMER "REGION_REFERENCES"
 
 static int
 check_name(hid_t id, const char *chk_name, const char *chk_user_path)
@@ -83,43 +87,26 @@ error:
     return -1;
 }
 
-int main( void )
+static int
+test_main(hid_t file_id, hid_t fapl)
 {
- char filename0[1024];
- char filename1[1024];
- char filename2[1024];
- char filename3[1024];
- hid_t   fapl;
- hid_t   file_id, file1_id, file2_id, file3_id;
- hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
- hid_t   dataset_id, dataset2_id;
- hid_t   space_id;
- hid_t   type_id, type2_id;
- hsize_t dims[1] = { 5 };
- const char *envval = NULL;
-
- envval = HDgetenv("HDF5_DRIVER");
- if (envval == NULL) 
-    envval = "nomatch";
- if (HDstrcmp(envval, "split")) {
-    /* Name length */
-    size_t  name_len;
-
-    /* Reset the library and get the file access property list */
-    h5_reset();
-    fapl = h5_fileaccess();
+    char filename1[1024];
+    char filename2[1024];
+    char filename3[1024];
+    hid_t   file1_id, file2_id, file3_id;
+    hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
+    hid_t   dataset_id, dataset2_id;
+    hid_t   space_id;
+    hid_t   type_id, type2_id;
+    hsize_t dims[1] = { 5 };
+    size_t  name_len; /* Name length */
 
     /* Initialize the file names */
-    h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
     h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
     h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
     h5_fixname(FILENAME[3], fapl, filename3, sizeof filename3);
 
-    /* Create a new file_id using default properties. */
-    if ((file_id = H5Fcreate( filename0, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) TEST_ERROR;
-
-
-/*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Gcreate, one group
     *-------------------------------------------------------------------------
     */
@@ -139,7 +126,7 @@ int main( void )
 
 
 
-/*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Gcreate, more than one group
     *-------------------------------------------------------------------------
     */
@@ -164,7 +151,7 @@ int main( void )
     PASSED();
 
 
-/*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Gopen
     *-------------------------------------------------------------------------
     */
@@ -192,7 +179,7 @@ int main( void )
 
 
 
-/*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Dcreate
     *-------------------------------------------------------------------------
     */
@@ -229,7 +216,7 @@ int main( void )
 
 
 
-/*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Dopen
     *-------------------------------------------------------------------------
     */
@@ -1237,12 +1224,12 @@ PASSED();
 
     /* Get name for non commited datatype, it should fail */
     H5E_BEGIN_TRY {
-	if(H5Iget_name( type_id, name, NAME_BUF_SIZE) > 0) TEST_ERROR;
+        if(H5Iget_name( type_id, name, NAME_BUF_SIZE) > 0) TEST_ERROR;
     } H5E_END_TRY;
 
     /* Get name for dataspace, it should fail */
     H5E_BEGIN_TRY {
-	if(H5Iget_name( space_id, name, NAME_BUF_SIZE) > 0) TEST_ERROR;
+        if(H5Iget_name( space_id, name, NAME_BUF_SIZE) > 0) TEST_ERROR;
     } H5E_END_TRY;
 }
 
@@ -2368,26 +2355,485 @@ PASSED();
 
     PASSED();
 
-   /*-------------------------------------------------------------------------
-    * end tests
-    *-------------------------------------------------------------------------
-    */
+    return(0);
+
+error:
+    return(1);
+}
+
+static int
+test_obj_ref(hid_t fapl)
+{
+    char filename1[1024];
+    char filename2[1024];
+    hid_t	fid1, fid2;		/* HDF5 File IDs		*/
+    hid_t	dataset, dataset2;	/* Dataset ID			*/
+    hid_t	group, group2;          /* Group ID                     */
+    hid_t	sid1;                   /* Dataspace ID			*/
+    hid_t	tid1;                   /* Datatype ID			*/
+    hsize_t	dims1[] = {SPACE1_DIM1};
+    hobj_ref_t  wbuf[SPACE1_DIM1];      /* Buffer to write to disk */
+    int         tu32[SPACE1_DIM1];      /* Int data */
+    int         i;                      /* counting variables */
+    char buf[100];
+
+    /* Initialize the file names */
+    h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
+
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create dataspace for datasets */
+    if((sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create a group */
+    if((group = H5Gcreate(fid1, "Group1", (size_t)0)) < 0)
+        TEST_ERROR
+
+    /* Create a single dataset inside the second file, which will be mounted
+     * and used to mask objects in the first file */
+    if((dataset = H5Dcreate(fid2, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+    
+    /* Create a dataset (inside Group1) */
+    if((dataset = H5Dcreate(group, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Initialize data buffer */
+    for(i = 0; i < SPACE1_DIM1; i++)
+        tu32[i] = i * 3;
+
+    /* Write selection to disk */
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, tu32) < 0)
+        TEST_ERROR
+
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+
+    /* Create another dataset (inside Group1) */
+    if((dataset = H5Dcreate(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+ 
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+ 
+    /* Create a datatype to refer to */
+    if((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
+        TEST_ERROR
+
+    /* Insert fields */
+    if(H5Tinsert(tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0)
+        TEST_ERROR
+    if(H5Tinsert(tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0)
+        TEST_ERROR
+    if(H5Tinsert(tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR
+
+    /* Save datatype for later */
+    if(H5Tcommit(group, "Datatype1", tid1) < 0)
+        TEST_ERROR
+
+    /* Close datatype */
+    if(H5Tclose(tid1) < 0)
+        TEST_ERROR
+
+    /* Create a new group in group1 */
+    if((group2 = H5Gcreate(group, "Group2", (size_t)0)) < 0)
+        TEST_ERROR
+ 
+    /* Create a hard link to group1 in group2 */
+    if(H5Glink(fid1, H5G_LINK_HARD, "/Group1", "/Group1/Group2/Link") < 0)
+        TEST_ERROR
+ 
+    /* Create dataset in that group */
+    if((dataset = H5Dcreate(group2, "Dataset4", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+  
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+  
+    /* Close group */
+    if(H5Gclose(group) < 0)
+        TEST_ERROR
+    if(H5Gclose(group2) < 0)
+        TEST_ERROR
+
+    /* Open up that hard link and make a new dataset there */
+    if((group = H5Gopen(fid1, "/Group1/Group2/Link")) < 0)
+        TEST_ERROR
+    if((dataset = H5Dcreate(group, "Dataset5", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+    if(H5Gclose(group) < 0)
+        TEST_ERROR
 
 
+    /* Create a dataset to store references */
+    if((dataset = H5Dcreate(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create reference to dataset */
+    if(H5Rcreate(&wbuf[0], fid1, "/Dataset3", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
+    /* Create reference to dataset */
+    if(H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
+    /* Create reference to group */
+    if(H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
+    /* Create reference to named datatype */
+    if(H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+    
+    if(H5Rcreate(&wbuf[4], fid1, "/Group1/Group2/Dataset4", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+    if(H5Rcreate(&wbuf[5], fid1, "/Group1/Group2", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+    if(H5Rcreate(&wbuf[6], fid1, "/Group1/Group2/Link/Dataset5", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
+    /* Create reference to root group */
+    if(H5Rcreate(&wbuf[7], fid1, "/", H5R_OBJECT, -1) < 0)
+        TEST_ERROR
+
+    /* Write selection to disk */
+    if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR
+
+    TESTING("getting path to normal dataset in root group"); 
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[0])) < 0) TEST_ERROR
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 10))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 10))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to dataset in /Group1"); 
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[1])) < 0) TEST_ERROR
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 17))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 17))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to /Group1"); 
+    if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[2])) < 0) TEST_ERROR
+    i = H5Iget_name(group, (char*)buf, sizeof(buf));
+    if(H5Gclose(group) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 8))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[2], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 8))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to datatype in /Group1"); 
+    if((tid1 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[3])) < 0) TEST_ERROR
+    i = H5Iget_name(tid1, (char*)buf, sizeof(buf));
+    if(H5Tclose(tid1) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 18))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[3], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 18))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to dataset in nested group"); 
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[4])) < 0) TEST_ERROR
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 24))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[4], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 24))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to nested group"); 
+    if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[5])) < 0) TEST_ERROR
+    i = H5Iget_name(group, (char*)buf, sizeof(buf));
+    if(H5Gclose(group) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 15))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[5], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 15))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to dataset created via hard link"); 
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[6])) < 0) TEST_ERROR
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 17))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[6], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 17))) TEST_ERROR
+    PASSED()
+
+    HDmemset(buf, 0, sizeof(buf));
+    TESTING("getting path to root group"); 
+    if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[7])) < 0) TEST_ERROR
+    i = H5Iget_name(group, (char*)buf, sizeof(buf));
+    if(H5Gclose(group) < 0) TEST_ERROR
+    if(!((HDstrcmp(buf, "/") == 0) && (i == 2))) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[7], (char*)buf, sizeof(buf));
+    if(!((HDstrcmp(buf, "/") == 0) && (i == 2))) TEST_ERROR
+    PASSED()
+
+    /* Now we mount fid2 at /Group2 and look for dataset4.  It shouldn't be found */
+    if(H5Fmount(fid1, "/Group1/Group2", fid2, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    TESTING("getting path to dataset hidden by a mounted file");
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[4])) < 0) TEST_ERROR
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(i != 0) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[4], (char*)buf, sizeof(buf));
+    if(i != 0) TEST_ERROR
+    PASSED()
+
+    /* Now we try unlinking dataset2 from the file and searching for it.  It shouldn't be found */
+    if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[1])) < 0)
+        TEST_ERROR
+    if(H5Gunlink(fid1, "/Group1/Dataset2") < 0)
+        TEST_ERROR
+ 
+    TESTING("getting path to dataset that has been unlinked"); 
+    i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
+    if(H5Dclose(dataset2) < 0) TEST_ERROR
+    if(i != 0) TEST_ERROR
+    i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char*)buf, sizeof(buf));
+    if(i != 0) TEST_ERROR
+    PASSED()
+    
+    /* Close disk dataspace */
+    if(H5Sclose(sid1) < 0)
+        TEST_ERROR
+    
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+ 
     /* Close file */
-    H5Fclose( file_id );
-    puts("All getname tests passed.");
-    h5_cleanup(FILENAME, fapl);
- }
- else
- {
-     puts("All getname tests skipped - Incompatible with current Virtual File Driver");
- }
- return 0;
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
 
- error:
-  H5Fclose( file_id );
-  H5_FAILED();
-  return 1;
+    return 0;
+
+error:
+    return 1;
+}
+
+static int
+test_reg_ref(hid_t fapl)
+{
+    char filename1[1024];
+    hid_t	file_id;        /* file identifier */
+    hid_t	dsetv_id;       /*dataset identifiers*/
+    hid_t	dsetr_id;      
+    hid_t	space_id, spacer_id;      
+    hsize_t	dims[2] = {2,9};
+    hsize_t	dimsr[1] = {2};
+    int		rank = 2;
+    int		rankr = 1;
+    herr_t	status;
+    hdset_reg_ref_t ref[2];
+    hdset_reg_ref_t ref_out[2];
+    int		data[2][9] = {{1,1,2,3,3,4,5,5,6},{1,2,2,3,4,4,5,6,6}};
+    hsize_t 	start[2];
+    hsize_t 	count[2];
+    hsize_t 	coord[2][3] = {{0, 0, 1}, {6, 0, 8}};
+    unsigned 	num_points = 3;
+    size_t 	name_size1, name_size2;
+    char 	buf1[NAME_BUF_SIZE], buf2[NAME_BUF_SIZE];
+
+    /* Initialize the file name */
+    h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
+
+    /* Create file with default file access and file creation properties */
+    if((file_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	TEST_ERROR
+
+    /* Create dataspace for datasets */
+    if((space_id = H5Screate_simple(rank, dims, NULL)) < 0)
+	TEST_ERROR
+    if((spacer_id = H5Screate_simple(rankr, dimsr, NULL)) < 0)
+	TEST_ERROR
+
+    /* Create integer dataset */
+    if((dsetv_id = H5Dcreate(file_id, REFREG_DSETNAMEV, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+     /* Write data to the dataset */
+    if((status = H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data)) < 0)
+	TEST_ERROR
+    if((status = H5Dclose(dsetv_id)) < 0)
+	TEST_ERROR
+
+    /* Dataset with references */
+    if((dsetr_id = H5Dcreate(file_id, REFREG_DSETNAMER, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+    /*
+     * Create a reference to the hyperslab.
+     */
+    start[0] = 0; 
+    start[1] = 3; 
+    count[0] = 2;
+    count[1] = 3;
+    if((status = H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL)) < 0)
+	TEST_ERROR
+    if((status = H5Rcreate(&ref[0], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id)) < 0)
+	TEST_ERROR
+
+    /* Create a reference to elements selection */
+    if((status = H5Sselect_none(space_id)) < 0)
+	TEST_ERROR
+    if((status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord)) < 0)
+	TEST_ERROR
+    if((status = H5Rcreate(&ref[1], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id)) < 0)
+	TEST_ERROR
+
+    /* Write dataset with the references */
+    if((status = H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref)) < 0)
+	TEST_ERROR
+
+    /* Close all objects */
+    if((status = H5Sclose(space_id)) < 0)
+	TEST_ERROR
+    if((status = H5Sclose(spacer_id)) < 0)
+	TEST_ERROR
+    if((status = H5Dclose(dsetr_id)) < 0)
+	TEST_ERROR
+    if((status = H5Fclose(file_id)) < 0)
+	TEST_ERROR
+
+
+    /* Reopen the file to read selections back */
+    if((file_id = H5Fopen(filename1, H5F_ACC_RDWR,  H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+    /* Reopen the dataset with object references and read references to the buffer */
+    if((dsetr_id = H5Dopen(file_id, REFREG_DSETNAMER)) , 0)
+	TEST_ERROR
+
+    if((status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out)) < 0)
+	TEST_ERROR
+
+    /* Get name of the dataset the first region reference points to using H5Rget_name */
+    TESTING("H5Rget_name to get name from region reference (hyperslab)");
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE);
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR 
+    PASSED()
+
+    TESTING("H5Iget_name to get name from region reference (hyperslab)");
+
+    /* Dereference the first reference */
+    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[0]);
+
+    /* Get name of the dataset the first region reference points using H5Iget_name */
+    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
+    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 8))) TEST_ERROR
+
+    if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
+
+    PASSED()
+
+    /* Get name of the dataset the second region reference points to using H5Rget_name */
+    TESTING("H5Rget_name to get name from region reference (pnt selec)");
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char*)buf1, NAME_BUF_SIZE);      
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR
+    PASSED()
+
+    TESTING("H5Iget_name to get name from region reference (pnt selec)");
+
+    /* Dereference the second reference */
+    if((dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[1])) < 0) TEST_ERROR
+
+    /* Get name of the dataset the first region reference points using H5Iget_name */
+    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
+    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 8))) TEST_ERROR
+
+    if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
+
+    PASSED()
+
+    if((status = H5Dclose(dsetr_id)) < 0)
+	TEST_ERROR
+    if((status = H5Fclose(file_id)) < 0)
+	TEST_ERROR
+     
+    return 0;
+
+error:
+    return 1;
+}
+
+int
+main(void)
+{
+    hid_t   file_id = (-1);
+    const char *envval;
+
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL) 
+        envval = "nomatch";
+    if(HDstrcmp(envval, "split")) {
+        int nerrors = 0;
+        hid_t fapl;
+        char filename0[1024];
+
+        /* Reset the library and get the file access property list */
+        h5_reset();
+        fapl = h5_fileaccess();
+        h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
+
+        /* Create a new file_id using default properties. */
+        if((file_id = H5Fcreate(filename0,H5F_ACC_TRUNC, H5P_DEFAULT, fapl )) < 0) TEST_ERROR
+
+        /* Call "main" test routine */
+	nerrors += test_main(file_id, fapl);
+	nerrors += test_obj_ref(fapl);
+	nerrors += test_reg_ref(fapl);
+
+        /* Close file */
+        H5Fclose(file_id);
+
+	if(nerrors)
+            goto error;
+        puts("All getname tests passed.");
+
+        h5_cleanup(FILENAME, fapl);
+    } /* end if */
+    else
+        puts("All getname tests skipped - Incompatible with current Virtual File Driver");
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    puts("***** GET NAME TESTS FAILED *****");
+
+    return 1;
 }
 
