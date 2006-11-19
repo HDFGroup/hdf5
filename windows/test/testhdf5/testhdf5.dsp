@@ -438,6 +438,21 @@ SOURCE=..\..\..\test\tskiplist.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\test\tsohm.c
+
+!IF  "$(CFG)" == "testhdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\test\ttime.c
 
 !IF  "$(CFG)" == "testhdf5 - Win32 Release"
