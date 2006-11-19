@@ -44,8 +44,8 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5HFdblock, H5HFdtable, H5HFhuge, H5HFhdr, H5HFiblock,"+-
         "H5HFiter, H5HFsection, H5HFspace, H5HFtiny,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
-        "H5MP, H5MPtest,H5L, H5Lexternal, H5O, H5Oattr, H5Obogus, H5Ocache,"+-
-        "H5Ocont, H5Ocopy, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
+        "H5MP, H5MPtest,H5L, H5Lexternal, H5O, H5Oalloc, H5Oattr, H5Obogus, H5Ocache,"+-
+        "H5Ocont, H5Ocopy, H5Odbg, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omtime,"+-
         "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab,"+-
         "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Plapl, "+-

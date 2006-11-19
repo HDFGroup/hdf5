@@ -634,7 +634,6 @@
 ./src/H5SMcache.c
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
-./src/H5SMpublic.h
 ./src/H5ST.c
 ./src/H5STprivate.h
 ./src/H5T.c
