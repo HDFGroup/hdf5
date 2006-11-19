@@ -26,7 +26,6 @@ CFG=h5repack - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "h5repack - Win32 Release"
@@ -42,6 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "../../../tools/h5repack/Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
 # ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
@@ -68,6 +68,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "../../../tools/h5repack/Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE F90 /check:bounds /compile_only /debug:full /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt
 # ADD F90 /browser /check:bounds /compile_only /debug:full /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
@@ -117,10 +118,6 @@ SOURCE=..\..\..\tools\h5repack\h5repack_opttable.c
 # Begin Source File
 
 SOURCE=..\..\..\tools\h5repack\h5repack_parse.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\tools\h5repack\h5repack_refs.c
 # End Source File
 # Begin Source File
 
