@@ -317,8 +317,6 @@ int do_copy_objects(hid_t fidin,
  void     *buf=NULL;      /* buffer for raw data */
  void     *sm_buf=NULL;   /* buffer for raw data */
  unsigned i;
- int      nfilters;       /* number of filters in DCPL */
- H5D_layout_t layout;
 #if defined(H5REPACK_GETTIME)
  time_t start_time, finish_time, time_secs;
 #endif
@@ -376,37 +374,14 @@ int do_copy_objects(hid_t fidin,
  *-------------------------------------------------------------------------
  */
   case H5G_DATASET:
-  
-/*-------------------------------------------------------------------------
- * early check for filters or a non default layout
- *-------------------------------------------------------------------------
- */
-   if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
-    goto error;
-   if ((dcpl_id=H5Dget_create_plist(dset_in))<0)
-     goto error;
-    
-   /* get information about input filters */
-   if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
-    goto error;
-   if ((layout = H5Pget_layout(dcpl_id))<0)
-    goto error;
-
-   if (H5Dclose(dset_in)<0)
-     goto error;
-   if (H5Pclose(dcpl_id)<0)
-     goto error;
    
 /*-------------------------------------------------------------------------
  * check if we should use H5Ocopy or not
- * if the DCPL has filters, we read/write the object
+ * if there is a request for filters/layout, we read/write the object
  * otherwise we do a copy using H5Ocopy
  *-------------------------------------------------------------------------
  */
-   if (nfilters 
-      /* does the dcpl has filters ? */ 
-       ||
-       options->op_tbl->nelems
+   if (options->op_tbl->nelems
        /* do we have input request for filter/chunk ? */ 
        ||
        options->all_filter==1 || options->all_layout==1 
