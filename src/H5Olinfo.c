@@ -449,7 +449,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     H5O_linfo_postcopy_ud_t *udata = (H5O_linfo_postcopy_ud_t *)_udata;     /* 'User data' passed in */
     H5O_link_t dst_lnk;                 /* Destination link to insert */
     hbool_t dst_lnk_init = FALSE;       /* Whether the destination link is initialized */
-    herr_t ret_value = H5B2_ITER_CONT;  /* Return value */
+    herr_t ret_value = H5_ITER_CONT;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_post_copy_file_cb)
 
@@ -460,13 +460,13 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     /* Copy the link (and the object it points to) */
     if(H5G_link_copy_file(udata->dst_oloc->file, udata->dxpl_id, src_lnk,
             udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B2_ITER_ERROR, "unable to copy link")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link")
     dst_lnk_init = TRUE;
 
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
     if(H5G_dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5B2_ITER_ERROR, "unable to insert destination link")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
 
 done:
     /* Check if the destination link has been initialized */

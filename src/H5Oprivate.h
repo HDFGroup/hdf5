@@ -353,14 +353,6 @@ typedef struct H5O_stab_t {
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
 
-/* Define return values from operator callback function for H5O_iterate */
-/* (Actually, any postive value will cause the iterator to stop and pass back
- *      that positive value to the function that called the iterator)
- */
-#define H5O_ITER_ERROR  (-1)
-#define H5O_ITER_CONT   (0)
-#define H5O_ITER_STOP   (1)
-
 /* Typedef for iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);

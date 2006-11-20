@@ -168,6 +168,7 @@ hid_t H5E_TRAVERSE_g       = FAIL;      /* Link traversal failure */
 hid_t H5E_NLINKS_g         = FAIL;      /* Too many soft links in path */
 hid_t H5E_NOTREGISTERED_g  = FAIL;      /* Link class not registered */
 hid_t H5E_CANTMOVE_g       = FAIL;      /* Move callback returned error */
+hid_t H5E_CANTSORT_g       = FAIL;      /* Can't sort objects */
 
 /* Parallel MPI errors */
 hid_t H5E_MPI_g            = FAIL;      /* Some MPI function failed */
@@ -182,6 +183,13 @@ hid_t H5E_CANTNEXT_g       = FAIL;      /* Can't move to next iterator location 
 hid_t H5E_BADSELECT_g      = FAIL;      /* Invalid selection */
 hid_t H5E_CANTCOMPARE_g    = FAIL;      /* Can't compare objects */
 
+/* Argument errors */
+hid_t H5E_UNINITIALIZED_g  = FAIL;      /* Information is uinitialized */
+hid_t H5E_UNSUPPORTED_g    = FAIL;      /* Feature is unsupported */
+hid_t H5E_BADTYPE_g        = FAIL;      /* Inappropriate type */
+hid_t H5E_BADRANGE_g       = FAIL;      /* Out of range */
+hid_t H5E_BADVALUE_g       = FAIL;      /* Bad value */
+
 /* B-tree related errors */
 hid_t H5E_NOTFOUND_g       = FAIL;      /* Object not found */
 hid_t H5E_EXISTS_g         = FAIL;      /* Object already exists */
@@ -194,13 +202,6 @@ hid_t H5E_CANTINSERT_g     = FAIL;      /* Unable to insert object */
 hid_t H5E_CANTLIST_g       = FAIL;      /* Unable to list node */
 hid_t H5E_CANTMODIFY_g     = FAIL;      /* Unable to modify record */
 hid_t H5E_CANTREMOVE_g     = FAIL;      /* Unable to remove object */
-
-/* Argument errors */
-hid_t H5E_UNINITIALIZED_g  = FAIL;      /* Information is uinitialized */
-hid_t H5E_UNSUPPORTED_g    = FAIL;      /* Feature is unsupported */
-hid_t H5E_BADTYPE_g        = FAIL;      /* Inappropriate type */
-hid_t H5E_BADRANGE_g       = FAIL;      /* Out of range */
-hid_t H5E_BADVALUE_g       = FAIL;      /* Bad value */
 
 /* Datatype conversion errors */
 hid_t H5E_CANTCONVERT_g    = FAIL;      /* Can't convert datatypes */

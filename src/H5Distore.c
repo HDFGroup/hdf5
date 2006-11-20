@@ -888,7 +888,7 @@ H5D_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_l
 
     udata->total_storage += lt_key->nbytes;
 
-    FUNC_LEAVE_NOAPI(H5B_ITER_CONT)
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D_istore_iter_allocated() */
 
 /*-------------------------------------------------------------------------
@@ -914,7 +914,7 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
     const H5D_istore_key_t	*lt_key = (const H5D_istore_key_t *)_lt_key;
     unsigned       rank;
     hsize_t        chunk_index;
-    int            ret_value = H5B_ITER_CONT;     /* Return value */
+    int            ret_value = H5_ITER_CONT;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_chunkmap);
 
@@ -970,7 +970,7 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
         HDfputs("]\n", udata->stream);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(H5B_ITER_CONT)
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D_istore_iter_dump() */
 
 
@@ -1009,7 +1009,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     size_t                  nbytes = lt_key->nbytes;
     H5Z_cb_t                cb_struct;
 
-    int                     ret_value = H5B_ITER_CONT; /* Return value */
+    int                     ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy)
 
@@ -1033,10 +1033,10 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     if(nbytes > buf_size) {
         /* Re-allocate memory for copying the chunk */
         if(NULL == (udata->buf = H5MM_realloc(udata->buf, nbytes)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed for raw data chunk")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
         if(udata->bkg) {
             if(NULL == (udata->bkg = H5MM_realloc(udata->bkg, nbytes)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed for raw data chunk")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
             if(!udata->cpy_info->expand_ref)
                 HDmemset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
 
@@ -1049,14 +1049,14 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
     /* read chunk data from the source file */
     if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, nbytes, dxpl_id, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, H5B_ITER_ERROR, "unable to read raw data chunk")
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
 
     /* Need to uncompress variable-length & reference data elements */
     if(is_compressed && (is_vlen || fix_ref)) {
         unsigned filter_mask = lt_key->filter_mask;
 
         if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &nbytes, &buf_size, &buf) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5B_ITER_ERROR, "data pipeline read failed")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
     /* Perform datatype conversion, if necessary */
@@ -1073,7 +1073,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
         /* Convert from source file to memory */
         if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "datatype conversion failed")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Copy into another buffer, to reclaim memory later */
         HDmemcpy(reclaim_buf, buf, reclaim_buf_size);
@@ -1083,11 +1083,11 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
         /* Convert from memory to destination file */
         if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5B_ITER_ERROR, "datatype conversion failed")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Reclaim space from variable length data */
         if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5B_ITER_ERROR, "unable to reclaim variable-length data")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5_ITER_ERROR, "unable to reclaim variable-length data")
     } /* end if */
     else if(fix_ref) {
         /* Check for expanding references */
@@ -1116,7 +1116,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     if(is_compressed && (is_vlen || fix_ref) ) {
         if(H5Z_pipeline(pline, 0, &(udata_dst.common.key.filter_mask), edc_read,
                 cb_struct, &nbytes, &buf_size, &buf) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5B_ITER_ERROR, "output pipeline failed")
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
         udata_dst.common.key.nbytes = nbytes;
 	udata->buf = buf;
 	udata->buf_size = buf_size;
@@ -1124,12 +1124,12 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
     /* Insert chunk into the destination Btree */
     if(H5B_insert(udata->file_dst, dxpl_id, H5B_ISTORE, udata->addr_dst, &udata_dst) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5B_ITER_ERROR, "unable to allocate chunk")
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5_ITER_ERROR, "unable to allocate chunk")
 
     /* Write chunk data to destination file */
     HDassert(H5F_addr_defined(udata_dst.addr));
     if(H5F_block_write(udata->file_dst, H5FD_MEM_DRAW, udata_dst.addr, nbytes, dxpl_id, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5B_ITER_ERROR, "unable to write raw data to file")
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3119,7 +3119,7 @@ H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UN
     H5D_istore_it_ud3_t       *udata = (H5D_istore_it_ud3_t *)_udata;
     const H5D_istore_key_t       *lt_key = (const H5D_istore_key_t *)_lt_key;
     unsigned                u;
-    int                     ret_value = H5B_ITER_CONT;       /* Return value */
+    int                     ret_value = H5_ITER_CONT;       /* Return value */
 
     /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of
      * storage that contains the beginning of the logical address space represented by UDATA.
@@ -3138,7 +3138,7 @@ H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UN
 
             /* Remove */
             if(H5B_remove(f, dxpl_id, H5B_ISTORE, udata->common.mesg->u.chunk.addr, &bt_udata) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to remove entry")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5_ITER_ERROR, "unable to remove entry")
 	    break;
 	} /* end if */
 

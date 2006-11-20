@@ -104,14 +104,12 @@ H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
 H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
 H5_DLL hid_t H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id);
-H5_DLL herr_t H5Gclose(hid_t group_id);
-H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
-        H5G_iterate_t op, void *op_data);
 H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
+H5_DLL herr_t H5Gclose(hid_t group_id);
 
 /* Functions and variables defined for compatibility with previous versions
  * of the HDF5 API.
@@ -134,6 +132,8 @@ H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
 H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
 H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
     char *buf);
+H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
+        H5G_iterate_t op, void *op_data);
 
 #ifdef __cplusplus
 }

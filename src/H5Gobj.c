@@ -324,7 +324,7 @@ H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned UNUSED idx, void *_udata
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_obj_oh_it_ud1_t *udata = (H5G_obj_oh_it_ud1_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5O_ITER_CONT;   /* Return value */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_obj_compact_to_dense_cb)
 
@@ -359,7 +359,7 @@ static herr_t
 H5G_obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_obj_stab_it_ud1_t *udata = (H5G_obj_stab_it_ud1_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5B_ITER_CONT;   /* Return value */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_obj_stab_to_new_cb)
 
@@ -370,7 +370,7 @@ H5G_obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
     /* Insert link into group */
     /* (Casting away const OK - QAK) */
     if(H5G_obj_insert(udata->grp_oloc, lnk->name, (H5O_link_t *)lnk, FALSE, udata->dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_ITER_ERROR, "can't insert link into group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert link into group")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

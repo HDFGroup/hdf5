@@ -36,14 +36,6 @@
 /* Library Private Macros */
 /**************************/
 
-/* Define return values from operator callback function for H5B2_iterate */
-/* (Actually, any positive value will cause the iterator to stop and pass back
- *      that positive value to the function that called the iterator)
- */
-#define H5B2_ITER_ERROR  (-1)
-#define H5B2_ITER_CONT   (0)
-#define H5B2_ITER_STOP   (1)
-
 
 /****************************/
 /* Library Private Typedefs */

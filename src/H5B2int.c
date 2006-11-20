@@ -2121,7 +2121,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     uint8_t *native = NULL;             /* Pointers to copy of node's native records */
     H5B2_node_ptr_t *node_ptrs = NULL;  /* Pointers to node's node pointers */
     unsigned u;                         /* Local index */
-    herr_t ret_value = H5B2_ITER_CONT;  /* Iterator return value */
+    herr_t ret_value = H5_ITER_CONT;  /* Iterator return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_iterate_node)
 

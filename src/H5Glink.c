@@ -217,7 +217,7 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  */
 herr_t
 H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
-    const H5G_entry_t *ent, const char *name)
+    H5HL_t *_heap, const H5G_entry_t *ent, const char *name)
 {
     herr_t     ret_value = SUCCEED;       /* Return value */
 
@@ -226,31 +226,39 @@ H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     /* check arguments */
     HDassert(f);
     HDassert(lnk);
+    HDassert(H5F_addr_defined(lheap_addr) || _heap);
+    HDassert(!(H5F_addr_defined(lheap_addr) && _heap));
     HDassert(ent);
+    HDassert(name);
 
     /* Set (default) common info for link */
     lnk->cset = H5F_DEFAULT_CSET;
     lnk->corder = 0;
     lnk->corder_valid = FALSE;       /* Creation order not valid for this link */
     lnk->name = H5MM_xstrdup(name);
+    HDassert(lnk->name);
 
     /* Object is a symbolic or hard link */
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
-        H5HL_t *heap;           /* Pointer to local heap for group */
+        H5HL_t *heap = _heap;   /* Pointer to local heap for group */
 
-        /* Lock the local heap */
-        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
+        /* Check if the heap pointer was passed in */
+        if(!heap) {
+            /* Lock the local heap */
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
+        } /* end if */
 
         s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
 
         /* Copy the link value */
         lnk->u.soft.name = H5MM_xstrdup(s);
 
-        /* Release the local heap */
-        if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
+        /* Release the local heap, if we locked it */
+        if(heap != _heap)
+            if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
         /* Set link type */
         lnk->type = H5L_TYPE_SOFT;
@@ -330,7 +338,7 @@ H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_ent_to_link() */
+} /* end H5G_ent_to_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -445,7 +453,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
 
         /* Make a temporary copy, so that it will not change the info in the cache */
         if(NULL == H5O_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B2_ITER_ERROR, "unable to copy message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy message")
 
         /* Set up group location for soft link to start in */
         H5G_name_reset(&grp_path);
@@ -478,7 +486,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
 
     /* Copy src link information to dst link information */
     if(NULL == H5O_copy(H5O_LINK_ID, src_lnk, dst_lnk))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B2_ITER_ERROR, "unable to copy message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy message")
     dst_lnk_init = TRUE;
 
     /* Check if object in source group is a hard link & copy it */
@@ -498,7 +506,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
 
         /* Copy the shared object from source to destination */
         if(H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, dxpl_id, cpy_info, TRUE) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5B2_ITER_ERROR, "unable to copy object")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy object")
 
         /* Copy new destination object's information for eventual insertion */
         dst_lnk->u.hard.addr = new_dst_oloc.addr;
@@ -516,6 +524,124 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_sort_table
+ *
+ * Purpose:     Sort table containing a list of links for a group
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_sort_table(H5G_link_table_t *ltable, H5L_index_t idx_type,
+    H5_iter_order_t order)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_sort_table)
+
+    /* Sanity check */
+    HDassert(ltable);
+
+    /* Pick appropriate sorting routine */
+    if(idx_type == H5L_INDEX_NAME) {
+        if(order == H5_ITER_INC)
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
+        else if(order == H5_ITER_DEC)
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
+        else
+            HDassert(order == H5_ITER_NATIVE);
+    } /* end if */
+    else {
+        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+        if(order == H5_ITER_INC)
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
+        else if(order == H5_ITER_DEC)
+            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
+        else
+            HDassert(order == H5_ITER_NATIVE);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_link_sort_table() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_iterate_table
+ *
+ * Purpose:     Iterate over table containing a list of links for a group,
+ *              making appropriate callbacks
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Nov 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
+    hsize_t *last_lnk, hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
+{
+    size_t u;                           /* Local index variable */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_link_iterate_table, FAIL)
+
+    /* Sanity check */
+    HDassert(ltable);
+    HDassert(lnk_op);
+
+    /* Skip over links, if requested */
+    if(last_lnk)
+        *last_lnk += skip;
+
+    /* Iterate over link messages */
+    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
+    for(; u < ltable->nlinks && !ret_value; u++) {
+        /* Check which kind of callback to make */
+        switch(lnk_op->op_type) {
+            case H5G_LINK_OP_OLD:
+                /* Make the old-type application callback */
+                ret_value = (lnk_op->u.old_op)(gid, ltable->lnks[u].name, op_data);
+                break;
+
+            case H5G_LINK_OP_APP:
+                {
+                    H5L_info_t info;    /* Link info */
+
+                    /* Retrieve the info for the link */
+                    if(H5G_link_to_info(&(ltable->lnks[u]), &info) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link")
+
+                    /* Make the application callback */
+                    ret_value = (lnk_op->u.app_op)(gid, ltable->lnks[u].name, &info, op_data);
+                }
+                break;
+
+            case H5G_LINK_OP_LIB:
+                /* Call the library's callback */
+                ret_value = (lnk_op->u.lib_op)(&(ltable->lnks[u]), op_data);
+        } /* end switch */
+
+        /* Increment the number of entries passed through */
+        if(last_lnk)
+            (*last_lnk)++;
+    } /* end for */
+
+    /* Check for callback failure and pass along return value */
+    if(ret_value < 0)
+        HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_link_iterate_table() */
 
 
 /*-------------------------------------------------------------------------

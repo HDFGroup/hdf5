@@ -53,14 +53,6 @@
 #define H5B_MAGIC	"TREE"		/*tree node magic number	     */
 #define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
 
-/* Define return values from operator callback function for H5B_iterate */
-/* (Actually, any postive value will cause the iterator to stop and pass back
- *      that positive value to the function that called the iterator)
- */
-#define H5B_ITER_ERROR  (-1)
-#define H5B_ITER_CONT   (0)
-#define H5B_ITER_STOP   (1)
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/

@@ -219,7 +219,7 @@ MINOR, LINK, H5E_TRAVERSE, Link traversal failure
 MINOR, LINK, H5E_NLINKS, Too many soft links in path
 MINOR, LINK, H5E_NOTREGISTERED, Link class not registered
 MINOR, LINK, H5E_CANTMOVE, Move callback returned error
-
+MINOR, LINK, H5E_CANTSORT, Can't sort objects
 
 # Parallel MPI errors
 MINOR, MPI, H5E_MPI, Some MPI function failed

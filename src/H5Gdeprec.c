@@ -675,3 +675,74 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_comment() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Giterate
+ *
+ * Purpose:	Iterates over the entries of a group.  The LOC_ID and NAME
+ *		identify the group over which to iterate and IDX indicates
+ *		where to start iterating (zero means at the beginning).	 The
+ *		OPERATOR is called for each member and the iteration
+ *		continues until the operator returns non-zero or all members
+ *		are processed. The operator is passed a group ID for the
+ *		group being iterated, a member name, and OP_DATA for each
+ *		member.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, March 23, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
+    void *op_data)
+{
+    H5G_link_iterate_t lnk_op;          /* Link operator */
+    hsize_t     last_obj;               /* Index of last object looked at */
+    hsize_t	idx;                    /* Internal location to hold index */
+    herr_t	ret_value;
+
+    FUNC_ENTER_API(H5Giterate, FAIL)
+    H5TRACE5("e","is*Isxx",loc_id,name,idx_p,op,op_data);
+
+    /* Check args */
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_p && *idx_p < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    if(!op)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+
+    /* Set number of objects looked at to zero */
+    last_obj = 0;
+    idx = (hsize_t)(idx_p == NULL ? 0 : *idx_p);
+
+    /* Build link operator info */
+    lnk_op.op_type = H5G_LINK_OP_OLD;
+    lnk_op.u.old_op = op;
+
+    /* Call private function. */
+    if((ret_value = H5G_obj_iterate(loc_id, name, H5L_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
+
+    /* Check for too high of a starting index (ex post facto :-) */
+    /* (Skipping exactly as many entries as are in the group is currently an error) */
+    if(idx > 0 && idx >= last_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+
+    /* Set the index we stopped at */
+    if(idx_p)
+        *idx_p = (int)last_obj;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Giterate() */
+

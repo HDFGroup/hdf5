@@ -2430,7 +2430,7 @@ H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 {
     H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
-    herr_t ret_value = H5O_ITER_CONT;   /* Return value */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_remove_cb)
 
@@ -2441,12 +2441,12 @@ H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     if(udata->op) {
         /* Call the iterator callback */
         if((try_remove = (udata->op)(mesg->native, sequence, udata->op_data)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "object header message deletion callback failed")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "object header message deletion callback failed")
     } /* end if */
     else {
         /* If there's no callback routine, does the sequence # match? */
         if((int)sequence == udata->sequence || H5O_ALL == udata->sequence)
-            try_remove = H5O_ITER_STOP;
+            try_remove = H5_ITER_STOP;
     } /* end else */
 
     /* Try removing the message, if indicated */
@@ -2460,7 +2460,7 @@ H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         else {
             /* Convert message into a null message */
             if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "unable to convert into null message")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
             /* Indicate that the object header was modified */
             *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
@@ -2468,7 +2468,7 @@ H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
         /* Break out now, if we've found the correct message */
         if(udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
-            HGOTO_DONE(H5O_ITER_STOP)
+            HGOTO_DONE(H5_ITER_STOP)
     } /* end if */
 
 done:
@@ -3209,7 +3209,7 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
-    herr_t              ret_value = H5O_ITER_CONT;      /* Return value */
+    herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_iterate_real)
 

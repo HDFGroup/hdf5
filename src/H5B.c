@@ -1244,10 +1244,10 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	     * Perform the iteration operator, which might invoke an
 	     * application callback.
 	     */
-	    for (u=0, ret_value=H5B_ITER_CONT; u<nchildren && !ret_value; u++) {
-		ret_value = (*op)(f, dxpl_id, key+u*type->sizeof_nkey,
-                         child[u], key+(u+1)*type->sizeof_nkey, udata);
-		if (ret_value<0)
+	    for(u = 0, ret_value = H5_ITER_CONT; u < nchildren && !ret_value; u++) {
+		ret_value = (*op)(f, dxpl_id, key + (u * type->sizeof_nkey),
+                         child[u], key + ((u + 1) * type->sizeof_nkey), udata);
+		if(ret_value < 0)
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed")
 	    } /* end for */
 	} /* end for */

@@ -487,7 +487,7 @@ H5G_dense_lookup_cb(const void *_lnk, void *_user_lnk)
     if(user_lnk) {
         /* Copy link information */
         if(H5O_copy(H5O_LINK_ID, lnk, user_lnk) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
     } /* end if */
 
 done:
@@ -582,7 +582,7 @@ H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
 
     /* Copy link information */
     if(NULL == H5O_copy(H5O_LINK_ID, tmp_lnk, udata->lnk))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:
     if(tmp_lnk)
@@ -597,7 +597,7 @@ done:
  *
  * Purpose:	v2 B-tree callback for dense link storage lookup by index
  *
- * Return:	H5B2_ITER_ERROR/H5B2_ITER_CONT/H5B2_ITER_STOP
+ * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -611,7 +611,7 @@ H5G_dense_lookup_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
     H5G_bt2_ud_lbi_t *bt2_udata = (H5G_bt2_ud_lbi_t *)_bt2_udata;         /* User data for callback */
     H5G_fh_ud_lbi_t fh_udata;          /* User data for fractal heap 'op' callback */
-    int ret_value = H5B2_ITER_CONT;     /* Return value */
+    int ret_value = H5_ITER_CONT;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_bt2_cb)
 
@@ -624,7 +624,7 @@ H5G_dense_lookup_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     /* Call fractal heap 'op' routine, to copy the link information */
     if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, record->id,
             H5G_dense_lookup_by_idx_fh_cb, &fh_udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5B2_ITER_ERROR, "link found callback failed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5_ITER_ERROR, "link found callback failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -718,7 +718,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
         /* Copy link information */
         if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
     } /* end else */
 
 done:
@@ -751,7 +751,7 @@ static herr_t
 H5G_dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_dense_bt_ud_t *udata = (H5G_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5B2_ITER_CONT;   /* Return value */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_build_table_cb)
 
@@ -762,7 +762,7 @@ H5G_dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Copy link information */
     if(H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5B2_ITER_ERROR, "can't copy link message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
     /* Increment number of links stored */
     udata->curr_lnk++;
@@ -828,23 +828,8 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
         /* Sort link table in correct iteration order */
-        if(idx_type == H5L_INDEX_NAME) {
-            if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
-            else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
-            else
-                HDassert(order == H5_ITER_NATIVE);
-        } /* end if */
-        else {
-            HDassert(idx_type == H5L_INDEX_CRT_ORDER);
-            if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
-            else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
-            else
-                HDassert(order == H5_ITER_NATIVE);
-        } /* end else */
+        if(H5G_link_sort_table(ltable, idx_type, order) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages")
     } /* end if */
     else
         ltable->lnks = NULL;
@@ -896,7 +881,7 @@ done:
  *
  * Purpose:	v2 B-tree callback for dense link storage iterator
  *
- * Return:	H5B2_ITER_ERROR/H5B2_ITER_CONT/H5B2_ITER_STOP
+ * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -909,7 +894,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
     H5G_bt2_ud_it_t *bt2_udata = (H5G_bt2_ud_it_t *)_bt2_udata;         /* User data for callback */
-    int ret_value = H5B2_ITER_CONT;         /* Return value */
+    int ret_value = H5_ITER_CONT;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_iterate_bt2_cb)
 
@@ -927,7 +912,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
         /* Call fractal heap 'op' routine, to copy the link information */
         if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, record->id,
                 H5G_dense_iterate_fh_cb, &fh_udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5B2_ITER_ERROR, "link found callback failed")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5_ITER_ERROR, "link found callback failed")
 
         /* Check which type of callback to make */
         switch(bt2_udata->lnk_op->op_type) {
@@ -942,7 +927,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
                     /* Retrieve the info for the link */
                     if(H5G_link_to_info(fh_udata.lnk, &info) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link")
 
                     /* Make the application callback */
                     ret_value = (bt2_udata->lnk_op->u.app_op)(bt2_udata->gid, fh_udata.lnk->name, &info, bt2_udata->op_data);
@@ -990,10 +975,10 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
-    H5G_bt2_ud_it_t udata;             /* User data for iterator callback */
+    H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};      /* Table of links */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_dense_iterate, FAIL)
 
@@ -1028,51 +1013,12 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HERROR(H5E_SYM, H5E_BADITER, "link iteration failed");
     } /* end if */
     else {
-        size_t u;                       /* Local index variable */
-
         /* Build the table of links for this group */
         if(H5G_dense_build_table(f, dxpl_id, linfo, idx_type, order, &ltable) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "error building table of links")
 
-        /* Iterate over link messages */
-        for(u = 0, ret_value = H5B_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {
-            if(skip > 0)
-                --skip;
-            else {
-                /* Check which kind of callback to make */
-                switch(lnk_op->op_type) {
-                    case H5G_LINK_OP_OLD:
-                        /* Make the old-type application callback */
-                        ret_value = (lnk_op->u.old_op)(gid, ltable.lnks[u].name, op_data);
-                        break;
-
-                    case H5G_LINK_OP_APP:
-                        {
-                            H5L_info_t info;    /* Link info */
-
-                            /* Retrieve the info for the link */
-                            if(H5G_link_to_info(&(ltable.lnks[u]), &info) < 0)
-                                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
-
-                            /* Make the application callback */
-                            ret_value = (lnk_op->u.app_op)(gid, ltable.lnks[u].name, &info, op_data);
-                        }
-                        break;
-
-                    case H5G_LINK_OP_LIB:
-                        /* Call the library's callback */
-                        ret_value = (lnk_op->u.lib_op)(&(ltable.lnks[u]), op_data);
-                } /* end switch */
-            } /* end else */
-
-            /* Increment the number of entries passed through */
-            /* (whether we skipped them or not) */
-            if(last_lnk)
-                (*last_lnk)++;
-        } /* end for */
-
-        /* Check for callback failure and pass along return value */
-        if(ret_value < 0)
+        /* Iterate over links in table */
+        if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
     } /* end else */
 
@@ -1381,7 +1327,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
 
     /* Decode link information */
     if(NULL == (lnk = H5O_decode(udata->f, udata->dxpl_id, obj, H5O_LINK_ID)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5B2_ITER_ERROR, "can't decode link")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5_ITER_ERROR, "can't decode link")
 
     /* Check for removing the link from the creation order index */
     if(udata->rem_from_corder_index) {
@@ -1395,7 +1341,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         HDassert(H5F_addr_defined(udata->corder_bt2_addr));
         if(H5B2_remove(udata->f, udata->dxpl_id, H5G_BT2_CORDER, udata->corder_bt2_addr,
                 &bt2_udata, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5B2_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
     /* Replace open objects' names, if requested */
@@ -1550,7 +1496,7 @@ H5G_dense_remove_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
 
     /* Decode link information */
     if(NULL == (udata->lnk = H5O_decode(udata->f, udata->dxpl_id, obj, H5O_LINK_ID)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5B2_ITER_ERROR, "can't decode link")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5_ITER_ERROR, "can't decode link")
 
     /* Can't operate on link here because the fractal heap block is locked */
 
@@ -1643,7 +1589,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Remove the record from the name index v2 B-tree */
         if(H5B2_remove(bt2_udata->f, bt2_udata->dxpl_id, other_bt2_class, bt2_udata->other_bt2_addr,
                 &other_bt2_udata, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5B2_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
     /* Replace open objects' names */

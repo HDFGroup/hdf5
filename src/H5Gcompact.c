@@ -86,7 +86,7 @@ H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_bt_t *udata = (H5G_iter_bt_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value=H5O_ITER_CONT;             /* Return value */
+    herr_t ret_value=H5_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_build_table_cb)
 
@@ -97,7 +97,7 @@ H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 
     /* Copy link message into table */
     if(NULL == H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
     /* Increment current link entry to operate on */
     udata->curr_lnk++;
@@ -142,6 +142,7 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
     if(ltable->nlinks > 0) {
         H5G_iter_bt_t udata;               /* User data for iteration callback */
 
+        /* Allocate the link table */
         if((ltable->lnks = H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -154,23 +155,8 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
         /* Sort link table in correct iteration order */
-        if(idx_type == H5L_INDEX_NAME) {
-            if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
-            else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
-            else
-                HDassert(order == H5_ITER_NATIVE);
-        } /* end if */
-        else {
-            HDassert(idx_type == H5L_INDEX_CRT_ORDER);
-            if(order == H5_ITER_INC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
-            else if(order == H5_ITER_DEC)
-                HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
-            else
-                HDassert(order == H5_ITER_NATIVE);
-        } /* end else */
+        if(H5G_link_sort_table(ltable, idx_type, order) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages")
     } /* end if */
     else
         ltable->lnks = NULL;
@@ -349,7 +335,7 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udat
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5O_ITER_CONT;           /* Return value */
+    herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_remove_common_cb)
 
@@ -361,10 +347,10 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udat
     if(HDstrcmp(lnk->name, udata->name) == 0) {
         /* Determine the object's type */
         if(H5G_link_name_replace(udata->file, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5O_ITER_ERROR, "unable to get object type")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object type")
 
         /* Stop the iteration, we found the correct link */
-        HGOTO_DONE(H5O_ITER_STOP)
+        HGOTO_DONE(H5_ITER_STOP)
     } /* end if */
 
 done:
@@ -478,12 +464,11 @@ done:
  */
 herr_t
 H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_obj,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
-    size_t              u;                      /* Local index variable */
-    herr_t		ret_value;
+    herr_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_iterate, FAIL)
 
@@ -496,44 +481,8 @@ H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     if(H5G_compact_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
-    /* Iterate over link messages */
-    for(u = 0, ret_value = H5O_ITER_CONT; u < ltable.nlinks && !ret_value; u++) {
-        if(skip > 0)
-            --skip;
-        else {
-            /* Check which kind of callback to make */
-            switch(lnk_op->op_type) {
-                case H5G_LINK_OP_OLD:
-                    /* Make the old-type application callback */
-                    ret_value = (lnk_op->u.old_op)(gid, ltable.lnks[u].name, op_data);
-                    break;
-
-                case H5G_LINK_OP_APP:
-                    {
-                        H5L_info_t info;    /* Link info */
-
-                        /* Retrieve the info for the link */
-                        if(H5G_link_to_info(&(ltable.lnks[u]), &info) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B2_ITER_ERROR, "unable to get info for link")
-
-                        /* Make the application callback */
-                        ret_value = (lnk_op->u.app_op)(gid, ltable.lnks[u].name, &info, op_data);
-                    }
-                    break;
-
-                case H5G_LINK_OP_LIB:
-                    /* Call the library's callback */
-                    ret_value = (lnk_op->u.lib_op)(&(ltable.lnks[u]), op_data);
-            } /* end switch */
-        } /* end else */
-
-        /* Increment the number of entries passed through */
-        /* (whether we skipped them or not) */
-        (*last_obj)++;
-    } /* end for */
-
-    /* Check for callback failure and pass along return value */
-    if(ret_value < 0)
+    /* Iterate over links in table */
+    if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
         HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
@@ -564,7 +513,7 @@ H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_lkp_t *udata = (H5G_iter_lkp_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5O_ITER_CONT;           /* Return value */
+    herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_compact_lookup_cb)
 
@@ -577,14 +526,14 @@ H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
         if(udata->lnk) {
             /* Copy link information */
             if(NULL == H5O_copy(H5O_LINK_ID, lnk, udata->lnk))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
         } /* end if */
 
         /* Indicate that the correct link was found */
         udata->found = TRUE;
 
         /* Stop iteration now */
-        HGOTO_DONE(H5O_ITER_STOP)
+        HGOTO_DONE(H5_ITER_STOP)
     } /* end if */
 
 done:
@@ -674,7 +623,7 @@ H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
 
     /* Copy link information */
     if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5O_ITER_ERROR, "can't copy link message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:
     /* Release link table */

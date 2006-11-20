@@ -63,10 +63,10 @@ iter_cb(const void *_record, void *_op_data)
     hsize_t *idx = (hsize_t *)_op_data;
 
     if(*record != *idx)
-        return(H5B2_ITER_ERROR);
+        return(H5_ITER_ERROR);
 
     (*idx)++;
-    return(H5B2_ITER_CONT);
+    return(H5_ITER_CONT);
 } /* end iter_cb() */
 
 
