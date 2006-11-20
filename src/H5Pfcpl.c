@@ -161,8 +161,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned        num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
     unsigned        sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
     unsigned        sohm_index_minsizes[H5SM_MAX_NUM_INDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
-    size_t         sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
-    size_t         sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
+    unsigned         sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
+    unsigned         sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)

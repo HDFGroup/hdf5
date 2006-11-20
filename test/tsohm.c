@@ -78,9 +78,9 @@ static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
 
     /* Check list-to-btree and btree-to-list values */
     ret = H5Pget_shared_mesg_phase_change(fcpl_id, &list_size, &btree_size);
-    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
-    VERIFY(list_size, l2b, "H5Pset_shared_mesg_phase_change");
-    VERIFY(btree_size, b2l, "H5Pset_shared_mesg_phase_change");
+    CHECK_I(ret, "H5Pget_shared_mesg_phase_change");
+    VERIFY(list_size, l2b, "H5Pget_shared_mesg_phase_change");
+    VERIFY(btree_size, b2l, "H5Pget_shared_mesg_phase_change");
 }
 
 
