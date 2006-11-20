@@ -611,6 +611,19 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
         if(skip > 0 && (size_t)skip >= linfo.nlinks)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
+        /* Check for creation order tracking, if creation order index lookup requested */
+        if(idx_type == H5L_INDEX_CRT_ORDER) {
+            H5O_ginfo_t ginfo;		        /* Group info message */
+
+            /* Get group info message, to see if creation order is tracked for links in this group */
+            if(NULL == H5O_read(&(grp->oloc), H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
+
+            /* Check if creation order is tracked */
+            if(!ginfo.track_corder)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
+        } /* end if */
+
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Iterate over the links in the group, building a table of the link messages */
             if((ret_value = H5G_dense_iterate(grp->oloc.file, dxpl_id, &linfo, idx_type, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
@@ -625,6 +638,10 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
     else {
         /* Clear error stack from not finding the link info message */
         H5E_clear_stack(NULL);
+
+        /* Can only perform name lookups on groups with symbol tables */
+        if(idx_type != H5L_INDEX_NAME)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Iterate over symbol table */
         if((ret_value = H5G_stab_iterate(&(grp->oloc), dxpl_id, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)

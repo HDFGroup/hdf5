@@ -585,8 +585,9 @@ H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:
+    /* Release the space allocated for the link */
     if(tmp_lnk)
-        H5O_reset(H5O_LINK_ID, tmp_lnk);
+        H5O_free(H5O_LINK_ID, tmp_lnk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_lookup_by_idx_fh_cb() */

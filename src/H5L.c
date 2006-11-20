@@ -1160,7 +1160,6 @@ H5Literate(hid_t loc_id, const char *group_name,
     if((ret_value = H5G_obj_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
-
     /* Set the index we stopped at */
     if(idx_p)
         *idx_p = last_lnk;

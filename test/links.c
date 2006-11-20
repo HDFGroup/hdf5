@@ -74,8 +74,20 @@ const char *FILENAME[] = {
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
-#define CORDER_NLINKS               17
+#define CORDER_NLINKS               18
+#define CORDER_ITER_STOP            3
 #define CORDER_EST_ENTRY_LEN        9
+
+/* Link iteration struct */
+typedef struct {
+    H5_iter_order_t order;      /* Direction of iteration */
+    unsigned ncalled;           /* # of times callback is entered */
+    unsigned nskipped;          /* # of links skipped */
+    int stop;                   /* # of iterations to stop after */
+    int64_t curr;               /* Current creation order value */
+    size_t max_visit;           /* Size of "visited link" flag array */
+    hbool_t *visited;           /* Pointer to array of "visited link" flags */
+} link_iter_info_t;
 
 #ifndef QAK
 
@@ -2654,13 +2666,13 @@ external_link_query(hid_t fapl, hbool_t new_format)
       if(H5Lunpack_elink_val(query_buf, li.u.val_size - 1, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(query_buf, 0, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(query_buf, (size_t)0, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(NULL, 0, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(NULL, (size_t)0, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(NULL, 1000, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(NULL, (size_t)1000, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
 
     PASSED();
@@ -6983,17 +6995,275 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t * info,
-    void *op_data)
+link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *info,
+    void *_op_data)
 {
+    link_iter_info_t *op_data = (link_iter_info_t *)_op_data;   /* User data */
+    char objname[NAME_BUF_SIZE]; /* Object name */
+    H5L_info_t my_info;         /* Local link info */
+
+#ifdef QAK
+HDfprintf(stderr, "link_name = '%s'\n", link_name);
+if(info)
+    HDfprintf(stderr, "info->corder = %Hd\n", info->corder);
+HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
+#endif /* QAK */
+
+    /* Increment # of times the callback was called */
+    op_data->ncalled++;
+
+    /* Get the link information directly to compare */
+    if(H5Lget_info(group_id, link_name, &my_info, H5P_DEFAULT) < 0) 
+        return(H5_ITER_ERROR);
+
+    /* Check more things for link iteration (vs. group iteration) */
+    if(info) {
+        /* Check for correct order of iteration */
+        /* (if we are operating in increasing or decreasing order) */
+        if(op_data->order != H5_ITER_NATIVE)
+            if(info->corder != op_data->curr)
+                return(H5_ITER_ERROR);
+
+        /* Compare link info structs */
+        if(info->type != my_info.type)
+            return(H5_ITER_ERROR);
+        if(info->corder_valid != my_info.corder_valid)
+            return(H5_ITER_ERROR);
+        if(info->corder != my_info.corder)
+            return(H5_ITER_ERROR);
+        if(info->cset != my_info.cset)
+            return(H5_ITER_ERROR);
+        if(H5F_addr_ne(info->u.address, my_info.u.address))
+            return(H5_ITER_ERROR);
+    } /* end if */
+
+    /* Verify name of link */
+    sprintf(objname, "filler %02u", (unsigned)my_info.corder);
+    if(HDstrcmp(link_name, objname))
+        return(H5_ITER_ERROR);
+
+    /* Check if we've visited this link before */
+    if((size_t)op_data->curr >= op_data->max_visit)
+        return(H5_ITER_ERROR);
+    if(op_data->visited[op_data->curr])
+        return(H5_ITER_ERROR);
+    op_data->visited[op_data->curr] = TRUE;
+
+    /* Advance to next value, in correct direction */
+    if(op_data->order != H5_ITER_DEC)
+        op_data->curr++;
+    else
+        op_data->curr--;
+
+    /* Check for stopping in the middle of iterating */
+    if(op_data->stop > 0)
+        if(--op_data->stop == 0)
+            return(CORDER_ITER_STOP);
+
     return(H5_ITER_CONT);
 } /* end link_iterate_cb() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:    group_iterate_cb
+ *
+ * Purpose:     Callback routine for iterating over links in group with
+ *              H5Giterate()
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+group_iterate_cb(hid_t group_id, const char *link_name, void *_op_data)
+{
+    return(link_iterate_cb(group_id, link_name, NULL, _op_data));
+} /* end group_iterate_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_iterate_fail_cb
+ *
+ * Purpose:     Callback routine for iterating over links in group that
+ *              always returns failure
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_iterate_fail_cb(hid_t UNUSED group_id, const char UNUSED *link_name,
+    const H5L_info_t UNUSED *info, void UNUSED *_op_data)
+{
+    return(H5_ITER_ERROR);
+} /* end link_iterate_fail_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_iterate_check
+ *
+ * Purpose:     Check iteration over links in a group
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_iterate_check(hid_t group_id, H5L_index_t idx_type, H5_iter_order_t order,
+    unsigned max_links, link_iter_info_t *iter_info)
+{
+    unsigned    v;                      /* Local index variable */
+    hsize_t     skip;                   /* # of links to skip in group */
+    int         gskip;                  /* # of links to skip in group, with H5Giterate */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Iterate over links in group */
+    iter_info->nskipped = skip = 0;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(skip != max_links) TEST_ERROR
+    for(v = 0; v < max_links; v++)
+        if(iter_info->visited[v] == FALSE) TEST_ERROR
+
+
+    /* Iterate over links in group, with H5Giterate */
+    iter_info->nskipped = gskip = 0;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(gskip != (int)max_links) TEST_ERROR
+    for(v = 0; v < max_links; v++)
+        if(iter_info->visited[v] == FALSE) TEST_ERROR
+
+
+    /* Skip over some links in group */
+    iter_info->nskipped = skip = max_links / 2;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(skip != max_links) TEST_ERROR
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v + (max_links / 2)] == FALSE) TEST_ERROR
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v] == FALSE) TEST_ERROR
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_links; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        if(nvisit != (max_links / 2)) TEST_ERROR
+    } /* end else */
+
+
+    /* Skip over some links in group, with H5Giterate */
+    iter_info->nskipped = gskip = max_links / 2;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - gskip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(gskip != (int)max_links) TEST_ERROR
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v + (max_links / 2)] == FALSE) TEST_ERROR
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v] == FALSE) TEST_ERROR
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_links; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        if(nvisit != (max_links / 2)) TEST_ERROR
+    } /* end else */
+
+
+    /* Iterate over links in group, stopping in the middle */
+    iter_info->nskipped = skip = 0;
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if((ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(ret != CORDER_ITER_STOP) TEST_ERROR
+    if(iter_info->ncalled != 3) TEST_ERROR
+
+
+    /* Iterate over links in group, stopping in the middle, with H5Giterate() */
+    iter_info->nskipped = gskip = 0;
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if((ret = H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info)) < 0) TEST_ERROR
+    if(ret != CORDER_ITER_STOP) TEST_ERROR
+    if(iter_info->ncalled != 3) TEST_ERROR
+
+
+    /* Check for iteration routine indicating failure */
+    skip = 0;
+    H5E_BEGIN_TRY {
+        ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
+
+    /* Success */
+    return(0);
+
+error:
+    return(-1);
+} /* end link_iterate_check() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    link_iterate
  *
- * Purpose:     Create a group with creation order indices and test deleting
+ * Purpose:     Create a group with creation order indices and test iterating over
  *              links by index.
  *
  * Return:      Success:        0
@@ -7015,17 +7285,29 @@ link_iterate(hid_t fapl)
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
-    H5L_info_t  linfo;                  /* Link info struct */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename[NAME_BUF_SIZE];/* File name */
-    char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
+    link_iter_info_t iter_info;         /* Iterator info */
+    hbool_t     *visited = NULL;        /* Array of flags for visiting links */
+    hsize_t     skip;                   /* # of links to skip in group */
     unsigned    u;                      /* Local index variable */
     herr_t      ret;                    /* Generic return value */
+
+    /* Create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
+
+    /* Query the group creation properties */
+    if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
+
+    /* Allocate the "visited link" array */
+    iter_info.max_visit = max_compact * 2;
+    if(NULL == (visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
+    iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
     for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -7036,11 +7318,18 @@ link_iterate(hid_t fapl)
                         else
                             TESTING("iterating over links by creation order index in increasing order w/o creation order index")
                     } /* end if */
-                    else {
+                    else if(order == H5_ITER_DEC) {
                         if(use_index)
                             TESTING("iterating over links by creation order index in decreasing order w/creation order index")
                         else
                             TESTING("iterating over links by creation order index in decreasing order w/o creation order index")
+                    } /* end else */
+                    else {
+                        HDassert(order == H5_ITER_NATIVE);
+                        if(use_index)
+                            TESTING("iterating over links by creation order index in native order w/creation order index")
+                        else
+                            TESTING("iterating over links by creation order index in native order w/o creation order index")
                     } /* end else */
                 } /* end if */
                 else {
@@ -7050,11 +7339,18 @@ link_iterate(hid_t fapl)
                         else
                             TESTING("iterating over links by name index in increasing order w/o creation order index")
                     } /* end if */
-                    else {
+                    else if(order == H5_ITER_DEC) {
                         if(use_index)
                             TESTING("iterating over links by name index in decreasing order w/creation order index")
                         else
                             TESTING("iterating over links by name index in decreasing order w/o creation order index")
+                    } /* end else */
+                    else {
+                        HDassert(order == H5_ITER_NATIVE);
+                        if(use_index)
+                            TESTING("iterating over links by name index in native order w/creation order index")
+                        else
+                            TESTING("iterating over links by name index in native order w/o creation order index")
                     } /* end else */
                 } /* end else */
 
@@ -7062,29 +7358,19 @@ link_iterate(hid_t fapl)
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
                 if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
-                /* Create group creation property list */
-                if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
-
                 /* Set creation order tracking & indexing on group */
-                if(use_index)
-                    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
                 if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
                 if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-                /* Query the group creation properties */
-                if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
-
 
                 /* Check for iteration on empty group */
-                H5E_BEGIN_TRY {
-                    ret = H5Literate(group_id, ".", idx_type, order, NULL, link_iterate_cb, NULL, H5P_DEFAULT);
-                } H5E_END_TRY;
-                if(ret >= 0) TEST_ERROR
+                /* (should be OK) */
+                if(H5Literate(group_id, ".", idx_type, order, NULL, link_iterate_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
 
-#ifdef QAK
                 /* Create several links, up to limit of compact form */
                 for(u = 0; u < max_compact; u++) {
                     hid_t group_id2;	        /* Group ID */
@@ -7095,53 +7381,24 @@ link_iterate(hid_t fapl)
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
-
-                    /* Verify link information for new link */
-                    if(link_info_by_idx_check(group_id, objname, (hsize_t)u, TRUE, use_index) < 0) TEST_ERROR
                 } /* end for */
 
                 /* Verify state of group (compact) */
                 if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
-                /* Check for out of bound deletion */
+                /* Check for out of bound iteration on compact group */
+                skip = (hsize_t)u;
                 H5E_BEGIN_TRY {
-                    ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, NULL, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
-                /* Delete links from compact group */
-                for(u = 0; u < (max_compact - 1); u++) {
-                    /* Delete first link in appropriate order */
-                    if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+                /* Test iteration over links in compact group */
+                if(link_iterate_check(group_id, idx_type, order, u, &iter_info) < 0) TEST_ERROR
 
-                    /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
-                    if(H5Lget_info_by_idx(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC) {
-                        if(linfo.corder != (u + 1)) TEST_ERROR
-                    } /* end if */
-                    else {
-                        if(linfo.corder != (max_compact - (u + 2))) TEST_ERROR
-                    } /* end else */
-
-                    /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                    if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", (u + 1));
-                    else
-                        sprintf(objname, "filler %02u", (max_compact - (u + 2)));
-                    if(HDstrcmp(objname, tmpname)) TEST_ERROR
-                } /* end for */
-
-                /* Delete last link */
-                if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-
-                /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
 
                 /* Create more links, to push group into dense form */
-                for(u = 0; u < (max_compact * 2); u++) {
+                for(; u < (max_compact * 2); u++) {
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
@@ -7150,147 +7407,24 @@ link_iterate(hid_t fapl)
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
-
-                    /* Verify state of group (dense) */
-                    if(u >= max_compact)
-                        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
-
-                    /* Verify link information for new link */
-                    if(link_info_by_idx_check(group_id, objname, (hsize_t)u, TRUE, use_index) < 0) TEST_ERROR
                 } /* end for */
 
-                /* Check for out of bound deletion again */
+                /* Verify state of group (dense) */
+                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+                /* Check for out of bound iteration on dense group */
+                skip = (hsize_t)u;
                 H5E_BEGIN_TRY {
-                    ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, NULL, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
-                /* Delete links from dense group, in appropriate order */
-                for(u = 0; u < ((max_compact * 2) - 1); u++) {
-                    /* Delete first link in appropriate order */
-                    if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-
-                    /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
-                    if(H5Lget_info_by_idx(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC) {
-                        if(linfo.corder != (u + 1)) TEST_ERROR
-                    } /* end if */
-                    else {
-                        if(linfo.corder != ((max_compact * 2) - (u + 2))) TEST_ERROR
-                    } /* end else */
-
-                    /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                    if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", (u + 1));
-                    else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - (u + 2)));
-                    if(HDstrcmp(objname, tmpname)) TEST_ERROR
-                } /* end for */
-
-                /* Delete last link */
-                if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-
-                /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-                if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
-
-                /* Check for deletion on empty group again */
-                H5E_BEGIN_TRY {
-                    ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                } H5E_END_TRY;
-                if(ret >= 0) TEST_ERROR
-
-
-                /* Delete links in middle */
-
-
-                /* Create more links, to push group into dense form */
-                for(u = 0; u < (max_compact * 2); u++) {
-                    hid_t group_id2;	        /* Group ID */
-
-                    /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
-
-                    /* Create hard link, with group object */
-                    if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
-                    if(H5Gclose(group_id2) < 0) TEST_ERROR
-
-                    /* Verify state of group (dense) */
-                    if(u >= max_compact)
-                        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
-
-                    /* Verify link information for new link */
-                    if(link_info_by_idx_check(group_id, objname, (hsize_t)u, TRUE, use_index) < 0) TEST_ERROR
-                } /* end for */
-
-                /* Delete every other link from dense group, in appropriate order */
-                for(u = 0; u < max_compact; u++) {
-                    /* Delete link */
-                    if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT) < 0) TEST_ERROR
-
-                    /* Verify the link information for current link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
-                    if(H5Lget_info_by_idx(group_id, ".", idx_type, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC) {
-                        if(linfo.corder != ((u * 2) + 1)) TEST_ERROR
-                    } /* end if */
-                    else {
-                        if(linfo.corder != ((max_compact * 2) - ((u * 2) + 2))) TEST_ERROR
-                    } /* end else */
-
-                    /* Verify the name for current link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                    if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", ((u * 2) + 1));
-                    else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - ((u * 2) + 2)));
-                    if(HDstrcmp(objname, tmpname)) TEST_ERROR
-                } /* end for */
-
-                /* Delete remaining links from dense group, in appropriate order */
-                for(u = 0; u < (max_compact - 1); u++) {
-                    /* Delete link */
-                    if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-
-                    /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
-                    if(H5Lget_info_by_idx(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC) {
-                        if(linfo.corder != ((u * 2) + 3)) TEST_ERROR
-                    } /* end if */
-                    else {
-                        if(linfo.corder != ((max_compact * 2) - ((u * 2) + 4))) TEST_ERROR
-                    } /* end else */
-
-                    /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                    if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", ((u * 2) + 3));
-                    else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - ((u * 2) + 4)));
-                    if(HDstrcmp(objname, tmpname)) TEST_ERROR
-                } /* end for */
-
-                /* Delete last link */
-                if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
-
-                /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-                if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
-#endif /* QAK */
-
+                /* Test iteration over links in dense group */
+                if(link_iterate_check(group_id, idx_type, order, u, &iter_info) < 0) TEST_ERROR
 
 
                 /* Close the group */
                 if(H5Gclose(group_id) < 0) TEST_ERROR
-
-                /* Close the group creation property list */
-                if(H5Pclose(gcpl_id) < 0) TEST_ERROR
 
                 /* Close the file */
                 if(H5Fclose(file_id) < 0) TEST_ERROR
@@ -7300,16 +7434,400 @@ link_iterate(hid_t fapl)
         } /* end for */
     } /* end for */
 
+    /* Close the group creation property list */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+
+    /* Free resources */
+    if(visited)
+        HDfree(visited);
+
     return 0;
 
 error:
+    /* Free resources */
     H5E_BEGIN_TRY {
         H5Pclose(gcpl_id);
         H5Gclose(group_id);
         H5Fclose(file_id);
     } H5E_END_TRY;
+
+    if(visited)
+        HDfree(visited);
+
     return -1;
 } /* end link_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_iterate_old_cb
+ *
+ * Purpose:     Callback routine for iterating over [old] links in group
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_iterate_old_cb(hid_t group_id, const char *link_name, const H5L_info_t *info,
+    void *_op_data)
+{
+    link_iter_info_t *op_data = (link_iter_info_t *)_op_data;   /* User data */
+    char objname[NAME_BUF_SIZE]; /* Object name */
+    H5L_info_t my_info;         /* Local link info */
+
+#ifdef QAK
+HDfprintf(stderr, "link_name = '%s'\n", link_name);
+if(info)
+    HDfprintf(stderr, "info->corder = %Hd\n", info->corder);
+HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
+#endif /* QAK */
+
+    /* Increment # of times the callback was called */
+    op_data->ncalled++;
+
+    /* Get the link information directly to compare */
+    if(H5Lget_info(group_id, link_name, &my_info, H5P_DEFAULT) < 0) 
+        return(H5_ITER_ERROR);
+
+    /* Check more things for link iteration (vs. group iteration) */
+    if(info) {
+        /* Compare link info structs */
+        if(info->type != my_info.type)
+            return(H5_ITER_ERROR);
+        if(info->corder_valid != my_info.corder_valid)
+            return(H5_ITER_ERROR);
+        if(info->corder != my_info.corder)
+            return(H5_ITER_ERROR);
+        if(info->cset != my_info.cset)
+            return(H5_ITER_ERROR);
+        if(H5F_addr_ne(info->u.address, my_info.u.address))
+            return(H5_ITER_ERROR);
+    } /* end if */
+
+    /* Verify name of link */
+    sprintf(objname, "filler %02u", (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
+    if(HDstrcmp(link_name, objname))
+        return(H5_ITER_ERROR);
+
+    /* Check if we've visited this link before */
+    if((size_t)op_data->curr >= op_data->max_visit)
+        return(H5_ITER_ERROR);
+    if(op_data->visited[op_data->curr])
+        return(H5_ITER_ERROR);
+    op_data->visited[op_data->curr] = TRUE;
+
+    /* Advance to next value, in correct direction */
+    if(op_data->order != H5_ITER_DEC)
+        op_data->curr++;
+    else
+        op_data->curr--;
+
+    /* Check for stopping in the middle of iterating */
+    if(op_data->stop > 0)
+        if(--op_data->stop == 0)
+            return(CORDER_ITER_STOP);
+
+    return(H5_ITER_CONT);
+} /* end link_iterate_old_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    group_iterate_old_cb
+ *
+ * Purpose:     Callback routine for iterating over links in group with
+ *              H5Giterate()
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+group_iterate_old_cb(hid_t group_id, const char *link_name, void *_op_data)
+{
+    return(link_iterate_old_cb(group_id, link_name, NULL, _op_data));
+} /* end group_iterate_old_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_iterate_old_check
+ *
+ * Purpose:     Check iteration over [old] links in a group
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
+    unsigned max_links, link_iter_info_t *iter_info)
+{
+    unsigned    v;                      /* Local index variable */
+    hsize_t     skip;                   /* # of links to skip in group */
+    int         gskip;                  /* # of links to skip in group, with H5Giterate */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Iterate over links in group */
+    iter_info->nskipped = skip = 0;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(skip != max_links) TEST_ERROR
+    for(v = 0; v < max_links; v++)
+        if(iter_info->visited[v] == FALSE) TEST_ERROR
+
+
+    /* Iterate over links in group, with H5Giterate */
+    iter_info->nskipped = gskip = 0;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(gskip != (int)max_links) TEST_ERROR
+    for(v = 0; v < max_links; v++)
+        if(iter_info->visited[v] == FALSE) TEST_ERROR
+
+
+    /* Skip over some links in group */
+    iter_info->nskipped = skip = max_links / 2;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(skip != max_links) TEST_ERROR
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v + (max_links / 2)] == FALSE) TEST_ERROR
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v] == FALSE) TEST_ERROR
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_links; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        if(nvisit != (max_links / 2)) TEST_ERROR
+    } /* end else */
+
+
+    /* Skip over some links in group, with H5Giterate */
+    iter_info->nskipped = gskip = max_links / 2;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - gskip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if(H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info) < 0) TEST_ERROR
+
+    /* Verify that we visited all the links */
+    if(gskip != (int)max_links) TEST_ERROR
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v + (max_links / 2)] == FALSE) TEST_ERROR
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_links / 2); v++)
+            if(iter_info->visited[v] == FALSE) TEST_ERROR
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_links; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        if(nvisit != (max_links / 2)) TEST_ERROR
+    } /* end else */
+
+
+    /* Iterate over links in group, stopping in the middle */
+    iter_info->nskipped = skip = 0;
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if((ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(ret != CORDER_ITER_STOP) TEST_ERROR
+    if(iter_info->ncalled != 3) TEST_ERROR
+
+
+    /* Iterate over links in group, stopping in the middle, with H5Giterate() */
+    iter_info->nskipped = gskip = 0;
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    if((ret = H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info)) < 0) TEST_ERROR
+    if(ret != CORDER_ITER_STOP) TEST_ERROR
+    if(iter_info->ncalled != 3) TEST_ERROR
+
+
+    /* Check for iteration routine indicating failure */
+    skip = 0;
+    H5E_BEGIN_TRY {
+        ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
+
+    /* Success */
+    return(0);
+
+error:
+    return(-1);
+} /* end link_iterate_old_check() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_iterate_old
+ *
+ * Purpose:     Create a "old-style" group and test iterating over links by index.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 14, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_iterate_old(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1);	/* Group ID */
+    H5_iter_order_t order;              /* Order within in the index */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    link_iter_info_t iter_info;         /* Iterator info */
+    hbool_t     *visited = NULL;        /* Array of flags for visiting links */
+    hsize_t     skip;                   /* # of links to skip in group */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Allocate the "visited link" array */
+    iter_info.max_visit = CORDER_NLINKS;
+    if(NULL == (visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
+    iter_info.visited = visited;
+
+    /* Loop over operating in different orders */
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        /* Print appropriate test message */
+        if(order == H5_ITER_INC) {
+            TESTING("iterating over links by name index in increasing order in old-style group")
+        } /* end if */
+        else if(order == H5_ITER_DEC) {
+            TESTING("iterating over links by name index in decreasing order in old-style group")
+        } /* end else */
+        else {
+            HDassert(order == H5_ITER_NATIVE);
+            TESTING("iterating over links by name index in native order in old-style group")
+        } /* end else */
+
+        /* Create file */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+        /* Create group with creation order tracking on */
+        if((group_id = H5Gcreate(file_id, CORDER_GROUP_NAME, (size_t)0)) < 0) TEST_ERROR
+
+
+        /* Check for iteration on empty group */
+        /* (should be OK) */
+        if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, NULL, link_iterate_old_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Create several links */
+        for(u = 0; u < CORDER_NLINKS; u++) {
+            hid_t group_id2;	        /* Group ID */
+
+            /* Make name for link */
+            sprintf(objname, "filler %02u", u);
+
+            /* Create hard link, with group object */
+            if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+            if(H5Gclose(group_id2) < 0) TEST_ERROR
+        } /* end for */
+
+        /* Verify state of group (symbol table) */
+        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+
+        /* Check for out of bound iteration on old-style group */
+        skip = (hsize_t)u;
+        H5E_BEGIN_TRY {
+            ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Check for iteration on creation order */
+        /* (should fail) */
+        skip = (hsize_t)0;
+        H5E_BEGIN_TRY {
+            ret = H5Literate(group_id, ".", H5L_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Test iteration over links in group */
+        if(link_iterate_old_check(group_id, order, u, &iter_info) < 0) TEST_ERROR
+
+
+        /* Close the group */
+        if(H5Gclose(group_id) < 0) TEST_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file_id) < 0) TEST_ERROR
+
+        PASSED();
+    } /* end for */
+
+    /* Free resources */
+    if(visited)
+        HDfree(visited);
+
+    return 0;
+
+error:
+    /* Free resources */
+    H5E_BEGIN_TRY {
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    if(visited)
+        HDfree(visited);
+
+    return -1;
+} /* end link_iterate_old() */
 
 
 /*-------------------------------------------------------------------------
@@ -7417,16 +7935,18 @@ main(void)
                 nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
                 nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
                 nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
+                nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
             } /* end if */
             else {
                 /* Test new API calls on old-style groups */
                 nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
                 nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
+                nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
             }
         } /* end for */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
-            nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
+            nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
 #endif /* QAK */
 
         /* Close 2nd FAPL */

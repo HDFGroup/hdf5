@@ -470,6 +470,11 @@ H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
         if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE,
                   H5G_node_iterate, stab.btree_addr, &udata)) < 0)
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
+
+        /* Check for too high of a starting index (ex post facto :-) */
+        /* (Skipping exactly as many entries as are in the group is currently an error) */
+        if(skip > 0 && skip >= *last_lnk)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
     } /* end if */
     else {
         H5G_bt_it_bt_t udata;                   /* User data to pass to B-tree callback */
@@ -483,6 +488,10 @@ H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
         if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_build_table,
                 stab.btree_addr, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to build link table")
+
+        /* Check for skipping out of bounds */
+        if(skip > 0 && (size_t)skip >= ltable.nlinks)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
         /* Sort link table in correct iteration order */
         if(H5G_link_sort_table(&ltable, H5L_INDEX_NAME, order) < 0)

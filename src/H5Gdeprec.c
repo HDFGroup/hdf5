@@ -733,11 +733,6 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     if((ret_value = H5G_obj_iterate(loc_id, name, H5L_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
-    /* Check for too high of a starting index (ex post facto :-) */
-    /* (Skipping exactly as many entries as are in the group is currently an error) */
-    if(idx > 0 && idx >= last_obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
-
     /* Set the index we stopped at */
     if(idx_p)
         *idx_p = (int)last_obj;
