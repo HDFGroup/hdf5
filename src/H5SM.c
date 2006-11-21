@@ -616,9 +616,6 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(NULL == (encoding_buf = H5MM_calloc(buf_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding");
 
-    /* JAMES: make purify happy.  I think calloc above should do this. */
-    HDmemset(encoding_buf, 0, buf_size);
-
     if(H5O_encode(f, encoding_buf, mesg, type_id) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "can't encode message to be shared");
 
