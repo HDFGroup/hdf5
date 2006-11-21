@@ -1610,6 +1610,21 @@ SOURCE=..\..\..\src\H5O.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Oalloc.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Oattr.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1677,6 +1692,21 @@ SOURCE=..\..\..\src\H5Ocont.c
 # Begin Source File
 
 SOURCE=..\..\..\src\H5Ocopy.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Odbg.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
 

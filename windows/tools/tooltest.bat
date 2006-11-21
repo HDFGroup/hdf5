@@ -55,13 +55,14 @@
      :: This line will set variable %testinput% equal to ..\..\testfiles\test1.h5
 
      set testinput=%1
-      
+::echo %testinput%     
      :: %testinput:~16% will get all of the chars of %testinput% except the first 16 chars
+     :: The number 16 here is calculated through the length of "..\..\testfiles\".
      :: Example case: %testinput:~16% will give you test1.h5
      :: The whole line will set varialbe %testoutput% equal to ..\..\temptest\out.test1.h5
 
 		 set testoutput=..\..\temptest\out.%testinput:~16%
-
+::echo %testoutput%
  		 ::Set exp_file equal to the second parameter
 		 :: Example case: %exp_file% will be equal to %nodiff%
      set exp_file=%2
@@ -77,17 +78,22 @@
      :: "-i ..\..\testfiles\test1.h5  -o ..\..\temptest\out.test1.h5"
      :: The following two lines will set %flagout% equal to
      :: "-i test1.h5  -o ..\..\temptest\out.test1.h5"
-
-     set flagout=%flag:..\..\testfiles\t=t%
-     set flagout=%flagout:..\..\temptest\t=t%
-
+     :: KY note: replace the string "..\..\testfiles\test1.h5" to "test1.h5", this can be done with
+     :: "..\..\testfiles\t=t" inside the variable with"% %". Now the testing file has been changed
+     :: from test1.h5 to h5repack..., so the following line should be changed too. 11/21/2006.
+:: replace "testfiles\t" with "t" if the name of testing file is test***.h5. Now the testing file is h5repack**.h5,
+:: replace "h" with "t".
+     set flagout=%flag:..\..\testfiles\h=h%
+::echo %flagout%
+     set flagout=%flagout:..\..\temptest\h=h%
+::echo %flagout%
      :: "." will be used as a delimiter in the for loop for printing output
      :: But "." inside ".txt" and".." will not be treated as a delimiter. So replace it
      :: with a "#" and recover it before printing results.
 
      set flagout=%flagout:.txt=#txt%
      set flagout=%flagout:..=##%
- 
+:: echo %flagout%
      :: This for loop uses "." as a delimiter and gets the first and the fourth tokens 
      :: and assign it to var1 and var4 
 		 ::Example case: 
@@ -95,8 +101,8 @@
      :: This for loop will set %var1% as "-i test1" and %var4% as "h5"
      
      for /f "tokens=1,4 delims=." %%a in ("%flagout%") do (
-  	 set var1=%%a
-     set var4=%%b
+ 	 set var1=%%a
+    set var4=%%b
      )
 
      ::Add in extension for input file 
@@ -127,7 +133,7 @@
         goto GTEST
      )
       
-     if %test_exefile%==h5copy goto GTEST  
+  ::   if %test_exefile%==h5copy goto GTEST  
      ::Based on the third parameter, we will go to different part.
      :: GTEST means general test, no need to check zlib and szlib
      

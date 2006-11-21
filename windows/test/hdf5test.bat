@@ -237,12 +237,6 @@ echo ============================
 
 getname%2\%1\getname%2
 
-echo ============================
-echo Testing ref 
-echo ============================
-
-ref%2\%1\ref%2
-
 echo.
 echo ============================
 echo Testing vfd 
