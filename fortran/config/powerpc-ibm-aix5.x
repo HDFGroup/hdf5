@@ -45,7 +45,7 @@ case $CC_BASENAME in
 	# Turn off shared lib option.  It causes some test suite to fail.
 	enable_shared="${enable_shared:-no}"
         # Use -D_LARGE_FILES by default to support large file size.
-        CFLAGS="-qlanglvl=ansi -D_LARGE_FILES $CFLAGS"
+        CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $CFLAGS"
 	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	# -O causes test/dtypes to fail badly. Turn it off for now.
