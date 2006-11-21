@@ -357,6 +357,9 @@ H5_DLL herr_t H5G_init(void);
 H5_DLL char * H5G_normalize(const char *name);
 H5_DLL const char * H5G_component(const char *name, size_t *size_p);
 H5_DLL herr_t H5G_traverse_term_interface(void);
+H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
+    const H5O_link_t *lnk, unsigned target, size_t *nlinks, hbool_t last_comp,
+    H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);

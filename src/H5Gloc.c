@@ -58,6 +58,7 @@ typedef struct {
 /* User data for looking up an object in a group by index */
 typedef struct {
     /* downward */
+    hid_t lapl_id;              /* LAPL to use for operation */
     hid_t dxpl_id;              /* DXPL to use for operation */
     H5L_index_t idx_type;       /* Index to use */
     H5_iter_order_t order;      /* Iteration order within index */
@@ -414,6 +415,8 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata;   /* User data passed in */
     H5O_link_t fnd_lnk;                 /* Link within group */
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
+    size_t links_left = 1;              /* # of links left to traverse (somewhat bogus... :-/ ) */
+    hbool_t obj_loc_valid = FALSE;      /* Flag to indicate that the object location is valid */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_by_idx_cb)
@@ -428,12 +431,26 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
     lnk_copied = TRUE;
 
-    /* Build the object location for the link */
+    /* Build the initial object location for the link */
+    if(H5G_link_to_loc(obj_loc, &fnd_lnk, udata->loc) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location")
+    obj_loc_valid = TRUE;
+
+    /* Perform any special traversals that the link needs */
+    /* (soft links, user-defined links, file mounting, etc.) */
+    /* (may modify the object location) */
+    if(H5G_traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, &links_left, TRUE, udata->loc, udata->lapl_id, udata->dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
 
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
         H5O_reset(H5O_LINK_ID, &fnd_lnk);
+
+    /* Release the object location if we failed after copying it */
+    if(ret_value < 0 && obj_loc_valid)
+        if(H5G_loc_free(udata->loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -472,6 +489,7 @@ H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name, H5L_index_t idx_type
 
     /* Set up user data for locating object */
     udata.dxpl_id = dxpl_id;
+    udata.lapl_id = lapl_id;
     udata.idx_type = idx_type;
     udata.order = order;
     udata.n = n;

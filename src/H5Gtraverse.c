@@ -445,14 +445,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5G_traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     unsigned target, size_t *nlinks, hbool_t last_comp,
     H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_special)
+    FUNC_ENTER_NOAPI(H5G_traverse_special, FAIL)
 
     /* Sanity check */
     HDassert(grp_loc);

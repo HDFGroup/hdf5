@@ -348,10 +348,10 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0)
-        if(loc_found)
-            if(H5G_loc_free(&obj_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+    /* Release the object location if we failed after copying it */
+    if(ret_value < 0 && loc_found)
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
