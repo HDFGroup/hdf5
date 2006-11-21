@@ -12,7 +12,7 @@
 # http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 
-
+# Configuration file for building on the IBM POWER AIX platforms.
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
@@ -47,7 +47,7 @@ case $CC_BASENAME in
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
     # Make sure this is applied to other API compile options such as C++.
-    CFLAGS="-qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
+    CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
