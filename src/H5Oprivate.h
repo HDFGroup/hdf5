@@ -408,10 +408,10 @@ H5_DLL htri_t H5O_is_shared(unsigned type_id, const void *mesg);
 H5_DLL herr_t H5O_set_share(H5F_t *f, H5O_shared_t *share, unsigned type_id,
     void *mesg);
 H5_DLL herr_t H5O_reset_share(H5F_t *f, unsigned type_id, void *mesg);
-H5_DLL herr_t H5O_get_info(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
+H5_DLL herr_t H5O_get_stat(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
-H5_DLL H5G_obj_t H5O_obj_type(H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
 H5_DLL uint32_t H5O_mesg_hash(unsigned type_id, H5F_t *f, const void *mesg);
 
 /* Object copying routines */

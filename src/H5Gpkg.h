@@ -363,6 +363,7 @@ H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
+H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 
 /******************************/
 /* Package Private Prototypes */

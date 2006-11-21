@@ -62,7 +62,7 @@ static H5O_loc_t *H5O_dtype_get_oloc(hid_t obj_id);
 
 /* This message derives from H5O object class */
 const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
-    H5G_TYPE,			/* object type			*/
+    H5O_TYPE_NAMED_DATATYPE,	/* object type			*/
     "named datatype",		/* object name, for debugging	*/
     NULL,			/* get 'copy file' user data	*/
     NULL,			/* free 'copy file' user data	*/

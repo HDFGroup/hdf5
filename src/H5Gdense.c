@@ -1281,15 +1281,20 @@ H5G_dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
         ret_value = H5G_LINK;
     else if(ltable.lnks[idx].type >= H5L_TYPE_UD_MIN)
         ret_value = H5G_UDLINK;
-    else if(ltable.lnks[idx].type == H5L_TYPE_HARD){
+    else if(ltable.lnks[idx].type == H5L_TYPE_HARD) {
         H5O_loc_t tmp_oloc;             /* Temporary object location */
+        H5O_type_t obj_type;            /* Type of object at location */
 
         /* Build temporary object location */
         tmp_oloc.file = f;
         tmp_oloc.addr = ltable.lnks[idx].u.hard.addr;
 
         /* Get the type of the object */
-        if((ret_value = H5O_obj_type(&tmp_oloc, dxpl_id)) == H5G_UNKNOWN)
+        if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
+
+        /* Map to group object type */
+        if(H5G_UNKNOWN == (ret_value = H5G_map_obj_type(obj_type)))
             HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
     } else {
         HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")

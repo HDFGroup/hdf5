@@ -696,9 +696,9 @@ static herr_t
 H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_bt_it_gtbi_t	*udata = (H5G_bt_it_gtbi_t *)_udata;
-    H5O_loc_t tmp_oloc;                 /* Temporary object location */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_stab_get_type_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_get_type_by_idx_cb)
 
     /* Sanity check */
     HDassert(ent);
@@ -711,16 +711,25 @@ H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
             break;
 
         default:
-            /* Build temporary object location */
-            tmp_oloc.file = udata->common.f;
-            HDassert(H5F_addr_defined(ent->header));
-            tmp_oloc.addr = ent->header;
+            {
+                H5O_loc_t tmp_oloc;             /* Temporary object location */
+                H5O_type_t obj_type;            /* Type of object at location */
 
-            udata->type = H5O_obj_type(&tmp_oloc, udata->common.dxpl_id);
+                /* Build temporary object location */
+                tmp_oloc.file = udata->common.f;
+                HDassert(H5F_addr_defined(ent->header));
+                tmp_oloc.addr = ent->header;
+
+                /* Get the type of the object */
+                if(H5O_obj_type(&tmp_oloc, &obj_type, udata->common.dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+                udata->type = H5G_map_obj_type(obj_type);
+            }
             break;
     } /* end switch */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_get_type_by_idx_cb */
 
 

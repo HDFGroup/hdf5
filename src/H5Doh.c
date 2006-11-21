@@ -59,7 +59,7 @@ static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
 
 /* This message derives from H5O object class */
 const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
-    H5G_DATASET,		/* object type			*/
+    H5O_TYPE_DATASET,		/* object type			*/
     "dataset",			/* object name, for debugging	*/
     H5O_dset_get_copy_file_udata, /* get 'copy file' user data	*/
     H5O_dset_free_copy_file_udata, /* free 'copy file' user data	*/

@@ -105,7 +105,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     insertion_loc.oloc = &insert_oloc;
     H5G_loc_reset(&insertion_loc);
     if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to locate insertion point")
     insert_loc_valid = TRUE;
     file = insertion_loc.oloc->file;
 
@@ -446,6 +446,7 @@ H5Topen(hid_t loc_id, const char *name)
     H5G_loc_t	 loc;
     H5G_name_t   path;            	/* Datatype group hier. path */
     H5O_loc_t    oloc;            	/* Datatype object location */
+    H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
@@ -474,8 +475,10 @@ H5Topen(hid_t loc_id, const char *name)
     obj_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, dxpl_id) != H5G_TYPE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_NAMED_DATATYPE)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
 
     /* Open it */
     if((type = H5T_open(&type_loc, dxpl_id)) == NULL)
@@ -520,6 +523,7 @@ H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id)
     H5G_loc_t	 loc;
     H5G_name_t   path;            	/* Datatype group hier. path */
     H5O_loc_t    oloc;            	/* Datatype object location */
+    H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
@@ -555,8 +559,10 @@ H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id)
     obj_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, dxpl_id) != H5G_TYPE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a named datatype")
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_NAMED_DATATYPE)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
 
     /* Open it */
     if((type = H5T_open(&type_loc, dxpl_id)) == NULL)

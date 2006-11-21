@@ -229,7 +229,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     insertion_loc.oloc = &insert_oloc;
     H5G_loc_reset(&insertion_loc);
     if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to locate insertion point")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate insertion point")
     insert_loc_valid=TRUE;
     file = insertion_loc.oloc->file;
 
@@ -379,8 +379,9 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_loc_t   grp_loc;                /* Location used to open group */
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hid_t       ret_value = FAIL;
+    hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Gopen, FAIL)
     H5TRACE2("i","is",loc_id,name);
@@ -402,7 +403,9 @@ H5Gopen(hid_t loc_id, const char *name)
     loc_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&grp_oloc, H5AC_dxpl_id) != H5G_GROUP)
+    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
         HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
 
     /* Open the group */
@@ -454,8 +457,9 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     H5G_loc_t   grp_loc;                /* Location used to open group */
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hid_t      ret_value=FAIL;       /* Return value */
+    hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Gopen_expand, FAIL);
     H5TRACE3("i","isi",loc_id,name,gapl_id);
@@ -484,7 +488,9 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     loc_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&grp_oloc, H5AC_dxpl_id) != H5G_GROUP)
+    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
         HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
 
     /* Open the group */
@@ -567,6 +573,7 @@ herr_t
 H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
 {
     H5G_loc_t		loc;            /* Location of object */
+    H5O_type_t          obj_type;       /* Type of object at location */
     herr_t		ret_value;
 
     FUNC_ENTER_API(H5Gget_num_objs, FAIL)
@@ -575,8 +582,10 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if(H5O_obj_type(loc.oloc, H5AC_ind_dxpl_id) != H5G_GROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
     if(!num_objs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nil pointer")
 
@@ -608,6 +617,7 @@ H5G_obj_t
 H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
     H5G_loc_t		loc;            /* Object location */
+    H5O_type_t          obj_type;       /* Type of object at location */
     H5G_obj_t		ret_value;
 
     FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN)
@@ -616,8 +626,10 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
-    if(H5O_obj_type(loc.oloc, H5AC_ind_dxpl_id) != H5G_GROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
 
     /* Call internal function*/
     if((ret_value = H5G_obj_get_type_by_idx(loc.oloc, idx, H5AC_ind_dxpl_id)) == H5G_UNKNOWN)
@@ -1512,6 +1524,48 @@ H5G_fileof(H5G_t *grp)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_map_obj_type
+ *
+ * Purpose:	Maps the object type to the older "group" object type
+ *
+ * Return:	Object type (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 21, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_obj_t
+H5G_map_obj_type(H5O_type_t obj_type)
+{
+    H5G_obj_t ret_value;        /* Return value */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_map_obj_type)
+
+    /* Map object type to older "group" object type */
+    switch(obj_type) {
+        case H5O_TYPE_GROUP:
+            ret_value = H5G_GROUP;
+            break;
+
+        case H5O_TYPE_DATASET:
+            ret_value = H5G_DATASET;
+            break;
+
+        case H5O_TYPE_NAMED_DATATYPE:
+            ret_value = H5G_TYPE;
+            break;
+
+        default:
+            ret_value = H5G_UNKNOWN;
+    } /* end switch */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_map_obj_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_get_objinfo_cb
  *
  * Purpose:	Callback for retrieving info about an object.  This routine
@@ -1553,10 +1607,14 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
          *      a hard link, follow it and get info on the object
          */
         if(udata->follow_link || !lnk || (lnk->type == H5L_TYPE_HARD)) {
+            H5O_type_t obj_type;        /* Type of object */
+
             /* Get object type */
-	    statbuf->type = H5O_obj_type(obj_loc->oloc, udata->dxpl_id);
-            if(statbuf->type == H5G_UNKNOWN)
-                H5E_clear_stack(NULL);  /* clear any errors resulting from checking type */
+            if(H5O_obj_type(obj_loc->oloc, &obj_type, udata->dxpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
+
+            /* Map object type to older group object type */
+            statbuf->type = H5G_map_obj_type(obj_type);
 
 	    /* Get basic info for object */
 	    statbuf->objno[0] = (unsigned long)(obj_loc->oloc->addr);
@@ -1577,7 +1635,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
             } /* end if */
 
             /* Get object header information */
-            if(H5O_get_info(obj_loc->oloc, &(statbuf->ohdr), udata->dxpl_id) < 0)
+            if(H5O_get_stat(obj_loc->oloc, &(statbuf->ohdr), udata->dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
         } /* end if */
     } /* end if */

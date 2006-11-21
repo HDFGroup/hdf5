@@ -202,7 +202,7 @@ typedef struct {
 
 /* Class for types of objects in file */
 typedef struct H5O_obj_class_t {
-    H5G_obj_t	type;				/*object type on disk	     */
+    H5O_type_t	type;				/*object type on disk	     */
     const char	*name;				/*for debugging		     */
     void       *(*get_copy_file_udata)(void);	/*retrieve user data for 'copy file' operation */
     void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */

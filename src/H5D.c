@@ -533,6 +533,7 @@ H5Dopen(hid_t loc_id, const char *name)
     H5G_loc_t	 dset_loc;		/* Object location of dataset */
     H5G_name_t   path;            	/* Dataset group hier. path */
     H5O_loc_t    oloc;            	/* Dataset object location */
+    H5O_type_t   obj_type;              /* Type of object at location */
     hbool_t      loc_found = FALSE;     /* Location at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
@@ -557,7 +558,9 @@ H5Dopen(hid_t loc_id, const char *name)
     loc_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, dxpl_id) != H5G_DATASET)
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_DATASET)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Open the dataset */
@@ -611,6 +614,7 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
     H5G_loc_t	 dset_loc;		/* Object location of dataset */
     H5G_name_t   path;            	/* Dataset group hier. path */
     H5O_loc_t    oloc;            	/* Dataset object location */
+    H5O_type_t   obj_type;              /* Type of object at location */
     hbool_t      loc_found = FALSE;     /* Location at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
@@ -642,7 +646,9 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
     loc_found = TRUE;
 
     /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, dxpl_id) != H5G_DATASET)
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_DATASET)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Open the dataset */

@@ -457,6 +457,7 @@ ssize_t
 H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
 {
     H5G_loc_t		loc;            /* Object location */
+    H5O_type_t          obj_type;       /* Type of object at location */
     ssize_t		ret_value;
 
     FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL)
@@ -465,8 +466,10 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if(H5O_obj_type(loc.oloc, H5AC_ind_dxpl_id) != H5G_GROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a group")
 
     /* Call internal function */
     if((ret_value = H5G_obj_get_name_by_idx(loc.oloc, H5L_INDEX_NAME, H5_ITER_INC, idx, name, size, H5AC_ind_dxpl_id)) < 0)

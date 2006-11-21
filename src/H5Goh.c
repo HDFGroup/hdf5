@@ -60,7 +60,7 @@ static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
 
 /* This message derives from H5O object class */
 const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
-    H5G_GROUP,			/* object type			*/
+    H5O_TYPE_GROUP,		/* object type			*/
     "group",			/* object name, for debugging	*/
     NULL,			/* get 'copy file' user data	*/
     NULL,			/* free 'copy file' user data	*/

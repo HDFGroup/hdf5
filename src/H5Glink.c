@@ -753,7 +753,7 @@ H5G_link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     const char *lnk_name, H5L_type_t lnk_type, haddr_t lnk_addr)
 {
     H5RS_str_t *obj_path_r = NULL;      /* Full path for link being removed */
-    H5G_obj_t obj_type;                 /* Type of link/object being deleted */
+    H5G_obj_t grp_obj_type;             /* Type of link/object being deleted */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_link_name_replace, FAIL)
@@ -766,20 +766,25 @@ H5G_link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
         case H5L_TYPE_HARD:
             {
                 H5O_loc_t tmp_oloc;             /* Temporary object location */
+                H5O_type_t obj_type;            /* Type of object at location */
 
                 /* Build temporary object location */
                 tmp_oloc.file = file;
                 tmp_oloc.addr = lnk_addr;
 
                 /* Get the type of the object */
-                if(H5G_UNKNOWN == (obj_type = H5O_obj_type(&tmp_oloc, dxpl_id)))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine object type")
+                if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
+
+                /* Map to group object type */
+                if(H5G_UNKNOWN == (grp_obj_type = H5G_map_obj_type(obj_type)))
+                    HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
             }
             break;
 
         case H5L_TYPE_SOFT:
             /* Get the object's type */
-            obj_type = H5G_LINK;
+            grp_obj_type = H5G_LINK;
             break;
 
         default:  /* User-defined link */
@@ -787,13 +792,13 @@ H5G_link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
 
             /* Get the object's type */
-            obj_type = H5G_UDLINK;
+            grp_obj_type = H5G_UDLINK;
     } /* end switch */
 
     /* Search the open IDs and replace names for unlinked object */
     if(grp_full_path_r) {
         obj_path_r = H5G_build_fullpath_refstr_str(grp_full_path_r, lnk_name);
-        if(H5G_name_replace(obj_type, file, obj_path_r,
+        if(H5G_name_replace(grp_obj_type, file, obj_path_r,
                 NULL, NULL, NULL, H5G_NAME_DELETE) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
     } /* end if */

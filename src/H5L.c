@@ -2343,8 +2343,14 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     /* Get object type */
     switch(lnk->type) {
         case H5L_TYPE_HARD:
-            if(H5G_UNKNOWN == (type = H5O_obj_type(obj_loc->oloc, udata->dxpl_id)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type to move")
+            {
+                H5O_type_t obj_type;            /* Type of object at location */
+
+                if(H5O_obj_type(obj_loc->oloc, &obj_type, udata->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+                if(H5G_UNKNOWN == (type = H5G_map_obj_type(obj_type)))
+                    HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "unknown object type to move")
+            }
             break;
 
         case H5L_TYPE_SOFT:

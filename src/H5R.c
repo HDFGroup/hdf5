@@ -340,7 +340,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
     H5G_loc_t loc;              /* Group location */
-    int oid_type;               /* type of object being dereferenced */
+    H5O_type_t obj_type;        /* Type of object */
     hid_t ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_dereference)
@@ -402,10 +402,13 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
     loc.oloc = &oloc;
     loc.path = &path;
 
+    /* Get the type of the object */
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get object type")
+
     /* Open the object */
-    oid_type = H5O_obj_type(&oloc, dxpl_id);
-    switch(oid_type) {
-        case H5G_GROUP:
+    switch(obj_type) {
+        case H5O_TYPE_GROUP:
             {
                 H5G_t *group;               /* Pointer to group to open */
 
@@ -420,7 +423,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             } /* end case */
             break;
 
-        case H5G_TYPE:
+        case H5O_TYPE_NAMED_DATATYPE:
             {
                 H5T_t *type;                /* Pointer to datatype to open */
 
@@ -435,7 +438,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             } /* end case */
             break;
 
-        case H5G_DATASET:
+        case H5O_TYPE_DATASET:
             {
                 H5D_t *dset;                /* Pointer to dataset to open */
 
@@ -662,6 +665,7 @@ static H5G_obj_t
 H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
+    H5O_type_t obj_type;        /* Type of object */
     const uint8_t *p;           /* Pointer to OID to store */
     H5G_obj_t ret_value;        /* Return value */
 
@@ -718,8 +722,11 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_r
     if(H5O_link(&oloc, 0, dxpl_id) <= 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, H5G_UNKNOWN, "dereferencing deleted object")
 
-    /* Get the OID type */
-    ret_value = H5O_obj_type(&oloc, dxpl_id);
+    /* Get the object type */
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get object type")
+
+    ret_value = H5G_map_obj_type(obj_type);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
