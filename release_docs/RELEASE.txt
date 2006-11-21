@@ -160,6 +160,12 @@ New Features
 
     Library:
     --------
+       - Added new H5Oopen_by_idx() routine to open an object in a group
+            according to the order within an index.
+            - QAK - 2006/11/20
+       - Added new H5Literate() routine to iterate over links in a group
+            according to the order within an index.
+            - QAK - 2006/11/20
        - Added new H5Ldelete_by_idx() routine to delete a link according to
             the order within an index.
             - QAK - 2006/11/13

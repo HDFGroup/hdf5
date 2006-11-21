@@ -74,6 +74,7 @@ const char *FILENAME[] = {
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
+#define CORDER_SOFT_GROUP_NAME  "corder_soft_group"
 #define CORDER_NLINKS               18
 #define CORDER_ITER_STOP            3
 #define CORDER_EST_ENTRY_LEN        9
@@ -6978,7 +6979,6 @@ error:
 
     return -1;
 } /* end delete_by_idx_old() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -7828,6 +7828,518 @@ error:
 
     return -1;
 } /* end link_iterate_old() */
+#endif /* QAK */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_by_idx_check
+ *
+ * Purpose:     Check opening by index in a group
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 21, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
+    H5L_index_t idx_type, H5_iter_order_t order, unsigned max_links,
+    haddr_t *objno)
+{
+    char        mntname[NAME_BUF_SIZE]; /* Link value */
+    hid_t       group_id;       /* ID of group to test */
+    H5G_stat_t  sb;             /* Buffer for querying object's info */
+    haddr_t     obj_addr;       /* Address of object in file */
+    haddr_t     mnt_root_addr;  /* Address of root group in file to mount */
+    hid_t       obj_id;         /* ID of object opened */
+    unsigned    mnt_idx;        /* Index to mount group on */
+    unsigned    u, v;           /* Local index variables */
+
+    /* Work through main & soft link groups */
+    for(v = 0; v < 2; v++) {
+        /* Choose appropriate group to open links within */
+        switch(v) {
+            case 0:
+                group_id = main_group_id;
+                break;
+
+            case 1:
+                group_id = soft_group_id;
+                break;
+        } /* end switch */
+
+        /* Open each object in main group by index and check that it's the correct one */
+        for(u = 0; u < max_links; u++) {
+            /* Open the object */
+            if((obj_id = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT)) < 0) TEST_ERROR
+
+            /* Get the object's information */
+            if(H5Gget_objinfo(obj_id, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+            obj_addr = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+            obj_addr = (haddr_t)sb.objno[0];
+#endif
+
+            /* Check that the object is the correct one */
+            if(order == H5_ITER_INC) {
+                if(H5F_addr_ne(obj_addr, objno[u])) TEST_ERROR
+            } /* end if */
+            else if(order == H5_ITER_DEC) {
+                unsigned dec_u = max_links - (u + 1);       /* Decreasing mapped index */
+
+                if(H5F_addr_ne(obj_addr, objno[dec_u])) TEST_ERROR
+            } /* end if */
+            else {
+                /* XXX: What to do about native order? */
+            } /* end else */
+
+            /* Close object */
+            if(H5Oclose(obj_id) < 0) TEST_ERROR
+        } /* end for */
+    } /* end for */
+
+
+    /*
+     * Verify opening correct object by index when file mounting is present
+     */
+
+    /* Get the address of the root group in the file to mount */
+    if(H5Gget_objinfo(mount_file_id, "/", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+    mnt_root_addr = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+    mnt_root_addr = (haddr_t)sb.objno[0];
+#endif
+
+    /* Mount a file over a group in main group */
+    mnt_idx = 2;
+    sprintf(mntname, "/%s/filler %02u", CORDER_GROUP_NAME, mnt_idx);
+    if(H5Fmount(main_group_id, mntname, mount_file_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open the object that the file is mounted on */
+    if((obj_id = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)mnt_idx, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Get the object's information */
+    if(H5Gget_objinfo(obj_id, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+    obj_addr = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+    obj_addr = (haddr_t)sb.objno[0];
+#endif
+
+    /* Check that the object is the root of the mounted file and not in the previous file */
+    if(H5F_addr_ne(obj_addr, mnt_root_addr)) TEST_ERROR
+    if(H5F_addr_eq(obj_addr, objno[mnt_idx])) TEST_ERROR
+
+    /* Close object */
+    if(H5Oclose(obj_id) < 0) TEST_ERROR
+
+    /* Unmount the file */
+    if(H5Funmount(main_group_id, mntname) < 0) TEST_ERROR
+
+
+    /* Success */
+    return(0);
+
+error:
+    return(-1);
+} /* end open_by_idx_check() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_by_idx
+ *
+ * Purpose:     Create a group with creation order indices and test opening
+ *              objects by index.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 21, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+open_by_idx(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	mount_file_id = (-1); 	/* File ID for file to mount */
+    hid_t	group_id = (-1);	/* Group ID */
+    hid_t	soft_group_id = (-1);	/* Group ID for soft links */
+    hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_iter_order_t order;              /* Order within in the index */
+    hbool_t     use_index;              /* Use index on creation order values */
+    unsigned    max_compact;            /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
+    H5G_stat_t  sb;                     /* Buffer for querying object's info */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        valname[NAME_BUF_SIZE]; /* Link value */
+    haddr_t     *objno = NULL;          /* Addresses of the objects created */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
+
+    /* Query the group creation properties */
+    if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
+
+    /* Allocate object address array */
+    if(NULL == (objno = HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
+
+    /* Create file to mount */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((mount_file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Loop over operating on different indices on link fields */
+    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+        /* Loop over operating in different orders */
+        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+            /* Loop over using index for creation order value */
+            for(use_index = FALSE; use_index <= TRUE; use_index++) {
+                /* Print appropriate test message */
+                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                    if(order == H5_ITER_INC) {
+                        if(use_index)
+                            TESTING("open object by creation order index in increasing order w/creation order index")
+                        else
+                            TESTING("open object by creation order index in increasing order w/o creation order index")
+                    } /* end if */
+                    else if(order == H5_ITER_DEC) {
+                        if(use_index)
+                            TESTING("open object by creation order index in decreasing order w/creation order index")
+                        else
+                            TESTING("open object by creation order index in decreasing order w/o creation order index")
+                    } /* end else */
+                    else {
+                        HDassert(order == H5_ITER_NATIVE);
+                        if(use_index)
+                            TESTING("open object by creation order index in native order w/creation order index")
+                        else
+                            TESTING("open object by creation order index in native order w/o creation order index")
+                    } /* end else */
+                } /* end if */
+                else {
+                    if(order == H5_ITER_INC) {
+                        if(use_index)
+                            TESTING("open object by name index in increasing order w/creation order index")
+                        else
+                            TESTING("open object by name index in increasing order w/o creation order index")
+                    } /* end if */
+                    else if(order == H5_ITER_DEC) {
+                        if(use_index)
+                            TESTING("open object by name index in decreasing order w/creation order index")
+                        else
+                            TESTING("open object by name index in decreasing order w/o creation order index")
+                    } /* end else */
+                    else {
+                        HDassert(order == H5_ITER_NATIVE);
+                        if(use_index)
+                            TESTING("open object by name index in native order w/creation order index")
+                        else
+                            TESTING("open object by name index in native order w/o creation order index")
+                    } /* end else */
+                } /* end else */
+
+                /* Create file */
+                h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+                if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+                /* Set creation order tracking & indexing on group */
+                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
+                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+
+                /* Create group with creation order tracking on */
+                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
+                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+                /* Create group with creation order tracking on for soft links */
+                if((soft_group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
+                if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+
+                /* Try to open on object in an empty group */
+                H5E_BEGIN_TRY {
+                    ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                } H5E_END_TRY;
+                if(ret >= 0) TEST_ERROR
+
+
+                /* Create several links, up to limit of compact form */
+                for(u = 0; u < max_compact; u++) {
+                    hid_t group_id2;	        /* Group ID */
+
+                    /* Make name for link */
+                    sprintf(objname, "filler %02u", u);
+
+                    /* Create hard link, with group object */
+                    if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+
+                    /* Retrieve group's address on disk */
+                    if(H5Gget_objinfo(group_id2, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+                    objno[u] = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+                    objno[u] = (haddr_t)sb.objno[0];
+#endif
+
+                    /* Close group created */
+                    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+                    /* Create soft link in another group, to objects in main group */
+                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                } /* end for */
+
+                /* Verify state of group (compact) */
+                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+
+                /* Check for out of bound open by index on compact group */
+                H5E_BEGIN_TRY {
+                    ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                } H5E_END_TRY;
+                if(ret >= 0) TEST_ERROR
+
+                /* Verify opening objects by index */
+                if(open_by_idx_check(group_id, soft_group_id, mount_file_id, idx_type, order, u, objno) < 0) TEST_ERROR
+
+
+                /* Create more links, to push group into dense form */
+                for(; u < (max_compact * 2); u++) {
+                    hid_t group_id2;	        /* Group ID */
+
+                    /* Make name for link */
+                    sprintf(objname, "filler %02u", u);
+
+                    /* Create hard link, with group object */
+                    if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+
+                    /* Retrieve group's address on disk */
+                    if(H5Gget_objinfo(group_id2, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+                    objno[u] = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+                    objno[u] = (haddr_t)sb.objno[0];
+#endif
+
+                    /* Close group created */
+                    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+                    /* Create soft link in another group, to objects in main group */
+                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                } /* end for */
+
+                /* Verify state of group (dense) */
+                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+
+                /* Check for out of bound open by index on compact group */
+                H5E_BEGIN_TRY {
+                    ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                } H5E_END_TRY;
+                if(ret >= 0) TEST_ERROR
+
+                /* Verify opening objects by index */
+                if(open_by_idx_check(group_id, soft_group_id, mount_file_id, idx_type, order, u, objno) < 0) TEST_ERROR
+
+
+                /* Close the groups */
+                if(H5Gclose(group_id) < 0) TEST_ERROR
+                if(H5Gclose(soft_group_id) < 0) TEST_ERROR
+
+                /* Close the file */
+                if(H5Fclose(file_id) < 0) TEST_ERROR
+
+                PASSED();
+            } /* end for */
+        } /* end for */
+    } /* end for */
+
+    /* Close the file for mounting */
+    if(H5Fclose(mount_file_id) < 0) TEST_ERROR
+
+    /* Close the group creation property list */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+
+    /* Free resources */
+    if(objno)
+        HDfree(objno);
+
+    return 0;
+
+error:
+    /* Free resources */
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl_id);
+        H5Gclose(group_id);
+        H5Gclose(soft_group_id);
+        H5Fclose(file_id);
+        H5Fclose(mount_file_id);
+    } H5E_END_TRY;
+
+    if(objno)
+        HDfree(objno);
+
+    return -1;
+} /* end open_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_by_idxold_
+ *
+ * Purpose:     Create an old-style group and test opening
+ *              objects by index.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 21, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+open_by_idx_old(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	mount_file_id = (-1); 	/* File ID for file to mount */
+    hid_t	group_id = (-1);	/* Group ID */
+    hid_t	soft_group_id = (-1);	/* Group ID for soft links */
+    H5_iter_order_t order;              /* Order within in the index */
+    H5G_stat_t  sb;                     /* Buffer for querying object's info */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        valname[NAME_BUF_SIZE]; /* Link value */
+    haddr_t     *objno = NULL;          /* Addresses of the objects created */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic return value */
+
+    /* Allocate object address array */
+    if(NULL == (objno = HDmalloc(sizeof(haddr_t) * CORDER_NLINKS))) TEST_ERROR
+
+    /* Create file to mount */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((mount_file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Loop over operating in different orders */
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        /* Print appropriate test message */
+        if(order == H5_ITER_INC) {
+            TESTING("open object by name index in increasing order in old-style group")
+        } /* end if */
+        else if(order == H5_ITER_DEC) {
+            TESTING("open object by name index in decreasing order in old-style group")
+        } /* end else */
+        else {
+            HDassert(order == H5_ITER_NATIVE);
+            TESTING("open object by name index in native order in old-style group")
+        } /* end else */
+
+        /* Create file */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+        if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+        /* Create old-style group */
+        if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+        /* Create group with creation order tracking on for soft links */
+        if((soft_group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+        if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+
+        /* Try to open on object in an empty group */
+        H5E_BEGIN_TRY {
+            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+
+        /* Create several links */
+        for(u = 0; u < CORDER_NLINKS; u++) {
+            hid_t group_id2;	        /* Group ID */
+
+            /* Make name for link */
+            sprintf(objname, "filler %02u", u);
+
+            /* Create hard link, with group object */
+            if((group_id2 = H5Gcreate(group_id, objname, (size_t)0)) < 0) TEST_ERROR
+
+            /* Retrieve group's address on disk */
+            if(H5Gget_objinfo(group_id2, ".", FALSE, &sb) < 0) TEST_ERROR
+#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
+            objno[u] = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+#else
+            objno[u] = (haddr_t)sb.objno[0];
+#endif
+
+            /* Close group created */
+            if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+            /* Create soft link in another group, to objects in main group */
+            sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+            if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        } /* end for */
+
+        /* Verify state of group (symbol table) */
+        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+
+        /* Check for out of bound open by index */
+        H5E_BEGIN_TRY {
+            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Check for creation order index open */
+        H5E_BEGIN_TRY {
+            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(ret >= 0) TEST_ERROR
+
+        /* Verify opening objects by index */
+        if(open_by_idx_check(group_id, soft_group_id, mount_file_id, H5L_INDEX_NAME, order, u, objno) < 0) TEST_ERROR
+
+
+        /* Close the groups */
+        if(H5Gclose(group_id) < 0) TEST_ERROR
+        if(H5Gclose(soft_group_id) < 0) TEST_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file_id) < 0) TEST_ERROR
+
+        PASSED();
+    } /* end for */
+
+    /* Close the file for mounting */
+    if(H5Fclose(mount_file_id) < 0) TEST_ERROR
+
+    /* Free resources */
+    if(objno)
+        HDfree(objno);
+
+    return 0;
+
+error:
+    /* Free resources */
+    H5E_BEGIN_TRY {
+        H5Gclose(group_id);
+        H5Gclose(soft_group_id);
+        H5Fclose(file_id);
+        H5Fclose(mount_file_id);
+    } H5E_END_TRY;
+
+    if(objno)
+        HDfree(objno);
+
+    return -1;
+} /* end open_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -7936,17 +8448,18 @@ main(void)
                 nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
                 nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
                 nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
+                nerrors += open_by_idx(fapl2) < 0 ? 1 : 0;
             } /* end if */
             else {
                 /* Test new API calls on old-style groups */
                 nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
                 nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
                 nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
+                nerrors += open_by_idx_old(fapl) < 0 ? 1 : 0;
             }
         } /* end for */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
-            nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
 #endif /* QAK */
 
         /* Close 2nd FAPL */
