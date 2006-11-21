@@ -372,7 +372,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
      * fcpl */
     if(shared->sohm_addr != HADDR_UNDEF)
     {
-        unsigned index_flags[H5SM_MAX_NUM_INDEXES];
+        unsigned index_flags[H5SM_MAX_NUM_INDEXES] = {0};
         size_t   sohm_l2b;           /* SOHM list-to-btree cutoff    */
         size_t   sohm_b2l;           /* SOHM btree-to-list cutoff    */
 

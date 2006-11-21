@@ -388,6 +388,9 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         size_t	size;               /* Header size on disk */
         hsize_t x;
 
+        /* JAMES: consider only writing as many messages as necessary, and then adding a
+         * blank "end of list" message or something?
+         */
         size = H5SM_LIST_SIZE(f, list->header->num_messages);
 
         /* Encode the list */
@@ -502,6 +505,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     for(x=header->num_messages; x<header->list_to_btree; x++)
     {
         list->messages[x].fheap_id = 0; /* JAMES: would making this one operation make it faster? */
+        list->messages[x].ref_count = 0;
         list->messages[x].hash = H5O_HASH_UNDEF;
     }
 
