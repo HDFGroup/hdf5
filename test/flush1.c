@@ -112,7 +112,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-hid_t extend_file(hid_t file)
+static hid_t
+extend_file(hid_t file)
 { 
     hid_t	dcpl, space, dset;
     hsize_t	ds_size[2] = {100, 100};
