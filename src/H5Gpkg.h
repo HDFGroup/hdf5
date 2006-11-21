@@ -434,6 +434,8 @@ H5_DLL herr_t H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk,
 H5_DLL herr_t H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info,
     haddr_t lheap_addr, const H5G_entry_t *ent);
 H5_DLL herr_t H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *linfo);
+H5_DLL herr_t H5G_link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
+    H5G_loc_t *obj_loc);
 H5_DLL herr_t H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id,
     const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk,
     H5O_copy_t *cpy_info);
@@ -529,7 +531,7 @@ H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char 
 /*
  * These functions operate on group "locations"
  */
-H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5_copy_depth_t depth);
+H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, hid_t dxpl_id);
 

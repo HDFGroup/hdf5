@@ -268,6 +268,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
+    /* Open the object */
     if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
@@ -279,6 +280,81 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen_by_idx
+ *
+ * Purpose:	Opens an object within an HDF5 file, according to the offset
+ *              within an index.
+ *
+ *              This function opens an object in the same way that H5Gopen,
+ *              H5Topen, and H5Dopen do. However, H5Oopen doesn't require
+ *              the type of object to be known beforehand. This can be
+ *              useful in user-defined links, for instance, when only a
+ *              path is known.
+ *
+ *              The opened object should be closed again with H5Oclose
+ *              or H5Gclose, H5Tclose, or H5Dclose.
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 20 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t lapl_id)
+{
+    H5G_loc_t	loc;
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(H5Oopen_by_idx, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location, according to the order in the index */
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    loc_found = TRUE;
+
+    /* Open the object */
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+done:
+    if(ret_value < 0)
+        if(loc_found)
+            if(H5G_loc_free(&obj_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oopen_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -332,7 +408,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(addr == 0)
+    if(!H5F_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no address supplied")
 
     /* Set up opened group location to fill in */
@@ -341,18 +417,17 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5G_loc_reset(&obj_loc);
     obj_loc.oloc->addr = addr;
     obj_loc.oloc->file = loc.oloc->file;
-    H5G_name_reset(obj_loc.path);
+    H5G_name_reset(obj_loc.path);       /* objects opened through this routine don't have a path name */
 
+    /* Open the object */
     if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0) {
-        if(loc_found) {
+    if(ret_value < 0)
+        if(loc_found)
             if(H5G_loc_free(&obj_loc) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-        }
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */

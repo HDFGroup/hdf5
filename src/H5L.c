@@ -1935,7 +1935,7 @@ H5L_get_val_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
-    H5O_link_t grp_lnk;                 /* Link within group */
+    H5O_link_t fnd_lnk;                 /* Link within group */
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1947,18 +1947,18 @@ H5L_get_val_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 
     /* Query link */
     if(H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order,
-                udata->n, &grp_lnk, udata->dxpl_id) < 0)
+                udata->n, &fnd_lnk, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
     lnk_copied = TRUE;
 
     /* Retrieve the value for the link */
-    if(H5L_get_val_real(&grp_lnk, udata->buf, udata->size) < 0)
+    if(H5L_get_val_real(&fnd_lnk, udata->buf, udata->size) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value")
 
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &grp_lnk);
+        H5O_reset(H5O_LINK_ID, &fnd_lnk);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -2610,7 +2610,7 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gibi_t *udata = (H5L_trav_gibi_t *)_udata;   /* User data passed in */
-    H5O_link_t grp_lnk;                 /* Link within group */
+    H5O_link_t fnd_lnk;                 /* Link within group */
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2622,18 +2622,18 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 
     /* Query link */
     if(H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order,
-                udata->n, &grp_lnk, udata->dxpl_id) < 0)
+                udata->n, &fnd_lnk, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
     lnk_copied = TRUE;
 
     /* Get information from the link */
-    if(H5G_link_to_info(&grp_lnk, udata->linfo) < 0)
+    if(H5G_link_to_info(&fnd_lnk, udata->linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &grp_lnk);
+        H5O_reset(H5O_LINK_ID, &fnd_lnk);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */

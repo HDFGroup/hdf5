@@ -22,10 +22,17 @@
  *
  *-------------------------------------------------------------------------
  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
 #include "H5Dprivate.h"		/* Datasets				*/
@@ -33,21 +40,61 @@
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
-/* Private typedefs */
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for looking up an object in a group */
 typedef struct {
+    /* upward */
     H5G_loc_t  *loc;            /* Group location to set */
-} H5G_loc_ud1_t;
+} H5G_loc_fnd_t;
 
-/* Private macros */
+/* User data for looking up an object in a group by index */
+typedef struct {
+    /* downward */
+    hid_t dxpl_id;              /* DXPL to use for operation */
+    H5L_index_t idx_type;       /* Index to use */
+    H5_iter_order_t order;      /* Iteration order within index */
+    hsize_t n;                  /* Offset within index */
 
-/* Local variables */
+    /* upward */
+    H5G_loc_t  *loc;            /* Group location to set */
+} H5G_loc_fbi_t;
 
-/* PRIVATE PROTOTYPES */
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/* Group traversal callbacks */
 static herr_t H5G_loc_find_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
     H5G_own_loc_t *own_loc/*out*/);
+static herr_t H5G_loc_find_by_idx_cb(H5G_loc_t *grp_loc, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
+    H5G_own_loc_t *own_loc/*out*/);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -184,7 +231,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_copy(H5G_loc_t *dst, H5G_loc_t *src, H5_copy_depth_t depth)
+H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -261,10 +308,6 @@ H5G_loc_free(H5G_loc_t *loc)
     HDassert(loc);
 
     /* Reset components of the location */
-#ifdef NOT_YET
-    if(H5G_ent_free(loc->ent) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to free entry")
-#endif /* NOT_YET */
     if(H5G_name_free(loc->path) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free path")
     if(H5O_loc_free(loc->oloc) < 0)
@@ -291,8 +334,8 @@ static herr_t
 H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
-    H5G_loc_ud1_t *udata = (H5G_loc_ud1_t *)_udata;   /* User data passed in */
-    herr_t ret_value = SUCCEED;              /* Return value */
+    H5G_loc_fnd_t *udata = (H5G_loc_fnd_t *)_udata;   /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_cb)
 
@@ -328,8 +371,8 @@ herr_t
 H5G_loc_find(H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc/*out*/,
     hid_t lapl_id, hid_t dxpl_id)
 {
-    H5G_loc_ud1_t udata;                /* User data for traversal callback */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5G_loc_fnd_t udata;                /* User data for traversal callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_loc_find, FAIL)
 
@@ -348,6 +391,99 @@ H5G_loc_find(H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc/*out*/,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_find() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_find_by_idx_cb
+ *
+ * Purpose:	Callback for retrieving object location for an object in a group
+ *              according to the order within an index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
+{
+    H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata;   /* User data passed in */
+    H5O_link_t fnd_lnk;                 /* Link within group */
+    hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_by_idx_cb)
+
+    /* Check if the name in this group resolved to a valid link */
+    if(obj_loc == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group doesn't exist")
+
+    /* Query link */
+    if(H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order,
+                udata->n, &fnd_lnk, udata->dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
+    lnk_copied = TRUE;
+
+    /* Build the object location for the link */
+
+done:
+    /* Reset the link information, if we have a copy */
+    if(lnk_copied)
+        H5O_reset(H5O_LINK_ID, &fnd_lnk);
+
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_find_by_idx_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_find_by_idx
+ *
+ * Purpose:	Find a symbol from a location, according to the order in an index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, November 20, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5G_loc_t *obj_loc/*out*/, hid_t lapl_id,
+    hid_t dxpl_id)
+{
+    H5G_loc_fbi_t udata;                /* User data for traversal callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_loc_find_by_idx, FAIL)
+
+    /* Check args. */
+    HDassert(loc);
+    HDassert(group_name && *group_name);
+    HDassert(obj_loc);
+
+    /* Set up user data for locating object */
+    udata.dxpl_id = dxpl_id;
+    udata.idx_type = idx_type;
+    udata.order = order;
+    udata.n = n;
+    udata.loc = obj_loc;
+
+    /* Traverse group hierarchy to locate object */
+    if(H5G_traverse(loc, group_name, H5G_TARGET_NORMAL, H5G_loc_find_by_idx_cb, &udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_find_by_idx() */
 
 
 /*-------------------------------------------------------------------------

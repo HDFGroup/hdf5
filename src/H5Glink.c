@@ -415,6 +415,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_link_to_loc
+ *
+ * Purpose:	Build group location from group and link object 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November 20 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
+    H5G_loc_t *obj_loc)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_link_to_loc, FAIL)
+
+    /* Sanity check */
+    HDassert(grp_loc);
+    HDassert(lnk);
+    HDassert(obj_loc);
+
+    /*
+     * Build location from the link
+     */
+
+    /* Check for unknown library-internal link */
+    if(lnk->type > H5L_TYPE_BUILTIN_MAX && lnk->type < H5L_TYPE_UD_MIN)
+        HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "unknown link type")
+
+    /* Build object's group hier. location */
+    if(H5G_name_set(grp_loc->path, obj_loc->path, lnk->name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name")
+
+    /* Set the object location, if it's a hard link set the address also */
+    obj_loc->oloc->file = grp_loc->oloc->file;
+    obj_loc->oloc->holding_file = FALSE;
+    if(lnk->type == H5L_TYPE_HARD)
+        obj_loc->oloc->addr = lnk->u.hard.addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_link_to_loc() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_link_copy_file
  *
  * Purpose:     Copy a link and the object it points to from one file to

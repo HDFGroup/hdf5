@@ -52,13 +52,13 @@ static char *H5G_comp_g = NULL;                 /*component buffer      */
 static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_traverse_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5G_traverse_link_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
+static herr_t H5G_traverse_ud(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
-static herr_t H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
+static herr_t H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5G_traverse_mount(H5G_loc_t *loc/*in,out*/);
@@ -147,7 +147,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_traverse_ud(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
+H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t _lapl_id,
     hid_t dxpl_id)
 {
@@ -291,9 +291,7 @@ done:
  *		whose entry is GRP_LOC and the link tail entry is OBJ_LOC.
  *
  * Return:	Success:	Non-negative, OBJ_LOC will contain information
- *				about the object to which the link points and
- *				GRP_LOC will contain the information about
- *				the group in which the link tail appears.
+ *				about the object to which the link points
  *
  *		Failure:	Negative
  *
@@ -303,7 +301,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_traverse_slink(H5G_loc_t *grp_loc/*in,out*/, H5O_link_t *lnk,
+H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, size_t *nlinks/*in,out*/, hid_t lapl_id,
     hid_t dxpl_id)
 {
@@ -432,6 +430,90 @@ H5G_traverse_mount(H5G_loc_t *obj_loc/*in,out*/)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_mount() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_traverse_special
+ *
+ * Purpose:	Handle traversing special link situations
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov 20 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
+    unsigned target, size_t *nlinks, hbool_t last_comp,
+    H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_special)
+
+    /* Sanity check */
+    HDassert(grp_loc);
+    HDassert(lnk);
+    HDassert(obj_loc);
+    HDassert(nlinks);
+
+    /*
+     * If we found a symbolic link then we should follow it.  But if this
+     * is the last component of the name and the H5G_TARGET_SLINK bit of
+     * TARGET is set then we don't follow it.
+     */
+    if(H5L_TYPE_SOFT == lnk->type &&
+            (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
+        if((*nlinks)-- <= 0)
+            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
+        if(H5G_traverse_slink(grp_loc, lnk, obj_loc, nlinks, lapl_id, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "symbolic link traversal failed")
+    } /* end if */
+
+    /*
+     * If we found a user-defined link then we should follow it.  But if this
+     * is the last component of the name and the H5G_TARGET_UDLINK bit of
+     * TARGET is set then we don't follow it.
+     */
+    if(lnk->type >= H5L_TYPE_UD_MIN &&
+            (0 == (target & H5G_TARGET_UDLINK) || !last_comp) ) {
+        if((*nlinks)-- <= 0)
+            HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
+        if(H5G_traverse_ud(grp_loc, lnk, obj_loc, nlinks, lapl_id, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "user-defined link traversal failed")
+    } /* end if */
+
+    /*
+     * Resolve mount points to the mounted group.  Do not do this step if
+     * the H5G_TARGET_MOUNT bit of TARGET is set and this is the last
+     * component of the name.
+     *
+     * (If this link is a hard link, try to perform mount point traversal)
+     *
+     * (Note that the soft and external link traversal above can change
+     *  the status of the object (into a hard link), so don't use an 'else'
+     *  statement here. -QAK)
+     */
+    if(H5F_addr_defined(obj_loc->oloc->addr) &&
+            (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
+        if(H5G_traverse_mount(obj_loc/*in,out*/) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
+    } /* end if */
+
+    /* If the grp_loc is the only thing holding an external file open
+     * and obj_loc is in the same file, obj_loc should also hold the
+     * file open so that closing the grp_loc doesn't close the file.
+     */
+    if(grp_loc->oloc->holding_file && grp_loc->oloc->file == obj_loc->oloc->file)
+        if(H5O_loc_hold_file(obj_loc->oloc) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_traverse_special() */
 
 
 /*-------------------------------------------------------------------------
@@ -564,75 +646,22 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         /* (Defer issuing error for bad lookup until later) */
         lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id);
 
-        /* If the lookup was OK, try traversing soft links and mount points, if allowed */
+        /* If the lookup was OK, build object location and traverse special links, etc. */
         if(lookup_status >= 0) {
-            /* Indicate that the link info is valid */
+            /* Sanity check link and indicate it's valid */
             HDassert(lnk.type >= H5L_TYPE_HARD);
-            if(lnk.type >H5L_TYPE_BUILTIN_MAX && lnk.type < H5L_TYPE_UD_MIN)
-                HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "unknown link type")
+            HDassert(!HDstrcmp(H5G_comp_g, lnk.name));
             link_valid = TRUE;
 
-            /* Build object's group hier. location */
-            if(H5G_name_set(grp_loc.path, obj_loc.path, H5G_comp_g) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name")
-
-            /* Set the object location, if it's a hard link set the address also */
-            obj_loc.oloc->file = grp_loc.oloc->file;
-            obj_loc.oloc->holding_file = FALSE;
-            if(lnk.type == H5L_TYPE_HARD)
-                obj_loc.oloc->addr = lnk.u.hard.addr;
+            /* Build object location from the link */
+            if(H5G_link_to_loc(&grp_loc, &lnk, &obj_loc) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location")
             obj_loc_valid = TRUE;
 
-            /*
-             * If we found a symbolic link then we should follow it.  But if this
-             * is the last component of the name and the H5G_TARGET_SLINK bit of
-             * TARGET is set then we don't follow it.
-             */
-            if(H5L_TYPE_SOFT == lnk.type &&
-                    (0 == (target & H5G_TARGET_SLINK) || !last_comp)) {
-                if((*nlinks)-- <= 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
-                if(H5G_traverse_slink(&grp_loc/*in,out*/, &lnk/*in*/, &obj_loc, nlinks, lapl_id, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "symbolic link traversal failed")
-            } /* end if */
-
-            /*
-             * If we found a user-defined link then we should follow it.  But if this
-             * is the last component of the name and the H5G_TARGET_UDLINK bit of
-             * TARGET is set then we don't follow it.
-             */
-            if(lnk.type >= H5L_TYPE_UD_MIN &&
-                    (0 == (target & H5G_TARGET_UDLINK) || !last_comp) ) {
-                if((*nlinks)-- <= 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_NLINKS, FAIL, "too many links")
-                if(H5G_traverse_ud(&grp_loc/*in,out*/, &lnk/*in*/, &obj_loc, nlinks, lapl_id, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "user-defined link traversal failed")
-            } /* end if */
-
-            /*
-             * Resolve mount points to the mounted group.  Do not do this step if
-             * the H5G_TARGET_MOUNT bit of TARGET is set and this is the last
-             * component of the name.
-             *
-             * (If this link is a hard link, try to perform mount point traversal)
-             *
-             * (Note that the soft and external link traversal above can change
-             *  the status of the object (into a hard link), so don't use an 'else'
-             *  statement here. -QAK)
-             */
-            if(H5F_addr_defined(obj_loc.oloc->addr) &&
-                    (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
-                if(H5G_traverse_mount(&obj_loc/*in,out*/) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
-            } /* end if */
-
-            /* If the grp_loc is the only thing holding an external file open
-             * and obj_loc is in the same file, obj_loc should also hold the
-             * file open so that closing the grp_loc doesn't close the file.
-             */
-            if(grp_loc.oloc->holding_file && grp_loc.oloc->file == obj_loc.oloc->file)
-                if(H5O_loc_hold_file(obj_loc.oloc) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
+            /* Perform any special traversals that the link needs */
+            /* (soft links, user-defined links, file mounting, etc.) */
+            if(H5G_traverse_special(&grp_loc, &lnk, target, nlinks, last_comp, &obj_loc, lapl_id, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
         } /* end if */
 
         /* Check for last component in name provided */

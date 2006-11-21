@@ -29,8 +29,13 @@
 #define _H5Opublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
+#include "H5public.h"		/* Generic Functions			*/
+#include "H5Ipublic.h"		/* IDs			  		*/
+#include "H5Lpublic.h"		/* Links		  		*/
+
+/*****************/
+/* Public Macros */
+/*****************/
 
 /* Flags for object copy (H5Ocopy) */
 #define H5O_COPY_SHALLOW_HIERARCHY_FLAG (0x0001u)   /* Copy only immediate members */
@@ -57,6 +62,10 @@
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
 
 
+/*******************/
+/* Public Typedefs */
+/*******************/
+
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
     hsize_t free;               /* Free space within object header */
@@ -64,12 +73,23 @@ typedef struct H5O_stat_t {
     unsigned nchunks;           /* Number of object header chunks */
 } H5O_stat_t;
 
+
+/********************/
+/* Public Variables */
+/********************/
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*********************/
+/* Public Prototypes */
+/*********************/
 H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
+H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
@@ -79,4 +99,5 @@ H5_DLL herr_t H5Oclose(hid_t object_id);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Opublic_H */
+
