@@ -21,8 +21,6 @@
  * Purpose:             Public declarations for the H5O (object header)
  *                      package.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5Opublic_H
@@ -55,10 +53,10 @@
  */
 #define H5O_MESG_NONE_FLAG     0x0000          /* No shared messages */
 #define H5O_MESG_SDSPACE_FLAG  0x0001          /* Simple Dataspace Message.  */
-#define H5O_MESG_DTYPE_FLAG	   0x0002          /* Datatype Message.  */
+#define H5O_MESG_DTYPE_FLAG    0x0002          /* Datatype Message.  */
 #define H5O_MESG_FILL_FLAG     0x0004          /* Fill Value Message. */
-#define H5O_MESG_PLINE_FLAG	   0x0008          /* Filter pipeline message.  */
-#define H5O_MESG_ATTR_FLAG	   0x0010          /* Attribute Message.  */
+#define H5O_MESG_PLINE_FLAG    0x0008          /* Filter pipeline message.  */
+#define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
 
 
@@ -66,12 +64,41 @@
 /* Public Typedefs */
 /*******************/
 
+/* A struct that's part of the H5G_stat_t routine (deprecated) */
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
     hsize_t free;               /* Free space within object header */
     unsigned nmesgs;            /* Number of object header messages */
     unsigned nchunks;           /* Number of object header chunks */
 } H5O_stat_t;
+
+/* Types of objects in file */
+typedef enum H5O_type_t {
+    H5O_TYPE_UNKNOWN = -1,	/* Unknown object type		*/
+    H5O_TYPE_GROUP,	        /* Object is a group		*/
+    H5O_TYPE_DATASET,		/* Object is a dataset		*/
+    H5O_TYPE_NAMED_DATATYPE,	/* Object is a named data type	*/
+} H5O_type_t;
+
+/* Information struct for object (for H5Oget_info/H5Oget_info_by_idx) */
+typedef struct H5O_info_t {
+    unsigned long 	fileno;		/* File number that object is located in */
+    haddr_t 		addr;		/* Object address in file	*/
+    H5O_type_t 		type;		/* Basic object type (group, dataset, etc.) */
+    unsigned 		rc;		/* Reference count of object    */
+    time_t		mtime;		/* Modification time		*/
+    struct {
+        unsigned version;		/* Version number of header format in file */
+        hsize_t size;			/* Total size of object header in file */
+        hsize_t free;			/* Free space within object header */
+        unsigned nmesgs;		/* Number of object header messages */
+        unsigned nchunks;		/* Number of object header chunks */
+        uint64_t msg_present;		/* Flags to indicate presence of message type in header */
+        uint64_t msg_shared;		/* Flags to indicate message type is shared in header */
+    } hdr;
+    hsize_t             extra;          /* Size of additional metadata for an object */
+                                        /* (B-tree & heap for groups, B-tree for chunked dataset, etc.) */
+} H5O_info_t;
 
 
 /********************/
@@ -90,6 +117,8 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+H5_DLL herr_t H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo,
+    hid_t lapl_id);
 H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
