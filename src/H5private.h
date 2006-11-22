@@ -427,23 +427,7 @@
 #endif
 
 /* Definition of int64_t was moved to H5public.h */
-
-#if H5_SIZEOF_UINT64_T>=8
-#elif H5_SIZEOF_INT>=8
-    typedef unsigned uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG>=8
-    typedef unsigned long uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG>=8
-    typedef unsigned long_long uint64_t;
-#   undef H5_SIZEOF_UINT64_T
-#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#   error "nothing appropriate for uint64_t"
-#endif
+/* Definition of uint64_t was moved to H5public.h */
 
 /*
  * Maximum and minimum values.	These should be defined in <limits.h> for the

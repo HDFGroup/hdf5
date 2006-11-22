@@ -227,6 +227,26 @@ typedef ssize_t			hssize_t;
 #   error "nothing appropriate for int64_t"
 #endif
 
+/* uint64_t type is used for fields for H5O_info_t.  It may be
+ * defined in Posix.1g, otherwise it is defined here.
+ */
+#if H5_SIZEOF_UINT64_T>=8
+#elif H5_SIZEOF_INT>=8
+    typedef unsigned uint64_t;
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG>=8
+    typedef unsigned long uint64_t;
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
+#elif H5_SIZEOF_LONG_LONG>=8
+    typedef unsigned long_long uint64_t;
+#   undef H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for uint64_t"
+#endif
+
 /* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,       /* Unknown order */
