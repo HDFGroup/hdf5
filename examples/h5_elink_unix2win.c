@@ -144,7 +144,7 @@ unix2win_example()
 
     /* Create the target file. */
 #ifdef WIN32
-    if((fid=H5Fcreate("u2w\u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
+    if((fid=H5Fcreate("u2w\\u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 #else
     if((fid=H5Fcreate("u2w/u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 #endif
