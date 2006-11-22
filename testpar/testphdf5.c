@@ -308,28 +308,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
     return (ret_pl);
 }
 
-/*
- * Check the size of a file using MPI routines
- */
-MPI_Offset
-h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
-{
-    MPI_File	fh;             /* MPI file handle */
-    MPI_Offset	size=0;         /* File size to return */
-
-    if (MPI_SUCCESS != MPI_File_open(comm, (char*)filename, MPI_MODE_RDONLY, info, &fh))
-        goto done;
-
-    if (MPI_SUCCESS != (MPI_File_get_size(fh, &size)))
-        goto done;
-
-    if (MPI_SUCCESS != MPI_File_close(&fh))
-        size=0;
-
-done:
-    return(size);
-}
-
 int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
