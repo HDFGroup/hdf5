@@ -77,7 +77,7 @@ typedef enum H5O_type_t {
     H5O_TYPE_UNKNOWN = -1,	/* Unknown object type		*/
     H5O_TYPE_GROUP,	        /* Object is a group		*/
     H5O_TYPE_DATASET,		/* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE,	/* Object is a named data type	*/
+    H5O_TYPE_NAMED_DATATYPE 	/* Object is a named data type	*/
 } H5O_type_t;
 
 /* Information struct for object (for H5Oget_info/H5Oget_info_by_idx) */
