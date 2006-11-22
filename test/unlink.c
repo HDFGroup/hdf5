@@ -529,8 +529,8 @@ test_filespace(void)
     hsize_t     attr_dims[FILESPACE_ATTR_NDIMS]= {FILESPACE_ATTR_DIM0, FILESPACE_ATTR_DIM1};        /* Attribute dimensions */
     int        *data = NULL;    /* Pointer to dataset buffer */
     int        *tmp_data;       /* Temporary pointer to dataset buffer */
-    off_t       empty_size;     /* Size of an empty file */
-    off_t       file_size;      /* Size of each file created */
+    h5_stat_size_t	empty_size;     /* Size of an empty file */
+    h5_stat_size_t	file_size;      /* Size of each file created */
     herr_t	status;         /* Function status return value */
     unsigned u,v,w;             /* Local index variables */
 
@@ -572,7 +572,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of an empty file */
-    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((empty_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
 /* Create common objects for datasets */
 
@@ -629,7 +629,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -653,7 +653,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -677,7 +677,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -701,7 +701,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -725,7 +725,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -771,7 +771,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -795,7 +795,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -858,7 +858,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -885,7 +885,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -909,7 +909,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -939,7 +939,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -968,7 +968,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1048,7 +1048,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1081,7 +1081,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1114,7 +1114,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1151,7 +1151,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1200,7 +1200,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))<0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;

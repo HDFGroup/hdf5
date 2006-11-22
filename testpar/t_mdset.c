@@ -334,7 +334,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
+    file_size=h5_get_file_size(filename);
     VRFY((file_size == 2147485696ULL), "File is correct size");
 
     /*
@@ -363,7 +363,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
+    file_size=h5_get_file_size(filename);
     VRFY((file_size == 4294969344ULL), "File is correct size");
 
     /*
@@ -392,7 +392,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_mpi_get_file_size(filename, MPI_COMM_WORLD, MPI_INFO_NULL);
+    file_size=h5_get_file_size(filename);
     VRFY((file_size == 8589936640ULL), "File is correct size");
 
     /* Close fapl */
@@ -1569,7 +1569,7 @@ void io_mode_confusion(void)
 
 
     if ( verbose )
-        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank);
+        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);
 
     return;
 

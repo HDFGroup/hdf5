@@ -1398,8 +1398,8 @@ test_attr_dtype_shared(void)
     int data=8;                 /* Data to write */
     int rdata=0;                /* Read read in */
     H5G_stat_t statbuf;         /* Object's information */
-    off_t empty_filesize;       /* Size of empty file */
-    off_t filesize;             /* Size of file after modifications */
+    h5_stat_size_t empty_filesize;       /* Size of empty file */
+    h5_stat_size_t filesize;             /* Size of file after modifications */
     herr_t  ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1415,7 +1415,7 @@ test_attr_dtype_shared(void)
 
     /* Get size of file */
     empty_filesize=h5_get_file_size(FILENAME);
-    if(empty_filesize==0)
+    if(empty_filesize<0)
         TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
 
     /* Re-open file */
