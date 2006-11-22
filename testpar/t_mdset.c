@@ -1708,7 +1708,7 @@ void io_mode_confusion(void)
 
 
     if ( verbose )
-        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank);
+        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);
 
     return;
 
