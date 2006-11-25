@@ -2975,10 +2975,10 @@ test_nested_survive(hid_t fapl)
     if(H5Funmount(gidA, ".") < 0)
         TEST_ERROR
 
-    /* Check name (should be unavailable) */
+    /* Check name */
     if((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len != 0)
+    if(name_len == 0 || HDstrcmp(name, "/M"))
         TEST_ERROR
 
     /* Open object in file #3 through file #1 mount path (should fail) */

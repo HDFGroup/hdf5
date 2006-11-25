@@ -100,29 +100,7 @@
 /* User data for path traversal routine for "insertion file" routine */
 typedef struct {
     H5G_loc_t *loc;         /* Pointer to the location for insertion */
-} H5G_trav_ud1_t;
-
-/* User data for path traversal routine for getting object info */
-typedef struct {
-    H5G_stat_t  *statbuf;			/* Stat buffer about object */
-    hbool_t follow_link;                        /* Whether we are following a link or not */
-    H5F_t *loc_file;                            /* Pointer to the file the location is in */
-    hid_t dxpl_id;                              /* Dataset transfer property list */
-} H5G_trav_ud4_t;
-
-/* User data for path traversal routine for inserting object */
-typedef struct {
-    H5G_loc_t *obj_loc;         /* Object location */
-    hid_t dxpl_id;              /* Dataset transfer property list */
-} H5G_trav_ud7_t;
-
-/* User data for path traversal routine for getting external link name */
-typedef struct {
-    hbool_t want_file_name;                     /* Whether to retrieve file name (or object name) */
-    size_t size;                                /* Size of user buffer */
-    char *lname;                                /* User name buffer */
-    size_t name_len;                            /* Full length of name found */
-} H5G_trav_ud8_t;
+} H5G_trav_ins_t;
 
 /* Package variables */
 
@@ -135,9 +113,6 @@ H5FL_DEFINE(H5G_shared_t);
 /* Private prototypes */
 static H5G_t *H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
 static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
-static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
-    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -596,88 +571,6 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_num_objs() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gget_objtype_by_idx
- *
- * Purpose:     Returns the type of objects in the group by giving index.
- *
- *
- * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
- *
- *		Failure:	H5G_UNKNOWN
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
-{
-    H5G_loc_t		loc;            /* Object location */
-    H5O_type_t          obj_type;       /* Type of object at location */
-    H5G_obj_t		ret_value;
-
-    FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN)
-    H5TRACE2("Go","ih",loc_id,idx);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
-    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
-
-    /* Call internal function*/
-    if((ret_value = H5G_obj_get_type_by_idx(loc.oloc, idx, H5AC_ind_dxpl_id)) == H5G_UNKNOWN)
-	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object type")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_objtype_by_idx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gget_objinfo
- *
- * Purpose:	Returns information about an object.  If FOLLOW_LINK is
- *		non-zero then all symbolic links are followed; otherwise all
- *		links except the last component of the name are followed.
- *
- * Return:	Non-negative on success, with the fields of STATBUF (if
- *              non-null) initialized. Negative on failure.
- *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
-	       H5G_stat_t *statbuf/*out*/)
-{
-    H5G_loc_t	loc;
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Gget_objinfo, FAIL)
-    H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
-
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-
-    /* Get info */
-    if(H5G_get_objinfo(&loc, name, follow_link, statbuf, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_objinfo() */
 
 
 /*-------------------------------------------------------------------------
@@ -1566,164 +1459,6 @@ H5G_map_obj_type(H5O_type_t obj_type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_get_objinfo_cb
- *
- * Purpose:	Callback for retrieving info about an object.  This routine
- *              gets the info
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 20, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
-{
-    H5G_trav_ud4_t *udata = (H5G_trav_ud4_t *)_udata;   /* User data passed in */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_get_objinfo_cb)
-
-    /* Check if the name in this group resolved to a valid link */
-    if(lnk == NULL && obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
-
-    /* Only modify user's buffer if it's available */
-    if(udata->statbuf) {
-        H5G_stat_t *statbuf = udata->statbuf;   /* Convenience pointer for statbuf */
-
-        /* Reset buffer */
-        HDmemset(statbuf, 0, sizeof(H5G_stat_t));
-
-        /* Common code to retrieve the file's fileno */
-        /* (Use the object location's file info, if it's available) */
-        if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
-
-        /* Info for soft and UD links is gotten by H5L_get_info. If we have
-         *      a hard link, follow it and get info on the object
-         */
-        if(udata->follow_link || !lnk || (lnk->type == H5L_TYPE_HARD)) {
-            H5O_type_t obj_type;        /* Type of object */
-
-            /* Get object type */
-            if(H5O_obj_type(obj_loc->oloc, &obj_type, udata->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
-
-            /* Map object type to older group object type */
-            statbuf->type = H5G_map_obj_type(obj_type);
-
-	    /* Get basic info for object */
-	    statbuf->objno[0] = (unsigned long)(obj_loc->oloc->addr);
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-	    statbuf->objno[1] = (unsigned long)(obj_loc->oloc->addr >> 8 * sizeof(long));
-#else
-	    statbuf->objno[1] = 0;
-#endif
-	    statbuf->nlink = H5O_link(obj_loc->oloc, 0, udata->dxpl_id);
-
-            /* Get creation time for object */
-            if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_ID, 0, &(statbuf->mtime), udata->dxpl_id)) {
-                H5E_clear_stack(NULL);
-                if(NULL == H5O_read(obj_loc->oloc, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), udata->dxpl_id)) {
-                    H5E_clear_stack(NULL);
-                    statbuf->mtime = 0;
-                } /* end if */
-            } /* end if */
-
-            /* Get object header information */
-            if(H5O_get_stat(obj_loc->oloc, &(statbuf->ohdr), udata->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
-        } /* end if */
-    } /* end if */
-
-done:
-    /* Indicate that this callback didn't take ownership of the group *
-     * location for the object */
-    *own_loc = H5G_OWN_NONE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_objinfo_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_get_objinfo
- *
- * Purpose:	Returns information about an object.
- *
- * Return:	Success:	Non-negative with info about the object
- *				returned through STATBUF if it isn't the null
- *				pointer.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
-    H5G_stat_t *statbuf/*out*/, hid_t dxpl_id)
-{
-    H5G_trav_ud4_t udata;           /* User data for callback */
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_get_objinfo, FAIL)
-
-    HDassert(loc);
-    HDassert(name && *name);
-
-    /* Set up user data for retrieving information */
-    udata.statbuf = statbuf;
-    udata.follow_link = follow_link;
-    udata.loc_file = loc->oloc->file;
-    udata.dxpl_id = dxpl_id;
-
-    /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(loc, name, (unsigned)(follow_link ? H5G_TARGET_NORMAL : H5G_TARGET_SLINK|H5G_TARGET_UDLINK),
-            H5G_get_objinfo_cb, &udata, H5P_DEFAULT, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
-
-    /* Assign object type and link length for soft links and UD links */
-    /* The default linklen (for non-links) is 0. */
-    if(statbuf)
-        statbuf->linklen = 0;
-
-    /* If we're pointing at a soft or UD link, get the real link length and type */
-    if(statbuf && follow_link == 0)
-    {
-        H5L_info_t linfo;           /* Link information buffer */
-        herr_t ret;
-
-        /* Get information about link to the object. If this fails, e.g.
-         * because the object is ".", just treat the object as a hard link. */
-        H5E_BEGIN_TRY {
-            ret = H5L_get_info(loc, name, &linfo, H5P_DEFAULT, dxpl_id);
-        } H5E_END_TRY
-
-        if(ret >=0 && linfo.type != H5L_TYPE_HARD)
-        {
-            statbuf->linklen = linfo.u.val_size;
-            if(linfo.type == H5L_TYPE_SOFT)
-                statbuf->type = H5G_LINK;
-            else  /* UD link. H5L_get_info checked for invalid link classes */
-            {
-                HDassert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
-                statbuf->type = H5G_UDLINK;
-            }
-        } /* end if */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_objinfo() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_insertion_loc_cb
  *
  * Purpose:	Callback for finding insertion location.  This routine sets the
@@ -1740,7 +1475,7 @@ static herr_t
 H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
-    H5G_trav_ud1_t *udata = (H5G_trav_ud1_t *)_udata;   /* User data passed in */
+    H5G_trav_ins_t *udata = (H5G_trav_ins_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_insertion_loc_cb)
@@ -1781,7 +1516,7 @@ herr_t
 H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
     H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id)
 {
-    H5G_trav_ud1_t udata;           /* User data for traversal */
+    H5G_trav_ins_t udata;           /* User data for traversal */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_insertion_loc, FAIL)

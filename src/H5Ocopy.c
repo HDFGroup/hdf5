@@ -336,6 +336,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Initialize header information */
     oh_dst->version = oh_src->version;
     oh_dst->nlink = 0;
+    oh_dst->skipped_mesg_size = 0;
 
     /* Initialize size of chunk array.  The destination always has only one
      * chunk.

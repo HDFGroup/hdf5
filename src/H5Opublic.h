@@ -89,10 +89,12 @@ typedef struct H5O_info_t {
     time_t		mtime;		/* Modification time		*/
     struct {
         unsigned version;		/* Version number of header format in file */
-        hsize_t size;			/* Total size of object header in file */
-        hsize_t free;			/* Free space within object header */
         unsigned nmesgs;		/* Number of object header messages */
         unsigned nchunks;		/* Number of object header chunks */
+        hsize_t hdr_size;		/* Total size of object header in file */
+        hsize_t meta_space;		/* Space within header for object header metadata information */
+        hsize_t mesg_space;		/* Space within header for actual message information */
+        hsize_t free_space;		/* Free space within object header */
         uint64_t msg_present;		/* Flags to indicate presence of message type in header */
         uint64_t msg_shared;		/* Flags to indicate message type is shared in header */
     } hdr;

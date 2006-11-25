@@ -390,6 +390,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             /* Skip header messages we don't know about */
             /* (Usually from future versions of the library) */
 	    if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
+                /* Increment the size of the message skipped over (for later sanity checking) */
+                oh->skipped_mesg_size += H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
+
                 /* Increment skipped messages counter */
                 skipped_msgs++;
             } /* end if */

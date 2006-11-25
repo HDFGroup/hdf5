@@ -93,12 +93,28 @@ H5O_assert(const H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;               /* Pointer to current message to examine */
     H5O_mesg_t *tmp_msg;                /* Pointer to temporary message to examine */
+    size_t meta_space;                  /* Size of header metadata */
+    size_t mesg_space;                  /* Size of message raw data */
+    size_t free_space;                  /* Size of free space in header */
+    size_t hdr_size;                    /* Size of header's chunks */
     unsigned u, v;                      /* Local index variables */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_assert)
 
+    /* Initialize the space tracking variables */
+    hdr_size = 0;
+    meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    mesg_space = 0;
+    free_space = 0;
+
     /* Loop over all chunks in object header */
     for(u = 0; u < oh->nchunks; u++) {
+        /* Accumulate the size of the header on header */
+        hdr_size += oh->chunk[u].size;
+
+        /* If the chunk has a gap, add it to the free space */
+        free_space += oh->chunk[u].gap;
+
         /* Check for valid raw data image */
         HDassert(oh->chunk[u].image);
         HDassert(oh->chunk[u].size > (size_t)H5O_SIZEOF_CHKHDR_OH(oh));
@@ -121,6 +137,16 @@ H5O_assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        /* Accumulate information, based on the type of message */
+	if(H5O_NULL_ID == curr_msg->type->id)
+            free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else if(H5O_CONT_ID == curr_msg->type->id)
+            meta_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else {
+            meta_space += H5O_SIZEOF_MSGHDR_OH(oh);
+            mesg_space += curr_msg->raw_size;
+        } /* end else */
+
         /* Make certain that the message is in a valid chunk */
         HDassert(curr_msg->chunkno < oh->nchunks);
 
@@ -142,6 +168,9 @@ H5O_assert(const H5O_t *oh)
                 HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
         } /* end for */
     } /* end for */
+
+    /* Sanity check that all the bytes are accounted for */
+    HDassert(hdr_size == (free_space + meta_space + mesg_space + oh->skipped_mesg_size));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_assert() */

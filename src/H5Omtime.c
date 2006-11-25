@@ -266,8 +266,8 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the
      * modification time message. This really isn't as bad as it sounds -- the
-     * only way a user can get the modification time is from H5Gget_objinfo()
-     * and H5G_get_objinfo() can gracefully recover.
+     * only way a user can get the modification time is from our internal
+     * query routines, which can gracefully recover.
      */
 
     /* Irix64 */

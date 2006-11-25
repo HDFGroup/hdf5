@@ -68,6 +68,15 @@ typedef struct {
     H5G_loc_t  *loc;            /* Group location to set */
 } H5G_loc_fbi_t;
 
+/* User data for getting an object's info in a group */
+typedef struct {
+    /* downward */
+    hid_t dxpl_id;              /* DXPL to use for operation */
+
+    /* upward */
+    H5O_info_t  *oinfo;         /* Object information to retrieve */
+} H5G_loc_info_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -550,4 +559,82 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_info_cb
+ *
+ * Purpose:	Callback for retrieving object info for an object in a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 23, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_loc_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+{
+    H5G_loc_info_t *udata = (H5G_loc_info_t *)_udata;   /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_info_cb)
+
+    /* Check if the name in this group resolved to a valid link */
+    if(obj_loc == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+
+    /* Query object information */
+    if(H5O_get_info(obj_loc->oloc, udata->oinfo, udata->dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
+
+done:
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_info_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_info
+ *
+ * Purpose:	Retrieve the information for an object from a group location
+ *              and path to that object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, November 23, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc_info(H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/,
+    hid_t lapl_id, hid_t dxpl_id)
+{
+    H5G_loc_info_t udata;               /* User data for traversal callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_loc_info, FAIL)
+
+    /* Check args. */
+    HDassert(loc);
+    HDassert(name && *name);
+    HDassert(oinfo);
+
+    /* Set up user data for locating object */
+    udata.dxpl_id = dxpl_id;
+    udata.oinfo = oinfo;
+
+    /* Traverse group hierarchy to locate object */
+    if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G_loc_info_cb, &udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_info() */
 

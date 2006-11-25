@@ -495,7 +495,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
 
     /* Expand soft link */
     if(H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link) {
-        H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
+        H5O_info_t  oinfo;          /* Information about object pointed to by soft link */
         H5G_loc_t   grp_loc;        /* Group location holding soft link */
         H5G_name_t  grp_path;       /* Path for group holding soft link */
 
@@ -509,18 +509,11 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
         grp_loc.oloc = (H5O_loc_t *)src_oloc;    /* Casting away const OK -QAK */
 
         /* Check if the object pointed by the soft link exists in the source file */
-        /* (It would be more efficient to make a specialized traversal callback,
-         *      but this is good enough for now... -QAK)
-         */
-        if(H5G_get_objinfo(&grp_loc, tmp_src_lnk.u.soft.name, TRUE, &statbuf, dxpl_id) >= 0) {
+        if(H5G_loc_info(&grp_loc, tmp_src_lnk.u.soft.name, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
             /* Convert soft link to hard link */
             tmp_src_lnk.u.soft.name = H5MM_xfree(tmp_src_lnk.u.soft.name);
             tmp_src_lnk.type = H5L_TYPE_HARD;
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-            tmp_src_lnk.u.hard.addr = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
-#else
-            tmp_src_lnk.u.hard.addr = statbuf.objno[0];
-#endif
+            tmp_src_lnk.u.hard.addr = oinfo.addr;
             src_lnk = &tmp_src_lnk;
         } /* end if */
         else {

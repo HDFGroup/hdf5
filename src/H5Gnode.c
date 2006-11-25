@@ -1829,7 +1829,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 
         /* expand soft link */
         if(H5G_CACHED_SLINK == src_ent->type && cpy_info->expand_soft_link) {
-            H5G_stat_t  statbuf;        /* Information about object pointed to by soft link */
+            H5O_info_t  oinfo;          /* Information about object pointed to by soft link */
             H5G_loc_t   grp_loc;        /* Group location holding soft link */
             H5G_name_t  grp_path;       /* Path for group holding soft link */
             char *link_name;            /* Pointer to value of soft link */
@@ -1846,15 +1846,8 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             link_name = (char *)H5HL_offset_into(f, heap, tmp_src_ent.cache.slink.lval_offset);
 
             /* Check if the object pointed by the soft link exists in the source file */
-            /* (It would be more efficient to make a specialized traversal callback,
-             *      but this is good enough for now... -QAK)
-             */
-            if(H5G_get_objinfo(&grp_loc, link_name, TRUE, &statbuf, dxpl_id) >= 0) {
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-                tmp_src_ent.header = (((haddr_t)statbuf.objno[1]) << (8 * sizeof(long))) | (haddr_t)statbuf.objno[0];
-#else
-                tmp_src_ent.header = statbuf.objno[0];
-#endif
+            if(H5G_loc_info(&grp_loc, link_name, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
+                tmp_src_ent.header = oinfo.addr;
                 src_ent = &tmp_src_ent;
             } /* end if */
             else

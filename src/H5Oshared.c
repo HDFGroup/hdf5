@@ -101,16 +101,14 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
  *		koziol@ncsa.uiuc.edu
  *		Sep 24 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
-H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_class_t *type, void *mesg)
+H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
+    const H5O_msg_class_t *type, void *mesg)
 {
-    haddr_t fheap_addr;
     H5HF_t *fheap = NULL;
-    unsigned char *buf=NULL;    /* Pointer to raw message in heap */
+    unsigned char *buf = NULL;  /* Pointer to raw message in heap */
     void * native_mesg = NULL;  /* Only used for messages shared in heap */
     void *ret_value = NULL;     /* Return value */
 
@@ -126,16 +124,20 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_cla
      */
     HDassert(shared->flags != H5O_NOT_SHARED);
 
-    if(shared->flags & H5O_SHARED_IN_HEAP_FLAG )
-    {
+    /* Check for implicit shared object header message */
+    if(shared->flags & H5O_SHARED_IN_HEAP_FLAG) {
+        haddr_t fheap_addr;
         size_t buf_size;
 
+        /* Retrieve the fractal heap address for shared messages */
         if((fheap_addr = H5SM_get_fheap_addr(f, type->id, dxpl_id)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, NULL, "can't get fheap address for shared messages")
 
-        if(NULL == (fheap =H5HF_open(f, dxpl_id, fheap_addr)))
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, fheap_addr)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap")
 
+        /* Get the size of the message in the heap */
         if(H5HF_get_obj_len(fheap, dxpl_id, &(shared->u.heap_id), &buf_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, NULL, "can't get message size from fractal heap.")
 
@@ -143,6 +145,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_cla
         if(NULL == (buf = HDmalloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+        /* Retrieve the message from the heap */
         if(H5HF_read(fheap, dxpl_id, &(shared->u.heap_id), buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
@@ -151,23 +154,25 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_cla
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
         /* Make sure that this message is labeled as shared */
-        assert(type->set_share);
+        HDassert(type->set_share);
         if(((type->set_share)(f, native_mesg, shared)) < 0)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
-        ret_value = H5O_copy(type->id, native_mesg, mesg);
-    }
-    else
-    {
+        /* Get a copy of the message to return */
+        if(NULL == (ret_value = H5O_copy(type->id, native_mesg, mesg)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy message")
+    } /* end if */
+    else {
         HDassert(shared->flags & H5O_COMMITTED_FLAG);
-        /* Get the shared message from an object header*/
-        if(NULL == (ret_value = H5O_read_real(&(shared->u.oloc), type, 0, mesg, dxpl_id)))
-            HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL, "unable to read message")
-    }
+
+        /* Get the shared message from an object header */
+        if(NULL == (ret_value = H5O_read(&(shared->u.oloc), type->id, 0, mesg, dxpl_id)))
+            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read message")
+    } /* end else */
 
     /* Mark the message as shared */
     if(type->set_share && (type->set_share)(f, ret_value, shared) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
 done:
     if(buf)

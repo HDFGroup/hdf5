@@ -149,8 +149,6 @@ H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL herr_t H5G_free(H5G_t *grp);
 H5_DLL H5G_t *H5G_open(H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
-H5_DLL herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
-    hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
     H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
@@ -196,6 +194,8 @@ H5_DLL herr_t H5G_loc_find(H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5G_loc_t *obj_loc/*out*/, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5G_loc_info(H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/,
+    hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_free(H5G_loc_t *loc);
 

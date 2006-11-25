@@ -125,6 +125,8 @@ static void * H5O_copy_real(const H5O_msg_class_t *type, const void *mesg,
         void *dst);
 static int H5O_count_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
         hid_t dxpl_id);
+static void *H5O_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence,
+    void *mesg, hid_t dxpl_id);
 static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
                                  const H5O_msg_class_t **type_p, int sequence);
 static int H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
@@ -147,7 +149,6 @@ static herr_t H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type
     H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
 static const H5O_obj_class_t *H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
-static herr_t H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id);
 
 /*********************/
 /* Package Variables */
@@ -581,14 +582,9 @@ herr_t
 H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-    H5G_loc_t   obj_loc;                /* Location used to open object */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oopen, FAIL)
-    H5TRACE3("i","isi",loc_id,name,lapl_id);
+    FUNC_ENTER_API(H5Oget_info, FAIL)
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -603,25 +599,11 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up opened object location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+    /* Retrieve the object's information */
+    if(H5G_loc_info(&loc, name, oinfo/*out*/, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Get the information about the object */
-    if(H5O_get_info(obj_loc.oloc, oinfo, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(loc_found)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info() */
 
@@ -801,6 +783,7 @@ H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
     /* Initialize rudimentary information object object header */
     oh->version = H5F_USE_LATEST_FORMAT(f) ? H5O_VERSION_LATEST : H5O_VERSION_1;
     oh->nlink = 0;
+    oh->skipped_mesg_size = 0;
 
     /* Compute total size of initial object header */
     /* (i.e. object header prefix and first chunk) */
@@ -1512,7 +1495,7 @@ H5O_exists_oh(H5O_t *oh, unsigned type_id, int sequence)
 void *
 H5O_read(const H5O_loc_t *loc, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
+    H5O_t *oh = NULL;                   /* Object header to use */
     void *ret_value;                    /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_read, NULL)
@@ -1522,15 +1505,20 @@ H5O_read(const H5O_loc_t *loc, unsigned type_id, int sequence, void *mesg, hid_t
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(type_id < NELMTS(H5O_msg_class_g));
-    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
-    HDassert(type);
     HDassert(sequence >= 0);
 
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
+
     /* Call the "real" read routine */
-    if((ret_value = H5O_read_real(loc, type, sequence, mesg, dxpl_id)) == NULL)
+    if((ret_value = H5O_read_real(loc->file, oh, type_id, sequence, mesg, dxpl_id)) == NULL)
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header")
 
 done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_read() */
 
@@ -1558,28 +1546,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
+static void *
+H5O_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
 {
-    H5O_t          *oh = NULL;
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     int             idx;
     void           *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_read_real)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(f);
+    HDassert(oh);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(sequence >= 0);
 
-    /* copy the message to the user-supplied buffer */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
-
     /* can we get it from the object header? */
-    if((idx = H5O_find_in_ohdr(loc->file, dxpl_id, oh, &type, sequence)) < 0)
+    if((idx = H5O_find_in_ohdr(f, dxpl_id, oh, &type, sequence)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header")
 
     if(oh->mesg[idx].flags & H5O_FLAG_SHARED) {
@@ -1591,7 +1576,7 @@ H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence, v
 	H5O_shared_t *shared;
 
 	shared = (H5O_shared_t *)(oh->mesg[idx].native);
-        ret_value = H5O_shared_read(loc->file, dxpl_id, shared, type, mesg);
+        ret_value = H5O_shared_read(f, dxpl_id, shared, type, mesg);
     } else {
 	/*
 	 * The message is not shared, but rather exists in the object
@@ -1599,14 +1584,11 @@ H5O_read_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence, v
 	 * the raw message) so we must copy the native message before
 	 * returning.
 	 */
-	if(NULL == (ret_value = (type->copy) (oh->mesg[idx].native, mesg, 0)))
+	if(NULL == (ret_value = (type->copy)(oh->mesg[idx].native, mesg, 0)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end else */
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_read_real() */
 
@@ -3107,65 +3089,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_stat
- *
- * Purpose:	Retrieve information about an object header
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Oct  7 2003
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5O_get_stat(H5O_loc_t *loc, H5O_stat_t *ostat, hid_t dxpl_id)
-{
-    H5O_t *oh = NULL;           /* Object header information */
-    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
-    hsize_t total_size;         /* Total amount of space used in file */
-    hsize_t free_space;         /* Free space in object header */
-    unsigned u;                 /* Local index variable */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(H5O_get_stat, FAIL)
-
-    /* Check args */
-    HDassert(loc);
-    HDassert(ostat);
-
-    /* Get the object header information */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
-
-    /* Iterate over all the messages, accumulating the total size & free space */
-    total_size = H5O_SIZEOF_HDR_OH(oh);
-    free_space = 0;
-    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-        /* Accumulate the size for this message */
-        total_size += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
-
-        /* Check for this message being free space */
-	if(H5O_NULL_ID == curr_msg->type->id)
-            free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
-    } /* end for */
-
-    /* Set the information for this object header */
-    ostat->size = total_size;
-    ostat->free = free_space;
-    ostat->nmesgs = oh->nmesgs;
-    ostat->nchunks = oh->nchunks;
-
-done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_get_stat() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_encode
  *
  * Purpose:	Encode an object(data type and simple data space only)
@@ -3867,10 +3790,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Object header */
+    H5O_chunk_t *curr_chunk;	        /* Pointer to current message being operated on */
+    H5O_mesg_t *curr_msg;               /* Pointer to current message being operated on */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_get_info, FAIL)
@@ -3879,10 +3805,80 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     HDassert(oloc);
     HDassert(oinfo);
 
-    /* Get the object header information */
+    /* Get the object header */
     if(NULL == (oh = H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
+    /* Retrieve the file's fileno */
+    if(H5F_get_fileno(oloc->file, &oinfo->fileno) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to read fileno")
+
+    /* Set the object's address */
+    oinfo->addr = oloc->addr;
+
+    /* Retrieve the type of the object */
+    if(H5O_obj_type_real(oh, &oinfo->type) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+
+    /* Set the object's reference count */
+    oinfo->rc = oh->nlink;
+
+    /* Get modification time for object */
+    if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->mtime, dxpl_id)) {
+        H5E_clear_stack(NULL);
+        if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->mtime, dxpl_id)) {
+            H5E_clear_stack(NULL);
+            oinfo->mtime = 0;
+        } /* end if */
+    } /* end if */
+
+    /* Set the version for the object header */
+    oinfo->hdr.version = oh->version;
+
+    /* Set the number of messages & chunks */
+    oinfo->hdr.nmesgs = oh->nmesgs;
+    oinfo->hdr.nchunks = oh->nchunks;
+
+    /* Iterate over all the messages, accumulating message size & type information */
+    oinfo->hdr.meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    oinfo->hdr.mesg_space = 0;
+    oinfo->hdr.free_space = 0;
+    oinfo->hdr.msg_present = 0;
+    oinfo->hdr.msg_shared = 0;
+    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        uint64_t type_flag;             /* Flag for message type */
+
+        /* Accumulate information, based on the type of message */
+	if(H5O_NULL_ID == curr_msg->type->id)
+            oinfo->hdr.free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else if(H5O_CONT_ID == curr_msg->type->id)
+            oinfo->hdr.meta_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else {
+            oinfo->hdr.meta_space += H5O_SIZEOF_MSGHDR_OH(oh);
+            oinfo->hdr.mesg_space += curr_msg->raw_size;
+        } /* end else */
+
+        /* Set flag to indicate present of message type */
+        type_flag = ((uint64_t)1) << curr_msg->type->id;
+        oinfo->hdr.msg_present |= type_flag;
+
+        /* Set flag if the message is shared in some way */
+        if(curr_msg->flags & H5O_FLAG_SHARED)                                   \
+            oinfo->hdr.msg_shared |= type_flag;
+    } /* end for */
+
+    /* Iterate over all the chunks, adding any gaps to the free space */
+    oinfo->hdr.hdr_size = 0;
+    for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
+        /* Accumulate the size of the header on header */
+        oinfo->hdr.hdr_size += curr_chunk->size;
+
+        /* If the chunk has a gap, add it to the free space */
+        oinfo->hdr.free_space += curr_chunk->gap;
+    } /* end for */
+
+    /* Sanity check that all the bytes are accounted for */
+    HDassert(oinfo->hdr.hdr_size == (oinfo->hdr.free_space + oinfo->hdr.meta_space + oinfo->hdr.mesg_space + oh->skipped_mesg_size));
 
 done:
     if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
