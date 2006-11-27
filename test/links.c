@@ -8377,6 +8377,7 @@ object_info_check(hid_t main_group_id, hid_t soft_group_id, H5L_index_t idx_type
 
             /* Check that the object is the correct one */
             if(H5F_addr_ne(oinfo.addr, objno[u])) TEST_ERROR
+            if(H5F_addr_ne(oinfo.num_attrs, u)) TEST_ERROR
 
             /* Query the object's information, by index */
             if(H5Oget_info_by_idx(group_id, ".", idx_type, order, (hsize_t)u, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
@@ -8384,11 +8385,13 @@ object_info_check(hid_t main_group_id, hid_t soft_group_id, H5L_index_t idx_type
             /* Check that the object is the correct one */
             if(order == H5_ITER_INC) {
                 if(H5F_addr_ne(oinfo.addr, objno[u])) TEST_ERROR
+                if(H5F_addr_ne(oinfo.num_attrs, u)) TEST_ERROR
             } /* end if */
             else if(order == H5_ITER_DEC) {
                 unsigned dec_u = max_links - (u + 1);       /* Decreasing mapped index */
 
                 if(H5F_addr_ne(oinfo.addr, objno[dec_u])) TEST_ERROR
+                if(H5F_addr_ne(oinfo.num_attrs, dec_u)) TEST_ERROR
             } /* end if */
             else {
                 /* XXX: What to do about native order? */
@@ -8426,6 +8429,7 @@ object_info(hid_t fapl)
     hid_t	group_id = (-1);	/* Group ID */
     hid_t	soft_group_id = (-1);	/* Group ID for soft links */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    hid_t       space_id = (-1);        /* Dataspace ID (for attributes) */
     H5L_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
@@ -8435,9 +8439,10 @@ object_info(hid_t fapl)
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        attrname[NAME_BUF_SIZE]; /* Attribute name */
     haddr_t     *objno = NULL;          /* Addresses of the objects created */
     herr_t      ret;                    /* Generic return value */
-    unsigned    u;                      /* Local index variable */
+    unsigned    u, v;                   /* Local index variables */
 
     /* Create group creation property list */
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
@@ -8447,6 +8452,9 @@ object_info(hid_t fapl)
 
     /* Allocate object address array */
     if(NULL == (objno = HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
+
+    /* Create dataspace for attributes */
+    if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
     for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
@@ -8524,6 +8532,7 @@ object_info(hid_t fapl)
                 /* Create several links, up to limit of compact form */
                 for(u = 0; u < max_compact; u++) {
                     hid_t group_id2;	        /* Group ID */
+                    hid_t attr_id;              /* Attribute ID */
 
                     /* Make name for link */
                     sprintf(objname, "filler %02u", u);
@@ -8534,6 +8543,18 @@ object_info(hid_t fapl)
                     /* Retrieve group's address on disk */
                     if(H5Oget_info(group_id2, ".", &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
                     objno[u] = oinfo.addr;
+
+                    /* Create attributes on new object */
+                    for(v = 0; v < u; v++) {
+                        /* Make name for attribute */
+                        sprintf(attrname, "attr %02u", v);
+
+                        /* Create attribute */
+                        if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+
+                        /* Close attribute */
+                        if(H5Aclose(attr_id) < 0) TEST_ERROR
+                    } /* end for */
 
                     /* Close group created */
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
@@ -8559,6 +8580,7 @@ object_info(hid_t fapl)
                 /* Create more links, to push group into dense form */
                 for(; u < (max_compact * 2); u++) {
                     hid_t group_id2;	        /* Group ID */
+                    hid_t attr_id;              /* Attribute ID */
 
                     /* Make name for link */
                     sprintf(objname, "filler %02u", u);
@@ -8569,6 +8591,18 @@ object_info(hid_t fapl)
                     /* Retrieve group's address on disk */
                     if(H5Oget_info(group_id2, ".", &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
                     objno[u] = oinfo.addr;
+
+                    /* Create attributes on new object */
+                    for(v = 0; v < u; v++) {
+                        /* Make name for attribute */
+                        sprintf(attrname, "attr %02u", v);
+
+                        /* Create attribute */
+                        if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+
+                        /* Close attribute */
+                        if(H5Aclose(attr_id) < 0) TEST_ERROR
+                    } /* end for */
 
                     /* Close group created */
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
@@ -8603,10 +8637,9 @@ object_info(hid_t fapl)
         } /* end for */
     } /* end for */
 
-    /* Close the group creation property list */
-    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
-
     /* Free resources */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+    if(H5Sclose(space_id) < 0) TEST_ERROR
     if(objno)
         HDfree(objno);
 
@@ -8615,6 +8648,7 @@ object_info(hid_t fapl)
 error:
     /* Free resources */
     H5E_BEGIN_TRY {
+        H5Sclose(space_id);
         H5Pclose(gcpl_id);
         H5Gclose(group_id);
         H5Gclose(soft_group_id);
@@ -8647,14 +8681,19 @@ object_info_old(hid_t fapl)
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1);	/* Group ID */
     hid_t	soft_group_id = (-1);	/* Group ID for soft links */
+    hid_t       space_id = (-1);        /* Dataspace ID (for attributes) */
     H5_iter_order_t order;              /* Order within in the index */
     H5O_info_t  oinfo;                  /* Buffer for querying object's info */
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        attrname[NAME_BUF_SIZE]; /* Attribute name */
     haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
     herr_t      ret;                    /* Generic return value */
-    unsigned    u;                      /* Local index variable */
+    unsigned    u, v;                   /* Local index variables */
+
+    /* Create dataspace for attributes */
+    if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
     /* Loop over operating in different orders */
     for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
@@ -8692,6 +8731,7 @@ object_info_old(hid_t fapl)
         /* Create several links */
         for(u = 0; u < CORDER_NLINKS; u++) {
             hid_t group_id2;	        /* Group ID */
+            hid_t attr_id;              /* Attribute ID */
 
             /* Make name for link */
             sprintf(objname, "filler %02u", u);
@@ -8702,6 +8742,18 @@ object_info_old(hid_t fapl)
             /* Retrieve group's address on disk */
             if(H5Oget_info(group_id2, ".", &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
             objno[u] = oinfo.addr;
+
+            /* Create attributes on new object */
+            for(v = 0; v < u; v++) {
+                /* Make name for attribute */
+                sprintf(attrname, "attr %02u", v);
+
+                /* Create attribute */
+                if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+
+                /* Close attribute */
+                if(H5Aclose(attr_id) < 0) TEST_ERROR
+            } /* end for */
 
             /* Close group created */
             if(H5Gclose(group_id2) < 0) TEST_ERROR
@@ -8740,11 +8792,15 @@ object_info_old(hid_t fapl)
         PASSED();
     } /* end for */
 
+    /* Free resources */
+    if(H5Sclose(space_id) < 0) TEST_ERROR
+
     return 0;
 
 error:
     /* Free resources */
     H5E_BEGIN_TRY {
+        H5Sclose(space_id);
         H5Gclose(group_id);
         H5Gclose(soft_group_id);
         H5Fclose(file_id);

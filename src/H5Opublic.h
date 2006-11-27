@@ -87,6 +87,7 @@ typedef struct H5O_info_t {
     H5O_type_t 		type;		/* Basic object type (group, dataset, etc.) */
     unsigned 		rc;		/* Reference count of object    */
     time_t		mtime;		/* Modification time		*/
+    hsize_t 		num_attrs;	/* # of attributes attached to object */
     struct {
         unsigned version;		/* Version number of header format in file */
         unsigned nmesgs;		/* Number of object header messages */

@@ -123,8 +123,6 @@ static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size,
 static herr_t H5O_reset_real(const H5O_msg_class_t *type, void *native);
 static void * H5O_copy_real(const H5O_msg_class_t *type, const void *mesg,
         void *dst);
-static int H5O_count_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
-        hid_t dxpl_id);
 static void *H5O_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
@@ -1370,8 +1368,11 @@ done:
 int
 H5O_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    int	ret_value;                      /* Return value */
+    H5O_t *oh = NULL;           /* Object header to operate on */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    int	acc;                    /* Count of the message type found */
+    unsigned u;                 /* Local index variable */
+    int	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_count, FAIL)
 
@@ -1381,46 +1382,6 @@ H5O_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
-    HDassert(type);
-
-    /* Call the "real" count routine */
-    if((ret_value = H5O_count_real(loc, type, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to count object header messages")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_count() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_count_real
- *
- * Purpose:	Counts the number of messages in an object header which are a
- *		certain type.
- *
- * Return:	Success:	Number of messages of specified type.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 21, 1998
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5O_count_real(H5O_loc_t *loc, const H5O_msg_class_t *type, hid_t dxpl_id)
-{
-    H5O_t	*oh = NULL;
-    int	acc;
-    unsigned	u;
-    int	ret_value;
-
-    FUNC_ENTER_NOAPI(H5O_count_real, FAIL)
-
-    /* Check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
     HDassert(type);
 
     /* Load the object header */
@@ -1436,11 +1397,11 @@ H5O_count_real(H5O_loc_t *loc, const H5O_msg_class_t *type, hid_t dxpl_id)
     ret_value = acc;
 
 done:
-    if (oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_count_real() */
+} /* end H5O_count() */
 
 
 /*-------------------------------------------------------------------------
@@ -3909,6 +3870,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->hdr.nchunks = oh->nchunks;
 
     /* Iterate over all the messages, accumulating message size & type information */
+    oinfo->num_attrs = 0;
     oinfo->hdr.meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     oinfo->hdr.mesg_space = 0;
     oinfo->hdr.free_space = 0;
@@ -3916,6 +3878,10 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->hdr.msg_shared = 0;
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         uint64_t type_flag;             /* Flag for message type */
+
+        /* Check for attribute message */
+	if(H5O_ATTR_ID == curr_msg->type->id)
+            oinfo->num_attrs++;
 
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)

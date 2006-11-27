@@ -12,16 +12,21 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5A_init_interface
 
 
-/* Private header files */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
-#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -29,7 +34,35 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
-/* PRIVATE PROTOTYPES */
+/****************/
+/* Local Macros */
+/****************/
+
+/* The number of reserved IDs in dataset ID group */
+#define H5A_RESERVED_ATOMS  0
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/* Object header iterator callbacks */
+/* Data structure for callback for locating the index by name */
+typedef struct H5A_iter_cb1 {
+    const char *name;
+    int idx;
+} H5A_iter_cb1;
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
 			const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 static hid_t H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
@@ -38,23 +71,54 @@ static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_
 static int H5A_get_index(H5O_loc_t *loc, const char *name, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
 static herr_t H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxpl_id);
-
-/* Object header iterator callbacks */
-/* Data structure for callback for locating the index by name */
-typedef struct H5A_iter_cb1 {
-    const char *name;
-    int idx;
-} H5A_iter_cb1;
 static herr_t H5A_find_idx_by_name(const void *mesg, unsigned idx, void *op_data);
 
-/* The number of reserved IDs in dataset ID group */
-#define H5A_RESERVED_ATOMS  0
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare the free lists for H5A_t's */
 H5FL_DEFINE(H5A_t);
 
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE(attr_buf);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_init
+ *
+ * Purpose:	Initialize the interface from some other package.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November 27, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_init, FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_init() */
 
 
 /*--------------------------------------------------------------------------
@@ -1218,62 +1282,6 @@ H5A_get_storage_size(const H5A_t *attr)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Aget_num_attrs
- PURPOSE
-    Determines the number of attributes attached to an object
- USAGE
-    int H5Aget_num_attrs (loc_id)
-        hid_t loc_id;       IN: Object (dataset or group) to be queried
- RETURNS
-    Number of attributes on success, negative on failure
-
- DESCRIPTION
-        This function returns the number of attributes attached to a dataset or
-    group, 'location_id'.
---------------------------------------------------------------------------*/
-int
-H5Aget_num_attrs(hid_t loc_id)
-{
-    H5O_loc_t    	*loc = NULL;	/* Object location for attribute */
-    void           	*obj = NULL;
-    int			ret_value;
-
-    FUNC_ENTER_API(H5Aget_num_attrs, FAIL)
-    H5TRACE1("Is","i",loc_id);
-
-    /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(NULL == (obj = H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom")
-    switch (H5I_get_type (loc_id)) {
-        case H5I_DATASET:
-            loc = H5D_oloc((H5D_t*)obj);
-            break;
-
-        case H5I_DATATYPE:
-            if(NULL == (loc = H5T_oloc((H5T_t*)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "target datatype is not committed")
-            break;
-
-        case H5I_GROUP:
-            loc = H5G_oloc((H5G_t*)obj);
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "inappropriate attribute target")
-    } /*lint !e788 All appropriate cases are covered */
-
-    /* Look up the attribute for the object */
-    ret_value = H5O_count(loc, H5O_ATTR_ID, H5AC_ind_dxpl_id);
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Aget_num_attrs() */
 
 
 /*-------------------------------------------------------------------------

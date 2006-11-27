@@ -66,8 +66,9 @@ H5FL_EXTERN(H5A_t);
 H5FL_BLK_EXTERN(attr_buf);
 
 /* Function prototypes for H5A package scope */
-H5_DLL H5A_t       *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr, unsigned update_flags);
-H5_DLL herr_t      H5A_free(H5A_t *attr);
-H5_DLL herr_t      H5A_close(H5A_t *attr);
+H5_DLL herr_t H5A_init(void);
+H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr, unsigned update_flags);
+H5_DLL herr_t H5A_free(H5A_t *attr);
+H5_DLL herr_t H5A_close(H5A_t *attr);
 
 #endif
