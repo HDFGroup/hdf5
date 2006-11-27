@@ -609,6 +609,74 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Oget_info_by_idx
+ *
+ * Purpose:	Retrieve information about an object, according to the order
+ *              of an index.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 26 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Oget_info_by_idx, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!oinfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location, according to the order in the index */
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    loc_found = TRUE;
+
+    /* Retrieve the object's information */
+    if(H5O_get_info(obj_loc.oloc, oinfo, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
+
+done:
+    /* Release the object location */
+    if(loc_found)
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_info_by_idx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_open_by_loc
  *
  * Purpose:	Opens an object and returns an ID given its group loction.

@@ -98,7 +98,7 @@ typedef struct H5O_info_t {
         uint64_t msg_present;		/* Flags to indicate presence of message type in header */
         uint64_t msg_shared;		/* Flags to indicate message type is shared in header */
     } hdr;
-    hsize_t             extra;          /* Size of additional metadata for an object */
+    hsize_t             meta_size;      /* Size of additional metadata for an object */
                                         /* (B-tree & heap for groups, B-tree for chunked dataset, etc.) */
 } H5O_info_t;
 
@@ -120,6 +120,9 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 H5_DLL herr_t H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo,
+    hid_t lapl_id);
+H5_DLL herr_t H5Oget_info_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo,
     hid_t lapl_id);
 H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
