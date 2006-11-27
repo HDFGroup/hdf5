@@ -1297,7 +1297,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     int64_t old_corder;         /* Creation order value of link */
     time_t old_modification_time;
     time_t curr_time;
-    hbool_t track_corder;       /* Status of creation order tracking for GCPL */
+    unsigned crt_order_flags;   /* Status of creation order info for GCPL */
     char filename[1024];
 
     if(new_format)
@@ -1309,11 +1309,11 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
      * in the root group
      */
     if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
-    if(H5Pget_creation_order_tracking(fcpl_id, &track_corder) < 0) TEST_ERROR
-    if(track_corder != FALSE) TEST_ERROR
-    if(H5Pset_creation_order_tracking(fcpl_id, TRUE) < 0) TEST_ERROR
-    if(H5Pget_creation_order_tracking(fcpl_id, &track_corder) < 0) TEST_ERROR
-    if(track_corder != TRUE) TEST_ERROR
+    if(H5Pget_link_creation_order(fcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != 0) TEST_ERROR
+    if(H5Pset_link_creation_order(fcpl_id, H5P_CRT_ORDER_TRACKED) < 0) TEST_ERROR
+    if(H5Pget_link_creation_order(fcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != H5P_CRT_ORDER_TRACKED) TEST_ERROR
 
     /* Create file */
     /* (with creation order tracking for the root group) */
@@ -5199,8 +5199,8 @@ corder_create_empty(hid_t fapl)
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1);	/* Group ID */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    hbool_t     track_corder;   	/* Status of creation order tracking for GCPL */
-    hbool_t     index_corder;   	/* Status of creation order indexing for GCPL */
+    unsigned    crt_order_flags;   	/* Status of creation order info for GCPL */
+    herr_t      ret;                    /* Generic return value */
     char        filename[NAME_BUF_SIZE];/* File name */
 
     TESTING("creating empty group with creation order indexing")
@@ -5213,29 +5213,25 @@ corder_create_empty(hid_t fapl)
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
 
     /* Set creation order indexing on group */
-    if(H5Pget_creation_order_index(gcpl_id, &index_corder) < 0) TEST_ERROR
-    if(index_corder != FALSE) TEST_ERROR
-    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
-    if(H5Pget_creation_order_index(gcpl_id, &index_corder) < 0) TEST_ERROR
-    if(index_corder != TRUE) TEST_ERROR
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != 0) TEST_ERROR
 
     /* Creating a group with onder creation order indexing on should fail */
     H5E_BEGIN_TRY {
-        group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT);
+        ret = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_INDEXED);
     } H5E_END_TRY;
     if(group_id > 0) {
-        H5Gclose(group_id);
 	H5_FAILED();
-	puts("    H5Gcreate_expand() should have failed for a creation order index with no tracking.");
+	puts("    H5Pset_link_create_order() should have failed for a creation order index with no tracking.");
 	TEST_ERROR
     } /* end if */
 
-    /* Set creation order tracking on group */
-    if(H5Pget_creation_order_tracking(gcpl_id, &track_corder) < 0) TEST_ERROR
-    if(track_corder != FALSE) TEST_ERROR
-    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
-    if(H5Pget_creation_order_tracking(gcpl_id, &track_corder) < 0) TEST_ERROR
-    if(track_corder != TRUE) TEST_ERROR
+    /* Set creation order tracking & indexing on group */
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != 0) TEST_ERROR
+    if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
     if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -5267,10 +5263,8 @@ corder_create_empty(hid_t fapl)
     if((gcpl_id = H5Gget_create_plist(group_id)) < 0) TEST_ERROR
 
     /* Query the group creation properties */
-    if(H5Pget_creation_order_index(gcpl_id, &index_corder) < 0) TEST_ERROR
-    if(index_corder != TRUE) TEST_ERROR
-    if(H5Pget_creation_order_tracking(gcpl_id, &track_corder) < 0) TEST_ERROR
-    if(track_corder != TRUE) TEST_ERROR
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) TEST_ERROR
+    if(crt_order_flags != (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) TEST_ERROR
 
     /* Close the group creation property list */
     if(H5Pclose(gcpl_id) < 0) TEST_ERROR
@@ -5331,8 +5325,7 @@ corder_create_compact(hid_t fapl)
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
 
     /* Set creation order tracking & indexing on group */
-    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
-    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+    if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
     if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -5453,8 +5446,7 @@ corder_create_dense(hid_t fapl)
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
 
     /* Set creation order tracking & indexing on group */
-    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
-    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+    if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
     if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -5590,8 +5582,7 @@ corder_transition(hid_t fapl)
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) FAIL_STACK_ERROR
 
     /* Set creation order tracking & indexing on group */
-    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
-    if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+    if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
     /* Query the group creation properties */
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) FAIL_STACK_ERROR
@@ -5834,8 +5825,7 @@ corder_delete(hid_t fapl)
         if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) FAIL_STACK_ERROR
 
         /* Set creation order tracking & indexing on group */
-        if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
-        if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) FAIL_STACK_ERROR
+        if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
         /* Query the group creation properties */
         if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) FAIL_STACK_ERROR
@@ -6125,9 +6115,7 @@ link_info_by_idx(hid_t fapl)
             if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
 
             /* Set creation order tracking & indexing on group */
-            if(use_index)
-                if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
-            if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+            if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
             /* Create group with creation order indexing & tracking on */
             if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -6501,9 +6489,7 @@ delete_by_idx(hid_t fapl)
                 if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
 
                 /* Set creation order tracking & indexing on group */
-                if(use_index)
-                    if(H5Pset_creation_order_index(gcpl_id, TRUE) < 0) TEST_ERROR
-                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -7359,8 +7345,7 @@ link_iterate(hid_t fapl)
                 if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
                 /* Set creation order tracking & indexing on group */
-                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
-                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -8052,8 +8037,7 @@ open_by_idx(hid_t fapl)
                 if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
                 /* Set creation order tracking & indexing on group */
-                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
-                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -8510,8 +8494,7 @@ object_info(hid_t fapl)
                 if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
                 /* Set creation order tracking & indexing on group */
-                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
-                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -8905,8 +8888,7 @@ group_info(hid_t fapl)
                 if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
                 /* Set creation order tracking & indexing on group */
-                if(H5Pset_creation_order_index(gcpl_id, use_index) < 0) TEST_ERROR
-                if(H5Pset_creation_order_tracking(gcpl_id, TRUE) < 0) TEST_ERROR
+                if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
                 if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR

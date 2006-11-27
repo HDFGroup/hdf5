@@ -395,9 +395,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_creation_order_tracking
+ * Function:    H5Pset_link_creation_order
  *
- * Purpose:     Set the flag to track creation order of links in a group
+ * Purpose:     Set the flags for creation order of links in a group
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -406,14 +406,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder)
+H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     H5O_ginfo_t ginfo;                  /* Group information structure */
+    H5O_linfo_t linfo;                  /* Link information structure */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_creation_order_tracking, FAIL)
-    H5TRACE2("e","ib",plist_id,track_corder);
+    FUNC_ENTER_API(H5Pset_link_creation_order, FAIL)
+
+        /* Check for bad combination of flags */
+    if(!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
@@ -423,16 +427,27 @@ H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder)
     if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
-    /* Update fields */
-    ginfo.track_corder = track_corder;
+    /* Update field */
+    ginfo.track_corder = (crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE;
 
     /* Set group info */
     if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
 
+    /* Get link info */
+    if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
+
+    /* Update field */
+    linfo.index_corder = (crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE;
+
+    /* Set link info */
+    if(H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
+
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_creation_order_tracking() */
+} /* end H5Pset_link_creation_order() */
 
 
 /*-------------------------------------------------------------------------
@@ -448,17 +463,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /*out*/)
+H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_creation_order_tracking, FAIL)
-    H5TRACE2("e","ix",plist_id,track_corder);
+    FUNC_ENTER_API(H5Pget_link_creation_order, FAIL)
 
     /* Get values */
-    if(track_corder) {
+    if(crt_order_flags) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5O_ginfo_t ginfo;          /* Group information structure */
+        H5O_linfo_t linfo;          /* Link information structure */
+
+        /* Reset the value to return */
+        *crt_order_flags = 0;
 
         /* Get the plist structure */
         if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
@@ -468,92 +486,16 @@ H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /*out*/)
         if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
-        *track_corder = ginfo.track_corder;
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_creation_order_tracking() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Pset_creation_order_index
- *
- * Purpose:     Set the flag to index creation order of links in a group
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              October 30, 2006
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_creation_order_index(hid_t plist_id, hbool_t index_corder)
-{
-    H5P_genplist_t *plist;              /* Property list pointer */
-    H5O_linfo_t linfo;                  /* Link information structure */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(H5Pset_creation_order_index, FAIL)
-    H5TRACE2("e","ib",plist_id,index_corder);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Get link info */
-    if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
-
-    /* Update fields */
-    linfo.index_corder = index_corder;
-
-    /* Set link info */
-    if(H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_creation_order_index() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Pget_creation_order_index
- *
- * Purpose:     Returns the flag indicating that creation order is indexed
- *              for links in a group.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              October 30, 2006
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_creation_order_index(hid_t plist_id, hbool_t *index_corder /*out*/)
-{
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pget_creation_order_index, FAIL)
-    H5TRACE2("e","ix",plist_id,index_corder);
-
-    /* Get values */
-    if(index_corder) {
-        H5P_genplist_t *plist;      /* Property list pointer */
-        H5O_linfo_t linfo;          /* Link information structure */
-
-        /* Get the plist structure */
-        if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        *crt_order_flags |= ginfo.track_corder ? H5P_CRT_ORDER_TRACKED : 0;
 
         /* Get link info */
         if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
-        *index_corder = linfo.index_corder;
+        *crt_order_flags |= linfo.index_corder ? H5P_CRT_ORDER_INDEXED : 0;
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_creation_order_index() */
+} /* end H5Pget_link_creation_order() */
 

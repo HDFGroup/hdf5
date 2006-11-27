@@ -88,6 +88,10 @@
 #define H5P_LINK_CREATE_DEFAULT		(H5OPEN H5P_LST_LINK_CREATE_g)
 #define H5P_LINK_ACCESS_DEFAULT		(H5OPEN H5P_LST_LINK_ACCESS_g)
 
+/* Common creation order flags (for links in groups and attributes on objects) */
+#define H5P_CRT_ORDER_TRACKED           0x0001
+#define H5P_CRT_ORDER_INDEXED           0x0002
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -382,10 +386,8 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
 H5_DLL herr_t H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned *min_dense /*out*/);
 H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name_len);
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
-H5_DLL herr_t H5Pset_creation_order_tracking(hid_t plist_id, hbool_t track_corder);
-H5_DLL herr_t H5Pget_creation_order_tracking(hid_t plist_id, hbool_t *track_corder /* out */);
-H5_DLL herr_t H5Pset_creation_order_index(hid_t plist_id, hbool_t index_corder);
-H5_DLL herr_t H5Pget_creation_order_index(hid_t plist_id, hbool_t *index_corder /* out */);
+H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags);
+H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /* out */);
 
 /* String creation property list (SCPL) routines */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
