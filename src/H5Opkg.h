@@ -185,7 +185,7 @@ struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     unsigned	version;		/*version number		     */
-    int		nlink;			/*link count			     */
+    unsigned	nlink;			/*link count			     */
     size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */

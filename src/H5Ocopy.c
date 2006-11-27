@@ -633,8 +633,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     /* Increment object header's reference count, if any descendents have created links to link to this object */
     if(addr_map->inc_ref_count) {
-        H5_CHECK_OVERFLOW(addr_map->inc_ref_count, hsize_t, int);
-        oh_dst->nlink += (int)addr_map->inc_ref_count;
+        H5_CHECK_OVERFLOW(addr_map->inc_ref_count, hsize_t, unsigned);
+        oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
     /* Insert destination object header in cache */

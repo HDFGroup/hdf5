@@ -157,15 +157,20 @@ typedef struct H5O_shared_t {
  * Link Info Message.
  * (Contains dynamic information about links in a group)
  * (Data structure in memory)
+ * (if the fields in this struct are changed, remember to change the default
+ *      link info structure in src/H5Gprivate.h - QAK)
  */
 typedef struct H5O_linfo_t {
+    /* (creation order info) */
     hbool_t     index_corder;           /* Are creation order values indexed on links? */
-    hsize_t     nlinks;                 /* Number of links in the group      */
     int64_t     min_corder;             /* Current min. creation order value for group */
     int64_t     max_corder;             /* Current max. creation order value for group */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
+
+    /* (storage management info) */
+    hsize_t     nlinks;                 /* Number of links in the group      */
     haddr_t     link_fheap_addr;        /* Address of fractal heap for storing "dense" links */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of links */
-    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
 } H5O_linfo_t;
 
 /*
@@ -296,17 +301,24 @@ typedef struct H5O_bogus_t {
 
 /*
  * Group info message.
- * (Contains static information about a group)
+ * (Contains constant information about a group)
  * (Data structure in memory)
+ * (if the fields in this struct are changed, remember to change the default
+ *      group info structure in src/H5Gprivate.h - QAK)
  */
 typedef struct H5O_ginfo_t {
     /* "Old" format group info (not stored) */
     uint32_t    lheap_size_hint;        /* Local heap size hint              */
 
     /* "New" format group info (stored) */
+    /* (creation order info) */
     hbool_t     track_corder;           /* Are creation order values tracked on links? */
+
+    /* (storage management info) */
     uint32_t	max_compact;		/* Maximum # of compact links        */
     uint32_t	min_dense;		/* Minimum # of "dense" links        */
+
+    /* (initial object header size info) */
     uint32_t	est_num_entries;	/* Estimated # of entries in group   */
     uint32_t	est_name_len;		/* Estimated length of entry name    */
 } H5O_ginfo_t;

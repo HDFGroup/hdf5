@@ -192,7 +192,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 {
     size_t table_size;              /* Size of SOHM master table on disk */
     uint8_t *buf=NULL;              /* Reading buffer */
-    uint8_t *p;                     /* Pointer into input buffer */
+    const uint8_t *p;               /* Pointer into input buffer */
     uint8_t x;                      /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
@@ -564,7 +564,6 @@ done:
 } /* end of H5SM_clear_list */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_dest_list
  *

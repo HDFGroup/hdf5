@@ -502,7 +502,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
         HGOTO_DONE(FALSE);
 
     /* If the message isn't big enough, don't bother sharing it */
-    if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) <0)
+    if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) == 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
     if(mesg_size < 50) /* JAMES: arbitrary value.  Make this per-index, along with index sizes? */
         HGOTO_DONE(FALSE);
@@ -644,7 +644,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         /* See if the message is already in the index and get its location */
         /* JAMES: should return a pointer to the message */
         list_pos=H5SM_find_in_list(f, list, &key);
-        if(list_pos != FAIL)
+        if(list_pos != UFAIL)
         {
             /* The message was in the index.  Increment its reference count. */
             ++(list->messages[list_pos].ref_count);
@@ -811,7 +811,7 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *m
 
     /* Find the correct index and try to delete from it */
     if((index_num = H5SM_get_index(table, type_id)) < 0)
-	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, HADDR_UNDEF, "unable to find correct SOHM index")
+	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
 
     /* JAMES: this triggers some warning on heping.  "overflow in implicit constant conversion" */
     if(H5SM_delete_from_index(f, dxpl_id, &(table->indexes[index_num]), type_id, mesg, &cache_flags) < 0)
@@ -832,7 +832,7 @@ done:
  * Purpose:     Find a message's location in a list
  *
  * Return:      Number of messages remaining in the index on success
- *              FAIL if message couldn't be found
+ *              UFAIL if message couldn't be found
  *
  * Programmer:  James Laird
  *              Tuesday, May 2, 2006
@@ -843,7 +843,8 @@ static hsize_t
 H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key)
 {
     hsize_t              x;
-    hsize_t              ret_value = FAIL;
+    hsize_t              ret_value = UFAIL;
+
     FUNC_ENTER_NOAPI_NOFUNC(H5SM_find_in_list)
 
     HDassert(f);
@@ -929,7 +930,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(f, list, &key)) == FAIL)
+        if((list_pos = H5SM_find_in_list(f, list, &key)) == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         --(list->messages[list_pos].ref_count);

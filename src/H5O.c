@@ -1299,7 +1299,8 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 
     /* adjust link count */
     if(adjust < 0) {
-	if(oh->nlink + adjust < 0)
+        /* Check for too large of an adjustment */
+        if((unsigned)(-adjust) > oh->nlink)
 	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
 	oh->nlink += adjust;
         oh_flags |= H5AC__DIRTIED_FLAG;

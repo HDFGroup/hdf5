@@ -7069,7 +7069,7 @@ main(void)
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");
             nerrors += test_copy_option(my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Ocopy(): shallow group copy");
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Ocopy(): expand object reference");
-            nerrors += test_copy_option(my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Gcopy(): preserve NULL messages");
+            nerrors += test_copy_option(my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Ocopy(): preserve NULL messages");
 
 /* TODO: not implemented
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");

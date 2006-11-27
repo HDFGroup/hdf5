@@ -266,7 +266,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Header size (in bytes):",
 	      (unsigned)H5O_SIZEOF_HDR_OH(oh));
-    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of links:",
 	      oh->nlink);
     HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,

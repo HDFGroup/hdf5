@@ -71,12 +71,13 @@
 #define H5G_CRT_LINK_INFO_NAME                  "link info"
 #define H5G_CRT_LINK_INFO_SIZE                  sizeof(H5O_linfo_t)
 #define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_INDEX_CORDER, \
-                                                    H5G_CRT_LINFO_NLINKS, \
                                                     H5G_CRT_LINFO_MIN_CORDER, \
                                                     H5G_CRT_LINFO_MAX_CORDER, \
+                                                    H5G_CRT_LINFO_CORDER_BT2_ADDR, \
+                                                    H5G_CRT_LINFO_NLINKS, \
                                                     H5G_CRT_LINFO_LINK_FHEAP_ADDR, \
-                                                    H5G_CRT_LINFO_NAME_BT2_ADDR, \
-                                                    H5G_CRT_LINFO_CORDER_BT2_ADDR}
+                                                    H5G_CRT_LINFO_NAME_BT2_ADDR \
+                                                }
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT           0
@@ -94,7 +95,8 @@
                                                     H5G_CRT_GINFO_MAX_COMPACT, \
                                                     H5G_CRT_GINFO_MIN_DENSE, \
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
-                                                    H5G_CRT_GINFO_EST_NAME_LEN}
+                                                    H5G_CRT_GINFO_EST_NAME_LEN \
+                                                }
 
 
 /* Type of operation being performed for call to H5G_name_replace() */
