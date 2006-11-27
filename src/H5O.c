@@ -319,6 +319,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen_by_idx, FAIL)
+    H5TRACE6("i","isLiIohi",loc_id,group_name,idx_type,order,n,lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

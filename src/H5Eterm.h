@@ -185,13 +185,6 @@ H5E_CANTNEXT_g=
 H5E_BADSELECT_g=    
 H5E_CANTCOMPARE_g=
 
-/* Argument errors */    
-H5E_UNINITIALIZED_g=    
-H5E_UNSUPPORTED_g=    
-H5E_BADTYPE_g=    
-H5E_BADRANGE_g=    
-H5E_BADVALUE_g=
-
 /* B-tree related errors */    
 H5E_NOTFOUND_g=    
 H5E_EXISTS_g=    
@@ -204,6 +197,13 @@ H5E_CANTINSERT_g=
 H5E_CANTLIST_g=    
 H5E_CANTMODIFY_g=    
 H5E_CANTREMOVE_g=
+
+/* Argument errors */    
+H5E_UNINITIALIZED_g=    
+H5E_UNSUPPORTED_g=    
+H5E_BADTYPE_g=    
+H5E_BADRANGE_g=    
+H5E_BADVALUE_g=
 
 /* Datatype conversion errors */    
 H5E_CANTCONVERT_g=    
