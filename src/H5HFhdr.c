@@ -224,7 +224,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
-            ((H5V_log2_gen((hsize_t)hdr->max_man_size) + 7) / 8));
+            ((H5V_log2_gen((uint64_t)hdr->max_man_size) + 7) / 8));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

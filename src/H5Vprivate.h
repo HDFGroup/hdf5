@@ -344,7 +344,7 @@ static const char LogTable256[] =
  *-------------------------------------------------------------------------
  */
 static H5_inline unsigned UNUSED
-H5V_log2_gen(hsize_t n)
+H5V_log2_gen(uint64_t n)
 {
     unsigned r;                         /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */

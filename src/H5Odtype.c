@@ -222,7 +222,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((hsize_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
 
                 /*
                  * Compound datatypes...
@@ -720,7 +720,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't detect array class")
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((hsize_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
 
                 /*
                  * Compound datatypes...
@@ -1123,7 +1123,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                 HDassert(has_array >= 0);
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((hsize_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
 
                 /* Compute the total size needed to encode compound datatype */
                 for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {

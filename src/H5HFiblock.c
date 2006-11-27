@@ -736,7 +736,7 @@ HDfprintf(stderr, "%s: Reducing root indirect block\n", FUNC);
     max_child_row = iblock->max_child / hdr->man_dtable.cparam.width;
 
     /* Compute new # of rows in root indirect block */
-    new_nrows = 1 << (1 + H5V_log2_gen((hsize_t)max_child_row));
+    new_nrows = 1 << (1 + H5V_log2_gen((uint64_t)max_child_row));
 #ifdef QAK
 HDfprintf(stderr, "%s: new_nrows = %u\n", FUNC, new_nrows);
 HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);

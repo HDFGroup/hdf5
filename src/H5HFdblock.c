@@ -375,7 +375,7 @@ HDfprintf(stderr, "%s: request = %Zu\n", FUNC, request);
     if(request < hdr->man_dtable.cparam.start_block_size)
         min_dblock_size = hdr->man_dtable.cparam.start_block_size;
     else {
-        min_dblock_size = ((size_t)1) << (1 + H5V_log2_gen((hsize_t)request));
+        min_dblock_size = ((size_t)1) << (1 + H5V_log2_gen((uint64_t)request));
         HDassert(min_dblock_size <= hdr->man_dtable.cparam.max_direct_size);
     } /* end else */
 
