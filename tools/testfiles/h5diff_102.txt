@@ -1,0 +1,11 @@
+#############################
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp1 g1/fp2 -v'
+#############################
+Dataset:     </g1/fp1> and </g1/fp2>
+position        fp1             fp2             difference          
+------------------------------------------------------------
+[ 0 1 ]          1e-05           2e-05           1e-05          
+[ 1 0 ]          1e-05           9e-06           9.99999e-07    
+[ 1 1 ]          0               1e-05           1e-05          
+[ 2 0 ]          1e-05           0               1e-05          
+4 differences found
