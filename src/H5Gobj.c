@@ -657,47 +657,60 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_obj_count
+ * Function:	H5G_obj_info
  *
- * Purpose:	Check the number of objects in a group
+ * Purpose:	Retrieve information about a group
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Sep  6 2005
+ *		koziol@hdfgroup.org
+ *		Nov 27 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
+H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		        /* Link info message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_obj_count, FAIL)
+    FUNC_ENTER_NOAPI(H5G_obj_info, FAIL)
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(num_objs);
+    HDassert(grp_info);
 
     /* Attempt to get the link info for this group */
     if(H5O_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
-        /* Set the number of objects */
-        *num_objs = linfo.nlinks;
+        /* Retrieve the information about the links */
+        grp_info->nlinks = linfo.nlinks;
+        grp_info->min_corder = linfo.min_corder;
+        grp_info->max_corder = linfo.max_corder;
+
+        /* Check if the group is using compact or dense storage for its links */
+        if(H5F_addr_defined(linfo.link_fheap_addr))
+            grp_info->storage_type = H5G_STORAGE_TYPE_DENSE;
+        else
+            grp_info->storage_type = H5G_STORAGE_TYPE_COMPACT;
     } /* end if */
     else {
         /* Clear error stack from not finding the link info message */
         H5E_clear_stack(NULL);
 
         /* Get the number of objects in this group by iterating over symbol table */
-        if(H5G_stab_count(oloc, num_objs, dxpl_id) < 0)
+        if(H5G_stab_count(oloc, &grp_info->nlinks, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't count objects")
+
+        /* Set the other information about the group */
+        grp_info->storage_type = H5G_STORAGE_TYPE_SYMBOL_TABLE;
+        grp_info->min_corder = 0;
+        grp_info->max_corder = 0;
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_obj_count() */
+} /* end H5G_obj_info() */
 
 
 /*-------------------------------------------------------------------------

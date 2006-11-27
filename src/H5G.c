@@ -404,7 +404,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Gopen() */
+} /* end H5Gopen() */
 
 
 /*-------------------------------------------------------------------------
@@ -489,88 +489,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gclose
- *
- * Purpose:	Closes the specified group.  The group ID will no longer be
- *		valid for accessing the group.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Wednesday, December 31, 1997
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gclose(hid_t group_id)
-{
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Gclose, FAIL);
-    H5TRACE1("e","i",group_id);
-
-    /* Check args */
-    if (NULL == H5I_object_verify(group_id,H5I_GROUP))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
-
-    /*
-     * Decrement the counter on the group atom.	 It will be freed if the count
-     * reaches zero.
-     */
-    if (H5I_dec_ref(group_id) < 0)
-    	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gget_num_objs
- *
- * Purpose:     Returns the number of objects in the group.  It iterates
- *              all B-tree leaves and sum up total number of group members.
- *
- * Return:	Success:        Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
-{
-    H5G_loc_t		loc;            /* Location of object */
-    H5O_type_t          obj_type;       /* Type of object at location */
-    herr_t		ret_value;
-
-    FUNC_ENTER_API(H5Gget_num_objs, FAIL)
-    H5TRACE2("e","i*h",loc_id,num_objs);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
-    if(!num_objs)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nil pointer")
-
-    /* Call private function. */
-    if((ret_value = H5G_obj_count(loc.oloc, num_objs, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't determine ")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_num_objs() */
+} /* end H5Gopen_expand() */
 
 
 /*-------------------------------------------------------------------------
@@ -656,6 +575,170 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_create_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_info
+ *
+ * Purpose:	Retrieve information about a group.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 27 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_info(hid_t loc_id, const char *name, H5G_info_t *grp_info, hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    H5G_loc_t   grp_loc;                /* Location used to open group */
+    H5G_name_t  grp_path;            	/* Opened object group hier. path */
+    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Gget_info, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(!grp_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    grp_loc.oloc = &grp_oloc;
+    grp_loc.path = &grp_path;
+    H5G_loc_reset(&grp_loc);
+
+    /* Find the group object */
+    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    loc_found = TRUE;
+
+    /* Retrieve the group's information */
+    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+
+done:
+    if(loc_found && H5G_loc_free(&grp_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_info_by_idx
+ *
+ * Purpose:	Retrieve information about a group, according to the order
+ *              of an index.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 27 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5G_info_t *grp_info, hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    H5G_loc_t   grp_loc;                /* Location used to open group */
+    H5G_name_t  grp_path;            	/* Opened object group hier. path */
+    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Gget_info_by_idx, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!grp_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    grp_loc.oloc = &grp_oloc;
+    grp_loc.path = &grp_path;
+    H5G_loc_reset(&grp_loc);
+
+    /* Find the object's location, according to the order in the index */
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    loc_found = TRUE;
+
+    /* Retrieve the group's information */
+    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+
+done:
+    /* Release the object location */
+    if(loc_found && H5G_loc_free(&grp_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_info_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gclose
+ *
+ * Purpose:	Closes the specified group.  The group ID will no longer be
+ *		valid for accessing the group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, December 31, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gclose(hid_t group_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Gclose, FAIL);
+    H5TRACE1("e","i",group_id);
+
+    /* Check args */
+    if(NULL == H5I_object_verify(group_id,H5I_GROUP))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /*
+     * Decrement the counter on the group atom.	 It will be freed if the count
+     * reaches zero.
+     */
+    if(H5I_dec_ref(group_id) < 0)
+    	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gclose() */
 
 /*
  *-------------------------------------------------------------------------

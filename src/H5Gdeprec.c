@@ -625,9 +625,8 @@ H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id
 
 done:
     /* Release obj_loc */
-    if(loc_valid)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+    if(loc_valid && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_set_comment() */
@@ -684,9 +683,8 @@ H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid
 
 done:
     /* Release obj_loc */
-    if(loc_valid)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
+    if(loc_valid && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_comment() */
@@ -703,6 +701,8 @@ done:
  *		are processed. The operator is passed a group ID for the
  *		group being iterated, a member name, and OP_DATA for each
  *		member.
+ *
+ * Note:	Deprecated in favor of H5Literate
  *
  * Return:	Success:	The return value of the first operator that
  *				returns non-zero, or zero if all members were
@@ -766,7 +766,6 @@ done:
  * Note:	Deprecated in favor of H5Lget_info/H5Oget_info
  *
  * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
- *
  *		Failure:	H5G_UNKNOWN
  *
  * Programmer:	Raymond Lu
@@ -989,4 +988,53 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_objinfo() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_num_objs
+ *
+ * Purpose:     Returns the number of objects in the group.  It iterates
+ *              all B-tree leaves and sum up total number of group members.
+ *
+ * Note:	Deprecated in favor of H5Gget_info
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
+{
+    H5G_loc_t		loc;            /* Location of object */
+    H5G_info_t          grp_info;       /* Group information */
+    H5O_type_t          obj_type;       /* Type of object at location */
+    herr_t		ret_value = SUCCEED;
+
+    FUNC_ENTER_API(H5Gget_num_objs, FAIL)
+    H5TRACE2("e","i*h",loc_id,num_objs);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if(!num_objs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad pointer to # of objects")
+
+    /* Retrieve information about the group */
+    if(H5G_obj_info(loc.oloc, &grp_info, H5AC_ind_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't determine")
+
+    /* Set the number of objects [sic: links] in the group */
+    *num_objs = grp_info.nlinks;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_num_objs() */
 

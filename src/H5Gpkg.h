@@ -65,14 +65,14 @@
  * points).  This datatype determines what (if anything) is cached in the
  * symbol table entry.
  */
-typedef enum H5G_type_t {
+typedef enum H5G_cache_type_t {
     H5G_CACHED_ERROR	= -1, 	/*force enum to be signed		     */
     H5G_NOTHING_CACHED  = 0,    /*nothing is cached, must be 0               */
     H5G_CACHED_STAB     = 1,    /*symbol table, `stab'                       */
     H5G_CACHED_SLINK	= 2, 	/*symbolic link				     */
 
     H5G_NCACHED                 /*THIS MUST BE LAST                          */
-} H5G_type_t;
+} H5G_cache_type_t;
 
 /*
  * A symbol table entry caches these parameters from object header
@@ -100,7 +100,7 @@ typedef union H5G_cache_t {
  */
 typedef struct H5G_entry_t {
     hbool_t     dirty;                  /*entry out-of-date?                 */
-    H5G_type_t  type;                   /*type of information cached         */
+    H5G_cache_type_t type;              /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     size_t      name_off;               /*offset of name within name heap    */
     haddr_t     header;                 /*file address of object header      */
@@ -510,8 +510,7 @@ H5_DLL herr_t H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name,
 H5_DLL herr_t H5G_obj_iterate(hid_t loc_id, const char *group_name,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_obj,
     H5G_link_iterate_t *lnk_op, void *op_data, hid_t dxpl_id);
-H5_DLL herr_t H5G_obj_count(struct H5O_loc_t *oloc, hsize_t *num_objs,
-    hid_t dxpl_id);
+H5_DLL herr_t H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id);
 H5_DLL ssize_t H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
     H5_iter_order_t order, hsize_t n, char* name, size_t size, hid_t dxpl_id);
 H5_DLL H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,

@@ -160,6 +160,12 @@ New Features
 
     Library:
     --------
+       - Added new H5Gget_info_by_idx() routine to query the information about
+            a group according to the order within an index.
+            - QAK - 2006/11/27
+       - Added new H5Gget_info() routine to query the information about a
+            group by name.
+            - QAK - 2006/11/27
        - Added new H5Oget_info_by_idx() routine to query the information about
             an object in a group according to the order within an index.
             - QAK - 2006/11/26

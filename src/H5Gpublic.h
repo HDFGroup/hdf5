@@ -38,13 +38,14 @@
 /* Public Macros */
 /*****************/
 
+/* Deprecated macros, for backward compatibility */
+
 /* Macros for types of objects in a group (see H5G_obj_t definition) */
 #define H5G_NTYPES	256		/* Max possible number of types	*/
 #define H5G_NLIBTYPES	8		/* Number of internal types	*/
 #define H5G_NUSERTYPES	(H5G_NTYPES-H5G_NLIBTYPES)
 #define H5G_USERTYPE(X)	(8+(X))		/* User defined types		*/
 
-/* Deprecated macros, for backward compatibility */
 #define H5G_LINK_ERROR H5L_TYPE_ERROR
 #define H5G_LINK_HARD H5L_TYPE_HARD
 #define H5G_LINK_SOFT H5L_TYPE_SOFT
@@ -58,6 +59,25 @@ extern "C" {
 /*******************/
 /* Public Typedefs */
 /*******************/
+
+/* Types of link storage for groups */
+typedef enum H5G_storage_type_t {
+    H5G_STORAGE_TYPE_UNKNOWN = -1,	/* Unknown link storage type	*/
+    H5G_STORAGE_TYPE_SYMBOL_TABLE,      /* Links in group are stored with a "symbol table" */
+                                        /* (this is sometimes called "old-style" groups) */
+    H5G_STORAGE_TYPE_COMPACT,		/* Links are stored in object header */
+    H5G_STORAGE_TYPE_DENSE 		/* Links are stored in fractal heap & indexed with v2 B-tree */
+} H5G_storage_type_t;
+
+/* Information struct for group (for H5Gget_info/H5Gget_info_by_idx) */
+typedef struct H5G_info_t {
+    H5G_storage_type_t 	storage_type;	/* Type of storage for links in group */
+    hsize_t 	nlinks;		        /* Number of links in group */
+    int64_t     min_corder;             /* Current min. creation order value for group */
+    int64_t     max_corder;             /* Current max. creation order value for group */
+} H5G_info_t;
+
+/* Deprecated typedefs, for backward compatibility */
 
 /*
  * An object has a certain type. The first few numbers are reserved for use
@@ -104,8 +124,12 @@ H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
 H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
 H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
 H5_DLL hid_t H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id);
-H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
+H5_DLL herr_t H5Gget_info(hid_t loc_id, const char *name, H5G_info_t *ginfo,
+    hid_t lapl_id);
+H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
+    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo,
+    hid_t lapl_id);
 H5_DLL herr_t H5Gclose(hid_t group_id);
 
 /* Functions and variables defined for compatibility with previous versions
@@ -134,6 +158,7 @@ H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
+H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
 
 #ifdef __cplusplus
 }

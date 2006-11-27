@@ -128,7 +128,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     H5F_addr_decode(f, pp, &(ent->header));
     UINT32DECODE(*pp, tmp);
     *pp += 4; /*reserved*/
-    ent->type=(H5G_type_t)tmp;
+    ent->type=(H5G_cache_type_t)tmp;
 
     /* decode scratch-pad */
     switch (ent->type) {
