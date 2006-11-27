@@ -19,8 +19,9 @@
 #   Added the SKIP feature.
 #   Albert Cheng, 2005/2/3
 #   Added -p option for parallel h5diff tests.
-#   Pedro Vicente Nunes, 10/25/2005
-#   Added test #9
+#   Pedro Vicente Nunes:
+#    10/25/2005: Added test #9
+#    11/27/2006: Added test #10, #11
 
 
 ###############################################################################
@@ -502,6 +503,11 @@ TOOLTEST h5diff_90.txt $FILE1 $FILE1
 # 10. read by hyperslab, print indexes
 
 TOOLTEST h5diff_100.txt $FILE9 $FILE10 -v
+
+# 11. floating point comparison
+
+TOOLTEST h5diff_101.txt $FILE1 $FILE1 /g1/d1  g1/d2  -v
+TOOLTEST h5diff_102.txt $FILE1 $FILE1 /g1/fp1 g1/fp2 -v
 
 # ##############################################################################
 # # END

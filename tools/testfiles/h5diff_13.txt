@@ -4,8 +4,9 @@ Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic2.h5 -r'
 Dataset:     </g1/dset1> and </g1/dset1>
 position        dset1           dset1           difference          
 ------------------------------------------------------------
-[ 0 1 ]          1.000000        1.100000        0.100000       
-[ 1 0 ]          1.000000        1.010000        0.010000       
-[ 1 1 ]          1.000000        1.001000        0.001000       
-[ 2 0 ]          1.000000        1.000100        0.000100       
-4 differences found
+[ 0 0 ]          1               0               1              
+[ 0 1 ]          1               1.1             0.1            
+[ 1 0 ]          1               1.01            0.01           
+[ 1 1 ]          1               1.001           0.001          
+[ 2 1 ]          0               1               1              
+5 differences found

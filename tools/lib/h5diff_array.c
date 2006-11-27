@@ -22,7 +22,7 @@
  *-------------------------------------------------------------------------
  */
 
-#define F_FORMAT      "%-15f %-15f %-15f\n"
+#define F_FORMAT      "%-15g %-15g %-15g\n"
 #define I_FORMAT      "%-15d %-15d %-15d\n"
 #define C_FORMAT      "%-16c %-17c\n"
 #define S_FORMAT      "%-16s %-17s\n"
@@ -53,6 +53,7 @@
 
 
 static int   both_zero;
+static int   is_zero;
 static float per;
 
 
@@ -78,22 +79,33 @@ static float per;
                     per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
                  }
 
+#define BOTH_ZERO(A,B) { both_zero=0;                             \
+                         if (A==0 && B==0)                        \
+                          both_zero=1;                            \
+                       }
+
+#define IS_ZERO(A) { is_zero=0;                             \
+                     if (A==0)                              \
+                      is_zero=1;                            \
+                   }
+
 /*-------------------------------------------------------------------------
  * local prototypes
  *-------------------------------------------------------------------------
  */
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
-static hbool_t is_zero(const void *_mem, size_t size);
+static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 
+/* values for FLT_EPSILON same as C Reference manual */
+#define H5DIFF_FLT_EPSILON  .00001
+#define H5DIFF_DBL_EPSILON  .000000001
 
-#ifdef NOT_YET
-#define EPSILON .0000001
 static hbool_t equal_float(float value, float expected);
-#endif
+static hbool_t equal_double(double value, double expected);
 
 
 /*-------------------------------------------------------------------------
@@ -658,8 +670,8 @@ hsize_t diff_datum(void       *_mem1,
 
  case H5T_REFERENCE:
 
-  iszero1=is_zero(_mem1, H5Tget_size(m_type));
-  iszero2=is_zero(_mem2, H5Tget_size(m_type));
+  iszero1=all_zero(_mem1, H5Tget_size(m_type));
+  iszero2=all_zero(_mem2, H5Tget_size(m_type));
   if (iszero1==1 || iszero2==1)
   {
    return 0;
@@ -1874,7 +1886,7 @@ hsize_t diff_datum(void       *_mem1,
    }
    }
 
-   else if (temp1_float != temp2_float)
+   else if (equal_float(temp1_float,temp2_float)==FALSE)
    {
 
     if ( print_data(options) )
@@ -1982,9 +1994,7 @@ hsize_t diff_datum(void       *_mem1,
    }
    }
 
-
-
-   else if (temp1_double != temp2_double)
+   else if (equal_double(temp1_double,temp2_double)==FALSE)
    {
     if ( print_data(options) )
     {
@@ -2009,7 +2019,7 @@ hsize_t diff_datum(void       *_mem1,
 
 
 /*-------------------------------------------------------------------------
- * Function: is_zero
+ * Function: all_zero
  *
  * Purpose: Determines if memory is initialized to all zero bytes.
  *
@@ -2018,7 +2028,7 @@ hsize_t diff_datum(void       *_mem1,
  *-------------------------------------------------------------------------
  */
 
-static hbool_t is_zero(const void *_mem, size_t size)
+static hbool_t all_zero(const void *_mem, size_t size)
 {
  const unsigned char *mem = (const unsigned char *)_mem;
 
@@ -2591,7 +2601,7 @@ hsize_t diff_float(unsigned char *mem1,
    memcpy(&temp1_float, mem1, sizeof(float));
    memcpy(&temp2_float, mem2, sizeof(float));
 
-   if (temp1_float != temp2_float)
+   if (equal_float(temp1_float,temp2_float)==FALSE)
    {
     if ( print_data(options) )
     {
@@ -2761,7 +2771,7 @@ hsize_t diff_double(unsigned char *mem1,
    memcpy(&temp1_double, mem1, sizeof(double));
    memcpy(&temp2_double, mem2, sizeof(double));
 
-   if (temp1_double != temp2_double)
+   if (equal_double(temp1_double,temp2_double)==FALSE)
    {
     if ( print_data(options) )
     {
@@ -4579,7 +4589,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    equal_float
+ * Function:    equal_float, equal_double
  *
  * Purpose:     use a relative error formula to deal with floating point 
  *              uncertainty 
@@ -4592,17 +4602,41 @@ error:
  *-------------------------------------------------------------------------
  */
 
-#ifdef NOT_YET
 static 
 hbool_t equal_float(float value, float expected)                               
 {
- if ( fabs( (value-expected) / expected) < EPSILON)
-  return TRUE;
- else
-  return FALSE;
- 
+    BOTH_ZERO(value,expected)
+    if (both_zero)
+        return TRUE;
+
+    IS_ZERO(expected)
+    if (is_zero)
+        return(equal_float(expected,value));
+
+    if ( fabs( (value-expected) / expected) < H5DIFF_FLT_EPSILON)
+        return TRUE;
+    else
+        return FALSE;
+    
 }
-#endif
+
+static 
+hbool_t equal_double(double value, double expected)                               
+{
+    BOTH_ZERO(value,expected)
+    if (both_zero)
+        return TRUE;
+
+    IS_ZERO(expected)
+    if (is_zero)
+        return(equal_double(expected,value));
+
+    if ( fabs( (value-expected) / expected) < H5DIFF_DBL_EPSILON)
+        return TRUE;
+    else
+        return FALSE;
+    
+}
 
 
 

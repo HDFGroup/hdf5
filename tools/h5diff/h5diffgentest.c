@@ -132,8 +132,8 @@ int test_basic(const char *fname1,
  hsize_t dims[2] = { 3,2 };
 
  /* Test */
- double  data1[3][2] = {{1,1},{1,1},{1,1}};
- double  data2[3][2] = {{1,1.1},{1.01,1.001},{1.0001,1}};
+ double  data1[3][2] = {{1,1},  {1,1},       {0,0}};
+ double  data2[3][2] = {{0,1.1},{1.01,1.001},{0,1}};
  int     data5[3][2] = {{100,100},{100,100},{100,100}};
  int     data6[3][2] = {{101,102},{103,104},{150,200}};
  unsigned long_long data7[3][2] = {{100,100},{100,100},{100,100}};
@@ -153,6 +153,12 @@ A   B   1-B/A   %
 0   0   #DIV/0! #DIV/0!
 100 50  0.5     50
 */
+
+ /* floating point comparison , epsilon = 0.00001 */
+ float  data11[3][2] ={{0.00000f,0.00001f},{0.00001f, 0.00000f},{0.00001f,0.00001f}};
+ float  data12[3][2] ={{0.00000f,0.00002f},{0.000009f,0.00001f},{0.00000f,0.00001f}};
+ double data13[3][2] ={{0.000000000,0.000000001},{0.000000001, 0.000000000},{0.000000001,0.000000001}};
+ double data14[3][2] ={{0.000000000,0.000000002},{0.0000000009,0.000000001},{0.000000000,0.000000001}};
 
 /*-------------------------------------------------------------------------
  * Create two files
@@ -183,6 +189,12 @@ A   B   1-B/A   %
  /* test divide by zero in percente case */
  write_dset(gid1,2,dims,"dset9",H5T_NATIVE_DOUBLE,data9);
  write_dset(gid1,2,dims,"dset10",H5T_NATIVE_DOUBLE,data10);
+
+ /* test floating point comparison */
+ write_dset(gid1,2,dims,"fp1",H5T_NATIVE_FLOAT,data11);
+ write_dset(gid1,2,dims,"fp2",H5T_NATIVE_FLOAT,data12);
+ write_dset(gid1,2,dims,"d1",H5T_NATIVE_DOUBLE,data13);
+ write_dset(gid1,2,dims,"d2",H5T_NATIVE_DOUBLE,data14);
 
 /*-------------------------------------------------------------------------
  * Close

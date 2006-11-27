@@ -1315,6 +1315,8 @@
 ./tools/testfiles/h5diff_80.txt
 ./tools/testfiles/h5diff_90.txt
 ./tools/testfiles/h5diff_100.txt
+./tools/testfiles/h5diff_101.txt
+./tools/testfiles/h5diff_102.txt
 ./tools/testfiles/info.h5repack
 
 
