@@ -22,7 +22,7 @@ Items in [] are optional
 The 'count' value must be a positive integer
 The 'delta' and 'relative' values must be positive numbers
 The -d compare criteria is |a - b| > delta
-The -p compare criteria is |1 - b/a| > relative
+The -p compare criteria is |(b-a)/a| > relative
 
 h5diff has four modes of output:
  Normal mode: print the number of differences found and where they occured

@@ -305,7 +305,7 @@ void usage(void)
  printf("The 'count' value must be a positive integer\n");
  printf("The 'delta' and 'relative' values must be positive numbers\n");
  printf("The -d compare criteria is |a - b| > delta\n");
- printf("The -p compare criteria is |1 - b/a| > relative\n");
+ printf("The -p compare criteria is |(b-a)/a| > relative\n");
  printf("\n");
  printf("h5diff has four modes of output:\n");
  printf(" Normal mode: print the number of differences found and where they occured\n");
