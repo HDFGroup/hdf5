@@ -13,10 +13,10 @@
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 
 # This script should be run nightly from cron.  It checks out hdf5
-# from the CVS source tree and compares it against the previous
+# from the source repository and compares it against the previous
 # snapshot.  If anything significant changed then a new snapshot is
 # created, the minor version number is incremented, and the change is
-# checked back into the CVS repository.
+# checked back into the source repository.
 #
 
 # function definitions
@@ -217,7 +217,7 @@ Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
 	[op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
-    checkout: Run cvs checkout
+    checkout: Run source checkout
     diff:     Run diff on current and previous versions.  Exit 0 if
               no significant differences are found.  Otherwise, non-zero.
     deploy:   deploy binary to directory <dir>
@@ -284,10 +284,8 @@ CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 if [ $H5VERSION != hdf5 ]; then
-    CVSVERSION="-r $H5VERSION"
     SVNVERSION="hdf5/branches/$H5VERSION"
 else
-    CVSVERSION=				# use the default (main) version
     SVNVERSION=hdf5/trunk		# use the default (trunk) version
 fi
 
@@ -299,7 +297,7 @@ for d in `echo $PATH | sed -e 's/:/ /g'` ; do
 done
 
 #=============================
-# Run CVS checkout
+# Run source checkout
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     TIMESTAMP "checkout"
@@ -313,16 +311,10 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # regardless of the return code of distclean.
     ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
 
-    # verify proper cvs setting
-    if [ -z "$CVSROOT" ]; then
-	echo "CVSROOT not defined!" 1>&2
-	exit 1
-    fi
     SVNROOT=http://sleipnir.hdfgroup.uiuc.edu/svn/repos
-    # Check out the current version from CVS
-    # (cd $BASEDIR; cvs -Q co -P -d current ${CVSVERSION} hdf5 ) || exit 1
+    # Check out the current version from source repository.
     (cd $BASEDIR; svn -q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
-fi # Do CVS checkout
+fi # Do source checkout
 
 
 #=============================
@@ -431,7 +423,7 @@ fi # Deploy
 
 
 #=============================
-# Run Release snapshot, update version, and commit to cvs and tag
+# Run Release snapshot, update version, and commit to source repository
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
@@ -439,14 +431,13 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	(cd ${CURRENT} && ${MAKE} distclean)
 	(
 	    # Turn on exit on error in the sub-shell so that it does not
-	    # cvs commit if errors encounter here.
+	    # commit source if errors encounter here.
 	    set -e
 	    cd ${CURRENT}
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ARCHIVES}..."
 	    bin/release -d $ARCHIVES $METHODS
 	    perl bin/h5vers -i
-	    # cvs -Q commit -m "Snapshot $RELEASE_VERSION"
 	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
@@ -454,7 +445,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 
     # Replace the previous version with the current version.
     # Should check if the errcode of the release process but there
-    # are other failures after release was done (e.g. h5vers or cvs failures)
+    # are other failures after release was done (e.g. h5vers or svn failures)
     # that should allow the replacement to occure.
     rm -rf ${PREVIOUS}
     mv ${CURRENT} ${PREVIOUS}
