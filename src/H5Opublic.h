@@ -89,6 +89,7 @@ typedef struct H5O_info_t {
     time_t		atime;		/* Access time			*/
     time_t		mtime;		/* Modification time		*/
     time_t		ctime;		/* Change time			*/
+    time_t		btime;		/* Birth time			*/
     hsize_t 		num_attrs;	/* # of attributes attached to object */
     struct {
         unsigned version;		/* Version number of header format in file */

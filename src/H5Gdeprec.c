@@ -901,7 +901,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
 	    statbuf->nlink = oinfo.rc;
 
             /* Get modification time for object */
-            statbuf->mtime = oinfo.mtime;
+            statbuf->mtime = oinfo.ctime;
 
             /* Retrieve the object header information */
             statbuf->ohdr.size = oinfo.hdr.hdr_size;

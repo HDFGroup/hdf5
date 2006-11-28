@@ -336,7 +336,29 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Initialize header information */
     oh_dst->version = oh_src->version;
     oh_dst->nlink = 0;
-    oh_dst->skipped_mesg_size = 0;
+    oh_dst->skipped_mesg_size = oh_src->skipped_mesg_size;
+    oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);
+    oh_dst->sizeof_addr = H5F_SIZEOF_ADDR(oloc_dst->file);
+
+    /* Copy time fields */
+    oh_dst->atime = oh_src->atime;
+    oh_dst->mtime = oh_src->mtime;
+    oh_dst->ctime = oh_src->ctime;
+    oh_dst->btime = oh_src->btime;
+
+    /* Copy attribute information */
+    oh_dst->max_compact = oh_src->max_compact;
+    oh_dst->min_dense = oh_src->min_dense;
+    oh_dst->nattrs = oh_src->nattrs;
+    /* XXX: Bail out for now, if the source object has densely stored attributes */
+    if(H5F_addr_defined(oh_src->attr_fheap_addr))
+        HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "densely stored attributes not supported yet")
+    else {
+        HDassert(!H5F_addr_defined(oh_src->name_bt2_addr));
+        oh_dst->attr_fheap_addr = HADDR_UNDEF;
+        oh_dst->name_bt2_addr = HADDR_UNDEF;
+    } /* end else */
+    
 
     /* Initialize size of chunk array.  The destination always has only one
      * chunk.
@@ -467,9 +489,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* copy this message into destination file */
         if(copy_type->copy_file) {
             /*
-                * Decode the message if necessary.  If the message is shared then do
-                * a shared message, ignoring the message type.
-                */
+             * Decode the message if necessary.  If the message is shared then do
+             * a shared message, ignoring the message type.
+             */
             if(NULL == mesg_src->native) {
                 /* Decode the message if necessary */
                 HDassert(copy_type->decode);

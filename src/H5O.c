@@ -844,12 +844,32 @@ H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
     oh->version = H5F_USE_LATEST_FORMAT(f) ? H5O_VERSION_LATEST : H5O_VERSION_1;
     oh->nlink = 0;
     oh->skipped_mesg_size = 0;
+    oh->sizeof_size = H5F_SIZEOF_SIZE(f);
+    oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
-        /* Initialize time fields */
-        oh->atime = oh->mtime = oh->ctime = H5_now();
+        /* Initialize all time fields with current time */
+        oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
+
+        /* Initialize attribute tracking fields */
+        oh->max_compact = 0;
+        oh->min_dense = 0;
+        oh->nattrs = 0;
+        oh->attr_fheap_addr = HADDR_UNDEF;
+        oh->name_bt2_addr = HADDR_UNDEF;
     } /* end if */
+    else {
+        /* Reset unused time fields */
+        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Reset unused attribute fields */
+        oh->max_compact = 0;
+        oh->min_dense = 0;
+        oh->nattrs = 0;
+        oh->attr_fheap_addr = HADDR_UNDEF;
+        oh->name_bt2_addr = HADDR_UNDEF;
+    } /* end else */
 
     /* Compute total size of initial object header */
     /* (i.e. object header prefix and first chunk) */
@@ -3861,6 +3881,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         oinfo->atime = oh->atime;
         oinfo->mtime = oh->mtime;
         oinfo->ctime = oh->ctime;
+        oinfo->btime = oh->btime;
     } /* end if */
     else {
         /* No information for access & modification fields */
@@ -3870,11 +3891,12 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
          */
         oinfo->atime = 0;
         oinfo->mtime = 0;
+        oinfo->btime = 0;
 
         /* Might be information for modification time */
-        if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->mtime, dxpl_id)) {
+        if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->ctime, dxpl_id)) {
             H5E_clear_stack(NULL);
-            if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->mtime, dxpl_id)) {
+            if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->ctime, dxpl_id)) {
                 H5E_clear_stack(NULL);
                 oinfo->ctime = 0;
             } /* end if */
@@ -3920,6 +3942,11 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         if(curr_msg->flags & H5O_FLAG_SHARED)                                   \
             oinfo->hdr.msg_shared |= type_flag;
     } /* end for */
+#ifdef LATER
+/* XXX: Uncomment this when attributes are tracked by the object header */
+    if(oh->version > H5O_VERSION_1)
+        HDassert(oh->nattrs == oinfo->num_attrs);
+#endif /* LATER */
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.hdr_size = 0;

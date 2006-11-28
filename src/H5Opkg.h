@@ -77,13 +77,13 @@
 /*
  * Size of object header prefix.
  */
-#define H5O_SIZEOF_HDR_VERS(V)						      \
+#define H5O_SIZEOF_HDR_VERS(V,SOFS,SOFA)				      \
      (((V) == H5O_VERSION_1) ?						      \
         H5O_ALIGN_OLD(1 +	/*version number	*/		      \
                   1 +		/*reserved 		*/		      \
                   2 +		/*number of messages	*/		      \
                   4 +		/*reference count	*/		      \
-                  4)		/*header data size	*/		      \
+                  4)		/*chunk data size	*/		      \
         :								      \
 		(H5O_SIZEOF_MAGIC +	/*magic number  	*/	      \
                   1 +		/*version number 	*/		      \
@@ -92,13 +92,19 @@
                   4 +		/*access time		*/		      \
                   4 +		/*modification time	*/		      \
                   4 +		/*change time		*/		      \
-                  4 +		/*header data size	*/		      \
+                  4 +		/*birth time		*/		      \
+                  2 +		/*max compact attributes	*/	      \
+                  2 +		/*min dense attributes	*/		      \
+                  (SOFS) +	/*# of attributes	*/		      \
+                  (SOFA) +	/*addr of attribute heap	*/	      \
+                  (SOFA) +	/*addr of attribute name index	*/	      \
+                  4 +		/*chunk data size	*/		      \
                   H5O_SIZEOF_CHKSUM)	/*checksum size	        */	      \
     )
 #define H5O_SIZEOF_HDR_OH(O)						      \
-     H5O_SIZEOF_HDR_VERS((O)->version)
+     H5O_SIZEOF_HDR_VERS((O)->version, (O)->sizeof_size, (O)->sizeof_addr)
 #define H5O_SIZEOF_HDR_F(F)						      \
-     H5O_SIZEOF_HDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
+     H5O_SIZEOF_HDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1, H5F_SIZEOF_SIZE(F), H5F_SIZEOF_ADDR(F))
 
 /*
  * Size of object header message prefix
@@ -110,7 +116,7 @@
                    1 +	/*flags              	*/			      \
                    3)	/*reserved		*/			      \
         :								      \
-                (2 +	/*message type		*/			      \
+                (1 +	/*message type		*/			      \
                    2 + 	/*sizeof message data	*/			      \
                    1)	/*flags              	*/			      \
     )
@@ -188,14 +194,26 @@ struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
 
-    /* General information (stored) */
+    /* General information (not stored) */
+    size_t      sizeof_size;            /* Size of file sizes 		     */
+    size_t      sizeof_addr;            /* Size of file addresses	     */
+
+    /* Object information (stored) */
     unsigned	version;		/*version number		     */
     unsigned	nlink;			/*link count			     */
 
-    /* Time information (stored) */
+    /* Time information (stored, for versions > 1) */
     time_t      atime;                  /*access time 			     */
     time_t      mtime;                  /*modification time 		     */
     time_t      ctime;                  /*change time 			     */
+    time_t      btime;                  /*birth time 			     */
+
+    /* Attribute information (stored, for versions > 1) */
+    uint16_t	max_compact;		/* Maximum # of compact attributes   */
+    uint16_t	min_dense;		/* Minimum # of "dense" attributes   */
+    hsize_t     nattrs;                 /* Number of attributes in the group */
+    haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
+    haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
 
     /* Message management (stored, indirectly) */
     size_t	nmesgs;			/*number of messages		     */

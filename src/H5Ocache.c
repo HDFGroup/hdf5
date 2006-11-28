@@ -128,7 +128,10 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
             p = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
 
             /* Encode the message prefix */
-            UINT16ENCODE(p, curr_msg->type->id);
+            if(oh->version == H5O_VERSION_1)
+                UINT16ENCODE(p, curr_msg->type->id)
+            else
+                *p++ = (uint8_t)curr_msg->type->id;
             HDassert(curr_msg->raw_size < H5O_MESG_MAX_SIZE);
             UINT16ENCODE(p, curr_msg->raw_size);
             *p++ = curr_msg->flags;
@@ -206,7 +209,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 {
     H5O_t	*oh = NULL;     /* Object header read in */
     uint8_t     read_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
-    uint8_t	*p;             /* Pointer into buffer to decode */
+    const uint8_t *p;           /* Pointer into buffer to decode */
     size_t	spec_read_size; /* Size of buffer to speculatively read in */
     size_t	prefix_size;    /* Size of object header prefix */
     unsigned	nmesgs;         /* Total # of messages in this object header */
@@ -246,6 +249,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* Generic, non-stored information */
+    oh->sizeof_size = H5F_SIZEOF_SIZE(f);
+    oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
+
     /* Check for magic number */
     /* (indicates version 2 or later) */
     if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC)) {
@@ -279,7 +286,26 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         UINT32DECODE(p, oh->atime);
         UINT32DECODE(p, oh->mtime);
         UINT32DECODE(p, oh->ctime);
+        UINT32DECODE(p, oh->btime);
+
+        /* Attribute fields */
+        UINT16DECODE(p, oh->max_compact);
+        UINT16DECODE(p, oh->min_dense);
+        H5F_DECODE_LENGTH(f, p, oh->nattrs);
+        H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
+        H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
     } /* end if */
+    else {
+        /* Reset unused time fields */
+        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Reset unused attribute fields */
+        oh->max_compact = 0;
+        oh->min_dense = 0;
+        oh->nattrs = 0;
+        oh->attr_fheap_addr = HADDR_UNDEF;
+        oh->name_bt2_addr = HADDR_UNDEF;
+    } /* end else */
 
     /* First chunk size */
     UINT32DECODE(p, chunk_size);
@@ -382,7 +408,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             uint8_t	flags;          /* Flags for current message */
 
             /* Decode message prefix info */
-	    UINT16DECODE(p, id);
+            if(oh->version == H5O_VERSION_1)
+                UINT16DECODE(p, id)
+            else
+                id = *p++;
 	    UINT16DECODE(p, mesg_size);
 	    HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
 	    flags = *p++;
@@ -586,6 +615,14 @@ H5O_assert(oh);
             UINT32ENCODE(p, oh->atime);
             UINT32ENCODE(p, oh->mtime);
             UINT32ENCODE(p, oh->ctime);
+            UINT32ENCODE(p, oh->btime);
+
+            /* Attribute fields */
+            UINT16ENCODE(p, oh->max_compact);
+            UINT16ENCODE(p, oh->min_dense);
+            H5F_ENCODE_LENGTH(f, p, oh->nattrs);
+            H5F_addr_encode(f, &p, oh->attr_fheap_addr);
+            H5F_addr_encode(f, &p, oh->name_bt2_addr);
 
             /* Chunk size */
             UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh)));
