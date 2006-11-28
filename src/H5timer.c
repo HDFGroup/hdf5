@@ -38,6 +38,10 @@
 #   include <sys/resource.h>
 #endif
 
+#ifdef H5_HAVE_GETTIMEOFDAY
+#include <sys/time.h>
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
 
 /****************/
 /* Local Macros */
@@ -245,4 +249,36 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 	}
     }
 } /* end H5_bandwidth() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_now
+ *
+ * Purpose:	Retrieves the current time, as seconds after the UNIX epoch.
+ *
+ * Return:	# of seconds from the epoch (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 28, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+time_t
+H5_now(void)
+{
+    time_t	now;                    /* Current time */
+
+#ifdef H5_HAVE_GETTIMEOFDAY
+    {
+        struct timeval now_tv;
+
+        HDgettimeofday(&now_tv, NULL);
+        now = now_tv.tv_sec;
+    }
+#else /* H5_HAVE_GETTIMEOFDAY */
+    now = HDtime(NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    return(now);
+} /* end H5_now() */
 

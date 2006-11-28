@@ -43,10 +43,6 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
 
-#ifdef H5_HAVE_GETTIMEOFDAY
-#include <sys/time.h>
-#endif /* H5_HAVE_GETTIMEOFDAY */
-
 /****************/
 /* Local Macros */
 /****************/
@@ -848,6 +844,12 @@ H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
     oh->version = H5F_USE_LATEST_FORMAT(f) ? H5O_VERSION_LATEST : H5O_VERSION_1;
     oh->nlink = 0;
     oh->skipped_mesg_size = 0;
+
+    /* Initialize version-specific fields */
+    if(oh->version > H5O_VERSION_1) {
+        /* Initialize time fields */
+        oh->atime = oh->mtime = oh->ctime = H5_now();
+    } /* end if */
 
     /* Compute total size of initial object header */
     /* (i.e. object header prefix and first chunk) */
@@ -2253,7 +2255,6 @@ H5O_touch_oh(H5F_t *f,
              unsigned * oh_flags_ptr)
 {
     time_t	now;                    /* Current time */
-    unsigned	idx;                    /* Index of modification time message to update */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh)
@@ -2261,46 +2262,50 @@ H5O_touch_oh(H5F_t *f,
     HDassert(oh);
     HDassert(oh_flags_ptr);
 
-    /* Look for existing message */
-    for(idx = 0; idx < oh->nmesgs; idx++)
-	if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
-            break;
+    /* Get current time */
+    now = H5_now();
 
-#ifdef H5_HAVE_GETTIMEOFDAY
-    {
-        struct timeval now_tv;
+    /* Check version, to determine how to store time information */
+    if(oh->version == H5O_VERSION_1) {
+        unsigned	idx;                    /* Index of modification time message to update */
 
-        HDgettimeofday(&now_tv, NULL);
-        now = now_tv.tv_sec;
-    }
-#else /* H5_HAVE_GETTIMEOFDAY */
-    now = HDtime(NULL);
-#endif /* H5_HAVE_GETTIMEOFDAY */
+        /* Look for existing message */
+        for(idx = 0; idx < oh->nmesgs; idx++)
+            if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
+                break;
 
-    /* Create a new message, if necessary */
-    if(idx == oh->nmesgs) {
-        size_t	size;           /* New modification time message size */
+        /* Create a new message, if necessary */
+        if(idx == oh->nmesgs) {
+            size_t	size;           /* New modification time message size */
 
-        /* If we have to create a new message, but we aren't 'forcing' it, get out now */
-	if(!force)
-            HGOTO_DONE(SUCCEED);        /*nothing to do*/
+            /* If we would have to create a new message, but we aren't 'forcing' it, get out now */
+            if(!force)
+                HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
-	size = (H5O_MSG_MTIME_NEW->raw_size)(f, &now);
-	if((idx = H5O_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, size, oh_flags_ptr)) == UFAIL)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
+            size = (H5O_MSG_MTIME_NEW->raw_size)(f, &now);
+            if((idx = H5O_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, size, oh_flags_ptr)) == UFAIL)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
+        } /* end if */
+
+        /* Allocate 'native' space, if necessary */
+        if(NULL == oh->mesg[idx].native) {
+            if(NULL == (oh->mesg[idx].native = H5FL_MALLOC(time_t)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for modification time message")
+        } /* end if */
+
+        /* Update the message */
+        *((time_t *)(oh->mesg[idx].native)) = now;
+
+        /* Mark the message as dirty */
+        oh->mesg[idx].dirty = TRUE;
     } /* end if */
+    else {
+        /* XXX: For now, update access time & change fields in the object header */
+        /* (will need to add some code to update modification time appropriately) */
+        oh->atime = oh->ctime = now;
+    } /* end else */
 
-    /* Allocate 'native' space, if necessary */
-    if(NULL == oh->mesg[idx].native) {
-	if(NULL == (oh->mesg[idx].native = H5FL_MALLOC(time_t)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for modification time message")
-    } /* end if */
-
-    /* Update the message */
-    *((time_t *)(oh->mesg[idx].native)) = now;
-
-    /* Mark the message & object header as dirty */
-    oh->mesg[idx].dirty = TRUE;
+    /* Mark the object header as dirty */
     *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 done:
@@ -3852,13 +3857,29 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->rc = oh->nlink;
 
     /* Get modification time for object */
-    if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->mtime, dxpl_id)) {
-        H5E_clear_stack(NULL);
-        if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->mtime, dxpl_id)) {
-            H5E_clear_stack(NULL);
-            oinfo->mtime = 0;
-        } /* end if */
+    if(oh->version > H5O_VERSION_1) {
+        oinfo->atime = oh->atime;
+        oinfo->mtime = oh->mtime;
+        oinfo->ctime = oh->ctime;
     } /* end if */
+    else {
+        /* No information for access & modification fields */
+        /* (we stopped updating the "modification time" header message for
+         *      raw data changes, so the "modification time" header message
+         *      is closest to the 'change time', in POSIX terms - QAK)
+         */
+        oinfo->atime = 0;
+        oinfo->mtime = 0;
+
+        /* Might be information for modification time */
+        if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->mtime, dxpl_id)) {
+            H5E_clear_stack(NULL);
+            if(NULL == H5O_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->mtime, dxpl_id)) {
+                H5E_clear_stack(NULL);
+                oinfo->ctime = 0;
+            } /* end if */
+        } /* end if */
+    } /* end else */
 
     /* Set the version for the object header */
     oinfo->hdr.version = oh->version;

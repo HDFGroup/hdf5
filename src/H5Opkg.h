@@ -85,12 +85,15 @@
                   4 +		/*reference count	*/		      \
                   4)		/*header data size	*/		      \
         :								      \
-		(H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
+		(H5O_SIZEOF_MAGIC +	/*magic number  	*/	      \
                   1 +		/*version number 	*/		      \
                   2 +		/*number of messages	*/		      \
                   4 +		/*reference count	*/		      \
+                  4 +		/*access time		*/		      \
+                  4 +		/*modification time	*/		      \
+                  4 +		/*change time		*/		      \
                   4 +		/*header data size	*/		      \
-                  H5O_SIZEOF_CHKSUM)	/*checksum size	        */		      \
+                  H5O_SIZEOF_CHKSUM)	/*checksum size	        */	      \
     )
 #define H5O_SIZEOF_HDR_OH(O)						      \
      H5O_SIZEOF_HDR_VERS((O)->version)
@@ -184,12 +187,23 @@ typedef struct H5O_chunk_t {
 struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
+
+    /* General information */
     unsigned	version;		/*version number		     */
     unsigned	nlink;			/*link count			     */
-    size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
+
+    /* Time information */
+    time_t      atime;                  /*access time 			     */
+    time_t      mtime;                  /*modification time 		     */
+    time_t      ctime;                  /*change time 			     */
+
+    /* Message management */
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
+    size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
+
+    /* Chunk management */
     size_t	nchunks;		/*number of chunks		     */
     size_t	alloc_nchunks;		/*chunks allocated		     */
     H5O_chunk_t *chunk;			/*array of chunks		     */

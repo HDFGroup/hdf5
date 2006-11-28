@@ -273,6 +273,14 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Link count */
     UINT32DECODE(p, oh->nlink);
 
+    /* Version-specific fields */
+    if(oh->version > H5O_VERSION_1) {
+        /* Time fields */
+        UINT32DECODE(p, oh->atime);
+        UINT32DECODE(p, oh->mtime);
+        UINT32DECODE(p, oh->ctime);
+    } /* end if */
+
     /* First chunk size */
     UINT32DECODE(p, chunk_size);
 
@@ -573,6 +581,11 @@ H5O_assert(oh);
 
             /* Link count */
             UINT32ENCODE(p, oh->nlink);
+
+            /* Time fields */
+            UINT32ENCODE(p, oh->atime);
+            UINT32ENCODE(p, oh->mtime);
+            UINT32ENCODE(p, oh->ctime);
 
             /* Chunk size */
             UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh)));

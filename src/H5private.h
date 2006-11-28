@@ -511,6 +511,7 @@ H5_DLL void H5_timer_begin (H5_timer_t *timer);
 H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
 			   H5_timer_t *timer/*in,out*/);
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+H5_DLL time_t H5_now(void);
 
 /* Depth of object copy */
 typedef enum {
