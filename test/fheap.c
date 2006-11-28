@@ -14989,6 +14989,174 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_bug1
+ *
+ * Purpose:	Test inserting several objects, then deleting one and
+ *              re-inserting an object, along with opening and closing
+ *              the file.
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 28, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+    size_t      obj_size;               /* Size of object */
+    size_t      obj_loc;                /* Location of object in buffer */
+    fheap_heap_state_t state;           /* State of fractal heap */
+
+    /*
+     * Display testing message
+     */
+    TESTING("bug1: inserting several objects & removing one, then re-inserting")
+
+    /* Perform common file & heap open operations */
+    if(open_heap(filename, fapl, dxpl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
+        TEST_ERROR
+
+    /* Get information about heap ID lengths */
+    if(H5HF_get_id_len(fh, &id_len) < 0)
+        FAIL_STACK_ERROR
+    if(id_len > MAX_HEAP_ID_LEN)
+        TEST_ERROR
+
+    /* Initialize the heap ID structure */
+    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+
+    /* Insert objects */
+    obj_size = 44;
+    obj_loc = 1;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    obj_size = 484;
+    obj_loc = 2;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    obj_size = 168;
+    obj_loc = 3;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    obj_size = 96;
+    obj_loc = 4;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    obj_size = 568;
+    obj_loc = 5;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    obj_size = 568;
+    obj_loc = 6;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Re-open the heap */
+    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Remove one of the objects */
+    if(H5HF_remove(fh, dxpl, &keep_ids.ids[id_len * 4]) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Re-open the heap */
+    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Insert another object */
+    obj_size = 208;
+    obj_loc = 6;
+    if(add_obj(fh, dxpl, obj_loc, obj_size, NULL, &keep_ids))
+        TEST_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Free resources */
+    H5MM_xfree(keep_ids.ids);
+    H5MM_xfree(keep_ids.lens);
+    H5MM_xfree(keep_ids.offs);
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5MM_xfree(keep_ids.ids);
+        H5MM_xfree(keep_ids.lens);
+        H5MM_xfree(keep_ids.offs);
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_bug1() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the fractal heap code
@@ -15433,6 +15601,9 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #ifndef QAK
     } /* end for */
 #endif /* QAK */
+
+    /* Tests that address specific bugs */
+    nerrors += test_bug1(fapl, &small_cparam, &tparam);
 
     if(nerrors)
         goto error;

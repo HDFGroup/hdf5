@@ -575,8 +575,6 @@ H5HF_sect_single_locate_parent(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t refresh,
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on section's indirect block")
         } /* end if */
     } /* end if */
-    else
-        HDassert(sect->u.single.parent == NULL);
 
     /* Set the information for the section */
     sect->u.single.parent = sec_iblock;
