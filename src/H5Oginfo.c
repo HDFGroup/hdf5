@@ -119,12 +119,12 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     ginfo->track_corder = (flags & H5O_GINFO_FLAG_TRACK_CORDER) ? TRUE : FALSE;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
-    UINT32DECODE(p, ginfo->max_compact)
-    UINT32DECODE(p, ginfo->min_dense)
+    UINT16DECODE(p, ginfo->max_compact)
+    UINT16DECODE(p, ginfo->min_dense)
 
     /* Get the estimated # of entries & name lengths */
-    UINT32DECODE(p, ginfo->est_num_entries)
-    UINT32DECODE(p, ginfo->est_name_len)
+    UINT16DECODE(p, ginfo->est_num_entries)
+    UINT16DECODE(p, ginfo->est_name_len)
 
     /* Set return value */
     ret_value = ginfo;
@@ -174,12 +174,12 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
-    UINT32ENCODE(p, ginfo->max_compact)
-    UINT32ENCODE(p, ginfo->min_dense)
+    UINT16ENCODE(p, ginfo->max_compact)
+    UINT16ENCODE(p, ginfo->min_dense)
 
     /* Estimated # of entries & name lengths */
-    UINT32ENCODE(p, ginfo->est_num_entries)
-    UINT32ENCODE(p, ginfo->est_name_len)
+    UINT16ENCODE(p, ginfo->est_num_entries)
+    UINT16ENCODE(p, ginfo->est_name_len)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_encode() */
@@ -257,10 +257,10 @@ H5O_ginfo_size(const H5F_t UNUSED *f, const void UNUSED *_mesg)
     /* Set return value */
     ret_value = 1 +                     /* Version */
                 1 +                     /* Flags */
-                4 +                     /* "Max compact" links */
-                4 +                     /* "Min dense" links */
-                4 +                     /* Estimated # of entries in group */
-                4;                      /* Estimated length of name of entry in group */
+                2 +                     /* "Max compact" links */
+                2 +                     /* "Min dense" links */
+                2 +                     /* Estimated # of entries in group */
+                2;                      /* Estimated length of name of entry in group */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ginfo_size() */

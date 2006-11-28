@@ -188,22 +188,22 @@ struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
 
-    /* General information */
+    /* General information (stored) */
     unsigned	version;		/*version number		     */
     unsigned	nlink;			/*link count			     */
 
-    /* Time information */
+    /* Time information (stored) */
     time_t      atime;                  /*access time 			     */
     time_t      mtime;                  /*modification time 		     */
     time_t      ctime;                  /*change time 			     */
 
-    /* Message management */
+    /* Message management (stored, indirectly) */
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
     size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
 
-    /* Chunk management */
+    /* Chunk management (not stored) */
     size_t	nchunks;		/*number of chunks		     */
     size_t	alloc_nchunks;		/*chunks allocated		     */
     H5O_chunk_t *chunk;			/*array of chunks		     */

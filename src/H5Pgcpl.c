@@ -235,6 +235,14 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     FUNC_ENTER_API(H5Pset_link_phase_change, FAIL)
     H5TRACE3("e","iIuIu",plist_id,max_compact,min_dense);
 
+    /* Range check values */
+    if(max_compact < min_dense)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value")
+    if(max_compact > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536")
+    if(min_dense > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536")
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -328,6 +336,12 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
 
     FUNC_ENTER_API(H5Pset_est_link_info, FAIL)
     H5TRACE3("e","iIuIu",plist_id,est_num_entries,est_name_len);
+
+    /* Range check values */
+    if(est_num_entries > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. number of entries must be < 65536")
+    if(est_name_len > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. name length must be < 65536")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))

@@ -315,12 +315,12 @@ typedef struct H5O_ginfo_t {
     hbool_t     track_corder;           /* Are creation order values tracked on links? */
 
     /* (storage management info) */
-    uint32_t	max_compact;		/* Maximum # of compact links        */
-    uint32_t	min_dense;		/* Minimum # of "dense" links        */
+    uint16_t	max_compact;		/* Maximum # of compact links        */
+    uint16_t	min_dense;		/* Minimum # of "dense" links        */
 
     /* (initial object header size info) */
-    uint32_t	est_num_entries;	/* Estimated # of entries in group   */
-    uint32_t	est_name_len;		/* Estimated length of entry name    */
+    uint16_t	est_num_entries;	/* Estimated # of entries in group   */
+    uint16_t	est_name_len;		/* Estimated length of entry name    */
 } H5O_ginfo_t;
 
 /*
