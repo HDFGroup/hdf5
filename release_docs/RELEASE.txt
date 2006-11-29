@@ -338,6 +338,10 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* Newer versions of g95 are not compatible with v1.6.5.  Last known g95
+  version that is still compatiable with v1.6.5 is May 17, 2006.
+  AKC - 2006/11/29.
+
 * Intel Compilers for Linux x86_86 platforms (EM64T-based, v8.1) has
   optimization error in the data types conversion code.  Before running
   configure, edit the file config/intel-flags by changing the setting of
