@@ -83,8 +83,12 @@ typedef uint64_t H5SM_fheap_id_t;
 #define H5O_HASH_SIZE 32
 #define H5O_HASH_UNDEF ((uint32_t)FAIL)
 
+/* ========= Object Creation properties ============ */
+#define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
+#define H5O_CRT_ATTR_MIN_DENSE_NAME	"min dense attr"	/* Min. # of attributes to store densely */
+
 /* ========= Object Copy properties ============ */
-#define H5O_CPY_OPTION_NAME 			"copy object"   /* Copy options */
+#define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
 
 /* The object location information for an object */
 typedef struct H5O_loc_t {
@@ -370,13 +374,14 @@ typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
 
 /* Forward declarations for prototype arguments */
+struct H5P_genplist_t;
 struct H5SL_t;
 struct H5O_t;
 
 /* General message operators */
 H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
-    H5O_loc_t *loc/*out*/);
+    hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 H5_DLL herr_t H5O_open(const H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
@@ -425,6 +430,7 @@ H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t
     void *op_data, hid_t dxpl_id);
 H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
 H5_DLL uint32_t H5O_mesg_hash(unsigned type_id, H5F_t *f, const void *mesg);
+H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,

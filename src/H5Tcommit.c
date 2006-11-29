@@ -230,7 +230,6 @@ done:
 static herr_t
 H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED tapl_id)
 {
-    H5P_genplist_t  *tc_plist;          /* Property list created */
     H5O_loc_t   temp_oloc;              /* Temporary object header location */
     H5G_name_t  temp_path;              /* Temporary path */
     hbool_t     loc_init=FALSE;         /* Have temp_oloc and temp_path been initialized? */
@@ -280,7 +279,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED 
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if(H5O_create(file, dxpl_id, dtype_size, &temp_oloc) < 0)
+    if(H5O_create(file, dxpl_id, dtype_size, tcpl_id, &temp_oloc) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if(H5O_modify(&temp_oloc, H5O_DTYPE_ID, 0, H5O_FLAG_CONSTANT | H5O_FLAG_DONTSOHM, H5O_UPDATE_TIME, type, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
@@ -292,13 +291,10 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED 
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
     loc_init = FALSE;
 
-    /* Get the property list */
-    if(NULL == (tc_plist = H5I_object(tcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
+    /* Set the shared info fields */
     type->sh_loc.flags = H5O_COMMITTED_FLAG;
     type->shared->state = H5T_STATE_OPEN;
-    type->shared->fo_count=1;
+    type->shared->fo_count = 1;
 
     /* Add datatype to the list of open objects in the file */
     if(H5FO_top_incr(type->sh_loc.u.oloc.file, type->sh_loc.u.oloc.addr) < 0)
@@ -584,6 +580,79 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_create_plist
+ *
+ * Purpose:	Returns a copy of the datatype creation property list.
+ *
+ * Return:	Success:	ID for a copy of the datatype creation
+ *				property list.  The property list ID should be
+ *				released by calling H5Pclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, November 28, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tget_create_plist(hid_t dtype_id)
+{
+    H5T_t	        *type;          /* Datatype object for ID */
+    H5P_genplist_t      *tcpl_plist;    /* Existing datatype creation propertty list */
+    hid_t		new_tcpl_id = FAIL;     /* New datatype creation property list */
+    herr_t              status;         /* Generic status value */
+    hid_t		ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Tget_create_plist, FAIL)
+    H5TRACE1("i","i",dtype_id);
+
+    /* Check arguments */
+    if(NULL == (type = H5I_object_verify(dtype_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    /* Copy the default datatype creation property list */
+    if(NULL == (tcpl_plist = H5I_object(H5P_LST_DATATYPE_CREATE_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
+    if((new_tcpl_id = H5P_copy_plist(tcpl_plist)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+
+    /* Check if the datatype is committed */
+    if((status = H5T_committed(type)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
+
+    /* Retrieve further information, if the datatype is committed */
+    if(status > 0) {
+        H5P_genplist_t  *new_plist;     /* New datatype creation property list */
+        H5O_loc_t	*type_oloc;     /* Object location for committed datatype */
+
+        /* Get property list object for new TCPL */
+        if(NULL == (new_plist = H5I_object(new_tcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+        /* Get the datatype's object location */
+        if(NULL == (type_oloc = H5T_oloc(type)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get object location of datatype")
+
+        /* Retrieve any object creation properties */
+        if(H5O_get_create_plist(type_oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
+    } /* end if */
+
+    /* Set the return value */
+    ret_value = new_tcpl_id;
+
+done:
+    if(ret_value < 0) {
+        if(new_tcpl_id > 0)
+            (void)H5I_dec_ref(new_tcpl_id);
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tget_create_plist() */
 
 
 /*-------------------------------------------------------------------------

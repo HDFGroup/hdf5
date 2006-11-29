@@ -691,36 +691,40 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         if(lookup_status < 0) {
             /* If an intermediate group doesn't exist & flag is set, create the group */
             if(target & H5G_CRT_INTMD_GROUP) {
-                H5O_ginfo_t	ginfo;		/* Group info message for parent group */
-                H5O_linfo_t	linfo;		/* Link info message for parent group */
+                const H5O_ginfo_t def_ginfo = H5G_CRT_GROUP_INFO_DEF;   /* Default group info settings */
+                const H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;    /* Default link info settings */
+                H5O_ginfo_t	par_ginfo;	/* Group info settings for parent group */
+                H5O_linfo_t	par_linfo;	/* Link info settings for parent group */
+                const H5O_ginfo_t *ginfo;	/* Group info settings for new group */
+                const H5O_linfo_t *linfo;	/* Link info settings for new group */
 
                 /* Get the group info for parent group */
                 /* (OK if not found) */
-                if(NULL == H5O_read(grp_loc.oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id)) {
-                    H5O_ginfo_t def_ginfo = H5G_CRT_GROUP_INFO_DEF;
-
+                if(NULL == H5O_read(grp_loc.oloc, H5O_GINFO_ID, 0, &par_ginfo, dxpl_id)) {
                     /* Clear error stack from not finding the group info message */
                     H5E_clear_stack(NULL);
 
                     /* Use default group info settings */
-                    HDmemcpy(&ginfo, &def_ginfo, sizeof(H5O_ginfo_t));
+                    ginfo = &def_ginfo;
                 } /* end if */
+                else
+                    ginfo = &par_ginfo;
 
                 /* Get the link info for parent group */
                 /* (OK if not found) */
-                if(NULL == H5O_read(grp_loc.oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
-                    H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;
-
+                if(NULL == H5O_read(grp_loc.oloc, H5O_LINFO_ID, 0, &par_linfo, dxpl_id)) {
                     /* Clear error stack from not finding the link info message */
                     H5E_clear_stack(NULL);
 
                     /* Use default link info settings */
-                    HDmemcpy(&linfo, &def_linfo, sizeof(H5O_linfo_t));
+                    linfo = &def_linfo;
                 } /* end if */
+                else
+                    linfo = &par_linfo;
 
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
-                if(H5G_obj_create(grp_oloc.file, dxpl_id, &ginfo, &linfo, obj_loc.oloc/*out*/) < 0)
+                if(H5G_obj_create(grp_oloc.file, dxpl_id, ginfo, linfo, H5P_GROUP_CREATE_DEFAULT, obj_loc.oloc/*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */

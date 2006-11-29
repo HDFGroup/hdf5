@@ -564,6 +564,170 @@ test_h5o_refcount(void)
 
 /****************************************************************
 **
+**  test_h5o_plist(): Test object creation properties
+**
+****************************************************************/
+static void
+test_h5o_plist(void)
+{
+    hid_t       fid;                        /* HDF5 File ID      */
+    hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
+    hid_t       fapl;                       /* File access property list */
+    hid_t       gcpl, dcpl, tcpl;           /* Object creation properties */
+    unsigned    def_max_compact, def_min_dense; /* Default phase change parameters */
+    unsigned    max_compact, min_dense;         /* Actual phase change parameters */
+    herr_t      ret;                        /* Value returned from API calls */
+
+    /* Make a FAPL that uses the "use the latest version of the format" flag */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the "use the latest version of the format" flag for creating objects in the file */
+    ret = H5Pset_latest_format(fapl, TRUE);
+    CHECK(ret, FAIL, "H5Pset_latest_format");
+
+    /* Create a new HDF5 file */
+    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create group, dataset & named datatype creation property lists */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, FAIL, "H5Pcreate");
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    tcpl = H5Pcreate(H5P_DATATYPE_CREATE);
+    CHECK(tcpl, FAIL, "H5Pcreate");
+
+    /* Retrieve default attribute phase change values */
+    ret = H5Pget_attr_phase_change(gcpl, &def_max_compact, &def_min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Set non-default attribute phase change values on each creation property list */
+    ret = H5Pset_attr_phase_change(gcpl, def_max_compact + 1, def_min_dense - 1);
+    CHECK(ret, FAIL, "H5Pset_attr_phase_change");
+    ret = H5Pset_attr_phase_change(dcpl, def_max_compact + 1, def_min_dense - 1);
+    CHECK(ret, FAIL, "H5Pset_attr_phase_change");
+    ret = H5Pset_attr_phase_change(tcpl, def_max_compact + 1, def_min_dense - 1);
+    CHECK(ret, FAIL, "H5Pset_attr_phase_change");
+
+    /* Retrieve attribute phase change values on each creation property list and verify */
+    ret = H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(tcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+
+    /* Create a group, dataset, and committed datatype within the file,
+     *  using the respective type of creation property lists.
+     */
+
+    /* Create the group */
+    grp = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate_expand");
+    ret = H5Llink(fid, "group", grp, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Llink");
+
+    /* Commit the type inside the group */
+    dtype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype, FAIL, "H5Tcopy");
+    ret = H5Tcommit_expand(fid, dtype, tcpl, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit_expand");
+    ret = H5Llink(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Llink");
+
+    /* Create the dataspace for the dataset. */
+    dspace = H5Screate(H5S_SCALAR);
+    CHECK(dspace, FAIL, "H5Screate");
+
+    /* Create the dataset. */
+    dset = H5Dcreate_expand(fid, H5T_NATIVE_INT, dspace, dcpl, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate_expand");
+    ret = H5Llink(fid, "dataset", dset, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Llink");
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close current objects */
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(tcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file and check that the object creation properties persist */
+    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open objects */
+    grp = H5Gopen(fid, "group");
+    CHECK(grp, FAIL, "H5Gopen");
+    dtype = H5Topen(fid, "datatype");
+    CHECK(dtype, FAIL, "H5Topen");
+    dset = H5Dopen(fid, "dataset");
+    CHECK(dset, FAIL, "H5Dopen");
+
+    /* Retrieve each object's creation property list */
+    gcpl = H5Gget_create_plist(grp);
+    CHECK(gcpl, FAIL, "H5Gget_create_plist");
+    tcpl = H5Tget_create_plist(dtype);
+    CHECK(dcpl, FAIL, "H5Tget_create_plist");
+    dcpl = H5Dget_create_plist(dset);
+    CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    /* Retrieve attribute phase change values on each creation property list and verify */
+    ret = H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(tcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+
+    /* Close current objects */
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(tcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the FAPL */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+} /* test_h5o_plist() */
+
+
+/****************************************************************
+**
 **  test_h5o(): Main H5O (generic object) testing routine.
 **
 ****************************************************************/
@@ -577,6 +741,7 @@ test_h5o(void)
     test_h5o_open_by_addr();	/* Test opening objects by address */
     test_h5o_close();		/* Test generic close function */
     test_h5o_refcount();        /* Test incrementing and decrementing reference count */
+    test_h5o_plist();           /* Test object creation properties */
 } /* test_h5o() */
 
 
@@ -589,8 +754,6 @@ test_h5o(void)
  *
  * Programmer:	James Laird
  *              June 3, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

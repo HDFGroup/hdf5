@@ -363,7 +363,6 @@ H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
-H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 
 /******************************/
 /* Package Private Prototypes */
@@ -504,7 +503,7 @@ H5_DLL herr_t H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
 /* Functions that understand group objects */
 H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
-    const H5O_linfo_t *linfo, H5O_loc_t *oloc/*out*/);
+    const H5O_linfo_t *linfo, hid_t gcpl_id, H5O_loc_t *oloc/*out*/);
 H5_DLL herr_t H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_iterate(hid_t loc_id, const char *group_name,

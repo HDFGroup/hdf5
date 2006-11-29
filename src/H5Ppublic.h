@@ -166,6 +166,7 @@ H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_g;
 /* Public Prototypes */
 /*********************/
 
+/* Generic property list routines */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
@@ -216,6 +217,10 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
+
+/* Object creation property list (OCPL) routines */
+H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
+H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 
 /* File creation property list (FCPL) routines */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,
@@ -389,7 +394,7 @@ H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* 
 H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags);
 H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /* out */);
 
-/* String creation property list (SCPL) routines */
+/* String creation property list (STRCPL) routines */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 
@@ -399,7 +404,7 @@ H5_DLL herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks);
 H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
 H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
 
-/* Object copy property list (OCPL) routines */
+/* Object copy property list (OCPYPL) routines */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
 

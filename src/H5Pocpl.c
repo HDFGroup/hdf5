@@ -15,10 +15,10 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pocpl.c
- *			Mar 13 2006
- *			Peter Cao <xcao@ncsa.uiuc.edu>
+ *			Nov 28 2006
+ *			Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Object copying property list class routines
+ * Purpose:		Object creation property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -42,10 +42,13 @@
 /* Local Macros */
 /****************/
 
-/* ========= Object Copy properties ============ */
-/* Definitions for copy options */
-#define H5O_CPY_OPTION_SIZE			sizeof(unsigned)
-#define H5O_CPY_OPTION_DEF			0
+/* ========= Object Creation properties ============ */
+/* Definitions for the max. # of attributes to store compactly */
+#define H5O_CRT_ATTR_MAX_COMPACT_SIZE   sizeof(unsigned)
+#define H5O_CRT_ATTR_MAX_COMPACT_DEF    8
+/* Definitions for the min. # of attributes to store densely */
+#define H5O_CRT_ATTR_MIN_DENSE_SIZE     sizeof(unsigned)
+#define H5O_CRT_ATTR_MIN_DENSE_DEF      6
 
 
 /******************/
@@ -63,20 +66,20 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_ocpy_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P_ocrt_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-/* Object copy property list class library initialization object */
-const H5P_libclass_t H5P_CLS_OCPY[1] = {{
-    "object copy",		/* Class name for debugging     */
+/* Object creation property list class library initialization object */
+const H5P_libclass_t H5P_CLS_OCRT[1] = {{
+    "object create",		/* Class name for debugging     */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_OBJECT_COPY_g,	/* Pointer to class ID          */
-    &H5P_LST_OBJECT_COPY_g,	/* Pointer to default property list ID */
-    H5P_ocpy_reg_prop,		/* Default property registration routine */
+    &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class ID          */
+    NULL,			/* Pointer to default property list ID */
+    H5P_ocrt_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */
@@ -84,6 +87,7 @@ const H5P_libclass_t H5P_CLS_OCPY[1] = {{
     NULL,			/* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
+
 
 
 /*****************************/
@@ -98,112 +102,130 @@ const H5P_libclass_t H5P_CLS_OCPY[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_ocpy_reg_prop
+ * Function:    H5P_ocrt_reg_prop
  *
- * Purpose:     Initialize the object copy property list class
+ * Purpose:     Initialize the object creation property list class
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              October 31, 2006
+ *              November 28, 2006
  *-------------------------------------------------------------------------
  */
-herr_t
-H5P_ocpy_reg_prop(H5P_genclass_t *pclass)
+static herr_t
+H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
 {
-    unsigned ocpy_option = H5O_CPY_OPTION_DEF;  /* Default object copy flags */
+    unsigned attr_max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;   /* Default max. compact attribute storage settings */
+    unsigned attr_min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;       /* Default min. dense attribute storage settings */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_ocpy_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5P_ocrt_reg_prop)
 
-    /* Register copy options property */
-    if(H5P_register(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE,
-             &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* Register max. compact attribute storage property */
+    if(H5P_register(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE,
+             &attr_max_compact, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register min. dense attribute storage property */
+    if(H5P_register(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE,
+             &attr_min_dense, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_ocpy_reg_prop() */
+} /* end H5P_ocrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_copy_object
+ * Function:	H5Pset_attr_phase_change
  *
- * Purpose:     Set properties when copying an object (group, dataset, and datatype)
- *              from one location to another
+ * Purpose:	Sets the cutoff values for indexes storing attributes
+ *              in object headers for this file.  If more than max_compact
+ *              attributes are in an object header, the attributes will be
+ *              moved to a heap and indexed with a B-tree.
+ *              Likewise, an object header containing fewer than min_dense
+ *              attributes will be converted back to storing the attributes
+ *              directly in the object header.
  *
- * Usage:       H5Pset_copy_group(plist_id, cpy_option)
- *              hid_t plist_id;			IN: Property list to copy object
- *              unsigned cpy_option; 		IN: Options to copy object such as
- *                  H5O_COPY_SHALLOW_HIERARCHY_FLAG    -- Copy only immediate members
- *                  H5O_COPY_EXPAND_SOFT_LINK_FLAG     -- Expand soft links into new objects/
- *                  H5O_COPY_EXPAND_EXT_LINK_FLAG      -- Expand external links into new objects
- *                  H5O_COPY_EXPAND_REFERENCE_FLAG -- Copy objects that are pointed by references
- *                  H5O_COPY_WITHOUT_ATTR_FLAG         -- Copy object without copying attributes
+ *              If the max_compact is zero then attributes for this object will
+ *              never be stored in the object header but will be always be
+ *              stored in a heap.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
+ * Programmer:	Quincey Koziol
+ *		Tuesday, November 28, 2006
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
+H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_copy_object, FAIL)
-    H5TRACE2("e","iIu",plist_id,cpy_option);
+    FUNC_ENTER_API(H5Pset_attr_phase_change, FAIL)
+    H5TRACE3("e","iIuIu",plist_id,max_compact,min_dense);
 
-    /* Check parameters */
-    if(cpy_option & ~H5O_COPY_ALL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown option specified")
+    /* Range check values */
+    if(max_compact < min_dense)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be >= min dense value")
+    if(max_compact > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max compact value must be < 65536")
+    if(min_dense > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Set value */
-    if(H5P_set(plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set copy object flag")
+    /* Set property values */
+    if(H5P_set(plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &max_compact) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list")
+    if(H5P_set(plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &min_dense) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_copy_object() */
+} /* end H5Pset_attr_phase_change */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_copy_object
+ * Function:	H5Pget_attr_phase_change
  *
- * Purpose:     Returns the cpy_option, which is set for H5Ocopy(hid_t loc_id,
- *              const char* name, ... ) for copying objects
+ * Purpose:	Gets the phase change values for attribute storage
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
+ * Programmer:	Quincey Koziol
+ *		Tuesday, November 28, 2006
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
+H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_copy_object, FAIL)
-    H5TRACE2("e","ix",plist_id,cpy_option);
+    FUNC_ENTER_API(H5Pget_attr_phase_change, FAIL)
+    H5TRACE3("e","i*Iu*Iu",plist_id,max_compact,min_dense);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(cpy_option)
-        if(H5P_get(plist, H5O_CPY_OPTION_NAME, cpy_option) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
+    if(max_compact) {
+        if(H5P_get(plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, max_compact) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
+    } /* end if */
+    if(min_dense) {
+        if(H5P_get(plist, H5O_CRT_ATTR_MIN_DENSE_NAME, min_dense) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_copy_object() */
+} /* end H5Pget_attr_phase_change() */
 

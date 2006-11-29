@@ -157,6 +157,7 @@ H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
+H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 
 /*
  * These functions operate on symbol table nodes.

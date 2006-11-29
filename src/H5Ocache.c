@@ -461,7 +461,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                     oh->mesg[mesgno].dirty = FALSE;
                     oh->mesg[mesgno].flags = flags;
                     oh->mesg[mesgno].native = NULL;
-                    oh->mesg[mesgno].raw = p;
+                    oh->mesg[mesgno].raw = (uint8_t *)p;        /* Casting away const OK - QAK */
                     oh->mesg[mesgno].raw_size = mesg_size;
                     oh->mesg[mesgno].chunkno = chunkno;
                 } /* end else */

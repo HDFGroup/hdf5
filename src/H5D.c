@@ -966,6 +966,10 @@ H5Dget_create_plist(hid_t dset_id)
     if (NULL == (new_plist = H5I_object(new_dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
+    /* Retrieve any object creation properties */
+    if(H5O_get_create_plist(&dset->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
+
     /* Get the fill value property */
     if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
@@ -1177,15 +1181,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *plist)
+H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 {
     size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
     H5O_loc_t          *oloc = NULL;    /* Dataset's object location */
-    H5O_layout_t       *layout; /* Dataset's layout information */
-    H5T_t              *type;   /* Dataset's datatype */
-    H5S_t              *space;  /* Dataset's dataspace */
-    H5D_alloc_time_t alloc_time;/* Dataset's allocation time */
-    H5O_efl_t          *efl;    /* Dataset's external file list */
+    H5O_layout_t       *layout;         /* Dataset's layout information */
+    H5T_t              *type;           /* Dataset's datatype */
+    H5D_alloc_time_t alloc_time;        /* Dataset's allocation time */
+    H5O_efl_t          *efl;            /* Dataset's external file list */
+    H5P_genplist_t     *dc_plist = NULL;        /* Dataset's creation property list */
     hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
 
     /* fill value variables */
@@ -1204,11 +1208,10 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     HDassert(file);
     HDassert(dset);
 
-    /* Pick up former parameters */
+    /* Set some location variables, for convenience */
     oloc = &dset->oloc;
     layout = &dset->shared->layout;
     type = dset->shared->type;
-    space = dset->shared->space;
     alloc_time = dset->shared->alloc_time;
     efl = &dset->shared->efl;
 
@@ -1227,16 +1230,20 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 
     /* Check if dataset has non-default creation property list */
     if(dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
+        /* Get new dataset's property list object */
+        if (NULL == (dc_plist = H5I_object(dset->shared->dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+
         /*
          * Retrieve properties of fill value and others. Copy them into new fill
          * value struct.
          */
-        if(H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time")
         dset->shared->fill_time=fill_time;    /* Cache this for later */
 
         /* Get the fill value information from the property list */
-        if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
+        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value")
     } /* end if */
 
@@ -1251,7 +1258,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 
             /* Update dataset creation property */
             HDassert(dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT);
-            if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+            if(H5P_set(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill time")
         } /* end if */
 
@@ -1286,8 +1293,8 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     if(layout->type == H5D_COMPACT)
         ohdr_size += layout->u.compact.size;
 
-    /* Create (open for write access) an object header */
-    if(H5O_create(file, dxpl_id, ohdr_size, oloc) < 0)
+    /* Create an object header for the dataset */
+    if(H5O_create(file, dxpl_id, ohdr_size, dset->shared->dcpl_id, oloc/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
 
     /* Get a pointer to the object header itself */
@@ -1315,20 +1322,20 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 
         /* Update dataset creation property */
         HDassert(dset->shared->dcpl_id!=H5P_DATASET_CREATE_DEFAULT);
-        if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
+        if(H5P_set(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value")
     } /* end if */
 
     /* Update the type and space header messages */
     if(H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type, &oh_flags) < 0 ||
-            H5S_append(file, dxpl_id, oh, space, &oh_flags) < 0)
+            H5S_append(file, dxpl_id, oh, dset->shared->space, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages")
 
     /* Update the filters message, if this is a chunked dataset */
     if(layout->type == H5D_CHUNKED) {
         H5O_pline_t         pline;      /* Chunked data I/O pipeline info */
 
-        if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter")
 
         if(pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_FLAG_CONSTANT, &pline, &oh_flags) < 0)
@@ -1687,7 +1694,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
     /* Update the dataset's entry info. */
-    if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
+    if(H5D_update_entry_info(file, dxpl_id, new_dset) != SUCCEED)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
 
     /* Get the dataset's DCPL cache info */

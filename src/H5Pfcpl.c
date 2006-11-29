@@ -961,7 +961,6 @@ done:
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_shared_mesg_phase_change
  *
@@ -992,10 +991,15 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
 
     /* Check that values are sensible.  The min_btree value must be no greater
      * than the max list plus one.
-     * No need to check values otherwise, since they can't be negative.
+     * 
+     * Range check to make certain they will fit into encoded form.
      */
     if(max_list + 1 < min_btree)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "minimum B-tree value is greater than maximum list value")
+    if(max_list > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max list value must be < 65536")
+    if(min_btree > 65535)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min btree value must be < 65536")
 
     /* Avoid the strange case where max_list == 0 and min_btree == 1, so deleting the
      * last message in a B-tree makes it become an empty list.
@@ -1018,7 +1022,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_sohm_list_max
+ * Function:	H5Pget_shared_mesg_phase_change
  *
  * Purpose:	Gets the maximum size of a SOHM list index before it becomes
  *              a B-tree.
@@ -1056,4 +1060,4 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
 done:
     FUNC_LEAVE_API(ret_value);
 }
-
+

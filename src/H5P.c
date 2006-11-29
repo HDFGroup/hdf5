@@ -128,22 +128,6 @@ const H5P_libclass_t H5P_CLS_ROOT[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
-/* Object creation property list class library initialization object */
-/* (move to proper source code file when used for real) */
-const H5P_libclass_t H5P_CLS_OCRT[1] = {{
-    "object create",		/* Class name for debugging     */
-    &H5P_CLS_ROOT_g,		/* Parent class ID              */
-    &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class ID          */
-    NULL,			/* Pointer to default property list ID */
-    NULL,			/* Default property registration routine */
-    NULL,		        /* Class creation callback      */
-    NULL,		        /* Class creation callback info */
-    NULL,			/* Class copy callback          */
-    NULL,		        /* Class copy callback info     */
-    NULL,			/* Class close callback         */
-    NULL 		        /* Class close callback info    */
-}};
-
 /* Group access property list class library initialization object */
 /* (move to proper source code file when used for real) */
 const H5P_libclass_t H5P_CLS_GACC[1] = {{
@@ -210,6 +194,7 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
 
 
 /* Library property list classes defined in other code modules */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
@@ -233,7 +218,7 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
 /*******************/
 
 /* Track the revision count of a class, to make comparisons faster */
-static unsigned H5P_next_rev=0;
+static unsigned H5P_next_rev = 0;
 #define H5P_GET_NEXT_REV        (H5P_next_rev++)
 
 /* List of all property list classes in the library */
@@ -268,7 +253,6 @@ H5FL_DEFINE_STATIC(H5P_genprop_t);
 
 /* Declare a free list to manage the H5P_genplist_t struct */
 H5FL_DEFINE_STATIC(H5P_genplist_t);
-
 
 
 /*--------------------------------------------------------------------------

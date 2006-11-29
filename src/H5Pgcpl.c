@@ -102,14 +102,14 @@ const H5P_libclass_t H5P_CLS_GCRT[1] = {{
  *              October 31, 2006
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_gcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;     /* Default group info settings */
     H5O_linfo_t linfo = H5G_CRT_LINK_INFO_DEF;      /* Default link info settings */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_gcrt_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5P_gcrt_reg_prop)
 
     /* Register group info property */
     if(H5P_register(pclass, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE,

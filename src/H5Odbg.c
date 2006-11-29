@@ -269,6 +269,47 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of links:",
 	      oh->nlink);
+    /* Extra information for later versions */
+    if(oh->version > H5O_VERSION_1) {
+        struct tm *tm;          /* Time structure */
+        char buf[128];          /* Buffer for formatting time info */
+
+        /* Time fields */
+        tm = HDlocaltime(&oh->atime);
+        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Access Time:", buf);
+        tm = HDlocaltime(&oh->mtime);
+        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Modification Time:", buf);
+        tm = HDlocaltime(&oh->ctime);
+        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Change Time:", buf);
+        tm = HDlocaltime(&oh->btime);
+        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Birth Time:", buf);
+
+        /* Attribute tracking fields */
+        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                  "Max. compact attributes:",
+                  (unsigned)oh->max_compact);
+        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                  "Min. dense attributes:",
+                  (unsigned)oh->min_dense);
+        HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+                  "Number of attributes:",
+                  oh->nattrs);
+        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                  "Attribute heap address:",
+                  oh->attr_fheap_addr);
+        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                  "Attribute name index address:",
+                  oh->name_bt2_addr);
+    } /* end if */
+
     HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,
 	      "Number of messages (allocated):",
 	      oh->nmesgs, oh->alloc_nmesgs);

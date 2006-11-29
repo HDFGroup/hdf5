@@ -114,8 +114,8 @@ typedef struct H5O_typeinfo_t {
 
 static hid_t H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id);
 static H5O_loc_t * H5O_get_oloc(hid_t id);
-static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size,
-    H5O_loc_t *loc/*out*/, haddr_t header);
+static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
+    hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 static herr_t H5O_reset_real(const H5O_msg_class_t *type, void *native);
 static void * H5O_copy_real(const H5O_msg_class_t *type, const void *mesg,
         void *dst);
@@ -772,7 +772,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5O_loc_t *loc/*out*/)
+H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
+    H5O_loc_t *loc/*out*/)
 {
     haddr_t	header;                 /* Address of object header */
     herr_t      ret_value = SUCCEED;    /* return value */
@@ -792,7 +793,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5O_loc_t *loc/*out*/)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header header")
 
     /* initialize the object header */
-    if(H5O_new(f, dxpl_id, size_hint, loc, header) != SUCCEED)
+    if(H5O_new(f, dxpl_id, header, size_hint, ocpl_id, loc) != SUCCEED)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header")
 
 done:
@@ -819,8 +820,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
-    haddr_t header)
+H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
+    hid_t ocpl_id, H5O_loc_t *loc/*out*/)
 {
     H5O_t      *oh = NULL;
     size_t      oh_size;                /* Size of initial object header */
@@ -831,6 +832,7 @@ H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
     /* check args */
     HDassert(f);
     HDassert(loc);
+    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* Set up object location */
     loc->file = f;
@@ -849,12 +851,24 @@ H5O_new(H5F_t *f, hid_t dxpl_id, size_t chunk_size, H5O_loc_t *loc/*out*/,
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
+        H5P_genplist_t  *oc_plist;          /* Object creation property list */
+
         /* Initialize all time fields with current time */
         oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
 
+        /* Get the property list */
+        if(NULL == (oc_plist = H5I_object(ocpl_id)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
+
         /* Initialize attribute tracking fields */
-        oh->max_compact = 0;
-        oh->min_dense = 0;
+
+        /* Retrieve phase change values from property list */
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
+
+        /* Set starting values for attribute info */
         oh->nattrs = 0;
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
@@ -3960,6 +3974,55 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 
     /* Sanity check that all the bytes are accounted for */
     HDassert(oinfo->hdr.hdr_size == (oinfo->hdr.free_space + oinfo->hdr.meta_space + oinfo->hdr.mesg_space + oh->skipped_mesg_size));
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_get_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_create_plist
+ *
+ * Purpose:	Retrieve the object creation properties for an object
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 28 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_plist)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_get_create_plist, FAIL)
+
+    /* Check args */
+    HDassert(oloc);
+    HDassert(oc_plist);
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Set property values, if they were used for the object */
+    if(oh->version > H5O_VERSION_1) {
+        unsigned max_compact = oh->max_compact;         /* Alias for setting the max. compact value */
+        unsigned min_dense = oh->min_dense;             /* Alias for setting the min. dense value */
+
+        /* Set the property list values with aliases, so the sizes are correct */
+        if(H5P_set(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &max_compact) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list")
+        if(H5P_set(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &min_dense) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
+    } /* end if */
 
 done:
     if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)

@@ -605,6 +605,7 @@
 ./src/H5Plapl.c
 ./src/H5Plcpl.c
 ./src/H5Pocpl.c
+./src/H5Pocpypl.c
 ./src/H5Ppkg.h
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h

@@ -125,7 +125,7 @@ static herr_t H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo,
  */
 herr_t
 H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
-    const H5O_linfo_t *linfo, H5O_loc_t *oloc/*out*/)
+    const H5O_linfo_t *linfo, hid_t gcpl_id, H5O_loc_t *oloc/*out*/)
 {
     size_t hdr_size;                    /* Size of object header to request */
     hbool_t use_latest_format;          /* Flag indicating the new group format should be used */
@@ -188,7 +188,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
      * since nothing refers to it yet.	The link count will be
      * incremented if the object is added to the group directed graph.
      */
-    if(H5O_create(f, dxpl_id, hdr_size, oloc/*out*/) < 0)
+    if(H5O_create(f, dxpl_id, hdr_size, gcpl_id, oloc/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
     /* Check for format of group to create */
