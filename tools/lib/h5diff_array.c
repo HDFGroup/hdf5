@@ -136,7 +136,7 @@ int print_data(diff_opt_t *options)
  */
 static
 void print_pos( int        *ph,       /* print header */
-                int        per,       /* print percentage */
+                int        pp,        /* print percentage */
                 hsize_t    curr_pos,
                 hsize_t    *acc,
                 hsize_t    *pos,
@@ -150,7 +150,7 @@ void print_pos( int        *ph,       /* print header */
  if ( *ph==1 )
  {
   *ph=0;
-  if (per)
+  if (pp)
   {
    parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
     "position",
