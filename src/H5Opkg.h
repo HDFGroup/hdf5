@@ -209,8 +209,8 @@ struct H5O_t {
     time_t      btime;                  /*birth time 			     */
 
     /* Attribute information (stored, for versions > 1) */
-    uint16_t	max_compact;		/* Maximum # of compact attributes   */
-    uint16_t	min_dense;		/* Minimum # of "dense" attributes   */
+    unsigned	max_compact;		/* Maximum # of compact attributes   */
+    unsigned	min_dense;		/* Minimum # of "dense" attributes   */
     hsize_t     nattrs;                 /* Number of attributes in the group */
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */

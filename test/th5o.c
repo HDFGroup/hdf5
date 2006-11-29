@@ -654,6 +654,36 @@ test_h5o_plist(void)
     ret = H5Sclose(dspace);
     CHECK(ret, FAIL, "H5Sclose");
 
+    /* Close current creation property lists */
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(tcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Retrieve each object's creation property list */
+    gcpl = H5Gget_create_plist(grp);
+    CHECK(gcpl, FAIL, "H5Gget_create_plist");
+    tcpl = H5Tget_create_plist(dtype);
+    CHECK(dcpl, FAIL, "H5Tget_create_plist");
+    dcpl = H5Dget_create_plist(dset);
+    CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    /* Retrieve attribute phase change values on each creation property list and verify */
+    ret = H5Pget_attr_phase_change(gcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+    ret = H5Pget_attr_phase_change(tcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+    VERIFY(max_compact, (def_max_compact + 1), "H5Pget_attr_phase_change");
+    VERIFY(min_dense, (def_min_dense - 1), "H5Pget_attr_phase_change");
+
     /* Close current objects */
     ret = H5Pclose(gcpl);
     CHECK(ret, FAIL, "H5Pclose");
