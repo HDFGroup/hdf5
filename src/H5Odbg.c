@@ -374,14 +374,14 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 		   oh->mesg[i].dirty);
 	HDfprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
 		   "Shared:",
-		   (oh->mesg[i].flags & H5O_FLAG_SHARED) ? "Yes" : "No");
+		   (oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) ? "Yes" : "No");
 	HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Constant:",
-		  (oh->mesg[i].flags & H5O_FLAG_CONSTANT) ? "Yes" : "No");
-	if(oh->mesg[i].flags & ~H5O_FLAG_BITS) {
+		  (oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) ? "Yes" : "No");
+	if(oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS) {
 	    HDfprintf (stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3),
 		       "*** ADDITIONAL UNKNOWN FLAGS --->",
-		       oh->mesg[i].flags & ~H5O_FLAG_BITS);
+		       oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
 	} /* end if */
 	HDfprintf(stream, "%*s%-*s %Zu bytes\n", indent+3, "", MAX(0,fwidth-3),
 		  "Raw size in obj header:",
@@ -403,7 +403,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 
 	/* decode the message */
-	if(oh->mesg[i].flags & H5O_FLAG_SHARED) {
+	if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
 	    decode = H5O_MSG_SHARED->decode;
 	    debug = H5O_MSG_SHARED->debug;
 	} else {
@@ -424,7 +424,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
 
 	/* If the message is shared then also print the pointed-to message */
-	if(oh->mesg[i].flags & H5O_FLAG_SHARED) {
+	if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
 	    H5O_shared_t *shared = (H5O_shared_t*)(oh->mesg[i].native);
 	    void *mesg;
 

@@ -390,7 +390,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HDassert(!mesg_src->dirty);     /* Should be cleared by earlier call to flush messages */
 
         /* Check for shared message to operate on */
-        if(mesg_src->flags & H5O_FLAG_SHARED)
+        if(mesg_src->flags & H5O_MSG_FLAG_SHARED)
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_src->type;
@@ -480,7 +480,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* (Use destination message, in case the message has been removed (i.e
             *      converted to a nil message) in the destination -QAK)
             */
-        if(mesg_dst->flags & H5O_FLAG_SHARED)
+        if(mesg_dst->flags & H5O_MSG_FLAG_SHARED)
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_dst->type;
@@ -632,7 +632,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* (Use destination message, in case the message has been removed (i.e
          *      converted to a nil message) in the destination -QAK)
          */
-        if(mesg_dst->flags & H5O_FLAG_SHARED)
+        if(mesg_dst->flags & H5O_MSG_FLAG_SHARED)
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_dst->type;

@@ -54,7 +54,7 @@
         const H5O_msg_class_t	*decode_type;                                 \
                                                                               \
         /* Check for shared message */                                        \
-        if ((MSG)->flags & H5O_FLAG_SHARED)                                   \
+        if ((MSG)->flags & H5O_MSG_FLAG_SHARED)                                   \
             decode_type = H5O_MSG_SHARED;                                     \
         else                                                                  \
             decode_type = (MSG)->type;                                        \
@@ -1170,7 +1170,7 @@ H5O_free_mesg(H5O_mesg_t *mesg)
     HDassert(mesg);
 
     /* Free any native information */
-    if(mesg->flags & H5O_FLAG_SHARED)
+    if(mesg->flags & H5O_MSG_FLAG_SHARED)
         mesg->native = H5O_free_real(H5O_MSG_SHARED, mesg->native);
     else
         mesg->native = H5O_free_real(mesg->type, mesg->native);
@@ -1631,7 +1631,7 @@ H5O_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence, void *mesg, h
     if((idx = H5O_find_in_ohdr(f, dxpl_id, oh, &type, sequence)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header")
 
-    if(oh->mesg[idx].flags & H5O_FLAG_SHARED) {
+    if(oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) {
 	/*
 	 * If the message is shared then then the native pointer points to an
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
@@ -1761,7 +1761,7 @@ done:
  * dataspaces */
 int
 H5O_modify(H5O_loc_t *loc, unsigned type_id, int overwrite,
-   unsigned flags, unsigned update_flags, void *mesg, hid_t dxpl_id)
+   unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id)
 {
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     htri_t shared_mess;
@@ -1777,19 +1777,19 @@ H5O_modify(H5O_loc_t *loc, unsigned type_id, int overwrite,
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(mesg);
-    HDassert(0 == (flags & ~H5O_FLAG_BITS));
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
 
     /* Should this message be written as a SOHM? */
     if((shared_mess = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) >0)
     {
         /* Mark the message as shared */
-        flags |= H5O_FLAG_SHARED;
+        mesg_flags |= H5O_MSG_FLAG_SHARED;
 
     } else if(shared_mess < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message");
 
     /* Call the "real" modify routine */
-    if((ret_value = H5O_modify_real(loc, type, overwrite, flags, update_flags, mesg, dxpl_id)) < 0)
+    if((ret_value = H5O_modify_real(loc, type, overwrite, mesg_flags, update_flags, mesg, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
@@ -1833,7 +1833,7 @@ done:
  */
 static int
 H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
-   unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id)
+   unsigned mesg_flags, unsigned update_flags, const void *mesg, hid_t dxpl_id)
 {
     H5O_t		*oh = NULL;
     unsigned		oh_flags = H5AC__NO_FLAGS_SET;
@@ -1853,7 +1853,7 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(type);
     HDassert(mesg);
-    HDassert(0 == (flags & ~H5O_FLAG_BITS));
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
 
     /* Check for write access on the file */
     if(0 == (loc->file->intent & H5F_ACC_RDWR))
@@ -1884,15 +1884,15 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     if(overwrite < 0) {
         /* Create a new message */
         /* JAMES: why is sh_mesg passed in here?  Is it ever used? */
-        if((idx = H5O_new_mesg(loc->file, oh, &flags, type, mesg, &sh_mesg, &type, &mesg, dxpl_id, &oh_flags)) == UFAIL)
+        if((idx = H5O_new_mesg(loc->file, oh, &mesg_flags, type, mesg, &sh_mesg, &type, &mesg, dxpl_id, &oh_flags)) == UFAIL)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
 
         /* Set the correct sequence number for the message created */
 	sequence++;
 
-    } else if(oh->mesg[idx].flags & H5O_FLAG_CONSTANT) {
+    } else if(oh->mesg[idx].flags & H5O_MSG_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify constant message")
-    } else if(oh->mesg[idx].flags & H5O_FLAG_SHARED) {
+    } else if(oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) {
         /* This message is shared, but it's being modified.  This is valid if
          * it's shared in the heap .
          * First, make sure it's not a committed message; these can't ever
@@ -1927,7 +1927,7 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     }
 
     /* Write the information to the message */
-    if(H5O_write_mesg(oh, idx, write_type, write_mesg, flags, update_flags, &oh_flags) < 0)
+    if(H5O_write_mesg(oh, idx, write_type, write_mesg, mesg_flags, update_flags, &oh_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
 
     /* Update the modification time message if any */
@@ -2048,7 +2048,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
+H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned mesg_flags,
     void *mesg, unsigned * oh_flags_ptr)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
@@ -2063,7 +2063,7 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
-    HDassert(0 == (flags & ~H5O_FLAG_BITS));
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
     HDassert(mesg);
     HDassert(oh_flags_ptr);
 
@@ -2071,12 +2071,12 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
     if((shared_mess = H5SM_try_share(f, dxpl_id, type_id, mesg)) >0)
     {
         /* Mark the message as shared */
-        flags |= H5O_FLAG_SHARED;
+        mesg_flags |= H5O_MSG_FLAG_SHARED;
     }
     else if(shared_mess < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
-    if((ret_value = H5O_append_real( f, dxpl_id, oh, type, flags, mesg, oh_flags_ptr)) < 0)
+    if((ret_value = H5O_append_real( f, dxpl_id, oh, type, mesg_flags, mesg, oh_flags_ptr)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
 
 done:
@@ -2103,7 +2103,7 @@ done:
  */
 static int
 H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
-    unsigned flags, const void *mesg, unsigned * oh_flags_ptr)
+    unsigned mesg_flags, const void *mesg, unsigned * oh_flags_ptr)
 {
     unsigned		idx;            /* Index of message to modify */
     H5O_shared_t	sh_mesg;
@@ -2115,16 +2115,16 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     HDassert(f);
     HDassert(oh);
     HDassert(type);
-    HDassert(0 == (flags & ~H5O_FLAG_BITS));
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
     HDassert(mesg);
     HDassert(oh_flags_ptr);
 
     /* Create a new message */
-    if((idx = H5O_new_mesg(f, oh, &flags, type, mesg, &sh_mesg, &type, &mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
+    if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &type, &mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
 
     /* Write the information to the message */
-    if(H5O_write_mesg(oh, idx, type, mesg, flags, 0, oh_flags_ptr) < 0)
+    if(H5O_write_mesg(oh, idx, type, mesg, mesg_flags, 0, oh_flags_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -2152,7 +2152,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_type,
+H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *orig_type,
     const void *orig_mesg, H5O_shared_t *sh_mesg, const H5O_msg_class_t **new_type,
     const void **new_mesg, hid_t dxpl_id, unsigned * oh_flags_ptr)
 {
@@ -2165,7 +2165,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
     /* check args */
     HDassert(f);
     HDassert(oh);
-    HDassert(flags);
+    HDassert(mesg_flags);
     HDassert(orig_type);
     HDassert(orig_mesg);
     HDassert(sh_mesg);
@@ -2174,7 +2174,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
     HDassert(oh_flags_ptr);
 
     /* Check for shared message */
-    if(*flags & H5O_FLAG_SHARED) {
+    if(*mesg_flags & H5O_MSG_FLAG_SHARED) {
         HDmemset(sh_mesg, 0, sizeof(H5O_shared_t));
 
         if ((NULL == orig_type->is_shared) || (NULL == orig_type->get_share))
@@ -2184,7 +2184,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_msg_class_t *orig_t
              * If the message isn't shared then turn off the shared bit
              * and treat it as an unshared message.
              */
-            *flags &= ~H5O_FLAG_SHARED;
+            *mesg_flags &= ~H5O_MSG_FLAG_SHARED;
         } else if(is_shared > 0) {
             /* Message is shared. Get shared message, change message type,
              * and use shared information */
@@ -2233,7 +2233,7 @@ done:
  */
 static herr_t
 H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
-    const void *mesg, unsigned flags, unsigned update_flags,
+    const void *mesg, unsigned mesg_flags, unsigned update_flags,
     unsigned * oh_flags_ptr)
 {
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
@@ -2258,7 +2258,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
     if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native, update_flags)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
 
-    idx_msg->flags = flags;
+    idx_msg->flags = mesg_flags;
     idx_msg->dirty = TRUE;
     *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
 
@@ -2642,7 +2642,7 @@ H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
          * Keep track of how many times we failed trying to remove constant
          * messages.
          */
-        if(mesg->flags & H5O_FLAG_CONSTANT)
+        if(mesg->flags & H5O_MSG_FLAG_CONSTANT)
             udata->nfailed++;
         else {
             /* Convert message into a null message */
@@ -3116,7 +3116,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
     HDassert(mesg);
 
     /* Get the message to free's type */
-    if(mesg->flags & H5O_FLAG_SHARED)
+    if(mesg->flags & H5O_MSG_FLAG_SHARED)
         type = H5O_MSG_SHARED;
     else
         type = mesg->type;
@@ -3364,7 +3364,7 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
             LOAD_NATIVE(loc->file, dxpl_id, idx_msg, FAIL)
 
             /* JAMES: test */
-            if(idx_msg->flags & H5O_FLAG_SHARED)
+            if(idx_msg->flags & H5O_MSG_FLAG_SHARED)
             {
                 if(NULL == (unshared_mesg = H5O_shared_read(loc->file, dxpl_id, idx_msg->native, idx_msg->type, NULL)))
                     HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message");
@@ -3388,7 +3388,7 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
             } /* end else */
 
             /* JAMES again */
-            if(idx_msg->flags & H5O_FLAG_SHARED)
+            if(idx_msg->flags & H5O_MSG_FLAG_SHARED)
             {
                 H5O_free_real(idx_msg->type, unshared_mesg);
             }
@@ -3953,7 +3953,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         oinfo->hdr.msg_present |= type_flag;
 
         /* Set flag if the message is shared in some way */
-        if(curr_msg->flags & H5O_FLAG_SHARED)                                   \
+        if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
             oinfo->hdr.msg_shared |= type_flag;
     } /* end for */
 #ifdef LATER

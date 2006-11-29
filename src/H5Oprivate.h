@@ -68,11 +68,11 @@ typedef uint64_t H5SM_fheap_id_t;
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
 
 /* Flags needed when encoding messages */
-#define H5O_FLAG_CONSTANT	0x01u
-#define H5O_FLAG_SHARED		0x02u
-#define H5O_FLAG_SOHM		0x04u
-#define H5O_FLAG_DONTSOHM	0x08u
-#define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED|H5O_FLAG_SOHM|H5O_FLAG_DONTSOHM)
+#define H5O_MSG_FLAG_CONSTANT	0x01u
+#define H5O_MSG_FLAG_SHARED	0x02u
+#define H5O_MSG_FLAG_SOHM	0x04u
+#define H5O_MSG_FLAG_DONTSOHM	0x08u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_SOHM|H5O_MSG_FLAG_DONTSOHM)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u

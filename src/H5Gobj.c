@@ -198,7 +198,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert group info message */
-        if(H5O_modify(oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
+        if(H5O_modify(oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
     } /* end if */
     else {
@@ -486,7 +486,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
             /* Insert group info message */
-            if(H5O_modify(grp_oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, 0, &new_ginfo, dxpl_id) < 0)
+            if(H5O_modify(grp_oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_MSG_FLAG_CONSTANT, 0, &new_ginfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
             /* Set up user data for iteration */

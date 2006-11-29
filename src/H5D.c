@@ -1302,7 +1302,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
 
     /* Write new fill value message */
-    if(H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_FLAG_CONSTANT, &fill, &oh_flags) < 0)
+    if(H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, &fill, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
     /* If there is valid information for the old fill value struct, update it */
@@ -1317,7 +1317,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL,"unable to copy fill value")
 
         /* Write old fill value */
-        if(fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_FLAG_CONSTANT, fill_prop, &oh_flags) < 0)
+        if(fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, fill_prop, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
         /* Update dataset creation property */
@@ -1327,7 +1327,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     } /* end if */
 
     /* Update the type and space header messages */
-    if(H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type, &oh_flags) < 0 ||
+    if(H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_SHARED, type, &oh_flags) < 0 ||
             H5S_append(file, dxpl_id, oh, dset->shared->space, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages")
 
@@ -1338,7 +1338,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter")
 
-        if(pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_FLAG_CONSTANT, &pline, &oh_flags) < 0)
+        if(pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, &pline, &oh_flags) < 0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
@@ -1374,14 +1374,14 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             efl->slot[u].name_offset = offset;
         }
 
-        if (H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_FLAG_CONSTANT, efl, &oh_flags) < 0)
+        if (H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, efl, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     }
 
     /* Update layout message */
     /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
     /* Note: this is relying on H5D_alloc_storage not calling H5O_modify during dataset creation */
-    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, (alloc_time == H5D_ALLOC_TIME_EARLY ? H5O_FLAG_CONSTANT : 0), layout, &oh_flags) < 0)
+    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, (alloc_time == H5D_ALLOC_TIME_EARLY ? H5O_MSG_FLAG_CONSTANT : 0), layout, &oh_flags) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 #ifdef H5O_ENABLE_BOGUS
@@ -2563,7 +2563,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
          * set the address.  (this is improves forward compatibility).
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            if(H5O_modify(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_FLAG_CONSTANT, update_time, &(dset->shared->layout), dxpl_id) < 0)
+            if(H5O_modify(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_MSG_FLAG_CONSTANT, update_time, &(dset->shared->layout), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
     } /* end if */
 
