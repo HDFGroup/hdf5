@@ -51,12 +51,6 @@
 #define LLI_FORMAT_P_NOTCOMP  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
 #define ULLI_FORMAT_P_NOTCOMP "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
 
-
-static int   both_zero;
-static int   is_zero;
-static float per;
-
-
 /*-------------------------------------------------------------------------
  * -p relative error formula
  *
@@ -414,7 +408,8 @@ hsize_t diff_datum(void       *_mem1,
  hid_t         obj2_id;
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
- float         f1, f2;
+ float         f1, f2, per;
+ int           both_zero;
 
  type_size = H5Tget_size( m_type );
 
@@ -2388,6 +2383,8 @@ hsize_t character_compare_opt(unsigned char *mem1,
  hsize_t            nfound=0;  /* differences found */
  unsigned char      temp1_uchar;
  unsigned char      temp2_uchar;
+ float              per;
+ int                both_zero;
 
  memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
  memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -2484,6 +2481,7 @@ hsize_t diff_float(unsigned char *mem1,
  float       temp2_float;
  hsize_t     i;
  float       per;
+ int         both_zero;
 
 
  /* -d and !-p */
@@ -2652,6 +2650,7 @@ hsize_t diff_double(unsigned char *mem1,
  double      temp2_double;
  hsize_t     i;
  float       per;
+ int         both_zero;
 
 
  /* -d and !-p */
@@ -2820,6 +2819,7 @@ hsize_t diff_schar(unsigned char *mem1,
  char        temp2_char;
  hsize_t     i;
  float       per;
+ int         both_zero;
 
 
  /* -d and !-p */
@@ -2991,6 +2991,7 @@ hsize_t diff_uchar(unsigned char *mem1,
  unsigned char temp2_uchar;
  hsize_t       i;
  float         per;
+ int           both_zero;
 
 
  /* -d and !-p */
@@ -3161,7 +3162,7 @@ hsize_t diff_short(unsigned char *mem1,
  short         temp2_short;
  hsize_t       i;
  float         per;
-
+ int           both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -3334,6 +3335,7 @@ hsize_t diff_ushort(unsigned char *mem1,
  unsigned short temp2_ushort;
  hsize_t        i;
  float          per;
+ int            both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -3507,6 +3509,7 @@ hsize_t diff_int(unsigned char *mem1,
  int           temp2_int;
  hsize_t       i;
  float         per;
+ int           both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -3680,6 +3683,7 @@ hsize_t diff_uint(unsigned char *mem1,
  unsigned int   temp2_uint;
  hsize_t        i;
  float          per;
+ int            both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -3853,6 +3857,7 @@ hsize_t diff_long(unsigned char *mem1,
  long          temp2_long;
  hsize_t       i;
  float         per;
+ int           both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -4030,6 +4035,7 @@ hsize_t diff_ulong(unsigned char *mem1,
  unsigned long  temp2_ulong;
  hsize_t        i;
  float          per;
+ int            both_zero;
 
 
  /* -d and !-p */
@@ -4209,6 +4215,7 @@ hsize_t diff_llong(unsigned char *mem1,
  long_long     temp2_llong;
  hsize_t       i;
  float         per;
+ int           both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -4385,6 +4392,7 @@ hsize_t diff_ullong(unsigned char *mem1,
  unsigned long_long  temp2_ullong;
  hsize_t             i;
  float               f1, f2, per;
+ int                 both_zero;
 
  /* -d and !-p */
  if (options->d && !options->p)
@@ -4605,6 +4613,9 @@ error:
 static 
 hbool_t equal_float(float value, float expected)                               
 {
+    int both_zero;
+    int is_zero;
+
     BOTH_ZERO(value,expected)
     if (both_zero)
         return TRUE;
@@ -4623,6 +4634,9 @@ hbool_t equal_float(float value, float expected)
 static 
 hbool_t equal_double(double value, double expected)                               
 {
+    int both_zero;
+    int is_zero;
+
     BOTH_ZERO(value,expected)
     if (both_zero)
         return TRUE;
