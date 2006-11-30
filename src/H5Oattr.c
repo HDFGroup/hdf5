@@ -39,7 +39,7 @@ static herr_t H5O_attr_free(void *mesg);
 static herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
@@ -760,7 +760,7 @@ done:
  */
 static herr_t
 H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
-    void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    const void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
     void UNUSED *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_pre_copy_file)
@@ -1064,9 +1064,10 @@ static herr_t
 H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
 		     H5O_shared_t *sh /*out*/)
 {
-    H5A_t  *mesg = (H5A_t *)_mesg;
+    const H5A_t  *mesg = (const H5A_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -1074,8 +1075,9 @@ H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
     if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_attr_set_share
@@ -1097,7 +1099,8 @@ H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 {
     H5A_t  *mesg = (H5A_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -1105,8 +1108,9 @@ H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_attr_is_shared
@@ -1126,8 +1130,9 @@ H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 static htri_t
 H5O_attr_is_shared(const void *_mesg)
 {
-    H5A_t  *mesg = (H5A_t *)_mesg;
+    const H5A_t  *mesg = (const H5A_t *)_mesg;
     htri_t       ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_is_shared)
 
     HDassert(mesg);
@@ -1143,6 +1148,7 @@ H5O_attr_is_shared(const void *_mesg)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_is_shared */
+
 
 /*--------------------------------------------------------------------------
  NAME

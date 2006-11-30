@@ -180,38 +180,10 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(f_src);
     HDassert(f_dst);
     HDassert(layout_dst && H5D_COMPACT == layout_dst->type);
+    HDassert(dt_src);
 
-    /* If there's a source datatype, set up type conversion information */
-    if(!dt_src)
-        /* Type conversion not necessary */
-        HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
-    else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
-        /* Create datatype ID for src datatype, so it gets freed */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-
-        if(f_src != f_dst) {
-            /* Check for expanding references */
-            if(cpy_info->expand_ref) {
-                size_t ref_count;
-
-                /* Determine # of reference elements to copy */
-                ref_count = layout_src->u.compact.size / H5T_get_size(dt_src);
-
-                /* Copy objects referenced in source buffer to destination file and set destination elements */
-                if(H5O_copy_expand_ref(f_src, layout_src->u.compact.buf, dxpl_id, f_dst,
-                        layout_dst->u.compact.buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
-            } /* end if */
-            else
-                /* Reset value to zero */
-                HDmemset(layout_dst->u.compact.buf, 0, layout_src->u.compact.size);
-        } /* end if */
-        else
-            /* Type conversion not necessary */
-            HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
-    } /* end if */
-    else if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+    /* If there's a VLEN source datatype, do type conversion information */
+    if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
         H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
         H5T_t *dt_dst;              /* Destination datatype */
         H5T_t *dt_mem;              /* Memory datatype */
@@ -306,8 +278,35 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
     } /* end if */
-    else
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy dataset elements")
+    else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
+        /* Create datatype ID for src datatype, so it gets freed */
+        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
+        if(f_src != f_dst) {
+            /* Check for expanding references */
+            if(cpy_info->expand_ref) {
+                size_t ref_count;
+
+                /* Determine # of reference elements to copy */
+                ref_count = layout_src->u.compact.size / H5T_get_size(dt_src);
+
+                /* Copy objects referenced in source buffer to destination file and set destination elements */
+                if(H5O_copy_expand_ref(f_src, layout_src->u.compact.buf, dxpl_id, f_dst,
+                        layout_dst->u.compact.buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+            } /* end if */
+            else
+                /* Reset value to zero */
+                HDmemset(layout_dst->u.compact.buf, 0, layout_src->u.compact.size);
+        } /* end if */
+        else
+            /* Type conversion not necessary */
+            HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+    } /* end if */
+    else 
+        /* Type conversion not necessary */
+        HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
 
 done:
     if(buf_sid > 0)

@@ -45,6 +45,7 @@
 
 /* Forward references of package typedefs */
 typedef struct H5S_t H5S_t;
+typedef struct H5S_extent_t H5S_extent_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
@@ -214,6 +215,8 @@ H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/]);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
+
+H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
 
 /* Operations on selections */
 H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);

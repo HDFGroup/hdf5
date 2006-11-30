@@ -130,6 +130,10 @@ H5O_dset_free_copy_file_udata(void *_udata)
     /* Sanity check */
     HDassert(udata);
 
+    /* Release copy of dataset's dataspace extent, if it was set */
+    if(udata->src_space_extent)
+        H5O_free(H5O_SDSPACE_ID, udata->src_space_extent);
+
     /* Release copy of dataset's datatype, if it was set */
     if(udata->src_dtype)
         H5T_close(udata->src_dtype);

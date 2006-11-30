@@ -665,6 +665,14 @@ H5O_layout_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
             break;
 
         case H5D_CONTIGUOUS:
+            /* Compute the size of the contiguous storage for versions of the
+             * layout message less than version 3 because versions 1 & 2 would
+             * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
+             */
+            if(layout_src->version < 3)
+                layout_dst->u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
+                                        H5T_get_size(udata->src_dtype);
+
             if(H5F_addr_defined(layout_src->u.contig.addr)) {
                 /* create contig layout */
                 if(H5D_contig_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, dxpl_id) < 0)
@@ -729,13 +737,17 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_debug);
 
     /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+              "Version:", mesg->version);
     if(mesg->type==H5D_CHUNKED) {
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                  "Type:", "Chunked");
         HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                   "B-tree address:", mesg->u.chunk.addr);
         HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
@@ -750,12 +762,16 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
         HDfprintf(stream, "}\n");
     } /* end if */
     else if(mesg->type==H5D_CONTIGUOUS) {
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                  "Type:", "Contiguous");
         HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                   "Data address:", mesg->u.contig.addr);
         HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
                   "Data Size:", mesg->u.contig.size);
     } /* end if */
     else {
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                  "Type:", "Compact");
         HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
                   "Data Size:", mesg->u.compact.size);
     } /* end else */

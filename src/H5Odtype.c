@@ -39,7 +39,7 @@ static herr_t H5O_dtype_set_share(H5F_t *f, void *_mesg,
     const H5O_shared_t *sh);
 static herr_t H5O_dtype_is_shared (const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
@@ -1338,9 +1338,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 
     /* If this is now a committed datatype, set its state properly. */
     if(sh->flags & H5O_COMMITTED_FLAG)
-    {
         dt->shared->state = H5T_STATE_NAMED;
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_set_share() */
@@ -1364,8 +1362,9 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 static htri_t
 H5O_dtype_is_shared (const void *_mesg)
 {
-    H5T_t	*dt = (H5T_t *)_mesg;
+    const H5T_t	*dt = (const H5T_t *)_mesg;
     htri_t       ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_is_shared)
 
     HDassert(dt);
@@ -1376,7 +1375,6 @@ H5O_dtype_is_shared (const void *_mesg)
         ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5O_dtype_is_shared */
 
 
@@ -1397,10 +1395,10 @@ H5O_dtype_is_shared (const void *_mesg)
  */
 static herr_t
 H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
-    void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+    const void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
     void *_udata)
 {
-    H5T_t	   *dt_src = (H5T_t *)mesg_src;  /* Source datatype */
+    const H5T_t	   *dt_src = (const H5T_t *)mesg_src;  /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     herr_t         ret_value = SUCCEED;          /* Return value */
 
@@ -1413,19 +1411,18 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
     /* If the user data is non-NULL, assume we are copying a dataset
      * and check if we need to make a copy of the datatype for later in
      * the object copying process.  (We currently only need to make a copy
-     * of the datatype if it's a vlen or reference datatype)
+     * of the datatype if it's a vlen or reference datatype, or if the layout
+     * message is an early version, but since the layout information isn't
+     * available here, we just make a copy in all situations)
      */
     if(udata) {
-        if((H5T_detect_class(dt_src, H5T_VLEN) > 0)  || 
-                (H5T_get_class(dt_src, FALSE) == H5T_REFERENCE)) {
-            /* Create a memory copy of the variable-length datatype */
-            if(NULL == (udata->src_dtype = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+        /* Create a memory copy of the variable-length datatype */
+        if(NULL == (udata->src_dtype = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
 
-            /* Set the location of the source datatype */
-            if(H5T_set_loc(udata->src_dtype, file_src, H5T_LOC_DISK) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-        } /* end if */
+        /* Set the location of the source datatype to describe the disk form of the data */
+        if(H5T_set_loc(udata->src_dtype, file_src, H5T_LOC_DISK) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
     } /* end if */
 
 done:

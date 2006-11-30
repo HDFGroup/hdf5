@@ -46,7 +46,7 @@ static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     hbool_t adj_link);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-              void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_shared_debug (H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
@@ -104,7 +104,7 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
  *-------------------------------------------------------------------------
  */
 void *
-H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
+H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, void *mesg)
 {
     H5HF_t *fheap = NULL;
@@ -611,10 +611,10 @@ done:
  */
 static herr_t
 H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    const void *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
     void *udata)
 {
-    H5O_shared_t   *shared_src = (H5O_shared_t *)native_src;
+    const H5O_shared_t   *shared_src = (const H5O_shared_t *)native_src;
     void           *mesg_native = NULL;
     herr_t         ret_value = SUCCEED;          /* Return value */
 

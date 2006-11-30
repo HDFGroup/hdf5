@@ -665,9 +665,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
 done:
     /* Free deleted array */
-    if(deleted) {
+    if(deleted)
         HDfree(deleted);
-    }
 
     /* Release pointer to source object header and its derived objects */
     if(oh_src != NULL) {

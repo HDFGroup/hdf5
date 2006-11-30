@@ -41,6 +41,11 @@ const char *FILENAME[] = {
 };
 
 #define FILE_EXT 		"objcopy_ext.dat"
+/* The fill_old.h5 is generated from gen_old_fill.c in HDF5 'test' directory
+ * for version 1.4(after 1.4.3).  To get this data file, simply compile
+ * gen_old_fill.c with HDF5 library (before v1.5) and run it. */
+#define FILE_OLD_LAYOUT         "fill_old.h5"
+
 
 #define NAME_DATATYPE_SIMPLE 	"H5T_NATIVE_INT"
 #define NAME_DATATYPE_SIMPLE2 	"H5T_NATIVE_INT-2"
@@ -79,6 +84,7 @@ const char *FILENAME[] = {
 #define NAME_LINK_EXTERN	"/g_links/external_link_to_dataset_simple"
 #define NAME_LINK_SOFT_DANGLE	"/g_links/soft_link_to_nowhere"
 #define NAME_LINK_SOFT_DANGLE2	"/g_links2/soft_link_to_nowhere"
+#define NAME_OLD_FORMAT		"/dset1"
 
 #define NAME_BUF_SIZE   1024
 #define NUM_ATTRIBUTES 4
@@ -5490,6 +5496,94 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_old_layout
+ *
+ * Purpose:     Copy dataset that uses the "old" layout version (pre version 3)
+ *              format.
+ *
+ * Note:	This test uses the "fill_old.h5" file for convenience, since it
+ *              has a dataset with the old layout format.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, November 30, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_old_layout(hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    char *srcdir = HDgetenv("srcdir");  /* Where the src code is located */
+    char src_filename[NAME_BUF_SIZE] = "";
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): dataset with old layout format");
+
+    /* Generate correct name for source file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_OLD_LAYOUT) + 1) < sizeof(src_filename))) {
+        HDstrcpy(src_filename, srcdir);
+        HDstrcat(src_filename, "/");
+    } /* end if */
+    HDstrcat(src_filename, FILE_OLD_LAYOUT);
+
+    /* Initialize the destination filename */
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* open source file (read-only) */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_OLD_FORMAT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the source dataset */
+    if((did = H5Dopen(fid_src, NAME_OLD_FORMAT)) < 0) TEST_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+
+    /* close the destination dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the source dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did2);
+    	H5Dclose(did);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_old_layout */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_mount
  *
  * Purpose:     Test copying objects between mounted files
@@ -7064,6 +7158,7 @@ main(void)
             nerrors += test_copy_exist(my_fapl);
             nerrors += test_copy_path(my_fapl);
             nerrors += test_copy_same_file_named_datatype(my_fapl);
+            nerrors += test_copy_old_layout(my_fapl);
             nerrors += test_copy_option(my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Ocopy(): without attributes");
             nerrors += test_copy_option(my_fapl, 0, TRUE, "H5Ocopy(): with missing groups");
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");

@@ -166,7 +166,7 @@ struct H5O_msg_class_t {
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
     htri_t	(*is_shared)(const void*);    /* Is message shared? */
-    herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
+    herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, const H5O_msg_class_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
     herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
@@ -229,6 +229,7 @@ struct H5O_t {
 
 /* Callback information for copying dataset */
 typedef struct {
+    struct H5S_extent_t *src_space_extent;     /* Copy of dataspace extent for dataset */
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
     H5O_pline_t *src_pline;             /* Copy of filter pipeline for dataet */
 } H5D_copy_file_ud_t;
@@ -396,7 +397,7 @@ H5_DLL herr_t H5O_assert(const H5O_t *oh);
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
 /* Shared object operators */
-H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
+H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, void *mesg);
 
 /* Useful metadata cache callbacks */

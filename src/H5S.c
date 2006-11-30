@@ -2306,6 +2306,32 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S_extent_nelem
+ *
+ * Purpose:	Determines how many elements a dataset extent describes.
+ *
+ * Return:	Success:	Number of data points in the dataset extent.
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, November 30, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5S_extent_nelem(const H5S_extent_t *ext)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_extent_nelem)
+
+    /* check args */
+    HDassert(ext);
+
+    /* Return the number of elements in extent */
+    FUNC_LEAVE_NOAPI(ext->nelem)
+} /* end H5S_extent_nelem() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_debug
  *
  * Purpose:	Prints debugging information about a data space.

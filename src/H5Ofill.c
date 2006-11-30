@@ -45,9 +45,9 @@ static void  *H5O_fill_copy(const void *_mesg, void *_dest, unsigned update_flag
 static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
-static herr_t H5O_fill_new_get_share (H5F_t *f, const void *_mesg,
+static herr_t H5O_fill_new_get_share(H5F_t *f, const void *_mesg,
     H5O_shared_t *sh);
-static herr_t H5O_fill_new_set_share (H5F_t *f, void *_mesg,
+static herr_t H5O_fill_new_set_share(H5F_t *f, void *_mesg,
     const H5O_shared_t *sh);
 static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -688,9 +688,10 @@ static herr_t
 H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
 		     H5O_shared_t *sh /*out*/)
 {
-    H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
+    const H5O_fill_new_t  *mesg = (const H5O_fill_new_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_get_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_get_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -698,7 +699,7 @@ H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
     if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_new_get_share() */
 
 
@@ -722,7 +723,8 @@ H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 {
     H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_set_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_set_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -730,8 +732,9 @@ H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_fill_new_set_share() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_is_shared
@@ -751,8 +754,9 @@ H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 static htri_t
 H5O_fill_new_is_shared(const void *_mesg)
 {
-    H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
+    const H5O_fill_new_t  *mesg = (const H5O_fill_new_t *)_mesg;
     htri_t       ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_is_shared)
 
     HDassert(mesg);
@@ -767,8 +771,8 @@ H5O_fill_new_is_shared(const void *_mesg)
         ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5O_fill_new_is_shared */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_debug

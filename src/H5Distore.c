@@ -197,6 +197,7 @@ typedef struct H5D_istore_it_ud4_t {
     void                *buf;                   /* Buffer to hold chunk data for read/write */
     void                *bkg;                   /* Buffer for background information during type conversion */
     size_t              buf_size;               /* Buffer size */
+    hbool_t             do_convert;             /* Whether to perform type conversions */
 
     /* needed for converting variable-length data */
     hid_t               tid_src;                /* Datatype ID for source datatype */
@@ -1014,7 +1015,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy)
 
     /* Check parameter for type conversion */
-    if(udata->dt_src) {
+    if(udata->do_convert) {
         if(H5T_detect_class(udata->dt_src, H5T_VLEN) > 0)
             is_vlen = TRUE;
         else if((H5T_get_class(udata->dt_src, FALSE) == H5T_REFERENCE) && (udata->file_src != udata->file_dst))
@@ -3566,6 +3567,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       sid_buf = -1;           /* ID for buffer dataspace */
     size_t      nelmts = 0;             /* Number of elements in buffer */
+    hbool_t     do_convert = FALSE;     /* Indicate that type conversions should be performed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_copy, FAIL)
@@ -3575,6 +3577,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(f_dst);
     HDassert(layout_src && H5D_CHUNKED == layout_src->type);
     HDassert(layout_dst && H5D_CHUNKED == layout_dst->type);
+    HDassert(dt_src);
 
     /* Create shared B-tree info for each file */
     if(H5D_istore_shared_create(f_src, layout_src) < 0)
@@ -3589,87 +3592,94 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
     } /* end if */
 
-    /* If there's a source datatype, set up type conversion information */
-    if(dt_src) {
-        if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
-            H5T_t *dt_dst;              /* Destination datatype */
-            H5T_t *dt_mem;              /* Memory datatype */
-            size_t mem_dt_size;         /* Memory datatype size */
-            size_t tmp_dt_size;         /* Temp. datatype size */
-            size_t max_dt_size;         /* Max atatype size */
-            hsize_t buf_dim;            /* Dimension for buffer */
-            unsigned u;
+    /* If there's a VLEN source datatype, set up type conversion information */
+    if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+        H5T_t *dt_dst;              /* Destination datatype */
+        H5T_t *dt_mem;              /* Memory datatype */
+        size_t mem_dt_size;         /* Memory datatype size */
+        size_t tmp_dt_size;         /* Temp. datatype size */
+        size_t max_dt_size;         /* Max atatype size */
+        hsize_t buf_dim;            /* Dimension for buffer */
+        unsigned u;
 
+        /* Create datatype ID for src datatype */
+        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
+        /* create a memory copy of the variable-length datatype */
+        if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
+
+        /* create variable-length datatype at the destinaton file */
+        if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
+        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
+
+        /* Set up the conversion functions */
+        if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+        if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
+
+        /* Determine largest datatype size */
+        if(0 == (max_dt_size = H5T_get_size(dt_src)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        max_dt_size = MAX(max_dt_size, mem_dt_size);
+        if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+        max_dt_size = MAX(max_dt_size, tmp_dt_size);
+
+        /* Compute the number of elements per chunk */
+        nelmts = 1;
+        for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
+            nelmts *= layout_src->u.chunk.dim[u];
+
+        /* Create the space and set the initial extent */
+        buf_dim = nelmts;
+        if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+
+        /* Atomize */
+        if((sid_buf = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+            H5S_close(buf_space);
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
+        } /* end if */
+
+        /* Set initial buffer sizes */
+        buf_size = nelmts * max_dt_size;
+        reclaim_buf_size = nelmts * mem_dt_size;
+
+        /* Allocate memory for reclaim buf */
+        if(NULL == (reclaim_buf = H5MM_malloc(reclaim_buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+        /* Indicate that type conversion should be performed */
+        do_convert = TRUE;
+    } /* end if */
+    else {
+        /* Create datatype ID for source datatype, so it gets freed */
+        if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
             /* Create datatype ID for src datatype */
             if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
-            /* create a memory copy of the variable-length datatype */
-            if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
-
-            /* create variable-length datatype at the destinaton file */
-            if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-            if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-            if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
-
-            /* Set up the conversion functions */
-            if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
-            if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
-
-            /* Determine largest datatype size */
-            if(0 == (max_dt_size = H5T_get_size(dt_src)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-            if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-            max_dt_size = MAX(max_dt_size, mem_dt_size);
-            if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-            max_dt_size = MAX(max_dt_size, tmp_dt_size);
-
-            /* Compute the number of elements per chunk */
-            nelmts = 1;
-            for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
-                nelmts *= layout_src->u.chunk.dim[u];
-
-            /* Create the space and set the initial extent */
-            buf_dim = nelmts;
-            if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
-
-            /* Atomize */
-            if((sid_buf = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
-                H5S_close(buf_space);
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
-            } /* end if */
-
-            /* Set initial buffer sizes */
-            buf_size = nelmts * max_dt_size;
-            reclaim_buf_size = nelmts * mem_dt_size;
-
-            /* Allocate memory for reclaim buf */
-            if(NULL == (reclaim_buf = H5MM_malloc(reclaim_buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+            /* Indicate that type conversion should be performed */
+            do_convert = TRUE;
         } /* end if */
-        else {
-            /* Create datatype ID for source datatype, so it gets freed */
-            if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
-                /* Create datatype ID for src datatype */
-                if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-            } /* end if */
 
-            buf_size = layout_src->u.chunk.size;
-            reclaim_buf_size = 0;
-        } /* end else */
+        buf_size = layout_src->u.chunk.size;
+        reclaim_buf_size = 0;
+    } /* end else */
 
+    /* Set up conversion buffer, if appropriate */
+    if(do_convert) {
         /* Allocate background memory for converting the chunk */
         if(NULL == (bkg = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
@@ -3680,10 +3690,6 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             /* Reset value to zero */
             HDmemset(bkg, 0, buf_size);
     } /* end if */
-    else {
-        buf_size = layout_src->u.chunk.size;
-        reclaim_buf_size = 0;
-    } /* end else */
 
     /* Allocate memory for copying the chunk */
     if(NULL == (buf = H5MM_malloc(buf_size)))
@@ -3701,6 +3707,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     udata.tid_mem = tid_mem;
     udata.tid_dst = tid_dst;
     udata.dt_src = dt_src;
+    udata.do_convert = do_convert;
     udata.tpath_src_mem = tpath_src_mem;
     udata.tpath_mem_dst = tpath_mem_dst;
     udata.reclaim_buf = reclaim_buf;

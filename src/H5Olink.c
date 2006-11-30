@@ -45,7 +45,7 @@ static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
 /* static herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link); */
 static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_link_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
@@ -570,7 +570,7 @@ done:
  */
 static herr_t
 H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
-    void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
+    const void UNUSED *native_src, hbool_t *deleted, const H5O_copy_t *cpy_info,
     void UNUSED *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_pre_copy_file)

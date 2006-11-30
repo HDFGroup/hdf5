@@ -41,7 +41,7 @@ static herr_t H5O_pline_set_share (H5F_t *f, void *_mesg,
     const H5O_shared_t *sh);
 static htri_t H5O_pline_is_shared(const void *_mesg);
 static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
@@ -571,10 +571,10 @@ H5O_pline_free(void *mesg)
  */
 static herr_t
 H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
-    void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+    const void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
     void *_udata)
 {
-    H5O_pline_t        *pline_src = (H5O_pline_t *)mesg_src;    /* Source datatype */
+    const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
@@ -614,9 +614,10 @@ static herr_t
 H5O_pline_get_share(H5F_t UNUSED *f, const void *_mesg,
 		     H5O_shared_t *sh /*out*/)
 {
-    H5O_pline_t  *mesg = (H5O_pline_t *)_mesg;
+    const H5O_pline_t  *mesg = (const H5O_pline_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_get_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_get_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -624,8 +625,9 @@ H5O_pline_get_share(H5F_t UNUSED *f, const void *_mesg,
     if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pline_get_share() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_pline_set_share
@@ -647,7 +649,8 @@ H5O_pline_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 {
     H5O_pline_t  *mesg = (H5O_pline_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_set_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_set_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -655,8 +658,9 @@ H5O_pline_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pline_set_share() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_pline_is_shared
@@ -676,14 +680,15 @@ H5O_pline_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 static htri_t
 H5O_pline_is_shared(const void *_mesg)
 {
-    H5O_pline_t  *mesg = (H5O_pline_t *)_mesg;
+    const H5O_pline_t  *mesg = (const H5O_pline_t *)_mesg;
     htri_t       ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_is_shared)
 
     HDassert(mesg);
 
-    /* Fill values can't currently be committed, but this should let the
-     * library read a "committed fill value" if we ever create one in
+    /* I/O pipelines can't currently be committed, but this should let the
+     * library read a "committed I/O pipeline" if we ever create one in
      * the future.
      */
     if(mesg->sh_loc.flags & (H5O_COMMITTED_FLAG | H5O_SHARED_IN_HEAP_FLAG))
@@ -692,8 +697,8 @@ H5O_pline_is_shared(const void *_mesg)
         ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5O_pline_is_shared */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_pline_debug

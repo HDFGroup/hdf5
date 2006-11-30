@@ -15,13 +15,13 @@
 #define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
 #define H5S_PACKAGE		/*prevent warning from including H5Spkg.h */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
-#include "H5Spkg.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Gprivate.h"		/* Groups			  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"		/* Object headers		  	*/
+#include "H5Spkg.h"		/* Dataspaces 				*/
 
 
 /* PRIVATE PROTOTYPES */
@@ -36,6 +36,8 @@ static herr_t H5O_sdspace_get_share (H5F_t *f, const void *_mesg,
 static herr_t H5O_sdspace_set_share (H5F_t *f, void *_mesg,
             const H5O_shared_t *sh);
 static htri_t H5O_sdspace_is_shared (const void *_mesg);
+static herr_t H5O_sdspace_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
@@ -55,7 +57,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_sdspace_get_share,    	/* get share method			*/
     H5O_sdspace_set_share,	/* set share method			*/
     H5O_sdspace_is_shared,	/* is shared method			*/
-    NULL,			/* pre copy native value to file */
+    H5O_sdspace_pre_copy_file,	/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     H5O_sdspace_debug	        /* debug the message		    	*/
@@ -323,22 +325,22 @@ H5O_sdspace_copy(const void *mesg, void *dest, unsigned UNUSED update_flags)
     H5S_extent_t	   *dst = (H5S_extent_t *) dest;
     void                   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_copy)
 
     /* check args */
     assert(src);
     if (!dst && NULL==(dst = H5FL_MALLOC(H5S_extent_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy extent information */
     if(H5S_extent_copy(dst,src)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Set return value */
     ret_value=dst;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -412,11 +414,11 @@ H5O_sdspace_reset(void *_mesg)
 {
     H5S_extent_t	*mesg = (H5S_extent_t*)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_reset)
 
     H5S_extent_release(mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -437,13 +439,13 @@ H5O_sdspace_reset(void *_mesg)
 static herr_t
 H5O_sdspace_free (void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_free)
 
     assert (mesg);
 
     H5FL_FREE(H5S_extent_t,mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -465,19 +467,20 @@ static herr_t
 H5O_sdspace_get_share(H5F_t UNUSED *f, const void *_mesg,
 		     H5O_shared_t *sh /*out*/)
 {
-    H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
+    const H5S_extent_t  *mesg = (const H5S_extent_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_get_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_get_share)
 
     HDassert (mesg);
     HDassert (sh);
 
-
     if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_sdspace_get_share() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_sdspace_set_share
@@ -499,7 +502,8 @@ H5O_sdspace_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 {
     H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
     herr_t       ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_set_share);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_set_share)
 
     HDassert (mesg);
     HDassert (sh);
@@ -507,8 +511,9 @@ H5O_sdspace_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_sdspace_is_shared
@@ -528,8 +533,9 @@ H5O_sdspace_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
 static htri_t
 H5O_sdspace_is_shared (const void *_mesg)
 {
-    H5S_extent_t  *mesg = (H5S_extent_t *)_mesg;
+    const H5S_extent_t  *mesg = (const H5S_extent_t *)_mesg;
     htri_t       ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_is_shared)
 
     HDassert(mesg);
@@ -544,8 +550,59 @@ H5O_sdspace_is_shared (const void *_mesg)
         ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5O_sdspace_is_shared */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_sdspace_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              November 30, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_sdspace_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
+    const void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+    void *_udata)
+{
+    const H5S_extent_t *src_space_extent = (const H5S_extent_t *)mesg_src;  /* Source dataspace extent */
+    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
+    herr_t         ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_pre_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(src_space_extent);
+
+    /* If the user data is non-NULL, assume we are copying a dataset
+     * and make a copy of the dataspace extent for later in the object copying
+     * process.  (We currently only need to make a copy of the dataspace extent
+     * if the layout is an early version, but that information isn't
+     * available here, so we just make a copy of it in all cases)
+     */
+    if(udata) {
+        /* Allocate copy of dataspace extent */
+        if(NULL == (udata->src_space_extent = H5FL_MALLOC(H5S_extent_t)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, FAIL, "dataspace extent allocation failed")
+
+        /* Create a copy of the dataspace extent */
+        if(H5S_extent_copy(udata->src_space_extent, src_space_extent) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dspace_pre_copy_file() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -572,7 +629,7 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
     const H5S_extent_t	   *sdim = (const H5S_extent_t *) mesg;
     unsigned		    u;	/* local counting variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_debug)
 
     /* check args */
     assert(f);
@@ -607,6 +664,6 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
         }
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
