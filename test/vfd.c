@@ -365,6 +365,10 @@ test_core(void)
     char        filename[1024];
     void        *fhandle=NULL;
     hsize_t     file_size;
+    int		*points, *check, *p1, *p2;
+    hid_t	dset1=-1, space1=-1;
+    hsize_t	dims1[2];
+    int		i, j, n;
 
     TESTING("CORE file driver");
 
@@ -405,7 +409,138 @@ test_core(void)
 
     if(H5Fclose(file)<0)
         TEST_ERROR;
+
+
+    /* Open the file with backing store off for read and write.  
+     * Changes won't be saved in file. */
+    if(H5Pset_fapl_core(fapl, CORE_INCREMENT, FALSE)<0)
+        TEST_ERROR;
+
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+        TEST_ERROR;
+
+    /* Allocate memory for data set. */
+    points=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+    check=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+
+    /* Initialize the dset1 */
+    p1 = points;
+    for (i = n = 0; i < DSET1_DIM1; i++)
+	for (j = 0; j < DSET1_DIM2; j++)
+	    *p1++ = n++;
+
+    /* Create the data space1 */
+    dims1[0] = DSET1_DIM1;
+    dims1[1] = DSET1_DIM2;
+    if ((space1 = H5Screate_simple(2, dims1, NULL))<0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if ((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT))<0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if (H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+
+    if((dset1=H5Dopen(file, DSET1_NAME))<0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if (H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for (i = 0; i < DSET1_DIM1; i++) {
+	for (j = 0; j < DSET1_DIM2; j++) {
+	    if (*p1++ != *p2++) {
+		H5_FAILED();
+		printf("    Read different values than written in data set 1.\n");
+		printf("    At index %d,%d\n", i, j);
+        	TEST_ERROR;
+	    }
+	}
+    }
+
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+
+    if(H5Fclose(file)<0)
+        TEST_ERROR;
+
+    /* Open the file with backing store on for read and write.  
+     * Changes will be saved in file. */
+    if(H5Pset_fapl_core(fapl, CORE_INCREMENT, TRUE)<0)
+        TEST_ERROR;
+
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if ((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT))<0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if (H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+
+    if((dset1=H5Dopen(file, DSET1_NAME))<0)
+        TEST_ERROR;
+
+    /* Reallocate memory for reading buffer. */
+    if(check)
+	free(check);
+
+    check=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+
+    /* Read the data back from dset1 */
+    if (H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for (i = 0; i < DSET1_DIM1; i++) {
+	for (j = 0; j < DSET1_DIM2; j++) {
+	    if (*p1++ != *p2++) {
+		H5_FAILED();
+		printf("    Read different values than written in data set 1.\n");
+		printf("    At index %d,%d\n", i, j);
+        	TEST_ERROR;
+	    }
+	}
+    }
+
+    /* Check file size API */
+    if(H5Fget_filesize(file, &file_size) < 0)
+        TEST_ERROR;
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable. */
+    if(file_size<64*KB || file_size>256*KB)
+        TEST_ERROR;
+
+    if(H5Sclose(space1)<0)
+        TEST_ERROR;
+    if(H5Dclose(dset1)<0)
+        TEST_ERROR;
+    if(H5Fclose(file)<0)
+        TEST_ERROR;
+    if(points)
+	free(points);
+    if(check)
+	free(check);
+
     h5_cleanup(FILENAME, fapl);
+
     PASSED();
     return 0;
 
