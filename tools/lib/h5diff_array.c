@@ -65,12 +65,18 @@
 
  *-------------------------------------------------------------------------
  */
-#define PER(A,B) { per = -1;                                      \
+
+static int   not_comparable;
+
+#define PER(A,B) { per=-1;                                        \
+                   not_comparable=0;                              \
                    both_zero=0;                                   \
                    if (A==0 && B==0)                              \
                     both_zero=1;                                  \
                    if (A!=0)                                      \
                     per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
+                   else                                           \
+                    not_comparable=1;                             \
                  }
 
 #define BOTH_ZERO(A,B) { both_zero=0;                             \
@@ -803,7 +809,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_char,temp2_char);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -833,7 +839,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_char,temp2_char);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -902,7 +908,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_uchar,temp2_uchar);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -932,7 +938,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_uchar,temp2_uchar);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1003,7 +1009,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_short,temp2_short);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1033,7 +1039,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_short,temp2_short);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1105,7 +1111,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_ushort,temp2_ushort);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1135,7 +1141,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_ushort,temp2_ushort);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1205,7 +1211,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_int,temp2_int);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1236,7 +1242,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_int,temp2_int);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1306,7 +1312,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_uint,temp2_uint);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1336,7 +1342,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_uint,temp2_uint);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1406,7 +1412,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_long,temp2_long);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1436,7 +1442,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_long,temp2_long);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1505,7 +1511,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_ulong,temp2_ulong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1535,7 +1541,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_ulong,temp2_ulong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1607,7 +1613,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_llong,temp2_llong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1637,7 +1643,7 @@ hsize_t diff_datum(void       *_mem1,
    {
     PER(temp1_llong,temp2_llong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1711,7 +1717,7 @@ hsize_t diff_datum(void       *_mem1,
     ull2float(temp2_ullong,&f2);
     PER(f1,f2);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1744,7 +1750,7 @@ hsize_t diff_datum(void       *_mem1,
     ull2float(temp2_ullong,&f2);
     PER(f1,f2);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1823,7 +1829,7 @@ hsize_t diff_datum(void       *_mem1,
     
    PER(temp1_float,temp2_float);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1855,7 +1861,7 @@ hsize_t diff_datum(void       *_mem1,
 
    PER(temp1_float,temp2_float);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1929,7 +1935,7 @@ hsize_t diff_datum(void       *_mem1,
   
    PER(temp1_double,temp2_double);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -1962,7 +1968,7 @@ hsize_t diff_datum(void       *_mem1,
   
    PER(temp1_double,temp2_double);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2519,7 +2525,7 @@ hsize_t diff_float(unsigned char *mem1,
 
    PER(temp1_float,temp2_float);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2561,7 +2567,7 @@ hsize_t diff_float(unsigned char *mem1,
 
    PER(temp1_float,temp2_float);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2690,7 +2696,7 @@ hsize_t diff_double(unsigned char *mem1,
 
    PER(temp1_double,temp2_double);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2732,7 +2738,7 @@ hsize_t diff_double(unsigned char *mem1,
 
    PER(temp1_double,temp2_double);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2859,7 +2865,7 @@ hsize_t diff_schar(unsigned char *mem1,
 
    PER(temp1_char,temp2_char);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -2901,7 +2907,7 @@ hsize_t diff_schar(unsigned char *mem1,
 
    PER(temp1_char,temp2_char);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3032,7 +3038,7 @@ hsize_t diff_uchar(unsigned char *mem1,
 
    PER(temp1_uchar,temp2_uchar);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3074,7 +3080,7 @@ hsize_t diff_uchar(unsigned char *mem1,
 
    PER(temp1_uchar,temp2_uchar);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3202,7 +3208,7 @@ hsize_t diff_short(unsigned char *mem1,
 
    PER(temp1_short,temp2_short);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3246,7 +3252,7 @@ hsize_t diff_short(unsigned char *mem1,
 
    PER(temp1_short,temp2_short);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3375,7 +3381,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 
    PER(temp1_ushort,temp2_ushort);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3419,7 +3425,7 @@ hsize_t diff_ushort(unsigned char *mem1,
 
    PER(temp1_ushort,temp2_ushort);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3549,7 +3555,7 @@ hsize_t diff_int(unsigned char *mem1,
 
    PER(temp1_int,temp2_int);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3593,7 +3599,7 @@ hsize_t diff_int(unsigned char *mem1,
 
    PER(temp1_int,temp2_int);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3723,7 +3729,7 @@ hsize_t diff_uint(unsigned char *mem1,
 
    PER(temp1_uint,temp2_uint);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3767,7 +3773,7 @@ hsize_t diff_uint(unsigned char *mem1,
 
    PER(temp1_uint,temp2_uint);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3900,7 +3906,7 @@ hsize_t diff_long(unsigned char *mem1,
 
    PER(temp1_long,temp2_long);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -3944,7 +3950,7 @@ hsize_t diff_long(unsigned char *mem1,
 
    PER(temp1_long,temp2_long);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4081,7 +4087,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 
    PER(temp1_ulong,temp2_ulong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4125,7 +4131,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 
    PER(temp1_ulong,temp2_ulong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4256,7 +4262,7 @@ hsize_t diff_llong(unsigned char *mem1,
 
    PER(temp1_llong,temp2_llong);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4300,7 +4306,7 @@ hsize_t diff_llong(unsigned char *mem1,
 
     PER(temp1_llong,temp2_llong);
 
-    if (per==-1 && !both_zero) /* not comparable */
+    if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4435,7 +4441,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    ull2float(temp2_ullong,&f2);
    PER(f1,f2);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
@@ -4481,7 +4487,7 @@ hsize_t diff_ullong(unsigned char *mem1,
    ull2float(temp2_ullong,&f2);
    PER(f1,f2);
 
-   if (per==-1 && !both_zero) /* not comparable */
+   if (not_comparable && !both_zero) /* not comparable */
    {
     print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
     parallel_print(SPACES);
