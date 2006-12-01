@@ -101,18 +101,6 @@ static int   not_comparable;
                  }
 
 
-#define PER_FLOAT(A,B) { per=-1;                                  \
-                   not_comparable=0;                              \
-                   both_zero=0;                                   \
-                   if (equal_double(A,B))                         \
-                    both_zero=1;                                  \
-                   if (!equal_double(A,0.0))                      \
-                    per = (double)ABS( ( double)(B-A) / (double)A ); \
-                   else                                           \
-                    not_comparable=1;                             \
-                 }
-
-
 #define BOTH_ZERO(A,B) { both_zero=0;                             \
                          if (A==0 && B==0)                        \
                           both_zero=1;                            \
@@ -1689,7 +1677,7 @@ hsize_t diff_datum(void       *_mem1,
       {
           ull2float(temp1_ullong,&f1);
           ull2float(temp2_ullong,&f2);
-          PER_FLOAT(f1,f2);
+          PER(f1,f2);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1719,7 +1707,7 @@ hsize_t diff_datum(void       *_mem1,
       {
           ull2float(temp1_ullong,&f1);
           ull2float(temp2_ullong,&f2);
-          PER_FLOAT(f1,f2);
+          PER(f1,f2);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1794,7 +1782,7 @@ hsize_t diff_datum(void       *_mem1,
       else if (!options->d && options->p)
       {
 
-          PER_FLOAT(temp1_float,temp2_float);
+          PER(temp1_float,temp2_float);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1825,7 +1813,7 @@ hsize_t diff_datum(void       *_mem1,
       else if ( options->d && options->p)
       {
           
-          PER_FLOAT(temp1_float,temp2_float);
+          PER(temp1_float,temp2_float);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1898,7 +1886,7 @@ hsize_t diff_datum(void       *_mem1,
       else if (!options->d && options->p)
       {
           
-          PER_FLOAT(temp1_double,temp2_double);
+          PER(temp1_double,temp2_double);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1931,7 +1919,7 @@ hsize_t diff_datum(void       *_mem1,
       else if ( options->d && options->p)
       {
           
-          PER_FLOAT(temp1_double,temp2_double);
+          PER(temp1_double,temp2_double);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -2479,7 +2467,7 @@ hsize_t diff_float(unsigned char *mem1,
             memcpy(&temp1_float, mem1, sizeof(float));
             memcpy(&temp2_float, mem2, sizeof(float));
             
-            PER_FLOAT(temp1_float,temp2_float);
+            PER(temp1_float,temp2_float);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
@@ -2521,7 +2509,7 @@ hsize_t diff_float(unsigned char *mem1,
             memcpy(&temp1_float, mem1, sizeof(float));
             memcpy(&temp2_float, mem2, sizeof(float));
             
-            PER_FLOAT(temp1_float,temp2_float);
+            PER(temp1_float,temp2_float);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
@@ -2650,7 +2638,7 @@ hsize_t diff_double(unsigned char *mem1,
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
             
-            PER_FLOAT(temp1_double,temp2_double);
+            PER(temp1_double,temp2_double);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
@@ -2692,7 +2680,7 @@ hsize_t diff_double(unsigned char *mem1,
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
             
-            PER_FLOAT(temp1_double,temp2_double);
+            PER(temp1_double,temp2_double);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
@@ -4383,7 +4371,7 @@ hsize_t diff_ullong(unsigned char *mem1,
             
             ull2float(temp1_ullong,&f1);
             ull2float(temp2_ullong,&f2);
-            PER_FLOAT(f1,f2);
+            PER(f1,f2);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
@@ -4426,7 +4414,7 @@ hsize_t diff_ullong(unsigned char *mem1,
             
             ull2float(temp1_ullong,&f1);
             ull2float(temp2_ullong,&f2);
-            PER_FLOAT(f1,f2);
+            PER(f1,f2);
             
             if (not_comparable && !both_zero) /* not comparable */
             {
