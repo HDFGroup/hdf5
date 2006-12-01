@@ -28,9 +28,9 @@ typedef struct {
  int    m_report;  /* report mode: print the data */
  int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
  int    d;         /* delta, absolute value to compare */
- float  delta;     /* delta value */
+ double delta;     /* delta value */
  int    p;         /* relative error to compare*/
- float  percent;   /* relative error value */
+ double percent;   /* relative error value */
  int    n;         /* count, compare up to count */
  hsize_t count;    /* count value */
  int    err_stat;  /* an error ocurred (1, error, 0, no error) */

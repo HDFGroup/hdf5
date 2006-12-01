@@ -96,7 +96,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
        printf("<-d %s> is not a valid option\n", argv[i+1] );
        usage();
       }
-      options->delta = (float) atof(argv[i+1]);
+      options->delta = atof(argv[i+1]);
       i++; /* go to next */
      }
      else
@@ -114,7 +114,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
        printf("<-p %s> is not a valid option\n", argv[i+1] );
        usage();
       }
-      options->percent = (float) atof(argv[i+1]);
+      options->percent = atof(argv[i+1]);
       i++; /* go to next */
      }
      else
