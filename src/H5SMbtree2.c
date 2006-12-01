@@ -89,11 +89,12 @@ const H5B2_class_t H5SM_INDEX[1]={{     /* B-tree class information */
 herr_t
 H5SM_message_compare(const H5SM_mesg_key_t *rec1, const H5SM_sohm_t *rec2)
 {
-    herr_t hash_diff;
+    int64_t hash_diff; /* Has to be able to hold two 32-bit values */
     herr_t ret_value=0;
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
-    hash_diff = (herr_t) (rec1->hash - rec2->hash);
+    hash_diff = rec1->hash;
+    hash_diff -= rec2->hash;
 
     /* If the hash values match, make sure the messages are really the same */
     if(0 == hash_diff)     {
@@ -122,8 +123,13 @@ H5SM_message_compare(const H5SM_mesg_key_t *rec1, const H5SM_sohm_t *rec2)
             ret_value = HDmemcmp(rec1->encoding, buf2, rec1->encoding_size);
         }
     }
-    else
-        ret_value = hash_diff;
+    else {
+        /* Compress 64-bit hash_diff to fit in an herr_t */
+        if(hash_diff > 0)
+            ret_value = 1;
+        else
+            ret_value = -1;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_message_compare */
@@ -319,9 +325,9 @@ H5SM_incr_ref(void *record, void *op_data, hbool_t *changed)
  *              remove the record from the B-tree even if the refcount
  *              reaches zero.
  *
- *              The new refcount is returned through op_data.  If this is
- *              zero, the calling function should remove this record from
- *              the B-tree.
+ *              The new message is returned through op_data.  If its
+ *              reference count is zero, the calling function should
+ *              remove this record from the B-tree.
  *
  * Return:	Non-negative on success
  *              Negative on failure
@@ -345,7 +351,7 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
     *changed = TRUE;
 
     if(op_data)
-       *(hsize_t *)op_data = message->ref_count;
+       *(H5SM_sohm_t *)op_data = *message;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }

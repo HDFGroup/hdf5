@@ -373,19 +373,22 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     if(shared->sohm_addr != HADDR_UNDEF)
     {
         unsigned index_flags[H5SM_MAX_NUM_INDEXES] = {0};
+        unsigned minsizes[H5SM_MAX_NUM_INDEXES] = {0};
         size_t   sohm_l2b;           /* SOHM list-to-btree cutoff    */
         size_t   sohm_b2l;           /* SOHM btree-to-list cutoff    */
 
         HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5SM_MAX_NUM_INDEXES);
 
         /* Read in the shared OH message information if there is any */
-        if(H5SM_get_info(f, index_flags, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)
+        if(H5SM_get_info(f, index_flags, minsizes, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read SOHM table information")
 
         /* Set values in the property list */
         if(H5P_set(c_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &(shared->sohm_nindexes)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
         if(H5P_set(c_plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, index_flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
+        if(H5P_set(c_plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
         if(H5P_set(c_plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &sohm_l2b) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list");

@@ -59,11 +59,9 @@
 #define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
 
-
 /*******************/
 /* Public Typedefs */
 /*******************/
-
 /* A struct that's part of the H5G_stat_t routine (deprecated) */
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */

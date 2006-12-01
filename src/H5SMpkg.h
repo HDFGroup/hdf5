@@ -40,7 +40,7 @@
 
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
          + 4                      /* reference count*/                       \
-         + 8)    /* JAMES: size of hash value on disk */
+         + 8)    /* JAMES: size of heap ID on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + 1                                   /* Table version */           \
@@ -48,6 +48,7 @@
 
 #define H5SM_INDEX_HEADER_SIZE(f) (1 /* Whether index is a list or B-tree */ \
          + 2         /* Type of messages stored in the index */              \
+         + 4         /* Minimum size of messages to share */                 \
          + (3 * 2)   /* B-tree cutoff, list cutoff, # of shared messages */  \
          + H5F_SIZEOF_ADDR(f) /* Location of list or B-tree */               \
          + H5F_SIZEOF_ADDR(f)) /* Address of heap */
@@ -115,6 +116,7 @@ typedef struct {
 /* Typedef for a SOHM index header */
 typedef struct {
   unsigned mesg_types;          /* Bit flag vector of message types */
+  size_t min_mesg_size;         /* number of messages being tracked */
   size_t list_to_btree;         /* >= this many messages, index with a B-tree */
   size_t btree_to_list;         /* <= this many messages, index with a list again */
   size_t num_messages;          /* number of messages being tracked */

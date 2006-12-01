@@ -159,7 +159,7 @@ typedef struct
 #define MISC11_SYM_LK           8
 #define MISC11_SYM_IK           32
 #define MISC11_ISTORE_IK        64
-#define MISC11_NINDEXES         1
+#define MISC11_NINDEXES    1
 
 /* Definitions for misc. test #12 */
 #define MISC12_FILE             "tmisc12.h5"
@@ -1839,7 +1839,7 @@ test_misc11(void)
     CHECK(ret, FAIL, "H5Pset_istore_k");
 
     ret=H5Pset_shared_mesg_nindexes(fcpl,MISC11_NINDEXES);
-    CHECK(ret, FAIL, "H5Pset_istore_k");
+    CHECK(ret, FAIL, "H5Pset_shared_mesg");
 
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock

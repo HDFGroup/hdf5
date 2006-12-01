@@ -104,6 +104,8 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     unsigned num_indexes;
     unsigned list_to_btree, btree_to_list;
     unsigned index_type_flags[H5SM_MAX_NUM_INDEXES];
+    unsigned minsizes[H5SM_MAX_NUM_INDEXES];
+    unsigned type_flags_used;
     ssize_t x;
     hsize_t table_size;
     herr_t ret_value=SUCCEED;
@@ -120,13 +122,28 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
 
     /* Get information from fcpl */
     if(H5P_get(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &num_indexes)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
     if(H5P_get(fc_plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, &index_type_flags)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM type flags")
     if(H5P_get(fc_plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &list_to_btree)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM list maximum")
     if(H5P_get(fc_plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &btree_to_list)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM btree minimum")
+    if(H5P_get(fc_plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, &minsizes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM message min sizes")
+
+    /* Verify that values are valid */
+    if(num_indexes > H5SM_MAX_NUM_INDEXES)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "number of indexes in property list is too large")
+
+    /* Check that type flags weren't duplicated anywhere */
+    type_flags_used = 0;
+    for(x=0; x<num_indexes; ++x) {
+        if(index_type_flags[x] & type_flags_used) {
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "the same shared message type flag is assigned to more than one index")
+        }
+        type_flags_used |= index_type_flags[x];
+    }
 
     /* Set version and number of indexes in table and in superblock.
      * Right now we just use one byte to hold the number of indexes.
@@ -153,12 +170,12 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     /* Initialize all of the indexes, but don't allocate space for them to
      * hold messages until we actually need to write to them.
      */
-     /* JAMES: currently all indexes use the same values */
     for(x=0; x<table->num_indexes; x++)
     {
         table->indexes[x].btree_to_list = btree_to_list;
         table->indexes[x].list_to_btree = list_to_btree;
         table->indexes[x].mesg_types = index_type_flags[x];
+        table->indexes[x].min_mesg_size = minsizes[x];
         table->indexes[x].index_addr = HADDR_UNDEF;
         table->indexes[x].heap_addr = HADDR_UNDEF;
         table->indexes[x].num_messages = 0;
@@ -422,12 +439,13 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t * header, hid_t dxpl_id)
     if((list->messages = H5FL_ARR_MALLOC(H5SM_sohm_t, num_entries)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list")
 
-    /* Initialize list */
+    /* Initialize messages in list */
+    HDmemset(list->messages, 0, sizeof(H5SM_sohm_t) * num_entries);
+
     /* JAMES: would making fewer operations out of this make it faster? */
-    for(x=0; x<num_entries; x++)
-    {
-        list->messages[x].ref_count=0;
-        list->messages[x].fheap_id=0;
+    for(x=0; x<num_entries; x++) {
+//        list->messages[x].ref_count=0;
+//        list->messages[x].fheap_id=0;
         list->messages[x].hash=H5O_HASH_UNDEF;
     }
 
@@ -493,21 +511,13 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     H5SM_master_table_t *table = NULL;
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
-    herr_t              ret_value = SUCCEED;
+    herr_t              ret_value = TRUE;
     FUNC_ENTER_NOAPI(H5SM_try_share, FAIL)
 
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
     if(f->shared->sohm_addr == HADDR_UNDEF)
         HGOTO_DONE(FALSE);
-
-    /* If the message isn't big enough, don't bother sharing it */
-    if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) == 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
-    if(mesg_size < 50) /* JAMES: arbitrary value.  Make this per-index, along with index sizes? */
-        HGOTO_DONE(FALSE);
-
-    /* JAMES_HEAP: skip this step if it's already shared--just increment the refcount on the message itself */
 
     /* Type-specific checks */
     /* JAMES: should this go here? Should there be a "can share" callback? */
@@ -542,7 +552,13 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     if(index_num < 0)
         HGOTO_DONE(FALSE);
 
-    /* At this point, the message should definitely be shared. */
+    /* If the message isn't big enough, don't bother sharing it */
+    if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) <0)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
+    if(mesg_size < table->indexes[index_num].min_mesg_size)
+        HGOTO_DONE(FALSE);
+
+    /* At this point, the message will be shared. */
 
     /* If the index hasn't been allocated yet, create it */
     if(table->indexes[index_num].index_addr == HADDR_UNDEF)
@@ -674,16 +690,19 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
         /* JAMES: wrap this in a function call? */
 
-        /* Encode the message and get its size */
+        /* Encode the message and get its size */ /* JAMES: already have this */
         if((mesg_size = H5O_raw_size(type_id, f, mesg)) == 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get size of message")
+
+        /* JAMES: fix memory problem */
+        shared.u.heap_id = 0;
 
         if(H5HF_insert(fheap, dxpl_id, mesg_size, key.encoding, &(shared.u.heap_id)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
 
         /* Check whether the list has grown enough that it needs to become a B-tree */
         /* JAMES: make this a separate function */
-        if(header->index_type == H5SM_LIST && header->num_messages > header->list_to_btree)
+        if(header->index_type == H5SM_LIST && header->num_messages >= header->list_to_btree)
         {
             hsize_t     list_size;        /* Size of list on disk */
             haddr_t     tree_addr;
@@ -788,7 +807,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *mesg)
+H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *sh_mesg)
 {
     H5SM_master_table_t  *table = NULL;
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
@@ -797,10 +816,10 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *m
     FUNC_ENTER_NOAPI(H5SM_try_delete, FAIL)
 
     HDassert(f);
-    HDassert(mesg);
+    HDassert(sh_mesg);
 
     /* Make sure SHARED_IN_HEAP flag is set; if not, there's no message to delete */
-    if(0 == (mesg->flags & H5O_SHARED_IN_HEAP_FLAG))
+    if(0 == (sh_mesg->flags & H5O_SHARED_IN_HEAP_FLAG))
         HGOTO_DONE(SUCCEED);
 
     HDassert(f->shared->sohm_addr != HADDR_UNDEF);
@@ -814,7 +833,7 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *m
 	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
 
     /* JAMES: this triggers some warning on heping.  "overflow in implicit constant conversion" */
-    if(H5SM_delete_from_index(f, dxpl_id, &(table->indexes[index_num]), type_id, mesg, &cache_flags) < 0)
+    if(H5SM_delete_from_index(f, dxpl_id, &(table->indexes[index_num]), type_id, sh_mesg, &cache_flags) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete mesage from SOHM index")
 
 done:
@@ -895,7 +914,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
     HDassert(mesg);
     HDassert(cache_flags);
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
-
     
     /* Open the heap that this message is in */
     if(NULL == (fheap=H5HF_open(f, dxpl_id, header->heap_addr)))
@@ -957,6 +975,8 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
         if(header->index_type == H5SM_LIST)
         {
             list->messages[list_pos].hash = H5O_HASH_UNDEF;
+            list->messages[list_pos].fheap_id = 0;
+            list->messages[list_pos].ref_count = 0; /* Just in case */
         }
         else
         {
@@ -973,7 +993,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
          */
         /* JAMES: there's an off-by-one error here */
         /* JAMES: make this a separate function */
-        if(header->num_messages < header->btree_to_list)
+        if(header->index_type == H5SM_BTREE && header->num_messages < header->btree_to_list)
         {
             /* Remember the btree address for this index; we'll overwrite the
              * address in the index header
@@ -1037,8 +1057,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, size_t *list_to_btree,
-              size_t *btree_to_list, hid_t dxpl_id)
+herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
+            size_t *list_to_btree, size_t *btree_to_list, hid_t dxpl_id)
 {
     H5SM_master_table_t *table = NULL;
     haddr_t table_addr;
@@ -1070,9 +1090,9 @@ herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, size_t *list_to_btree,
     *btree_to_list = table->indexes[0].btree_to_list;
 
     /* Get information about the individual SOHM indexes */
-    for(i=0; i<table->num_indexes; ++i)
-    {
+    for(i=0; i<table->num_indexes; ++i) {
         index_flags[i] = table->indexes[i].mesg_types;
+        minsizes[i] = table->indexes[i].min_mesg_size;
     }
 
 done:

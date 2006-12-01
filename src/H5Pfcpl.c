@@ -77,7 +77,6 @@
 #define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
 #define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
 #define H5F_CRT_SHMSG_INDEX_TYPES_DEF  {0,0,0,0,0,0}
-/* JAMES #define H5F_CRT_SHMSG_INDEX_TYPES_DEF       { H5O_MESG_FILL_FLAG |H5O_MESG_SDSPACE_FLAG,H5O_MESG_ATTR_FLAG, 0, H5O_MESG_DTYPE_FLAG,0,H5O_MESG_PLINE_FLAG} */
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF {250,250,250,250,250,250}
 /* Definitions for shared object header list/btree phase change cutoffs */
@@ -158,11 +157,11 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned freespace_ver = H5F_CRT_FREESPACE_VERS_DEF;/* Default free space version # */
     unsigned objectdir_ver = H5F_CRT_OBJ_DIR_VERS_DEF;  /* Default object directory version # */
     unsigned sharedheader_ver = H5F_CRT_SHARE_HEAD_VERS_DEF;    /* Default shared header message version # */
-    unsigned        num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
-    unsigned        sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
-    unsigned        sohm_index_minsizes[H5SM_MAX_NUM_INDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
-    unsigned         sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
-    unsigned         sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
+    unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
+    unsigned sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
+    unsigned sohm_index_minsizes[H5SM_MAX_NUM_INDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
+    unsigned sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
+    unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
@@ -798,7 +797,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_shared_imesg_nindexes
+ * Function:	H5Pget_shared_mesg_nindexes
  *
  * Purpose:	Get the number of Shared Object Header Message (SOHM)
  *              indexes specified in this property list.
@@ -852,7 +851,6 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     unsigned    nindexes;               /* Number of SOHM indexes */
     unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
     unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
-    unsigned    x;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL);
@@ -884,12 +882,6 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     /* Set values in arrays */
     type_flags[index_num - 1] = mesg_type_flags;
     minsizes[index_num - 1] = min_mesg_size;
-
-    /* Check that type flags does introduce any duplicate values */
-    for(x=0; x < nindexes; ++x) {
-        if(x != (index_num - 1) && (type_flags[index_num - 1] & type_flags[x]) != 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't assign the same flag to different indexes")
-    }
 
     /* Write arrays back to plist */
     if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)

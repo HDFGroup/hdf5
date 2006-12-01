@@ -139,14 +139,14 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         HDmemcpy(p, H5SM_TABLE_MAGIC, (size_t)H5SM_TABLE_SIZEOF_MAGIC);
         p += H5SM_TABLE_SIZEOF_MAGIC;
 
-        *p++ = H5SM_MASTER_TABLE_VERSION; /* Version */
+        *p++ = table->version; /* Version */
 
         /* Encode each index header */
         for(x=0; x<table->num_indexes; ++x) {
             *p++ = table->indexes[x].index_type;      /* Is message index a list or a B-tree? */
 
             UINT16ENCODE(p, table->indexes[x].mesg_types);    /* Type of messages in the index */
-
+            UINT32ENCODE(p, table->indexes[x].min_mesg_size); /* Minimum size of message to share */
             UINT16ENCODE(p, table->indexes[x].list_to_btree);  /* List cutoff; fewer than this number and index becomes a list */
             UINT16ENCODE(p, table->indexes[x].btree_to_list);  /* B-tree cutoff; more than this number and index becomes a B-tree */
             UINT16ENCODE(p, table->indexes[x].num_messages);   /* Number of messages shared */
@@ -239,6 +239,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
         table->indexes[x].index_type= *p++;  /* type of the index (list or B-tree) */
 
         UINT16DECODE(p, table->indexes[x].mesg_types);
+        UINT32DECODE(p, table->indexes[x].min_mesg_size);
         UINT16DECODE(p, table->indexes[x].list_to_btree);
         UINT16DECODE(p, table->indexes[x].btree_to_list);
         UINT16DECODE(p, table->indexes[x].num_messages);

@@ -1884,7 +1884,7 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
     if(overwrite < 0) {
         /* Create a new message */
         /* JAMES: why is sh_mesg passed in here?  Is it ever used? */
-        if((idx = H5O_new_mesg(loc->file, oh, &mesg_flags, type, mesg, &sh_mesg, &type, &mesg, dxpl_id, &oh_flags)) == UFAIL)
+        if((idx = H5O_new_mesg(loc->file, oh, &mesg_flags, type, mesg, &sh_mesg, &write_type, &write_mesg, dxpl_id, &oh_flags)) == UFAIL)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
 
         /* Set the correct sequence number for the message created */
@@ -3135,15 +3135,9 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
         * We shouldn't need to do a search in the SOHM table on delete. */
         if(type == H5O_MSG_SHARED)
         {
-            /* JAMES ugly!  And not quite correct. */
-            void * mesg_orig;
-            if(NULL == (mesg_orig = H5O_shared_read(f, dxpl_id, mesg->native, mesg->type, NULL)))
-                HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message")
-
+            /* The native message here is actually a shared message.    */
             if(H5SM_try_delete(f, dxpl_id, mesg->type->id, mesg->native) < 0)
                 HGOTO_ERROR (H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
-
-            H5O_free(mesg->type->id, mesg_orig);
         }
 
         if((type->del)(f, dxpl_id, mesg->native, adj_link) < 0)
@@ -3337,6 +3331,9 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
+    void               *native_mesg;    /* Native, readable message */
+    hbool_t             native_mesg_alloc = FALSE;  /* True if native_mesg needs to be freed */
+
     herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_iterate_real)
@@ -3355,22 +3352,11 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
     /* Iterate over messages */
     for(sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs && !ret_value; idx++, idx_msg++) {
 	if(type->id == idx_msg->type->id) {
-            void * unshared_mesg; /* JAMES */
 
             /*
-             * Decode the message if necessary.  If the message is shared then decode
-             * a shared message, ignoring the message type.
+             * Decode the message if necessary.
              */
             LOAD_NATIVE(loc->file, dxpl_id, idx_msg, FAIL)
-
-            /* JAMES: test */
-            if(idx_msg->flags & H5O_MSG_FLAG_SHARED)
-            {
-                if(NULL == (unshared_mesg = H5O_shared_read(loc->file, dxpl_id, idx_msg->native, idx_msg->type, NULL)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message");
-            }
-            else
-                unshared_mesg = idx_msg->native;
 
             /* Check for making an "internal" (i.e. within the H5O package) callback */
             if(internal) {
@@ -3379,19 +3365,28 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
                     break;
             } /* end if */
             else {
-                /* Call the iterator callback */
-/* JAMES                if((ret_value = (op.app_op)(idx_msg->native, sequence, op_data)) != 0)
-                    break;
-*/
-                if((ret_value = (op.app_op)(unshared_mesg, sequence, op_data)) != 0)
-                    break;
-            } /* end else */
+                /* If the message is shared, get the real message it points to */
+                /* JAMES: test */
+                if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
+                    if(NULL == (native_mesg = H5O_shared_read(loc->file, dxpl_id,
+                                idx_msg->native, idx_msg->type, NULL)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message");
+                    native_mesg_alloc = TRUE;
+                }
+                else {
+                    native_mesg = idx_msg->native;
+                }
 
-            /* JAMES again */
-            if(idx_msg->flags & H5O_MSG_FLAG_SHARED)
-            {
-                H5O_free_real(idx_msg->type, unshared_mesg);
-            }
+                /* Call the iterator callback */
+                if((ret_value = (op.app_op)(native_mesg, sequence, op_data)) != 0)
+                    break;
+
+                /* Free the "real" message if it was allocated */
+                if(native_mesg_alloc) {
+                    H5O_free(idx_msg->type->id, native_mesg);
+                    native_mesg_alloc = FALSE;
+                }
+            } /* end else */
 
             /* Check for error from iterator */
             if(ret_value < 0)
@@ -3403,6 +3398,12 @@ H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect
     } /* end for */
 
 done:
+    /* Free the native message if it was allocated */
+    if(native_mesg_alloc) {
+        H5O_free(idx_msg->type->id, native_mesg);
+        native_mesg_alloc = FALSE;
+    }
+
     if(oh) {
         /* Check if object header was modified */
         if(oh_flags & H5AC__DIRTIED_FLAG) {

@@ -109,7 +109,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 {
     H5HF_t *fheap = NULL;
     unsigned char *buf = NULL;  /* Pointer to raw message in heap */
-    void * native_mesg = NULL;  /* Only used for messages shared in heap */
+    void *native_mesg = NULL;   /* Used for messages shared in heap */
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read)
@@ -118,6 +118,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     HDassert(f);
     HDassert(shared);
     HDassert(type);
+    HDassert(type->set_share);
 
     /* This message could have a heap ID (SOHM) or the address of an object
      * header on disk (named datatype)
@@ -153,14 +154,9 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         if(NULL == (native_mesg = H5O_decode(f, dxpl_id, buf, type->id)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
-        /* Make sure that this message is labeled as shared */
-        HDassert(type->set_share);
-        if(((type->set_share)(f, native_mesg, shared)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
-
-        /* Get a copy of the message to return */
-        if(NULL == (ret_value = H5O_copy(type->id, native_mesg, mesg)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy message")
+        /* Copy this message to the user's buffer */
+        if(NULL == (ret_value = (type->copy) (native_mesg, mesg, 0)))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end if */
     else {
         HDassert(shared->flags & H5O_COMMITTED_FLAG);
