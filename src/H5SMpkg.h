@@ -35,6 +35,7 @@
 #define H5SM_LIST_SIZEOF_MAGIC 4
 #define H5SM_TABLE_MAGIC "SMTB"
 #define H5SM_TABLE_SIZEOF_MAGIC 4
+#define H5SM_SIZEOF_CHECKSUM 4
 
 #define H5SM_MASTER_TABLE_VERSION	0	/* Version of the Shared Object Header Message Master Table*/
 
@@ -44,7 +45,7 @@
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + 1                                   /* Table version */           \
-         + 0/* JAMES checksum */)                                  /* Checksum */
+         + H5SM_SIZEOF_CHECKSUM)               /* Checksum */
 
 #define H5SM_INDEX_HEADER_SIZE(f) (1 /* Whether index is a list or B-tree */ \
          + 2         /* Type of messages stored in the index */              \
@@ -56,7 +57,8 @@
 /* JAMES: add checksum? */
 #define H5SM_LIST_SIZE(f, num_mesg) H5SM_LIST_SIZEOF_MAGIC                   \
          + 1        /* List version */                                       \
-         + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)
+         + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)                              \
+         + H5SM_SIZEOF_CHECKSUM                /* Checksum */
 
 #define H5SM_MAX_INDEXES 8
 #define H5SM_MAX_LIST_ELEMS 1000

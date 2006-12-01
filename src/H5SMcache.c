@@ -125,9 +125,10 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
     if (table->cache_info.is_dirty) {
         uint8_t buf[H5F_TABLEBUF_SIZE];  /* Temporary buffer */   /* JAMES This is big. Do I need to use H5FL_BLK_MALLOC instead? */
-        uint8_t *p;                 /* Pointer into raw data buffer */
-        size_t	size;               /* Header size on disk */
-        int x;                      /* Counter variable */
+        uint8_t  *p;                 /* Pointer into raw data buffer */
+        size_t	 size;               /* Header size on disk */
+        uint32_t computed_chksum;    /* Computed metadata checksum value */
+        int      x;                  /* Counter variable */
 
         /* Encode the master table and all of the index headers as one big blob */
         size = H5SM_TABLE_SIZE(f) + (H5SM_INDEX_HEADER_SIZE(f) * table->num_indexes);
@@ -154,7 +155,9 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
             H5F_addr_encode(f, &p, table->indexes[x].heap_addr); /* Address of the index's heap */
         }
 
-        /* JAMES: do checksum */
+        /* Compute checksum on buffer */
+        computed_chksum = H5_checksum_metadata(buf, (size - H5SM_SIZEOF_CHECKSUM), 0);
+        UINT32ENCODE(p, computed_chksum);
 
         /* Write the table to disk */
         HDassert((size_t)(p - buf) == size);
@@ -190,10 +193,12 @@ done:
 static H5SM_master_table_t *
 H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, H5SM_master_table_t *table)
 {
-    size_t table_size;              /* Size of SOHM master table on disk */
-    uint8_t *buf=NULL;              /* Reading buffer */
-    const uint8_t *p;               /* Pointer into input buffer */
-    uint8_t x;                      /* Counter variable for index headers */
+    size_t        table_size;          /* Size of SOHM master table on disk */
+    uint8_t       *buf=NULL;           /* Reading buffer */
+    const uint8_t *p;                  /* Pointer into input buffer */
+    uint32_t      stored_chksum;       /* Stored metadata checksum value */
+    uint32_t      computed_chksum;     /* Computed metadata checksum value */
+    uint8_t       x;                   /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
     FUNC_ENTER_NOAPI(H5SM_load_table, NULL)
@@ -228,7 +233,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     /* Don't count the checksum in the table size yet, since it comes after
      * all of the index headers
      */
-    HDassert((size_t)(p - buf) == H5SM_TABLE_SIZE(f) /* JAMES: minus checksum size */);
+    HDassert((size_t)(p - buf) == H5SM_TABLE_SIZE(f) - H5SM_SIZEOF_CHECKSUM);
 
     /* Allocate space for the index headers in memory*/
     if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, table->num_indexes)))
@@ -248,8 +253,18 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     }
 
     /* Read in checksum */
+    UINT32DECODE(p, stored_chksum);
 
+    /* Sanity check */
     HDassert((size_t)(p - buf) == table_size);
+
+    /* Compute checksum on entire header */
+    computed_chksum = H5_checksum_metadata(buf, (table_size - H5SM_SIZEOF_CHECKSUM), 0);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message table");
+
     ret_value = table;
 
 done:
@@ -387,6 +402,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         uint8_t buf[H5F_LISTBUF_SIZE];  /* Temporary buffer */   /* JAMES Do I need to use H5FL_BLK_MALLOC instead? */
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t	size;               /* Header size on disk */
+        uint32_t computed_chksum;   /* Computed metadata checksum value */
         hsize_t x;
 
         /* JAMES: consider only writing as many messages as necessary, and then adding a
@@ -415,6 +431,10 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
               UINT64ENCODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
             }
         }
+
+        /* Compute checksum on buffer */
+        computed_chksum = H5_checksum_metadata(buf, (size - H5SM_SIZEOF_CHECKSUM), 0);
+        UINT32ENCODE(p, computed_chksum);
 
         /* Write the list to disk */
         HDassert((size_t)(p - buf) == size);
@@ -454,6 +474,8 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     size_t size;                    /* Size of SOHM list on disk */
     uint8_t *buf = NULL;            /* Reading buffer */
     uint8_t *p;                     /* Pointer into input buffer */
+    uint32_t stored_chksum;         /* Stored metadata checksum value */
+    uint32_t computed_chksum;       /* Computed metadata checksum value */
     hsize_t x;                      /* Counter variable for messages in list */
     H5SM_list_t *ret_value=NULL;
 
@@ -502,6 +524,21 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
         UINT64DECODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
     }
 
+    /* Read in checksum */
+    UINT32DECODE(p, stored_chksum);
+
+    /* Sanity check */
+    HDassert((size_t)(p - buf) == size);
+
+
+    /* Compute checksum on entire header */
+    computed_chksum = H5_checksum_metadata(buf, (size - H5SM_SIZEOF_CHECKSUM), 0);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list");
+
+
     /* Initialize the rest of the array */
     for(x=header->num_messages; x<header->list_to_btree; x++)
     {
@@ -509,8 +546,6 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
         list->messages[x].ref_count = 0;
         list->messages[x].hash = H5O_HASH_UNDEF;
     }
-
-    HDassert((size_t)(p - buf) == size);
 
     ret_value = list;
 done:
