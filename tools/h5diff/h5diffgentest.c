@@ -75,7 +75,7 @@ static int test_types(const char *fname);
 static int test_datatypes(const char *fname);
 static int test_attributes(const char *fname,int make_diffs);
 static int test_datasets(const char *fname,int make_diffs);
-static int test_hyperslab(char *fname,int make_diffs);
+static int test_hyperslab(const char *fname,int make_diffs);
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
 static void write_dset_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -2374,15 +2374,15 @@ void gen_datareg(hid_t fid,
  *-------------------------------------------------------------------------
  */
 static
-int test_hyperslab(char *fname, 
+int test_hyperslab(const char *fname, 
                    int make_diffs /* flag to modify data buffers */)
 {
- hid_t   did;
- hid_t   fid;
- hid_t   f_sid;
- hid_t   m_sid;
- hid_t   tid;
- hid_t   dcpl;
+ hid_t   did=-1;
+ hid_t   fid=-1;
+ hid_t   f_sid=-1;
+ hid_t   m_sid=-1;
+ hid_t   tid=-1;
+ hid_t   dcpl=-1;
  hsize_t dims[1]={GBLL};                  /* dataset dimensions */
  hsize_t hs_size[1]={GBLL/(1024*1024)};   /* hyperslab dimensions */
  hsize_t chunk_dims[1]={GBLL/1024};       /* chunk dimensions */
