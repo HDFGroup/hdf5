@@ -94,10 +94,10 @@ hsize_t diff_dataset( hid_t file1_id,
                       const char *obj2_name,
                       diff_opt_t *options )
 {
- hid_t   did1;
- hid_t   did2;
- hid_t   dcpl1;
- hid_t   dcpl2;
+ hid_t   did1=-1;
+ hid_t   did2=-1;
+ hid_t   dcpl1=-1;
+ hid_t   dcpl2=-1;
  hsize_t nfound=0;
 
 /*-------------------------------------------------------------------------
@@ -191,12 +191,12 @@ hsize_t diff_datasetid( hid_t did1,
                         const char *obj2_name,
                         diff_opt_t *options )
 {
- hid_t      sid1;
- hid_t      sid2;
- hid_t      f_tid1;
- hid_t      f_tid2;                
- hid_t      m_tid1;
- hid_t      m_tid2;                
+ hid_t      sid1=-1;
+ hid_t      sid2=-1;
+ hid_t      f_tid1=-1;
+ hid_t      f_tid2=-1;                
+ hid_t      m_tid1=-1;
+ hid_t      m_tid2=-1;                
  size_t     m_size1;
  size_t     m_size2;               
  H5T_sign_t sign1;
@@ -412,7 +412,7 @@ hsize_t diff_datasetid( hid_t did1,
   nfound = diff_array(buf1,
                       buf2,
                       nelmts1,
-                      0,
+                      (hsize_t)0,
                       rank1,
                       dims1,
                       options,
@@ -441,8 +441,6 @@ hsize_t diff_datasetid( hid_t did1,
   /* hyperslab info */
   hsize_t       hs_offset[H5S_MAX_RANK]; /*starting offset */
   hsize_t       hs_size[H5S_MAX_RANK];   /*size this pass */
-  unsigned char *sm_buf1 = NULL;         /*buffer for raw data */
-  unsigned char *sm_buf2 = NULL;         /*buffer for raw data */
   hsize_t       hs_nelmts;               /*elements in request */
   hsize_t       zero[8];                 /*vector of zeros */
   
