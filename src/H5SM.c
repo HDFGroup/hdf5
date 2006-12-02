@@ -444,8 +444,6 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t * header, hid_t dxpl_id)
 
     /* JAMES: would making fewer operations out of this make it faster? */
     for(x=0; x<num_entries; x++) {
-//        list->messages[x].ref_count=0;
-//        list->messages[x].fheap_id=0;
         list->messages[x].hash=H5O_HASH_UNDEF;
     }
 
