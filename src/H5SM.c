@@ -106,7 +106,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     unsigned index_type_flags[H5SM_MAX_NUM_INDEXES];
     unsigned minsizes[H5SM_MAX_NUM_INDEXES];
     unsigned type_flags_used;
-    ssize_t x;
+    unsigned x;
     hsize_t table_size;
     herr_t ret_value=SUCCEED;
 
@@ -553,7 +553,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
         HGOTO_DONE(FALSE);
 
     /* If the message isn't big enough, don't bother sharing it */
-    if((mesg_size = H5O_mesg_size(type_id, f, mesg, 0)) <0)
+    if(0 == (mesg_size = H5O_mesg_size(type_id, f, mesg, 0)))
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
     if(mesg_size < table->indexes[index_num].min_mesg_size)
         HGOTO_DONE(FALSE);
@@ -644,7 +644,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     key.encoding = encoding_buf;
     key.encoding_size = buf_size;
     key.fheap = fheap;
-    key.mesg_heap_id = -1; /* Message doesn't yet have a heap ID */
+    key.mesg_heap_id = 0; /* JAMES: Message doesn't yet have a heap ID */
 
     /* Assume the message is already in the index and try to increment its
      * reference count.  If this fails, the message isn't in the index after
@@ -731,7 +731,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
             list_size = H5SM_LIST_SIZE(f, header->list_to_btree);
             if(H5MF_xfree(f, H5FD_MEM_SOHM, dxpl_id, header->index_addr, list_size) < 0)
-	        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "unable to free shared message list")
+	        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to free shared message list")
 
             header->index_addr = tree_addr;
             header->index_type = H5SM_BTREE;

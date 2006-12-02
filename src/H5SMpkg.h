@@ -110,7 +110,7 @@ typedef enum {
 typedef struct {
   uint32_t hash;    /* The hash value for this message */
   const void *encoding; /* The message encoded */
-  hsize_t encoding_size; /* Size of the encoding */
+  size_t encoding_size; /* Size of the encoding */
   H5HF_t *fheap;    /* The heap for this message type, open. */
   H5SM_fheap_id_t mesg_heap_id; /* The heap_id for this message */
 } H5SM_mesg_key_t;
@@ -173,14 +173,14 @@ H5_DLL herr_t H5SM_message_decode(const H5F_t *f, const uint8_t *raw,
 /* H5SM_message_compare is in H5SMbtree2.c, but is also used by list code
  * in H5SM.c.
  */
-H5_DLL herr_t H5SM_message_compare(const H5SM_mesg_key_t *rec1,
-                                   const H5SM_sohm_t *rec2);
+H5_DLL herr_t H5SM_message_compare(const void *rec1,
+                                   const void *rec2);
 
 /* H5B2_modify_t callbacks to adjust record's refcount. */
 H5_DLL herr_t H5SM_incr_ref(void *record, void *op_data, hbool_t *changed);
 H5_DLL herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 
 /* H5B2_remove_t callback to add messages to a list index */
-H5_DLL herr_t H5SM_convert_to_list_op(void * record, void *op_data);
+H5_DLL herr_t H5SM_convert_to_list_op(const void * record, void *op_data);
 
 #endif /*_H5SMpkg_H*/

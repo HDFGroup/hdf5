@@ -87,14 +87,16 @@ const H5B2_class_t H5SM_INDEX[1]={{     /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_message_compare(const H5SM_mesg_key_t *rec1, const H5SM_sohm_t *rec2)
+H5SM_message_compare(const void *rec1, const void *rec2)
 {
+    const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *) rec1;
+    const H5SM_sohm_t *mesg = (const H5SM_sohm_t *) rec2;
     int64_t hash_diff; /* Has to be able to hold two 32-bit values */
     herr_t ret_value=0;
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
-    hash_diff = rec1->hash;
-    hash_diff -= rec2->hash;
+    hash_diff = key->hash;
+    hash_diff -= mesg->hash;
 
     /* If the hash values match, make sure the messages are really the same */
     if(0 == hash_diff)     {
@@ -102,9 +104,9 @@ H5SM_message_compare(const H5SM_mesg_key_t *rec1, const H5SM_sohm_t *rec2)
          * or the encoded buffers
          */
         /* JAMES: not a great test.  Use a flag instead? */
-        if(rec1->encoding_size == 0)
+        if(key->encoding_size == 0)
         {
-            ret_value = (herr_t) (rec1->mesg_heap_id - rec2->fheap_id);
+            ret_value = (herr_t) (key->mesg_heap_id - mesg->fheap_id);
         }
         else
         {
@@ -116,11 +118,11 @@ H5SM_message_compare(const H5SM_mesg_key_t *rec1, const H5SM_sohm_t *rec2)
              */
             HDmemset(buf2, 0, H5O_MESG_MAX_SIZE);
 
-            ret = H5HF_read(rec1->fheap, H5AC_dxpl_id, &(rec2->fheap_id), &buf2);
+            ret = H5HF_read(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), &buf2);
             HDassert(ret >= 0);
 
             /* JAMES: I think I want to use in-heap callback here. */
-            ret_value = HDmemcmp(rec1->encoding, buf2, rec1->encoding_size);
+            ret_value = HDmemcmp(key->encoding, buf2, key->encoding_size);
         }
     }
     else {
@@ -206,9 +208,9 @@ H5SM_message_retrieve(void *udata, const void *native)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
+H5SM_message_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_nrecord)
 {
-    H5SM_sohm_t *message = (H5SM_sohm_t *)_nrecord;
+    const H5SM_sohm_t *message = (const H5SM_sohm_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_encode)
 
@@ -236,7 +238,7 @@ H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
  */
 /* JAMES: can we combine this with H5SMcache functions? */
 herr_t
-H5SM_message_decode(const H5F_t *f, const uint8_t *raw, void *_nrecord)
+H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *)_nrecord;
 
@@ -266,8 +268,8 @@ H5SM_message_decode(const H5F_t *f, const uint8_t *raw, void *_nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_message_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata)
+H5SM_message_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+    int indent, int fwidth, const void *record, const void UNUSED *_udata)
 {
     const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 
@@ -375,10 +377,10 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_convert_to_list_op(void * record, void *op_data)
+H5SM_convert_to_list_op(const void * record, void *op_data)
 {
-    H5SM_sohm_t *message = (H5SM_sohm_t *) record;
-    H5SM_list_t *list = (H5SM_list_t *) op_data;
+    const H5SM_sohm_t *message = (const H5SM_sohm_t *) record;
+    const H5SM_list_t *list = (const H5SM_list_t *) op_data;
     hsize_t      x;
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_convert_to_list_op)
 
