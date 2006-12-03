@@ -542,61 +542,54 @@ test_compact_io(hid_t fapl)
     TESTING("compact dataset I/O");
 
     /* Initialize data */
-    n=0;
-    for(i=0; i<16; i++) {
-        for(j=0; j<8; j++) {
+    n = 0;
+    for(i = 0; i < 16; i++)
+        for(j = 0; j < 8; j++)
             wbuf[i][j] = n++;
-        }
-    }
 
     /* Create a small data space for compact dataset */
     dims[0] = 16;
     dims[1] = 8;
-    space = H5Screate_simple(2, dims, NULL);
-    assert(space>=0);
+    if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 
     /* Create a file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        goto error;
+        TEST_ERROR
 
     /* Create property list for compact dataset creation */
-    plist = H5Pcreate(H5P_DATASET_CREATE);
-    assert(plist >= 0);
-    status = H5Pset_layout(plist, H5D_COMPACT);
-    assert(status >= 0);
-    status = H5Pset_alloc_time(plist, H5D_ALLOC_TIME_EARLY);
-    assert(status >= 0);
+    if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(plist, H5D_COMPACT) < 0) TEST_ERROR
+    if(H5Pset_alloc_time(plist, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR
 
     /* Create and write to a compact dataset */
-    if((dataset = H5Dcreate(file, DSET_COMPACT_IO_NAME, H5T_NATIVE_INT, space,
-                        plist))<0)
-        goto error;
+    if((dataset = H5Dcreate(file, DSET_COMPACT_IO_NAME, H5T_NATIVE_INT, space, plist))<0)
+        TEST_ERROR
 
     /* Test dataset address.  Should be undefined. */
-    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) TEST_ERROR
 
     if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
-        goto error;
+        TEST_ERROR
 
     /* Test dataset address.  Should be undefined. */
-    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) TEST_ERROR
 
     /* Close file */
-    H5Sclose(space);
-    H5Pclose(plist);
-    H5Dclose(dataset);
-    H5Fclose(file);
+    if(H5Sclose(space) < 0) TEST_ERROR
+    if(H5Pclose(plist) < 0) TEST_ERROR
+    if(H5Dclose(dataset) < 0) TEST_ERROR
+    if(H5Fclose(file) < 0) TEST_ERROR
 
     /*
      * Open the file and check data
      */
     if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0)
-        goto error;
+        TEST_ERROR
     if((dataset = H5Dopen(file, DSET_COMPACT_IO_NAME))<0)
-        goto error;
+        TEST_ERROR
     if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)<0)
-        goto error;
+        TEST_ERROR
 
      /* Check that the values read are the same as the values written */
      for (i = 0; i < 16; i++) {
@@ -612,8 +605,9 @@ test_compact_io(hid_t fapl)
          }
      }
 
-     H5Dclose(dataset);
-     H5Fclose(file);
+     if(H5Dclose(dataset) < 0) TEST_ERROR
+     if(H5Fclose(file) < 0) TEST_ERROR
+
      PASSED();
      return 0;
 

@@ -519,6 +519,9 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
 
     /* Type-specific checks */
     /* JAMES: should this go here? Should there be a "can share" callback? */
+    /* QAK: Yes, a "can share" callback would be very good here, this chunk of
+     *          code is really violating the encapsulation of the datatype class
+     */
     if(type_id == H5O_DTYPE_ID)
     {
         /* Don't share immutable datatypes */
@@ -573,12 +576,12 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
 done:
     /* Release the master SOHM table */
     if (table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5SM_write_mesg
  *

@@ -194,11 +194,11 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     /* Check for format of group to create */
     if(use_latest_format) {
         /* Insert link info message */
-        if(H5O_modify(oloc, H5O_LINFO_ID, H5O_NEW_MESG, 0, 0, linfo, dxpl_id) < 0)
+        if(H5O_msg_create(oloc, H5O_LINFO_ID, 0, 0, linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert group info message */
-        if(H5O_modify(oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
+        if(H5O_msg_create(oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
     } /* end if */
     else {
@@ -482,11 +482,11 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             /* Convert group to "new format" group, in order to hold the information */
 
             /* Insert link info message */
-            if(H5O_modify(grp_oloc, H5O_LINFO_ID, H5O_NEW_MESG, 0, 0, &new_linfo, dxpl_id) < 0)
+            if(H5O_msg_create(grp_oloc, H5O_LINFO_ID, 0, 0, &new_linfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
             /* Insert group info message */
-            if(H5O_modify(grp_oloc, H5O_GINFO_ID, H5O_NEW_MESG, H5O_MSG_FLAG_CONSTANT, 0, &new_ginfo, dxpl_id) < 0)
+            if(H5O_msg_create(grp_oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_TIME, &new_ginfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
             /* Set up user data for iteration */
@@ -541,7 +541,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     /* Increment the number of objects in this group */
     if(!use_old_format) {
         linfo.nlinks++;
-        if(H5O_modify(grp_oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
+        if(H5O_write(grp_oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
     } /* end if */
 
@@ -906,10 +906,26 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 
                 /* If ok, insert links as link messages */
                 if(can_convert) {
+                    struct H5O_t *oh = NULL;      /* Pointer to group's object header */
+                    unsigned oh_flags = H5AC__DIRTIED_FLAG;
+
+                    /* Get a pointer to the object header itself */
+                    if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+
                     /* Insert link messages into group */
                     for(u = 0; u < linfo->nlinks; u++)
-                        if(H5O_modify(oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), dxpl_id) < 0)
+                        if(H5O_append(oloc->file, dxpl_id, oh, H5O_LINK_ID, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), &oh_flags) < 0) {
+                            /* Release object header */
+                            if(H5O_unprotect(oloc, oh, dxpl_id, oh_flags) < 0)
+                                HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+                        } /* end if */
+
+                    /* Release object header */
+                    if(H5O_unprotect(oloc, oh, dxpl_id, oh_flags) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
                     /* Remove the dense storage */
                     if(H5G_dense_delete(oloc->file, dxpl_id, linfo, FALSE) < 0)
@@ -924,7 +940,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
     } /* end if */
 
     /* Update link info in the object header */
-    if(H5O_modify(oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
+    if(H5O_write(oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
 
 done:

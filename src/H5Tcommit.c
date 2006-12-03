@@ -281,7 +281,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED 
      */
     if(H5O_create(file, dxpl_id, dtype_size, tcpl_id, &temp_oloc) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
-    if(H5O_modify(&temp_oloc, H5O_DTYPE_ID, 0, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSOHM, H5O_UPDATE_TIME, type, dxpl_id) < 0)
+    if(H5O_msg_create(&temp_oloc, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSOHM, H5O_UPDATE_TIME, type, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
 
     /* Copy the new object header's location into the datatype, taking ownership of it */

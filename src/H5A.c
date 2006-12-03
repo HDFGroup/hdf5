@@ -417,7 +417,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->obj_opened = TRUE;
 
     /* Create the attribute message and save the attribute index */
-    if(H5O_modify(&(attr->oloc), H5O_ATTR_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0)
+    if(H5O_msg_create(&(attr->oloc), H5O_ATTR_ID, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
 
     /* Register the new attribute and get an ID for it */
@@ -828,7 +828,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
 
         /* Modify the attribute data */
-        if(H5O_modify(&(attr->oloc), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0)
+        if(H5O_write(&(attr->oloc), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
     } /* end if */
 
@@ -1380,7 +1380,7 @@ H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxp
     found_attr.initialized = TRUE;
 
     /* Modify the attribute message */
-    if(H5O_modify(loc, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0)
+    if(H5O_write(loc, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
 
     /* Close the attribute */

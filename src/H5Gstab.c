@@ -186,7 +186,7 @@ H5G_stab_create(H5O_loc_t *grp_oloc, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
      * Insert the symbol table message into the object header and the symbol
      * table entry.
      */
-    if(H5O_modify(grp_oloc, H5O_STAB_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, stab, dxpl_id) < 0)
+    if(H5O_msg_create(grp_oloc, H5O_STAB_ID, 0, H5O_UPDATE_TIME, stab, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
 done:

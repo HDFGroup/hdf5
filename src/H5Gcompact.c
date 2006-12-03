@@ -194,7 +194,7 @@ H5G_compact_insert(H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
     HDassert(obj_lnk);
 
     /* Insert link message into group */
-    if(H5O_modify(grp_oloc, H5O_LINK_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, obj_lnk, dxpl_id) < 0)
+    if(H5O_msg_create(grp_oloc, H5O_LINK_ID, 0, H5O_UPDATE_TIME, obj_lnk, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
 done:

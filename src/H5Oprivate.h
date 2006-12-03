@@ -63,7 +63,6 @@ typedef uint64_t H5SM_fheap_id_t;
 
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
-#define H5O_NEW_MESG	(-1)		/*new message			     */
 #define H5O_ALL		(-1)		/* Operate on all messages of type   */
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
 
@@ -389,15 +388,18 @@ H5_DLL int H5O_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
     hid_t dxpl_id);
 H5_DLL htri_t H5O_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
+H5_DLL herr_t H5O_msg_create(H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
+    unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL void *H5O_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
-H5_DLL int H5O_modify(H5O_loc_t *loc, unsigned type_id,
-    int overwrite, unsigned flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
+    unsigned flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL struct H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, struct H5O_t *oh, hid_t dxpl_id,
     unsigned oh_flags);
-H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
-    unsigned flags, void *mesg, unsigned * oh_flags_ptr);
+H5_DLL herr_t H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
+    unsigned mesg_flags, unsigned update_flags, void *mesg,
+    unsigned *oh_flags_ptr);
 H5_DLL herr_t H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
     hbool_t force, unsigned *oh_flags_ptr);

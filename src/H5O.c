@@ -54,7 +54,7 @@
         const H5O_msg_class_t	*decode_type;                                 \
                                                                               \
         /* Check for shared message */                                        \
-        if ((MSG)->flags & H5O_MSG_FLAG_SHARED)                                   \
+        if((MSG)->flags & H5O_MSG_FLAG_SHARED)                                \
             decode_type = H5O_MSG_SHARED;                                     \
         else                                                                  \
             decode_type = (MSG)->type;                                        \
@@ -123,12 +123,12 @@ static void *H5O_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
                                  const H5O_msg_class_t **type_p, int sequence);
-static int H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
-    int overwrite, unsigned flags, unsigned update_flags, const void *mesg,
+static herr_t H5O_write_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
+    unsigned overwrite, unsigned flags, unsigned update_flags, const void *mesg,
     hid_t dxpl_id);
-static int H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    const H5O_msg_class_t *type, unsigned flags, const void *mesg,
-    unsigned * oh_flags_ptr);
+static herr_t H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
+    const void *mesg, unsigned * oh_flags_ptr);
 static herr_t H5O_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
@@ -136,9 +136,9 @@ static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
     const H5O_msg_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
     const H5O_msg_class_t **new_type, const void **new_mesg, hid_t dxpl_id,
     unsigned * oh_flags_ptr);
-static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
-    const void *mesg, unsigned flags, unsigned update_flags,
-    unsigned * oh_flags_ptr);
+static herr_t H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+    const H5O_msg_class_t *type, const void *mesg, unsigned flags,
+    unsigned update_flags, unsigned * oh_flags_ptr);
 static herr_t H5O_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
     H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
 static const H5O_obj_class_t *H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id);
@@ -1724,30 +1724,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_modify
+ * Function:	H5O_write
  *
  * Purpose:	Modifies an existing message or creates a new message.
- *		The cache fields in that symbol table entry ENT are *not*
- *		updated, you must do that separately because they often
- *		depend on multiple object header messages.  Besides, we
- *		don't know which messages will be constant and which will
- *		not.
  *
- *		The OVERWRITE argument is either a sequence number of a
- *		message to overwrite (usually zero) or the constant
- *		H5O_NEW_MESG (-1) to indicate that a new message is to
- *		be created.  If the message to overwrite doesn't exist then
- *		it is created (but only if it can be inserted so its sequence
- *		number is OVERWRITE; that is, you can create a message with
- *		the sequence number 5 if there is no message with sequence
- *		number 4).
+ *		The OVERWRITE argument is a sequence number of a
+ *		message to overwrite (usually zero).
+ *		If the message to overwrite doesn't exist then this routine
+ *              fails.
  *
- *              The UPDATE_TIME argument is a boolean that allows the caller
- *              to skip updating the modification time.  This is useful when
- *              several calls to H5O_modify will be made in a sequence.
+ *              The UPDATE_FLAGS argument are flags that allow the caller
+ *              to skip updating the modification time or reseting the message
+ *              data.  This is useful when several calls to H5O_write will be
+ *              made in a sequence.
  *
- * Return:	Success:	The sequence number of the message that
- *				was modified or created.
+ * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
  *
@@ -1759,15 +1750,15 @@ done:
  */
 /* JAMES: this will probably get put through its paces when extending shared
  * dataspaces */
-int
-H5O_modify(H5O_loc_t *loc, unsigned type_id, int overwrite,
+herr_t
+H5O_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
    unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    htri_t shared_mess;
-    int	ret_value;              /* Return value */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    htri_t shared_mesg;                 /* Whether the message should be shared */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_modify, FAIL)
+    FUNC_ENTER_NOAPI(H5O_write, FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1780,48 +1771,37 @@ H5O_modify(H5O_loc_t *loc, unsigned type_id, int overwrite,
     HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
 
     /* Should this message be written as a SOHM? */
-    if((shared_mess = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) >0)
-    {
+    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) > 0)
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
-
-    } else if(shared_mess < 0)
+    else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message");
 
     /* Call the "real" modify routine */
-    if((ret_value = H5O_modify_real(loc, type, overwrite, mesg_flags, update_flags, mesg, dxpl_id)) < 0)
+    if(H5O_write_real(loc, type, overwrite, mesg_flags, update_flags, mesg, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_modify() */
+} /* end H5O_write() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_modify_real
+ * Function:	H5O_write_real
  *
  * Purpose:	Modifies an existing message or creates a new message.
- *		The cache fields in that symbol table entry ENT are *not*
- *		updated, you must do that separately because they often
- *		depend on multiple object header messages.  Besides, we
- *		don't know which messages will be constant and which will
- *		not.
  *
- *		The OVERWRITE argument is either a sequence number of a
- *		message to overwrite (usually zero) or the constant
- *		H5O_NEW_MESG (-1) to indicate that a new message is to
- *		be created.  If the message to overwrite doesn't exist then
- *		it is created (but only if it can be inserted so its sequence
- *		number is OVERWRITE; that is, you can create a message with
- *		the sequence number 5 if there is no message with sequence
- *		number 4).
+ *		The OVERWRITE argument is a sequence number of a
+ *		message to overwrite (usually zero).
+ *		If the message to overwrite doesn't exist then this routine
+ *              fails.
  *
- *              The UPDATE_TIME argument is a boolean that allows the caller
- *              to skip updating the modification time.  This is useful when
- *              several calls to H5O_modify will be made in a sequence.
+ *              The UPDATE_FLAGS argument are flags that allow the caller
+ *              to skip updating the modification time or reseting the message
+ *              data.  This is useful when several calls to H5O_write will be
+ *              made in a sequence.
  *
- * Return:	Success:	The sequence number of the message that
- *				was modified or created.
+ * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
  *
@@ -1831,21 +1811,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
-H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
+static herr_t
+H5O_write_real(H5O_loc_t *loc, const H5O_msg_class_t *type, unsigned overwrite,
    unsigned mesg_flags, unsigned update_flags, const void *mesg, hid_t dxpl_id)
 {
     H5O_t		*oh = NULL;
     unsigned		oh_flags = H5AC__NO_FLAGS_SET;
-    int		        sequence;
+    int	        	sequence;       /* Sequence # of message type to modify */
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
     H5O_shared_t	sh_mesg;
-    const H5O_msg_class_t *write_type = type;    /* Type of message to be written */
-    const void          *write_mesg = mesg;    /* Actual message being written */
-    int		        ret_value;
+    const H5O_msg_class_t *write_type = type;   /* Type of message to be written */
+    const void          *write_mesg = mesg;     /* Actual message being written */
+    herr_t	        ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_modify_real)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_write_real)
 
     /* check args */
     HDassert(loc);
@@ -1864,33 +1844,19 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Count similar messages */
-    for(idx = 0, sequence = -1, idx_msg=&oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++) {
+    for(idx = 0, sequence = -1, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++) {
 	if(type->id != idx_msg->type->id)
             continue;
-	if(++sequence == overwrite)
+	if(++sequence == (int)overwrite)
             break;
     } /* end for */
 
     /* Was the right message found? */
-    if(overwrite >= 0 && (idx >= oh->nmesgs || sequence != overwrite)) {
-	/* No, but can we insert a new one with this sequence number? */
-	if(overwrite == sequence + 1)
-	    overwrite = -1;
-	else
-	    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found")
-    } /* end if */
+    if(sequence != (int)overwrite)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found")
 
-    /* Check for creating new message */
-    if(overwrite < 0) {
-        /* Create a new message */
-        /* JAMES: why is sh_mesg passed in here?  Is it ever used? */
-        if((idx = H5O_new_mesg(loc->file, oh, &mesg_flags, type, mesg, &sh_mesg, &write_type, &write_mesg, dxpl_id, &oh_flags)) == UFAIL)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
-
-        /* Set the correct sequence number for the message created */
-	sequence++;
-
-    } else if(oh->mesg[idx].flags & H5O_MSG_FLAG_CONSTANT) {
+    /* Check for modifying a constant message */
+    if(oh->mesg[idx].flags & H5O_MSG_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify constant message")
     } else if(oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) {
         /* This message is shared, but it's being modified.  This is valid if
@@ -1898,54 +1864,97 @@ H5O_modify_real(H5O_loc_t *loc, const H5O_msg_class_t *type, int overwrite,
          * First, make sure it's not a committed message; these can't ever
          * be modified.
          */
-        if(((H5O_shared_t*) oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG)
+        if(((H5O_shared_t*)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify committed message")
 
         /* Remove the old message from the SOHM index */
         if(H5SM_try_delete(loc->file, dxpl_id, oh->mesg[idx].type->id, oh->mesg[idx].native) < 0)
             HGOTO_ERROR (H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
 
-        /* Now this message is no longer shared and we can safely overwrite
-         * it.
+        /* Now this message is no longer shared and we can safely overwrite it.
          * We need to make sure that the message we're writing is shared,
          * though, and that the library doesn't try to reset the current
          * message like it would in a normal overwrite (this message is
-         * realy a shared pointer, not a real
-         * message).
+         * realy a shared pointer, not a real message).
          * JAMES: will this break if a shared message is overwritten with a larger
          * non-shared message?
          */
         HDassert(H5O_is_shared(type->id, mesg) > 0); /* JAMES: this should work with
                                                       * replacement messages that aren't shared, too. */
 
-        if(H5O_get_share(type->id, loc->file, mesg, &sh_mesg)<0)
+        if(H5O_get_share(type->id, loc->file, mesg, &sh_mesg) < 0)
               HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Instead of writing the original message, write a shared message */
-        write_type = H5O_msg_class_g[H5O_SHARED_ID];
+        write_type = H5O_MSG_SHARED;
         write_mesg = &sh_mesg;
-    }
+    } /* end if */
 
     /* Write the information to the message */
-    if(H5O_write_mesg(oh, idx, write_type, write_mesg, mesg_flags, update_flags, &oh_flags) < 0)
+    if(H5O_write_mesg(loc->file, dxpl_id, oh, idx, write_type, write_mesg, mesg_flags, update_flags, &oh_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
-
-    /* Update the modification time message if any */
-    if(update_flags & H5O_UPDATE_TIME)
-        H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags);
 #ifdef H5O_DEBUG
 H5O_assert(oh);
 #endif /* H5O_DEBUG */
-
-    /* Set return value */
-    ret_value = sequence;
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_modify_real() */
+} /* end H5O_write_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_create
+ *
+ * Purpose:	Create a new object header message
+ *
+ * Return:	Success:	The sequence number of the message that
+ *				was created.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  1 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_create(H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
+    unsigned update_flags, void *mesg, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_create, FAIL)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
+    HDassert(mesg);
+
+    /* Check for write access on the file */
+    if(0 == (loc->file->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
+
+    /* Protect the object header */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Go append message to object header */
+    if(H5O_append(loc->file, dxpl_id, oh, type_id, mesg_flags, update_flags, mesg, &oh_flags) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -2033,8 +2042,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_append
  *
- * Purpose:	Simplified version of H5O_modify, used when creating a new
- *              object header message (usually during object creation)
+ * Purpose:	Simplified version of H5O_msg_create, used when creating a new
+ *              object header message (usually during object creation) and
+ *              several messages will be added to the object header at once.
  *
  * Return:	Success:	The sequence number of the message that
  *				was created.
@@ -2047,13 +2057,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned mesg_flags,
-    void *mesg, unsigned * oh_flags_ptr)
+    unsigned update_flags, void *mesg, unsigned * oh_flags_ptr)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    htri_t shared_mess;              /* Should this message be stored in the Shared Message table? */
-    int	ret_value;                      /* Return value */
+    htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_append, FAIL)
 
@@ -2068,15 +2078,13 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned mesg_f
     HDassert(oh_flags_ptr);
 
     /* Should this message be written as a SOHM? */
-    if((shared_mess = H5SM_try_share(f, dxpl_id, type_id, mesg)) >0)
-    {
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, type_id, mesg)) > 0)
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
-    }
-    else if(shared_mess < 0)
+    else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
-    if((ret_value = H5O_append_real( f, dxpl_id, oh, type, mesg_flags, mesg, oh_flags_ptr)) < 0)
+    if(H5O_append_real(f, dxpl_id, oh, type, mesg_flags, update_flags, mesg, oh_flags_ptr) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
 
 done:
@@ -2087,8 +2095,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_append_real
  *
- * Purpose:	Simplified version of H5O_modify, used when creating a new
- *              object header message (usually during object creation)
+ * Purpose:	Simplified version of H5O_msg_create, used when creating a new
+ *              object header message (usually during object creation) and
+ *              several messages will be added to the object header at once.
  *
  * Return:	Success:	The sequence number of the message that
  *				was created.
@@ -2101,13 +2110,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
-    unsigned mesg_flags, const void *mesg, unsigned * oh_flags_ptr)
+    unsigned mesg_flags, unsigned update_flags, const void *mesg, unsigned * oh_flags_ptr)
 {
     unsigned		idx;            /* Index of message to modify */
     H5O_shared_t	sh_mesg;
-    int		        ret_value;
+    herr_t	        ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_append_real)
 
@@ -2124,14 +2133,11 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
 
     /* Write the information to the message */
-    if(H5O_write_mesg(oh, idx, type, mesg, mesg_flags, 0, oh_flags_ptr) < 0)
+    if(H5O_write_mesg(f, dxpl_id, oh, idx, type, mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
 #endif /* H5O_DEBUG */
-
-    /* Set return value */
-    ret_value = idx;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2175,20 +2181,21 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
 
     /* Check for shared message */
     if(*mesg_flags & H5O_MSG_FLAG_SHARED) {
-        HDmemset(sh_mesg, 0, sizeof(H5O_shared_t));
-
-        if ((NULL == orig_type->is_shared) || (NULL == orig_type->get_share))
-            HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable");
-        if ((is_shared = (orig_type->is_shared)(orig_mesg)) == FALSE) {
+        if((NULL == orig_type->is_shared) || (NULL == orig_type->get_share))
+            HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable")
+        if((is_shared = (orig_type->is_shared)(orig_mesg)) == FALSE) {
             /*
              * If the message isn't shared then turn off the shared bit
              * and treat it as an unshared message.
              */
             *mesg_flags &= ~H5O_MSG_FLAG_SHARED;
+            *new_type = orig_type;
+            *new_mesg = orig_mesg;
         } else if(is_shared > 0) {
             /* Message is shared. Get shared message, change message type,
              * and use shared information */
-            if ((orig_type->get_share)(f, orig_mesg, sh_mesg/*out*/) < 0)
+            HDmemset(sh_mesg, 0, sizeof(H5O_shared_t));
+            if((orig_type->get_share)(f, orig_mesg, sh_mesg/*out*/) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, UFAIL, "can't get shared message")
 
             *new_type = H5O_MSG_SHARED;
@@ -2232,9 +2239,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
-    const void *mesg, unsigned mesg_flags, unsigned update_flags,
-    unsigned * oh_flags_ptr)
+H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+    const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
+    unsigned update_flags, unsigned *oh_flags_ptr)
 {
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2242,6 +2249,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
     FUNC_ENTER_NOAPI_NOINIT(H5O_write_mesg)
 
     /* check args */
+    HDassert(f);
     HDassert(oh);
     HDassert(type);
     HDassert(mesg);
@@ -2258,8 +2266,15 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_msg_class_t *type,
     if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native, update_flags)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
 
+    /* Update the message flags and mark the message as modified */
     idx_msg->flags = mesg_flags;
     idx_msg->dirty = TRUE;
+
+    /* Update the modification time message if any */
+    if(update_flags & H5O_UPDATE_TIME)
+        H5O_touch_oh(f, dxpl_id, oh, FALSE, oh_flags_ptr);
+
+    /* Mark the object header as modified */
     *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 done:
@@ -2613,7 +2628,7 @@ done:
  */
 static herr_t
 H5O_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
-    unsigned sequence, unsigned * oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */

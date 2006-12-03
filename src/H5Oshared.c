@@ -531,7 +531,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
      * are written (in H5O_shared_link) and decrement it here.
      * SOHMs in the heap behave differently; their refcount is incremented
      * during H5SM_share when they are going to be written (in H5O_append
-     * or H5O_modify). Their refcount in the SOHM indexes still needs to
+     * or H5O_write). Their refcount in the SOHM indexes still needs to
      * be decremented when they're deleted (in H5O_shared_link_adj).
      */
 

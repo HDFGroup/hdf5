@@ -1029,7 +1029,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_modify
+ * Function:	H5S_write
  *
  * Purpose:	Updates a data space by writing a message to an object
  *		header.
@@ -1042,11 +1042,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_modify(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
+H5S_write(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_modify, FAIL)
+    FUNC_ENTER_NOAPI(H5S_write, FAIL)
 
     HDassert(loc);
     HDassert(ds);
@@ -1055,7 +1055,7 @@ H5S_modify(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if(H5O_modify(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
+            if(H5O_write(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple dataspace message")
             break;
 
@@ -1066,7 +1066,7 @@ H5S_modify(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_modify() */
+} /* end H5S_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -1091,23 +1091,23 @@ done:
  */
 herr_t
 H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
-           unsigned * oh_flags_ptr)
+           unsigned *oh_flags_ptr)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_append, FAIL);
+    FUNC_ENTER_NOAPI(H5S_append, FAIL)
 
-    assert(f);
-    assert(oh);
-    assert(ds);
-    assert(oh_flags_ptr);
+    HDassert(f);
+    HDassert(oh);
+    HDassert(ds);
+    HDassert(oh_flags_ptr);
 
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent), oh_flags_ptr)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
+            if(H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent), oh_flags_ptr) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message")
             break;
 
         default:
@@ -1116,7 +1116,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_append() */
 
 

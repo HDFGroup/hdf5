@@ -95,7 +95,7 @@ main(void)
     /* create a new message */
     TESTING("message creation");
     time_new = 11111111;
-    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -123,7 +123,7 @@ main(void)
      */
     TESTING("message modification");
     time_new = 33333333;
-    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -152,7 +152,7 @@ main(void)
      */
     TESTING("duplicate message creation");
     time_new = 55555555;
-    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -180,7 +180,7 @@ main(void)
      */
     TESTING("duplicate message modification");
     time_new = 77777777;
-    if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_write(&oh_loc, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -214,7 +214,7 @@ main(void)
     TESTING("object header overflow in memory");
     for (i=0; i<40; i++) {
         time_new = (i+1)*1000+1;
-        if (H5O_modify(&oh_loc, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	    H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
@@ -234,7 +234,7 @@ main(void)
     TESTING("object header overflow on disk");
     for (i=0; i<10; i++) {
         time_new = (i + 1) * 1000 + 10;
-        if (H5O_modify(&oh_loc, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	    H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;

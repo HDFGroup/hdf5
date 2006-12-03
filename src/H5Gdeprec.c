@@ -619,7 +619,7 @@ H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id
     if(buf && *buf) {
         /* Casting away const OK -QAK */
 	comment.s = (char *)buf;
-	if(H5O_modify(obj_loc.oloc, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
+	if(H5O_msg_create(obj_loc.oloc, H5O_NAME_ID, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message")
     } /* end if */
 

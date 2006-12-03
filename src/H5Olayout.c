@@ -315,8 +315,11 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
             UINT16ENCODE(p, mesg->u.compact.size);
 
             /* Raw data */
-            if(mesg->u.compact.size > 0 && mesg->u.compact.buf) {
-                HDmemcpy(p, mesg->u.compact.buf, mesg->u.compact.size);
+            if(mesg->u.compact.size > 0) {
+                if(mesg->u.compact.buf)
+                    HDmemcpy(p, mesg->u.compact.buf, mesg->u.compact.size);
+                else
+                    HDmemset(p, 0, mesg->u.compact.size);
                 p += mesg->u.compact.size;
             } /* end if */
             break;
