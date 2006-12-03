@@ -150,11 +150,11 @@ typedef struct size2_helper_struct {
 ****************************************************************/
 static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
                 const unsigned *flags_in, const unsigned *minsizes_in,
-                size_t l2b, size_t b2l)
+                unsigned l2b, unsigned b2l)
 {
     unsigned    num_indexes;
     unsigned    index_flags, min_mesg_size;
-    size_t      list_size, btree_size;
+    unsigned    list_size, btree_size;
     unsigned     x;
     herr_t      ret;
 
@@ -169,7 +169,7 @@ static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
         ret = H5Pget_shared_mesg_index(fcpl_id, x, &index_flags, &min_mesg_size);
         CHECK_I(ret, "H5Pget_shared_mesg_index");
         VERIFY(index_flags, flags_in[x-1], "H5Pget_shared_mesg_index");
-        /* JAMES: check min_mesg_size here */
+        VERIFY(min_mesg_size, minsizes_in[x-1], "H5Pget_shared_mesg_index");
     }
 
     /* Check list-to-btree and btree-to-list values */
@@ -377,7 +377,7 @@ make_dtype_1()
     if(H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT)<0) TEST_ERROR
 
     str_id = H5Tcopy(H5T_C_S1);
-    if(H5Tset_size(str_id,10)<0) TEST_ERROR
+    if(H5Tset_size(str_id,(size_t) 10)<0) TEST_ERROR
 
     if(H5Tinsert(dtype1_id,"vl_string",HOFFSET(dtype1_struct,str),str_id)<0) TEST_ERROR
     if(H5Tinsert(dtype1_id,"i2",HOFFSET(struct dtype1_struct,i2),H5T_NATIVE_INT)<0) TEST_ERROR
