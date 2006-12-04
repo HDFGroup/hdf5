@@ -893,9 +893,6 @@ H5O_alloc(H5F_t *f,
     /* Mark the object header as modified */
     *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
 
-#ifdef H5O_DEBUG
-H5O_assert(oh);
-#endif /* H5O_DEBUG */
     /* Set return value */
     ret_value = idx;
 

@@ -44,6 +44,24 @@
 /* Local Macros */
 /****************/
 
+/* Load native information for a message, if it's not already present */
+/* (Only works for messages with decode callback) */
+#define H5O_LOAD_NATIVE(F, DXPL, MSG, ERR)                                        \
+    if(NULL == (MSG)->native) {                                               \
+        const H5O_msg_class_t	*decode_type;                                 \
+                                                                              \
+        /* Check for shared message */                                        \
+        if((MSG)->flags & H5O_MSG_FLAG_SHARED)                                \
+            decode_type = H5O_MSG_SHARED;                                     \
+        else                                                                  \
+            decode_type = (MSG)->type;                                        \
+                                                                              \
+        /* Decode the message */                                              \
+        HDassert(decode_type->decode);                                        \
+        if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->raw))) \
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
+    } /* end if */
+
 
 /******************/
 /* Local Typedefs */
@@ -226,6 +244,10 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     /* Write the information to the message */
     if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
+
+    /* If the message added is an attribute, increment count */
+    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1)
+        oh->nattrs++;
 #ifdef H5O_DEBUG
 H5O_assert(oh);
 #endif /* H5O_DEBUG */
@@ -1055,8 +1077,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
-    unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
+    unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
@@ -1091,6 +1113,10 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             /* Convert message into a null message */
             if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+
+            /* If the message removed is an attribute, decrement count */
+            if(H5O_ATTR_ID == mesg->type->id && oh->version > H5O_VERSION_1)
+                oh->nattrs--;
 
             /* Indicate that the object header was modified */
             *oh_flags_ptr |= H5AC__DIRTIED_FLAG;

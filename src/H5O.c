@@ -1875,11 +1875,8 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
             oinfo->hdr.msg_shared |= type_flag;
     } /* end for */
-#ifdef LATER
-/* XXX: Uncomment this when attributes are tracked by the object header */
     if(oh->version > H5O_VERSION_1)
         HDassert(oh->nattrs == oinfo->num_attrs);
-#endif /* LATER */
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.hdr_size = 0;

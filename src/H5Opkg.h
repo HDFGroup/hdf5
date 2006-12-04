@@ -151,24 +151,6 @@
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
      H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
-/* Load native information for a message, if it's not already present */
-/* (Only works for messages with decode callback) */
-#define H5O_LOAD_NATIVE(F, DXPL, MSG, ERR)                                        \
-    if(NULL == (MSG)->native) {                                               \
-        const H5O_msg_class_t	*decode_type;                                 \
-                                                                              \
-        /* Check for shared message */                                        \
-        if((MSG)->flags & H5O_MSG_FLAG_SHARED)                                \
-            decode_type = H5O_MSG_SHARED;                                     \
-        else                                                                  \
-            decode_type = (MSG)->type;                                        \
-                                                                              \
-        /* Decode the message */                                              \
-        HDassert(decode_type->decode);                                        \
-        if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->raw))) \
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
-    } /* end if */
-
 struct H5O_msg_class_t {
     unsigned	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */

@@ -93,6 +93,7 @@ H5O_assert(const H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;               /* Pointer to current message to examine */
     H5O_mesg_t *tmp_msg;                /* Pointer to temporary message to examine */
+    hsize_t num_attrs;                  /* Number of attributes on object */
     size_t meta_space;                  /* Size of header metadata */
     size_t mesg_space;                  /* Size of message raw data */
     size_t free_space;                  /* Size of free space in header */
@@ -101,11 +102,12 @@ H5O_assert(const H5O_t *oh)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_assert)
 
-    /* Initialize the space tracking variables */
+    /* Initialize the tracking variables */
     hdr_size = 0;
     meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     mesg_space = 0;
     free_space = 0;
+    num_attrs = 0;
 
     /* Loop over all chunks in object header */
     for(u = 0; u < oh->nchunks; u++) {
@@ -137,6 +139,10 @@ H5O_assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        /* Check for attribute message */
+	if(H5O_ATTR_ID == curr_msg->type->id)
+            num_attrs++;
+
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
             free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
@@ -168,6 +174,8 @@ H5O_assert(const H5O_t *oh)
                 HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
         } /* end for */
     } /* end for */
+    if(oh->version > H5O_VERSION_1)
+        HDassert(oh->nattrs == num_attrs);
 
     /* Sanity check that all the bytes are accounted for */
     HDassert(hdr_size == (free_space + meta_space + mesg_space + oh->skipped_mesg_size));
