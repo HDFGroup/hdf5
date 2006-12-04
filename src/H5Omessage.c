@@ -237,6 +237,13 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
+    /* If the message added is an attribute, increment count */
+    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1) {
+#ifdef QAK
+HDfprintf(stderr, "%s: adding attribute to new-style object header\n", FUNC);
+#endif /* QAK */
+    } /* end if */
+
     /* Create a new message */
     if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
@@ -994,7 +1001,8 @@ H5O_msg_exists_oh(H5O_t *oh, unsigned type_id, int sequence)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link, hid_t dxpl_id)
+H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
+    hid_t dxpl_id)
 {
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
@@ -1110,13 +1118,13 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         if(mesg->flags & H5O_MSG_FLAG_CONSTANT)
             udata->nfailed++;
         else {
-            /* Convert message into a null message */
-            if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
-
             /* If the message removed is an attribute, decrement count */
             if(H5O_ATTR_ID == mesg->type->id && oh->version > H5O_VERSION_1)
                 oh->nattrs--;
+
+            /* Convert message into a null message */
+            if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
             /* Indicate that the object header was modified */
             *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
