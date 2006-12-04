@@ -33,9 +33,9 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Gprivate.h"		/* Groups				*/
+#include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5SMprivate.h"        /*JAMES: for H5SM_get_fheap_addr.  Change this? */
 
 static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, const uint8_t*);
@@ -143,7 +143,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, NULL, "can't get message size from fractal heap.")
 
         /* Allocate buffer */
-        if(NULL == (buf = HDmalloc(buf_size)))
+        if(NULL == (buf = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Retrieve the message from the heap */
@@ -155,7 +155,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
         /* Copy this message to the user's buffer */
-        if(NULL == (ret_value = (type->copy) (native_mesg, mesg, 0)))
+        if(NULL == (ret_value = (type->copy)(native_mesg, mesg, 0)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end if */
     else {
@@ -172,14 +172,13 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 
 done:
     if(buf)
-        HDfree(buf);
+        H5MM_xfree(buf);
 
     if(native_mesg)
         H5O_msg_free(type->id, native_mesg);
 
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap")
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_read() */
@@ -418,8 +417,6 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
  *		koziol@ncsa.uiuc.edu
  *		Sep 26 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -429,33 +426,28 @@ H5O_shared_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
     H5O_shared_t	*dest = (H5O_shared_t *) _dest;
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_copy)
 
     /* check args */
-    assert(mesg);
-    if (!dest && NULL==(dest = H5MM_malloc (sizeof(H5O_shared_t))))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    HDassert(mesg);
+    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_shared_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     dest->flags = mesg->flags;
     if(mesg->flags & H5O_COMMITTED_FLAG)
-    {
         H5O_loc_copy(&(dest->u.oloc), &(mesg->u.oloc), H5_COPY_DEEP);
-    }
     else if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
-    {
-        dest->u.heap_id= mesg->u.heap_id;
-    } else
-    {
+        dest->u.heap_id = mesg->u.heap_id;
+    else
         /* This message's sharing information is being reset */
         HDassert(mesg->flags == H5O_NOT_SHARED);
-    }
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_copy() */
 
 

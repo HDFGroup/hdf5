@@ -289,7 +289,7 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(root_ptr.node_nrec > 0) {
         /* Iterate through nodes */
         if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, depth, &root_ptr, op, op_data)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+            HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
     } /* end if */
 
 done:

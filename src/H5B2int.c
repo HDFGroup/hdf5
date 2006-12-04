@@ -2170,14 +2170,14 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 
     /* Allocate space for the native keys in memory */
     if((native = H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
 
     /* Copy the native keys */
     HDmemcpy(native, node_native, (shared->type->nrec_size * curr_node->node_nrec));
 
     /* Unlock the node */
     if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     node = NULL;
 
     /* Iterate through records, in order */
@@ -2185,20 +2185,20 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Descend into child node, if current node is an internal node */
         if(depth > 0) {
             if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, (depth - 1), &(node_ptrs[u]), op, op_data)) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+                HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
         } /* end if */
 
         /* Make callback for current record */
         if(!ret_value) {
             if((ret_value = (op)(H5B2_NAT_NREC(native, shared, u), op_data)) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
+                HERROR(H5E_BTREE, H5E_CANTLIST, "iterator function failed");
         } /* end if */
     } /* end for */
 
     /* Descend into last child node, if current node is an internal node */
     if(!ret_value && depth > 0) {
         if((ret_value = H5B2_iterate_node(f, dxpl_id, bt2_shared, (depth - 1), &(node_ptrs[u]), op, op_data)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+            HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
     } /* end if */
 
 done:

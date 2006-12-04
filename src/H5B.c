@@ -1248,7 +1248,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 		ret_value = (*op)(f, dxpl_id, key + (u * type->sizeof_nkey),
                          child[u], key + ((u + 1) * type->sizeof_nkey), udata);
 		if(ret_value < 0)
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed")
+                    HERROR(H5E_BTREE, H5E_CANTLIST, "iterator function failed");
 	    } /* end for */
 	} /* end for */
     } /* end else */
