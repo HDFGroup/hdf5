@@ -1061,7 +1061,7 @@ done:
  */
 herr_t
 H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
-    size_t *list_to_btree, size_t *btree_to_list, hid_t dxpl_id)
+    unsigned *list_to_btree, unsigned *btree_to_list, hid_t dxpl_id)
 {
     H5SM_master_table_t *table = NULL;
     haddr_t table_addr;
