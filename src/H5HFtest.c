@@ -101,7 +101,7 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
         cparam->id_len = fh->hdr->id_len;
     cparam->max_man_size = fh->hdr->max_man_size;
     HDmemcpy(&(cparam->managed), &(fh->hdr->man_dtable.cparam), sizeof(H5HF_dtable_cparam_t));
-    H5O_copy(H5O_PLINE_ID, &(fh->hdr->pline), &(cparam->pline));
+    H5O_msg_copy(H5O_PLINE_ID, &(fh->hdr->pline), &(cparam->pline));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_cparam_test() */

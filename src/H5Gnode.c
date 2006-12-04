@@ -1520,7 +1520,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
                         ret_value = (udata->lnk_op->u.lib_op)(&lnk, udata->op_data);
 
                         /* Release memory for link object */
-                        if(H5O_reset(H5O_LINK_ID, &lnk) < 0)
+                        if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5_ITER_ERROR, "unable to release link message")
                     }
             } /* end switch */

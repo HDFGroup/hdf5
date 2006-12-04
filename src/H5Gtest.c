@@ -132,7 +132,7 @@ H5G_is_empty_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link info messages found")
 
         /* Get the link info */
-        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
@@ -166,7 +166,7 @@ H5G_is_empty_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and group info messages found")
 
         /* Get the B-tree & local heap info */
-        if(NULL == H5O_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbol table message")
 
         /* Get the count of links in the group */
@@ -342,7 +342,7 @@ H5G_is_new_dense_test(hid_t gid)
         H5O_linfo_t linfo;		/* Link info message */
 
         /* Get the link info */
-        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
@@ -392,7 +392,7 @@ H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Get the link info */
-    if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
+    if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
     /* Check for 'dense' link storage file addresses being defined */
@@ -452,7 +452,7 @@ H5G_lheap_size_test(hid_t gid, size_t *lheap_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Make certain the group has a symbol table message */
-    if(NULL == H5O_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
+    if(NULL == H5O_msg_read(&(grp->oloc), H5O_STAB_ID, 0, &stab, H5AC_dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbol table message")
 
     /* Check the size of the local heap for the group */

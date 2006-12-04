@@ -647,9 +647,9 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
     /* check args */
     HDassert(loc);
 
-    /* Read in attribute with H5O_read() */
+    /* Read in attribute with H5O_msg_read() */
     H5_CHECK_OVERFLOW(idx,unsigned,int);
-    if(NULL == (attr = (H5A_t *)H5O_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
+    if(NULL == (attr = (H5A_t *)H5O_msg_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized = TRUE;
 
@@ -828,7 +828,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
 
         /* Modify the attribute data */
-        if(H5O_write(&(attr->oloc), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0)
+        if(H5O_msg_write(&(attr->oloc), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
     } /* end if */
 
@@ -1352,7 +1352,7 @@ H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxp
 
     /* Read in the existing attributes to check for duplicates */
     seq = 0;
-    while(H5O_read(loc, H5O_ATTR_ID, seq, &found_attr, dxpl_id) != NULL) {
+    while(H5O_msg_read(loc, H5O_ATTR_ID, seq, &found_attr, dxpl_id) != NULL) {
         /*
 	 * Compare found attribute name.
 	 */
@@ -1360,7 +1360,7 @@ H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxp
             idx = seq;
             break;
 	}
-	if(H5O_reset(H5O_ATTR_ID, &found_attr) < 0)
+	if(H5O_msg_reset(H5O_ATTR_ID, &found_attr) < 0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	seq++;
     } /* end while */
@@ -1380,7 +1380,7 @@ H5A_rename(H5O_loc_t *loc, const char *old_name, const char *new_name, hid_t dxp
     found_attr.initialized = TRUE;
 
     /* Modify the attribute message */
-    if(H5O_write(loc, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0)
+    if(H5O_msg_write(loc, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
 
     /* Close the attribute */
@@ -1452,17 +1452,17 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     if(idx < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
     if(idx < H5O_count(loc.oloc, H5O_ATTR_ID, H5AC_dxpl_id)) {
-        while(H5O_read(loc.oloc, H5O_ATTR_ID, idx++, &found_attr, H5AC_dxpl_id) != NULL) {
+        while(H5O_msg_read(loc.oloc, H5O_ATTR_ID, idx++, &found_attr, H5AC_dxpl_id) != NULL) {
 	    /*
 	     * Compare found attribute name to new attribute name reject
 	     * creation if names are the same.
 	     */
 	    if((ret_value = (op)(loc_id,found_attr.name,op_data)) != 0) {
-		if(H5O_reset(H5O_ATTR_ID, &found_attr) < 0)
+		if(H5O_msg_reset(H5O_ATTR_ID, &found_attr) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 		break;
 	    } /* end if */
-	    if(H5O_reset(H5O_ATTR_ID, &found_attr) < 0)
+	    if(H5O_msg_reset(H5O_ATTR_ID, &found_attr) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	} /* end while */
         H5E_clear_stack(NULL);

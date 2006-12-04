@@ -198,7 +198,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
 
         /* Free the shared information */
-        H5O_free_real(H5O_MSG_SHARED, shared);
+        H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
         if((attr->dt = (H5O_MSG_DTYPE->decode)(f, dxpl_id, p)) == NULL)
@@ -227,7 +227,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
         /* Free the shared information */
-        H5O_free_real(H5O_MSG_SHARED, shared);
+        H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
         if((extent = (H5O_MSG_SDSPACE->decode)(f, dxpl_id, p)) == NULL)
@@ -1072,7 +1072,7 @@ H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1105,7 +1105,7 @@ H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)

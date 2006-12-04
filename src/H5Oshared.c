@@ -90,10 +90,10 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
  * Purpose:	Reads a message referred to by a shared message.
  *
  * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_reset().  If
+ *				should be freed by calling H5O_msg_reset().  If
  *				MESG is a null pointer then the caller should
  *				also call H5MM_xfree() on the return value
- *				after calling H5O_reset().
+ *				after calling H5O_msg_reset().
  *
  *		Failure:	NULL
  *
@@ -162,7 +162,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         HDassert(shared->flags & H5O_COMMITTED_FLAG);
 
         /* Get the shared message from an object header */
-        if(NULL == (ret_value = H5O_read(&(shared->u.oloc), type->id, 0, mesg, dxpl_id)))
+        if(NULL == (ret_value = H5O_msg_read(&(shared->u.oloc), type->id, 0, mesg, dxpl_id)))
             HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read message")
     } /* end else */
 
@@ -175,7 +175,7 @@ done:
         HDfree(buf);
 
     if(native_mesg)
-        H5O_free(type->id, native_mesg);
+        H5O_msg_free(type->id, native_mesg);
 
     if(fheap)
         if(H5HF_close(fheap, dxpl_id) < 0)
@@ -530,8 +530,8 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
      * Committed datatypes increment the OH of the original message when they
      * are written (in H5O_shared_link) and decrement it here.
      * SOHMs in the heap behave differently; their refcount is incremented
-     * during H5SM_share when they are going to be written (in H5O_append
-     * or H5O_write). Their refcount in the SOHM indexes still needs to
+     * during H5SM_share when they are going to be written (in H5O_msg_append
+     * or H5O_msg_write). Their refcount in the SOHM indexes still needs to
      * be decremented when they're deleted (in H5O_shared_link_adj).
      */
 
@@ -632,7 +632,7 @@ H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
 
 done:
     if(mesg_native)
-        H5O_free_real(type, mesg_native);
+        H5O_msg_free_real(type, mesg_native);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_pre_copy_file() */

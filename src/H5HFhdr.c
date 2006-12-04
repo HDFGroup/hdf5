@@ -420,7 +420,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
      */
     if(cparam->pline.nused > 0) {
         /* Copy the I/O filter pipeline from the creation parameters to the header */
-        if(NULL == H5O_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
+        if(NULL == H5O_msg_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */

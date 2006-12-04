@@ -431,7 +431,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
             mesg = H5O_shared_read(f, dxpl_id, shared, oh->mesg[i].type, NULL);
 	    if(oh->mesg[i].type->debug)
 		(oh->mesg[i].type->debug)(f, dxpl_id, mesg, stream, indent + 3, MAX (0, fwidth - 3));
-	    H5O_free_real(oh->mesg[i].type, mesg);
+	    H5O_msg_free_real(oh->mesg[i].type, mesg);
 	} /* end if */
     } /* end for */
     sequence = H5MM_xfree(sequence);

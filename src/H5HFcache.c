@@ -379,11 +379,11 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         p += hdr->filter_len;
 
         /* Copy the information into the header's I/O pipeline structure */
-        if(NULL == H5O_copy(H5O_PLINE_ID, pline, &(hdr->pline)))
+        if(NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &(hdr->pline)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, NULL, "can't copy I/O filter pipeline")
 
         /* Release the space allocated for the I/O pipeline filters */
-        H5O_free(H5O_PLINE_ID, pline);
+        H5O_msg_free(H5O_PLINE_ID, pline);
     } /* end if */
     else 
         /* Set the heap header's size */
@@ -589,7 +589,7 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
 
     /* Release any I/O pipeline filter information */
     if(hdr->pline.nused)
-        H5O_reset(H5O_PLINE_ID, &(hdr->pline));
+        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
 
     /* Free the shared info itself */
     H5FL_FREE(H5HF_hdr_t, hdr);

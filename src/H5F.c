@@ -2333,10 +2333,10 @@ H5F_get_intent(const H5F_t *f)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_intent)
 
-    assert(f);
+    HDassert(f);
 
     FUNC_LEAVE_NOAPI(f->intent)
-}
+} /* end H5F_get_intent() */
 
 
 /*-------------------------------------------------------------------------

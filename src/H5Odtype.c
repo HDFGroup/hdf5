@@ -1291,7 +1291,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
         HDassert(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state);
 
     /* Do actual copy of shared information */
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(dt->sh_loc), sh))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(dt->sh_loc), sh))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get shared information")
 
 done:
@@ -1331,7 +1331,7 @@ H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
         (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
 
     /* Copy the shared information */
-    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(dt->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(dt->sh_loc)))
         ret_value = FAIL;
 
     /* If this is now a committed datatype, set its state properly. */

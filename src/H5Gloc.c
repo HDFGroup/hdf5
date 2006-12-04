@@ -454,7 +454,7 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &fnd_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &fnd_lnk);
 
     /* Release the object location if we failed after copying it */
     if(ret_value < 0 && obj_loc_valid)

@@ -545,7 +545,7 @@ H5Gget_create_plist(hid_t group_id)
         H5O_ginfo_t ginfo;		/* Group info message            */
 
         /* Read the group info */
-        if(NULL == H5O_read(&(grp->oloc), H5O_GINFO_ID, 0, &ginfo, H5AC_ind_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, 0, &ginfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
 
         /* Set the group info for the property list */
@@ -560,7 +560,7 @@ H5Gget_create_plist(hid_t group_id)
         H5O_linfo_t linfo;		/* Link info message            */
 
         /* Read the link info */
-        if(NULL == H5O_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_ind_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Set the link info for the property list */

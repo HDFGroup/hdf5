@@ -2275,7 +2275,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     fh = NULL;
 
     /* Release the I/O pipeline filter information */
-    H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline);
+    H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline);
 
 
     /* Set the heap ID length to a size that's too small for 'managed' heap IDs */
@@ -2577,8 +2577,8 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Release the I/O pipeline filter information */
-    H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline);
-    H5O_reset(H5O_PLINE_ID, &test_cparam.pline);
+    H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline);
+    H5O_msg_reset(H5O_PLINE_ID, &test_cparam.pline);
 
     /* All tests passed */
     PASSED()
@@ -13071,7 +13071,7 @@ HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_si
         tparam->actual_id_len = old_actual_id_len;
 
     /* Free resources */
-    H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+    H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
     H5MM_xfree(heap_id);
 
     /* All tests passed */
@@ -14241,7 +14241,7 @@ HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_si
         TEST_ERROR
 
     /* Free resources */
-    H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+    H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* All tests passed */
     PASSED()
@@ -14549,7 +14549,7 @@ HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_si
 #endif /* NOT_YET */
 
     /* Free resources */
-    H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+    H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* All tests passed */
     PASSED()
@@ -14744,7 +14744,7 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
 
     /* Free resources */
     if(tparam->comp == FHEAP_TEST_COMPRESS)
-        H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* Free resources */
     H5MM_xfree(keep_ids.ids);
@@ -14961,7 +14961,7 @@ HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
 
     /* Free resources */
     if(tparam->comp == FHEAP_TEST_COMPRESS)
-        H5O_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* Free resources */
     H5MM_xfree(keep_ids.ids);

@@ -938,7 +938,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
 
         /* Free any native information */
-        H5O_free_mesg(mesg);
+        H5O_msg_free_mesg(mesg);
     } /* end if */
 
     /* Change message type to nil and zero it */
@@ -1255,7 +1255,7 @@ H5O_merge_null(H5O_t *oh)
                         /* Second message has been merged, delete it */
                         if(merged_msg) {
                             /* Release any information/memory for second message */
-                            H5O_free_mesg(curr_msg2);
+                            H5O_msg_free_mesg(curr_msg2);
 
                             /* Mark first message as dirty */
                             curr_msg->dirty = TRUE;
@@ -1391,7 +1391,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                  */
 
                 /* Release any information/memory for message */
-                H5O_free_mesg(null_msg);
+                H5O_msg_free_mesg(null_msg);
 
                 /* Remove null message from list of messages */
                 if(null_msg_no < (oh->nmesgs - 1))

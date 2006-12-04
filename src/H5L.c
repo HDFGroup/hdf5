@@ -1958,7 +1958,7 @@ H5L_get_val_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &fnd_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &fnd_lnk);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -2364,7 +2364,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     } /* end switch */
 
     /* Set up user data for move_dest_cb */
-    if((udata_out.lnk = H5O_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
+    if((udata_out.lnk = H5O_msg_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved")
 
     /* In this special case, the link's name is going to be replaced at its
@@ -2639,7 +2639,7 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &fnd_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &fnd_lnk);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */

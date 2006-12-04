@@ -151,6 +151,24 @@
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
      H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
+/* Load native information for a message, if it's not already present */
+/* (Only works for messages with decode callback) */
+#define H5O_LOAD_NATIVE(F, DXPL, MSG, ERR)                                        \
+    if(NULL == (MSG)->native) {                                               \
+        const H5O_msg_class_t	*decode_type;                                 \
+                                                                              \
+        /* Check for shared message */                                        \
+        if((MSG)->flags & H5O_MSG_FLAG_SHARED)                                \
+            decode_type = H5O_MSG_SHARED;                                     \
+        else                                                                  \
+            decode_type = (MSG)->type;                                        \
+                                                                              \
+        /* Decode the message */                                              \
+        HDassert(decode_type->decode);                                        \
+        if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->raw))) \
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
+    } /* end if */
+
 struct H5O_msg_class_t {
     unsigned	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
@@ -376,12 +394,16 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg,
     hbool_t adj_link);
-H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
-H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL void * H5O_copy_mesg_file(const H5O_msg_class_t *copy_type,
     const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
+
+/* Object header message routines */
+H5_DLL void *H5O_msg_read_real(H5F_t *f, H5O_t *oh, unsigned type_id,
+    int sequence, void *mesg, hid_t dxpl_id);
+H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
+H5_DLL herr_t H5O_msg_free_mesg(H5O_mesg_t *mesg);
 
 /* Object header allocation routines */
 H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,

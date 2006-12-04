@@ -471,7 +471,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
 done:
     /* Check if the destination link has been initialized */
     if(dst_lnk_init)
-        H5O_reset(H5O_LINK_ID, &dst_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &dst_lnk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_post_copy_file_cb() */

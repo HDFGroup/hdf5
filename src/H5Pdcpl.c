@@ -247,7 +247,7 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
 
     /* Make copies of fill value, external file list, and data pipeline */
     if(src_fill.buf) {
-        if(NULL == H5O_copy(H5O_FILL_ID, &src_fill, &dst_fill))
+        if(NULL == H5O_msg_copy(H5O_FILL_ID, &src_fill, &dst_fill))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value")
     } /* end if */
     else {
@@ -255,9 +255,9 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
 	dst_fill.size = src_fill.size;
     } /* end else */
     HDmemset(&dst_efl, 0, sizeof(H5O_efl_t));
-    if(NULL == H5O_copy(H5O_EFL_ID, &src_efl, &dst_efl))
+    if(NULL == H5O_msg_copy(H5O_EFL_ID, &src_efl, &dst_efl))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list")
-    if(NULL == H5O_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
+    if(NULL == H5O_msg_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline")
 
     /* Set the fill value, external file list, and data pipeline property
@@ -316,11 +316,11 @@ H5P_dcrt_close(hid_t dcpl_id, void UNUSED *close_data)
 
     /* Clean up any values set for the fill-value, external file-list and
      * data pipeline */
-    if(H5O_reset(H5O_FILL_ID, &fill) < 0)
+    if(H5O_msg_reset(H5O_FILL_ID, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")
-    if(H5O_reset(H5O_EFL_ID, &efl) < 0)
+    if(H5O_msg_reset(H5O_EFL_ID, &efl) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release external file list info")
-    if(H5O_reset(H5O_PLINE_ID, &pline) < 0)
+    if(H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release pipeline info")
 
 done:
@@ -2012,7 +2012,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
 
     /* Reset the fill structure */
-    if(H5O_reset(H5O_FILL_ID, &fill)<0)
+    if(H5O_msg_reset(H5O_FILL_ID, &fill)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset fill value");
 
     if(value) {

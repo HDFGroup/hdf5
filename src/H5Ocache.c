@@ -756,7 +756,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         /* Verify that message is clean */
         HDassert(oh->mesg[u].dirty == 0);
 
-        H5O_free_mesg(&oh->mesg[u]);
+        H5O_msg_free_mesg(&oh->mesg[u]);
     } /* end for */
     if(oh->mesg)
         oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);

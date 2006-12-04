@@ -790,7 +790,7 @@ H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id)
 
     if(H5O_open(loc->oloc) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named datatype")
-    if(NULL == (dt = H5O_read(loc->oloc, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
+    if(NULL == (dt = H5O_msg_read(loc->oloc, H5O_DTYPE_ID, 0, NULL, dxpl_id)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header")
 
     /* Mark the type as named and open */

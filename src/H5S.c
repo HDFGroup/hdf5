@@ -643,7 +643,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     }
 
     /* Copy the shared object info */
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(src->sh_loc), &(dst->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(src->sh_loc), &(dst->sh_loc)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information");
 
 done:
@@ -1055,7 +1055,7 @@ H5S_write(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if(H5O_write(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
+            if(H5O_msg_write(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple dataspace message")
             break;
 
@@ -1106,7 +1106,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if(H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent), oh_flags_ptr) < 0)
+            if(H5O_msg_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent), oh_flags_ptr) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message")
             break;
 
@@ -1148,7 +1148,7 @@ H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
     if(NULL == (ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if(H5O_read(loc, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
+    if(H5O_msg_read(loc, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header")
 
     /* Default to entire dataspace being selected */
@@ -1877,7 +1877,7 @@ H5S_decode(const unsigned char *buf)
     /* Copy the extent into dataspace structure */
     if((ds = H5FL_CALLOC(H5S_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table")
-    if(H5O_copy(H5O_SDSPACE_ID, extent, &(ds->extent)) == NULL)
+    if(H5O_msg_copy(H5O_SDSPACE_ID, extent, &(ds->extent)) == NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy object")
     if(H5S_extent_release(extent) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, NULL, "can't release previous dataspace")

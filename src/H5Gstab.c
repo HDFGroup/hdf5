@@ -268,7 +268,7 @@ H5G_stab_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     HDassert(obj_lnk);
 
     /* Retrieve symbol table message */
-    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     if(H5G_stab_insert_real(grp_oloc->file, &stab, name, obj_lnk, dxpl_id) < 0)
@@ -305,7 +305,7 @@ H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     HDassert(name && *name);
 
     /* Read in symbol table message */
-    if(NULL == H5O_read(loc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(loc, H5O_STAB_ID, 0, &stab, dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     /* Initialize data to pass through B-tree */
@@ -355,7 +355,7 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
     lnk_copied = TRUE;
 
     /* Read in symbol table message */
-    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     /* Initialize data to pass through B-tree */
@@ -371,7 +371,7 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
 done:
     /* Reset the link information, if we have a copy */
     if(lnk_copied)
-        H5O_reset(H5O_LINK_ID, &obj_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &obj_lnk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_remove() */
@@ -450,7 +450,7 @@ H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     HDassert(lnk_op && lnk_op->u.old_op);
 
     /* Get the B-tree info */
-    if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Check on iteration order */
@@ -539,7 +539,7 @@ H5G_stab_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
     *num_objs = 0;
 
     /* Get the B-tree info */
-    if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Iterate over the group members */
@@ -627,7 +627,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     HDassert(oloc);
 
     /* Get the B-tree & local heap info */
-    if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Remap index for decreasing iteration order */
@@ -761,7 +761,7 @@ H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     HDassert(oloc);
 
     /* Get the B-tree & local heap info */
-    if(NULL == H5O_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "unable to determine local heap address")
 
     /* Set iteration information */
@@ -859,7 +859,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     udata.lnk = lnk;
 
     /* Set up the user data for actual B-tree find operation */
-    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message")
     bt_udata.common.name = name;
     bt_udata.common.heap_addr = stab.heap_addr;
@@ -956,7 +956,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
     HDassert(lnk);
 
     /* Get the B-tree & local heap info */
-    if(NULL == H5O_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
+    if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Remap index for decreasing iteration order */

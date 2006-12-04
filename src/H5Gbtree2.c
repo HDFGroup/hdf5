@@ -176,7 +176,7 @@ H5G_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     } /* end if */
 
     /* Release the space allocated for the link */
-    H5O_free(H5O_LINK_ID, lnk);
+    H5O_msg_free(H5O_LINK_ID, lnk);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

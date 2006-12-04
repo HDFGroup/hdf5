@@ -622,7 +622,7 @@ H5O_pline_get_share(H5F_t UNUSED *f, const void *_mesg,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -655,7 +655,7 @@ H5O_pline_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)

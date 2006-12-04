@@ -1268,7 +1268,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     } /* end if */
 
     if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
-        if(H5O_copy(H5O_FILL_ID, fill_prop, &fill) == NULL)
+        if(H5O_msg_copy(H5O_FILL_ID, fill_prop, &fill) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to copy fill value")
 
         if(fill_prop->buf && fill_prop->size > 0 && H5O_fill_convert(&fill, type, dxpl_id) < 0)
@@ -1302,22 +1302,22 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
 
     /* Write new fill value message */
-    if(H5O_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &fill, &oh_flags) < 0)
+    if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &fill, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
     /* If there is valid information for the old fill value struct, update it */
     /* (only if we aren't trying to write the latest version of the file format) */
     if(fill.buf && !use_latest_format) {
         /* Clear any previous values */
-        if(H5O_reset(H5O_FILL_ID, fill_prop)<0)
+        if(H5O_msg_reset(H5O_FILL_ID, fill_prop)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")
 
         /* Copy new fill value information to old fill value struct */
-        if(H5O_copy(H5O_FILL_ID, &fill, fill_prop) == NULL)
+        if(H5O_msg_copy(H5O_FILL_ID, &fill, fill_prop) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL,"unable to copy fill value")
 
         /* Write old fill value */
-        if(fill_prop->buf && H5O_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop, &oh_flags) < 0)
+        if(fill_prop->buf && H5O_msg_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message")
 
         /* Update dataset creation property */
@@ -1327,7 +1327,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     } /* end if */
 
     /* Update the type and space header messages */
-    if(H5O_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_SHARED, 0, type, &oh_flags) < 0 ||
+    if(H5O_msg_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_SHARED, 0, type, &oh_flags) < 0 ||
             H5S_append(file, dxpl_id, oh, dset->shared->space, &oh_flags) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages")
 
@@ -1338,7 +1338,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter")
 
-        if(pline.nused > 0 && H5O_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, &pline, &oh_flags) < 0)
+        if(pline.nused > 0 && H5O_msg_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, &pline, &oh_flags) < 0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
@@ -1374,14 +1374,14 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             efl->slot[u].name_offset = offset;
         } /* end for */
 
-        if(H5O_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, 0, efl, &oh_flags) < 0)
+        if(H5O_msg_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, 0, efl, &oh_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     } /* end if */
 
     /* Create layout message */
     /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
-    /* Note: this is relying on H5D_alloc_storage not calling H5O_write during dataset creation */
-    if(H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, ((alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout, &oh_flags) < 0)
+    /* Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation */
+    if(H5O_msg_append(file, dxpl_id, oh, H5O_LAYOUT_ID, ((alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout, &oh_flags) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 #ifdef H5O_ENABLE_BOGUS
@@ -1398,7 +1398,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 
 done:
     /* Release fill value information */
-    if(H5O_reset(H5O_FILL_ID, &fill) < 0)
+    if(H5O_msg_reset(H5O_FILL_ID, &fill) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release fill-value info")
 
     /* Release pointer to object header itself */
@@ -1891,7 +1891,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open")
 
     /* Get the type and space */
-    if(NULL == (dataset->shared->type = H5O_read(&(dataset->oloc), H5O_DTYPE_ID, 0, NULL, dxpl_id)))
+    if(NULL == (dataset->shared->type = H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, 0, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load type info from dataset header")
     /* Get a datatype ID for the dataset's datatype */
     if((dataset->shared->type_id = H5I_register(H5I_DATATYPE, dataset->shared->type))<0)
@@ -1905,7 +1905,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
 
     /* Get the optional filters message */
-    if(NULL == H5O_read(&(dataset->oloc), H5O_PLINE_ID, 0, &pline, dxpl_id)) {
+    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, 0, &pline, dxpl_id)) {
         H5E_clear_stack(NULL);
         HDmemset(&pline, 0, sizeof(pline));
     } /* end if */
@@ -1918,7 +1918,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
      * values are copied to the dataset create plist so the user can query
      * them.
      */
-    if(NULL == H5O_read(&(dataset->oloc), H5O_LAYOUT_ID, 0, &(dataset->shared->layout), dxpl_id))
+    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, 0, &(dataset->shared->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout.type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
@@ -1986,11 +1986,11 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
     /* Retrieve & release the previous fill-value settings */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't get fill value")
-    if(H5O_reset(H5O_FILL_ID, fill_prop)<0)
+    if(H5O_msg_reset(H5O_FILL_ID, fill_prop)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill info")
 
     /* Get the new fill value message */
-    if(NULL == H5O_read(&(dataset->oloc), H5O_FILL_NEW_ID, 0, &fill, dxpl_id)) {
+    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_NEW_ID, 0, &fill, dxpl_id)) {
         H5E_clear_stack(NULL);
         HDmemset(&fill, 0, sizeof(fill));
 
@@ -2016,12 +2016,12 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         fill.fill_time = H5D_FILL_TIME_IFSET;
     } /* end if */
     if(fill.fill_defined) {
-        if(NULL==H5O_copy(H5O_FILL_ID, &fill, fill_prop))
+        if(NULL==H5O_msg_copy(H5O_FILL_ID, &fill, fill_prop))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy fill value")
     } else {
 	/* For compatibility with v1.4.  Retrieve the old fill value message.
  	 * If size is 0, make it -1 for undefined. */
-        if(NULL == H5O_read(&(dataset->oloc), H5O_FILL_ID, 0, fill_prop, dxpl_id)) {
+        if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_ID, 0, fill_prop, dxpl_id)) {
             H5E_clear_stack(NULL);
             HDmemset(fill_prop, 0, sizeof(H5O_fill_t));
         } /* end if */
@@ -2053,7 +2053,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
     if((dataset->shared->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
             || (dataset->shared->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr))) {
         HDmemset(&dataset->shared->efl,0,sizeof(H5O_efl_t));
-        if(NULL != H5O_read(&(dataset->oloc), H5O_EFL_ID, 0, &dataset->shared->efl, dxpl_id)) {
+        if(NULL != H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, 0, &dataset->shared->efl, dxpl_id)) {
             if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->efl) < 0)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set external file list")
 
@@ -2082,7 +2082,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 
 done:
     /* Release fill value information */
-    if(H5O_reset(H5O_FILL_ID, &fill) < 0)
+    if(H5O_msg_reset(H5O_FILL_ID, &fill) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release fill-value info")
 
     if(ret_value < 0) {
@@ -2170,7 +2170,7 @@ H5D_close(H5D_t *dataset)
             case H5D_COMPACT:
                 /* Update header message of layout for compact dataset. */
                 if(dataset->shared->layout.u.compact.dirty) {
-                    if(H5O_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id) < 0)
+                    if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to update layout message")
                     dataset->shared->layout.u.compact.dirty = FALSE;
                 } /* end if */
@@ -2563,7 +2563,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
          * set the address.  (this is improves forward compatibility).
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            if(H5O_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_MSG_FLAG_CONSTANT, update_time, &(dset->shared->layout), dxpl_id) < 0)
+            if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_MSG_FLAG_CONSTANT, update_time, &(dset->shared->layout), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
     } /* end if */
 
@@ -3468,7 +3468,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
 
                 case H5D_COMPACT:
                     if(dataset->shared->layout.u.compact.dirty) {
-                        if(H5O_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id)<0)
+                        if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id)<0)
                             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
                         dataset->shared->layout.u.compact.dirty = FALSE;
                     } /* end if */

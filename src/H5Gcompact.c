@@ -96,7 +96,7 @@ H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     HDassert(udata->curr_lnk < udata->ltable->nlinks);
 
     /* Copy link message into table */
-    if(NULL == H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
     /* Increment current link entry to operate on */
@@ -530,7 +530,7 @@ H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     if(HDstrcmp(lnk->name, udata->name) == 0) {
         if(udata->lnk) {
             /* Copy link information */
-            if(NULL == H5O_copy(H5O_LINK_ID, lnk, udata->lnk))
+            if(NULL == H5O_msg_copy(H5O_LINK_ID, lnk, udata->lnk))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
         } /* end if */
 
@@ -627,7 +627,7 @@ H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index out of bound")
 
     /* Copy link information */
-    if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:

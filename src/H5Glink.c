@@ -500,7 +500,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
         H5G_name_t  grp_path;       /* Path for group holding soft link */
 
         /* Make a temporary copy, so that it will not change the info in the cache */
-        if(NULL == H5O_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
+        if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy message")
 
         /* Set up group location for soft link to start in */
@@ -521,12 +521,12 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
             H5E_clear_stack(NULL);
 
             /* Release any information copied for temporary src link */
-            H5O_reset(H5O_LINK_ID, &tmp_src_lnk);
+            H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
         } /* end else */
     } /* end if */
 
     /* Copy src link information to dst link information */
-    if(NULL == H5O_copy(H5O_LINK_ID, src_lnk, dst_lnk))
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy message")
     dst_lnk_init = TRUE;
 
@@ -557,11 +557,11 @@ done:
     /* Check if we used a temporary src link */
     if(src_lnk != _src_lnk) {
         HDassert(src_lnk == &tmp_src_lnk);
-        H5O_reset(H5O_LINK_ID, &tmp_src_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
     } /* end if */
     if(ret_value < 0)
         if(dst_lnk_init)
-            H5O_reset(H5O_LINK_ID, dst_lnk);
+            H5O_msg_reset(H5O_LINK_ID, dst_lnk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_copy_file() */
@@ -713,7 +713,7 @@ H5G_link_release_table(H5G_link_table_t *ltable)
     if(ltable->nlinks > 0) {
         /* Free link message information */
         for(u = 0; u < ltable->nlinks; u++)
-            if(H5O_reset(H5O_LINK_ID, &(ltable->lnks[u])) < 0)
+            if(H5O_msg_reset(H5O_LINK_ID, &(ltable->lnks[u])) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link message")
 
         /* Free table of links */

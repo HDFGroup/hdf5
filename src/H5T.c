@@ -3275,7 +3275,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     if(old_dt->sh_loc.flags & H5O_SHARED_IN_HEAP_FLAG ||
         new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN)
     {
-        if(NULL == H5O_copy(H5O_SHARED_ID, &(old_dt->sh_loc), &(new_dt->sh_loc)))
+        if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(old_dt->sh_loc), &(new_dt->sh_loc)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to copy shared location")
     }
     else

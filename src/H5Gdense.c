@@ -486,7 +486,7 @@ H5G_dense_lookup_cb(const void *_lnk, void *_user_lnk)
     /* Check if we want the link information */
     if(user_lnk) {
         /* Copy link information */
-        if(H5O_copy(H5O_LINK_ID, lnk, user_lnk) == NULL)
+        if(H5O_msg_copy(H5O_LINK_ID, lnk, user_lnk) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
     } /* end if */
 
@@ -581,13 +581,13 @@ H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Copy link information */
-    if(NULL == H5O_copy(H5O_LINK_ID, tmp_lnk, udata->lnk))
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, tmp_lnk, udata->lnk))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:
     /* Release the space allocated for the link */
     if(tmp_lnk)
-        H5O_free(H5O_LINK_ID, tmp_lnk);
+        H5O_msg_free(H5O_LINK_ID, tmp_lnk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_lookup_by_idx_fh_cb() */
@@ -718,7 +718,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
         /* Copy link information */
-        if(NULL == H5O_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
+        if(NULL == H5O_msg_copy(H5O_LINK_ID, &ltable.lnks[n], lnk))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
     } /* end else */
 
@@ -762,7 +762,7 @@ H5G_dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
     HDassert(udata->curr_lnk < udata->ltable->nlinks);
 
     /* Copy link information */
-    if(H5O_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
+    if(H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
     /* Increment number of links stored */
@@ -941,7 +941,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
         } /* end switch */
 
         /* Release the space allocated for the link */
-        H5O_free(H5O_LINK_ID, fh_udata.lnk);
+        H5O_msg_free(H5O_LINK_ID, fh_udata.lnk);
     } /* end else */
 
     /* Increment the number of entries passed through */
@@ -1072,7 +1072,7 @@ H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_u
     } /* end if */
 
     /* Release the space allocated for the link */
-    H5O_free(H5O_LINK_ID, lnk);
+    H5O_msg_free(H5O_LINK_ID, lnk);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1361,7 +1361,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     /* Release the space allocated for the link */
-    H5O_free(H5O_LINK_ID, lnk);
+    H5O_msg_free(H5O_LINK_ID, lnk);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1608,7 +1608,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     /* Release the space allocated for the link */
-    H5O_free(H5O_LINK_ID, fh_udata.lnk);
+    H5O_msg_free(H5O_LINK_ID, fh_udata.lnk);
 
     /* Remove record from fractal heap */
     if(H5HF_remove(bt2_udata->fheap, bt2_udata->dxpl_id, heap_id) < 0)

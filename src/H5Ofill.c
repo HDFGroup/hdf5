@@ -357,7 +357,7 @@ H5O_fill_new_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message")
 
     /* Copy shared message information */
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), &(dest->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), &(dest->sh_loc)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to copy fill value shared info");
 
     /* Copy data type of fill value */
@@ -696,7 +696,7 @@ H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -729,7 +729,7 @@ H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
     HDassert (mesg);
     HDassert (sh);
 
-    if(NULL == H5O_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1162,7 +1162,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 
     /* Delete all filters */
     if(H5Z_FILTER_ALL == filter) {
-        if(H5O_reset(H5O_PLINE_ID, pline) < 0)
+        if(H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
     } /* end if */
     /* Delete filter */

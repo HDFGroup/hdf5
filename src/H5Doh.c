@@ -132,7 +132,7 @@ H5O_dset_free_copy_file_udata(void *_udata)
 
     /* Release copy of dataset's dataspace extent, if it was set */
     if(udata->src_space_extent)
-        H5O_free(H5O_SDSPACE_ID, udata->src_space_extent);
+        H5O_msg_free(H5O_SDSPACE_ID, udata->src_space_extent);
 
     /* Release copy of dataset's datatype, if it was set */
     if(udata->src_dtype)
@@ -140,7 +140,7 @@ H5O_dset_free_copy_file_udata(void *_udata)
 
     /* Release copy of dataset's filter pipeline, if it was set */
     if (udata->src_pline)
-        H5O_free(H5O_PLINE_ID, udata->src_pline);
+        H5O_msg_free(H5O_PLINE_ID, udata->src_pline);
 
     /* Release space for 'copy file' user data */
     H5FL_FREE(H5D_copy_file_ud_t, udata);
