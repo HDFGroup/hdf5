@@ -1493,62 +1493,56 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, January 30, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5S_extend (H5S_t *space, const hsize_t *size)
+H5S_extend(H5S_t *space, const hsize_t *size)
 {
-    int	ret_value=0;
     unsigned	u;
+    int	ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5S_extend, FAIL);
+    FUNC_ENTER_NOAPI(H5S_extend, FAIL)
 
     /* Check args */
-    assert (space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space));
-    assert (size);
+    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    HDassert(size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for (u=0; u<space->extent.rank; u++) {
-        if (space->extent.size[u]<size[u]) {
-            if (space->extent.max &&
-                    H5S_UNLIMITED!=space->extent.max[u] &&
+    for(u = 0; u < space->extent.rank; u++) {
+        if(space->extent.size[u]<size[u]) {
+            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
                     space->extent.max[u]<size[u])
-                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
             ret_value++;
-        }
-    }
+        } /* end if */
+    } /* end for */
 
     /* Update */
-    if (ret_value) {
+    if(ret_value) {
         hsize_t nelem;  /* Number of elements in extent */
 
         /* Change the dataspace size & re-compute the number of elements in the extent */
-        for (u=0, nelem=1; u<space->extent.rank; u++) {
-            if (space->extent.size[u]<size[u])
+        for(u = 0, nelem = 1; u < space->extent.rank; u++) {
+            if(space->extent.size[u] < size[u])
                 space->extent.size[u] = size[u];
 
-            nelem*=space->extent.size[u];
-        }
+            nelem *= space->extent.size[u];
+        } /* end for */
         space->extent.nelem = nelem;
 
         /* If the selection is 'all', update the number of elements selected */
-        if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
-            if(H5S_select_all(space, FALSE)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+        if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_ALL)
+            if(H5S_select_all(space, FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
         /* Mark the dataspace as no longer shared if it was before */
-        /* JAMES: passes in NULL for the file because the file has nothing to do with it.
-         * can I eliminate the file completely from sharing?
-         */
-        if(H5O_reset_share(NULL, H5O_SDSPACE_ID, space) < 0)
+        if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
-    }
+    } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extend() */
 
 
 /*-------------------------------------------------------------------------
@@ -1738,7 +1732,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed for extent */
-    if((extent_size = H5O_raw_size(H5O_SDSPACE_ID, f, obj)) == 0)
+    if((extent_size = H5O_msg_raw_size(f, H5O_SDSPACE_ID, obj)) == 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
     /* Find out the size of buffer needed for selection */
@@ -1764,7 +1758,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
         UINT32ENCODE(buf, extent_size);
 
         /* Encode the extent part of dataspace */
-        if(H5O_encode(f, buf, obj, H5O_SDSPACE_ID) < 0)
+        if(H5O_msg_encode(f, H5O_SDSPACE_ID, buf, obj) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
         buf += extent_size;
 
@@ -1870,7 +1864,7 @@ H5S_decode(const unsigned char *buf)
 
     /* Decode the extent part of dataspace */
     /* (pass mostly bogus file pointer and bogus DXPL) */
-    if((extent = H5O_decode(f, H5P_DEFAULT, buf, H5O_SDSPACE_ID))==NULL)
+    if((extent = H5O_msg_decode(f, H5P_DEFAULT, H5O_SDSPACE_ID, buf))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
     buf += extent_size;
 
@@ -1923,7 +1917,7 @@ H5S_raw_size(const H5F_t *f, const H5S_t *space)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_raw_size)
 
     /* Return the size of buffer needed for extent */
-    FUNC_LEAVE_NOAPI(H5O_raw_size(H5O_SDSPACE_ID, f, &(space->extent)))
+    FUNC_LEAVE_NOAPI(H5O_msg_raw_size(f, H5O_SDSPACE_ID, &(space->extent)))
 } /* end H5S_raw_size() */
 
 

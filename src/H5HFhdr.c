@@ -424,7 +424,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */
-        if(0 == (hdr->filter_len = H5O_raw_size(H5O_PLINE_ID, hdr->f, &(hdr->pline))))
+        if(0 == (hdr->filter_len = H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, &(hdr->pline))))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, HADDR_UNDEF, "can't get I/O filter pipeline size")
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);

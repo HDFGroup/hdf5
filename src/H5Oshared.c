@@ -38,10 +38,10 @@
 #include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5SMprivate.h"        /*JAMES: for H5SM_get_fheap_addr.  Change this? */
 
-static void *H5O_shared_decode (H5F_t*, hid_t dxpl_id, const uint8_t*);
-static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);
+static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, const uint8_t*);
+static herr_t H5O_shared_encode(H5F_t*, uint8_t*, const void*);
 static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_shared_size (const H5F_t*, const void *_mesg);
+static size_t H5O_shared_size(const H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     hbool_t adj_link);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -49,7 +49,7 @@ static herr_t H5O_shared_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *t
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
-static herr_t H5O_shared_debug (H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
+static herr_t H5O_shared_debug(H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
@@ -151,7 +151,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
         /* Decode the message */
-        if(NULL == (native_mesg = H5O_decode(f, dxpl_id, buf, type->id)))
+        if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type->id, buf)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
         /* Copy this message to the user's buffer */
@@ -167,7 +167,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     } /* end else */
 
     /* Mark the message as shared */
-    if(type->set_share && (type->set_share)(f, ret_value, shared) < 0)
+    if(type->set_share && (type->set_share)(ret_value, shared) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
 done:
@@ -706,7 +706,7 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
 
         if(mesg_type->copy_file) {
         /* Copy the original, un-shared message and return it */
-            ret_value = H5O_copy_mesg_file(mesg_type, mesg_type, file_src, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
+            ret_value = H5O_msg_copy_file(mesg_type, mesg_type, file_src, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
             H5MM_xfree(dst_mesg);
         }
         else {

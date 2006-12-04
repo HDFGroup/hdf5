@@ -33,8 +33,8 @@ static void *H5O_dtype_copy(const void *_mesg, void *_dest, unsigned update_flag
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
 static herr_t H5O_dtype_free(void *_mesg);
-static herr_t H5O_dtype_get_share(H5F_t *f, const void *_mesg, H5O_shared_t *sh);
-static herr_t H5O_dtype_set_share(H5F_t *f, void *_mesg, const H5O_shared_t *sh);
+static herr_t H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh);
+static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static herr_t H5O_dtype_is_shared(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
@@ -1269,8 +1269,7 @@ H5O_dtype_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
-		    H5O_shared_t *sh/*out*/)
+H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -1312,8 +1311,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
-		     const H5O_shared_t *sh)
+H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
     herr_t       ret_value = SUCCEED;

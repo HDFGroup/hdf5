@@ -49,6 +49,27 @@
 /* Local Typedefs */
 /******************/
 
+/* User data for iteration while removing a message */
+typedef struct {
+    H5F_t      *f;              /* Pointer to file for insertion */
+    hid_t dxpl_id;              /* DXPL during iteration */
+    int sequence;               /* Sequence # to search for */
+    unsigned nfailed;           /* # of failed message removals */
+    H5O_operator_t op;          /* Callback routine for removal operations */
+    void *op_data;              /* Callback data for removal operations */
+    hbool_t adj_link;           /* Whether to adjust links when removing messages */
+} H5O_iter_ud1_t;
+
+/* Typedef for "internal library" iteration operations */
+typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned sequence, unsigned *oh_flags_ptr/*out*/, void *operator_data/*in,out*/);
+
+/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
+typedef union {
+    H5O_operator_t app_op;      /* Application callback for each message */
+    H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+} H5O_mesg_operator_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -68,6 +89,12 @@ static herr_t H5O_msg_write_real(H5O_loc_t *loc, const H5O_msg_class_t *type,
 static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
 static void *H5O_msg_copy_real(const H5O_msg_class_t *type, const void *mesg,
         void *dst);
+static herr_t H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
+    int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
+static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
+    unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/);
+static herr_t H5O_msg_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
+    H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
 static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     const H5O_msg_class_t **type_p, int sequence);
 static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
@@ -190,7 +217,7 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned me
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
     else if(shared_mesg < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
     if(H5O_msg_append_real(f, dxpl_id, oh, type, mesg_flags, update_flags, mesg, oh_flags_ptr) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
@@ -253,73 +280,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_hash
- *
- * Purpose:	Returns a hash value for an object header message.
- *
- * Return:	Non-H5O_HASH_UNDEF hash value on success
- *              H5O_HASH_UNDEF on failure
- *
- * Programmer:	James Laird
- *		April 13 2006
- *
- *-------------------------------------------------------------------------
- */
-uint32_t
-H5O_msg_hash(unsigned type_id, H5F_t *f, const void *mesg)
-{
-    size_t buf_size;
-    unsigned char * buf = NULL;    /* Buffer to be hashed */
-    uint32_t hash;
-    uint32_t ret_value;
-
-    FUNC_ENTER_NOAPI(H5O_msg_hash, H5O_HASH_UNDEF)
-
-    /* Check args */
-    HDassert(type_id < NELMTS(H5O_msg_class_g));
-    HDassert(mesg);
-    HDassert(f);
-
-    /* Find out the size of buffer needed */
-    if((buf_size = H5O_raw_size(type_id, f, mesg)) <= 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADSIZE, H5O_HASH_UNDEF, "can't find message size");
-
-    /* JAMES: revisit this!  Some messages don't use as much space as they say
-     * they need.  Quincey may have fixed this.
-     */
-    if((buf = H5MM_calloc(buf_size)) == NULL)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5O_HASH_UNDEF, "can't allocate buffer for message");
-
-    /* Encode message into temporary buffer */
-    if(H5O_encode(f, buf, mesg, type_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5O_HASH_UNDEF, "can't encode OH message");
-
-    /* 
-     * Compute the hash value for this message.  type_id is used here to
-     * initialize the hash algorithm, and affects the resulting value.
-     */
-    hash = H5_checksum_lookup3(buf, buf_size, type_id);
-
-    /* JAMES: this is a pretty good hash function. Do we need to version it?
-     * If so, we'd do so here. */
-
-    /* A hash value of H5O_HASH_UNDEF indicates failure. If we naturally
-     * generated this value, reset it to some valid value. */
-    if(hash == H5O_HASH_UNDEF)
-        hash = (uint32_t) 1;
-
-    /* Set return value */
-    ret_value = hash;
-
-done:
-    if(buf)
-        HDfree(buf);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_hash() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_msg_write
  *
  * Purpose:	Modifies an existing message or creates a new message.
@@ -371,7 +331,7 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
     else if(shared_mesg < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message");
+	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
 
     /* Call the "real" modify routine */
     if(H5O_msg_write_real(loc, type, overwrite, mesg_flags, update_flags, mesg, dxpl_id) < 0)
@@ -460,7 +420,7 @@ H5O_msg_write_real(H5O_loc_t *loc, const H5O_msg_class_t *type, unsigned overwri
          * First, make sure it's not a committed message; these can't ever
          * be modified.
          */
-        if(((H5O_shared_t*)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG)
+        if(((H5O_shared_t *)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify committed message")
 
         /* Remove the old message from the SOHM index */
@@ -475,10 +435,10 @@ H5O_msg_write_real(H5O_loc_t *loc, const H5O_msg_class_t *type, unsigned overwri
          * JAMES: will this break if a shared message is overwritten with a larger
          * non-shared message?
          */
-        HDassert(H5O_is_shared(type->id, mesg) > 0); /* JAMES: this should work with
+        HDassert(H5O_msg_is_shared(type->id, mesg) > 0); /* JAMES: this should work with
                                                       * replacement messages that aren't shared, too. */
 
-        if(H5O_get_share(type->id, loc->file, mesg, &sh_mesg) < 0)
+        if(H5O_msg_get_share(type->id, mesg, &sh_mesg) < 0)
               HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Instead of writing the original message, write a shared message */
@@ -885,6 +845,960 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_copy_real() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_count
+ *
+ * Purpose:	Counts the number of messages in an object header which are a
+ *		certain type.
+ *
+ * Return:	Success:	Number of messages of specified type.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5O_msg_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;           /* Object header to operate on */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    int	acc;                    /* Count of the message type found */
+    unsigned u;                 /* Local index variable */
+    int	ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_count, FAIL)
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Load the object header */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Loop over all messages, counting the ones of the type looked for */
+    for(u = acc = 0; u < oh->nmesgs; u++)
+	if(oh->mesg[u].type == type)
+            acc++;
+
+    /* Set return value */
+    ret_value = acc;
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_exists
+ *
+ * Purpose:	Determines if a particular message exists in an object
+ *		header without trying to decode the message.
+ *
+ * Return:	Success:	FALSE if the message does not exist; TRUE if
+ *				th message exists.
+ *
+ *		Failure:	FAIL if the existence of the message could
+ *				not be determined due to some error such as
+ *				not being able to read the object header.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, int sequence, hid_t dxpl_id)
+{
+    H5O_t	*oh = NULL;             /* Object header for location */
+    htri_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_exists, FAIL)
+
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(sequence >= 0);
+
+    /* Load the object header */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Call the "real" exists routine */
+    if((ret_value = H5O_msg_exists_oh(oh, type_id, sequence)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to verify object header message")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_exists_oh
+ *
+ * Purpose:	Determines if a particular message exists in an object
+ *		header without trying to decode the message.
+ *
+ * Return:	Success:	FALSE if the message does not exist; TRUE if
+ *				th message exists.
+ *
+ *		Failure:	FAIL if the existence of the message could
+ *				not be determined due to some error such as
+ *				not being able to read the object header.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_msg_exists_oh(H5O_t *oh, unsigned type_id, int sequence)
+{
+    const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
+    unsigned	u;              /* Local index variable */
+    htri_t      ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_exists_oh)
+
+    HDassert(oh);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(sequence >= 0);
+
+    /* Scan through the messages looking for the right one */
+    for(u = 0; u < oh->nmesgs; u++) {
+	if(type->id != oh->mesg[u].type->id)
+            continue;
+	if(--sequence < 0)
+            break;
+    } /* end for */
+
+    /* Set return value */
+    ret_value = (sequence < 0);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_exists_oh() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_remove
+ *
+ * Purpose:	Removes the specified message from the object header.
+ *		If sequence is H5O_ALL (-1) then all messages of the
+ *		specified type are removed.  Removing a message causes
+ *		the sequence numbers to change for subsequent messages of
+ *		the same type.
+ *
+ *		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 28 1997
+ *
+ * Modifications:
+ *
+ *	Robb Matzke, 7 Jan 1998
+ *	Does not remove constant messages.
+ *
+ *      Changed to use IDs for types, instead of type objects, then
+ *      call "real" routine.
+ *      Quincey Koziol
+ *	Feb 14 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link, hid_t dxpl_id)
+{
+    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_remove, FAIL)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Call the "real" remove routine */
+    if((ret_value = H5O_msg_remove_real(loc, type, sequence, NULL, NULL, adj_link, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_remove_op
+ *
+ * Purpose:	Removes messages from the object header that a callback
+ *              routine indicates should be removed.
+ *
+ *		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
+    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
+{
+    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_remove_op, FAIL)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Call the "real" remove routine */
+    if((ret_value = H5O_msg_remove_real(loc, type, sequence, op, op_data, adj_link, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_remove_op() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_remove_cb
+ *
+ * Purpose:	Object header iterator callback routine to remove messages
+ *              of a particular type that match a particular sequence number,
+ *              or all messages if the sequence number is H5O_ALL (-1).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
+    unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
+    htri_t try_remove = FALSE;         /* Whether to try removing a message */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_remove_cb)
+
+    /* check args */
+    HDassert(mesg);
+
+    /* Check for callback routine */
+    if(udata->op) {
+        /* Call the iterator callback */
+        if((try_remove = (udata->op)(mesg->native, sequence, udata->op_data)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "object header message deletion callback failed")
+    } /* end if */
+    else {
+        /* If there's no callback routine, does the sequence # match? */
+        if((int)sequence == udata->sequence || H5O_ALL == udata->sequence)
+            try_remove = H5_ITER_STOP;
+    } /* end else */
+
+    /* Try removing the message, if indicated */
+    if(try_remove) {
+        /*
+         * Keep track of how many times we failed trying to remove constant
+         * messages.
+         */
+        if(mesg->flags & H5O_MSG_FLAG_CONSTANT)
+            udata->nfailed++;
+        else {
+            /* Convert message into a null message */
+            if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+
+            /* Indicate that the object header was modified */
+            *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+        } /* end else */
+
+        /* Break out now, if we've found the correct message */
+        if(udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
+            HGOTO_DONE(H5_ITER_STOP)
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_remove_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_remove_real
+ *
+ * Purpose:	Removes the specified message from the object header.
+ *		If sequence is H5O_ALL (-1) then all messages of the
+ *		specified type are removed.  Removing a message causes
+ *		the sequence numbers to change for subsequent messages of
+ *		the same type.
+ *
+ *		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 28 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence,
+    H5O_operator_t app_op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
+{
+    H5O_iter_ud1_t udata;               /* User data for iterator */
+    H5O_mesg_operator_t op;             /* Wrapper for operator */
+    herr_t ret_value=SUCCEED;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_remove_real)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(type);
+
+    /* Make certain we are allowed to modify the file */
+    if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
+
+    /* Set up iterator operator data */
+    udata.f = loc->file;
+    udata.dxpl_id = dxpl_id;
+    udata.sequence = sequence;
+    udata.nfailed = 0;
+    udata.op = app_op;
+    udata.op_data = op_data;
+    udata.adj_link = adj_link;
+
+    /* Iterate over the messages, deleting appropriate one(s) */
+    op.lib_op = H5O_msg_remove_cb;
+    if(H5O_msg_iterate_real(loc, type, H5AC_WRITE, TRUE, op, &udata, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over messages")
+
+    /* Fail if we tried to remove any constant messages */
+    if(udata.nfailed)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_remove_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_iterate
+ *
+ * Purpose:	Iterate through object headers of a certain type.
+ *
+ * Return:	Returns a negative value if something is wrong, the return
+ *      value of the last operator if it was non-zero, or zero if all
+ *      object headers were processed.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov 19 2004
+ *
+ * Description:
+ *      This function interates over the object headers of an object
+ *  specified with 'ent' of type 'type_id'.  For each object header of the
+ *  object, the 'op_data' and some additional information (specified below) are
+ *  passed to the 'op' function.
+ *      The operation receives a pointer to the object header message for the
+ *  object being iterated over ('mesg'), and the pointer to the operator data
+ *  passed in to H5O_msg_iterate ('op_data').  The return values from an operator
+ *  are:
+ *      A. Zero causes the iterator to continue, returning zero when all
+ *          object headers of that type have been processed.
+ *      B. Positive causes the iterator to immediately return that positive
+ *          value, indicating short-circuit success.
+ *      C. Negative causes the iterator to immediately return that value,
+ *          indicating failure.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
+    void *op_data, hid_t dxpl_id)
+{
+    const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
+    H5O_mesg_operator_t op;         /* Wrapper for operator */
+    herr_t ret_value;               /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_iterate, FAIL)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Call the "real" iterate routine */
+    op.app_op = app_op;
+    if((ret_value = H5O_msg_iterate_real(loc, type, H5AC_READ, FALSE, op, op_data, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_iterate_real
+ *
+ * Purpose:	Iterate through object headers of a certain type.
+ *
+ * Return:	Returns a negative value if something is wrong, the return
+ *      value of the last operator if it was non-zero, or zero if all
+ *      object headers were processed.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ * Description:
+ *      This function interates over the object headers of an object
+ *  specified with 'ent' of type 'type_id'.  For each object header of the
+ *  object, the 'op_data' and some additional information (specified below) are
+ *  passed to the 'op' function.
+ *      The operation receives a pointer to the object header message for the
+ *  object being iterated over ('mesg'), and the pointer to the operator data
+ *  passed in to H5O_msg_iterate ('op_data').  The return values from an operator
+ *  are:
+ *      A. Zero causes the iterator to continue, returning zero when all
+ *          object headers of that type have been processed.
+ *      B. Positive causes the iterator to immediately return that positive
+ *          value, indicating short-circuit success.
+ *      C. Negative causes the iterator to immediately return that value,
+ *          indicating failure.
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_msg_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect_t prot,
+    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id)
+{
+    H5O_t		*oh = NULL;     /* Pointer to actual object header */
+    unsigned            oh_flags = H5AC__NO_FLAGS_SET;  /* Start iteration with no flags set on object header */
+    unsigned		idx;            /* Absolute index of current message in all messages */
+    unsigned		sequence;       /* Relative index of current message for messages of type */
+    H5O_mesg_t         *idx_msg;        /* Pointer to current message */
+    void               *native_mesg;    /* Native, readable message */
+    hbool_t             native_mesg_alloc = FALSE;  /* True if native_mesg needs to be freed */
+
+    herr_t              ret_value = H5_ITER_CONT;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_iterate_real)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type);
+    HDassert(op.app_op);
+
+    /* Protect the object header to iterate over */
+    if (NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, prot)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Iterate over messages */
+    for(sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs && !ret_value; idx++, idx_msg++) {
+	if(type->id == idx_msg->type->id) {
+
+            /*
+             * Decode the message if necessary.
+             */
+            H5O_LOAD_NATIVE(loc->file, dxpl_id, idx_msg, FAIL)
+
+            /* Check for making an "internal" (i.e. within the H5O package) callback */
+            if(internal) {
+                /* Call the "internal" iterator callback */
+                if((ret_value = (op.lib_op)(oh, idx_msg, sequence, &oh_flags, op_data)) != 0)
+                    break;
+            } /* end if */
+            else {
+                /* If the message is shared, get the real message it points to */
+                /* JAMES: test */
+                if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
+                    if(NULL == (native_mesg = H5O_shared_read(loc->file, dxpl_id,
+                                idx_msg->native, idx_msg->type, NULL)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message")
+                    native_mesg_alloc = TRUE;
+                }
+                else {
+                    native_mesg = idx_msg->native;
+                }
+
+                /* Call the iterator callback */
+                if((ret_value = (op.app_op)(native_mesg, sequence, op_data)) != 0)
+                    break;
+
+                /* Free the "real" message if it was allocated */
+                if(native_mesg_alloc) {
+                    H5O_msg_free(idx_msg->type->id, native_mesg);
+                    native_mesg_alloc = FALSE;
+                }
+            } /* end else */
+
+            /* Check for error from iterator */
+            if(ret_value < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "iterator function failed")
+
+            /* Increment sequence value for message type */
+            sequence++;
+        } /* end if */
+    } /* end for */
+
+done:
+    /* Free the native message if it was allocated */
+    if(native_mesg_alloc) {
+        H5O_msg_free(idx_msg->type->id, native_mesg);
+        native_mesg_alloc = FALSE;
+    }
+
+    if(oh) {
+        /* Check if object header was modified */
+        if(oh_flags & H5AC__DIRTIED_FLAG) {
+            /* Shouldn't be able to modify object header if we don't have write access */
+            HDassert(prot == H5AC_WRITE);
+
+            /* Try to condense object header info */
+            /* (Since this routine is invoked when a message is removed from
+             *  an object header, the header will be condensed after each
+             *  message removal)
+             */
+            if(H5O_condense_header(loc->file, oh, dxpl_id) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
+
+            H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags);
+        } /* end if */
+
+        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_iterate_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_raw_size
+ *
+ * Purpose:	Call the 'raw_size' method for a
+ *              particular class of object header.
+ *
+ * Return:	Size of message on success, 0 on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 13 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_msg_raw_size(const H5F_t *f, unsigned type_id, const void *mesg)
+{
+    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
+    size_t      ret_value;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_raw_size, 0)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->raw_size);
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Compute the raw data size for the mesg */
+    if((ret_value = (type->raw_size)(f, mesg)) == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_raw_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_mesg_size
+ *
+ * Purpose:	Calculate the final size of an encoded message in an object
+ *              header.
+ *
+ * Note:	This routine assumes that the message size will be used in the
+ *              creation of a new object header.
+ *
+ * Return:	Size of message on success, 0 on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep  6 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *mesg, size_t extra_raw)
+{
+    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
+    size_t      ret_value;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_mesg_size, 0)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->raw_size);
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Compute the raw data size for the mesg */
+    if((ret_value = (type->raw_size)(f, mesg)) == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+
+    /* Add in "extra" raw space */
+    ret_value += extra_raw;
+
+    /* Adjust size for alignment, if necessary */
+    ret_value = H5O_ALIGN_F(f, ret_value);
+
+    /* Add space for message header */
+    ret_value += H5O_SIZEOF_MSGHDR_F(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_mesg_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_get_share
+ *
+ * Purpose:	Call the 'get_share' method for a
+ *              particular class of object header.
+ *
+ * Return:	Success:	Non-negative, and SHARE describes the shared
+ *				object.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Oct  2 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share)
+{
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t ret_value;                   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_get_share, FAIL)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->get_share);
+    HDassert(mesg);
+    HDassert(share);
+
+    /* Get shared data for the mesg */
+    if((ret_value = (type->get_share)(mesg, share)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve shared message information")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_get_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_msg_is_shared
+ *
+ * Purpose:     Call the 'is_shared' method for a
+ *              particular class of object header.
+ *
+ * Return:      Object is shared:        TRUE
+ *              Object is not shared:    FALSE
+ *
+ * Programmer:  James Laird
+ *              jlaird@ncsa.uiuc.edu
+ *              April 5 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_msg_is_shared(unsigned type_id, const void *mesg)
+{
+    const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
+    htri_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_is_shared)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(mesg);
+
+    HDassert(type_id != H5O_SHARED_ID); /* JAMES: check for this mistake elsewhere, too */
+
+    /* If there is no is_shared function, then obviously it's not a shared message! */
+    if(!(type->is_shared))
+        ret_value = FALSE;
+    else
+        ret_value = (type->is_shared)(mesg);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_is_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_set_share
+ *
+ * Purpose:	Set the shared information for an object header message.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		jlaird@hdfgroup.org
+ *		November 1 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg)
+{
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t ret_value;                   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_set_share, FAIL)
+
+    /* Check args */
+    HDassert(share);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->set_share);
+    HDassert(mesg);
+    HDassert(share->flags != H5O_NOT_SHARED);
+
+    /* Set this message as the shared message for the message, wiping out
+     * any information that was there before
+     */
+    if((ret_value = (type->set_share)(mesg, share)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set shared message information")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_set_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_reset_share
+ *
+ * Purpose:	Reset the shared information for an object header message.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		jlaird@hdfgroup.org
+ *		Oct 17 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_reset_share(unsigned type_id, void *mesg)
+{
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    H5O_shared_t sh_mesg;               /* Shared message */
+    herr_t ret_value;                   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_reset_share, FAIL)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->set_share);
+    HDassert(mesg);
+
+    /* Initialize the shared message to zero. */
+    HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
+
+    /* Set this message as the shared message for the message, wiping out
+     * any information that was there before
+     */
+    if((ret_value = (type->set_share)(mesg, &sh_mesg)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to reset shared message information")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_reset_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_encode
+ *
+ * Purpose:	Encode an object(data type and simple data space only)
+ *              description into a buffer.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		July 13, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_encode(H5F_t *f, unsigned type_id, unsigned char *buf, const void *mesg)
+{
+    const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_encode,FAIL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* Encode */
+    if((type->encode)(f, buf, mesg) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_encode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_decode
+ *
+ * Purpose:	Decode a binary object description and return a new
+ *              object handle.
+ *
+ * Note:	This routine is not guaranteed to work with all possible
+ *              header messages, use with care.
+ *
+ * Return:	Success:        Pointer to object(data type or space)
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		July 14, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *buf)
+{
+    const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
+    void *ret_value;                    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_decode, NULL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* decode */
+    if((ret_value = (type->decode)(f, dxpl_id, buf)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_msg_copy_file
+ *
+ * Purpose:     Copies a message to file.  If MESG is is the null pointer then a null
+ *              pointer is returned with no error.
+ *
+ * Return:      Success:        Ptr to the new message
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Peter Cao
+ *              June 4, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata)
+{
+    void        *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_copy_file)
+
+    /* check args */
+    HDassert(copy_type);
+    HDassert(mesg_type);
+    HDassert(copy_type->copy_file);
+    HDassert(file_src);
+    HDassert(native_src);
+    HDassert(file_dst);
+    HDassert(cpy_info);
+
+    if(NULL == (ret_value = (copy_type->copy_file)(file_src, mesg_type, native_src, file_dst, dxpl_id, cpy_info, udata)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message to file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -1004,7 +1918,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
             /* Message is shared. Get shared message, change message type,
              * and use shared information */
             HDmemset(sh_mesg, 0, sizeof(H5O_shared_t));
-            if((orig_type->get_share)(f, orig_mesg, sh_mesg/*out*/) < 0)
+            if((orig_type->get_share)(orig_mesg, sh_mesg/*out*/) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, UFAIL, "can't get shared message")
 
             *new_type = H5O_MSG_SHARED;
@@ -1089,4 +2003,65 @@ H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_write_mesg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_delete_mesg
+ *
+ * Purpose:	Internal function to:
+ *              Delete an object header message from a file.  This frees the file
+ *              space used for anything referred to in the object header message.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		September 26 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
+{
+    const H5O_msg_class_t *type;  /* Type of object to free */
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_delete_mesg, FAIL)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Get the message to free's type */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED)
+        type = H5O_MSG_SHARED;
+    else
+        type = mesg->type;
+
+    /* Check if there is a file space deletion callback for this type of message */
+    if(type->del) {
+        /* Decode the message if necessary. */
+        if(NULL == mesg->native) {
+            HDassert(type->decode);
+            if(NULL == (mesg->native = (type->decode)(f, dxpl_id, mesg->raw)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
+        } /* end if */
+
+        /* Check if this message needs to be removed from the SOHM table */
+        /* JAMES: there should be a callback, maybe in H5O_shared_delete, to fiddle w/ the ref. count.
+        * We shouldn't need to do a search in the SOHM table on delete. */
+        if(type == H5O_MSG_SHARED)
+        {
+            /* The native message here is actually a shared message.    */
+            if(H5SM_try_delete(f, dxpl_id, mesg->type->id, mesg->native) < 0)
+                HGOTO_ERROR (H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
+        }
+
+        if((type->del)(f, dxpl_id, mesg->native, adj_link) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_delete_msg() */
 

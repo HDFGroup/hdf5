@@ -43,10 +43,8 @@ static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *typ
 static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
-static herr_t H5O_attr_get_share(H5F_t *f, const void *_mesg,
-    H5O_shared_t *sh);
-static herr_t H5O_attr_set_share(H5F_t *f, void *_mesg,
-    const H5O_shared_t *sh);
+static herr_t H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
+static herr_t H5O_attr_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_attr_is_shared(const void *_mesg);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
@@ -306,7 +304,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5A_t *attr = (const H5A_t *) mesg;
     size_t      name_len;   /* Attribute name length */
-    htri_t      is_shared_ret;  /* Return value from H5O_is_shared */
+    htri_t      is_shared_ret;  /* Return value from H5O_msg_is_shared */
     unsigned    version;        /* Attribute version */
     hbool_t     type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
     hbool_t     space_shared;   /* Flag to indicate that a shared dataspace is used for this attribute */
@@ -326,14 +324,14 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Check whether datatype and dataspace are shared */
-    if((is_shared_ret = H5O_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
+    if((is_shared_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't determine if datatype is shared")
     else if(is_shared_ret)
         type_shared = TRUE;
     else
         type_shared = FALSE;
 
-    if((is_shared_ret = H5O_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
+    if((is_shared_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't determine if dataspace is shared")
     else if(is_shared_ret)
         space_shared = TRUE;
@@ -399,7 +397,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information from datatype */
-        if((H5O_MSG_DTYPE->get_share)(f, attr->dt, &sh_mesg/*out*/) < 0)
+        if((H5O_MSG_DTYPE->get_share)(attr->dt, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute datatype")
 
         /* Encode shared message information for datatype */
@@ -425,7 +423,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information from dataspace */
-        if((H5O_MSG_SDSPACE->get_share)(f, attr->ds, &sh_mesg/*out*/) < 0)
+        if((H5O_MSG_SDSPACE->get_share)(attr->ds, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode shared attribute dataspace")
 
         /* Encode shared message information for dataspace */
@@ -531,12 +529,12 @@ H5O_attr_size(const H5F_t *f, const void *_mesg)
     use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Check whether datatype and dataspace are shared */
-    if(H5O_is_shared(H5O_DTYPE_ID, attr->dt) > 0)
+    if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt) > 0)
         type_shared = TRUE;
     else
         type_shared = FALSE;
 
-    if(H5O_is_shared(H5O_SDSPACE_ID, attr->ds) > 0)
+    if(H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds) > 0)
         space_shared = TRUE;
     else
         space_shared = FALSE;
@@ -671,21 +669,21 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     /* Remove both the datatype and dataspace from the SOHM heap if they're
      * shared there.
      */
-    if((tri_ret = H5O_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
+    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
     if(tri_ret > 0)
     {
-        if(H5O_get_share(H5O_DTYPE_ID, f, attr->dt, &sh_mesg) < 0)
+        if(H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
         if(H5SM_try_delete(f, H5AC_dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "can't remove datatype from SOHM heap")
     }
 
-    if((tri_ret =H5O_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
+    if((tri_ret =H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't tell if dataspace is shared")
     if(tri_ret > 0)
     {
-        if(H5O_get_share(H5O_SDSPACE_ID, f, attr->ds, &sh_mesg) < 0)
+        if(H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
         if(H5SM_try_delete(f, H5AC_dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_SOHM, FAIL, "can't remove dataspace from SOHM heap")
@@ -873,14 +871,14 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
         HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information for datatype */
-        if(H5O_get_share(H5O_DTYPE_ID, file_dst, attr_src->dt, &sh_mesg/*out*/) < 0)
+        if(H5O_msg_get_share(H5O_DTYPE_ID, attr_src->dt, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to get shared message")
 
         /* Compute shared message size for datatype */
-        attr_dst->dt_size = H5O_raw_size(H5O_SHARED_ID, file_dst, &sh_mesg);
+        attr_dst->dt_size = H5O_msg_raw_size(file_dst, H5O_SHARED_ID, &sh_mesg);
     } /* end if */
     else
-        attr_dst->dt_size = H5O_raw_size(H5O_DTYPE_ID, file_dst, attr_src->dt);
+        attr_dst->dt_size = H5O_msg_raw_size(file_dst, H5O_DTYPE_ID, attr_src->dt);
     HDassert(attr_dst->dt_size > 0);
     attr_dst->ds_size = H5S_raw_size(file_dst, attr_src->ds);
     HDassert(attr_dst->ds_size > 0);
@@ -1056,13 +1054,10 @@ done:
  * Programmer:	James Laird
  *              Tuesday, October 17, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
-		     H5O_shared_t *sh /*out*/)
+H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
 {
     const H5A_t  *mesg = (const H5A_t *)_mesg;
     herr_t       ret_value = SUCCEED;
@@ -1076,7 +1071,7 @@ H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_attr_get_share() */
 
 
 /*-------------------------------------------------------------------------
@@ -1089,13 +1084,10 @@ H5O_attr_get_share(H5F_t UNUSED *f, const void *_mesg,
  * Programmer:	James Laird
  *              Tuesday, October 10, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
-		     const H5O_shared_t *sh)
+H5O_attr_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 {
     H5A_t  *mesg = (H5A_t *)_mesg;
     herr_t       ret_value = SUCCEED;
@@ -1109,7 +1101,7 @@ H5O_attr_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
         ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_attr_set_share() */
 
 
 /*-------------------------------------------------------------------------
@@ -1212,7 +1204,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
         HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
         /* Get shared message information from datatype */
-        if((H5O_MSG_DTYPE->get_share)(f, mesg->dt, &sh_mesg/*out*/) < 0)
+        if((H5O_MSG_DTYPE->get_share)(mesg->dt, &sh_mesg/*out*/) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't retrieve shared message information")
 
         debug = H5O_MSG_SHARED->debug;

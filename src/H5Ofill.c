@@ -45,10 +45,8 @@ static void  *H5O_fill_copy(const void *_mesg, void *_dest, unsigned update_flag
 static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
-static herr_t H5O_fill_new_get_share(H5F_t *f, const void *_mesg,
-    H5O_shared_t *sh);
-static herr_t H5O_fill_new_set_share(H5F_t *f, void *_mesg,
-    const H5O_shared_t *sh);
+static herr_t H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh);
+static herr_t H5O_fill_new_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
@@ -680,13 +678,10 @@ H5O_fill_free (void *mesg)
  * Programmer:	James Laird
  *              Tuesday, October 10, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
-		     H5O_shared_t *sh /*out*/)
+H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
 {
     const H5O_fill_new_t  *mesg = (const H5O_fill_new_t *)_mesg;
     herr_t       ret_value = SUCCEED;
@@ -713,13 +708,10 @@ H5O_fill_new_get_share(H5F_t UNUSED *f, const void *_mesg,
  * Programmer:	James Laird
  *              Tuesday, October 10, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_set_share(H5F_t UNUSED *f, void *_mesg/*in,out*/,
-		     const H5O_shared_t *sh)
+H5O_fill_new_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 {
     H5O_fill_new_t  *mesg = (H5O_fill_new_t *)_mesg;
     herr_t       ret_value = SUCCEED;

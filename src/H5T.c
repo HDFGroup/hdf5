@@ -2843,7 +2843,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
-    if((buf_size = H5O_raw_size(H5O_DTYPE_ID, f, obj)) == 0)
+    if((buf_size = H5O_msg_raw_size(f, H5O_DTYPE_ID, obj)) == 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size")
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
@@ -2857,7 +2857,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
         *buf++ = H5T_ENCODE_VERSION;
 
         /* Encode into user's buffer */
-        if(H5O_encode(f, buf, obj, H5O_DTYPE_ID) < 0)
+        if(H5O_msg_encode(f, H5O_DTYPE_ID, buf, obj) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object")
     } /* end else */
 
@@ -2907,7 +2907,7 @@ H5T_decode(const unsigned char *buf)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    if((ret_value = H5O_decode(f, H5AC_dxpl_id, buf, H5O_DTYPE_ID)) == NULL)
+    if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, H5O_DTYPE_ID, buf)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
 done:

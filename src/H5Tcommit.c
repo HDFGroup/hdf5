@@ -272,7 +272,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED 
     loc_init = TRUE;
 
     /* Calculate message size infomation, for creating object header */
-    dtype_size = H5O_mesg_size(H5O_DTYPE_ID, file, type, (size_t)0);
+    dtype_size = H5O_msg_mesg_size(file, H5O_DTYPE_ID, type, (size_t)0);
     HDassert(dtype_size);
 
     /*

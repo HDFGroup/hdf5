@@ -377,17 +377,13 @@ struct H5P_genplist_t;
 struct H5SL_t;
 struct H5O_t;
 
-/* General message operators */
+/* Object header routines */
 H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
     hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 H5_DLL herr_t H5O_open(const H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL int H5O_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
-    hid_t dxpl_id);
-H5_DLL htri_t H5O_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
 H5_DLL struct H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, struct H5O_t *oh, hid_t dxpl_id,
     unsigned oh_flags);
@@ -399,25 +395,8 @@ H5_DLL herr_t H5O_bogus(H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
     unsigned * oh_flags_ptr);
 #endif /* H5O_ENABLE_BOGUS */
-H5_DLL herr_t H5O_remove(H5O_loc_t *loc, unsigned type_id, int sequence,
-    hbool_t adj_link, hid_t dxpl_id);
-H5_DLL herr_t H5O_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
-    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
-H5_DLL herr_t H5O_encode(H5F_t *f, unsigned char *buf, const void *obj, unsigned type_id);
-H5_DLL void* H5O_decode(H5F_t *f, hid_t dxpl_id, const unsigned char *buf,
-    unsigned type_id);
-H5_DLL size_t H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg);
-H5_DLL size_t H5O_mesg_size(unsigned type_id, const H5F_t *f, const void *mesg,
-    size_t extra_raw);
-H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
-H5_DLL htri_t H5O_is_shared(unsigned type_id, const void *mesg);
-H5_DLL herr_t H5O_set_share(H5F_t *f, H5O_shared_t *share, unsigned type_id,
-    void *mesg);
-H5_DLL herr_t H5O_reset_share(H5F_t *f, unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id);
-H5_DLL herr_t H5O_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
-    void *op_data, hid_t dxpl_id);
 H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
 H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 
@@ -434,7 +413,25 @@ H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
-H5_DLL uint32_t H5O_msg_hash(unsigned type_id, H5F_t *f, const void *mesg);
+H5_DLL int H5O_msg_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
+H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
+    hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence,
+    hbool_t adj_link, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
+    H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
+    void *op_data, hid_t dxpl_id);
+H5_DLL size_t H5O_msg_raw_size(const H5F_t *f, unsigned type_id, const void *mesg);
+H5_DLL size_t H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *mesg,
+    size_t extra_raw);
+H5_DLL herr_t H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share);
+H5_DLL htri_t H5O_msg_is_shared(unsigned type_id, const void *mesg);
+H5_DLL herr_t H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg);
+H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, unsigned char *buf, const void *obj);
+H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
+    const unsigned char *buf);
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,

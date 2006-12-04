@@ -539,7 +539,7 @@ H5Gget_create_plist(hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Check for the group having a group info message */
-    if((ginfo_exists = H5O_exists(&(grp->oloc), H5O_GINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
+    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(ginfo_exists) {
         H5O_ginfo_t ginfo;		/* Group info message            */
@@ -554,7 +554,7 @@ H5Gget_create_plist(hid_t group_id)
     } /* end if */
 
     /* Check for the group having a link info message */
-    if((linfo_exists = H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
+    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists) {
         H5O_linfo_t linfo;		/* Link info message            */
@@ -1285,8 +1285,8 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
     obj_opened = TRUE;
 
     /* Check if this object has the right message(s) to be treated as a group */
-    if((H5O_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0)
-            && (H5O_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0))
+    if((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0)
+            && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group")
 
 done:

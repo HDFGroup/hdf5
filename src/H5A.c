@@ -302,12 +302,12 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     HDassert(space);
 
     /* Reset shared message information */
-    HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+    HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
     /* Iterate over the existing attributes to check for duplicates */
     cb.name = name;
     cb.idx = (-1);
-    if((ret_value = H5O_iterate(loc->oloc, H5O_ATTR_ID, H5A_find_idx_by_name, &cb, dxpl_id)) < 0)
+    if((ret_value = H5O_msg_iterate(loc->oloc, H5O_ATTR_ID, H5A_find_idx_by_name, &cb, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
     if(ret_value > 0)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL, "attribute already exists")
@@ -372,37 +372,37 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * datatype and dataspace messages themselves, or the size of the "shared"
      * messages if either or both of them are shared.
      */
-    if((tri_ret = H5O_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE)
+    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE)
     {
         /* Message wasn't shared after all. Use size of normal datatype
          * message. */
-        attr->dt_size = H5O_raw_size(H5O_DTYPE_ID, attr->oloc.file, attr->dt);
+        attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, attr->dt);
     }
     else if(tri_ret > 0)
     {
         /* Message is shared.  Use size of shared message */
-        if(H5O_get_share(H5O_DTYPE_ID, attr->oloc.file, attr->dt, &sh_mesg) < 0)
+        if(H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
-        attr->dt_size = H5O_raw_size(H5O_SHARED_ID, attr->oloc.file, &sh_mesg);
+        attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
     }
     else
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if dataspace is shared")
 
     /* Perform the same test for the dataspace message */
-    if((tri_ret = H5O_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE)
+    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE)
     {
         /* Message wasn't shared after all. Use size of normal dataspace
          * message. */
-        attr->ds_size = H5O_raw_size(H5O_SDSPACE_ID, attr->oloc.file, attr->ds);
+        attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, attr->ds);
     }
     else if(tri_ret > 0)
     {
         /* Message is shared.  Use size of shared message */
-        if(H5O_get_share(H5O_SDSPACE_ID, attr->oloc.file, attr->ds, &sh_mesg) < 0)
+        if(H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
-        attr->ds_size = H5O_raw_size(H5O_SHARED_ID, attr->oloc.file, &sh_mesg);
+        attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
     }
     else
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if datatype is shared")
@@ -512,7 +512,7 @@ H5A_get_index(H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     udata.name = name;
     udata.idx = (-1);
-    if((ret_value = H5O_iterate(loc, H5O_ATTR_ID, H5A_find_idx_by_name, &udata, dxpl_id)) < 0)
+    if((ret_value = H5O_msg_iterate(loc, H5O_ATTR_ID, H5A_find_idx_by_name, &udata, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
     if(ret_value > 0)
         ret_value = udata.idx;
@@ -1451,7 +1451,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     start_idx = idx = (attr_num ? (int)*attr_num : 0);
     if(idx < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
-    if(idx < H5O_count(loc.oloc, H5O_ATTR_ID, H5AC_dxpl_id)) {
+    if(idx < H5O_msg_count(loc.oloc, H5O_ATTR_ID, H5AC_dxpl_id)) {
         while(H5O_msg_read(loc.oloc, H5O_ATTR_ID, idx++, &found_attr, H5AC_dxpl_id) != NULL) {
 	    /*
 	     * Compare found attribute name to new attribute name reject
@@ -1520,7 +1520,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
 
     /* Delete the attribute from the location */
-    if((ret_value = H5O_remove(loc.oloc, H5O_ATTR_ID, found, TRUE, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5O_msg_remove(loc.oloc, H5O_ATTR_ID, found, TRUE, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message")
 
 done:

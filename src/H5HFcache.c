@@ -374,7 +374,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         UINT32DECODE(p, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if(NULL == (pline = H5O_decode(hdr->f, dxpl_id, p, H5O_PLINE_ID)))
+        if(NULL == (pline = H5O_msg_decode(hdr->f, dxpl_id, H5O_PLINE_ID, p)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
         p += hdr->filter_len;
 
@@ -528,7 +528,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
             UINT32ENCODE(p, hdr->pline_root_direct_filter_mask);
 
             /* Encode I/O filter information */
-            if(H5O_encode(hdr->f, p, &(hdr->pline), H5O_PLINE_ID) < 0)
+            if(H5O_msg_encode(hdr->f, H5O_PLINE_ID, p, &(hdr->pline)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "can't encode I/O pipeline fiters")
             p += hdr->filter_len;
         } /* end if */

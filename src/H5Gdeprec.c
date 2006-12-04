@@ -612,7 +612,7 @@ H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id
     loc_valid = TRUE;
 
     /* Remove the previous comment message if any */
-    if(H5O_remove(obj_loc.oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
+    if(H5O_msg_remove(obj_loc.oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
         H5E_clear_stack(NULL);
 
     /* Add the new message */

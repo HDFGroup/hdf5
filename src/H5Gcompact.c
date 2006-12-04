@@ -151,7 +151,7 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
         udata.curr_lnk = 0;
 
         /* Iterate through the link messages, adding them to the table */
-        if(H5O_iterate(oloc, H5O_LINK_ID, H5G_compact_build_table_cb, &udata, dxpl_id) < 0)
+        if(H5O_msg_iterate(oloc, H5O_LINK_ID, H5G_compact_build_table_cb, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
         /* Sort link table in correct iteration order */
@@ -394,7 +394,7 @@ H5G_compact_remove(const H5O_loc_t *oloc, hid_t dxpl_id, H5RS_str_t *grp_full_pa
     udata.name = name;
 
     /* Iterate over the link messages to delete the right one */
-    if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
+    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
@@ -443,7 +443,7 @@ H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
     udata.name = ltable.lnks[n].name;
 
     /* Iterate over the link messages to delete the right one */
-    if(H5O_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
+    if(H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
@@ -578,7 +578,7 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     udata.found = FALSE;
 
     /* Iterate through the link messages, adding them to the table */
-    if(H5O_iterate(oloc, H5O_LINK_ID, H5G_compact_lookup_cb, &udata, dxpl_id) < 0)
+    if(H5O_msg_iterate(oloc, H5O_LINK_ID, H5G_compact_lookup_cb, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
     /* Check if we found the link we were looking for */

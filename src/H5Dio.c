@@ -898,7 +898,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Update modification time.  We have to do this explicitly because
      * writing to a dataset doesn't necessarily change the object header.
      */
-    if (H5O_touch(&(dataset->oloc), FALSE, dxpl_id) < 0)
+    if(H5O_touch(&(dataset->oloc), FALSE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time")
 #endif /* OLD_WAY */
 

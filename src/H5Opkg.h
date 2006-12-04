@@ -176,14 +176,14 @@ struct H5O_msg_class_t {
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
     void	*(*copy)(const void*, void*, unsigned);    /*copy native value         */
-    size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof raw val	     */
+    size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof encoded message	*/
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*del)(H5F_t *, hid_t, const void *, hbool_t); /* Delete space in file referenced by this message */
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
-    herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
-    herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
-    htri_t	(*is_shared)(const void*);    /* Is message shared? */
+    herr_t	(*get_share)(const void*, struct H5O_shared_t*);    /* Get shared information */
+    herr_t	(*set_share)(void*, const struct H5O_shared_t*);    /* Set shared information */
+    htri_t	(*is_shared)(const void*);      /* Is message shared? */
     herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, const H5O_msg_class_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
     herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
@@ -394,9 +394,6 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg,
     hbool_t adj_link);
-H5_DLL void * H5O_copy_mesg_file(const H5O_msg_class_t *copy_type,
-    const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 /* Object header message routines */
@@ -404,6 +401,10 @@ H5_DLL void *H5O_msg_read_real(H5F_t *f, H5O_t *oh, unsigned type_id,
     int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL herr_t H5O_msg_free_mesg(H5O_mesg_t *mesg);
+H5_DLL htri_t H5O_msg_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
+H5_DLL void * H5O_msg_copy_file(const H5O_msg_class_t *copy_type,
+    const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 
 /* Object header allocation routines */
 H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,

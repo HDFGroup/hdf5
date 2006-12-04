@@ -500,7 +500,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             } /* end if (NULL == mesg_src->native) */
 
             /* Copy the source message */
-            if((mesg_dst->native = H5O_copy_mesg_file(copy_type, mesg_dst->type,
+            if((mesg_dst->native = H5O_msg_copy_file(copy_type, mesg_dst->type,
                     oloc_src->file, mesg_src->native, oloc_dst->file, dxpl_id,
                     cpy_info, udata)) == NULL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")

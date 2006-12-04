@@ -162,17 +162,17 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
         size_t link_size;                   /* Size of a link message */
 
         /* Calculate message size infomation, for creating group's object header */
-        linfo_size = H5O_mesg_size(H5O_LINFO_ID, f, linfo, (size_t)0);
+        linfo_size = H5O_msg_mesg_size(f, H5O_LINFO_ID, linfo, (size_t)0);
         HDassert(linfo_size);
 
-        ginfo_size = H5O_mesg_size(H5O_GINFO_ID, f, ginfo, (size_t)0);
+        ginfo_size = H5O_msg_mesg_size(f, H5O_GINFO_ID, ginfo, (size_t)0);
         HDassert(ginfo_size);
 
         lnk.type = H5L_TYPE_HARD;
         lnk.corder = 0;
         lnk.corder_valid = ginfo->track_corder;
         lnk.name = &null_char;
-        link_size = H5O_mesg_size(H5O_LINK_ID, f, &lnk, (size_t)ginfo->est_name_len);
+        link_size = H5O_msg_mesg_size(f, H5O_LINK_ID, &lnk, (size_t)ginfo->est_name_len);
         HDassert(link_size);
 
         /* Compute size of header to use for creation */
@@ -434,7 +434,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         } /* end if */
 
         /* Get the link's message size */
-        if((link_msg_size = H5O_raw_size(H5O_LINK_ID, grp_oloc->file, obj_lnk)) == 0)
+        if((link_msg_size = H5O_msg_raw_size(grp_oloc->file, H5O_LINK_ID, obj_lnk)) == 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size")
 
         /* If there's still a small enough number of links, use the 'link' message */
@@ -458,11 +458,11 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.linfo = &linfo;
 
             /* Iterate over the 'link' messages, inserting them into the dense link storage  */
-            if(H5O_iterate(grp_oloc, H5O_LINK_ID, H5G_obj_compact_to_dense_cb, &udata, dxpl_id) < 0)
+            if(H5O_msg_iterate(grp_oloc, H5O_LINK_ID, H5G_obj_compact_to_dense_cb, &udata, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
 
             /* Remove all the 'link' messages */
-            if(H5O_remove(grp_oloc, H5O_LINK_ID, H5O_ALL, FALSE, dxpl_id) < 0)
+            if(H5O_msg_remove(grp_oloc, H5O_LINK_ID, H5O_ALL, FALSE, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link messages")
 
             use_new_dense = TRUE;
@@ -502,7 +502,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over old format links")
 
             /* Remove the symbol table message from the group */
-            if(H5O_remove(grp_oloc, H5O_STAB_ID, 0, FALSE, dxpl_id) < 0)
+            if(H5O_msg_remove(grp_oloc, H5O_STAB_ID, 0, FALSE, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete old format link storage")
 
             /* Recursively call this routine to insert the new link, since the
@@ -899,7 +899,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                  * into an object header message)
                  */
                 for(u = 0; u < linfo->nlinks; u++)
-                    if(H5O_mesg_size(H5O_LINK_ID, oloc->file, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                    if(H5O_msg_mesg_size(oloc->file, H5O_LINK_ID, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
                         can_convert = FALSE;
                         break;
                     } /* end if */
