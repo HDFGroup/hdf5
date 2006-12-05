@@ -523,10 +523,10 @@ herr_t H5IMlink_palette( hid_t loc_id,
 
 {
  hid_t       image_id;
- hid_t       attr_type;
- hid_t       attr_id;
- hid_t       attr_space_id;
- hid_t       attr_class;
+ hid_t       attr_type=-1;
+ hid_t       attr_id=-1;
+ hid_t       attr_space_id=-1;
+ hid_t       attr_class=-1;
  hobj_ref_t  ref;         /* write a new reference */
  hobj_ref_t  *refbuf;     /* buffer to read references */
  hssize_t    n_refs;
@@ -875,9 +875,9 @@ herr_t H5IMget_palette_info( hid_t loc_id,
 {
  hid_t      image_id;
  int        has_pal;
- hid_t      attr_type;
+ hid_t      attr_type=-1;
  hid_t      attr_id;
- hid_t      attr_space_id;
+ hid_t      attr_space_id=-1;
  hid_t      attr_class;
  hssize_t   n_refs;
  hsize_t    dim_ref;
@@ -989,9 +989,9 @@ herr_t H5IMget_palette( hid_t loc_id,
 {
  hid_t      image_id;
  int        has_pal;
- hid_t      attr_type;
+ hid_t      attr_type=-1;
  hid_t      attr_id;
- hid_t      attr_space_id;
+ hid_t      attr_space_id=-1;
  hid_t      attr_class;
  hssize_t   n_refs;
  hsize_t    dim_ref;
