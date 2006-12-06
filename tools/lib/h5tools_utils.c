@@ -49,14 +49,14 @@ static herr_t find_objs_cb(hid_t group, const char *name, void *op_data);
 
 
 /*-------------------------------------------------------------------------
- * Function:	error_msg
+ * Function:    error_msg
  *
- * Purpose:	Print a nicely formatted error message to stderr flushing the
+ * Purpose: Print a nicely formatted error message to stderr flushing the
  *              stdout stream first.
  *
- * Return:	Nothing
+ * Return:  Nothing
  *
- * Programmer:	Bill Wendling
+ * Programmer:  Bill Wendling
  *              Tuesday, 20. February 2001
  *
  * Modifications:
@@ -78,14 +78,14 @@ error_msg(const char *progname, const char *fmt, ...)
 
 
 /*-------------------------------------------------------------------------
- * Function:	warn_msg
+ * Function:    warn_msg
  *
- * Purpose:	Print a nicely formatted warning message to stderr flushing
+ * Purpose: Print a nicely formatted warning message to stderr flushing
  *              the stdout stream first.
  *
- * Return:	Nothing
+ * Return:  Nothing
  *
- * Programmer:	Bill Wendling
+ * Programmer:  Bill Wendling
  *              Tuesday, 20. February 2001
  *
  * Modifications:
@@ -111,18 +111,18 @@ warn_msg(const char *progname, const char *fmt, ...)
 
 
 /*-------------------------------------------------------------------------
- * Function:	get_option
+ * Function:    get_option
  *
- * Purpose:	Determine the command-line options a user specified. We can
- *		accept both short and long type command-lines.
+ * Purpose: Determine the command-line options a user specified. We can
+ *      accept both short and long type command-lines.
  *
- * Return:	Success:	The short valued "name" of the command line
- * 				parameter or EOF if there are no more
- * 				parameters to process.
+ * Return:  Success:    The short valued "name" of the command line
+ *              parameter or EOF if there are no more
+ *              parameters to process.
  *
- *		Failure:	A question mark.
+ *      Failure:    A question mark.
  *
- * Programmer:	Bill Wendling
+ * Programmer:  Bill Wendling
  *              Friday, 5. January 2001
  *
  * Modifications:
@@ -282,7 +282,7 @@ indentation(int x)
  * Function:    print_version
  *
  * Purpose:     Print the program name and the version information which is
- *		defined the same as the HDF5 library version.
+ *      defined the same as the HDF5 library version.
  *
  * Return:      void
  *
@@ -377,9 +377,9 @@ dump_table(char* tablename, table_t *table)
 
     printf("%s: # of entries = %d\n", tablename,table->nobjs);
     for (u = 0; u < table->nobjs; u++)
-	HDfprintf(stdout,"%a %s %d %d\n", table->objs[u].objno,
-	       table->objs[u].objname,
-	       table->objs[u].displayed, table->objs[u].recorded);
+    HDfprintf(stdout,"%a %s %d %d\n", table->objs[u].objno,
+           table->objs[u].objname,
+           table->objs[u].displayed, table->objs[u].recorded);
 }
 
 
@@ -428,7 +428,7 @@ search_obj(table_t *table, haddr_t objno)
 
     for (u = 0; u < table->nobjs; u++)
         if (table->objs[u].objno == objno)
-	    return &(table->objs[u]);
+        return &(table->objs[u]);
 
     return NULL;
 }
@@ -492,7 +492,8 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
 
         objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
         switch (statbuf.type) {
-            char *tmp;
+            char   *tmp;
+            size_t tmp_len;
 
             case H5G_GROUP:
                 if (search_obj(info->group_table, objno) == NULL) {
@@ -502,7 +503,9 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
                     add_obj(info->group_table, objno, tmp, TRUE);
 
                     old_prefix = info->prefix;
-                    info->prefix = tmp;
+                    tmp_len = HDstrlen(tmp);
+                    info->prefix = HDmalloc(tmp_len+1);
+                    HDstrcpy(info->prefix, tmp);
 
                     if(H5Giterate(group, name, NULL, find_objs_cb, (void *)info) < 0)
                         ret_value = FAIL;
