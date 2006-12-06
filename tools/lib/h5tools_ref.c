@@ -254,7 +254,7 @@ ref_path_table_put(const char *path, haddr_t objno)
  */
 int xid = 1;
 
-int get_next_xid() {
+int get_next_xid(void) {
     return xid++;
 }
 
@@ -266,7 +266,7 @@ int get_next_xid() {
  */
 haddr_t fake_xid = HADDR_MAX;
 haddr_t
-get_fake_xid () {
+get_fake_xid (void) {
     return (fake_xid--);
 }
 
