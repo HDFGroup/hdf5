@@ -682,7 +682,7 @@ usage(const char *prog)
 static void
 print_datatype(hid_t type,unsigned in_group)
 {
-    char       *fname;
+    char       *mname;
     hid_t       mtype, str_type;
     unsigned    nmembers;
     unsigned    ndims;
@@ -1004,7 +1004,7 @@ done:
             printf("H5T_COMPOUND %s\n", dump_header_format->structblockbegin);
 
             for (i = 0; i < nmembers; i++) {
-                fname = H5Tget_member_name(type, i);
+                mname = H5Tget_member_name(type, i);
                 mtype = H5Tget_member_type(type, i);
                 indentation(indent + COL);
 
@@ -1016,8 +1016,8 @@ done:
                 if (H5Tget_class(mtype) == H5T_COMPOUND)
                     indent -= COL;
 
-                printf(" \"%s\";\n", fname);
-                free(fname);
+                printf(" \"%s\";\n", mname);
+                free(mname);
             }
 
             indentation(indent);
@@ -3717,7 +3717,7 @@ int
 main(int argc, const char *argv[])
 {
     hid_t               fid, gid;
-    const char         *fname = NULL;
+    char               *fname = NULL;
     void               *edata;
     H5E_auto_stack_t    func;
     find_objs_t         info;
@@ -3771,7 +3771,7 @@ main(int argc, const char *argv[])
         usage(progname);
         leave(EXIT_FAILURE);
     }
-    fname = argv[opt_ind];
+    fname = HDstrdup(argv[opt_ind]);
 
     fid = h5tools_fopen(fname, driver, NULL, 0);
 
@@ -3917,6 +3917,8 @@ done:
     free_table(type_table);
 
     HDfree(prefix);
+    HDfree(info.prefix);
+    HDfree(fname);
 
     /* To Do:  clean up XML table */
 
@@ -4285,7 +4287,7 @@ xml_escape_the_string(const char *str, int slen)
 static void
 xml_print_datatype(hid_t type, unsigned in_group)
 {
-    char                   *fname;
+    char                   *mname;
     hid_t                   mtype;
     unsigned                nmembers;
     unsigned                ndims;
@@ -4523,13 +4525,13 @@ xml_print_datatype(hid_t type, unsigned in_group)
             for (i = 0; i < nmembers; i++) {
                 char *t_fname;
 
-                fname = H5Tget_member_name(type, i);
+                mname = H5Tget_member_name(type, i);
                 mtype = H5Tget_member_type(type, i);
                 indentation(indent);
-                t_fname = xml_escape_the_name(fname);
+                t_fname = xml_escape_the_name(mname);
                 printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
 
-                free(fname);
+                free(mname);
                 free(t_fname);
                 indent += COL;
                 indentation(indent);

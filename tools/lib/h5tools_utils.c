@@ -595,7 +595,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     init_table(type_table);
 
     /* Init the find_objs_t */
-    info->prefix = (char *)"";
+    info->prefix = HDcalloc(1, 1);
     info->group_table = *group_table;
     info->type_table = *type_table;
     info->dset_table = *dset_table;
