@@ -25,8 +25,13 @@
  *-------------------------------------------------------------------------
  */
 
-void parse_input(int argc, const char* argv[], const char** fname1, const char** fname2,
-                 const char** objname1, const char** objname2, diff_opt_t* options)
+void parse_input(int argc, 
+                 const char* argv[], 
+                 const char** fname1, 
+                 const char** fname2,
+                 const char** objname1, 
+                 const char** objname2, 
+                 diff_opt_t* options)
 {
  int        i;
  const char *s = NULL;
@@ -40,12 +45,12 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
  */
 
  if ( argc==2 && (strcmp("-h",argv[1])==0) )
-  usage();
+  usage(1);
 
  if ( argc<3 )
  {
   printf("Number of arguments is only %d\n", argc );
-  usage();
+  usage(1);
  }
 
 /*-------------------------------------------------------------------------
@@ -71,10 +76,10 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
     switch (*s) {
     default:
      printf("-%s is an invalid option\n", s );
-     usage();
+     usage(1);
      break;
     case 'h':
-     usage();
+     usage(0);
      break;
     case 'v':
      options->m_verbose = 1;
@@ -94,7 +99,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
       if ( check_f_input(argv[i+1])==-1)
       {
        printf("<-d %s> is not a valid option\n", argv[i+1] );
-       usage();
+       usage(1);
       }
       options->delta = atof(argv[i+1]);
       i++; /* go to next */
@@ -102,7 +107,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      else
      {
       printf("Not a valid -d option\n");
-      usage();
+      usage(1);
      }
      break;
     case 'p':
@@ -112,7 +117,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
       if ( check_f_input(argv[i+1])==-1)
       {
        printf("<-p %s> is not a valid option\n", argv[i+1] );
-       usage();
+       usage(1);
       }
       options->percent = atof(argv[i+1]);
       i++; /* go to next */
@@ -120,7 +125,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      else
      {
       printf("Not a valid -p option\n");
-      usage();
+      usage(1);
      }
      break;
     case 'n':
@@ -130,7 +135,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
       if ( check_n_input(argv[i+1])==-1)
       {
        printf("<-n %s> is not a valid option\n", argv[i+1] );
-       usage();
+       usage(1);
       }
       options->count = atol(argv[i+1]);
       i++; /* go to next */
@@ -138,7 +143,7 @@ void parse_input(int argc, const char* argv[], const char** fname1, const char**
      else
      {
       printf("Not a valid -n option\n");
-      usage();
+      usage(1);
      }
      break;
     } /*switch*/
@@ -283,7 +288,7 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-void usage(void)
+void usage(int status)
 {
  printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
  printf("\n");
@@ -337,12 +342,8 @@ void usage(void)
  printf("absolute path in both files. The compare criteria is: ");
  printf("1) datasets: numerical array differences 2) groups: name string difference ");
  printf("3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value\n");
-#ifdef H5_HAVE_PARALLEL
- if(g_Parallel)
-  h5diff_exit(0);
- else
-#endif
-  exit(0);
+
+ h5diff_exit(status);
 }
 
 /*-------------------------------------------------------------------------
