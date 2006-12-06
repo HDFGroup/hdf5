@@ -33,6 +33,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -76,17 +77,13 @@ typedef struct {
     H5O_operator_t op;          /* Callback routine for removal operations */
     void *op_data;              /* Callback data for removal operations */
     hbool_t adj_link;           /* Whether to adjust links when removing messages */
-} H5O_iter_ud1_t;
+} H5O_iter_rm_t;
 
-/* Typedef for "internal library" iteration operations */
-typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, unsigned *oh_flags_ptr/*out*/, void *operator_data/*in,out*/);
-
-/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
-typedef union {
-    H5O_operator_t app_op;      /* Application callback for each message */
-    H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
-} H5O_mesg_operator_t;
+/* User data for iteration when converting attributes to dense storage */
+typedef struct {
+    H5F_t      *f;              /* Pointer to file for insertion */
+    hid_t dxpl_id;              /* DXPL during iteration */
+} H5O_iter_to_dense_t;
 
 
 /********************/
@@ -100,7 +97,7 @@ typedef union {
 
 static herr_t H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     unsigned overwrite, unsigned mesg_flags, unsigned update_flags,
-    const void *mesg, unsigned *oh_flags_ptr, hid_t dxpl_id);
+    const void *mesg, hid_t dxpl_id, unsigned *oh_flags_ptr);
 static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
 static void *H5O_msg_copy_real(const H5O_msg_class_t *type, const void *mesg,
         void *dst);
@@ -108,8 +105,6 @@ static herr_t H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *t
     int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
     unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/);
-static herr_t H5O_msg_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
-    H5AC_protect_t prot, hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id);
 static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
     const H5O_msg_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
     const H5O_msg_class_t **new_type, const void **new_mesg, hid_t dxpl_id,
@@ -188,6 +183,49 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_msg_attr_to_dense_cb
+ *
+ * Purpose:	Object header iterator callback routine to convert compact
+ *              attributes to dense attributes
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  4 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_msg_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_to_dense_t *udata = (H5O_iter_to_dense_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_attr_to_dense_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+
+    /* Insert attribute into dense storage */
+    if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, mesg->native) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
+
+    /* Convert message into a null message */
+    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+
+    /* Indicate that the object header was modified */
+    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_attr_to_dense_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_msg_append
  *
  * Purpose:	Simplified version of H5O_msg_create, used when creating a new
@@ -213,8 +251,9 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     const H5O_msg_class_t *new_type;    /* Actual H5O class type for the ID */
     const void *new_mesg;               /* Actual message to write */
     const H5O_msg_class_t *type;        /* Original H5O class type for the ID */
-    H5O_shared_t	sh_mesg;        /* Shared object header info */
-    unsigned		idx;            /* Index of message to modify */
+    H5O_shared_t sh_mesg;               /* Shared object header info */
+    unsigned idx;                       /* Index of message to modify */
+    hbool_t new_format_attr;            /* Whether this message is an attribute in a new-format header */
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -237,23 +276,64 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
-    /* If the message added is an attribute, increment count */
-    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1) {
+    /* Set the flag for an attribute in a new format header */
+    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1)
+        new_format_attr = TRUE;
+    else
+        new_format_attr = FALSE;
+
+    /* If the message added is an attribute, check for dense storage */
+    if(new_format_attr) {
 #ifdef QAK
 HDfprintf(stderr, "%s: adding attribute to new-style object header\n", FUNC);
+HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
+HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
+HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
 #endif /* QAK */
+        /* Check for switching to "dense" attribute storage */
+        if(oh->nattrs == oh->max_compact && !H5F_addr_defined(oh->attr_fheap_addr)) {
+            H5O_iter_to_dense_t udata;          /* User data for callback */
+            H5O_mesg_operator_t op;             /* Wrapper for operator */
+#ifdef QAK
+HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
+#endif /* QAK */
+
+            /* Create dense storage for attributes */
+            if(H5A_dense_create(f, dxpl_id, oh) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
+
+            /* Set up user data for callback */
+            udata.f = f;
+            udata.dxpl_id = dxpl_id;
+
+            /* Iterate over existing attributes, moving them to dense storage */
+            op.lib_op = H5O_msg_attr_to_dense_cb;
+            if(H5O_msg_iterate_real(f, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, oh_flags_ptr) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
+        } /* end if */
     } /* end if */
 
-    /* Create a new message */
-    if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message")
+    /* Check for storing attribute with dense storage */
+    if(new_format_attr && H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Insert attribute into dense storage */
+#ifdef QAK
+HDfprintf(stderr, "%s: inserting attribute to dense storage\n", FUNC);
+#endif /* QAK */
+        if(H5A_dense_insert(f, dxpl_id, oh, mesg_flags, mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
+    } /* end if */
+    else {
+        /* Create a new message */
+        if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "unable to create new message")
 
-    /* Write the information to the message */
-    if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
+        /* Write the information to the message */
+        if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to write message")
+    } /* end else */
 
     /* If the message added is an attribute, increment count */
-    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1)
+    if(new_format_attr)
         oh->nattrs++;
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -307,6 +387,7 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
     HDassert(loc);
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5O_ATTR_ID != type_id);   /* Attributes are modified in another routine */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
@@ -329,8 +410,8 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Call the "real" modify routine */
-    if(H5O_msg_write_real(loc->file, oh, type, overwrite, mesg_flags, update_flags, mesg, &oh_flags, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
+    if(H5O_msg_write_real(loc->file, oh, type, overwrite, mesg_flags, update_flags, mesg, dxpl_id, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
@@ -368,12 +449,12 @@ done:
 static herr_t
 H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     unsigned overwrite, unsigned mesg_flags, unsigned update_flags,
-    const void *mesg, unsigned *oh_flags_ptr, hid_t dxpl_id)
+    const void *mesg, hid_t dxpl_id, unsigned *oh_flags_ptr)
 {
     int	        	sequence;       /* Sequence # of message type to modify */
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
-    H5O_shared_t	sh_mesg;
+    H5O_shared_t	sh_mesg;        /* Shared message to store */
     const H5O_msg_class_t *write_type = type;   /* Type of message to be written */
     const void          *write_mesg = mesg;     /* Actual message being written */
     herr_t	        ret_value = SUCCEED;    /* Return value */
@@ -409,12 +490,11 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
          * First, make sure it's not a committed message; these can't ever
          * be modified.
          */
-        if(((H5O_shared_t *)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG)
-            HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify committed message")
+        HDassert(!(((H5O_shared_t *)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG));
 
         /* Remove the old message from the SOHM index */
         if(H5SM_try_delete(f, dxpl_id, oh->mesg[idx].type->id, oh->mesg[idx].native) < 0)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
 
         /* Now this message is no longer shared and we can safely overwrite it.
          * We need to make sure that the message we're writing is shared,
@@ -429,7 +509,7 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
 
         /* Extract shared message info from current message */
         if(H5O_msg_get_share(type->id, mesg, &sh_mesg) < 0)
-              HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Instead of writing the original message, write a shared message */
         write_type = H5O_MSG_SHARED;
@@ -472,7 +552,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
+H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, int sequence, void *mesg,
+    hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Object header to use */
     void *ret_value;                    /* Return value */
@@ -575,7 +656,7 @@ H5O_msg_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence,
 	 * the raw message) so we must copy the native message before
 	 * returning.
 	 */
-	if(NULL == (ret_value = (type->copy)(oh->mesg[idx].native, mesg, 0)))
+	if(NULL == (ret_value = (type->copy)(oh->mesg[idx].native, mesg)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end else */
 
@@ -823,7 +904,7 @@ H5O_msg_copy_real(const H5O_msg_class_t *type, const void *mesg, void *dst)
     HDassert(type->copy);
 
     if(mesg)
-	if(NULL == (ret_value = (type->copy)(mesg, dst, 0)))
+	if(NULL == (ret_value = (type->copy)(mesg, dst)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message")
 
 done:
@@ -847,7 +928,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_msg_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
+H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;           /* Object header to operate on */
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
@@ -1088,7 +1169,7 @@ static herr_t
 H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
-    H5O_iter_ud1_t *udata = (H5O_iter_ud1_t *)_udata;   /* Operator user data */
+    H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
@@ -1106,7 +1187,7 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     else {
         /* If there's no callback routine, does the sequence # match? */
         if((int)sequence == udata->sequence || H5O_ALL == udata->sequence)
-            try_remove = H5_ITER_STOP;
+            try_remove = TRUE;
     } /* end else */
 
     /* Try removing the message, if indicated */
@@ -1164,9 +1245,11 @@ static herr_t
 H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence,
     H5O_operator_t app_op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
 {
-    H5O_iter_ud1_t udata;               /* User data for iterator */
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;  /* Start iteration with no flags set on object header */
+    H5O_iter_rm_t udata;                /* User data for iterator */
     H5O_mesg_operator_t op;             /* Wrapper for operator */
-    herr_t ret_value=SUCCEED;           /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_msg_remove_real)
 
@@ -1188,16 +1271,23 @@ H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int seque
     udata.op_data = op_data;
     udata.adj_link = adj_link;
 
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
     /* Iterate over the messages, deleting appropriate one(s) */
     op.lib_op = H5O_msg_remove_cb;
-    if(H5O_msg_iterate_real(loc, type, H5AC_WRITE, TRUE, op, &udata, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over messages")
+    if(H5O_msg_iterate_real(loc->file, oh, type, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "error iterating over messages")
 
     /* Fail if we tried to remove any constant messages */
     if(udata.nfailed)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)")
 
 done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove_real() */
 
@@ -1217,7 +1307,7 @@ done:
  *
  * Description:
  *      This function interates over the object headers of an object
- *  specified with 'ent' of type 'type_id'.  For each object header of the
+ *  specified with 'loc' of type 'type_id'.  For each object header of the
  *  object, the 'op_data' and some additional information (specified below) are
  *  passed to the 'op' function.
  *      The operation receives a pointer to the object header message for the
@@ -1237,6 +1327,8 @@ herr_t
 H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
     void *op_data, hid_t dxpl_id)
 {
+    H5O_t *oh = NULL;               /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;  /* Start iteration with no flags set on object header */
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     H5O_mesg_operator_t op;         /* Wrapper for operator */
     herr_t ret_value;               /* Return value */
@@ -1251,12 +1343,19 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
 
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
     /* Call the "real" iterate routine */
     op.app_op = app_op;
-    if((ret_value = H5O_msg_iterate_real(loc, type, H5AC_READ, FALSE, op, op_data, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
+    if((ret_value = H5O_msg_iterate_real(loc->file, oh, type, FALSE, op, op_data, dxpl_id, &oh_flags)) < 0)
+        HERROR(H5E_OHDR, H5E_BADITER, "unable to iterate over object header messages");
 
 done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_iterate() */
 
@@ -1292,53 +1391,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O_msg_iterate_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, H5AC_protect_t prot,
-    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id)
+herr_t
+H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
+    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id,
+    unsigned *oh_flags_ptr)
 {
-    H5O_t		*oh = NULL;     /* Pointer to actual object header */
-    unsigned            oh_flags = H5AC__NO_FLAGS_SET;  /* Start iteration with no flags set on object header */
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
     void               *native_mesg;    /* Native, readable message */
     hbool_t             native_mesg_alloc = FALSE;  /* True if native_mesg needs to be freed */
-
     herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_msg_iterate_real)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(f);
+    HDassert(oh);
     HDassert(type);
     HDassert(op.app_op);
-
-    /* Protect the object header to iterate over */
-    if (NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, prot)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    HDassert(oh_flags_ptr);
 
     /* Iterate over messages */
     for(sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs && !ret_value; idx++, idx_msg++) {
 	if(type->id == idx_msg->type->id) {
-
-            /*
-             * Decode the message if necessary.
-             */
-            H5O_LOAD_NATIVE(loc->file, dxpl_id, idx_msg, FAIL)
+            /* Decode the message if necessary.  */
+            H5O_LOAD_NATIVE(f, dxpl_id, idx_msg, FAIL)
 
             /* Check for making an "internal" (i.e. within the H5O package) callback */
             if(internal) {
                 /* Call the "internal" iterator callback */
-                if((ret_value = (op.lib_op)(oh, idx_msg, sequence, &oh_flags, op_data)) != 0)
+                if((ret_value = (op.lib_op)(oh, idx_msg, sequence, oh_flags_ptr, op_data)) != 0)
                     break;
             } /* end if */
             else {
                 /* If the message is shared, get the real message it points to */
                 /* JAMES: test */
                 if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
-                    if(NULL == (native_mesg = H5O_shared_read(loc->file, dxpl_id,
+                    if(NULL == (native_mesg = H5O_shared_read(f, dxpl_id,
                                 idx_msg->native, idx_msg->type, NULL)))
                         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message")
                     native_mesg_alloc = TRUE;
@@ -1371,27 +1461,18 @@ done:
     if(native_mesg_alloc)
         H5O_msg_free(idx_msg->type->id, native_mesg);
 
-    /* Object header cleanup */
-    if(oh) {
-        /* Check if object header was modified */
-        if(oh_flags & H5AC__DIRTIED_FLAG) {
-            /* Shouldn't be able to modify object header if we don't have write access */
-            HDassert(prot == H5AC_WRITE);
+    /* Check if object message was modified */
+    if(*oh_flags_ptr & H5AC__DIRTIED_FLAG) {
+        /* Try to condense object header info */
+        /* (Since this routine is used to remove messages from an
+         *  object header, the header will be condensed after each
+         *  message removal)
+         */
+        if(H5O_condense_header(f, oh, dxpl_id) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
 
-            /* Try to condense object header info */
-            /* (Since this routine is invoked when a message is removed from
-             *  an object header, the header will be condensed after each
-             *  message removal)
-             */
-            if(H5O_condense_header(loc->file, oh, dxpl_id) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
-
-            if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
-        } /* end if */
-
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+        if(H5O_touch_oh(f, dxpl_id, oh, FALSE, oh_flags_ptr) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1893,18 +1974,17 @@ H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     idx_msg = &oh->mesg[idx];
 
     /* Reset existing native information */
-    if(!(update_flags & H5O_UPDATE_DATA_ONLY))
-        H5O_msg_reset_real(type, idx_msg->native);
+    H5O_msg_reset_real(type, idx_msg->native);
 
     /* Copy the native value for the message */
-    if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native, update_flags)))
+    if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
 
     /* Update the message flags and mark the message as modified */
     idx_msg->flags = mesg_flags;
     idx_msg->dirty = TRUE;
 
-    /* Update the modification time message if any */
+    /* Update the modification time, if requested */
     if(update_flags & H5O_UPDATE_TIME)
         if(H5O_touch_oh(f, dxpl_id, oh, FALSE, oh_flags_ptr) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
@@ -1966,7 +2046,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
         {
             /* The native message here is actually a shared message.    */
             if(H5SM_try_delete(f, dxpl_id, mesg->type->id, mesg->native) < 0)
-                HGOTO_ERROR (H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
         }
 
         if((type->del)(f, dxpl_id, mesg->native, adj_link) < 0)

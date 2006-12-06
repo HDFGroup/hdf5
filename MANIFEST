@@ -409,6 +409,8 @@
 ./src/H5timer.c
 ./src/H5trace.c
 ./src/H5A.c
+./src/H5Abtree2.c
+./src/H5Adense.c
 ./src/H5Adeprec.c
 ./src/H5Apkg.h
 ./src/H5Aprivate.h
@@ -584,6 +586,7 @@
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
 ./src/H5Olink.c
+./src/H5Omessage.c
 ./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
@@ -594,6 +597,7 @@
 ./src/H5Osdspace.c
 ./src/H5Oshared.c
 ./src/H5Ostab.c
+./src/H5Otest.c
 ./src/H5P.c
 ./src/H5Pacpl.c
 ./src/H5Pdcpl.c

@@ -174,7 +174,7 @@ H5O_assert(const H5O_t *oh)
                 HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
         } /* end for */
     } /* end for */
-    if(oh->version > H5O_VERSION_1)
+    if(oh->version > H5O_VERSION_1 && !H5F_addr_defined(oh->attr_fheap_addr))
         HDassert(oh->nattrs == num_attrs);
 
     /* Sanity check that all the bytes are accounted for */

@@ -34,6 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes			  	*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
@@ -63,7 +64,6 @@
 /********************/
 
 static hid_t H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id);
-static H5O_loc_t * H5O_get_loc(hid_t id);
 static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
     hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
@@ -1400,6 +1400,12 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end for */
 
+    /* Check for dense attribute storage & delete it if necessary */
+    if(oh->version > H5O_VERSION_1 && H5F_addr_defined(oh->attr_fheap_addr)) {
+        if(H5A_dense_delete(f, dxpl_id, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
+    } /* end if */
+
     /* Free main (first) object header "chunk" */
     if(H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, oh->chunk[0].addr, (hsize_t)oh->chunk[0].size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
@@ -1576,7 +1582,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5O_loc_t *
+H5O_loc_t *
 H5O_get_loc(hid_t object_id)
 {
     H5O_loc_t   *ret_value;     /* Return value */
@@ -1875,8 +1881,16 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
             oinfo->hdr.msg_shared |= type_flag;
     } /* end for */
-    if(oh->version > H5O_VERSION_1)
-        HDassert(oh->nattrs == oinfo->num_attrs);
+
+    /* Sanity checking, etc. for # of attributes */
+    if(oh->version > H5O_VERSION_1) {
+        if(H5F_addr_defined(oh->attr_fheap_addr)) {
+            HDassert(oinfo->num_attrs == 0);
+            oinfo->num_attrs = oh->nattrs;
+        } /* end if */
+        else
+            HDassert(oh->nattrs == oinfo->num_attrs);
+    } /* end if */
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.hdr_size = 0;

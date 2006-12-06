@@ -40,7 +40,7 @@
 
 static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, const uint8_t*);
 static herr_t H5O_shared_encode(H5F_t*, uint8_t*, const void*);
-static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_shared_copy(const void *_mesg, void *_dest);
 static size_t H5O_shared_size(const H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     hbool_t adj_link);
@@ -155,7 +155,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
         /* Copy this message to the user's buffer */
-        if(NULL == (ret_value = (type->copy)(native_mesg, mesg, 0)))
+        if(NULL == (ret_value = (type->copy)(native_mesg, mesg)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
     } /* end if */
     else {
@@ -420,7 +420,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
+H5O_shared_copy(const void *_mesg, void *_dest)
 {
     const H5O_shared_t  *mesg = (const H5O_shared_t *) _mesg;
     H5O_shared_t	*dest = (H5O_shared_t *) _dest;

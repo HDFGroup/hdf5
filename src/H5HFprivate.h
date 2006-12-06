@@ -105,10 +105,12 @@ typedef herr_t (*H5HF_operator_t)(const void *obj/*in*/, size_t obj_len,
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
+
+/* General routines for fractal heap operations */
 H5_DLL H5HF_t *H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
 H5_DLL H5HF_t *H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
 H5_DLL herr_t H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p/*out*/);
-H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr);
+H5_DLL herr_t H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr/*out*/);
 H5_DLL herr_t H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size,
     const void *obj, void *id/*out*/);
 H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *id,

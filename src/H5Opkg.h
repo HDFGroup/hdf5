@@ -151,13 +151,14 @@
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
      H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
+
 struct H5O_msg_class_t {
     unsigned	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
     size_t	native_size;			 /*size of native message    */
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
-    void	*(*copy)(const void*, void*, unsigned);    /*copy native value         */
+    void	*(*copy)(const void *, void *);  /*copy native value         */
     size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof encoded message	*/
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
@@ -252,6 +253,18 @@ typedef struct H5O_addr_map_t {
     hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
     hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */
 } H5O_addr_map_t;
+
+
+/* Typedef for "internal library" iteration operations */
+typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned sequence, unsigned *oh_flags_ptr/*out*/, void *operator_data/*in,out*/);
+
+/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
+typedef union {
+    H5O_operator_t app_op;      /* Application callback for each message */
+    H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+} H5O_mesg_operator_t;
+
 
 /* H5O inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
@@ -387,6 +400,9 @@ H5_DLL htri_t H5O_msg_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence
 H5_DLL void * H5O_msg_copy_file(const H5O_msg_class_t *copy_type,
     const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
+    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id,
+    unsigned *oh_flags_ptr);
 
 /* Object header allocation routines */
 H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
@@ -395,18 +411,26 @@ H5_DLL herr_t H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_mesg_t *mesg, hbool_t delete_mesg, hbool_t adj_link);
 
+/* Shared object operators */
+H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
+    const H5O_msg_class_t *type, void *mesg);
+
+/* These functions operate on object locations */
+H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
+
+/* Useful metadata cache callbacks */
+H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
+
+/* Testing functions */
+#ifdef H5O_TESTING
+H5_DLL htri_t H5O_is_attr_dense_test(hid_t oid);
+#endif /* H5O_TESTING */
+
 /* Object header debugging routines */
 #ifdef H5O_DEBUG
 H5_DLL herr_t H5O_assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
-
-/* Shared object operators */
-H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
-    const H5O_msg_class_t *type, void *mesg);
-
-/* Useful metadata cache callbacks */
-H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 
 #endif /* _H5Opkg_H */
 

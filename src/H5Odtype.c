@@ -29,7 +29,7 @@
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
-static void *H5O_dtype_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_dtype_copy(const void *_mesg, void *_dest);
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
 static herr_t H5O_dtype_free(void *_mesg);
@@ -1024,7 +1024,7 @@ done:
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_copy(const void *_src, void *_dst, unsigned UNUSED update_flags)
+H5O_dtype_copy(const void *_src, void *_dst)
 {
     const H5T_t		   *src = (const H5T_t *) _src;
     H5T_t		   *dst = NULL;

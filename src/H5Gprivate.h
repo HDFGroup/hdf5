@@ -169,7 +169,6 @@ H5_DLL herr_t H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream
 /*
  * These functions operate on group object locations.
  */
-/* forward reference for later use */
 H5_DLL herr_t H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp,
     struct H5O_loc_t *oloc);
 H5_DLL herr_t H5G_obj_ent_encode(H5F_t *f, uint8_t **pp,

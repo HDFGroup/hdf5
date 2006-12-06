@@ -30,7 +30,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_efl_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_efl_copy(const void *_mesg, void *_dest);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
 static void *H5O_efl_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
@@ -259,7 +259,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
+H5O_efl_copy(const void *_mesg, void *_dest)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     H5O_efl_t		*dest = (H5O_efl_t *) _dest;

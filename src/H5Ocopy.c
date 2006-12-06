@@ -349,14 +349,21 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Copy attribute information */
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
-    oh_dst->nattrs = oh_src->nattrs;
-    /* XXX: Bail out for now, if the source object has densely stored attributes */
-    if(H5F_addr_defined(oh_src->attr_fheap_addr))
-        HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "densely stored attributes not supported yet")
-    else {
-        HDassert(!H5F_addr_defined(oh_src->name_bt2_addr));
+    if(cpy_info->copy_without_attr) {
+        oh_dst->nattrs = 0;
         oh_dst->attr_fheap_addr = HADDR_UNDEF;
         oh_dst->name_bt2_addr = HADDR_UNDEF;
+    } /* end if */
+    else {
+        oh_dst->nattrs = oh_src->nattrs;
+        /* XXX: Bail out for now, if the source object has densely stored attributes */
+        if(H5F_addr_defined(oh_src->attr_fheap_addr))
+            HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "densely stored attributes not supported yet")
+        else {
+            HDassert(!H5F_addr_defined(oh_src->name_bt2_addr));
+            oh_dst->attr_fheap_addr = HADDR_UNDEF;
+            oh_dst->name_bt2_addr = HADDR_UNDEF;
+        } /* end else */
     } /* end else */
     
 
@@ -438,10 +445,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         oh_dst->alloc_nmesgs = oh_dst->nmesgs = (oh_src->nmesgs - null_msgs);
 
     /* Allocate memory for destination message array */
-    if(oh_dst->alloc_nmesgs > 0) {
+    if(oh_dst->alloc_nmesgs > 0)
         if(NULL == (oh_dst->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh_dst->alloc_nmesgs)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    }
 
     /* "copy" pass over messages, to perform main message copying */
     null_msgs = 0;
@@ -472,9 +478,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* If we're preserving deleted messages, set their types to 'NULL'
          * in the destination.
          */
-        if(cpy_info->preserve_null && deleted[mesgno]) {
+        if(cpy_info->preserve_null && deleted[mesgno])
             mesg_dst->type = H5O_MSG_NULL;
-        }
 
         /* Check for shared message to operate on */
         /* (Use destination message, in case the message has been removed (i.e
@@ -525,7 +530,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
         dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
         dst_oh_size += H5O_ALIGN_OH(oh_dst, oh_dst->mesg[mesgno].raw_size);
-    }
+    } /* end for */
 
     /* Allocate space for chunk in destination file */
     if(HADDR_UNDEF == (oh_dst->chunk[0].addr = H5MF_alloc(oloc_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)dst_oh_size)))

@@ -445,9 +445,8 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
 
 done:
     /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(link_ptr && link_ptr != link_buf)
         H5FL_BLK_FREE(ser_link, link_ptr);
 
@@ -545,9 +544,8 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
 done:
     /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_lookup() */
@@ -895,7 +893,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
     H5G_bt2_ud_it_t *bt2_udata = (H5G_bt2_ud_it_t *)_bt2_udata;         /* User data for callback */
-    int ret_value = H5_ITER_CONT;         /* Return value */
+    herr_t ret_value = H5_ITER_CONT;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_iterate_bt2_cb)
 
@@ -913,7 +911,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
         /* Call fractal heap 'op' routine, to copy the link information */
         if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, record->id,
                 H5G_dense_iterate_fh_cb, &fh_udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5_ITER_ERROR, "link found callback failed")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, H5_ITER_ERROR, "heap op callback failed")
 
         /* Check which type of callback to make */
         switch(bt2_udata->lnk_op->op_type) {
@@ -976,7 +974,6 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
-    H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};      /* Table of links */
     herr_t ret_value;                   /* Return value */
@@ -994,9 +991,25 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
+    /* Check for skipping too many links */
+    if(skip > 0) {
+        hsize_t nrec;           /* # of records in v2 B-tree */
+
+        /* Retrieve # of records in name index */
+        /* (# of records in all indices the same) */
+        if(H5B2_get_nrec(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &nrec) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
+
+        /* Check for bad starting index */
+        if(skip >= nrec)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    } /* end if */
+
     /* Check on iteration order */
     /* ("native" iteration order is unordered for this link storage mechanism) */
     if(order == H5_ITER_NATIVE) {
+        H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
+
         /* Construct the user data for v2 B-tree iterator callback */
         udata.f = f;
         udata.dxpl_id = dxpl_id;
@@ -1471,9 +1484,8 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
 done:
     /* Release resources */
-    if(fheap)
-        if(H5HF_close(fheap, dxpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_remove() */

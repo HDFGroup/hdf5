@@ -41,7 +41,7 @@ DISTCLEANFILES=H5pubconf.h
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
-        H5A.c H5Adeprec.c H5AC.c H5B.c H5Bcache.c \
+        H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5AC.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c H5CS.c H5D.c H5Dcompact.c H5Dcontig.c \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Doh.c H5Dselect.c H5Dtest.c \
@@ -62,7 +62,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Ocont.c H5Ocopy.c H5Odbg.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
-        H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
+        H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c \
+        H5Otest.c \
         H5P.c H5Pacpl.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \

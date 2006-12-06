@@ -36,7 +36,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_name_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
 static herr_t H5O_name_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
@@ -167,7 +167,7 @@ H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_name_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
+H5O_name_copy(const void *_mesg, void *_dest)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     H5O_name_t             *dest = (H5O_name_t *) _dest;

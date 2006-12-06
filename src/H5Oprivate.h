@@ -31,6 +31,7 @@
 #include "H5Opublic.h"          /* Object header functions              */
 
 /* Public headers needed by this file */
+#include "H5Apublic.h"          /* Attributes				*/
 #include "H5Dpublic.h"          /* Dataset functions                    */
 #include "H5Lpublic.h"		/* Link functions                       */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -69,13 +70,11 @@ typedef uint64_t H5SM_fheap_id_t;
 /* Flags needed when encoding messages */
 #define H5O_MSG_FLAG_CONSTANT	0x01u
 #define H5O_MSG_FLAG_SHARED	0x02u
-#define H5O_MSG_FLAG_SOHM	0x04u
-#define H5O_MSG_FLAG_DONTSOHM	0x08u
-#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_SOHM|H5O_MSG_FLAG_DONTSOHM)
+#define H5O_MSG_FLAG_DONTSHARE	0x04u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
-#define H5O_UPDATE_DATA_ONLY    0x02u
 
 /* Hash value constants */
 /* JAMES: undefined hash value may not be great */
@@ -376,6 +375,7 @@ typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
 struct H5P_genplist_t;
 struct H5SL_t;
 struct H5O_t;
+struct H5A_t;
 
 /* Object header routines */
 H5_DLL herr_t H5O_init(void);
@@ -413,7 +413,7 @@ H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
-H5_DLL int H5O_msg_count(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
+H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence,
@@ -445,9 +445,7 @@ H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
 
-/*
- * These functions operate on object locations
- */
+/* These functions operate on object locations */
 H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
@@ -464,6 +462,14 @@ H5_DLL herr_t H5O_fill_convert(void *_fill, H5T_t *type, hid_t dxpl_id);
 
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+
+/* Attribute operations */
+H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
+    struct H5A_t *attr);
+H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
+    const char *old_name, const char *new_name);
+H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
+    unsigned skip, unsigned *last_attr, H5A_operator_t op, void *op_data);
 
 #endif /* _H5Oprivate_H */
 

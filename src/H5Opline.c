@@ -31,7 +31,7 @@
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
-static void *H5O_pline_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
 static herr_t H5O_pline_free(void *_mesg);
@@ -334,7 +334,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_copy(const void *_src, void *_dst/*out*/, unsigned UNUSED update_flags)
+H5O_pline_copy(const void *_src, void *_dst/*out*/)
 {
     const H5O_pline_t	*src = (const H5O_pline_t *)_src;       /* Source pipeline message */
     H5O_pline_t		*dst = (H5O_pline_t *)_dst;             /* Destination pipeline message */
@@ -586,7 +586,7 @@ H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *ty
      * the object copying process.
      */
     if(udata)
-        if(NULL == (udata->src_pline = H5O_pline_copy(pline_src, NULL, 0)))
+        if(NULL == (udata->src_pline = H5O_pline_copy(pline_src, NULL)))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to copy")
 
 done:

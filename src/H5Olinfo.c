@@ -38,7 +38,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_linfo_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_linfo_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_linfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_linfo_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_linfo_free(void *_mesg);
 static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
@@ -239,7 +239,7 @@ H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
+H5O_linfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     H5O_linfo_t         *dest = (H5O_linfo_t *) _dest;
@@ -391,7 +391,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_t
     HDassert(cpy_info);
 
     /* Copy the source message */
-    if(NULL == (linfo_dst = H5O_linfo_copy(linfo_src, NULL, FALSE)))
+    if(NULL == (linfo_dst = H5O_linfo_copy(linfo_src, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
 
     /* If we are performing a 'shallow hierarchy' copy, and the links in this

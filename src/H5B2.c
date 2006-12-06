@@ -1008,8 +1008,9 @@ done:
  * Function:	H5B2_modify
  *
  * Purpose:	Locate the specified information in a B-tree and modify it.
- *		The UDATA can point to additional data passed
- *		to the key comparison function.
+ *		The UDATA points to additional data passed
+ *		to the key comparison function for locating the record to
+ *              modify.
  *
  *              The 'OP' routine is called with the record found and the
  *              OP_DATA pointer, to allow caller to modify information about

@@ -248,7 +248,7 @@ static herr_t
 H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, 
     H5HF_operator_t op, void *op_data)
 {
-    H5HF_direct_t *dblock;              /* Pointer to direct block to query */
+    H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
     hsize_t obj_off;                    /* Object's offset in heap */
     size_t obj_len;                     /* Object's length in heap */
     size_t blk_off;                     /* Offset of object in block */
@@ -360,20 +360,14 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
     p = dblock->blk + blk_off;
 
     /* Call the user's 'op' callback */
-    if(op(p, obj_len, op_data) < 0) {
-        /* Release direct block */
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
-
+    if(op(p, obj_len, op_data) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
-    } /* end if */
-
-    /* Unlock direct block */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
-    dblock = NULL;
 
 done:
+    /* Unlock direct block */
+    if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_op_real() */
 

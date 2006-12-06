@@ -237,10 +237,9 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
 {
     ssize_t x;
     unsigned type_flag;
-    hbool_t found = FALSE;
     ssize_t ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(H5SM_get_index, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_get_index)
 
     /* Translate the H5O type_id into an H5SM type flag */
     switch(type_id)
@@ -267,12 +266,12 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
      */
-    for(x=0; x<table->num_indexes && !found; ++x)
+    for(x = 0; x < table->num_indexes; ++x)
     {
         if(table->indexes[x].mesg_types & type_flag)
         {
-            found = TRUE;
             ret_value = x;
+            break;
         }
     }
 
@@ -551,11 +550,11 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     /* Find the right index for this message type.  If there is no such index
      * then this type of message isn't shareable
      */
-    H5E_BEGIN_TRY {
-        index_num = H5SM_get_index(table, type_id);
-    } H5E_END_TRY
-    if(index_num < 0)
+    if((index_num = H5SM_get_index(table, type_id)) < 0)
+    {
+        H5E_clear_stack(NULL); /*ignore error*/
         HGOTO_DONE(FALSE);
+    } /* end if */
 
     /* If the message isn't big enough, don't bother sharing it */
     if(0 == (mesg_size = H5O_msg_mesg_size(f, type_id, mesg, 0)))
@@ -579,7 +578,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
 
 done:
     /* Release the master SOHM table */
-    if (table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)

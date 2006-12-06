@@ -29,10 +29,47 @@
 #include "H5Spkg.h"		/* Dataspaces				*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
+/* User data for iteration when updating an attribute */
+typedef struct {
+    /* down */
+    H5F_t *f;                   /* Pointer to file attribute is in */
+    hid_t dxpl_id;              /* DXPL for operation */
+    H5A_t *attr;                /* Attribute data to update object header with */
+
+    /* up */
+    hbool_t found;              /* Whether the attribute was found */
+} H5O_iter_wrt_t;
+
+/* User data for iteration when renaming an attribute */
+typedef struct {
+    /* down */
+    H5F_t *f;                   /* Pointer to file attribute is in */
+    hid_t dxpl_id;              /* DXPL for operation */
+    const char *old_name;       /* Old name of attribute */
+    const char *new_name;       /* New name of attribute */
+
+    /* up */
+    hbool_t found;              /* Whether the attribute was found */
+} H5O_iter_ren_t;
+
+/* User data for iteration when iterating over attributes */
+typedef struct {
+    /* down */
+    H5F_t *f;                   /* Pointer to file attribute is in */
+    hid_t dxpl_id;              /* DXPL for operation */
+    hid_t loc_id;               /* ID of object being iterated over */
+    unsigned skip;              /* # of attributes to skip over */
+    H5A_operator_t op;          /* Callback routine for each attribute */
+    void *op_data;              /* User data for callback */
+
+    /* up */
+    unsigned count;             /* Count of attributes examined */
+} H5O_iter_itr_t;
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
-static void *H5O_attr_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_attr_copy(const void *_mesg, void *_dest);
 static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset(void *_mesg);
 static herr_t H5O_attr_free(void *mesg);
@@ -470,18 +507,17 @@ done:
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_copy(const void *_src, void *_dst, unsigned update_flags)
+H5O_attr_copy(const void *_src, void *_dst)
 {
-    const H5A_t            *src = (const H5A_t *) _src;
-    void                   *ret_value;  /* Return value */
+    void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy)
 
     /* check args */
-    HDassert(src);
+    HDassert(_src);
 
     /* copy */
-    if(NULL == (ret_value = H5A_copy(_dst, src, update_flags)))
+    if(NULL == (ret_value = H5A_copy(_dst, _src)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute")
 
 done:
@@ -1228,4 +1264,481 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_write_cb
+ *
+ * Purpose:	Object header iterator callback routine to update an
+ *              attribute stored compactly.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  4 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+    HDassert(!udata->found);
+
+    /* Check for shared message */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
+        H5A_t shared_attr;             /* Copy of shared attribute */
+
+	/*
+	 * If the message is shared then then the native pointer points to an
+	 * H5O_MSG_SHARED message.  We use that information to look up the real
+	 * message in the global heap or some other object header.
+	 */
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
+
+        /* Check for correct attribute message to modify */
+        if(HDstrcmp(shared_attr.name, udata->attr->name) == 0) {
+            htri_t shared_mesg;         /* Whether the message should be shared */
+
+            /* Store new version of message as a SOHM */
+            /* (should always work, since we're not changing the size of the attribute) */
+            if((shared_mesg = H5SM_try_share(udata->f, udata->dxpl_id, H5O_ATTR_ID, udata->attr)) == 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "attribute changed sharing status")
+            else if(shared_mesg < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't share attribute")
+
+            /* Remove the old attribut from the SOHM index */
+            if(H5SM_try_delete(udata->f, udata->dxpl_id, H5O_ATTR_ID, mesg->native) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, H5_ITER_ERROR, "unable to delete shared attribute in shared storage")
+
+            /* Extract shared message info from current attribute */
+            if(H5O_attr_get_share(udata->attr, mesg->native) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't get shared info")
+
+            /* Indicate that we found the correct attribute */
+            udata->found = TRUE;
+        } /* end if */
+
+        /* Release copy of shared attribute */
+        H5O_attr_reset(&shared_attr);
+    } /* end if */
+    else {
+        /* Check for correct attribute message to modify */
+        if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->attr->name) == 0) {
+            /* Allocate storage for the message's data, if necessary */
+            if(((H5A_t *)mesg->native)->data == NULL)
+                if(NULL == (((H5A_t *)mesg->native)->data = H5FL_BLK_MALLOC(attr_buf, udata->attr->data_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
+
+            /* Copy the data */
+            HDmemcpy(((H5A_t *)mesg->native)->data, udata->attr->data, udata->attr->data_size);
+
+            /* Indicate that we found the correct attribute */
+            udata->found = TRUE;
+        } /* end if */
+    } /* end else */
+
+    /* Set common info, if we found the correct attribute */
+    if(udata->found) {
+        /* Mark message as dirty */
+        mesg->dirty = TRUE;
+
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+
+        /* Indicate that the object header was modified */
+        *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_write_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_write
+ *
+ * Purpose:	Write a new value to an attribute.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, December  4, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(attr);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Check for attributes stored densely */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Modify the attribute data in dense storage */
+        if(H5A_dense_write(loc->file, dxpl_id, oh, attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
+    } /* end if */
+    else {
+        H5O_iter_wrt_t udata;           /* User data for callback */
+        H5O_mesg_operator_t op;         /* Wrapper for operator */
+
+        /* Set up user data for callback */
+        udata.f = loc->file;
+        udata.dxpl_id = dxpl_id;
+        udata.attr = attr;
+        udata.found = FALSE;
+
+        /* Iterate over attributes, to locate correct one to update */
+        op.lib_op = H5O_attr_write_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
+
+        /* Check that we found the attribute */
+        if(!udata.found)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate open attribute?")
+    } /* end else */
+
+    /* Update the modification time, if any */
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_write */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_rename_dup_cb
+ *
+ * Purpose:	Object header iterator callback routine to check for
+ *              duplicate name during rename
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  5 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_rename_dup_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename_dup_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+    HDassert(!udata->found);
+
+    /* Check for shared message */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
+        H5A_t shared_attr;              /* Copy of shared attribute */
+
+	/*
+	 * If the message is shared then then the native pointer points to an
+	 * H5O_MSG_SHARED message.  We use that information to look up the real
+	 * message in the global heap or some other object header.
+	 */
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
+
+        /* Check for existing attribute with new name */
+        if(HDstrcmp(shared_attr.name, udata->new_name) == 0) {
+            /* Indicate that we found an existing attribute with the new name*/
+            udata->found = TRUE;
+
+            /* Stop iterating */
+            ret_value = H5_ITER_STOP;
+        } /* end if */
+
+        /* Release copy of shared attribute */
+        H5O_attr_reset(&shared_attr);
+    } /* end if */
+    else {
+        /* Check for existing attribute with new name */
+        if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->new_name) == 0) {
+            /* Indicate that we found an existing attribute with the new name*/
+            udata->found = TRUE;
+
+            /* Stop iterating */
+            ret_value = H5_ITER_STOP;
+        } /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_rename_dup_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_rename_mod_cb
+ *
+ * Purpose:	Object header iterator callback routine to change name of
+ *              attribute during rename
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  5 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename_mod_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+    HDassert(!udata->found);
+
+    /* Check for shared message */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
+        H5A_t shared_attr;             /* Copy of shared attribute */
+
+	/*
+	 * If the message is shared then then the native pointer points to an
+	 * H5O_MSG_SHARED message.  We use that information to look up the real
+	 * message in the global heap or some other object header.
+	 */
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
+
+        /* Check for correct attribute message to modify */
+        if(HDstrcmp(shared_attr.name, udata->old_name) == 0) {
+/* XXX: fix me */
+HDfprintf(stderr, "%s: renaming a shared attribute not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribute not supported yet")
+        } /* end if */
+
+        /* Release copy of shared attribute */
+        H5O_attr_reset(&shared_attr);
+    } /* end if */
+    else {
+        /* Find correct attribute message to rename */
+        if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->old_name) == 0) {
+            /* Change the name for the attribute */
+            H5MM_xfree(((H5A_t *)mesg->native)->name);
+            ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
+
+            /* Indicate that we found an existing attribute with the old name*/
+            udata->found = TRUE;
+
+            /* Mark message as dirty */
+            mesg->dirty = TRUE;
+
+            /* Stop iterating */
+            ret_value = H5_ITER_STOP;
+
+            /* Indicate that the object header was modified */
+            *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+        } /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_rename_mod_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_rename
+ *
+ * Purpose:	Rename an attribute.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, December  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name, const char *new_name)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(old_name);
+    HDassert(new_name);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Check for attributes stored densely */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+/* XXX: fix me */
+HDfprintf(stderr, "%s: renaming attributes in dense storage not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "renaming attributes in dense storage not supported yet")
+    } /* end if */
+    else {
+        H5O_iter_ren_t udata;           /* User data for callback */
+        H5O_mesg_operator_t op;         /* Wrapper for operator */
+
+        /* Set up user data for callback */
+        udata.f = loc->file;
+        udata.dxpl_id = dxpl_id;
+        udata.old_name = old_name;
+        udata.new_name = new_name;
+        udata.found = FALSE;
+
+        /* Iterate over attributes, to check if "new name" exists already */
+        op.lib_op = H5O_attr_rename_dup_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
+
+        /* If the new name was found, indicate an error */
+        if(udata.found)
+            HGOTO_ERROR(H5E_ATTR, H5E_EXISTS, FAIL, "attribute with new name already exists")
+
+        /* Iterate over attributes again, to actually rename attribute with old name */
+        op.lib_op = H5O_attr_rename_mod_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
+    } /* end else */
+
+    /* Update the modification time, if any */
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_rename */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_iterate
+ *
+ * Purpose:	Iterate over attributes for an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, December  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
+    unsigned skip, unsigned *last_attr, H5A_operator_t op, void *op_data)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    haddr_t attr_fheap_addr;            /* Address of fractal heap for dense attribute storage */
+    haddr_t name_bt2_addr;              /* Address of v2 B-tree for name index on dense attribute storage */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_iterate)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(op);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Retrieve the information about dense attribute storage */
+    if(oh->version > H5O_VERSION_1 && H5F_addr_defined(oh->attr_fheap_addr)) {
+        attr_fheap_addr = oh->attr_fheap_addr;
+        name_bt2_addr = oh->name_bt2_addr;
+    } /* end if */
+    else
+        attr_fheap_addr = name_bt2_addr = HADDR_UNDEF;
+
+    /* Release the object header */
+    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    oh = NULL;
+
+    /* Check for attributes stored densely */
+    if(H5F_addr_defined(attr_fheap_addr)) {
+        if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, attr_fheap_addr,
+                name_bt2_addr, skip, last_attr, op, op_data)) < 0)
+            HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+    } /* end if */
+    else {
+        unsigned idx;           /* Current attribute to operate on */
+
+        /* Check for skipping over too many attributes */
+        if((int)skip < H5O_msg_count(loc, H5O_ATTR_ID, dxpl_id)) {
+            H5A_t found_attr;           /* Copy of attribute for callback */
+
+            /* Read each attribute and call application's callback */
+            /* (this could be made more efficient by iterating over the
+             *  attribute header messages with H5O_msg_iterate, but then
+             *  the object header would be locked during the callback into
+             *  the application code, causing problems if they attempt to
+             *  do anything with the object the attribute is on - QAK)
+             */
+            idx = skip;
+            while(H5O_msg_read(loc, H5O_ATTR_ID, (int)idx, &found_attr, dxpl_id) != NULL) {
+                /* Call application's callback */
+                idx++;
+                if((ret_value = (op)(loc_id, found_attr.name, op_data)) != 0) {
+                    H5A_free(&found_attr);
+                    break;
+                } /* end if */
+                H5A_free(&found_attr);
+            } /* end while */
+
+            /* Clear error stack from running off end of attributes */
+            if(ret_value == 0)
+                H5E_clear_stack(NULL);
+        } /* end if */
+        else
+            if(skip > 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+
+        /* Update last attribute looked at */
+        if(last_attr)
+            *last_attr = idx;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_iterate */
 

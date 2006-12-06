@@ -39,7 +39,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_stab_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags);
+static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
@@ -179,7 +179,7 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
+H5O_stab_copy(const void *_mesg, void *_dest)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
