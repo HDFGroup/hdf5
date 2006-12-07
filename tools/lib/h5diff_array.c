@@ -51,6 +51,7 @@
 #define LLI_FORMAT_P_NOTCOMP  "%-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
 #define ULLI_FORMAT_P_NOTCOMP "%-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"u %-15"H5_PRINTF_LL_WIDTH"d not comparable\n"
 
+
 /* values for FLT_EPSILON same as C Reference manual */
 #define H5DIFF_FLT_EPSILON  .00001
 #define H5DIFF_DBL_EPSILON  .000000001
@@ -76,39 +77,42 @@ static hbool_t equal_double(double value, double expected);
 
 static int   not_comparable;
 
-#define PER(A,B) { per=-1;                                        \
-                   not_comparable=0;                              \
-                   both_zero=0;                                   \
-                   if (A==0 && B==0)                              \
-                    both_zero=1;                                  \
-                   if (A!=0)                                      \
-                    per = (double)ABS( ( double)(B-A) / (double)A ); \
-                   else                                           \
-                    not_comparable=1;                             \
-                 }
+#define PER(A,B) { per=-1;                           \
+    not_comparable=0;                                \
+    both_zero=0;                                     \
+    if (A==0 && B==0)                                \
+    both_zero=1;                                     \
+    if (A!=0)                                        \
+    per = (double)ABS( ( double)(B-A) / (double)A ); \
+    else                                             \
+    not_comparable=1;                                \
+}
 
 
-#define PER_UNSIGN(A,B) { per=-1;                                 \
-                   not_comparable=0;                              \
-                   both_zero=0;                                   \
-                   if (A==0 && B==0)                              \
-                    both_zero=1;                                  \
-                   if (A!=0)                                      \
-                    per = (double) (B-A) / (double)A ;            \
-                   else                                           \
-                    not_comparable=1;                             \
-                 }
+#define PER_UNSIGN(A,B) { per=-1;                    \
+    not_comparable=0;                                \
+    both_zero=0;                                     \
+    if (A==0 && B==0)                                \
+    both_zero=1;                                     \
+    if (A!=0)                                        \
+    per = (double) (B-A) / (double)A ;               \
+    else                                             \
+    not_comparable=1;                                \
+}
 
 
-#define BOTH_ZERO(A,B) { both_zero=0;                             \
-                         if (A==0 && B==0)                        \
-                          both_zero=1;                            \
-                       }
+#define BOTH_ZERO(A,B) { both_zero=0;                \
+    if (A==0 && B==0)                                \
+    both_zero=1;                                     \
+}
 
-#define IS_ZERO(A) { is_zero=0;                             \
-                     if (A==0)                              \
-                      is_zero=1;                            \
-                   }
+#define IS_ZERO(A) { is_zero=0;                      \
+    if (A==0)                                        \
+    is_zero=1;                                       \
+}
+
+
+#   define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
 
 /*-------------------------------------------------------------------------
  * local prototypes
@@ -901,13 +905,13 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and !-p */
       if (options->d && !options->p)
       {
-          if ( ABS(temp1_uchar-temp2_uchar) > options->delta)
+          if ( PDIFF(temp1_uchar,temp2_uchar) > options->delta)
           {
               if ( print_data(options) )
               {
                   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
                   parallel_print(SPACES);
-                  parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+                  parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
               }
               nfound++;
           }
@@ -921,7 +925,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
               options->not_cmp=1;
               nfound++;
           }
@@ -934,7 +938,7 @@ hsize_t diff_datum(void       *_mem1,
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar),per);
+                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar),per);
                   }
                   nfound++;
               }
@@ -948,20 +952,20 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
               options->not_cmp=1;
               nfound++;
           }
           
           else
               
-              if ( per > options->percent && ABS(temp1_uchar-temp2_uchar) > options->delta )
+              if ( per > options->percent && PDIFF(temp1_uchar,temp2_uchar) > options->delta )
               {
                   if ( print_data(options) )
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar),per);
+                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar),per);
                   }
                   nfound++;
               }
@@ -972,7 +976,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+              parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
           }
           nfound++;
       }
@@ -1091,14 +1095,14 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and !-p */
       if (options->d && !options->p)
       {
-          if ( ABS(temp1_ushort-temp2_ushort) > options->delta)
+          if ( PDIFF(temp1_ushort,temp2_ushort) > options->delta)
           {
               
               if ( print_data(options) )
               {
                   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
                   parallel_print(SPACES);
-                  parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort));
+                  parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort));
               }
               nfound++;
           }
@@ -1113,7 +1117,7 @@ hsize_t diff_datum(void       *_mem1,
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
               parallel_print(I_FORMAT_P_NOTCOMP,temp1_ushort,temp2_ushort,
-                  ABS(temp1_ushort-temp2_ushort));
+                  PDIFF(temp1_ushort,temp2_ushort));
               options->not_cmp=1;
               nfound++;
           }
@@ -1126,7 +1130,7 @@ hsize_t diff_datum(void       *_mem1,
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort),per);
+                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort),per);
                   }
                   nfound++;
               }
@@ -1140,20 +1144,20 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT_P_NOTCOMP,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort));
+              parallel_print(I_FORMAT_P_NOTCOMP,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort));
               options->not_cmp=1;
               nfound++;
           }
           
           else
               
-              if ( per > options->percent && ABS(temp1_ushort-temp2_ushort) > options->delta )
+              if ( per > options->percent && PDIFF(temp1_ushort,temp2_ushort) > options->delta )
               {
                   if ( print_data(options) )
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort),per);
+                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort),per);
                   }
                   nfound++;
               }
@@ -1164,7 +1168,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort));
+              parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort));
           }
           nfound++;
       }
@@ -1281,13 +1285,13 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and !-p */
       if (options->d && !options->p)
       {
-          if ( ABS(temp1_uint-temp2_uint) > options->delta)
+          if ( PDIFF(temp1_uint,temp2_uint) > options->delta)
           {
               if ( print_data(options) )
               {
                   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
                   parallel_print(SPACES);
-                  parallel_print(UI_FORMAT,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+                  parallel_print(UI_FORMAT,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
               }
               nfound++;
           }
@@ -1301,7 +1305,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
               options->not_cmp=1;
               nfound++;
           }
@@ -1314,7 +1318,7 @@ hsize_t diff_datum(void       *_mem1,
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint),per);
+                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint),per);
                   }
                   nfound++;
               }
@@ -1328,20 +1332,20 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
               options->not_cmp=1;
               nfound++;
           }
           
           else
               
-              if ( per > options->percent && ABS(temp1_uint-temp2_uint) > options->delta )
+              if ( per > options->percent && PDIFF(temp1_uint,temp2_uint) > options->delta )
               {
                   if ( print_data(options) )
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint),per);
+                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint),per);
                   }
                   nfound++;
               }
@@ -1352,7 +1356,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(UI_FORMAT,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+              parallel_print(UI_FORMAT,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
           }
           nfound++;
       }
@@ -1471,13 +1475,13 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and !-p */
       if (options->d && !options->p)
       {
-          if ( ABS(temp1_ulong-temp2_ulong) > options->delta)
+          if ( PDIFF(temp1_ulong,temp2_ulong) > options->delta)
           {
               if ( print_data(options) )
               {
                   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
                   parallel_print(SPACES);
-                  parallel_print(ULI_FORMAT,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+                  parallel_print(ULI_FORMAT,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
               }
               nfound++;
           }
@@ -1491,7 +1495,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+              parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
               options->not_cmp=1;
               nfound++;
           }
@@ -1504,7 +1508,7 @@ hsize_t diff_datum(void       *_mem1,
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(ULI_FORMAT_P,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong),per);
+                      parallel_print(ULI_FORMAT_P,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong),per);
                   }
                   nfound++;
               }
@@ -1518,20 +1522,20 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+              parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
               options->not_cmp=1;
               nfound++;
           }
           
           else
               
-              if ( per > options->percent && ABS(temp1_ulong-temp2_ulong) > options->delta )
+              if ( per > options->percent && PDIFF(temp1_ulong,temp2_ulong) > options->delta )
               {
                   if ( print_data(options) )
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(ULI_FORMAT_P,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong),per);
+                      parallel_print(ULI_FORMAT_P,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong),per);
                   }
                   nfound++;
               }
@@ -1542,7 +1546,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULI_FORMAT,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+              parallel_print(ULI_FORMAT,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
           }
           nfound++;
       }
@@ -1660,13 +1664,13 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and !-p */
       if (options->d && !options->p)
       {
-          if ( ABS(temp1_ullong-temp2_ullong) > (unsigned long_long)options->delta)
+          if ( PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long)options->delta)
           {
               if ( print_data(options) )
               {
                   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
                   parallel_print(SPACES);
-                  parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+                  parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
               }
               nfound++;
           }
@@ -1682,7 +1686,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+              parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
               options->not_cmp=1;
               nfound++;
           }
@@ -1696,7 +1700,7 @@ hsize_t diff_datum(void       *_mem1,
                   {
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       parallel_print(SPACES);
-                      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong),per);
+                      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
                   }
                   nfound++;
               }
@@ -1712,14 +1716,14 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+              parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
               options->not_cmp=1;
               nfound++;
           }
           
           else
               
-              if ( per > options->percent && ABS(temp1_ullong-temp2_ullong) > (unsigned long_long)options->delta )
+              if ( per > options->percent && PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long)options->delta )
               {
                   
                   if ( print_data(options) )
@@ -1727,7 +1731,7 @@ hsize_t diff_datum(void       *_mem1,
                       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
                       
                       parallel_print(SPACES);
-                      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong),per);
+                      parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
                   }
                   nfound++;
               }
@@ -1738,7 +1742,7 @@ hsize_t diff_datum(void       *_mem1,
           {
               print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
               parallel_print(SPACES);
-              parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+              parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
           }
           nfound++;
       }
@@ -2346,13 +2350,13 @@ hsize_t character_compare_opt(unsigned char *mem1,
  
  if (options->d && !options->p)
  {
-     if ( ABS(temp1_uchar-temp2_uchar) > options->delta)
+     if ( PDIFF(temp1_uchar,temp2_uchar) > options->delta)
      {
          if ( print_data(options) )
          {
              print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+             parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
          }
          nfound++;
      }
@@ -2367,7 +2371,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
          {
              print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar),per);
+             parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar),per);
          }
          nfound++;
      }
@@ -2376,13 +2380,13 @@ hsize_t character_compare_opt(unsigned char *mem1,
  else if ( options->d && options->p)
  {
      PER_UNSIGN(temp1_uchar,temp2_uchar);
-     if ( per > options->percent && ABS(temp1_uchar-temp2_uchar) > options->delta )
+     if ( per > options->percent && PDIFF(temp1_uchar,temp2_uchar) > options->delta )
      {
          if ( print_data(options) )
          {
              print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar),per);
+             parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar),per);
          }
          nfound++;
      }
@@ -2393,7 +2397,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
      {
          print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
          parallel_print(SPACES);
-         parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+         parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
      }
      nfound++;
  }
@@ -2952,13 +2956,13 @@ hsize_t diff_uchar(unsigned char *mem1,
          memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
          memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
          
-         if ( ABS(temp1_uchar-temp2_uchar) > options->delta)
+         if ( PDIFF(temp1_uchar,temp2_uchar) > options->delta)
          {
              if ( print_data(options) )
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+                 parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
              }
              nfound++;
          }
@@ -2986,7 +2990,7 @@ hsize_t diff_uchar(unsigned char *mem1,
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,
-                 ABS(temp1_uchar-temp2_uchar));
+                 PDIFF(temp1_uchar,temp2_uchar));
              options->not_cmp=1;
              nfound++;
          }
@@ -3000,7 +3004,7 @@ hsize_t diff_uchar(unsigned char *mem1,
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,
-                         ABS(temp1_uchar-temp2_uchar),
+                         PDIFF(temp1_uchar,temp2_uchar),
                          per);
                  }
                  nfound++;
@@ -3028,21 +3032,21 @@ hsize_t diff_uchar(unsigned char *mem1,
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
              parallel_print(I_FORMAT_P_NOTCOMP,temp1_uchar,temp2_uchar,
-                 ABS(temp1_uchar-temp2_uchar));
+                 PDIFF(temp1_uchar,temp2_uchar));
              options->not_cmp=1;
              nfound++;
          }
          
          else
              
-             if ( per > options->percent && ABS(temp1_uchar-temp2_uchar) > options->delta )
+             if ( per > options->percent && PDIFF(temp1_uchar,temp2_uchar) > options->delta )
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_uchar,temp2_uchar,
-                         ABS(temp1_uchar-temp2_uchar),
+                         PDIFF(temp1_uchar,temp2_uchar),
                          per);
                  }
                  nfound++;
@@ -3068,7 +3072,7 @@ hsize_t diff_uchar(unsigned char *mem1,
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,ABS(temp1_uchar-temp2_uchar));
+                 parallel_print(I_FORMAT,temp1_uchar,temp2_uchar,PDIFF(temp1_uchar,temp2_uchar));
              }
              nfound++;
          }
@@ -3295,13 +3299,13 @@ hsize_t diff_ushort(unsigned char *mem1,
          memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
          memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
          
-         if ( ABS(temp1_ushort-temp2_ushort) > options->delta)
+         if ( PDIFF(temp1_ushort,temp2_ushort) > options->delta)
          {
              if ( print_data(options) )
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort));
+                 parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort));
              }
              nfound++;
          }
@@ -3329,7 +3333,7 @@ hsize_t diff_ushort(unsigned char *mem1,
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
              parallel_print(I_FORMAT_P_NOTCOMP,temp1_ushort,temp2_ushort,
-                 ABS(temp1_ushort-temp2_ushort));
+                 PDIFF(temp1_ushort,temp2_ushort));
              options->not_cmp=1;
              nfound++;
          }
@@ -3343,7 +3347,7 @@ hsize_t diff_ushort(unsigned char *mem1,
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,
-                         ABS(temp1_ushort-temp2_ushort),
+                         PDIFF(temp1_ushort,temp2_ushort),
                          per);
                  }
                  nfound++;
@@ -3373,21 +3377,21 @@ hsize_t diff_ushort(unsigned char *mem1,
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
              parallel_print(I_FORMAT_P_NOTCOMP,temp1_ushort,temp2_ushort,
-                 ABS(temp1_ushort-temp2_ushort));
+                 PDIFF(temp1_ushort,temp2_ushort));
              options->not_cmp=1;
              nfound++;
          }
          
          else
              
-             if ( per > options->percent && ABS(temp1_ushort-temp2_ushort) > options->delta )
+             if ( per > options->percent && PDIFF(temp1_ushort,temp2_ushort) > options->delta )
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_ushort,temp2_ushort,
-                         ABS(temp1_ushort-temp2_ushort),
+                         PDIFF(temp1_ushort,temp2_ushort),
                          per);
                  }
                  nfound++;
@@ -3413,7 +3417,7 @@ hsize_t diff_ushort(unsigned char *mem1,
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,ABS(temp1_ushort-temp2_ushort));
+                 parallel_print(I_FORMAT,temp1_ushort,temp2_ushort,PDIFF(temp1_ushort,temp2_ushort));
              }
              nfound++;
          }
@@ -3643,13 +3647,13 @@ hsize_t diff_uint(unsigned char *mem1,
          memcpy(&temp1_uint, mem1, sizeof(unsigned int));
          memcpy(&temp2_uint, mem2, sizeof(unsigned int));
          
-         if ( ABS(temp1_uint-temp2_uint) > options->delta)
+         if ( PDIFF(temp1_uint,temp2_uint) > options->delta)
          {
              if ( print_data(options) )
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+                 parallel_print(I_FORMAT,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
              }
              nfound++;
          }
@@ -3676,7 +3680,7 @@ hsize_t diff_uint(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+             parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
              options->not_cmp=1;
              nfound++;
          }
@@ -3690,7 +3694,7 @@ hsize_t diff_uint(unsigned char *mem1,
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,
-                         ABS(temp1_uint-temp2_uint),
+                         PDIFF(temp1_uint,temp2_uint),
                          per);
                  }
                  nfound++;
@@ -3719,21 +3723,21 @@ hsize_t diff_uint(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+             parallel_print(I_FORMAT_P_NOTCOMP,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
              options->not_cmp=1;
              nfound++;
          }
          
          else
              
-             if ( per > options->percent && ABS(temp1_uint-temp2_uint) > options->delta )
+             if ( per > options->percent && PDIFF(temp1_uint,temp2_uint) > options->delta )
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(I_FORMAT_P,temp1_uint,temp2_uint,
-                         ABS(temp1_uint-temp2_uint),
+                         PDIFF(temp1_uint,temp2_uint),
                          per);
                  }
                  nfound++;
@@ -3759,7 +3763,7 @@ hsize_t diff_uint(unsigned char *mem1,
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(I_FORMAT,temp1_uint,temp2_uint,ABS(temp1_uint-temp2_uint));
+                 parallel_print(I_FORMAT,temp1_uint,temp2_uint,PDIFF(temp1_uint,temp2_uint));
              }
              nfound++;
          }
@@ -3997,13 +4001,13 @@ hsize_t diff_ulong(unsigned char *mem1,
              memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
              memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
              
-             if ( ABS(temp1_ulong-temp2_ulong) > options->delta)
+             if ( PDIFF(temp1_ulong,temp2_ulong) > options->delta)
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
-                     parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+                     parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
                  }
                  nfound++;
              }
@@ -4032,7 +4036,7 @@ hsize_t diff_ulong(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+             parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
              options->not_cmp=1;
              nfound++;
          }
@@ -4046,7 +4050,7 @@ hsize_t diff_ulong(unsigned char *mem1,
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(LI_FORMAT_P,temp1_ulong,temp2_ulong,
-                         ABS(temp1_ulong-temp2_ulong),
+                         PDIFF(temp1_ulong,temp2_ulong),
                          per);
                  }
                  nfound++;
@@ -4075,21 +4079,21 @@ hsize_t diff_ulong(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+             parallel_print(ULI_FORMAT_P_NOTCOMP,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
              options->not_cmp=1;
              nfound++;
          }
          
          else
              
-             if ( per > options->percent && ABS(temp1_ulong-temp2_ulong) > options->delta )
+             if ( per > options->percent && PDIFF(temp1_ulong,temp2_ulong) > options->delta )
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
                      parallel_print(LI_FORMAT_P,temp1_ulong,temp2_ulong,
-                         ABS(temp1_ulong-temp2_ulong),
+                         PDIFF(temp1_ulong,temp2_ulong),
                          per);
                  }
                  nfound++;
@@ -4115,7 +4119,7 @@ hsize_t diff_ulong(unsigned char *mem1,
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,ABS(temp1_ulong-temp2_ulong));
+                 parallel_print(LI_FORMAT,temp1_ulong,temp2_ulong,PDIFF(temp1_ulong,temp2_ulong));
              }
              nfound++;
          }
@@ -4301,7 +4305,6 @@ hsize_t diff_llong(unsigned char *mem1,
 
 
 
-
 /*-------------------------------------------------------------------------
  * Function: diff_ullong
  *
@@ -4341,13 +4344,13 @@ hsize_t diff_ullong(unsigned char *mem1,
          memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
          memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
          
-         if ( ABS(temp1_ullong-temp2_ullong) > (unsigned long_long) options->delta)
+         if ( PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long) options->delta)
          {
              if ( print_data(options) )
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+                 parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
              }
              nfound++;
          }
@@ -4376,7 +4379,7 @@ hsize_t diff_ullong(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+             parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
              options->not_cmp=1;
              nfound++;
          }
@@ -4389,7 +4392,7 @@ hsize_t diff_ullong(unsigned char *mem1,
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
-                     parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong),per);
+                     parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
                  }
                  nfound++;
              }
@@ -4419,20 +4422,20 @@ hsize_t diff_ullong(unsigned char *mem1,
          {
              print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
              parallel_print(SPACES);
-             parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+             parallel_print(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
              options->not_cmp=1;
              nfound++;
          }
          
          else
              
-             if ( per > options->percent && ABS(temp1_ullong-temp2_ullong) > (unsigned long_long)options->delta )
+             if ( per > options->percent && PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long)options->delta )
              {
                  if ( print_data(options) )
                  {
                      print_pos(ph,1,hyper_start+i,acc,pos,rank,obj1,obj2);
                      parallel_print(SPACES);
-                     parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong),per);
+                     parallel_print(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
                  }
                  nfound++;
              }
@@ -4457,7 +4460,7 @@ hsize_t diff_ullong(unsigned char *mem1,
              {
                  print_pos(ph,0,hyper_start+i,acc,pos,rank,obj1,obj2);
                  parallel_print(SPACES);
-                 parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,ABS(temp1_ullong-temp2_ullong));
+                 parallel_print(ULLI_FORMAT,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
              }
              nfound++;
          }
