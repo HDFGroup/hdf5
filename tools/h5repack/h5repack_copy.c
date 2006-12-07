@@ -24,9 +24,9 @@ extern char  *progname;
 static int do_create_refs;
 
 
-#define PER(A,B) { per = 0;                                       \
-                   if (A!=0)                                      \
-                    per = (float)fabs( ((float)B - (float)A) / (float) A  ); \
+#define PER(A,B) { per = 0;                   \
+                   if (A!=0)                  \
+                    per = (double) fabs( (double)(B-A) / (double)A  ); \
                  }
 
 #define FORMAT_OBJ      " %-27s %s\n"  /* obj type, name */
@@ -48,7 +48,7 @@ static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
  */
 static void print_dataset_info(hid_t dcpl_id,
                                char *objname,
-                               float per)
+                               double per)
 {
  char         strfilter[255];
 #if defined (PRINT_DEBUG )
@@ -313,7 +313,7 @@ int do_copy_objects(hid_t fidin,
  int      next;           /* external files */
  int      apply_s;        /* flag for apply filter to small dataset sizes */
  int      apply_f;        /* flag for apply filter to return error on H5Dcreate */
- float    per;            /* percent utilization of storage */
+ double   per;            /* percent utilization of storage */
  void     *buf=NULL;      /* buffer for raw data */
  void     *sm_buf=NULL;   /* buffer for raw data */
  unsigned i;
@@ -612,10 +612,10 @@ int do_copy_objects(hid_t fidin,
        /* get the storage size of the input dataset */
        dsize_out=H5Dget_storage_size(dset_out);
        PER((hssize_t)dsize_in,(hssize_t)dsize_out);
-       print_dataset_info(dcpl_out,travt->objs[i].name,(float)(per*100.0));
+       print_dataset_info(dcpl_out,travt->objs[i].name,per*100.0);
       }
       else
-       print_dataset_info(dcpl_id,travt->objs[i].name,(float)0);
+       print_dataset_info(dcpl_id,travt->objs[i].name,0.0);
      }
      
      if (apply_s==0 && options->verbose)
