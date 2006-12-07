@@ -44,8 +44,6 @@ void init_packobject(pack_info_t *obj)
  obj->refobj_id = -1;
  obj->layout = H5D_LAYOUT_ERROR;
  obj->nfilters = 0;
-
-
 }
 
 /*-------------------------------------------------------------------------
@@ -59,7 +57,7 @@ void init_packobject(pack_info_t *obj)
  */
 
 static void aux_tblinsert_filter(pack_opttbl_t *table,
-                                 int I,
+                                 unsigned int I,
                                  filter_info_t filt)
 {
  if (table->objs[ I ].nfilters<H5_REPACK_MAX_NFILTERS)
@@ -84,7 +82,7 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
  */
 
 static void aux_tblinsert_layout(pack_opttbl_t *table,
-                                 int I,
+                                 unsigned int I,
                                  pack_info_t *pack)
 {
  int k;
@@ -206,8 +204,8 @@ int options_add_layout( obj_list_t *obj_list,
                         pack_info_t *pack,
                         pack_opttbl_t *table )
 {
- unsigned int i;
- int          j, I, added=0, found=0;
+ unsigned int i, I;
+ int          j, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
@@ -305,8 +303,8 @@ int options_add_filter(obj_list_t *obj_list,
                        pack_opttbl_t *table )
 {
 
- unsigned int i;
- int          j, I, added=0, found=0;
+ unsigned int i, I;
+ int          j, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
