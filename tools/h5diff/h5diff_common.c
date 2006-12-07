@@ -45,12 +45,12 @@ void parse_input(int argc,
  */
 
  if ( argc==2 && (strcmp("-h",argv[1])==0) )
-  usage(1);
+  usage();
 
  if ( argc<3 )
  {
   printf("Number of arguments is only %d\n", argc );
-  usage(1);
+  usage();
  }
 
 /*-------------------------------------------------------------------------
@@ -76,10 +76,10 @@ void parse_input(int argc,
     switch (*s) {
     default:
      printf("-%s is an invalid option\n", s );
-     usage(1);
+     usage();
      break;
     case 'h':
-     usage(0);
+     usage();
      break;
     case 'v':
      options->m_verbose = 1;
@@ -99,7 +99,7 @@ void parse_input(int argc,
       if ( check_f_input(argv[i+1])==-1)
       {
        printf("<-d %s> is not a valid option\n", argv[i+1] );
-       usage(1);
+       usage();
       }
       options->delta = atof(argv[i+1]);
       i++; /* go to next */
@@ -107,7 +107,7 @@ void parse_input(int argc,
      else
      {
       printf("Not a valid -d option\n");
-      usage(1);
+      usage();
      }
      break;
     case 'p':
@@ -117,7 +117,7 @@ void parse_input(int argc,
       if ( check_f_input(argv[i+1])==-1)
       {
        printf("<-p %s> is not a valid option\n", argv[i+1] );
-       usage(1);
+       usage();
       }
       options->percent = atof(argv[i+1]);
       i++; /* go to next */
@@ -125,7 +125,7 @@ void parse_input(int argc,
      else
      {
       printf("Not a valid -p option\n");
-      usage(1);
+      usage();
      }
      break;
     case 'n':
@@ -135,7 +135,7 @@ void parse_input(int argc,
       if ( check_n_input(argv[i+1])==-1)
       {
        printf("<-n %s> is not a valid option\n", argv[i+1] );
-       usage(1);
+       usage();
       }
       options->count = atol(argv[i+1]);
       i++; /* go to next */
@@ -143,7 +143,7 @@ void parse_input(int argc,
      else
      {
       printf("Not a valid -n option\n");
-      usage(1);
+      usage();
      }
      break;
     } /*switch*/
@@ -288,7 +288,7 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-void usage(int status)
+void usage(void)
 {
  printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
  printf("\n");
@@ -343,7 +343,12 @@ void usage(int status)
  printf("1) datasets: numerical array differences 2) groups: name string difference ");
  printf("3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value\n");
 
- h5diff_exit(status);
+ #ifdef H5_HAVE_PARALLEL
+ if(g_Parallel)
+  h5diff_exit(0);
+ else
+#endif
+  exit(0);
 }
 
 /*-------------------------------------------------------------------------
