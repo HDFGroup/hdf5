@@ -29,6 +29,12 @@
 #include "H5Spkg.h"		/* Dataspaces				*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
+/* User data for iteration when converting attributes to dense storage */
+typedef struct {
+    H5F_t      *f;              /* Pointer to file for insertion */
+    hid_t dxpl_id;              /* DXPL during iteration */
+} H5O_iter_cvt_t;
+
 /* User data for iteration when updating an attribute */
 typedef struct {
     /* down */
@@ -1264,6 +1270,146 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_attr_to_dense_cb
+ *
+ * Purpose:	Object header iterator callback routine to convert compact
+ *              attributes to dense attributes
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  4 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_to_dense_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+
+    /* Insert attribute into dense storage */
+    if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, mesg->native) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
+
+    /* Convert message into a null message */
+    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+
+    /* Indicate that the object header was modified */
+    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_attr_to_dense_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_create
+ *
+ * Purpose:	Create a new attribute in the object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, December  8, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    unsigned mesg_flags = 0;            /* Flags for storing message */
+    htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_create)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(attr);
+
+    /* Should this message be written as a SOHM? */
+    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, H5O_ATTR_ID, attr)) > 0)
+        /* Mark the message as shared */
+        mesg_flags |= H5O_MSG_FLAG_SHARED;
+    else if(shared_mesg < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+#ifdef QAK
+HDfprintf(stderr, "%s: adding attribute to new-style object header\n", FUNC);
+HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
+HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
+HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
+#endif /* QAK */
+    /* Check for switching to "dense" attribute storage */
+    if(oh->version > H5O_VERSION_1 && oh->nattrs == oh->max_compact &&
+            !H5F_addr_defined(oh->attr_fheap_addr)) {
+        H5O_iter_cvt_t udata;           /* User data for callback */
+        H5O_mesg_operator_t op;         /* Wrapper for operator */
+#ifdef QAK
+HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
+#endif /* QAK */
+
+        /* Create dense storage for attributes */
+        if(H5A_dense_create(loc->file, dxpl_id, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
+
+        /* Set up user data for callback */
+        udata.f = loc->file;
+        udata.dxpl_id = dxpl_id;
+
+        /* Iterate over existing attributes, moving them to dense storage */
+        op.lib_op = H5A_attr_to_dense_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
+    } /* end if */
+
+    /* Increment attribute count */
+    oh->nattrs++;
+
+    /* Check for storing attribute with dense storage */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Insert attribute into dense storage */
+#ifdef QAK
+HDfprintf(stderr, "%s: inserting attribute to dense storage\n", FUNC);
+#endif /* QAK */
+        if(H5A_dense_insert(loc->file, dxpl_id, oh, mesg_flags, attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
+    } /* end if */
+    else {
+        /* Append new message to object header */
+        if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, mesg_flags, 0, attr, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new attribute in header")
+    } /* end else */
+
+    /* Update the modification time, if any */
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_create */
 
 
 /*-------------------------------------------------------------------------

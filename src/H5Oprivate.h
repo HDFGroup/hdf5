@@ -464,6 +464,7 @@ H5_DLL herr_t H5O_fill_convert(void *_fill, H5T_t *type, hid_t dxpl_id);
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 
 /* Attribute operations */
+H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, struct H5A_t *attr);
 H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
     struct H5A_t *attr);
 H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,

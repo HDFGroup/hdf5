@@ -79,12 +79,6 @@ typedef struct {
     hbool_t adj_link;           /* Whether to adjust links when removing messages */
 } H5O_iter_rm_t;
 
-/* User data for iteration when converting attributes to dense storage */
-typedef struct {
-    H5F_t      *f;              /* Pointer to file for insertion */
-    hid_t dxpl_id;              /* DXPL during iteration */
-} H5O_iter_to_dense_t;
-
 
 /********************/
 /* Package Typedefs */
@@ -135,8 +129,7 @@ static herr_t H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
  *
  * Purpose:	Create a new object header message
  *
- * Return:	Success:	The sequence number of the message that
- *				was created.
+ * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
  *
@@ -183,57 +176,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_attr_to_dense_cb
- *
- * Purpose:	Object header iterator callback routine to convert compact
- *              attributes to dense attributes
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  4 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_msg_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
-{
-    H5O_iter_to_dense_t *udata = (H5O_iter_to_dense_t *)_udata;   /* Operator user data */
-    herr_t ret_value = H5_ITER_CONT;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_attr_to_dense_cb)
-
-    /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-
-    /* Insert attribute into dense storage */
-    if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, mesg->native) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
-
-    /* Convert message into a null message */
-    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, FALSE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
-
-    /* Indicate that the object header was modified */
-    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_attr_to_dense_cb() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_msg_append
  *
  * Purpose:	Simplified version of H5O_msg_create, used when creating a new
  *              object header message (usually during object creation) and
  *              several messages will be added to the object header at once.
  *
- * Return:	Success:	The sequence number of the message that
- *				was created.
+ * Return:	Success:	Non-negative
  *
  *		Failure:	Negative
  *
@@ -248,12 +197,7 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg,
     unsigned *oh_flags_ptr)
 {
-    const H5O_msg_class_t *new_type;    /* Actual H5O class type for the ID */
-    const void *new_mesg;               /* Actual message to write */
     const H5O_msg_class_t *type;        /* Original H5O class type for the ID */
-    H5O_shared_t sh_mesg;               /* Shared object header info */
-    unsigned idx;                       /* Index of message to modify */
-    hbool_t new_format_attr;            /* Whether this message is an attribute in a new-format header */
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -262,6 +206,7 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     /* check args */
     HDassert(f);
     HDassert(oh);
+    HDassert(H5O_ATTR_ID != type_id);   /* Attributes are modified in another routine */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
@@ -276,72 +221,65 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
-    /* Set the flag for an attribute in a new format header */
-    if(H5O_ATTR_ID == type_id && oh->version > H5O_VERSION_1)
-        new_format_attr = TRUE;
-    else
-        new_format_attr = FALSE;
+    /* Append new message to object header */
+    if(H5O_msg_append_real(f, dxpl_id, oh, type, mesg_flags, update_flags, mesg, oh_flags_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new message in header")
 
-    /* If the message added is an attribute, check for dense storage */
-    if(new_format_attr) {
-#ifdef QAK
-HDfprintf(stderr, "%s: adding attribute to new-style object header\n", FUNC);
-HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
-HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
-HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
-#endif /* QAK */
-        /* Check for switching to "dense" attribute storage */
-        if(oh->nattrs == oh->max_compact && !H5F_addr_defined(oh->attr_fheap_addr)) {
-            H5O_iter_to_dense_t udata;          /* User data for callback */
-            H5O_mesg_operator_t op;             /* Wrapper for operator */
-#ifdef QAK
-HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
-#endif /* QAK */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_append() */
 
-            /* Create dense storage for attributes */
-            if(H5A_dense_create(f, dxpl_id, oh) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_append_real
+ *
+ * Purpose:	Append a new message to an object header.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  8 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
+    unsigned mesg_flags, unsigned update_flags, void *mesg,
+    unsigned *oh_flags_ptr)
+{
+    const H5O_msg_class_t *new_type;    /* Actual H5O class type for the ID */
+    const void *new_mesg;               /* Actual message to write */
+    H5O_shared_t sh_mesg;               /* Shared object header info */
+    unsigned idx;                       /* Index of message to modify */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-            /* Set up user data for callback */
-            udata.f = f;
-            udata.dxpl_id = dxpl_id;
+    FUNC_ENTER_NOAPI(H5O_msg_append_real, FAIL)
 
-            /* Iterate over existing attributes, moving them to dense storage */
-            op.lib_op = H5O_msg_attr_to_dense_cb;
-            if(H5O_msg_iterate_real(f, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, oh_flags_ptr) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
-        } /* end if */
-    } /* end if */
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(type);
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
+    HDassert(mesg);
+    HDassert(oh_flags_ptr);
 
-    /* Check for storing attribute with dense storage */
-    if(new_format_attr && H5F_addr_defined(oh->attr_fheap_addr)) {
-        /* Insert attribute into dense storage */
-#ifdef QAK
-HDfprintf(stderr, "%s: inserting attribute to dense storage\n", FUNC);
-#endif /* QAK */
-        if(H5A_dense_insert(f, dxpl_id, oh, mesg_flags, mesg) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
-    } /* end if */
-    else {
-        /* Create a new message */
-        if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "unable to create new message")
+    /* Create a new message */
+    if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "unable to create new message")
 
-        /* Write the information to the message */
-        if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to write message")
-    } /* end else */
-
-    /* If the message added is an attribute, increment count */
-    if(new_format_attr)
-        oh->nattrs++;
+    /* Write the information to the message */
+    if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
 #endif /* H5O_DEBUG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_append() */
+} /* end H5O_msg_append_real() */
 
 
 /*-------------------------------------------------------------------------

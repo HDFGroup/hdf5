@@ -392,6 +392,9 @@ H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg,
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 /* Object header message routines */
+H5_DLL herr_t H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
+    void *mesg, unsigned *oh_flags_ptr);
 H5_DLL void *H5O_msg_read_real(H5F_t *f, H5O_t *oh, unsigned type_id,
     int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);

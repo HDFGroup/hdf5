@@ -237,6 +237,8 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -322,8 +324,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* If the creation property list is H5P_DEFAULT, use the default character encoding */
     if(acpl_id == H5P_DEFAULT)
         attr->encoding = H5F_DEFAULT_CSET;
-    else
-    {
+    else {
         /* Get a local copy of the attribute creation property list */
         if (NULL == (ac_plist = H5I_object(acpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -415,9 +416,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
-    /* Create the attribute message and save the attribute index */
-    if(H5O_msg_create(&(attr->oloc), H5O_ATTR_ID, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
+    /* Create the attribute message */
+    if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create attribute in object header")
 
     /* Register the new attribute and get an ID for it */
     if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
@@ -427,10 +428,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->initialized = FALSE;
 
 done:
-    if(ret_value < 0) {
+    /* Cleanup on failure */
+    if(ret_value < 0)
         if(attr)
             (void)H5A_close(attr);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_create() */
@@ -680,10 +681,10 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
-    if(ret_value < 0) {
+    /* Cleanup on failure */
+    if(ret_value < 0)
         if(attr)
             (void)H5A_close(attr);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_open() */
