@@ -28,7 +28,7 @@ $ type sys$input
          Creating  HDF5 library
 $!
 $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
-        "H5A, H5AC, H5B, H5B2, H5B2cache,"+-
+        "H5A, H5Abtree2, H5Adense, H5Adeprec, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C, H5CS,"+-  
         "H5D, H5Dcontig, H5Dcompact,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
@@ -46,10 +46,10 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5HG, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5MF, H5MM,"+-
         "H5MP, H5MPtest,H5L, H5Lexternal, H5O, H5Oalloc, H5Oattr, H5Obogus, H5Ocache,"+-
         "H5Ocont, H5Ocopy, H5Odbg, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
-        "H5Olinfo, H5Olink, H5Omtime,"+-
-        "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab,"+-
+        "H5Olinfo, H5Olink, H5Omessage, H5Omtime,"+-
+        "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab, H5Otest, "+-
         "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Plapl, "+-
-        "H5Pocpl, H5Ptest, H5Pstrcpl, H5Plcpl"
+        "H5Pocpl, H5Pocpypl, H5Ptest, H5Pstrcpl, H5Plcpl"
 $ cobj1= "H5R, H5RC,"+-
         "H5RS, H5S, H5Sall, H5Shyper, H5Smpio, H5Snone, H5Spoint,"+-
         "H5Sselect, H5Stest,"+-
