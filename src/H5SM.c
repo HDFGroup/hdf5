@@ -193,7 +193,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
 
     /* Allocate space for the table on disk */
     table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t) (table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
-    if(HADDR_UNDEF == (table_addr = H5MF_alloc(f, H5FD_MEM_SOHM, dxpl_id, table_size)))
+    if(HADDR_UNDEF == (table_addr = H5MF_alloc(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for SOHM table")
 
     /* Cache the new table */
@@ -207,7 +207,7 @@ done:
     if(ret_value < 0)
     {
         if(table_addr != HADDR_UNDEF)
-            H5MF_xfree(f, H5FD_MEM_SOHM, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
+            H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
         if(table != NULL)
             H5FL_FREE(H5SM_master_table_t, table);
     }
@@ -455,7 +455,7 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t * header, hid_t dxpl_id)
 
     /* Allocate space for the list on disk */
     size = H5SM_LIST_SIZE(f, num_entries);
-    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_SOHM, dxpl_id, size)))
+    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_SOHM_INDEX, dxpl_id, size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list")
 
     /* Put the list into the cache */
@@ -475,7 +475,7 @@ done:
             H5FL_FREE(H5SM_list_t, list);
         }
         if(addr != HADDR_UNDEF)
-            H5MF_xfree(f, H5FD_MEM_SOHM, dxpl_id, addr, size);
+            H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, addr, size);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -731,7 +731,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
             list = NULL;
 
             list_size = H5SM_LIST_SIZE(f, header->list_to_btree);
-            if(H5MF_xfree(f, H5FD_MEM_SOHM, dxpl_id, header->index_addr, list_size) < 0)
+            if(H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, header->index_addr, list_size) < 0)
 	        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to free shared message list")
 
             header->index_addr = tree_addr;

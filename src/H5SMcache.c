@@ -161,7 +161,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
         /* Write the table to disk */
         HDassert((size_t)(p - buf) == size);
-	if(H5F_block_write(f, H5FD_MEM_SOHM, addr, size, dxpl_id, buf) < 0)
+	if(H5F_block_write(f, H5FD_MEM_SOHM_TABLE, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to save sohm table to disk")
 
 	table->cache_info.is_dirty = FALSE;
@@ -216,7 +216,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_SOHM, addr, table_size, dxpl_id, buf) < 0)
+    if(H5F_block_read(f, H5FD_MEM_SOHM_TABLE, addr, table_size, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_READERROR, NULL, "can't read SOHM table")
 
     p = buf;
@@ -438,7 +438,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 
         /* Write the list to disk */
         HDassert((size_t)(p - buf) == size);
-	if(H5F_block_write(f, H5FD_MEM_SOHM, addr, size, dxpl_id, buf) < 0)
+	if(H5F_block_write(f, H5FD_MEM_SOHM_INDEX, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to save sohm table to disk")
 
         list->cache_info.is_dirty = FALSE;
@@ -503,7 +503,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read list from disk */
-    if(H5F_block_read(f, H5FD_MEM_SOHM, addr, size, dxpl_id, buf) < 0)
+    if(H5F_block_read(f, H5FD_MEM_SOHM_INDEX, addr, size, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_READERROR, NULL, "can't read SOHM list")
     p = buf;
 

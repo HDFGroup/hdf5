@@ -39,7 +39,6 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_GHEAP      = 4,
     H5FD_MEM_LHEAP      = 5,
     H5FD_MEM_OHDR       = 6,
-    H5FD_MEM_SOHM       = 7,
 
     H5FD_MEM_NTYPES				/*must be last*/
 } H5FD_mem_t;
@@ -75,6 +74,19 @@ typedef enum H5FD_mem_t {
  */
 #define H5FD_MEM_FSPACE_HDR     H5FD_MEM_OHDR
 #define H5FD_MEM_FSPACE_SINFO   H5FD_MEM_LHEAP
+
+/* Map "shared object header message" master table to 'ohdr' type file memory,
+ * since its a fair amount of work to add a new kind of file memory and they are
+ * similar enough to object headers and probably too minor to deserve their own
+ * type.
+ *
+ * Map "shared object header message" indices to 'btree' type file memory,
+ * since they are similar enough to B-tree nodes.
+ *
+ *      -QAK
+ */
+#define H5FD_MEM_SOHM_TABLE     H5FD_MEM_OHDR
+#define H5FD_MEM_SOHM_INDEX     H5FD_MEM_BTREE
 
 /*
  * A free-list map which maps all types of allocation requests to a single

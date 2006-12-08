@@ -2187,7 +2187,7 @@ static void test_sohm_size2(int close_reopen)
      */
     if(btree_index.attrs1 > list_index_small.attrs1)
         VERIFY(0, 1, "h5_get_file_size");
-    if(btree_index.attrs1 > list_index_med.attrs1)
+    if(btree_index.attrs1 > list_index_med.attrs1 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
     if(list_index_med.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
@@ -2224,7 +2224,7 @@ static void test_sohm_size2(int close_reopen)
         VERIFY(0, 1, "h5_get_file_size");
     if(list_index_small.attrs2 > btree_index.attrs2 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
-    if(btree_index.attrs2 > list_index_med.attrs2)
+    if(btree_index.attrs2 > list_index_med.attrs2 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
     if(list_index_med.attrs2 > btree_index.attrs2 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
