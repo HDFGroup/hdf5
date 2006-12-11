@@ -24,6 +24,7 @@ file1     file2
 Group:       </g1> and </g1>
 0 differences found
 Dataset:     </g1/dset1> and </g1/dset1>
+size [3x2]
 position        dset1           dset1           difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              

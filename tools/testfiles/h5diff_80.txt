@@ -40,6 +40,7 @@ file1     file2
     x      x    /refreg        
 
 Dataset:     </dset> and </dset>
+size [2]
 position        dset            dset            difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
@@ -50,6 +51,7 @@ Dataset:     </dsetref> and </dsetref>
 Group:       </g1> and </g1>
 0 differences found
 Dataset:     </g1/array> and </g1/array>
+size [2]
 position        array           array           difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
@@ -60,6 +62,7 @@ position        array           array           difference
 [ 1 ]          6               0               6              
 6 differences found
 Dataset:     </g1/array2D> and </g1/array2D>
+size [3x2]
 position        array2D         array2D         difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -82,6 +85,7 @@ position        array2D         array2D         difference
 [ 2 1 ]          18              0               18             
 18 differences found
 Dataset:     </g1/array3D> and </g1/array3D>
+size [4x3x2]
 position        array3D         array3D         difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -158,12 +162,14 @@ position        array3D         array3D         difference
 [ 3 2 1 ]          72              0               72             
 72 differences found
 Dataset:     </g1/bitfield> and </g1/bitfield>
+size [2]
 position        bitfield        bitfield        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
 Dataset:     </g1/bitfield2D> and </g1/bitfield2D>
+size [3x2]
 position        bitfield2D      bitfield2D      difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -174,6 +180,7 @@ position        bitfield2D      bitfield2D      difference
 [ 2 1 ]          6               0               6              
 6 differences found
 Dataset:     </g1/bitfield3D> and </g1/bitfield3D>
+size [4x3x2]
 position        bitfield3D      bitfield3D      difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -202,6 +209,7 @@ position        bitfield3D      bitfield3D      difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 Dataset:     </g1/compound> and </g1/compound>
+size [2]
 position        compound        compound        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
@@ -210,6 +218,7 @@ position        compound        compound        difference
 [ 1 ]          4               0               4              
 4 differences found
 Dataset:     </g1/compound2D> and </g1/compound2D>
+size [3x2]
 position        compound2D      compound2D      difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -226,6 +235,7 @@ position        compound2D      compound2D      difference
 [ 2 1 ]          12              0               12             
 12 differences found
 Dataset:     </g1/compound3D> and </g1/compound3D>
+size [4x3x2]
 position        compound3D      compound3D      difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -278,6 +288,7 @@ position        compound3D      compound3D      difference
 [ 3 2 1 ]          48              0               48             
 48 differences found
 Dataset:     </g1/enum> and </g1/enum>
+size [2]
 position        enum            enum            difference          
 ------------------------------------------------------------
 [ 0 ]          RED              GREEN            
@@ -289,12 +300,14 @@ Dataset:     </g1/enum3D> and </g1/enum3D>
 </g1/enum3D> and </g1/enum3D> are empty datasets
 0 differences found
 Dataset:     </g1/float> and </g1/float>
+size [2]
 position        float           float           difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
 Dataset:     </g1/float2D> and </g1/float2D>
+size [3x2]
 position        float2D         float2D         difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -305,6 +318,7 @@ position        float2D         float2D         difference
 [ 2 1 ]          6               0               6              
 6 differences found
 Dataset:     </g1/float3D> and </g1/float3D>
+size [4x3x2]
 position        float3D         float3D         difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -333,12 +347,14 @@ position        float3D         float3D         difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 Dataset:     </g1/integer> and </g1/integer>
+size [2]
 position        integer         integer         difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
 Dataset:     </g1/integer2D> and </g1/integer2D>
+size [3x2]
 position        integer2D       integer2D       difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -349,6 +365,7 @@ position        integer2D       integer2D       difference
 [ 2 1 ]          6               0               6              
 6 differences found
 Dataset:     </g1/integer3D> and </g1/integer3D>
+size [4x3x2]
 position        integer3D       integer3D       difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -377,12 +394,14 @@ position        integer3D       integer3D       difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 Dataset:     </g1/opaque> and </g1/opaque>
+size [2]
 position        opaque          opaque          difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
 Dataset:     </g1/opaque2D> and </g1/opaque2D>
+size [3x2]
 position        opaque2D        opaque2D        difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -393,6 +412,7 @@ position        opaque2D        opaque2D        difference
 [ 2 1 ]          6               0               6              
 6 differences found
 Dataset:     </g1/opaque3D> and </g1/opaque3D>
+size [4x3x2]
 position        opaque3D        opaque3D        difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
@@ -421,140 +441,173 @@ position        opaque3D        opaque3D        difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 Dataset:     </g1/reference> and </g1/reference>
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 4 differences found
 Dataset:     </g1/reference2D> and </g1/reference2D>
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 12 differences found
 Dataset:     </g1/reference3D> and </g1/reference3D>
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
+size [2]
 position                                        difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 48 differences found
 Dataset:     </g1/string> and </g1/string>
+size [2]
 position        string          string          difference          
 ------------------------------------------------------------
 [ 0 ]          a                z                
@@ -563,6 +616,7 @@ position        string          string          difference
 [ 1 ]          e                z                
 4 differences found
 Dataset:     </g1/string2D> and </g1/string2D>
+size [3x2]
 position        string2D        string2D        difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
@@ -579,6 +633,7 @@ position        string2D        string2D        difference
 [ 2 1 ]          l                z                
 12 differences found
 Dataset:     </g1/string3D> and </g1/string3D>
+size [4x3x2]
 position        string3D        string3D        difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
@@ -630,6 +685,7 @@ position        string3D        string3D        difference
 [ 3 2 1 ]          Z                z                
 47 differences found
 Dataset:     </g1/vlen> and </g1/vlen>
+size [2]
 position        vlen            vlen            difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
@@ -637,6 +693,7 @@ position        vlen            vlen            difference
 [ 1 ]          3               0               3              
 3 differences found
 Dataset:     </g1/vlen2D> and </g1/vlen2D>
+size [3x2]
 position        vlen2D          vlen2D          difference          
 ------------------------------------------------------------
 [ 0 1 ]          1               0               1              
@@ -652,6 +709,7 @@ position        vlen2D          vlen2D          difference
 [ 2 1 ]          11              0               11             
 11 differences found
 Dataset:     </g1/vlen3D> and </g1/vlen3D>
+size [4x3x2]
 position        vlen3D          vlen3D          difference          
 ------------------------------------------------------------
 [ 0 0 1 ]          1               0               1              

@@ -7,6 +7,7 @@ file1     file2
     x      x    /big           
 
 Dataset:     </big> and </big>
+size [1073741824]
 position        big             big             difference          
 ------------------------------------------------------------
 [ 268435456 ]          31              0               31             

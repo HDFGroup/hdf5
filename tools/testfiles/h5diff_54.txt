@@ -2,6 +2,7 @@
 Expected output for 'h5diff h5diff_dtypes.h5 h5diff_dtypes.h5 -v dset4a dset4b'
 #############################
 Dataset:     </dset4a> and </dset4b>
+size [3x2]
 position        dset4a          dset4b          difference          
 ------------------------------------------------------------
 [ 1 0 ]          1               3               2              
