@@ -30,6 +30,7 @@
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
+#include "H5private.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -128,18 +129,23 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 ///\param	strg      - IN: Buffer for read string
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
+// Modification
+//		2006/12/9 - H5Aread allocates memory for character string
+//			    buffer with malloc, therefore, no allocation here,
+//			    but HDfree is needed. - BMR
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
-   size_t size = mem_type.getSize();
-   char* strg_C = new char[size+1];  // temporary C-string for C API
-   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C );
+   char* strg_C;  // temporary C-string for C API
+
+   // call C API to get the attribute string of chars
+   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C);
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::read", "H5Aread failed");
    }
-   strg = strg_C;
-   delete []strg_C;
+   strg = strg_C;	// get 'string' from the C char*
+   HDfree(strg_C);
 }
 
 //--------------------------------------------------------------------------
