@@ -317,7 +317,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # regardless of the return code of distclean.
     ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
 
-    SVNROOT=http://sleipnir.hdfgroup.uiuc.edu/svn/repos
+    SVNROOT=http://svn.hdfgroup.uiuc.edu
     # Check out the current version from source repository.
     (cd $BASEDIR; svn -q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
 fi # Do source checkout
