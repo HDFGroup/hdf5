@@ -1143,6 +1143,59 @@ test_attr_dtype_shared(void)
 
 /****************************************************************
 **
+**  test_string_attr(): Test read/write string attribute.
+**      Tests string attributes on groups.
+**
+****************************************************************/
+/* Info for a string attribute */
+const H5std_string ATTRSTR_NAME("String_attr");
+const H5std_string ATTRSTR_DATA("String Attribute");
+
+static void
+test_string_attr(void)
+{
+    // Output message about test being performed
+    MESSAGE(5, ("Testing Basic Attribute Writing Functions\n"));
+
+    try {
+	// Create file
+	H5File fid1(FILENAME, H5F_ACC_RDWR);
+
+	// Create a variable length string datatype to refer to.
+	StrType type(0, H5T_VARIABLE);
+
+	// Open the root group.
+	Group root = fid1.openGroup("/");
+
+	// Create dataspace for the attribute.
+	DataSpace att_space (H5S_SCALAR);
+
+	// Create an attribute for the root group.
+	Attribute gr_attr = root.createAttribute(ATTRSTR_NAME, type, att_space);
+
+	// Write data to the attribute.
+	gr_attr.write(type, ATTRSTR_DATA);
+
+	// Read and verify the attribute string as a string of chars.
+	char *string_att_check;
+	gr_attr.read(type, &string_att_check);
+	if(HDstrcmp(string_att_check, ATTRSTR_DATA.c_str())!=0)
+	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), string_att_check);
+
+	// Read and verify the attribute string as an std::string.
+	H5std_string read_str;
+	gr_attr.read(type, read_str);
+	if (read_str != ATTRSTR_DATA)
+	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n",__LINE__, ATTRSTR_DATA, read_str);
+    } // end try block
+
+    catch (Exception E) {
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   /* test_string_attr() */
+
+/****************************************************************
+**
 **  test_attr(): Main attribute testing routine.
 **
 ****************************************************************/
@@ -1167,6 +1220,8 @@ test_attr(void)
     test_attr_delete();		// Test deleting attributes
 
     test_attr_dtype_shared();	// Test using shared datatypes in attributes
+
+    test_string_attr();		// Test read/write string attribute
 
 }   /* test_attr() */
 
