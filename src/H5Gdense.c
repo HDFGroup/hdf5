@@ -482,12 +482,9 @@ H5G_dense_lookup_cb(const void *_lnk, void *_user_lnk)
     HDassert(lnk);
     HDassert(user_lnk);
 
-    /* Check if we want the link information */
-    if(user_lnk) {
-        /* Copy link information */
-        if(H5O_msg_copy(H5O_LINK_ID, lnk, user_lnk) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
-    } /* end if */
+    /* Copy link information */
+    if(H5O_msg_copy(H5O_LINK_ID, lnk, user_lnk) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

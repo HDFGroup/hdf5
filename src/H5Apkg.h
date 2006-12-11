@@ -140,11 +140,17 @@ H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 
 /* Attribute "dense" storage routines */
+H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    const char *name);
 H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const H5A_t *attr);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     haddr_t attr_fheap_addr, haddr_t name_bt2_addr, unsigned skip,
     unsigned *last_attr, H5A_operator_t op, void *op_data);
+
+/* Attribute object header routines */
+H5_DLL herr_t H5O_attr_reset(void *_mesg);
+H5_DLL herr_t H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
 
 #endif /* _H5Apkg_H */
 

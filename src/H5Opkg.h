@@ -23,6 +23,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Other private headers needed by this file */
+#include "H5Aprivate.h"		/* Attributes				*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 
 /* Object header macros */
@@ -417,6 +418,17 @@ H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, void *mesg);
+
+/* Attribute operations */
+H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
+H5_DLL H5A_t *H5O_attr_open(const H5O_loc_t *loc, const char *name,
+    hid_t dxpl_id);
+H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
+    H5A_t *attr);
+H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
+    const char *old_name, const char *new_name);
+H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
+    unsigned skip, unsigned *last_attr, H5A_operator_t op, void *op_data);
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);

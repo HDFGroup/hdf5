@@ -574,6 +574,7 @@
 ./src/H5O.c
 ./src/H5Oalloc.c
 ./src/H5Oattr.c
+./src/H5Oattribute.c
 ./src/H5Obogus.c
 ./src/H5Ocache.c
 ./src/H5Ocont.c

@@ -249,6 +249,100 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5A_dense_open_cb
+ *
+ * Purpose:	Callback when an attribute is located in an index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A_dense_open_cb(const void *_attr, void *_user_attr)
+{
+    const H5A_t *attr = (const H5A_t *)_attr; /* Record from B-tree */
+    H5A_t **user_attr = (H5A_t **)_user_attr; /* User data from v2 B-tree attribute lookup */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_open_cb)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(attr);
+    HDassert(user_attr);
+
+    /* Copy attribute information */
+    if(NULL == (*user_attr = H5A_copy(NULL, attr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_dense_open_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_dense_open
+ *
+ * Purpose:	Open an attribute in dense storage structures for an object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+H5A_t *
+H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
+{
+    H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
+    H5HF_t *fheap = NULL;               /* Fractal heap handle */
+    H5A_t *ret_value = NULL;            /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_dense_open, NULL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(name);
+
+    /* Open the fractal heap */
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, oh->attr_fheap_addr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap")
+
+    /* Create the "udata" information for v2 B-tree record modify */
+    udata.f = f;
+    udata.dxpl_id = dxpl_id;
+    udata.fheap = fheap;
+    udata.name = name;
+    udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.flags = 0;
+    udata.corder = -1;   /* XXX: None yet */
+    udata.found_op = H5A_dense_open_cb;       /* v2 B-tree comparison callback */
+    udata.found_op_data = &ret_value;
+
+    /* Find & copy the attribute in the 'name' index */
+    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute in name index")
+
+done:
+    /* Release resources */
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, NULL, "can't close fractal heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_dense_open() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5A_dense_insert
  *
  * Purpose:	Insert an attribute into dense storage structures for an object

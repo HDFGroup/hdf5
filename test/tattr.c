@@ -1683,12 +1683,12 @@ test_attr_dtype_shared(hid_t fapl)
 
 /****************************************************************
 **
-**  test_attr_dense(): Test basic H5A (attribute) code.
-**      Tests "dense" attribute storage
+**  test_attr_dense_create(): Test basic H5A (attribute) code.
+**      Tests "dense" attribute storage creation
 **
 ****************************************************************/
 static void
-test_attr_dense(hid_t fapl)
+test_attr_dense_create(hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
     hid_t	dataset;	/* Dataset ID			*/
@@ -1703,7 +1703,7 @@ test_attr_dense(hid_t fapl)
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Dense Attribute Storage\n"));
+    MESSAGE(5, ("Testing Dense Attribute Storage Creation\n"));
 
     /* Create file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -1781,7 +1781,128 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
-}   /* test_attr_dense() */
+}   /* test_attr_dense_create() */
+
+/****************************************************************
+**
+**  test_attr_dense_open(): Test basic H5A (attribute) code.
+**      Tests opening attributes in "dense" storage
+**
+****************************************************************/
+static void
+test_attr_dense_open(hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    max_compact;    /* Maximum # of attributes to store compactly */
+    unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Opening Attributes in Dense Storage\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Query the group creation properties */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Retrieve limits for compact/dense attribute storage */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+#ifdef QAK
+HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
+#endif /* QAK */
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add attributes, until just before coverting to dense storage */
+    for(u = 0; u < max_compact; u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add one more attribute, to push into "dense" storage */
+    /* Create attribute */
+    sprintf(attrname, "attr %02u", u);
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Write data into the attribute */
+    ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Re-open all the attributes and verify the data */
+    for(u = 0; u <= max_compact; u++) {
+        unsigned value;
+
+        /* Open attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Aopen_name(dataset, attrname);
+        CHECK(attr, FAIL, "H5Aopen");
+
+        /* Read data from the attribute */
+        ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
+        CHECK(ret, FAIL, "H5Aread");
+        VERIFY(value, u, "H5Aread");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_dense_open() */
 
 /****************************************************************
 **
@@ -1852,7 +1973,8 @@ test_attr(void)
     } /* end for */
 
     /* Tests on "new format" attribute storage */
-    test_attr_dense(fapl2);             /* Test dense attribute storage */
+    test_attr_dense_create(fapl2);         /* Test dense attribute storage creation */
+    test_attr_dense_open(fapl2);           /* Test opening attributes in dense storage */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */

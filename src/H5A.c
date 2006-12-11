@@ -17,6 +17,7 @@
 /****************/
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	*/
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5A_init_interface
@@ -31,6 +32,7 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
@@ -64,8 +66,10 @@ typedef struct H5A_iter_cb1 {
 /********************/
 
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
-			const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
+    const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 static hid_t H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
+static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
+    hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 static int H5A_get_index(H5O_loc_t *loc, const char *name, hid_t dxpl_id);
@@ -548,7 +552,7 @@ hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
     H5G_loc_t    	loc;            /* Object location */
-    int            	idx;
+    H5A_t               *attr = NULL;   /* Attribute opened */
     hid_t		ret_value;
 
     FUNC_ENTER_API(H5Aopen_name, FAIL)
@@ -562,13 +566,13 @@ H5Aopen_name(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Look up the attribute for the object */
-    if((idx = H5A_get_index(loc.oloc, name, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
+    /* Open the attribute on the object header */
+    if(NULL == (attr = H5A_open_by_name(&loc, name, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
-    /* Go do the real work for opening the attribute */
-    if((ret_value = H5A_open(&loc, (unsigned)idx, H5AC_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -676,7 +680,7 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
-    /* Register the new attribute and get an ID for it */
+    /* Register the attribute and get an ID for it */
     if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
@@ -688,6 +692,77 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_open_by_name
+ *
+ * Purpose:
+ *      Open an attribute in an object header, according to it's name
+ *      
+ * Usage:
+ *  herr_t H5A_open(loc, name, dxpl_id)
+ *      const H5G_loc_t *loc;   IN: Pointer to group location for object
+ *      const char *name;       IN: Name of attribute to open
+ *      hid_t dxpl_id;          IN: DXPL for operation
+ *
+ * Return: Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		December 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5A_t *
+H5A_open_by_name(const H5G_loc_t *loc, const char *name, hid_t dxpl_id)
+{
+    H5A_t       *attr = NULL;   /* Attribute from object header */
+    H5A_t       *ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5A_open_by_name)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Read in attribute from object header */
+    if(NULL == (attr = H5O_attr_open(loc->oloc, name, dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header")
+    attr->initialized = TRUE;
+
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+    /* Clear object location */
+    if(H5O_loc_reset(&(attr->oloc)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset location")
+
+    /* Clear path name */
+    if(H5G_name_reset(&(attr->path)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset path")
+#endif /* H5_USING_PURIFY */
+
+    /* Deep copy of the symbol table entry */
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
+
+    /* Deep copy of the group hier. path */
+    if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
+
+    /* Hold the symbol table entry (and file) open */
+    if(H5O_open(&(attr->oloc)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open")
+    attr->obj_opened = TRUE;
+
+    /* Set return value */
+    ret_value = attr;
+
+done:
+    /* Cleanup on failure */
+    if(ret_value == NULL && attr)
+        (void)H5A_close(attr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A_open_by_name() */
 
 
 /*--------------------------------------------------------------------------
@@ -1200,14 +1275,14 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 
         /* Terminate the string */
         buf[copy_len]='\0';
-    }
+    } /* end if */
 
     /* Set return value */
     ret_value = (ssize_t)nbytes;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Aget_type() */
+} /* H5Aget_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -1511,9 +1586,12 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
     new_attr->obj_opened = FALSE;
 
     /* Copy the guts of the attribute */
-    new_attr->name = H5MM_xstrdup(old_attr->name);
-    new_attr->dt = H5T_copy(old_attr->dt, H5T_COPY_ALL);
-    new_attr->ds = H5S_copy(old_attr->ds, FALSE);
+    if(NULL == (new_attr->name = H5MM_xstrdup(old_attr->name)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute name")
+    if(NULL == (new_attr->dt = H5T_copy(old_attr->dt, H5T_COPY_ALL)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute datatype")
+    if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute dataspace")
     /* XXX: Copy the object location and group path? -QAK */
 
     /* Copy the attribute data, if there is any */
@@ -1530,10 +1608,9 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
     ret_value = new_attr;
 
 done:
-    if(ret_value == NULL) {
+    if(ret_value == NULL)
         if(new_attr != NULL && allocated_attr)
             (void)H5A_close(new_attr);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_copy() */
