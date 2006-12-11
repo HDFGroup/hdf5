@@ -52,7 +52,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// not yet implemented??
 	hsize_t getVlenBufSize( DataType& type, DataSpace& space ) const;
-	void vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf ) const;
+	static void vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf );
 
 	// Reads the data of this dataset and stores it in the provided buffer.
 	// The memory and file dataspaces and the transferring property list

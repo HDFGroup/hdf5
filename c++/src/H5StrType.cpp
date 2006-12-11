@@ -102,7 +102,7 @@ StrType::StrType( const int dummy, const size_t& size ) : AtomType()
 {
    // use DataType::copy to make a copy of the string predefined type
    // then set its length
-   copy(H5T_C_S1);
+   copy(PredType::C_S1);
    setSize(size);
 }
 
