@@ -660,10 +660,10 @@ herr_t
 H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
 {
     unsigned btree_k[H5B_NUM_BTREE_ID];
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_istore_k, FAIL);
+    FUNC_ENTER_API(H5Pget_istore_k, FAIL)
     H5TRACE2("e","ix",plist_id,ik);
 
     /* Get the plist structure */
@@ -671,15 +671,15 @@ H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
-    if (ik) {
+    if(ik) {
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
         *ik = btree_k[H5B_ISTORE_ID];
-    }
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_istore_k() */
 
 
 /*-------------------------------------------------------------------------
@@ -716,15 +716,15 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
     unsigned        flags_used; /* type flags already specified.
                                  * Used to make sure a flag isn't used twice.
                                  */
-    herr_t          ret_value=SUCCEED;   /* return value */
+    herr_t          ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_shared_mesgs, FAIL);
+    FUNC_ENTER_API(H5Pset_shared_mesgs, FAIL)
     H5TRACE3("e","iIu*Iu",plist_id,nindexes,mesg_type_flags);
 
     /* Check arguments */
-    if (nindexes > H5SM_MAX_NUM_INDEXES)
+    if(nindexes > H5SM_MAX_NUM_INDEXES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is too large");
-    if (nindexes > 0 && !mesg_type_flags)
+    if(nindexes > 0 && !mesg_type_flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no type flags specified");
 
     /* Get the plist structure */
@@ -732,26 +732,26 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     flags_used = H5O_MESG_NONE_FLAG;
-
-    for (i=0; i<nindexes; i++) {
-        if (mesg_type_flags[i] == H5O_MESG_NONE_FLAG)
+    for(i = 0; i < nindexes; i++) {
+        if(mesg_type_flags[i] == H5O_MESG_NONE_FLAG)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "at least one flag must be set");
-        if (mesg_type_flags[i] != (mesg_type_flags[i] & H5O_MESG_ALL_FLAG))
+        if(mesg_type_flags[i] != (mesg_type_flags[i] & H5O_MESG_ALL_FLAG))
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid mesg type flag set");
-        if (mesg_type_flags[i] & flags_used)
+        if(mesg_type_flags[i] & flags_used)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "flag set for two different indexes");
-        type_flags[i]=mesg_type_flags[i]; /* Store message types dimensions */
+        type_flags[i] = mesg_type_flags[i]; /* Store message types dimensions */
         flags_used |= mesg_type_flags[i]; /* Make sure the user doesn't re-use a flag */
     } /* end for */
 
+    /* Set properties in property list */
     if(H5P_set(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
     if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_shared_mesgs() */
 
 
 /*-------------------------------------------------------------------------
@@ -775,7 +775,7 @@ herr_t
 H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_nindexes, FAIL);
     H5TRACE2("e","iIu",plist_id,nindexes);
@@ -785,7 +785,7 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is greater than H5SM_MAX_NUM_INDEXES");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_set(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
@@ -793,9 +793,9 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
-
+} /* end H5Pset_shared_mesg_nindexes() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_shared_mesg_nindexes
  *
@@ -812,10 +812,10 @@ done:
 herr_t
 H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_mesg_nindexes, FAIL);
+    FUNC_ENTER_API(H5Pget_shared_mesg_nindexes, FAIL)
     H5TRACE2("e","i*Iu",plist_id,nindexes);
 
     /* Get the plist structure */
@@ -826,9 +826,9 @@ H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_shared_mesg_nindexes() */
 
-}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_shared_mesg_index
@@ -851,9 +851,9 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     unsigned    nindexes;               /* Number of SOHM indexes */
     unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
     unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL);
+    FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL)
     H5TRACE4("e","iIuIuIu",plist_id,index_num,mesg_type_flags,min_mesg_size);
 
     /* Check arguments */
@@ -870,6 +870,7 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
 
+    /* Range check */
     if(index_num > nindexes)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "index_num is greater than number of indexes in property list");
 
@@ -890,11 +891,10 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_shared_mesg_index() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_shared_mesg_index
  *

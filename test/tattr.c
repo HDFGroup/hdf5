@@ -1688,7 +1688,7 @@ test_attr_dtype_shared(hid_t fapl)
 **
 ****************************************************************/
 static void
-test_attr_dense_create(hid_t fapl)
+test_attr_dense_create(hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
     hid_t	dataset;	/* Dataset ID			*/
@@ -1794,7 +1794,7 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
 **
 ****************************************************************/
 static void
-test_attr_dense_open(hid_t fapl)
+test_attr_dense_open(hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
     hid_t	dataset;	/* Dataset ID			*/
@@ -1915,7 +1915,7 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
 **
 ****************************************************************/
 static void
-test_attr_dense_delete(hid_t fapl)
+test_attr_dense_delete(hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
     hid_t	dataset;	/* Dataset ID			*/
@@ -2018,7 +2018,9 @@ void
 test_attr(void)
 {
     hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
-    hbool_t new_format;     /* Whether to use the new format or not */
+    hid_t	fcpl = (-1), fcpl2 = (-1);    /* File creation property lists */
+    hbool_t new_format;         /* Whether to use the new format or not */
+    hbool_t use_shared;         /* Whether to use shared attributes or not */
     herr_t ret;                 /* Generic return value */
 
     /* Output message about test being performed */
@@ -2043,7 +2045,7 @@ test_attr(void)
 
         /* Set the FAPL for the type of format */
         if(new_format) {
-            MESSAGE(7, ("testing with new file  format\n"));
+            MESSAGE(7, ("testing with new file format\n"));
             my_fapl = fapl2;
         } /* end if */
         else {
@@ -2077,13 +2079,48 @@ test_attr(void)
         test_attr_dtype_shared(my_fapl);   /* Test using shared dataypes in attributes */
     } /* end for */
 
+    /* Create a default file creation property list */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(fcpl, FAIL, "H5Pcreate");
+
+    /* Copy the file creation property list */
+    fcpl2 = H5Pcopy(fcpl);
+    CHECK(fcpl2, FAIL, "H5Pcopy");
+
+    /* Make attributes > 1 byte shared (i.e. all of them :-) */
+    ret = H5Pset_shared_mesg_nindexes(fcpl2, (unsigned)1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl2, (unsigned)1, H5O_MESG_ATTR_FLAG, (unsigned)1);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
     /* Tests on "new format" attribute storage */
-    test_attr_dense_create(fapl2);         /* Test dense attribute storage creation */
-    test_attr_dense_open(fapl2);           /* Test opening attributes in dense storage */
-    test_attr_dense_delete(fapl2);         /* Test deleting attributes in dense storage */
+    /* Loop over using shared attributes */
+    for(use_shared = FALSE; use_shared <= TRUE; use_shared++) {
+        hid_t my_fcpl;
+
+        /* Set the FCPL for shared or not */
+        if(new_format) {
+            MESSAGE(7, ("testing with shared attributes\n"));
+            my_fcpl = fcpl2;
+        } /* end if */
+        else {
+            MESSAGE(7, ("testing with shared attributes\n"));
+            my_fcpl = fcpl;
+        } /* end else */
+
+        test_attr_dense_create(my_fcpl, fapl2);         /* Test dense attribute storage creation */
+        test_attr_dense_open(my_fcpl, fapl2);           /* Test opening attributes in dense storage */
+        test_attr_dense_delete(my_fcpl, fapl2);         /* Test deleting attributes in dense storage */
+    } /* end for */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
+
+    /* Close  FCPLs */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(fcpl2);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close  FAPLs */
     ret = H5Pclose(fapl);
