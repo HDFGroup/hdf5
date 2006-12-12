@@ -328,10 +328,10 @@ herr_t
 H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     void *udata, H5B2_found_t op, void *op_data)
 {
-    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
-    H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
+    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
+    H5RC_t      *bt2_shared = NULL;     /* Pointer to ref-counter for shared B-tree info */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    hbool_t     incr_rc = FALSE;        /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
@@ -346,16 +346,16 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
-    bt2_shared=bt2->shared;
+    bt2_shared = bt2->shared;
     H5RC_INC(bt2_shared);
-    incr_rc=TRUE;
+    incr_rc = TRUE;
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared = H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Make copy of the root node pointer to start search with */
@@ -370,7 +370,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     bt2 = NULL;
 
     /* Check for empty tree */
-    if(curr_node_ptr.node_nrec==0)
+    if(curr_node_ptr.node_nrec == 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Walk down B-tree to find record or leaf node where record is located */

@@ -183,7 +183,7 @@ H5FL_BLK_DEFINE(ser_attr);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_build_table_cb(const H5A_t *attr, uint8_t mesg_flags, void *_udata)
+H5A_dense_build_table_cb(const H5A_t *attr, unsigned mesg_flags, void *_udata)
 {
     H5A_dense_bt_ud_t *udata = (H5A_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -1169,6 +1169,69 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_dense_exists
+ *
+ * Purpose:	Check if an attribute exists in dense storage structures for
+ *              an object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
+{
+    H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
+    H5HF_t *fheap = NULL;               /* Fractal heap handle */
+    htri_t ret_value = TRUE;            /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_dense_exists, NULL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(name);
+
+    /* Open the fractal heap */
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, oh->attr_fheap_addr)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+    /* Create the "udata" information for v2 B-tree record 'find' */
+    udata.f = f;
+    udata.dxpl_id = dxpl_id;
+    udata.fheap = fheap;
+    udata.name = name;
+    udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.flags = 0;
+    udata.corder = -1;   /* XXX: None yet */
+    udata.found_op = NULL;       /* v2 B-tree comparison callback */
+    udata.found_op_data = NULL;
+
+/* XXX: test for shared attributes */
+    /* Find the attribute in the 'name' index */
+    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, NULL, NULL) < 0) {
+        /* Assume that the failure was just not finding the attribute & clear stack */
+        H5E_clear_stack(NULL);
+
+        ret_value = FALSE;
+    } /* end if */
+
+done:
+    /* Release resources */
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_dense_exists() */
 
 
 /*-------------------------------------------------------------------------

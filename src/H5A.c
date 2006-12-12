@@ -73,7 +73,6 @@ static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
-static herr_t H5A_find_idx_by_name(const void *mesg, unsigned idx, void *op_data);
 
 
 /*********************/
@@ -233,7 +232,6 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate, FAIL)
-    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -288,14 +286,12 @@ done:
  */
 static hid_t
 H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
-	   const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
+    const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
     H5A_t	    *attr = NULL;
-    H5A_iter_cb1     cb;                    /* Iterator callback */
-    H5P_genplist_t  *ac_plist=NULL;      /* New Property list */
     H5O_shared_t     sh_mesg;
-    htri_t           tri_ret;            /* htri_t return value */
-    hid_t	     ret_value = FAIL;
+    htri_t           tri_ret;           /* htri_t return value */
+    hid_t	     ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_create)
 
@@ -308,13 +304,14 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Reset shared message information */
     HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
-    /* Iterate over the existing attributes to check for duplicates */
-    cb.name = name;
-    cb.idx = (-1);
-/* XXX: Add support/test for dense attribute storage */
-    if((ret_value = H5O_msg_iterate(loc->oloc, H5O_ATTR_ID, H5A_find_idx_by_name, &cb, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
-    if(ret_value > 0)
+    /* Check for existing attribute with same name */
+    /* (technically, the "attribute create" operation will fail for a duplicated
+     *  name, but it's going to be hard to unwind all the special cases on
+     *  failure, so just check first, for now - QAK)
+     */
+    if((tri_ret = H5O_attr_exists(loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error checking attributes")
+    else if(tri_ret > 0)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL, "attribute already exists")
 
     /* Check if the dataspace has an extent set (or is NULL) */
@@ -329,8 +326,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(acpl_id == H5P_DEFAULT)
         attr->encoding = H5F_DEFAULT_CSET;
     else {
+        H5P_genplist_t  *ac_plist;      /* ACPL Property list */
+
         /* Get a local copy of the attribute creation property list */
-        if (NULL == (ac_plist = H5I_object(acpl_id)))
+        if(NULL == (ac_plist = H5I_object(acpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
@@ -420,7 +419,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
-    /* Create the attribute message */
+    /* Create the attribute on the object */
     if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create attribute in object header")
 
@@ -438,50 +437,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_create() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_find_idx_by_name
- PURPOSE
-    Iterator callback to determine the index of a attribute
- USAGE
-    herr_t H5A_find_idx_by_name (mesg, idx, op_data)
-        const H5A_t *mesg;      IN: Pointer to attribute
-        unsigned idx;           IN: Index of attribute
-        void *op_data;          IN: Op data passed in
- RETURNS
-    Non-negative on success, negative on failure
-
- DESCRIPTION
-        This function determines if an attribute matches the name to search
-    for (from the 'op_data') and sets the index value in the 'op_data'.
---------------------------------------------------------------------------*/
-static herr_t
-H5A_find_idx_by_name(const void *_mesg, unsigned idx, void *_op_data)
-{
-    const H5A_t *mesg = (const H5A_t *)_mesg;   /* Pointer to attribute */
-    H5A_iter_cb1 *op_data = (H5A_iter_cb1 *)_op_data;   /* Pointer to op data */
-    int		ret_value;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_find_idx_by_name)
-
-    HDassert(mesg);
-    HDassert(op_data);
-
-    /*
-     * Compare found attribute name to queried name and set the idx in the
-     * callback info if names are the same.
-     */
-    if(HDstrcmp(mesg->name, op_data->name) == 0) {
-        op_data->idx = idx;
-        ret_value = H5_ITER_STOP;
-    } /* end if */
-    else
-        ret_value = H5_ITER_CONT;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_find_idx_by_name() */
 
 
 /*--------------------------------------------------------------------------

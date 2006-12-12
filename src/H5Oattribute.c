@@ -143,7 +143,7 @@ typedef struct {
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_attr_to_dense_cb
+ * Function:	H5O_attr_to_dense_cb
  *
  * Purpose:	Object header iterator callback routine to convert compact
  *              attributes to dense attributes
@@ -157,13 +157,13 @@ typedef struct {
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_to_dense_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_to_dense_cb)
 
     /* check args */
     HDassert(oh);
@@ -182,7 +182,7 @@ H5A_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_attr_to_dense_cb() */
+} /* end H5O_attr_to_dense_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -248,7 +248,7 @@ HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
 
         /* Iterate over existing attributes, moving them to dense storage */
 /* XXX: Test this with shared attributes */
-        op.lib_op = H5A_attr_to_dense_cb;
+        op.lib_op = H5O_attr_to_dense_cb;
         if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
     } /* end if */
@@ -936,6 +936,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     /* check args */
     HDassert(oh);
     HDassert(mesg);
+    HDassert(!udata->found);
 
     /* Check for shared message */
     if(mesg->flags & H5O_MSG_FLAG_SHARED) {
@@ -1150,4 +1151,132 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_count */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_exists_cb
+ *
+ * Purpose:	Object header iterator callback routine to check for an
+ *              attribute stored compactly, by name.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 11 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_exists_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+{
+    H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
+    herr_t ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_exists_cb)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(mesg);
+    HDassert(!udata->found);
+
+    /* Check for shared message */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
+        H5A_t shared_attr;             /* Copy of shared attribute */
+
+	/*
+	 * If the message is shared then then the native pointer points to an
+	 * H5O_MSG_SHARED message.  We use that information to look up the real
+	 * message in the global heap or some other object header.
+	 */
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
+
+        /* Check for correct attribute message */
+        if(HDstrcmp(shared_attr.name, udata->name) == 0)
+            /* Indicate that this message is the attribute sought */
+            udata->found = TRUE;
+
+        /* Release copy of shared attribute */
+        H5O_attr_reset(&shared_attr);
+    } /* end if */
+    else {
+        /* Check for correct attribute message */
+        if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->name) == 0)
+            /* Indicate that this message is the attribute sought */
+            udata->found = TRUE;
+    } /* end else */
+
+    /* Check for finding correct message to delete */
+    if(udata->found) {
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_exists_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_exists
+ *
+ * Purpose:	Determine if an attribute with a particular name exists on an object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, December 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;           /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    htri_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_exists)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Check for attributes stored densely */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Check if attribute exists in dense storage */
+        if((ret_value = H5A_dense_exists(loc->file, dxpl_id, oh, name)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
+    } /* end if */
+    else {
+        H5O_iter_rm_t udata;            /* User data for callback */
+        H5O_mesg_operator_t op;         /* Wrapper for operator */
+
+        /* Set up user data for callback */
+        udata.f = loc->file;
+        udata.dxpl_id = dxpl_id;
+        udata.name = name;
+        udata.found = FALSE;
+
+        /* Iterate over existing attributes, checking for attribute with same name */
+        op.lib_op = H5O_attr_exists_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
+
+        /* Check that we found the attribute */
+        ret_value = udata.found;
+    } /* end else */
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_exists */
 

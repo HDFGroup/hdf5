@@ -228,7 +228,7 @@ sub rewrite_func ($$$$$) {
 	}
       }
     }
-    $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\",\"";
+    $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
     $trace .= join("", @arg_str) . "\"";
     my $len = 4 + length $trace;
     for (@arg_name) {
@@ -236,7 +236,7 @@ sub rewrite_func ($$$$$) {
 	$trace .= ",\n             $_";
 	$len = 13 + length;
       } else {
-	$trace .= ",$_";
+	$trace .= ", $_";
 	$len += 1 + length;
       }
     }

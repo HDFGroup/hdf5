@@ -1770,6 +1770,10 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
+    /* Attempt to add attribute again, which should fail */
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    VERIFY(attr, FAIL, "H5Acreate");
+
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
@@ -1955,7 +1959,7 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     is_dense = H5O_is_attr_dense_test(dataset);
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
-    /* Add attributes, until just before coverting to dense storage */
+    /* Add attributes, until well into dense storage */
     for(u = 0; u < (max_compact * 2); u++) {
         /* Create attribute */
         sprintf(attrname, "attr %02u", u);

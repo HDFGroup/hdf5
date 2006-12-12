@@ -432,6 +432,7 @@ H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id
 H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
 H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL htri_t H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id);
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);

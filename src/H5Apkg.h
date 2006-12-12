@@ -122,7 +122,7 @@ typedef struct {
 } H5A_attr_table_t;
 
 /* Attribute iteration operator for internal library callbacks */
-typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, uint8_t mesg_flags,
+typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, unsigned mesg_flags,
     void *op_data);
 
 /* Describe kind of callback to make for each attribute */
@@ -171,6 +171,8 @@ H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     haddr_t attr_fheap_addr, haddr_t name_bt2_addr, unsigned skip,
     unsigned *last_attr, const H5A_attr_iterate_t *attr_op, void *op_data);
 H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    const char *name);
+H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 
 /* Attribute table operations */
