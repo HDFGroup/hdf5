@@ -217,7 +217,7 @@ struct H5O_t {
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
 
-    /* Message management (stored, indirectly) */
+    /* Message management (stored, in chunks) */
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */

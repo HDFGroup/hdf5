@@ -96,6 +96,7 @@ typedef struct H5A_bt2_ud_common_t {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     H5HF_t      *fheap;                 /* Fractal heap handle               */
+    H5HF_t      *shared_fheap;          /* Fractal heap handle for shared messages */
     const char  *name;                  /* Name of attribute to compare      */
     uint32_t    name_hash;              /* Hash of name of attribute to compare */
     uint8_t     flags;                  /* Flags for attribute storage location */
@@ -111,7 +112,7 @@ typedef struct H5A_bt2_ud_common_t {
 typedef struct H5A_bt2_ud_ins_t {
     /* downward */
     H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
-    uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID of attribute to insert    */
+    const uint8_t *id;                  /* Heap ID of attribute to insert    */
 } H5A_bt2_ud_ins_t;
 
 /* Data structure to hold table of attributes for an object */

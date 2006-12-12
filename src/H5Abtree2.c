@@ -148,10 +148,9 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     udata->cmp = HDstrcmp(udata->name, attr->name);
 
     /* Check for correct attribute & callback to make */
-    if(udata->cmp == 0 && udata->found_op) {
+    if(udata->cmp == 0 && udata->found_op)
         if((udata->found_op)(attr, udata->found_op_data) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPERATE, FAIL, "attribute found callback failed")
-    } /* end if */
 
 done:
     /* Release the space allocated for the attrbute */
@@ -250,6 +249,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
         HGOTO_DONE(1)
     else {
         H5A_fh_ud_cmp_t fh_udata;       /* User data for fractal heap 'op' callback */
+        H5HF_t *fheap;                  /* Fractal heap handle to use for finding object */
         herr_t status;                  /* Status from fractal heap 'op' routine */
 
         /* Sanity check */
@@ -267,14 +267,14 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
         fh_udata.cmp = 0;
 
         /* Check for attribute in shared storage */
-        if(bt2_rec->flags) {
-HDfprintf(stderr, "%s: Shared dense storage for attributes not supported yet!\n", "H5A_dense_btree2_name_compare");
-HDassert(0 && "Shared dense storage for attributes not supported yet!");
-        } /* end if */
+        if(bt2_rec->flags)
+            fheap = bt2_udata->shared_fheap;
+        else
+            fheap = bt2_udata->fheap;
+        HDassert(fheap);
 
         /* Check if the user's link and the B-tree's link have the same name */
-        status = H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, bt2_rec->id,
-                H5A_dense_fh_name_cmp, &fh_udata);
+        status = H5HF_op(fheap, bt2_udata->dxpl_id, bt2_rec->id, H5A_dense_fh_name_cmp, &fh_udata);
         HDassert(status >= 0);
 
         /* Callback will set comparison value */
@@ -308,8 +308,8 @@ H5A_dense_btree2_name_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_n
 
     /* Encode the record's fields */
     UINT32ENCODE(raw, nrecord->hash)
-    HDmemcpy(raw, nrecord->id, (size_t)H5A_DENSE_FHEAP_ID_LEN);
     *raw++ = nrecord->flags;
+    HDmemcpy(raw, nrecord->id, (size_t)H5A_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_encode() */
@@ -337,8 +337,8 @@ H5A_dense_btree2_name_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_n
 
     /* Decode the record's fields */
     UINT32DECODE(raw, nrecord->hash)
-    HDmemcpy(nrecord->id, raw, (size_t)H5A_DENSE_FHEAP_ID_LEN);
     nrecord->flags = *raw++;
+    HDmemcpy(nrecord->id, raw, (size_t)H5A_DENSE_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_decode() */

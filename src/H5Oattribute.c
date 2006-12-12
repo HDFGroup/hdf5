@@ -161,7 +161,9 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
-    herr_t ret_value = H5_ITER_CONT;   /* Return value */
+    H5A_t shared_attr;                  /* Copy of shared attribute */
+    H5A_t *attr;                        /* Pointer to attribute to insert */
+    herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_to_dense_cb)
 
@@ -169,11 +171,23 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(oh);
     HDassert(mesg);
 
+    /* Check for shared attribute */
+    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
+        /* Read the shared attribute in */
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
+
+        /* Point attribute to insert at shared attribute read in */
+        attr = &shared_attr;
+    } /* end if */
+    else
+        attr = mesg->native;
+
     /* Insert attribute into dense storage */
-    if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, mesg->native) < 0)
+    if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, attr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
 
-    /* Convert message into a null message */
+    /* Convert message into a null message in the header */
     if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
@@ -181,6 +195,10 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 done:
+    /* Release copy of shared attribute */
+    if(attr == &shared_attr)
+        H5O_attr_reset(&shared_attr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_to_dense_cb() */
 

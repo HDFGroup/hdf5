@@ -47,7 +47,7 @@ typedef struct H5O_t H5O_t;
 
 /* JAMES: should these be in H5SM_private?  or renamed? */
 /* JAMES: causes errors encoding/decoding if this is wrong.  Can't be constant. */
-#define H5SM_FHEAP_ID_LEN 6
+#define H5SM_FHEAP_ID_LEN 7
 
 /* JAMES: not great? */
 typedef uint64_t H5SM_fheap_id_t;

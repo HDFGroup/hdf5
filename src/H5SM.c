@@ -40,7 +40,7 @@
 #define H5SM_FHEAP_MAN_WIDTH                     4
 #define H5SM_FHEAP_MAN_START_BLOCK_SIZE          1024
 #define H5SM_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
-#define H5SM_FHEAP_MAN_MAX_INDEX                 20
+#define H5SM_FHEAP_MAN_MAX_INDEX                 32
 #define H5SM_FHEAP_MAN_START_ROOT_ROWS           1
 #define H5SM_FHEAP_CHECKSUM_DBLOCKS              TRUE
 #define H5SM_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
@@ -62,6 +62,7 @@ static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id,
         H5SM_index_header_t *header, unsigned type_id, const H5O_shared_t * mesg,
         unsigned *cache_flags);
 static hsize_t H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key);
+static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 static ssize_t H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id);
 
 
@@ -217,6 +218,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5SM_type_to_flag
+ *
+ * Purpose:     Get the shared message flag for a given message type.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  James Laird
+ *              Tuesday, October 10, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_type_to_flag)
+
+    /* Translate the H5O type_id into an H5SM type flag */
+    switch(type_id) {
+        case H5O_SDSPACE_ID:
+            *type_flag = H5O_MESG_SDSPACE_FLAG;
+            break;
+        case H5O_DTYPE_ID:
+            *type_flag = H5O_MESG_DTYPE_FLAG;
+            break;
+        case H5O_FILL_NEW_ID:
+            *type_flag = H5O_MESG_FILL_FLAG;
+            break;
+        case H5O_PLINE_ID:
+            *type_flag = H5O_MESG_PLINE_FLAG;
+            break;
+        case H5O_ATTR_ID:
+            *type_flag = H5O_MESG_ATTR_FLAG;
+            break;
+        default:
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unknown message type ID")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_type_to_flag() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5SM_get_index
  *
  * Purpose:     Get the index number for a given message type.
@@ -242,26 +288,8 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
     FUNC_ENTER_NOAPI_NOINIT(H5SM_get_index)
 
     /* Translate the H5O type_id into an H5SM type flag */
-    switch(type_id)
-    {
-        case H5O_SDSPACE_ID:
-            type_flag = H5O_MESG_SDSPACE_FLAG;
-            break;
-        case H5O_DTYPE_ID:
-            type_flag = H5O_MESG_DTYPE_FLAG;
-            break;
-        case H5O_FILL_NEW_ID:
-            type_flag = H5O_MESG_FILL_FLAG;
-            break;
-        case H5O_PLINE_ID:
-            type_flag = H5O_MESG_PLINE_FLAG;
-            break;
-        case H5O_ATTR_ID:
-            type_flag = H5O_MESG_ATTR_FLAG;
-            break;
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unknown message type ID")
-    }
+    if(H5SM_type_to_flag(type_id, &type_flag) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't map message type to flag")
 
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
@@ -284,6 +312,57 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5SM_type_shared
+ *
+ * Purpose:     Check if a given message type is shared in a file.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, December 12, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
+{
+    H5SM_master_table_t *table = NULL;  /* Shared object master table */
+    unsigned type_flag;                 /* Flag corresponding to message type */
+    size_t u;                           /* Local index variable */
+    htri_t ret_value = FALSE;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_type_shared)
+
+    /* Translate the H5O type_id into an H5SM type flag */
+    if(H5SM_type_to_flag(type_id, &type_flag) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't map message type to flag")
+
+    /* Look up the master SOHM table */
+    if(H5F_addr_defined(f->shared->sohm_addr)) {
+        if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
+    } /* end if */
+    else
+        /* No shared messages of any type */
+        HGOTO_DONE(FALSE)       
+
+    /* Search the indexes until we find one that matches this flag or we've
+     * searched them all.
+     */
+    for(u = 0; u < table->num_indexes; u++)
+        if(table->indexes[u].mesg_types & type_flag)
+            HGOTO_DONE(TRUE)
+
+done:
+    /* Release the master SOHM table */
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_type_shared() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5SM_get_fheap_addr
  *
  * Purpose:     Gets the address of the fractal heap used to store
@@ -299,14 +378,14 @@ done:
 haddr_t
 H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 {
-    H5SM_master_table_t *table = NULL;
-    ssize_t index_num; /* Which index */
+    H5SM_master_table_t *table = NULL;  /* Shared object master table */
+    ssize_t index_num;                  /* Which index */
     haddr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5SM_get_fheap_addr, FAIL)
 
     /* Look up the master SOHM table */
-    if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, HADDR_UNDEF, "unable to load SOHM master table")
 
     /* JAMES! */
@@ -317,8 +396,8 @@ H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 
 done:
     /* Release the master SOHM table */
-    if (table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, HADDR_UNDEF, "unable to close SOHM master table")
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, HADDR_UNDEF, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_fheap_addr() */
@@ -343,7 +422,9 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     haddr_t tree_addr=HADDR_UNDEF;   /* Address of SOHM B-tree */
     H5HF_create_t fheap_cparam;      /* Fractal heap creation parameters */
     H5HF_t *fheap = NULL;
+#ifndef NDEBUG
     size_t fheap_id_len;             /* Size of a fractal heap ID */
+#endif /* NDEBUG */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_create_index, FAIL)
@@ -393,8 +474,12 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     if(H5HF_get_heap_addr(fheap, &(header->heap_addr )) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
 
+#ifndef NDEBUG
+    /* Sanity check ID length */
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
+    HDassert(fheap_id_len == H5SM_FHEAP_ID_LEN);
+#endif /* NDEBUG */
 
 done:
     /* Close the fractal heap if one has been created */
@@ -773,7 +858,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
     /* Change the original message passed in to reflect that it's now shared */
     if(H5O_msg_set_share(type_id, &shared, mesg) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, FAIL, "unable to set sharing information")
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to set sharing information")
 
 done:
     /* Release the fractal heap if we opened it */
@@ -1000,7 +1085,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, uns
             /* Remember the btree address for this index; we'll overwrite the
              * address in the index header
              */
-            haddr_t btree_addr = header->index_addr;
             H5SM_index_header_t temp_header;
 
             /* The protect callback expects a header corresponding to the list
@@ -1100,8 +1184,8 @@ H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
 
 done:
     /* Release the master SOHM table if we took it out of the cache */
-    if (table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_info() */

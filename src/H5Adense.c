@@ -40,6 +40,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"		/* Object headers			*/
+#include "H5SMprivate.h"	/* Shared object header messages        */
 
 
 /****************/
@@ -65,8 +66,8 @@
 #define H5A_CORDER_BT2_MERGE_PERC       40
 #define H5A_CORDER_BT2_SPLIT_PERC       100
 
-/* Size of stack buffer for serialized attribute */
-#define H5A_ATTR_BUF_SIZE               128
+/* Size of stack buffer for serialized messages */
+#define H5A_MESG_BUF_SIZE               128
 
 
 /******************/
@@ -457,6 +458,7 @@ HDfprintf(stderr, "%s: oh->attr_fheap_addr = %a\n", FUNC, oh->attr_fheap_addr);
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
     HDassert(fheap_id_len == H5A_DENSE_FHEAP_ID_LEN);
+    HDassert(fheap_id_len == H5SM_FHEAP_ID_LEN);        /* Need to be interchangable -QAK */
 #ifdef QAK
 HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 #endif /* QAK */
@@ -467,6 +469,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 
     /* Create the name index v2 B-tree */
     bt2_rrec_size = 4 +                 /* Name's hash value */
+            1 +                         /* Message flags */
             fheap_id_len;               /* Fractal heap ID */
     if(H5B2_create(f, dxpl_id, H5A_BT2_NAME,
             (size_t)H5A_NAME_BT2_NODE_SIZE, bt2_rrec_size,
@@ -574,6 +577,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.f = f;
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
+    udata.shared_fheap = NULL;
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
@@ -612,10 +616,13 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     const H5A_t *attr)
 {
     H5A_bt2_ud_ins_t udata;             /* User data for v2 B-tree insertion */
-    H5HF_t *fheap = NULL;               /* Fractal heap handle */
-    size_t attr_size;                   /* Size of serialized attribute in the heap */
-    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
-    void *attr_ptr = NULL;              /* Pointer to serialized attribute */
+    H5HF_t *fheap = NULL;               /* Fractal heap handle for attributes */
+    H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
+    uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID of attribute to insert    */
+    H5O_shared_t sh_mesg;               /* Shared object header message */
+    uint8_t attr_buf[H5A_MESG_BUF_SIZE]; /* Buffer for serializing message */
+    void *attr_ptr = NULL;              /* Pointer to serialized message */
+    htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_insert, FAIL)
@@ -627,48 +634,79 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     HDassert(oh);
     HDassert(attr);
 
-    /* Check for inserting shared attribute */
-    if(mesg_flags & H5O_MSG_FLAG_SHARED) {
-/* XXX: fix me */
-HDfprintf(stderr, "%s: inserting shared attributes in dense storage not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "inserting shared attributes in dense storage not supported yet")
+    /* Check if attributes are shared in this file */
+    if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
+
+    /* Get handle for shared object heap, if attributes are sharable */
+    if(attr_sharable) {
+        haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
+
+        /* Retrieve the address of the shared object's fractal heap */
+        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+
+        /* Open the fractal heap for shared header messages */
+        if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
     } /* end if */
-
-    /* Find out the size of buffer needed for serialized attribute */
-    if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, attr)) == 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get attribute size")
-
-    /* Allocate space for serialized attribute, if necessary */
-    if(attr_size > sizeof(attr_buf)) {
-        if(NULL == (attr_ptr = H5FL_BLK_MALLOC(ser_attr, attr_size)))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end if */
-    else
-        attr_ptr = attr_buf;
-
-    /* Create serialized form of attribute */
-    if(H5O_msg_encode(f, H5O_ATTR_ID, attr_ptr, attr) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
     /* Open the fractal heap */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, oh->attr_fheap_addr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
-    /* Insert the serialized attribute into the fractal heap */
-    if(H5HF_insert(fheap, dxpl_id, attr_size, attr_ptr, udata.id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert attribute into fractal heap")
+    /* Check for inserting shared attribute */
+    if(mesg_flags & H5O_MSG_FLAG_SHARED) {
+        /* Sanity check */
+        HDassert(attr_sharable);
+
+        /* Get the shared information for the attribute */
+        HDmemset(&sh_mesg, 0, sizeof(sh_mesg));
+        if(H5O_attr_get_share(attr, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message")
+
+        /* Use heap ID for shared message heap */
+        udata.id = (const uint8_t *)&sh_mesg.u.heap_id;
+    } /* end if */
+    else {
+        size_t attr_size;                   /* Size of serialized attribute in the heap */
+
+        /* Find out the size of buffer needed for serialized message */
+        if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, attr)) == 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get message size")
+
+        /* Allocate space for serialized message, if necessary */
+        if(attr_size > sizeof(attr_buf)) {
+            if(NULL == (attr_ptr = H5FL_BLK_MALLOC(ser_attr, attr_size)))
+                HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
+        } /* end if */
+        else
+            attr_ptr = attr_buf;
+
+        /* Create serialized form of attribute or shared message */
+        if(H5O_msg_encode(f, H5O_ATTR_ID, attr_ptr, attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
+
+        /* Insert the serialized attribute into the fractal heap */
+        if(H5HF_insert(fheap, dxpl_id, attr_size, attr_ptr, id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert attribute into fractal heap")
+
+        /* Use heap ID for attribute heap */
+        udata.id = id;
+    } /* end else */
 
     /* Create the callback information for v2 B-tree record insertion */
     udata.common.f = f;
     udata.common.dxpl_id = dxpl_id;
     udata.common.fheap = fheap;
+    udata.common.shared_fheap = shared_fheap;
     udata.common.name = attr->name;
     udata.common.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
     udata.common.flags = mesg_flags;
     udata.common.corder = -1;   /* XXX: None yet */
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
-    /* udata.id already set in H5HF_insert() call */
+    /* udata.id already set */
 
     /* Insert attribute into 'name' tracking v2 B-tree */
     if(H5B2_insert(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata) < 0)
@@ -676,6 +714,8 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "inserting shared attributes in den
 
 done:
     /* Release resources */
+    if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(attr_ptr && attr_ptr != attr_buf)
@@ -769,10 +809,12 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5A_bt2_od_wrt_t op_data;           /* "Op data" for v2 B-tree modify */
+    H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     size_t attr_size;                   /* Size of serialized attribute in the heap */
-    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
+    uint8_t attr_buf[H5A_MESG_BUF_SIZE]; /* Buffer for serializing attribute */
     void *attr_ptr = NULL;              /* Pointer to serialized attribute */
+    htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_write, FAIL)
@@ -783,6 +825,23 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
     HDassert(f);
     HDassert(oh);
     HDassert(attr);
+
+    /* Check if attributes are shared in this file */
+    if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
+
+    /* Get handle for shared object heap, if attributes are sharable */
+    if(attr_sharable) {
+        haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
+
+        /* Retrieve the address of the shared object's fractal heap */
+        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+
+        /* Open the fractal heap for shared header messages */
+        if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+    } /* end if */
 
     /* Find out the size of buffer needed for serialized attribute */
     if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, attr)) == 0)
@@ -808,6 +867,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
     udata.f = f;
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
+    udata.shared_fheap = shared_fheap;
     udata.name = attr->name;
     udata.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
     udata.flags = 0;
@@ -827,6 +887,8 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
 
 done:
     /* Release resources */
+    if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(attr_ptr && attr_ptr != attr_buf)
@@ -1151,6 +1213,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.f = f;
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
+    udata.shared_fheap = NULL;
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
@@ -1209,6 +1272,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.f = f;
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
+    udata.shared_fheap = NULL;
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
