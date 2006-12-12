@@ -38,6 +38,9 @@ static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static herr_t H5O_dtype_is_shared(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
+static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+
 static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
@@ -58,7 +61,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_is_shared,	/* is shared method		*/
     H5O_dtype_pre_copy_file,	/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
+    H5O_dtype_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file */
     H5O_dtype_debug		/* debug the message		*/
 }};
@@ -1424,6 +1427,47 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_pre_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_dtype_copy_file
+ *  
+ * Purpose:     Copy a native datatype message from one file to another.
+ *
+ * Return:      Success:        Native copy of message
+ *              Failure:        NULL
+ *  
+ * Programmer:  James Laird
+ *              December 12, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_dtype_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t *mesg_type,
+    void *native_src, H5F_t *file_dst, hid_t UNUSED dxpl_id,
+    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+{
+    H5T_t               *dst_mesg = NULL;       /* Destination datatype */
+    void                *ret_value = NULL;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy_file)
+
+    /* Perform a normal copy of the object header message */
+    if(NULL == (dst_mesg = H5O_dtype_copy(native_src, NULL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
+
+    /* The datatype will be in the new file; set its location. */
+    if(H5T_set_loc(dst_mesg, file_dst, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to set location")
+
+    ret_value = dst_mesg;
+
+done:
+    if(NULL == ret_value) {
+        H5O_msg_free(mesg_type->id, dst_mesg);
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_copy_file() */
 
 
 /*--------------------------------------------------------------------------
