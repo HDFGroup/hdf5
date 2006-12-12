@@ -76,16 +76,16 @@ const int ATTR2_DIM2 = 2;
 int attr_data2[ATTR2_DIM1][ATTR2_DIM2]={{7614,-416},{197814,-3}}; /* Test data for 2nd attribute */
 
 const H5std_string ATTR3_NAME("Attr3");
-const int ATTR3_RANK = 3;
-const int ATTR3_DIM1 = 2;
-const int ATTR3_DIM2 = 2;
-const int ATTR3_DIM3 = 2;
+const hsize_t ATTR3_RANK = 3;
+const hsize_t ATTR3_DIM1 = 2;
+const hsize_t ATTR3_DIM2 = 2;
+const hsize_t ATTR3_DIM3 = 2;
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0}},{{981724.2,-0.91827},{2.0,23.0}}}; /* Test data for 3rd attribute */
 
 const H5std_string ATTR4_NAME("Attr4");
-const int ATTR4_RANK = 2;
-const int ATTR4_DIM1 = 2;
-const int ATTR4_DIM2 = 2;
+const hsize_t ATTR4_RANK = 2;
+const hsize_t ATTR4_DIM1 = 2;
+const hsize_t ATTR4_DIM2 = 2;
 
 const H5std_string ATTR4_FIELDNAME1("i");
 const H5std_string ATTR4_FIELDNAME2("d");
@@ -1051,7 +1051,7 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
 
 	// Create dataspace for dataset
 	DataSpace dspace;
@@ -1061,14 +1061,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
 
 	// Create attribute on dataset
 	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 
 	// Close attribute
 	attr.close();
@@ -1078,14 +1078,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
 
 	// Create attribute on dataset
 	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
 
 	// Write data into the attribute
 	attr.write(PredType::NATIVE_INT,&data);
@@ -1116,14 +1116,14 @@ test_attr_dtype_shared(void)
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val(statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+	verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
 
 	// Unlink the named datatype
 	fid1.unlink(TYPE1_NAME);
@@ -1186,7 +1186,7 @@ test_string_attr(void)
 	H5std_string read_str;
 	gr_attr.read(type, read_str);
 	if (read_str != ATTRSTR_DATA)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n",__LINE__, ATTRSTR_DATA, read_str);
+	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_str.c_str());
     } // end try block
 
     catch (Exception E) {
