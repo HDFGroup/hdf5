@@ -263,6 +263,13 @@ H5O_eliminate_gap(H5O_t *oh, H5O_mesg_t *mesg, uint8_t *gap_loc, size_t gap_size
             /* Adjust start of null message */
             mesg->raw -= gap_size;
         } /* end else */
+    }
+    else if(move_end == move_start && !null_before_gap) {
+	/* Slide null message up */
+	HDmemmove(move_start - gap_size, move_start, mesg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh));
+
+	/* Adjust start of null message */
+	mesg->raw -= gap_size;
     } /* end if */
 
     /* Zero out addition to null message */
