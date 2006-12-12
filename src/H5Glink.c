@@ -581,7 +581,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_sort_table(H5G_link_table_t *ltable, H5L_index_t idx_type,
+H5G_link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_sort_table)
@@ -590,7 +590,7 @@ H5G_link_sort_table(H5G_link_table_t *ltable, H5L_index_t idx_type,
     HDassert(ltable);
 
     /* Pick appropriate sorting routine */
-    if(idx_type == H5L_INDEX_NAME) {
+    if(idx_type == H5_INDEX_NAME) {
         if(order == H5_ITER_INC)
             HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_inc);
         else if(order == H5_ITER_DEC)
@@ -599,7 +599,7 @@ H5G_link_sort_table(H5G_link_table_t *ltable, H5L_index_t idx_type,
             HDassert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
-        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if(order == H5_ITER_INC)
             HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
         else if(order == H5_ITER_DEC)
@@ -628,7 +628,7 @@ H5G_link_sort_table(H5G_link_table_t *ltable, H5L_index_t idx_type,
  */
 herr_t
 H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
-    hsize_t *last_lnk, hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
+    hsize_t *last_lnk, hid_t gid, const H5G_link_iterate_t *lnk_op, void *op_data)
 {
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */

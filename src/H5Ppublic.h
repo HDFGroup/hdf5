@@ -236,6 +236,7 @@ H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
 H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik/*out*/, unsigned *lk/*out*/);
 H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
 H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
+H5_DLL herr_t H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_flags[]);
 H5_DLL herr_t H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes);
 H5_DLL herr_t H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes);
 H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_flags, unsigned min_mesg_size);

@@ -114,6 +114,29 @@ typedef struct H5A_bt2_ud_ins_t {
     uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID of attribute to insert    */
 } H5A_bt2_ud_ins_t;
 
+/* Data structure to hold table of attributes for an object */
+typedef struct {
+    size_t      nattrs;         /* # of attributes in table */
+    H5A_t       *attrs;         /* Pointer to array of attributes */
+    uint8_t     *flags;         /* Pointer to array of message flags for attributes */
+} H5A_attr_table_t;
+
+/* Attribute iteration operator for internal library callbacks */
+typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, uint8_t mesg_flags,
+    void *op_data);
+
+/* Describe kind of callback to make for each attribute */
+typedef struct {
+    enum {
+        H5A_ATTR_OP_APP,                /* Application callback */
+        H5A_ATTR_OP_LIB                 /* Library internal callback */
+    } op_type;
+    union {
+        H5A_operator_t app_op;           /* Application callback for each attribute */
+        H5A_lib_iterate_t lib_op;       /* Library internal callback for each attribute */
+    } u;
+} H5A_attr_iterate_t;
+
 
 /*****************************/
 /* Package Private Variables */
@@ -146,10 +169,18 @@ H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const H5A_t *attr);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     haddr_t attr_fheap_addr, haddr_t name_bt2_addr, unsigned skip,
-    unsigned *last_attr, H5A_operator_t op, void *op_data);
+    unsigned *last_attr, const H5A_attr_iterate_t *attr_op, void *op_data);
+H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    const char *name);
+
+/* Attribute table operations */
+H5_DLL herr_t H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable);
+H5_DLL herr_t H5A_attr_release_table(H5A_attr_table_t *atable);
 
 /* Attribute object header routines */
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
+H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
 H5_DLL herr_t H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
 
 #endif /* _H5Apkg_H */

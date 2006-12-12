@@ -581,7 +581,7 @@ done:
  */
 herr_t
 H5G_obj_iterate(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     H5G_link_iterate_t *lnk_op, void *op_data, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
@@ -612,7 +612,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
         /* Check for creation order tracking, if creation order index lookup requested */
-        if(idx_type == H5L_INDEX_CRT_ORDER) {
+        if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
@@ -640,7 +640,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
         H5E_clear_stack(NULL);
 
         /* Can only perform name lookups on groups with symbol tables */
-        if(idx_type != H5L_INDEX_NAME)
+        if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Iterate over symbol table */
@@ -728,7 +728,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
+H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, char* name, size_t size, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
@@ -742,7 +742,7 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
     /* Attempt to get the link info for this group */
     if(H5O_msg_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
-        if(idx_type == H5L_INDEX_CRT_ORDER) {
+        if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
@@ -771,7 +771,7 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5L_index_t idx_type,
         H5E_clear_stack(NULL);
 
         /* Can only perform name lookups on groups with symbol tables */
-        if(idx_type != H5L_INDEX_NAME)
+        if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Get the object's name from the symbol table */
@@ -891,7 +891,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                 size_t u;                       /* Local index */
 
                 /* Build the table of links for this group */
-                if(H5G_dense_build_table(oloc->file, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
+                if(H5G_dense_build_table(oloc->file, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
                 /* Inspect links in table for ones that can't be converted back
@@ -1004,10 +1004,9 @@ H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, h
     } /* end else */
 
     /* Update link info for a new-style group */
-    if(!use_old_format) {
+    if(!use_old_format)
         if(H5G_obj_remove_update_linfo(oloc, &linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1029,7 +1028,7 @@ done:
  */
 herr_t
 H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message            */
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
@@ -1043,7 +1042,7 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     /* Attempt to get the link info for this group */
     if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
-        if(idx_type == H5L_INDEX_CRT_ORDER) {
+        if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
@@ -1075,7 +1074,7 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
         H5E_clear_stack(NULL);
 
         /* Can only perform name lookups on groups with symbol tables */
-        if(idx_type != H5L_INDEX_NAME)
+        if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Using the old format for groups */
@@ -1166,7 +1165,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
+H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_link_t *lnk, hid_t dxpl_id)
 {
     H5O_linfo_t linfo;		        /* Link info message */
@@ -1180,7 +1179,7 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
     /* Attempt to get the link info message for this group */
     if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
-        if(idx_type == H5L_INDEX_CRT_ORDER) {
+        if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
@@ -1209,7 +1208,7 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5L_index_t idx_type,
         H5E_clear_stack(NULL);
 
         /* Can only perform name lookups on groups with symbol tables */
-        if(idx_type != H5L_INDEX_NAME)
+        if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Get the object's info from the symbol table */

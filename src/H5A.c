@@ -72,7 +72,6 @@ static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
     hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
-static int H5A_get_index(H5O_loc_t *loc, const char *name, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
 static herr_t H5A_find_idx_by_name(const void *mesg, unsigned idx, void *op_data);
 
@@ -312,6 +311,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Iterate over the existing attributes to check for duplicates */
     cb.name = name;
     cb.idx = (-1);
+/* XXX: Add support/test for dense attribute storage */
     if((ret_value = H5O_msg_iterate(loc->oloc, H5O_ATTR_ID, H5A_find_idx_by_name, &cb, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
     if(ret_value > 0)
@@ -433,9 +433,8 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 
 done:
     /* Cleanup on failure */
-    if(ret_value < 0)
-        if(attr)
-            (void)H5A_close(attr);
+    if(ret_value < 0 && attr)
+        (void)H5A_close(attr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_create() */
@@ -483,49 +482,6 @@ H5A_find_idx_by_name(const void *_mesg, unsigned idx, void *_op_data)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_find_idx_by_name() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_get_index
- PURPOSE
-    Determine the index of an attribute in an object header
- USAGE
-    int H5A_get_index (ent, name)
-        H5O_loc_t  *loc;        IN: Object location
-        const char *name;       IN: Name of dataset to find
- RETURNS
-    non-negative on success, negative on failure
-
- DESCRIPTION
-        This function determines the index of the attribute within an object
-    header.  This is not stored in the attribute structure because it is only
-    a subjective measure and can change if attributes are deleted from the
-    object header.
---------------------------------------------------------------------------*/
-static int
-H5A_get_index(H5O_loc_t *loc, const char *name, hid_t dxpl_id)
-{
-    H5A_iter_cb1 udata;         /* Iterator callback info */
-    int	ret_value = FAIL;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_get_index)
-
-    HDassert(loc);
-    HDassert(name);
-
-    udata.name = name;
-    udata.idx = (-1);
-    if((ret_value = H5O_msg_iterate(loc, H5O_ATTR_ID, H5A_find_idx_by_name, &udata, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
-    if(ret_value > 0)
-        ret_value = udata.idx;
-    else
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_get_index() */
 
 
 /*--------------------------------------------------------------------------
@@ -686,9 +642,8 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
 
 done:
     /* Cleanup on failure */
-    if(ret_value < 0)
-        if(attr)
-            (void)H5A_close(attr);
+    if(ret_value < 0 && attr)
+        (void)H5A_close(attr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_open() */
@@ -1481,8 +1436,7 @@ herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
     H5G_loc_t	loc;		        /* Object location */
-    int         found;
-    herr_t	ret_value;
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Adelete, FAIL)
     H5TRACE2("e","is",loc_id,name);
@@ -1495,13 +1449,9 @@ H5Adelete(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Look up the attribute index for the object */
-    if((found = H5A_get_index(loc.oloc, name, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
-
     /* Delete the attribute from the location */
-    if((ret_value = H5O_msg_remove(loc.oloc, H5O_ATTR_ID, found, TRUE, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message")
+    if(H5O_attr_remove(loc.oloc, name, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1592,7 +1542,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute datatype")
     if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute dataspace")
-    /* XXX: Copy the object location and group path? -QAK */
+/* XXX: Copy the object location and group path? -QAK */
 
     /* Copy the attribute data, if there is any */
     if(old_attr->data) {
@@ -1638,12 +1588,11 @@ H5A_free(H5A_t *attr)
 
     FUNC_ENTER_NOAPI(H5A_free, FAIL)
 
-    assert(attr);
+    HDassert(attr);
 
     /* Free dynamicly allocated items */
     if(attr->name)
         H5MM_xfree(attr->name);
-
     if(attr->dt)
         if(H5T_close(attr->dt) < 0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")

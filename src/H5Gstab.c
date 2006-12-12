@@ -494,7 +494,7 @@ H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
         /* Sort link table in correct iteration order */
-        if(H5G_link_sort_table(&ltable, H5L_INDEX_NAME, order) < 0)
+        if(H5G_link_sort_table(&ltable, H5_INDEX_NAME, order) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages")
 
         /* Iterate over links in table */

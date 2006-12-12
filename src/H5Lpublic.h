@@ -120,17 +120,6 @@ typedef struct {
     H5L_query_func_t query_func;    /* Callback for queries                 */
 } H5L_class_t;
 
-/*
- * The types of indices on links in groups.  Primarily used for "<do> <foo> by
- * index" routines and for iterating over links in groups.
- */
-typedef enum H5L_index_t {
-    H5L_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
-    H5L_INDEX_NAME,		/* Index on names of links		*/
-    H5L_INDEX_CRT_ORDER,	/* Index on creation order of links	*/
-    H5L_INDEX_N			/* Number of indices defined on links in groups */
-} H5L_index_t;
-
 /* Prototype for H5Literate() operator */
 typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t *info,
     void *op_data);
@@ -157,22 +146,22 @@ H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
                              const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
                               H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Literate(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate_t op, void *op_data, hid_t lapl_id);
 
 /* UD link functions */

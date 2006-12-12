@@ -91,7 +91,7 @@ typedef struct {
     hid_t       gid;                    /* Group ID for application callback */
     hsize_t     skip;                   /* Number of links to skip           */
     hsize_t     *last_lnk;              /* Pointer to the last link operated on */
-    H5G_link_iterate_t *lnk_op;         /* Callback for each link            */
+    const H5G_link_iterate_t *lnk_op;   /* Callback for each link            */
     void        *op_data;               /* Callback data for each link       */
 
     /* upward */
@@ -131,7 +131,7 @@ typedef struct {
  * H5HF_op function when removing a link from densely stored links.
  */
 typedef struct {
-    /* downward (internal) */
+    /* downward */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     hbool_t     adj_link;               /* Whether to adjust link count on object */
@@ -150,7 +150,7 @@ typedef struct {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     H5HF_t      *fheap;                 /* Fractal heap handle               */
-    H5L_index_t idx_type;               /* Primary index for removing link */
+    H5_index_t idx_type;               /* Primary index for removing link */
     haddr_t     other_bt2_addr;         /* Address of "other" v2 B-tree indexing link */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
 } H5G_bt2_ud_rmbi_t;
@@ -643,7 +643,7 @@ done:
  */
 herr_t
 H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
     H5HF_t *fheap = NULL;                     /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};      /* Table of links */
@@ -661,7 +661,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(lnk);
 
     /* Determine the address of the index to use */
-    if(idx_type == H5L_INDEX_NAME) {
+    if(idx_type == H5_INDEX_NAME) {
         /* Check if "native" order is OK - since names are hashed, getting them
          *      in strictly increasing or decreasing order requires building a
          *      table and sorting it.
@@ -675,7 +675,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
-        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
@@ -771,8 +771,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_dense_build_table
  *
- * Purpose:     Builds a table containing a sorted (alphabetically) list of
- *              links for a group
+ * Purpose:     Builds a table containing a sorted list of links for a group
  *
  * Note:	Used for building table of links in non-native iteration order
  *		for an index
@@ -787,7 +786,7 @@ done:
  */
 herr_t
 H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
+    H5_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -820,7 +819,7 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         lnk_op.u.lib_op = H5G_dense_build_table_cb;
 
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5G_dense_iterate(f, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
+        if(H5G_dense_iterate(f, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
         /* Sort link table in correct iteration order */
@@ -968,8 +967,8 @@ done:
  */
 herr_t
 H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
-    hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
+    hid_t gid, const H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};      /* Table of links */
@@ -1148,7 +1147,7 @@ done:
  */
 ssize_t
 H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name,
     size_t size)
 {
     H5HF_t *fheap = NULL;                     /* Fractal heap handle */
@@ -1166,7 +1165,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     HDassert(linfo);
 
     /* Determine the address of the index to use */
-    if(idx_type == H5L_INDEX_NAME) {
+    if(idx_type == H5_INDEX_NAME) {
         /* Check if "native" order is OK - since names are hashed, getting them
          *      in strictly increasing or decreasing order requires building a
          *      table and sorting it.
@@ -1180,7 +1179,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
             bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
-        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
@@ -1279,7 +1278,7 @@ H5G_dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     HDassert(linfo);
 
     /* Build the table of links for this group */
-    if(H5G_dense_build_table(f, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
+    if(H5G_dense_build_table(f, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "error building table of links")
 
     /* Check for going out of bounds */
@@ -1322,7 +1321,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_dense_remove_fh_cb
  *
- * Purpose:	Callback for fractal heap operator when removing over links
+ * Purpose:	Callback for fractal heap operator when removing links
  *
  * Return:	SUCCEED/FAIL
  *
@@ -1336,14 +1335,14 @@ static herr_t
 H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_rm_t *udata = (H5G_fh_ud_rm_t *)_udata;       /* User data for fractal heap 'op' callback */
-    H5O_link_t *lnk;            /* Pointer to link created from heap object */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5O_link_t *lnk = NULL;             /* Pointer to link created from heap object */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_fh_cb)
 
     /* Decode link information */
     if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5_ITER_ERROR, "can't decode link")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Check for removing the link from the creation order index */
     if(udata->rem_from_corder_index) {
@@ -1357,7 +1356,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         HDassert(H5F_addr_defined(udata->corder_bt2_addr));
         if(H5B2_remove(udata->f, udata->dxpl_id, H5G_BT2_CORDER, udata->corder_bt2_addr,
                 &bt2_udata, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove link from creation order index v2 B-tree")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
     /* Replace open objects' names, if requested */
@@ -1366,14 +1365,15 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRENAME, FAIL, "unable to rename open objects")
 
     /* Perform the deletion action on the link */
-    /* (call link message "delete" callback directly: *ick* - QAK) */
+    /* (call message "delete" callback directly: *ick* - QAK) */
     if(H5O_link_delete(udata->f, udata->dxpl_id, lnk, udata->adj_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
-    /* Release the space allocated for the link */
-    H5O_msg_free(H5O_LINK_ID, lnk);
-
 done:
+    /* Release the space allocated for the link */
+    if(lnk)
+        H5O_msg_free(H5O_LINK_ID, lnk);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_remove_fh_cb() */
 
@@ -1401,7 +1401,7 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_bt2_cb)
 
-    /* Set up the user data for fractalheap 'op' callback */
+    /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f = bt2_udata->common.f;
     fh_udata.dxpl_id = bt2_udata->common.dxpl_id;
     fh_udata.adj_link = bt2_udata->adj_link;
@@ -1544,7 +1544,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_by_idx_bt2_cb)
 
     /* Determine the index being used */
-    if(bt2_udata->idx_type == H5L_INDEX_NAME) {
+    if(bt2_udata->idx_type == H5_INDEX_NAME) {
         const H5G_dense_bt2_name_rec_t *record = (const H5G_dense_bt2_name_rec_t *)_record;
 
         /* Set the heap ID to operate on */
@@ -1553,13 +1553,13 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     else {
         const H5G_dense_bt2_corder_rec_t *record = (const H5G_dense_bt2_corder_rec_t *)_record;
 
-        HDassert(bt2_udata->idx_type == H5L_INDEX_CRT_ORDER);
+        HDassert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
 
         /* Set the heap ID to operate on */
         heap_id = record->id;
     } /* end else */
 
-    /* Set up the user data for fractalheap 'op' callback */
+    /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f = bt2_udata->f;
     fh_udata.dxpl_id = bt2_udata->dxpl_id;
     fh_udata.lnk = NULL;
@@ -1576,7 +1576,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         const H5B2_class_t *other_bt2_class;    /* Class of "other" v2 B-tree */
 
         /* Determine the index being used */
-        if(bt2_udata->idx_type == H5L_INDEX_NAME) {
+        if(bt2_udata->idx_type == H5_INDEX_NAME) {
             /* Set the class of the "other" index */
             other_bt2_class = H5G_BT2_CORDER;
 
@@ -1584,7 +1584,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.corder = fh_udata.lnk->corder;
         } /* end if */
         else {
-            HDassert(bt2_udata->idx_type == H5L_INDEX_CRT_ORDER);
+            HDassert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
 
             /* Set the class of the "other" index */
             other_bt2_class = H5G_BT2_NAME;
@@ -1644,7 +1644,7 @@ done:
  */
 herr_t
 H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5RS_str_t *grp_full_path_r, H5L_index_t idx_type, H5_iter_order_t order,
+    H5RS_str_t *grp_full_path_r, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t n)
 {
     H5HF_t *fheap = NULL;                     /* Fractal heap handle */
@@ -1662,7 +1662,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(linfo);
 
     /* Determine the address of the index to use */
-    if(idx_type == H5L_INDEX_NAME) {
+    if(idx_type == H5_INDEX_NAME) {
         /* Check if "native" order is OK - since names are hashed, getting them
          *      in strictly increasing or decreasing order requires building a
          *      table and sorting it.
@@ -1676,7 +1676,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
-        HDassert(idx_type == H5L_INDEX_CRT_ORDER);
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
@@ -1699,7 +1699,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         udata.dxpl_id = dxpl_id;
         udata.fheap = fheap;
         udata.idx_type = idx_type;
-        udata.other_bt2_addr = idx_type == H5L_INDEX_NAME ? linfo->corder_bt2_addr : linfo->name_bt2_addr;
+        udata.other_bt2_addr = idx_type == H5_INDEX_NAME ? linfo->corder_bt2_addr : linfo->name_bt2_addr;
         udata.grp_full_path_r = grp_full_path_r;
 
         /* Remove the record from the name index v2 B-tree */

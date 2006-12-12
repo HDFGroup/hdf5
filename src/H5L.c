@@ -57,7 +57,7 @@ typedef struct {
 /* User data for path traversal routine for getting link info by index */
 typedef struct {
     /* In */
-    H5L_index_t idx_type;               /* Index to use */
+    H5_index_t idx_type;               /* Index to use */
     H5_iter_order_t order;              /* Order to iterate in index */
     hsize_t n;                          /* Offset of link within index */
     hid_t dxpl_id;                      /* DXPL to use in callback */
@@ -102,7 +102,7 @@ typedef struct {
 /* User data for path traversal routine for getting link value by index */
 typedef struct {
     /* In */
-    H5L_index_t idx_type;               /* Index to use */
+    H5_index_t idx_type;               /* Index to use */
     H5_iter_order_t order;              /* Order to iterate in index */
     hsize_t n;                          /* Offset of link within index */
     hid_t dxpl_id;                      /* DXPL to use in callback */
@@ -120,7 +120,7 @@ typedef struct {
 /* User data for path traversal routine for removing link by index */
 typedef struct {
     /* In */
-    H5L_index_t idx_type;               /* Index to use */
+    H5_index_t idx_type;               /* Index to use */
     H5_iter_order_t order;              /* Order to iterate in index */
     hsize_t n;                          /* Offset of link within index */
     hid_t dxpl_id;                      /* DXPL to use in callback */
@@ -129,7 +129,7 @@ typedef struct {
 /* User data for path traversal routine for getting name by index */
 typedef struct {
     /* In */
-    H5L_index_t idx_type;               /* Index to use */
+    H5_index_t idx_type;               /* Index to use */
     H5_iter_order_t order;              /* Order to iterate in index */
     hsize_t n;                          /* Offset of link within index */
     size_t size;                        /* Size of name buffer */
@@ -158,7 +158,7 @@ static herr_t H5L_get_val_by_idx_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_val_by_idx(H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, void *buf/*out*/,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, void *buf/*out*/,
     size_t size, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
@@ -167,7 +167,7 @@ static herr_t H5L_delete_by_idx_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_delete_by_idx(H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
@@ -182,13 +182,13 @@ static herr_t H5L_get_info_by_idx_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_get_name_by_idx_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name/*out*/, size_t size, hid_t lapl_id, hid_t dxpl_id);
 
 /*********************/
@@ -689,7 +689,7 @@ done:
  */
 herr_t
 H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -702,7 +702,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
@@ -789,7 +789,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
+H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
@@ -805,7 +805,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5L_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
@@ -884,7 +884,7 @@ done:
  */
 herr_t
 H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linkbuf /*out*/, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Group location for group to query */
@@ -899,7 +899,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
@@ -1063,7 +1063,7 @@ done:
  */
 ssize_t
 H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
     H5G_loc_t	loc;            /* Location of group */
@@ -1078,7 +1078,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
@@ -1121,7 +1121,7 @@ done:
  */
 herr_t
 H5Literate(hid_t loc_id, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
     H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
     H5G_link_iterate_t lnk_op;  /* Link operator */
@@ -1136,7 +1136,7 @@ H5Literate(hid_t loc_id, const char *group_name,
     /* Check arguments */
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5L_INDEX_UNKNOWN || idx_type >= H5L_INDEX_N)
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
@@ -1988,7 +1988,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_val_by_idx(H5G_loc_t *loc, const char *group_name, H5L_index_t idx_type,
+H5L_get_val_by_idx(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id, hid_t dxpl_id)
 {
@@ -2163,7 +2163,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_delete_by_idx(H5G_loc_t *loc, const char *group_name, H5L_index_t idx_type,
+H5L_delete_by_idx(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_rmbi_t    udata;                  /* User data for callback */
@@ -2664,7 +2664,7 @@ done:
  */
 static herr_t
 H5L_get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_gibi_t udata;               /* User data for callback */
@@ -2776,7 +2776,7 @@ done:
  */
 static herr_t
 H5L_get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name/*out*/, size_t size, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_gnbi_t udata;               /* User data for callback */

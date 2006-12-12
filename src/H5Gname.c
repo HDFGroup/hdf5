@@ -1137,7 +1137,7 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
                 lnk_op.op_type = H5G_LINK_OP_APP;
                 lnk_op.u.app_op = H5G_refname_iterator;
 
-                ret_value = H5G_obj_iterate(udata->file, udata->container, H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->dxpl_id);
+                ret_value = H5G_obj_iterate(udata->file, udata->container, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->dxpl_id);
                 
                 /* If we didn't find the object, truncate the name to not include group name anymore */
                 if(!ret_value)

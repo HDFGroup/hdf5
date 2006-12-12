@@ -768,7 +768,7 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 
     if(msg_native) {
         H5O_msg_reset_real(type, msg_native);
-        if (NULL!=(type->free))
+        if(NULL != (type->free))
             (type->free)(msg_native);
         else
             H5MM_xfree(msg_native);
@@ -1032,6 +1032,7 @@ H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
     HDassert(loc);
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5O_ATTR_ID != type_id);   /* Attributes are modified in another routine */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
@@ -1075,6 +1076,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     HDassert(loc);
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5O_ATTR_ID != type_id);   /* Attributes are modified in another routine */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
@@ -1137,10 +1139,6 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         if(mesg->flags & H5O_MSG_FLAG_CONSTANT)
             udata->nfailed++;
         else {
-            /* If the message removed is an attribute, decrement count */
-            if(H5O_ATTR_ID == mesg->type->id && oh->version > H5O_VERSION_1)
-                oh->nattrs--;
-
             /* Convert message into a null message */
             if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, udata->adj_link) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
@@ -1980,12 +1978,11 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
         /* Check if this message needs to be removed from the SOHM table */
         /* JAMES: there should be a callback, maybe in H5O_shared_delete, to fiddle w/ the ref. count.
         * We shouldn't need to do a search in the SOHM table on delete. */
-        if(type == H5O_MSG_SHARED)
-        {
+        if(type == H5O_MSG_SHARED) {
             /* The native message here is actually a shared message.    */
             if(H5SM_try_delete(f, dxpl_id, mesg->type->id, mesg->native) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
-        }
+        } /* end if */
 
         if((type->del)(f, dxpl_id, mesg->native, adj_link) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")

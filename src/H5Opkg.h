@@ -429,6 +429,9 @@ H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
     const char *old_name, const char *new_name);
 H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     unsigned skip, unsigned *last_attr, H5A_operator_t op, void *op_data);
+H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
+    hid_t dxpl_id);
+H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);

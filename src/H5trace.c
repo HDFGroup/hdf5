@@ -895,178 +895,181 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'I':
 	    switch (type[1]) {
-            case 'o':
-		if (ptr) {
-		    if (vp)
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    else
-			fprintf(out, "NULL");
-		} /* end if */
-                else {
-		    H5_iter_order_t order = va_arg (ap, H5_iter_order_t); /*lint !e64 Type mismatch not really occuring */
-		    switch(order) {
-                        case H5_ITER_UNKNOWN:
-                            fprintf(out, "H5_ITER_UNKNOWN");
-                            break;
-                        case H5_ITER_INC:
-                            fprintf(out, "H5_ITER_INC");
-                            break;
-                        case H5_ITER_DEC:
-                            fprintf(out, "H5_ITER_DEC");
-                            break;
-                        case H5_ITER_NATIVE:
-                            fprintf(out, "H5_ITER_NATIVE");
-                            break;
-                        case H5_ITER_N:
-                            fprintf(out, "H5_ITER_N");
-                            break;
-		    } /* end switch */
-		} /* end else */
-		break;
-
-	    case 's':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-			if (asize_idx>=0 && asize[asize_idx]>=0) {
-			    int *p = (int*)vp;
-			    fprintf(out, " {");
-			    for (i=0; i<asize[asize_idx]; i++) {
-				fprintf(out, "%s%d", i?", ":"", p[i]);
-			    }
-			    fprintf(out, "}");
-			}
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    int is = va_arg (ap, int);
-		    fprintf (out, "%d", is);
-		    asize[argno] = is;
-		}
-		break;
-
-	    case 'u':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-			if (asize_idx>=0 && asize[asize_idx]>=0) {
-			    unsigned *p = (unsigned*)vp;
-			    fprintf(out, " {");
-			    for (i=0; i<asize[asize_idx]; i++) {
-				HDfprintf(out, "%s%u", i?", ":"", p[i]);
-			    }
-			    fprintf(out, "}");
-			}
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    unsigned iu = va_arg (ap, unsigned); /*lint !e732 Loss of sign not really occuring */
-		    fprintf (out, "%u", iu);
-		    asize[argno] = iu;
-		}
-		break;
-
-	    case 't':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5I_type_t id_type = va_arg (ap, H5I_type_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (id_type) {
-                        case H5I_UNINIT:
-                            fprintf (out, "H5I_UNINIT");
-                            break;
-                        case H5I_BADID:
-                            fprintf (out, "H5I_BADID");
-                            break;
-                        case H5I_FILE:
-                            fprintf (out, "H5I_FILE");
-                            break;
-                        case H5I_GROUP:
-                            fprintf (out, "H5I_GROUP");
-                            break;
-                        case H5I_DATATYPE:
-                            fprintf (out, "H5I_DATATYPE");
-                            break;
-                        case H5I_DATASPACE:
-                            fprintf (out, "H5I_DATASPACE");
-                            break;
-                        case H5I_DATASET:
-                            fprintf (out, "H5I_DATASET");
-                            break;
-                        case H5I_ATTR:
-                            fprintf (out, "H5I_ATTR");
-                            break;
-                        case H5I_REFERENCE:
-                            fprintf (out, "H5I_REFERENCE");
-                            break;
-                        case H5I_VFL:
-                            fprintf (out, "H5I_VFL");
-                            break;
-                        case H5I_GENPROP_CLS:
-                            fprintf (out, "H5I_GENPROP_CLS");
-                            break;
-                        case H5I_GENPROP_LST:
-                            fprintf (out, "H5I_GENPROP_LST");
-                            break;
-                        case H5I_ERROR_CLASS:
-                            fprintf (out, "H5I_ERROR_CLASS");
-                            break;
-                        case H5I_ERROR_MSG:
-                            fprintf (out, "H5I_ERROR_MSG");
-                            break;
-                        case H5I_ERROR_STACK:
-                            fprintf (out, "H5I_ERROR_STACK");
-                            break;
-                        case H5I_NTYPES:
-                            fprintf (out, "H5I_NTYPES");
-                            break;
-                        default:
-                            fprintf (out, "%ld", (long)id_type);
-                            break;
-		    }
-		}
-		break;
-
-	    default:
-		fprintf (out, "BADTYPE(I%c)", type[1]);
-		goto error;
-	    }
-	    break;
-
-	case 'L':
-	    switch(type[1]) {
                 case 'i':
                     if(ptr) {
                         if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5_index_t idx_type = va_arg(ap, H5_index_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(idx_type) {
+                            case H5_INDEX_UNKNOWN:
+                                fprintf(out, "H5_INDEX_UNKNOWN");
+                                break;
+                            case H5_INDEX_NAME:
+                                fprintf(out, "H5_INDEX_NAME");
+                                break;
+                            case H5_INDEX_CRT_ORDER:
+                                fprintf(out, "H5_INDEX_CRT_ORDER");
+                                break;
+                            case H5_INDEX_N:
+                                fprintf(out, "H5_INDEX_N");
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'o':
+                    if (ptr) {
+                        if (vp)
                             fprintf (out, "0x%lx", (unsigned long)vp);
                         else
                             fprintf(out, "NULL");
-                    } else {
-                        H5L_index_t idx_type = va_arg(ap, H5L_index_t); /*lint !e64 Type mismatch not really occuring */
+                    } /* end if */
+                    else {
+                        H5_iter_order_t order = va_arg (ap, H5_iter_order_t); /*lint !e64 Type mismatch not really occuring */
+                        switch(order) {
+                            case H5_ITER_UNKNOWN:
+                                fprintf(out, "H5_ITER_UNKNOWN");
+                                break;
+                            case H5_ITER_INC:
+                                fprintf(out, "H5_ITER_INC");
+                                break;
+                            case H5_ITER_DEC:
+                                fprintf(out, "H5_ITER_DEC");
+                                break;
+                            case H5_ITER_NATIVE:
+                                fprintf(out, "H5_ITER_NATIVE");
+                                break;
+                            case H5_ITER_N:
+                                fprintf(out, "H5_ITER_N");
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
 
-                        switch(idx_type) {
-                            case H5L_INDEX_UNKNOWN:
-                                fprintf(out, "H5L_INDEX_UNKNOWN");
+                case 's':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                            if (asize_idx>=0 && asize[asize_idx]>=0) {
+                                int *p = (int*)vp;
+                                fprintf(out, " {");
+                                for (i=0; i<asize[asize_idx]; i++) {
+                                    fprintf(out, "%s%d", i?", ":"", p[i]);
+                                }
+                                fprintf(out, "}");
+                            }
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        int is = va_arg (ap, int);
+                        fprintf (out, "%d", is);
+                        asize[argno] = is;
+                    }
+                    break;
+
+                case 't':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5I_type_t id_type = va_arg (ap, H5I_type_t); /*lint !e64 Type mismatch not really occuring */
+                        switch (id_type) {
+                            case H5I_UNINIT:
+                                fprintf (out, "H5I_UNINIT");
                                 break;
-                            case H5L_INDEX_NAME:
-                                fprintf(out, "H5L_INDEX_NAME");
+                            case H5I_BADID:
+                                fprintf (out, "H5I_BADID");
                                 break;
-                            case H5L_INDEX_CRT_ORDER:
-                                fprintf(out, "H5L_INDEX_CRT_ORDER");
+                            case H5I_FILE:
+                                fprintf (out, "H5I_FILE");
                                 break;
-                            case H5L_INDEX_N:
-                                fprintf(out, "H5L_INDEX_N");
+                            case H5I_GROUP:
+                                fprintf (out, "H5I_GROUP");
+                                break;
+                            case H5I_DATATYPE:
+                                fprintf (out, "H5I_DATATYPE");
+                                break;
+                            case H5I_DATASPACE:
+                                fprintf (out, "H5I_DATASPACE");
+                                break;
+                            case H5I_DATASET:
+                                fprintf (out, "H5I_DATASET");
+                                break;
+                            case H5I_ATTR:
+                                fprintf (out, "H5I_ATTR");
+                                break;
+                            case H5I_REFERENCE:
+                                fprintf (out, "H5I_REFERENCE");
+                                break;
+                            case H5I_VFL:
+                                fprintf (out, "H5I_VFL");
+                                break;
+                            case H5I_GENPROP_CLS:
+                                fprintf (out, "H5I_GENPROP_CLS");
+                                break;
+                            case H5I_GENPROP_LST:
+                                fprintf (out, "H5I_GENPROP_LST");
+                                break;
+                            case H5I_ERROR_CLASS:
+                                fprintf (out, "H5I_ERROR_CLASS");
+                                break;
+                            case H5I_ERROR_MSG:
+                                fprintf (out, "H5I_ERROR_MSG");
+                                break;
+                            case H5I_ERROR_STACK:
+                                fprintf (out, "H5I_ERROR_STACK");
+                                break;
+                            case H5I_NTYPES:
+                                fprintf (out, "H5I_NTYPES");
+                                break;
+                            default:
+                                fprintf (out, "%ld", (long)id_type);
                                 break;
                         }
                     }
                     break;
 
+                case 'u':
+                    if(ptr) {
+                        if(vp) {
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                            if(asize_idx >= 0 && asize[asize_idx] >= 0) {
+                                unsigned *p = (unsigned*)vp;
+
+                                fprintf(out, " {");
+                                for(i = 0; i < asize[asize_idx]; i++)
+                                    HDfprintf(out, "%s%u", i?", ":"", p[i]);
+                                fprintf(out, "}");
+                            } /* end if */
+                        } /* end if */
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        unsigned iu = va_arg(ap, unsigned); /*lint !e732 Loss of sign not really occuring */
+
+                        fprintf(out, "%u", iu);
+                        asize[argno] = iu;
+                    } /* end else */
+                    break;
+
+                default:
+                    fprintf (out, "BADTYPE(I%c)", type[1]);
+                    goto error;
+	    } /* end switch */
+	    break;
+
+	case 'L':
+	    switch(type[1]) {
                 case 'l':
                     if(ptr) {
                         if(vp)
@@ -1097,7 +1100,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                 default:
                     fprintf(out, "BADTYPE(G%c)", type[1]);
                     goto error;
-	    }
+	    } /* end switch */
 	    break;
 
 	case 'M':

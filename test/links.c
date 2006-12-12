@@ -5930,24 +5930,24 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n,
 
     /* Verify the link information for first link, in increasing creation order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != 0) TEST_ERROR
 
     /* Verify the link information for new link, in increasing creation order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != (int64_t)n) TEST_ERROR
 
     /* Verify value for new soft link, in increasing creation order */
     if(!hard_link) {
         HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-        if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
         if(HDstrcmp(valname, tmpval)) TEST_ERROR
     } /* end if */
 
     /* Verify the name for new link, in increasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(linkname, tmpname)) TEST_ERROR
 
     /* Don't test "native" order if there is no creation order index, since
@@ -5957,70 +5957,70 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n,
     if(use_index) {
         /* Verify the link information for first link, in native creation order (which is increasing) */
         HDmemset(&linfo, 0, sizeof(linfo));
-        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
         if(linfo.corder != 0) TEST_ERROR
 
         /* Verify the link information for new link, in native creation order (which is increasing) */
         HDmemset(&linfo, 0, sizeof(linfo));
-        if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
         if(linfo.corder != (int64_t)n) TEST_ERROR
 
         /* Verify value for new soft link, in native creation order (which is increasing) */
         if(!hard_link) {
             HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-            if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(valname, tmpval)) TEST_ERROR
         } /* end if */
 
         /* Verify the name for new link, in native creation order (which is increasing) */
         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-        if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
         if(HDstrcmp(linkname, tmpname)) TEST_ERROR
     } /* end if */
 
     /* Verify the link information for first link, in decreasing creation order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != 0) TEST_ERROR
 
     /* Verify the link information for new link, in decreasing creation order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != (int64_t)n) TEST_ERROR
 
     /* Verify value for new soft link, in decreasing creation order */
     if(!hard_link) {
         HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-        if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
         if(HDstrcmp(valname, tmpval)) TEST_ERROR
     } /* end if */
 
     /* Verify the name for new link, in decreasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(linkname, tmpname)) TEST_ERROR
 
 
     /* Verify the link information for first link, in increasing link name order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != 0) TEST_ERROR
 
     /* Verify the link information for new link, in increasing link name order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != (int64_t)n) TEST_ERROR
 
     /* Verify value for new soft link, in increasing link name order */
     if(!hard_link) {
         HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-        if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
         if(HDstrcmp(valname, tmpval)) TEST_ERROR
     } /* end if */
 
     /* Verify the name for new link, in increasing link name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(linkname, tmpname)) TEST_ERROR
 
     /* Don't test "native" order queries on link name order, since there's not
@@ -6029,24 +6029,24 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n,
 
     /* Verify the link information for first link, in decreasing link name order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != 0) TEST_ERROR
 
     /* Verify the link information for new link, in decreasing link name order */
     HDmemset(&linfo, 0, sizeof(linfo));
-    if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.corder != (int64_t)n) TEST_ERROR
 
     /* Verify value for new soft link, in decreasing link name order */
     if(!hard_link) {
         HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-        if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
         if(HDstrcmp(valname, tmpval)) TEST_ERROR
     } /* end if */
 
     /* Verify the name for new link, in decreasing link name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(linkname, tmpname)) TEST_ERROR
 
     /* Success */
@@ -6126,11 +6126,11 @@ link_info_by_idx(hid_t fapl)
 
             /* Check for query on empty group */
             H5E_BEGIN_TRY {
-                ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
 
@@ -6164,15 +6164,15 @@ link_info_by_idx(hid_t fapl)
 
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY {
-                ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
 
@@ -6206,15 +6206,15 @@ link_info_by_idx(hid_t fapl)
 
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY {
-                ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
+                ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
 
@@ -6331,31 +6331,31 @@ link_info_by_idx_old(hid_t fapl)
 
             /* Verify link information (in increasing order) */
             if(hard_link) {
-                if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
                 if(H5F_addr_ne(linfo.u.address, objno[u])) TEST_ERROR
             } /* end if */
             else {
-                if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                 if(HDstrcmp(valname, tmpval)) TEST_ERROR
             } /* end else */
 
             /* Verify link name (in increasing order) */
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
 
 
             /* Verify link information (in native order - native is increasing) */
             if(hard_link) {
-                if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
                 if(H5F_addr_ne(linfo.u.address, objno[u])) TEST_ERROR
             } /* end if */
             else {
-                if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                 if(HDstrcmp(valname, tmpval)) TEST_ERROR
             } /* end else */
 
             /* Verify link name (in native order - native is increasing) */
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
 
 
@@ -6367,26 +6367,26 @@ link_info_by_idx_old(hid_t fapl)
 
             /* Verify link information (in decreasing order) */
             if(hard_link) {
-                if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
                 if(H5F_addr_ne(linfo.u.address, objno[dec_u])) TEST_ERROR
             } /* end if */
             else {
-                if(H5Lget_val_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, tmpval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                 if(HDstrcmp(valname, tmpval)) TEST_ERROR
             } /* end else */
 
             /* Verify link name (in decreasing order) */
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
         } /* end for */
 
         /* Check for creation order index queries */
         H5E_BEGIN_TRY {
-            ret = H5Lget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
+            ret = H5Lget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
         H5E_BEGIN_TRY {
-            ret = H5Lget_name_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -6433,7 +6433,7 @@ delete_by_idx(hid_t fapl)
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1);	/* Group ID */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
@@ -6446,13 +6446,13 @@ delete_by_idx(hid_t fapl)
     herr_t      ret;                    /* Generic return value */
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
         for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
-                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                if(idx_type == H5_INDEX_CRT_ORDER) {
                     if(order == H5_ITER_INC) {
                         if(use_index)
                             TESTING("deleting links by creation order index in increasing order w/creation order index")
@@ -6783,7 +6783,7 @@ delete_by_idx_old(hid_t fapl)
 
         /* Check for deletion in empty group */
         H5E_BEGIN_TRY {
-            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+            ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -6811,13 +6811,13 @@ delete_by_idx_old(hid_t fapl)
 
         /* Check for bad index type deletion */
         H5E_BEGIN_TRY {
-            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)0, H5P_DEFAULT);
+            ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Check for out of bounds deletion */
         H5E_BEGIN_TRY {
-            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
+            ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -6826,11 +6826,11 @@ delete_by_idx_old(hid_t fapl)
             unsigned dec_u = CORDER_NLINKS - (u + 2);       /* Decreasing mapped index */
 
             /* Delete first link in appropriate order */
-            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Verify the link information for first link in appropriate order */
             HDmemset(&linfo, 0, sizeof(linfo));
-            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC) {
                 if(H5F_addr_ne(linfo.u.address, objno[u + 1])) TEST_ERROR
             } /* end if */
@@ -6840,7 +6840,7 @@ delete_by_idx_old(hid_t fapl)
 
             /* Verify the name for first link in appropriate order */
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
                 sprintf(objname, "filler %02u", (u + 1));
             else
@@ -6849,11 +6849,11 @@ delete_by_idx_old(hid_t fapl)
         } /* end for */
 
         /* Delete last link */
-        if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Check for deletion in empty group (again) */
         H5E_BEGIN_TRY {
-            ret = H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+            ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -6891,11 +6891,11 @@ delete_by_idx_old(hid_t fapl)
             unsigned dec_u = CORDER_NLINKS - ((u * 2) + 2);       /* Decreasing mapped index */
 
             /* Delete link */
-            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Verify the link information for current link in appropriate order */
             HDmemset(&linfo, 0, sizeof(linfo));
-            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC) {
                 if(H5F_addr_ne(linfo.u.address, objno[(u * 2) + 1])) TEST_ERROR
             } /* end if */
@@ -6905,7 +6905,7 @@ delete_by_idx_old(hid_t fapl)
 
             /* Verify the name for current link in appropriate order */
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
                 sprintf(objname, "filler %02u", ((u * 2) + 1));
             else
@@ -6918,11 +6918,11 @@ delete_by_idx_old(hid_t fapl)
             unsigned dec_u = CORDER_NLINKS - ((u * 2) + 4);       /* Decreasing mapped index */
 
             /* Delete link */
-            if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Verify the link information for first link in appropriate order */
             HDmemset(&linfo, 0, sizeof(linfo));
-            if(H5Lget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC) {
                 if(H5F_addr_ne(linfo.u.address, objno[(u * 2) + 3])) TEST_ERROR
             } /* end if */
@@ -6932,7 +6932,7 @@ delete_by_idx_old(hid_t fapl)
 
             /* Verify the name for first link in appropriate order */
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-            if(H5Lget_name_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
                 sprintf(objname, "filler %02u", ((u * 2) + 3));
             else
@@ -6941,7 +6941,7 @@ delete_by_idx_old(hid_t fapl)
         } /* end for */
 
         /* Delete last link */
-        if(H5Ldelete_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
         if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
@@ -7107,7 +7107,7 @@ link_iterate_fail_cb(hid_t UNUSED group_id, const char UNUSED *link_name,
  *-------------------------------------------------------------------------
  */
 static int
-link_iterate_check(hid_t group_id, H5L_index_t idx_type, H5_iter_order_t order,
+link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     unsigned max_links, link_iter_info_t *iter_info)
 {
     unsigned    v;                      /* Local index variable */
@@ -7266,7 +7266,7 @@ link_iterate(hid_t fapl)
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1);	/* Group ID */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
@@ -7291,13 +7291,13 @@ link_iterate(hid_t fapl)
     iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
         for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
-                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                if(idx_type == H5_INDEX_CRT_ORDER) {
                     if(order == H5_ITER_INC) {
                         if(use_index)
                             TESTING("iterating over links by creation order index in increasing order w/creation order index")
@@ -7570,7 +7570,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7600,7 +7600,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7662,7 +7662,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if((ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
     if(ret != CORDER_ITER_STOP) TEST_ERROR
     if(iter_info->ncalled != 3) TEST_ERROR
 
@@ -7682,7 +7682,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     /* Check for iteration routine indicating failure */
     skip = 0;
     H5E_BEGIN_TRY {
-        ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
+        ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
@@ -7750,7 +7750,7 @@ link_iterate_old(hid_t fapl)
 
         /* Check for iteration on empty group */
         /* (should be OK) */
-        if(H5Literate(group_id, ".", H5L_INDEX_NAME, order, NULL, link_iterate_old_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Literate(group_id, ".", H5_INDEX_NAME, order, NULL, link_iterate_old_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Create several links */
         for(u = 0; u < CORDER_NLINKS; u++) {
@@ -7770,7 +7770,7 @@ link_iterate_old(hid_t fapl)
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
         H5E_BEGIN_TRY {
-            ret = H5Literate(group_id, ".", H5L_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+            ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -7778,7 +7778,7 @@ link_iterate_old(hid_t fapl)
         /* (should fail) */
         skip = (hsize_t)0;
         H5E_BEGIN_TRY {
-            ret = H5Literate(group_id, ".", H5L_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+            ret = H5Literate(group_id, ".", H5_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -7830,7 +7830,7 @@ error:
  */
 static int
 open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
-    H5L_index_t idx_type, H5_iter_order_t order, unsigned max_links,
+    H5_index_t idx_type, H5_iter_order_t order, unsigned max_links,
     haddr_t *objno)
 {
     char        mntname[NAME_BUF_SIZE]; /* Link value */
@@ -7905,7 +7905,7 @@ open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
     if(H5Fmount(main_group_id, mntname, mount_file_id, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open the object that the file is mounted on */
-    if((obj_id = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, H5_ITER_INC, (hsize_t)mnt_idx, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((obj_id = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)mnt_idx, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Get the object's information */
     if(H5Gget_objinfo(obj_id, ".", FALSE, &sb) < 0) TEST_ERROR
@@ -7956,7 +7956,7 @@ open_by_idx(hid_t fapl)
     hid_t	group_id = (-1);	/* Group ID */
     hid_t	soft_group_id = (-1);	/* Group ID for soft links */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
@@ -7983,13 +7983,13 @@ open_by_idx(hid_t fapl)
     if((mount_file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
         for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
-                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                if(idx_type == H5_INDEX_CRT_ORDER) {
                     if(order == H5_ITER_INC) {
                         if(use_index)
                             TESTING("open object by creation order index in increasing order w/creation order index")
@@ -8237,7 +8237,7 @@ open_by_idx_old(hid_t fapl)
 
         /* Try to open on object in an empty group */
         H5E_BEGIN_TRY {
-            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
+            ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -8273,18 +8273,18 @@ open_by_idx_old(hid_t fapl)
 
         /* Check for out of bound open by index */
         H5E_BEGIN_TRY {
-            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
+            ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Check for creation order index open */
         H5E_BEGIN_TRY {
-            ret = H5Oopen_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), H5P_DEFAULT);
+            ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Verify opening objects by index */
-        if(open_by_idx_check(group_id, soft_group_id, mount_file_id, H5L_INDEX_NAME, order, u, objno) < 0) TEST_ERROR
+        if(open_by_idx_check(group_id, soft_group_id, mount_file_id, H5_INDEX_NAME, order, u, objno) < 0) TEST_ERROR
 
 
         /* Close the groups */
@@ -8329,7 +8329,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-object_info_check(hid_t main_group_id, hid_t soft_group_id, H5L_index_t idx_type,
+object_info_check(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type,
     H5_iter_order_t order, unsigned max_links, haddr_t *objno)
 {
     char        objname[NAME_BUF_SIZE]; /* Object name */
@@ -8413,7 +8413,7 @@ object_info(hid_t fapl)
     hid_t	soft_group_id = (-1);	/* Group ID for soft links */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
     hid_t       space_id = (-1);        /* Dataspace ID (for attributes) */
-    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
@@ -8440,13 +8440,13 @@ object_info(hid_t fapl)
     if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
         for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
-                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                if(idx_type == H5_INDEX_CRT_ORDER) {
                     if(order == H5_ITER_INC) {
                         if(use_index)
                             TESTING("query object info by creation order index in increasing order w/creation order index")
@@ -8507,7 +8507,7 @@ object_info(hid_t fapl)
 
                 /* Check for out of bound query by index on empty group */
                 H5E_BEGIN_TRY {
-                    ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &oinfo, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -8551,7 +8551,7 @@ object_info(hid_t fapl)
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
-                    ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -8599,7 +8599,7 @@ object_info(hid_t fapl)
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
-                    ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
+                    ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -8706,7 +8706,7 @@ object_info_old(hid_t fapl)
 
         /* Check for out of bound query by index on empty group */
         H5E_BEGIN_TRY {
-            ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &oinfo, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -8750,18 +8750,18 @@ object_info_old(hid_t fapl)
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY {
-            ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Check for creation order index query */
         H5E_BEGIN_TRY {
-            ret = H5Oget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), &oinfo, H5P_DEFAULT);
+            ret = H5Oget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), &oinfo, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Verify querying objects by name */
-        if(object_info_check(group_id, soft_group_id, H5L_INDEX_NAME, order, u, objno) < 0) TEST_ERROR
+        if(object_info_check(group_id, soft_group_id, H5_INDEX_NAME, order, u, objno) < 0) TEST_ERROR
 
 
         /* Close the groups */
@@ -8814,7 +8814,7 @@ group_info(hid_t fapl)
     hid_t	group_id = (-1);	/* Group ID */
     hid_t	soft_group_id = (-1);	/* Group ID for soft links */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    H5L_index_t idx_type;               /* Type of index to operate on */
+    H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
     hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
@@ -8834,13 +8834,13 @@ group_info(hid_t fapl)
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5L_INDEX_NAME; idx_type <=H5L_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
         /* Loop over operating in different orders */
         for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
-                if(idx_type == H5L_INDEX_CRT_ORDER) {
+                if(idx_type == H5_INDEX_CRT_ORDER) {
                     if(order == H5_ITER_INC) {
                         if(use_index)
                             TESTING("query group info by creation order index in increasing order w/creation order index")
@@ -8901,7 +8901,7 @@ group_info(hid_t fapl)
 
                 /* Check for out of bound query by index on empty group */
                 H5E_BEGIN_TRY {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -8995,7 +8995,7 @@ group_info(hid_t fapl)
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -9090,7 +9090,7 @@ group_info(hid_t fapl)
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
-                    ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
+                    ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -9182,7 +9182,7 @@ group_info_old(hid_t fapl)
 
         /* Check for out of bound query by index on empty group */
         H5E_BEGIN_TRY {
-            ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
+            ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -9229,10 +9229,10 @@ group_info_old(hid_t fapl)
             /* Retrieve group's information */
             if(order != H5_ITER_NATIVE) {
                 if(order == H5_ITER_INC) {
-                    if(H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end if */
                 else {
-                    if(H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end else */
 
                 /* Check (new) group's information */
@@ -9275,13 +9275,13 @@ group_info_old(hid_t fapl)
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY {
-            ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
+            ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
         /* Check for bad index query by index group */
         H5E_BEGIN_TRY {
-            ret = H5Gget_info_by_idx(group_id, ".", H5L_INDEX_CRT_ORDER, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
+            ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 

@@ -63,7 +63,7 @@ typedef struct {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_compact_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
 static herr_t H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id,
-    const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
+    const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     H5G_link_table_t *ltable);
 
 
@@ -123,7 +123,7 @@ done:
  */
 static herr_t
 H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
+    H5_index_t idx_type, H5_iter_order_t order, H5G_link_table_t *ltable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -217,7 +217,7 @@ done:
  */
 ssize_t
 H5G_compact_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
-    const H5O_linfo_t *linfo, H5L_index_t idx_type, H5_iter_order_t order,
+    const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t idx, char* name, size_t size)
 {
     H5G_link_table_t    ltable = {0, NULL};         /* Link table */
@@ -281,7 +281,7 @@ H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *l
     HDassert(oloc);
 
     /* Build table of all link messages */
-    if(H5G_compact_build_table(oloc, dxpl_id, linfo, H5L_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
+    if(H5G_compact_build_table(oloc, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "can't create link message table")
 
     /* Check for going out of bounds */
@@ -416,7 +416,7 @@ done:
  */
 herr_t
 H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
-    const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5L_index_t idx_type,
+    const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n)
 {
     H5G_link_table_t ltable = {0, NULL};/* Link table */
@@ -469,7 +469,7 @@ done:
  */
 herr_t
 H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
@@ -606,7 +606,7 @@ done:
  */
 herr_t
 H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    H5L_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
     H5G_link_table_t ltable = {0, NULL};/* Link table */
     herr_t ret_value = SUCCEED;         /* Return value */

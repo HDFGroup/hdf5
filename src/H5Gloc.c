@@ -60,7 +60,7 @@ typedef struct {
     /* downward */
     hid_t lapl_id;              /* LAPL to use for operation */
     hid_t dxpl_id;              /* DXPL to use for operation */
-    H5L_index_t idx_type;       /* Index to use */
+    H5_index_t idx_type;       /* Index to use */
     H5_iter_order_t order;      /* Iteration order within index */
     hsize_t n;                  /* Offset within index */
 
@@ -482,7 +482,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name, H5L_index_t idx_type,
+H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5G_loc_t *obj_loc/*out*/, hid_t lapl_id,
     hid_t dxpl_id)
 {

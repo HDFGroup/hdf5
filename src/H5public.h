@@ -264,6 +264,18 @@ typedef enum {
 #define H5_ITER_CONT    (0)
 #define H5_ITER_STOP    (1)
 
+/*
+ * The types of indices on links in groups/attributes on objects.
+ * Primarily used for "<do> <foo> by index" routines and for iterating over
+ * links in groups/attributes on objects.
+ */
+typedef enum H5_index_t {
+    H5_INDEX_UNKNOWN = -1,	/* Unknown index type			*/
+    H5_INDEX_NAME,		/* Index on names 			*/
+    H5_INDEX_CRT_ORDER,		/* Index on creation order 		*/
+    H5_INDEX_N			/* Number of indices defined 		*/
+} H5_index_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);
