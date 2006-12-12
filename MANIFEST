@@ -1079,6 +1079,7 @@
 ./c++/test/dsets.cpp
 ./c++/test/h5cpputil.cpp
 ./c++/test/h5cpputil.h
+./c++/test/tattr.cpp
 ./c++/test/testhdf5.cpp
 ./c++/test/tfile.cpp
 ./c++/test/th5s.cpp
