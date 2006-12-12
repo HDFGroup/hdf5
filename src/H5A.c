@@ -172,7 +172,7 @@ done:
 int
 H5A_term_interface(void)
 {
-    int	n=0;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_term_interface)
 
@@ -186,7 +186,7 @@ H5A_term_interface(void)
 	}
     }
     FUNC_LEAVE_NOAPI(n)
-}
+} /* H5A_term_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -228,9 +228,9 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
     H5G_loc_t           loc;                    /* Object location */
-    H5T_t		*type = NULL;
-    H5S_t		*space = NULL;
-    hid_t		ret_value = FAIL;
+    H5T_t		*type;                  /* Datatype to use for attribute */
+    H5S_t		*space;                 /* Dataspace to use for attribute */
+    hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate, FAIL)
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
@@ -531,6 +531,10 @@ H5Aopen_name(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
+    /* Cleanup on failure */
+    if(ret_value < 0 && attr)
+        (void)H5A_close(attr);
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
 
@@ -608,7 +612,7 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
     HDassert(loc);
 
     /* Read in attribute with H5O_msg_read() */
-    H5_CHECK_OVERFLOW(idx,unsigned,int);
+    H5_CHECK_OVERFLOW(idx, unsigned, int);
     if(NULL == (attr = (H5A_t *)H5O_msg_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized = TRUE;
@@ -726,9 +730,9 @@ done:
  PURPOSE
     Write out data to an attribute
  USAGE
-    herr_t H5Awrite (attr_id, type_id, buf)
+    herr_t H5Awrite (attr_id, dtype_id, buf)
         hid_t attr_id;       IN: Attribute to write
-        hid_t type_id;       IN: Memory datatype of buffer
+        hid_t dtype_id;       IN: Memory datatype of buffer
         const void *buf;     IN: Buffer of data to write
  RETURNS
     Non-negative on success/Negative on failure
@@ -737,19 +741,19 @@ done:
         This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
+H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    H5A_t		   *attr = NULL;
+    H5A_t	   *attr;               /* Attribute object for ID */
     const H5T_t    *mem_type = NULL;
-    herr_t		    ret_value;
+    herr_t	    ret_value;
 
     FUNC_ENTER_API(H5Awrite, FAIL)
-    H5TRACE3("e","iix",attr_id,type_id,buf);
+    H5TRACE3("e","iix",attr_id,dtype_id,buf);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
@@ -884,9 +888,9 @@ done:
  PURPOSE
     Read in data from an attribute
  USAGE
-    herr_t H5Aread (attr_id, type_id, buf)
+    herr_t H5Aread (attr_id, dtype_id, buf)
         hid_t attr_id;       IN: Attribute to read
-        hid_t type_id;       IN: Memory datatype of buffer
+        hid_t dtype_id;       IN: Memory datatype of buffer
         void *buf;           IN: Buffer for data to read
  RETURNS
     Non-negative on success/Negative on failure
@@ -895,25 +899,25 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread(hid_t attr_id, hid_t type_id, void *buf)
+H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
-    H5A_t		*attr = NULL;
+    H5A_t		*attr;                  /* Attribute object for ID */
     const H5T_t    	*mem_type = NULL;
     herr_t		ret_value;
 
     FUNC_ENTER_API(H5Aread, FAIL)
-    H5TRACE3("e","iix",attr_id,type_id,buf);
+    H5TRACE3("e","iix",attr_id,dtype_id,buf);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A_read(attr,mem_type,buf,H5AC_dxpl_id)) < 0)
+    if((ret_value = H5A_read(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
@@ -953,9 +957,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_read)
 
-    assert(attr);
-    assert(mem_type);
-    assert(buf);
+    HDassert(attr);
+    HDassert(mem_type);
+    HDassert(buf);
 
     /* Create buffer for data to store on disk */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->ds)) < 0)
@@ -968,9 +972,8 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
         dst_type_size = H5T_get_size(mem_type);
 
         /* Check if the attribute has any data yet, if not, fill with zeroes */
-        if(attr->obj_opened && !attr->initialized) {
-            HDmemset(buf,0,(dst_type_size*nelmts));
-        }   /* end if */
+        if(attr->obj_opened && !attr->initialized)
+            HDmemset(buf, 0, (dst_type_size * nelmts));
         else {  /* Attribute exists and has a value */
             /* Convert memory buffer into disk buffer */
             /* Set up type conversion function */
@@ -984,26 +987,26 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
                 /* Get the maximum buffer size needed and allocate it */
-                buf_size = nelmts*MAX(src_type_size,dst_type_size);
+                buf_size = nelmts * MAX(src_type_size, dst_type_size);
                 if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)) || NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the buffer for conversion */
-                HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
+                HDmemcpy(tconv_buf, attr->data, (src_type_size * nelmts));
 
                 /* Perform datatype conversion.  */
                 if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
                 /* Copy the converted data into the user's buffer */
-                HDmemcpy(buf,tconv_buf,(dst_type_size*nelmts));
+                HDmemcpy(buf, tconv_buf, (dst_type_size * nelmts));
             } /* end if */
             /* No type conversion necessary */
             else {
                 HDassert(dst_type_size == src_type_size);
 
                 /* Copy the attribute data into the user's buffer */
-                HDmemcpy(buf,attr->data,(dst_type_size*nelmts));
+                HDmemcpy(buf, attr->data, (dst_type_size * nelmts));
             } /* end else */
         } /* end else */
     } /* end if */
@@ -1042,8 +1045,8 @@ done:
 hid_t
 H5Aget_space(hid_t attr_id)
 {
-    H5A_t	*attr = NULL;
-    H5S_t	*dst = NULL;
+    H5A_t	*attr;                  /* Attribute object for ID */
+    H5S_t	*ds = NULL;             /* Copy of dataspace for attribute */
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Aget_space, FAIL)
@@ -1054,14 +1057,17 @@ H5Aget_space(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Copy the attribute's dataspace */
-    if(NULL == (dst = H5S_copy (attr->ds, FALSE)))
+    if(NULL == (ds = H5S_copy (attr->ds, FALSE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, dst)) < 0)
+    if((ret_value = H5I_register(H5I_DATASPACE, ds)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
+    if(ret_value < 0 && ds)
+        (void)H5S_close(ds);
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_space() */
 
@@ -1085,8 +1091,8 @@ done:
 hid_t
 H5Aget_type(hid_t attr_id)
 {
-    H5A_t	*attr = NULL;
-    H5T_t	*dst = NULL;
+    H5A_t	*attr;          /* Attribute object for ID */
+    H5T_t	*dt = NULL;     /* Copy of attribute's datatype */
     hid_t	 ret_value;
 
     FUNC_ENTER_API(H5Aget_type, FAIL)
@@ -1101,24 +1107,22 @@ H5Aget_type(hid_t attr_id)
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if(NULL == (dst = H5T_copy(attr->dt, H5T_COPY_REOPEN)))
+    if(NULL == (dt = H5T_copy(attr->dt, H5T_COPY_REOPEN)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
-    if(H5T_set_loc(dst, NULL, H5T_LOC_MEMORY) < 0)
+    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
-    if(H5T_lock(dst, FALSE) < 0)
+    if(H5T_lock(dt, FALSE) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
     /* Atomize */
-    if((ret_value = H5I_register(H5I_DATATYPE, dst)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
 
 done:
-    if(ret_value < 0) {
-        if(dst!=NULL)
-            (void)H5T_close(dst);
-    } /* end if */
+    if(ret_value < 0 && dt)
+        (void)H5T_close(dt);
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_type() */
@@ -1155,18 +1159,18 @@ H5Aget_create_plist(hid_t attr_id)
     FUNC_ENTER_API(H5Aget_create_plist, FAIL)
     H5TRACE1("i","i",attr_id);
 
-    assert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
+    HDassert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
 
     /* Get attribute and default attribute creation property list*/
-    if (NULL==(attr=H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if (NULL==(plist=H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
+    if(NULL == (plist = H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
 
     /* Create the property list object to return */
-    if((new_plist_id=H5P_copy_plist(plist)) < 0)
+    if((new_plist_id = H5P_copy_plist(plist)) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
-    if (NULL == (new_plist = H5I_object(new_plist_id)))
+    if(NULL == (new_plist = H5I_object(new_plist_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Set the character encoding on the new property list */
@@ -1225,7 +1229,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     copy_len = MIN(buf_size-1, nbytes);
 
     /* Copy all/some of the name */
-    if(buf && copy_len>0) {
+    if(buf && copy_len > 0) {
         HDmemcpy(buf, attr->name, copy_len);
 
         /* Terminate the string */
@@ -1255,8 +1259,6 @@ done:
  * Programmer:	Raymond Lu
  *              October 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -1277,7 +1279,7 @@ H5Aget_storage_size(hid_t attr_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Aget_storage_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1296,8 +1298,6 @@ done:
  * Programmer:	Raymond Lu
  *              October 23, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -1311,7 +1311,7 @@ H5A_get_storage_size(const H5A_t *attr)
     ret_value = attr->data_size;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5A_get_storage_size() */
 
 
 /*-------------------------------------------------------------------------

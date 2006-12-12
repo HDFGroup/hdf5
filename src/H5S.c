@@ -435,18 +435,16 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5S_close(H5S_t *ds)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_close, FAIL);
+    FUNC_ENTER_NOAPI(H5S_close, FAIL)
 
-    assert(ds);
+    HDassert(ds);
 
     /* Release selection (this should come before the extent release) */
     H5S_SELECT_RELEASE(ds);
@@ -455,11 +453,11 @@ H5S_close(H5S_t *ds)
     H5S_extent_release(&ds->extent);
 
     /* Release the main structure */
-    H5FL_FREE(H5S_t,ds);
+    H5FL_FREE(H5S_t, ds);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_close() */
 
 
 /*-------------------------------------------------------------------------
