@@ -220,7 +220,7 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf ) const
+void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf )
 {
    // Obtain identifiers for C API
    hid_t type_id = type.getId();
