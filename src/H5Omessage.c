@@ -1853,7 +1853,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
             *new_mesg = sh_mesg;
         } else {
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, UFAIL, "can't determine if message is shared")
-        }/* end else */
+        } /* end else */
     } /* end if */
     else {
         *new_type = orig_type;

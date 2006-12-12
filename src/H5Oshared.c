@@ -277,20 +277,18 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
     /* Version */
     version = *buf++;
     if(version < H5O_SHARED_VERSION_1 || version > H5O_SHARED_VERSION)
-	  HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message")
 
     /* Get the shared information flags
      * Flags are unused before version 3.
-     */ /* JAMES: double-check that this is endian-portable */
+     */
     if(version >= H5O_SHARED_VERSION_2)
-    {
         mesg->flags = *buf++;
-    }
     else
     {
         mesg->flags = H5O_COMMITTED_FLAG;
         buf++;
-    }
+    } /* end else */
 
     /* Skip reserved bytes (for version 1) */
     if(version == H5O_SHARED_VERSION_1)
@@ -298,9 +296,7 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
 
     /* Body */
     if(version == H5O_SHARED_VERSION_1)
-    {
         H5G_obj_ent_decode(f, &buf, &(mesg->u.oloc));
-    }
     else if (version >= H5O_SHARED_VERSION_2)
     {
         /* If this message is in the heap, copy a heap ID.
@@ -323,17 +319,16 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
 
             H5F_addr_decode(f, &buf, &(mesg->u.oloc.addr));
             mesg->u.oloc.file = f;
-        }
-    }
+        } /* end else */
+    } /* end else if */
 
     /* Set return value */
     ret_value = mesg;
 
 done:
-    if(ret_value==NULL) {
-        if(mesg!=NULL)
+    if(ret_value == NULL)
+        if(mesg != NULL)
             H5MM_xfree(mesg);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_decode() */
@@ -356,7 +351,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
+H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
     unsigned    version;
@@ -368,36 +363,27 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     HDassert(buf);
     HDassert(mesg);
 
-    /* JAMES: shouldn't be necessary. */
-    HDmemset(buf, 0, sizeof( H5O_shared_size(f, mesg)));
-
-    /* Encode */
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
      */
-    /* JAMES: also use "use latest version" flag here */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
+    /* JAMES: also use "use latest version" flag here? */
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
         version = H5O_SHARED_VERSION;
-    }
     else {
         HDassert(mesg->flags & H5O_COMMITTED_FLAG);
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
-    }
+    } /* end else */
 
     *buf++ = version;
-    *buf++ = (unsigned) mesg->flags;
+    *buf++ = (unsigned)mesg->flags;
 
     /* Encode either the heap ID of the message or the address of the
      * object header that holds it.
      */
     if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
-    {
-        HDmemcpy(buf, &(mesg->u.heap_id), (size_t) H5SM_FHEAP_ID_LEN);
-    }
-     else
-    {
+        HDmemcpy(buf, &(mesg->u.heap_id), (size_t)H5SM_FHEAP_ID_LEN);
+    else
         H5F_addr_encode(f, &buf, mesg->u.oloc.addr);
-    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_shared_encode() */
@@ -466,12 +452,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (const H5F_t *f, const void *_mesg)
+H5O_shared_size(const H5F_t *f, const void *_mesg)
 {
     const H5O_shared_t       *shared = (const H5O_shared_t *) _mesg;
     size_t	ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size)
 
     if(shared->flags & H5O_COMMITTED_FLAG)
     {
@@ -487,8 +473,8 @@ H5O_shared_size (const H5F_t *f, const void *_mesg)
                 H5SM_FHEAP_ID_LEN;		/* Shared in the heap   */
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -530,7 +516,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     /* Decrement the reference count on the shared object, if requested */
     if(adj_link)
         if(H5O_shared_link_adj(f, dxpl_id, shared, -1) < 0)
-            HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
     /* JAMES */
 /* JAMES    if((shared->flags & H5O_SHARED_IN_HEAP_FLAG) > 0)
@@ -552,8 +538,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* JAMES: this is where shared messages increment their links */
@@ -561,24 +545,24 @@ static herr_t
 H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_shared_t       *shared = (const H5O_shared_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link)
 
     /* check args */
-    assert(f);
-    assert(shared);
+    HDassert(f);
+    HDassert(shared);
 
     /* JAMES_HEAP: see comment in link_adj.  Unneccessary except for shared attributes, I think,
      * and they may yet take care of themselves.
      */
 
     /* Increment the reference count on the shared object */
-    if(H5O_shared_link_adj(f,dxpl_id,shared,1)<0)
-        HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count");
+    if(H5O_shared_link_adj(f, dxpl_id, shared, 1) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_link() */
 
 

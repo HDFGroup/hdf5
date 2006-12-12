@@ -627,7 +627,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     HDassert(oh);
     HDassert(attr);
 
-    /* Check for insertin shared attribute */
+    /* Check for inserting shared attribute */
     if(mesg_flags & H5O_MSG_FLAG_SHARED) {
 /* XXX: fix me */
 HDfprintf(stderr, "%s: inserting shared attributes in dense storage not supported yet!\n", FUNC);
@@ -1089,7 +1089,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_remove_bt2_cb)
 
-    /* Check for insertin shared attribute */
+    /* Check for inserting shared attribute */
     if(record->flags & H5O_MSG_FLAG_SHARED) {
 /* XXX: fix me */
 HDfprintf(stderr, "%s: removing shared attributes in dense storage not supported yet!\n", FUNC);
