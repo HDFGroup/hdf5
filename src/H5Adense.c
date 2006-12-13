@@ -66,8 +66,8 @@
 #define H5A_CORDER_BT2_MERGE_PERC       40
 #define H5A_CORDER_BT2_SPLIT_PERC       100
 
-/* Size of stack buffer for serialized messages */
-#define H5A_MESG_BUF_SIZE               128
+/* Size of stack buffer for serialized attributes */
+#define H5A_ATTR_BUF_SIZE               128
 
 
 /******************/
@@ -620,7 +620,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID of attribute to insert    */
     H5O_shared_t sh_mesg;               /* Shared object header message */
-    uint8_t attr_buf[H5A_MESG_BUF_SIZE]; /* Buffer for serializing message */
+    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     void *attr_ptr = NULL;              /* Pointer to serialized message */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -812,7 +812,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     size_t attr_size;                   /* Size of serialized attribute in the heap */
-    uint8_t attr_buf[H5A_MESG_BUF_SIZE]; /* Buffer for serializing attribute */
+    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
     void *attr_ptr = NULL;              /* Pointer to serialized attribute */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     herr_t ret_value = SUCCEED;         /* Return value */

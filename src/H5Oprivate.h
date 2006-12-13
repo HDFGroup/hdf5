@@ -139,6 +139,8 @@ typedef struct H5O_copy_t {
 #define H5O_SHARED_IN_HEAP_FLAG 0x01
 #define H5O_COMMITTED_FLAG 0x02
 
+#define H5O_IS_SHARED(F)        (((F) & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG)) ? TRUE : FALSE)
+
 /*
  * Shared object message.
  * This needs to go first because other messages can be shared and

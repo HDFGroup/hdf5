@@ -1359,22 +1359,16 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_is_shared (const void *_mesg)
+H5O_dtype_is_shared(const void *_mesg)
 {
-    const H5T_t	*dt = (const H5T_t *)_mesg;
-    htri_t       ret_value;
+    const H5T_t	*mesg = (const H5T_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_is_shared)
 
-    HDassert(dt);
+    HDassert(mesg);
 
-    if(dt->sh_loc.flags & (H5O_COMMITTED_FLAG | H5O_SHARED_IN_HEAP_FLAG))
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_is_shared */
+    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
+} /* end H5O_dtype_is_shared() */
 
 
 /*-------------------------------------------------------------------------

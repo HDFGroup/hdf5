@@ -32,6 +32,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
+#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -83,6 +84,12 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
 #define H5O_SHARED_VERSION_3	3
 #define H5O_SHARED_VERSION	H5O_SHARED_VERSION_3
 
+/* Size of stack buffer for serialized messages */
+#define H5O_MESG_BUF_SIZE               128
+
+/* Declare a free list to manage the serialized message information */
+H5FL_BLK_DEFINE(ser_mesg);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_shared_read
@@ -108,7 +115,8 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, void *mesg)
 {
     H5HF_t *fheap = NULL;
-    unsigned char *buf = NULL;  /* Pointer to raw message in heap */
+    uint8_t mesg_buf[H5O_MESG_BUF_SIZE]; /* Buffer for deserializing messages */
+    uint8_t *buf = NULL;        /* Pointer to raw message in heap */
     void *native_mesg = NULL;   /* Used for messages shared in heap */
     void *ret_value = NULL;     /* Return value */
 
@@ -132,23 +140,27 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 
         /* Retrieve the fractal heap address for shared messages */
         if((fheap_addr = H5SM_get_fheap_addr(f, type->id, dxpl_id)) == HADDR_UNDEF)
-            HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, NULL, "can't get fheap address for shared messages")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get fheap address for shared messages")
 
         /* Open the fractal heap */
         if(NULL == (fheap = H5HF_open(f, dxpl_id, fheap_addr)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap")
 
         /* Get the size of the message in the heap */
         if(H5HF_get_obj_len(fheap, dxpl_id, &(shared->u.heap_id), &buf_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, NULL, "can't get message size from fractal heap.")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get message size from fractal heap.")
 
-        /* Allocate buffer */
-        if(NULL == (buf = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        /* Allocate space for serialized message, if necessary */
+        if(buf_size > sizeof(mesg_buf)) {
+            if(NULL == (buf = H5FL_BLK_MALLOC(ser_mesg, buf_size)))
+                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
+        } /* end if */
+        else
+            buf = mesg_buf;
 
         /* Retrieve the message from the heap */
         if(H5HF_read(fheap, dxpl_id, &(shared->u.heap_id), buf) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
         /* Decode the message */
         if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type->id, buf)))
@@ -171,12 +183,11 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
 done:
-    if(buf)
-        H5MM_xfree(buf);
-
+    /* Release resources */
+    if(buf && buf != mesg_buf)
+        H5FL_BLK_FREE(ser_mesg, buf);
     if(native_mesg)
         H5O_msg_free(type->id, native_mesg);
-
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap")
 
