@@ -1376,7 +1376,7 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id, void UNUSED *key)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_unlock_cb);
 
-    assert (dt);
+    HDassert (dt && dt->shared);
     if (H5T_STATE_IMMUTABLE==dt->shared->state)
 	dt->shared->state = H5T_STATE_RDONLY;
 

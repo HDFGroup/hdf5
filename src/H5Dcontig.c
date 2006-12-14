@@ -1046,12 +1046,14 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     H5_CHECK_OVERFLOW(total_src_nbytes, hsize_t, size_t);
     buf_size = MIN(H5D_TEMP_BUF_SIZE, (size_t)total_src_nbytes);
 
+    /* Create datatype ID for src datatype.  We may or may not use this ID,
+     * but this ensures that the src datatype will be freed.
+     */
+    if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
     /* If there's a VLEN source datatype, set up type conversion information */
     if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
-        /* Create datatype ID for src datatype */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
@@ -1113,10 +1115,6 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     else {
         /* Check for reference datatype */
         if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
-            /* Create datatype ID for src datatype, so it gets freed */
-            if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-
             /* Need to fix values of references when copying across files */
             if(f_src != f_dst)
                 fix_ref = TRUE; 

@@ -182,6 +182,10 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(layout_dst && H5D_COMPACT == layout_dst->type);
     HDassert(dt_src);
 
+    /* Create datatype ID for src datatype, so it gets freed */
+    if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
     /* If there's a VLEN source datatype, do type conversion information */
     if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
         H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
@@ -194,10 +198,6 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         size_t tmp_dt_size;         /* Temporary datatype size */
         size_t max_dt_size;         /* Max atatype size */
         hsize_t buf_dim;            /* Dimension for buffer */
-
-        /* Create datatype ID for src datatype */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
@@ -279,10 +279,6 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
     } /* end if */
     else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
-        /* Create datatype ID for src datatype, so it gets freed */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-
         if(f_src != f_dst) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {

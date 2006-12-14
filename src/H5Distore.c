@@ -3579,6 +3579,10 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(layout_dst && H5D_CHUNKED == layout_dst->type);
     HDassert(dt_src);
 
+    /* Create datatype ID for src datatype */
+    if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
+
     /* Create shared B-tree info for each file */
     if(H5D_istore_shared_create(f_src, layout_src) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
@@ -3601,10 +3605,6 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         size_t max_dt_size;         /* Max atatype size */
         hsize_t buf_dim;            /* Dimension for buffer */
         unsigned u;
-
-        /* Create datatype ID for src datatype */
-        if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
@@ -3664,12 +3664,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         do_convert = TRUE;
     } /* end if */
     else {
-        /* Create datatype ID for source datatype, so it gets freed */
         if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
-            /* Create datatype ID for src datatype */
-            if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
-
             /* Indicate that type conversion should be performed */
             do_convert = TRUE;
         } /* end if */

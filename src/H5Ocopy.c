@@ -391,7 +391,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     for(mesgno = 0; mesgno < oh_src->nmesgs; mesgno++) {
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno]);
-        mesg_dst = &(oh_dst->mesg[mesgno]);
 
         /* Sanity check */
         HDassert(!mesg_src->dirty);     /* Should be cleared by earlier call to flush messages */
