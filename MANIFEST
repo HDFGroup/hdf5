@@ -1154,6 +1154,11 @@
 ./tools/testfiles/tbin2.ddl
 ./tools/testfiles/tbin3.ddl
 ./tools/testfiles/tbin4.ddl
+./tools/testfiles/tindicessub2.ddl
+./tools/testfiles/tindicessub3.ddl
+./tools/testfiles/tindicessub4.ddl
+./tools/testfiles/tindicessub1.ddl
+
 
 
 # Expected output from h5ls tests

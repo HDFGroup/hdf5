@@ -256,6 +256,12 @@ TOOLTEST tstring2.ddl -r -d str4 tstr3.h5
 TOOLTEST tindicesyes.ddl taindices.h5
 TOOLTEST tindicesno.ddl -y taindices.h5
 
+# array indices with subsetting
+TOOLTEST tindicessub1.ddl -d 1d -s 3 -c 40 taindices.h5
+TOOLTEST tindicessub2.ddl -d 2d -s 1,3 -c 6,4 taindices.h5
+TOOLTEST tindicessub3.ddl -d 3d -s 0,1,3 -c 1,6,4 taindices.h5
+TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,3 -c 1,1,1,1 taindices.h5
+
 
 # tests for filters
 # SZIP

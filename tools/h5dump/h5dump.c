@@ -2962,7 +2962,7 @@ parse_hsize_list(const char *h_list)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if (isdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)atoi(ptr);
+            p_list[i++] = (hsize_t)atof(ptr);
 
             while (isdigit(*ptr))
                 /* scroll to end of integer */

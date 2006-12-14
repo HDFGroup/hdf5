@@ -5364,14 +5364,14 @@ static void gent_aindices(void)
  hid_t    fid;     /* file id */
  hid_t    gid[6];  /* group ids */
  hsize_t  dims1[1]  = {100};
- hsize_t  dims2[2]  = {2,100};
- hsize_t  dims3[3]  = {2,2,100};
- hsize_t  dims4[4]  = {2,3,4,5};
+ hsize_t  dims2[2]  = {10,10};
+ hsize_t  dims3[3]  = {2,10,10};
+ hsize_t  dims4[4]  = {2,2,10,10};
  hsize_t  dims5[2]  = {32,4097}; /* big enough data size to force a second stripmine read */
  int      buf1[100];
- int      buf2[2][100];
- int      buf3[2][2][100];
- int      buf4[2][3][4][5];
+ int      buf2[10][10];
+ int      buf3[2][10][10];
+ int      buf4[2][2][10][10];
  double   *buf5;
  int      i, j, k, l, n, ret;
 
@@ -5379,22 +5379,22 @@ static void gent_aindices(void)
   buf1[i]=n++;
  }
 
- for (i=n=0; i<2; i++){
-  for (j=0; j<100; j++){
+ for (i=n=0; i<10; i++){
+  for (j=0; j<10; j++){
    buf2[i][j]=n++;
   }
  }
  for (i=n=0; i<2; i++){
-  for (j=0; j<2; j++){
-   for (k=0; k<100; k++){
+  for (j=0; j<10; j++){
+   for (k=0; k<10; k++){
     buf3[i][j][k]=n++;
    }
   }
  }
  for (i=n=0; i<2; i++){
-  for (j=0; j<3; j++){
-   for (k=0; k<4; k++){
-    for (l=0; l<5; l++){
+  for (j=0; j<2; j++){
+   for (k=0; k<10; k++){
+    for (l=0; l<10; l++){
      buf4[i][j][k][l]=n++;
     }
    }

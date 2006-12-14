@@ -563,7 +563,13 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
      if (info->line_ncols > 0)
       ncols = info->line_ncols;
 
-     h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
+
+    /* pass to the prefix in h5tools_simple_prefix the total position
+      instead of the current stripmine position i; this is necessary
+      to print the array indices */
+     curr_pos = ctx->sm_pos;
+
+     h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
      for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
@@ -703,6 +709,14 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
  * Programmer:
  *      Bill Wendling, Wednesday, 07. March 2001
  * Modifications:
+ *      Pedro Vicente, 12 December 2006
+ *      Add information to print array indices from the element position
+ *      The algorythm used is 
+ *      Given an index I(z,y,x) its position from the beginning of an array 
+ *      of sizes A(size_z, size_y,size_x) is given by
+ *      Position of I(z,y,x) = index_z * size_y * size_x 
+ *                             + index_y * size_x
+ *                             + index_x
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -710,32 +724,30 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                            hid_t p_type, struct subset_t *sset,
                            int indentlevel)
 {
-    herr_t              ret;                    /*the value to return   */
-    hid_t  f_space;  /*file data space */
-    int   i;                      /*counters  */
-    hsize_t  zero = 0;               /*vector of zeros */
-    unsigned int flags;   /*buffer extent flags */
-    hsize_t  total_size[H5S_MAX_RANK];/*total size of dataset*/
-
-    /* Print info */
-    h5tools_context_t ctx;   /*print context  */
-    size_t  p_type_nbytes;  /*size of memory type */
-
-    /* Stripmine info */
-    hsize_t  sm_size[H5S_MAX_RANK]; /*stripmine size */
-    hsize_t  sm_nbytes;  /*bytes per stripmine */
-    hsize_t  sm_nelmts;  /*elements per stripmine*/
-    unsigned char      *sm_buf = NULL;  /*buffer for raw data */
-    hid_t  sm_space;  /*stripmine data space */
-
-    hsize_t             count;
+    herr_t            ret;                     /* the value to return */
+    hid_t             f_space;                 /* file data space */
+    hsize_t           i, j;                    /* counters  */
+    hsize_t           zero = 0;                /* vector of zeros */
+    unsigned int      flags;                   /* buffer extent flags */
+    hsize_t           total_size[H5S_MAX_RANK];/* total size of dataset*/
+    hsize_t           elmtno;                  /* elemnt index  */
+    hsize_t           low[H5S_MAX_RANK];       /* low bound of hyperslab */
+    hsize_t           high[H5S_MAX_RANK];      /* higher bound of hyperslab */
+    h5tools_context_t ctx;                     /* print context  */
+    size_t            p_type_nbytes;           /* size of memory type */
+    hsize_t           sm_size[H5S_MAX_RANK];   /* stripmine size */
+    hsize_t           sm_nbytes;               /* bytes per stripmine */
+    hsize_t           sm_nelmts;               /* elements per stripmine*/
+    unsigned char     *sm_buf = NULL;          /* buffer for raw data */
+    hid_t             sm_space;                /* stripmine data space */
+    hsize_t           count;                   /* hyperslab count */
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
-
+    
     if (f_space == FAIL)
         goto done;
-
+    
     /*
      * check that everything looks okay. the dimensionality must not be too
      * great and the dimensionality of the items selected for printing must
@@ -755,17 +767,17 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
- assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));
-    ctx.size_last_dim = (int)(total_size[ctx.ndims - 1]);
+    ctx.size_last_dim = total_size[ctx.ndims - 1];
 
     count = sset->count[ctx.ndims - 1];
     sset->count[ctx.ndims - 1] = 1;
 
     if(ctx.ndims>0)
-     init_acc_pos(&ctx,total_size);
+        init_acc_pos(&ctx,total_size);
 
+  
     for (; count > 0; sset->start[ctx.ndims - 1] += sset->stride[ctx.ndims - 1],
-                      count--) {
+        count--) {
         /* calculate the potential number of elements we're going to print */
         H5Sselect_hyperslab(f_space, H5S_SELECT_SET,
             sset->start,
@@ -774,6 +786,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             sset->block);
         sm_nelmts = H5Sget_select_npoints(f_space);
 
+       
         /*
          * start (0, 0)
          * block (2, 2)
@@ -801,7 +814,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
          * a hyperslab whose size is manageable.
          */
         sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
-
+        
         if (ctx.ndims > 0)
             for (i = ctx.ndims; i > 0; --i) {
                 sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
@@ -825,17 +838,38 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
         /* Print the data */
         flags = START_OF_DATA;
-
+        
         if (count == 1)
             flags |= END_OF_DATA;
-
+        
         for (i = 0; i < ctx.ndims; i++) {
             ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
         }
 
+        /* print array indices. get the lower bound of the hyperslab and calulate
+           the element position at the start of hyperslab */
+        H5Sget_select_bounds(f_space,low,high);
+        elmtno=0;
+        for (i = 0; i < ctx.ndims-1; i++) 
+        {
+            hsize_t offset = 1; /* accumulation of the previous dimensions */
+            for (j = i+1; j < ctx.ndims; j++) 
+                offset *= total_size[j];
+            elmtno+= low[i] * offset;
+        }
+        elmtno+= low[ctx.ndims - 1];
+        
+       /* initialize the current stripmine position; this is necessary to print the array
+          indices */
+        ctx.sm_pos = elmtno;
+
         h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
                                  p_type, sm_buf);
         free(sm_buf);
+
+        /* we need to jump to next line and update the index */
+        ctx.need_prefix = 1;
+
         ctx.continuation++;
     }
 
@@ -845,9 +879,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         putc('\n', stream);
         fputs(OPT(info->line_sep, ""), stream);
     }
-
+    
     ret = SUCCEED;
-
+    
 done_close:
     H5Sclose(f_space);
 done:
@@ -876,33 +910,33 @@ static int
 h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                          hid_t p_type, int indentlevel)
 {
-    hid_t  f_space;  /*file data space */
-    hsize_t  elmtno;   /*counter  */
-    int   i;   /*counter  */
-    int   carry;   /*counter carry value */
-    hsize_t  zero[8];  /*vector of zeros */
-    unsigned int flags;   /*buffer extent flags */
-    hsize_t  total_size[H5S_MAX_RANK];/*total size of dataset*/
+    hid_t               f_space;                  /* file data space */
+    hsize_t             elmtno;                   /* counter  */
+    hsize_t             i;                        /* counter  */
+    int                 carry;                    /* counter carry value */
+    hsize_t             zero[8];                  /* vector of zeros */
+    unsigned int        flags;                    /* buffer extent flags */
+    hsize_t             total_size[H5S_MAX_RANK]; /* total size of dataset*/
 
     /* Print info */
-    h5tools_context_t ctx;   /*print context  */
-    size_t  p_type_nbytes;  /*size of memory type */
-    hsize_t  p_nelmts;  /*total selected elmts */
+    h5tools_context_t   ctx;                      /* print context  */
+    size_t              p_type_nbytes;            /* size of memory type */
+    hsize_t             p_nelmts;                 /* total selected elmts */
 
     /* Stripmine info */
-    hsize_t  sm_size[H5S_MAX_RANK]; /*stripmine size */
-    hsize_t  sm_nbytes;  /*bytes per stripmine */
-    hsize_t  sm_nelmts;  /*elements per stripmine*/
-    unsigned char      *sm_buf = NULL;  /*buffer for raw data */
-    hid_t  sm_space;  /*stripmine data space */
+    hsize_t             sm_size[H5S_MAX_RANK];    /* stripmine size */
+    hsize_t             sm_nbytes;                /* bytes per stripmine */
+    hsize_t             sm_nelmts;                /* elements per stripmine*/
+    unsigned char       *sm_buf = NULL;           /* buffer for raw data */
+    hid_t               sm_space;                 /* stripmine data space */
 
     /* Hyperslab info */
-    hsize_t  hs_offset[H5S_MAX_RANK];/*starting offset */
-    hsize_t  hs_size[H5S_MAX_RANK]; /*size this pass */
-    hsize_t  hs_nelmts;  /*elements in request */
+    hsize_t            hs_offset[H5S_MAX_RANK];   /* starting offset */
+    hsize_t            hs_size[H5S_MAX_RANK];     /* size this pass */
+    hsize_t            hs_nelmts;                 /* elements in request */
 
     /* VL data special information */
-    unsigned int        vl_data = 0;            /*contains VL datatypes */
+    unsigned int       vl_data = 0;               /* contains VL datatypes */
 
     f_space = H5Dget_space(dset);
 
@@ -918,7 +952,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
-
+    
     if ((size_t)ctx.ndims > NELMTS(sm_size)) {
         H5Sclose(f_space);
         return FAIL;

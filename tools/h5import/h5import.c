@@ -2571,7 +2571,7 @@ help(char *name)
   (void) fprintf(stderr, "\t			following values.\n");
   (void) fprintf(stderr, "\t			BE (default)\n");
   (void) fprintf(stderr, "\t			LE\n\n");
-  (void) fprintf(stderr, "\t		CHUNKED-DIMENSION:\n");
+  (void) fprintf(stderr, "\t		CHUNKED-DIMENSION-SIZES:\n");
   (void) fprintf(stderr, "\t			Integers separated by spaces to denote the \n");
   (void) fprintf(stderr, "\t			dimension sizes of the chunk for the no. of \n");
   (void) fprintf(stderr, "\t			dimensions determined by rank. Required field\n");
@@ -2581,7 +2581,7 @@ help(char *name)
   (void) fprintf(stderr, "\t		COMPRESSION-TYPE:\n");
   (void) fprintf(stderr, "\t			String denoting the type of compression to be\n");
   (void) fprintf(stderr, "\t			used with the chunked storage. Requires the\n");
-  (void) fprintf(stderr, "\t			CHUNKED-DIMENSION to be specified. The only \n");
+  (void) fprintf(stderr, "\t			CHUNKED-DIMENSION-SIZES to be specified. The only \n");
   (void) fprintf(stderr, "\t			currently supported compression method is GZIP. \n");
   (void) fprintf(stderr, "\t			Will accept the following value\n");
   (void) fprintf(stderr, "\t			GZIP\n\n");
@@ -2607,7 +2607,7 @@ help(char *name)
   (void) fprintf(stderr, "\t			Integers separated by spaces to denote the \n");
   (void) fprintf(stderr, "\t			maximum dimension sizes of all the \n");
   (void) fprintf(stderr, "\t			dimensions determined by rank. Requires the\n");
-  (void) fprintf(stderr, "\t			CHUNKED-DIMENSION to be specified. A value of \n");
+  (void) fprintf(stderr, "\t			CHUNKED-DIMENSION-SIZES to be specified. A value of \n");
   (void) fprintf(stderr, "\t			-1 for any dimension implies UNLIMITED \n");
   (void) fprintf(stderr, "\t			DIMENSION size for that particular dimension.\n\n");
   (void) fprintf(stderr, "\t   EXAMPLES:\n");
@@ -2620,7 +2620,7 @@ help(char *name)
   (void) fprintf(stderr, "\t		OUTPUT-SIZE 64\n");
   (void) fprintf(stderr, "\t		OUTPUT-ARCHITECTURE IEEE\n");
   (void) fprintf(stderr, "\t		OUTPUT-BYTE-ORDER LE\n");
-  (void) fprintf(stderr, "\t  		CHUNKED-DIMENSION 2 2 2 \n\n");
+  (void) fprintf(stderr, "\t  		CHUNKED-DIMENSION-SIZES 2 2 2 \n\n");
   (void) fprintf(stderr, "\t	The above configuration will accept a floating point array \n");
   (void) fprintf(stderr, "\t	(5 x 2 x 4)  in an ASCII file with the rank and dimension sizes \n");
   (void) fprintf(stderr, "\t	specified and will save it in a chunked data-set (of pattern \n");
@@ -2634,7 +2634,7 @@ help(char *name)
   (void) fprintf(stderr, "\t		DIMENSION-SIZES 6 3 5 2 4\n");
   (void) fprintf(stderr, "\t		OUTPUT-CLASS IN\n");
   (void) fprintf(stderr, "\t		OUTPUT-SIZE 32\n");
-  (void) fprintf(stderr, "\t  		CHUNKED-DIMENSION 2 2 2 2 2\n");
+  (void) fprintf(stderr, "\t  		CHUNKED-DIMENSION-SIZES 2 2 2 2 2\n");
   (void) fprintf(stderr, "\t		EXTENDIBLE-DATASET 1 3 \n");
   (void) fprintf(stderr, "\t		COMPRESSION-TYPE GZIP\n");
   (void) fprintf(stderr, "\t		COMPRESSION-PARAM 7\n\n\n");

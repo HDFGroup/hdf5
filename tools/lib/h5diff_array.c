@@ -262,7 +262,7 @@ hsize_t diff_array( void *_mem1,
  acc[rank-1]=1;
  for(j=(rank-2); j>=0; j--)
  {
-  acc[j]=acc[j+1]*(int)dims[j+1];
+  acc[j]=acc[j+1]*dims[j+1];
  }
  for ( j = 0; j < rank; j++)
   pos[j]=0;
