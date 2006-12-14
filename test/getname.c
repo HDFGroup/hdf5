@@ -2667,7 +2667,7 @@ test_reg_ref(hid_t fapl)
     /* Initialize the file name */
     h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
 
-    /* Create file with default file access and file creation properties */
+    /* Create file with default file create property but vfd access property. */
     if((file_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	TEST_ERROR
 
@@ -2727,7 +2727,7 @@ test_reg_ref(hid_t fapl)
 
 
     /* Reopen the file to read selections back */
-    if((file_id = H5Fopen(filename1, H5F_ACC_RDWR,  H5P_DEFAULT)) < 0)
+    if((file_id = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
 	TEST_ERROR
 
     /* Reopen the dataset with object references and read references to the buffer */
@@ -2795,7 +2795,11 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL) 
         envval = "nomatch";
-    if(HDstrcmp(envval, "split")) {
+    /* Does work with core driver. */
+    if(HDstrcmp(envval, "core")==0) {
+        printf("All getname tests skipped - "
+	    "Incompatible with current Virtual File Driver(%s)\n", envval);
+    }else{
         int nerrors = 0;
         hid_t fapl;
         char filename0[1024];
@@ -2805,7 +2809,9 @@ main(void)
         fapl = h5_fileaccess();
         h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
 
-        /* Create a new file_id using default properties. */
+        /* Create a new file_id using default create property but vfd access
+	 * property.
+	 */
         if((file_id = H5Fcreate(filename0,H5F_ACC_TRUNC, H5P_DEFAULT, fapl )) < 0) TEST_ERROR
 
         /* Call "main" test routine */
@@ -2822,8 +2828,6 @@ main(void)
 
         h5_cleanup(FILENAME, fapl);
     } /* end if */
-    else
-        puts("All getname tests skipped - Incompatible with current Virtual File Driver");
 
     return 0;
 
