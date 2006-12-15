@@ -501,7 +501,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, H5_ITER_ERROR, "unable to delete shared attribute in shared storage")
 
             /* Extract shared message info from current attribute */
-            if(H5O_attr_get_share(udata->attr, mesg->native) < 0)
+            if(NULL == H5O_attr_get_share(udata->attr, mesg->native))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't get shared info")
 
             /* Indicate that we found the correct attribute */

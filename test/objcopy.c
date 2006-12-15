@@ -40,6 +40,14 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* Configuration, really a series of bit flags.  Maximum value is all three
+ * bit flags enabled.
+ */
+#define CONFIG_SHARE_SRC 1
+#define CONFIG_SHARE_DST 2
+#define CONFIG_NEW_FORMAT 4
+#define MAX_CONFIGURATION 7
+
 #define FILE_EXT 		"objcopy_ext.dat"
 /* The fill_old.h5 is generated from gen_old_fill.c in HDF5 'test' directory
  * for version 1.4(after 1.4.3).  To get this data file, simply compile
@@ -1301,7 +1309,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_named_datatype(hid_t fapl)
+test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
@@ -1318,7 +1326,7 @@ test_copy_named_datatype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -1337,7 +1345,7 @@ test_copy_named_datatype(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1394,7 +1402,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_named_datatype_vl(hid_t fapl)
+test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
@@ -1411,7 +1419,7 @@ test_copy_named_datatype_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
     if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -1430,7 +1438,7 @@ test_copy_named_datatype_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1487,7 +1495,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_named_datatype_vl_vl(hid_t fapl)
+test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
@@ -1504,7 +1512,7 @@ test_copy_named_datatype_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create first vlen datatype */
     if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -1529,7 +1537,7 @@ test_copy_named_datatype_vl_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1588,7 +1596,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_simple(hid_t fapl)
+test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -1614,7 +1622,7 @@ test_copy_dataset_simple(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -1646,7 +1654,7 @@ test_copy_dataset_simple(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1705,7 +1713,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_simple_empty(hid_t fapl)
+test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -1724,7 +1732,7 @@ test_copy_dataset_simple_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -1753,7 +1761,7 @@ test_copy_dataset_simple_empty(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1813,7 +1821,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compound(hid_t fapl)
+test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -1844,7 +1852,7 @@ test_copy_dataset_compound(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0] = DIM_SIZE_1;
@@ -1883,7 +1891,7 @@ test_copy_dataset_compound(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -1944,7 +1952,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked(hid_t fapl)
+test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -1972,7 +1980,7 @@ test_copy_dataset_chunked(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2011,7 +2019,7 @@ test_copy_dataset_chunked(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2071,7 +2079,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked_empty(hid_t fapl)
+test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -2092,7 +2100,7 @@ test_copy_dataset_chunked_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2128,7 +2136,7 @@ test_copy_dataset_chunked_empty(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2188,7 +2196,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked_sparse(hid_t fapl)
+test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -2218,7 +2226,7 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2266,7 +2274,7 @@ test_copy_dataset_chunked_sparse(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2325,7 +2333,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compressed(hid_t fapl)
+test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
@@ -2359,7 +2367,7 @@ test_copy_dataset_compressed(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2399,7 +2407,7 @@ test_copy_dataset_compressed(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2461,7 +2469,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compact(hid_t fapl)
+test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -2488,7 +2496,7 @@ test_copy_dataset_compact(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -2527,7 +2535,7 @@ test_copy_dataset_compact(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2588,7 +2596,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_external(hid_t fapl)
+test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -2618,7 +2626,7 @@ test_copy_dataset_external(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -2654,7 +2662,7 @@ test_copy_dataset_external(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2714,7 +2722,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_named_dtype(hid_t fapl)
+test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -2740,7 +2748,7 @@ test_copy_dataset_named_dtype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -2775,7 +2783,7 @@ test_copy_dataset_named_dtype(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2835,7 +2843,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_named_dtype_hier(hid_t fapl)
+test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -2862,7 +2870,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -2912,7 +2920,7 @@ test_copy_dataset_named_dtype_hier(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -2974,7 +2982,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
+test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -3001,7 +3009,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -3051,7 +3059,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3113,7 +3121,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
+test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -3139,7 +3147,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -3185,7 +3193,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3246,7 +3254,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_attr_named_dtype(hid_t fapl)
+test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -3273,7 +3281,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Create group to place all objects in */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -3326,7 +3334,7 @@ test_copy_dataset_attr_named_dtype(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3388,7 +3396,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_contig_vl(hid_t fapl)
+test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -3418,7 +3426,7 @@ test_copy_dataset_contig_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -3446,7 +3454,7 @@ test_copy_dataset_contig_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3517,7 +3525,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked_vl(hid_t fapl)
+test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -3549,7 +3557,7 @@ test_copy_dataset_chunked_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -3584,7 +3592,7 @@ test_copy_dataset_chunked_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3655,7 +3663,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compact_vl(hid_t fapl)
+test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
@@ -3686,7 +3694,7 @@ test_copy_dataset_compact_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -3721,7 +3729,7 @@ test_copy_dataset_compact_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3792,7 +3800,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_attribute_vl(hid_t fapl)
+test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -3812,7 +3820,7 @@ test_copy_attribute_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -3841,7 +3849,7 @@ test_copy_attribute_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -3907,7 +3915,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compressed_vl(hid_t fapl)
+test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
@@ -3947,7 +3955,7 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0]=DIM_SIZE_1;
@@ -3984,7 +3992,7 @@ test_copy_dataset_compressed_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4059,7 +4067,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group_empty(hid_t fapl)
+test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
@@ -4076,7 +4084,7 @@ test_copy_group_empty(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_EMPTY, (size_t)0)) < 0) TEST_ERROR
@@ -4095,7 +4103,7 @@ test_copy_group_empty(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4154,7 +4162,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group(hid_t fapl)
+test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -4182,7 +4190,7 @@ test_copy_group(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -4226,7 +4234,7 @@ test_copy_group(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4288,7 +4296,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_root_group(hid_t fapl)
+test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -4316,7 +4324,7 @@ test_copy_root_group(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -4359,7 +4367,7 @@ test_copy_root_group(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4419,7 +4427,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group_deep(hid_t fapl)
+test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -4448,7 +4456,7 @@ test_copy_group_deep(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -4501,7 +4509,7 @@ test_copy_group_deep(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4561,7 +4569,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group_loop(hid_t fapl)
+test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
@@ -4579,7 +4587,7 @@ test_copy_group_loop(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -4612,7 +4620,7 @@ test_copy_group_loop(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4676,7 +4684,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group_wide_loop(hid_t fapl)
+test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
@@ -4696,7 +4704,7 @@ test_copy_group_wide_loop(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -4741,7 +4749,7 @@ test_copy_group_wide_loop(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4802,7 +4810,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_group_links(hid_t fapl)
+test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -4829,7 +4837,7 @@ test_copy_group_links(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
@@ -4877,7 +4885,7 @@ test_copy_group_links(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -4937,7 +4945,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_soft_link(hid_t fapl)
+test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -4964,7 +4972,7 @@ test_copy_soft_link(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
@@ -5003,7 +5011,7 @@ test_copy_soft_link(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5062,7 +5070,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_ext_link(hid_t fapl)
+test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -5091,7 +5099,7 @@ test_copy_ext_link(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_LINK, (size_t)0)) < 0) TEST_ERROR
@@ -5134,7 +5142,7 @@ test_copy_ext_link(hid_t fapl)
     if((fid_ext = H5Fopen(ext_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5197,7 +5205,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_exist(hid_t fapl)
+test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -5224,7 +5232,7 @@ test_copy_exist(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -5256,7 +5264,7 @@ test_copy_exist(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5305,7 +5313,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_path(hid_t fapl)
+test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -5333,7 +5341,7 @@ test_copy_path(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -5365,7 +5373,7 @@ test_copy_path(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5440,7 +5448,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_same_file_named_datatype(hid_t fapl)
+test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid = -1;                     /* File ID */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
@@ -5513,7 +5521,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_old_layout(hid_t fapl)
+test_copy_old_layout(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
@@ -5540,7 +5548,7 @@ test_copy_old_layout(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5622,7 +5630,7 @@ test_copy_mount(hid_t UNUSED fapl)
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compact_named_vl(hid_t fapl)
+test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid_copy=-1;                /* Datatype ID */
@@ -5653,7 +5661,7 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -5697,7 +5705,7 @@ test_copy_dataset_compact_named_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5770,7 +5778,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_contig_named_vl(hid_t fapl)
+test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid_copy=-1;                /* Datatype ID */
@@ -5800,7 +5808,7 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -5837,7 +5845,7 @@ test_copy_dataset_contig_named_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -5909,7 +5917,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked_named_vl(hid_t fapl)
+test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid_copy=-1;                /* Datatype ID */
@@ -5941,7 +5949,7 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -5985,7 +5993,7 @@ test_copy_dataset_chunked_named_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -6058,7 +6066,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compressed_named_vl(hid_t fapl)
+test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid_copy=-1;                /* Datatype ID */
@@ -6090,7 +6098,7 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -6135,7 +6143,7 @@ test_copy_dataset_compressed_named_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -6208,7 +6216,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compact_vl_vl(hid_t fapl)
+test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid=-1, tid2=-1;                      /* Datatype ID */
@@ -6253,7 +6261,7 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -6291,7 +6299,7 @@ test_copy_dataset_compact_vl_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -6363,7 +6371,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_contig_vl_vl(hid_t fapl)
+test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid=-1, tid2=-1;                      /* Datatype ID */
@@ -6408,7 +6416,7 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -6445,7 +6453,7 @@ test_copy_dataset_contig_vl_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
@@ -6517,7 +6525,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_chunked_vl_vl(hid_t fapl)
+test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid2=-1;       /* Datatype ID */
@@ -6562,7 +6570,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -6600,7 +6608,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
@@ -6673,7 +6681,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_dataset_compressed_vl_vl(hid_t fapl)
+test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1, tid2=-1;       /* Datatype ID */
@@ -6718,7 +6726,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
@@ -6757,7 +6765,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fapl)
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     if(H5Gclose(H5Gcreate(fid_dst, NAME_GROUP_UNCOPIED, (size_t)0)) < 0) TEST_ERROR
 
@@ -6831,7 +6839,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const char* test_desciption)
+test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const char* test_desciption)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t sid = -1;                             /* Dataspace ID */
@@ -6862,7 +6870,7 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
     addr_reset();
 
     /* create source file */
-    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create group at the SRC file */
     if((gid = H5Gcreate(fid_src, NAME_GROUP_TOP, (size_t)0)) < 0) TEST_ERROR
@@ -6949,7 +6957,7 @@ test_copy_option(hid_t fapl, unsigned flag, hbool_t crt_intermediate_grp, const 
         if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* create destination file */
-    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination
        files aren't the same */
@@ -7065,6 +7073,10 @@ error:
  *
  * Purpose:     Test H5Ocopy()
  *
+ *              Tests a number of cases: messages can be stored in the
+ *              new or old format, messages can be shared in either,
+ *              both, or neither of the source and destination files.
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
@@ -7087,7 +7099,8 @@ main(void)
     if(HDstrcmp(envval, "stdio") && HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         int     nerrors = 0;
         hid_t	fapl, fapl2;
-        hbool_t new_format;
+        hid_t   fcpl_shared;
+        int     configuration;  /* Configuration of tests. */
 
 	/* Setup */
 	h5_reset();
@@ -7099,13 +7112,38 @@ main(void)
         /* Set the "use the latest version of the format" flag for creating objects in the file */
         if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
 
-        /* Test with old & new format groups */
-        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        /* Create an FCPL with sharing enabled */
+        if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
+        if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
+        if(H5Pset_shared_mesg_index(fcpl_shared, 1, H5O_MESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
+
+        /* Test in all configurations */
+        for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {
             hid_t my_fapl;
+            hid_t fcpl_src;
+            hid_t fcpl_dst;
+
+            /* Test with and without shared messages */
+            if(configuration & CONFIG_SHARE_SRC) {
+                puts("\nTesting with shared src messages:");
+                fcpl_src = fcpl_shared;
+            }
+            else {
+                puts("\nTesting without shared src messages:");
+                fcpl_src = H5P_DEFAULT;
+            }
+            if(configuration & CONFIG_SHARE_DST) {
+                puts("Testing with shared dst messages:");
+                fcpl_dst = fcpl_shared;
+            }
+            else {
+                puts("Testing without shared dst messages:");
+                fcpl_dst = H5P_DEFAULT;
+            }
 
             /* Set the FAPL for the type of format */
-            if(new_format) {
-                puts("\nTesting with new group format:");
+            if(configuration & CONFIG_NEW_FORMAT) {
+                puts("Testing with new group format:");
                 my_fapl = fapl2;
             } /* end if */
             else {
@@ -7113,58 +7151,59 @@ main(void)
                 my_fapl = fapl;
             } /* end else */
 
+
             /* The tests... */
-            nerrors += test_copy_named_datatype(my_fapl);
-            nerrors += test_copy_named_datatype_vl(my_fapl);
-            nerrors += test_copy_named_datatype_vl_vl(my_fapl);
-            nerrors += test_copy_dataset_simple(my_fapl);
-            nerrors += test_copy_dataset_simple_empty(my_fapl);
-            nerrors += test_copy_dataset_compound(my_fapl);
-            nerrors += test_copy_dataset_chunked(my_fapl);
-            nerrors += test_copy_dataset_chunked_empty(my_fapl);
-            nerrors += test_copy_dataset_chunked_sparse(my_fapl);
-            nerrors += test_copy_dataset_compressed(my_fapl);
-            nerrors += test_copy_dataset_compact(my_fapl);
-            nerrors += test_copy_dataset_external(my_fapl);
-            nerrors += test_copy_dataset_named_dtype(my_fapl);
-            nerrors += test_copy_dataset_named_dtype_hier(my_fapl);
-            nerrors += test_copy_dataset_named_dtype_hier_outside(my_fapl);
-            nerrors += test_copy_dataset_multi_ohdr_chunks(my_fapl);
-            nerrors += test_copy_dataset_attr_named_dtype(my_fapl);
-            nerrors += test_copy_dataset_contig_vl(my_fapl);
-            nerrors += test_copy_dataset_chunked_vl(my_fapl);
-            nerrors += test_copy_dataset_compact_vl(my_fapl);
-            nerrors += test_copy_dataset_compressed_vl(my_fapl);
-            nerrors += test_copy_attribute_vl(my_fapl);
-            nerrors += test_copy_dataset_compact_named_vl(my_fapl);
-            nerrors += test_copy_dataset_contig_named_vl(my_fapl);
-            nerrors += test_copy_dataset_chunked_named_vl(my_fapl);
-            nerrors += test_copy_dataset_compressed_named_vl(my_fapl);
-            nerrors += test_copy_dataset_compact_vl_vl(my_fapl);
-            nerrors += test_copy_dataset_contig_vl_vl(my_fapl);
-            nerrors += test_copy_dataset_chunked_vl_vl(my_fapl);
-            nerrors += test_copy_dataset_compressed_vl_vl(my_fapl);
-            nerrors += test_copy_group_empty(my_fapl);
-            nerrors += test_copy_root_group(my_fapl);
-            nerrors += test_copy_group(my_fapl);
-            nerrors += test_copy_group_deep(my_fapl);
-            nerrors += test_copy_group_loop(my_fapl);
-            nerrors += test_copy_group_wide_loop(my_fapl);
-            nerrors += test_copy_group_links(my_fapl);
-            nerrors += test_copy_soft_link(my_fapl);
+            nerrors += test_copy_named_datatype(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_named_datatype_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_named_datatype_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compound(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_empty(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_sparse(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compressed(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compact(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_external(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_named_dtype(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_named_dtype_hier(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_named_dtype_hier_outside(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_multi_ohdr_chunks(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_attr_named_dtype(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_contig_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compact_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compressed_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_attribute_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compact_named_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_contig_named_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_named_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compressed_named_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compact_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compressed_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group_empty(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_root_group(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group_deep(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group_loop(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group_wide_loop(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_group_links(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_soft_link(fcpl_src, fcpl_dst, my_fapl);
 #ifndef H5_CANNOT_OPEN_TWICE
-            nerrors += test_copy_ext_link(my_fapl);
+            nerrors += test_copy_ext_link(fcpl_src, fcpl_dst, my_fapl);
 #endif /* H5_CANNOT_OPEN_TWICE */
-            nerrors += test_copy_exist(my_fapl);
-            nerrors += test_copy_path(my_fapl);
-            nerrors += test_copy_same_file_named_datatype(my_fapl);
-            nerrors += test_copy_old_layout(my_fapl);
-            nerrors += test_copy_option(my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Ocopy(): without attributes");
-            nerrors += test_copy_option(my_fapl, 0, TRUE, "H5Ocopy(): with missing groups");
-            nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");
-            nerrors += test_copy_option(my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Ocopy(): shallow group copy");
-            nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Ocopy(): expand object reference");
-            nerrors += test_copy_option(my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Ocopy(): preserve NULL messages");
+            nerrors += test_copy_exist(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_same_file_named_datatype(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_old_layout(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Ocopy(): without attributes");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, "H5Ocopy(): with missing groups");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Ocopy(): shallow group copy");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Ocopy(): expand object reference");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Ocopy(): preserve NULL messages");
 
 /* TODO: not implemented
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");

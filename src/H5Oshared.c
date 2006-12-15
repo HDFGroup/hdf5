@@ -293,10 +293,10 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
     /* Get the shared information flags
      * Flags are unused before version 3.
      */
-    if(version >= H5O_SHARED_VERSION_2)
+    if(version >= H5O_SHARED_VERSION_2) {
         mesg->flags = *buf++;
-    else
-    {
+    }
+    else {
         mesg->flags = H5O_COMMITTED_FLAG;
         buf++;
     } /* end else */
@@ -306,20 +306,18 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
         buf += 6;
 
     /* Body */
-    if(version == H5O_SHARED_VERSION_1)
+    if(version == H5O_SHARED_VERSION_1) {
         H5G_obj_ent_decode(f, &buf, &(mesg->u.oloc));
-    else if (version >= H5O_SHARED_VERSION_2)
-    {
+    }
+    else if (version >= H5O_SHARED_VERSION_2) {
         /* If this message is in the heap, copy a heap ID.
          * Otherwise, it is a named datatype, so copy an H5O_loc_t.
          */
-        if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
-        {
+        if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
             HDassert(version >= H5O_SHARED_VERSION_3 );
             HDmemcpy(&(mesg->u.heap_id), buf, (size_t) H5SM_FHEAP_ID_LEN);
         }
-        else
-        {
+        else {
             /* The H5O_COMMITTED_FLAG should be set if this message
              * is from an older version before the flag existed.
              */
@@ -337,9 +335,10 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
     ret_value = mesg;
 
 done:
-    if(ret_value == NULL)
+    if(ret_value == NULL) {
         if(mesg != NULL)
             H5MM_xfree(mesg);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_decode() */
@@ -377,9 +376,10 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
      */
-    /* JAMES: also use "use latest version" flag here? */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
+    /* JAMES: also use "use latest version" flag here */
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
         version = H5O_SHARED_VERSION;
+    }
     else {
         HDassert(mesg->flags & H5O_COMMITTED_FLAG);
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
@@ -391,10 +391,12 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     /* Encode either the heap ID of the message or the address of the
      * object header that holds it.
      */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
-        HDmemcpy(buf, &(mesg->u.heap_id), (size_t)H5SM_FHEAP_ID_LEN);
-    else
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
+        HDmemcpy(buf, &(mesg->u.heap_id), (size_t) H5SM_FHEAP_ID_LEN);
+    }
+     else {
         H5F_addr_encode(f, &buf, mesg->u.oloc.addr);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_shared_encode() */
@@ -484,8 +486,8 @@ H5O_shared_size(const H5F_t *f, const void *_mesg)
                 H5SM_FHEAP_ID_LEN;		/* Shared in the heap   */
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shared_size() */
+    FUNC_LEAVE_NOAPI(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -692,9 +694,9 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to read shared message")
 
         if(mesg_type->copy_file) {
-        /* Copy the original, un-shared message and return it */
-            ret_value = H5O_msg_copy_file(mesg_type, mesg_type, file_src, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
-            H5MM_xfree(dst_mesg);
+            /* Copy the original, un-shared message and return it */
+            ret_value = (mesg_type->copy_file)(file_src, mesg_type, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
+            H5O_msg_free(mesg_type->id, dst_mesg);
         }
         else {
             ret_value = dst_mesg;
@@ -705,9 +707,9 @@ done:
     if(!ret_value)
     {
         if(shared_dst)
-            H5MM_xfree(shared_dst);
+            H5O_msg_free(H5O_SHARED_ID, shared_dst);
         if(dst_mesg)
-            H5MM_xfree(dst_mesg);
+            H5O_msg_free(mesg_type->id, dst_mesg);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

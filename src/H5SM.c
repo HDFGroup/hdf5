@@ -720,6 +720,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 	HGOTO_ERROR(H5E_OHDR, H5E_BADSIZE, FAIL, "can't find message size")
     if(NULL == (encoding_buf = H5MM_calloc(buf_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding")
+
     if(H5O_msg_encode(f, type_id, encoding_buf, mesg) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "can't encode message to be shared")
 
@@ -1153,23 +1154,15 @@ H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
 
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
 
-    HDassert(f);
+    HDassert(f && f->shared);
+    HDassert(f->shared->sohm_addr != HADDR_UNDEF);
 
     /* Convenience variables */
     table_addr = f->shared->sohm_addr;
 
-    HDassert(table_addr != HADDR_UNDEF);
-    HDassert(f->shared->sohm_nindexes > 0);
-
-    /* Allocate and initialize the master table structure */
-    if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    table->version = f->shared->sohm_vers;
-    table->num_indexes = f->shared->sohm_nindexes;
 
     /* Read the rest of the SOHM table information from the cache */
-    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, table, H5AC_READ)))
+    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Return info */

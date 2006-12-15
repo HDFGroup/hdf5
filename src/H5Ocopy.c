@@ -302,6 +302,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     size_t                 dst_oh_size;             /* Total size of the destination OH */
     uint8_t                *current_pos;            /* Current position in destination image */
     size_t                 msghdr_size;
+    hbool_t                shared;                  /* Whether copy_file callback created a shared message */
     herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header_real)
@@ -506,8 +507,31 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             /* Copy the source message */
             if((mesg_dst->native = H5O_msg_copy_file(copy_type, mesg_dst->type,
                     oloc_src->file, mesg_src->native, oloc_dst->file, dxpl_id,
-                    cpy_info, udata)) == NULL)
+                    &shared, cpy_info, udata)) == NULL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
+
+            /* In being copied, the message may have become shared or stopped
+             * being shared.  If its sharing status has changed, recalculate
+             * its size and set/unset its sharing flag.
+             */
+            if(shared == TRUE && !(mesg_dst->flags & H5O_MSG_FLAG_SHARED)) {
+                /* Set shared flag */
+                mesg_dst->flags |= H5O_MSG_FLAG_SHARED;
+
+                /* Recompute shared message size (mesg_dst->native is really
+                 * an H5O_shared_t)
+                 */
+                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                        H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, mesg_dst->native));
+            }
+            else if(shared == FALSE && (mesg_dst->flags & H5O_MSG_FLAG_SHARED)) {
+                /* Unset shared flag */
+                mesg_dst->flags &= ~H5O_MSG_FLAG_SHARED;
+
+                /* Recompute native message size */
+                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+            }
 
             /* Mark the message in the destination as dirty, so it'll get encoded when the object header is flushed */
             mesg_dst->dirty = TRUE;
@@ -528,7 +552,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Add space for messages. */
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
         dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
-        dst_oh_size += H5O_ALIGN_OH(oh_dst, oh_dst->mesg[mesgno].raw_size);
+        dst_oh_size += oh_dst->mesg[mesgno].raw_size;
     } /* end for */
 
     /* Allocate space for chunk in destination file */

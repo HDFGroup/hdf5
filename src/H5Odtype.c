@@ -33,7 +33,7 @@ static void *H5O_dtype_copy(const void *_mesg, void *_dest);
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
 static herr_t H5O_dtype_free(void *_mesg);
-static herr_t H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh);
+static void *H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static herr_t H5O_dtype_is_shared(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
@@ -1264,39 +1264,39 @@ H5O_dtype_free(void *mesg)
  * Purpose:	Returns information about where the shared message is located
  *		by filling in the SH shared message struct.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Shared message on success/NULL on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, June  1, 1998
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void *
 H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    void      *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_get_share)
 
     HDassert(dt);
-    HDassert(sh);
 
-    /* Make sure the datatype is shared */
-    HDassert(dt->sh_loc.flags & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG));
+    /* Make sure the shared struct is initialized to some reasonable value */
+    HDassert((dt->sh_loc.flags & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG)) || dt->sh_loc.flags == H5O_NOT_SHARED);
 
+#ifndef NDEBUG
     /* Make sure datatype state is correct: committed datatypes must have
-     * state NAMED or OPEN and datatypes in the heap cannot be NAMED or OPEN. */
-    if(dt->sh_loc.flags & H5O_SHARED_IN_HEAP_FLAG)
-        HDassert(! (H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state));
-    else
+     * state NAMED or OPEN and neither unshared datatypes nor datatypes
+     * shared in the heap can be NAMED or OPEN. */
+    if(dt->sh_loc.flags & H5O_COMMITTED_FLAG)
         HDassert(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state);
+    else
+        HDassert(! (H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state));
+#endif /* NDEBUG */
 
     /* Do actual copy of shared information */
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(dt->sh_loc), sh))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get shared information")
+    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(dt->sh_loc), sh);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_get_share() */
 
@@ -1324,8 +1324,10 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
     HDassert(dt);
     HDassert(sh);
 
-    /* Make sure the shared message location is initialized*/
-    HDassert(sh->flags & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG));
+    /* Make sure the shared message location is initialized, so that it
+     * either has valid sharing information or is set to 0.
+     */
+    HDassert(sh->flags & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG) || sh->flags == H5O_NOT_SHARED);
 
     /* Make sure we're not sharing a committed type in the heap */
     HDassert(sh->flags & H5O_COMMITTED_FLAG ||

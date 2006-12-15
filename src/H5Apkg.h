@@ -184,7 +184,7 @@ H5_DLL herr_t H5A_attr_release_table(H5A_attr_table_t *atable);
 /* Attribute object header routines */
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
 H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-H5_DLL herr_t H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
+H5_DLL void *H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
 
 #endif /* _H5Apkg_H */
 

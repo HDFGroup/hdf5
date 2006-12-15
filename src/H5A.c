@@ -28,11 +28,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
+#include "H5Opkg.h"		/* Object headers			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
@@ -384,7 +384,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     else if(tri_ret > 0)
     {
         /* Message is shared.  Use size of shared message */
-        if(H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg) < 0)
+        if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
         attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
@@ -402,7 +402,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     else if(tri_ret > 0)
     {
         /* Message is shared.  Use size of shared message */
-        if(H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg) < 0)
+        if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
         attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);

@@ -662,7 +662,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
 
         /* Get the shared information for the attribute */
         HDmemset(&sh_mesg, 0, sizeof(sh_mesg));
-        if(H5O_attr_get_share(attr, &sh_mesg) < 0)
+        if(NULL == H5O_attr_get_share(attr, &sh_mesg))
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Use heap ID for shared message heap */

@@ -165,7 +165,7 @@ struct H5O_msg_class_t {
     herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*del)(H5F_t *, hid_t, const void *, hbool_t); /* Delete space in file referenced by this message */
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
-    herr_t	(*get_share)(const void*, struct H5O_shared_t*);    /* Get shared information */
+    void	*(*get_share)(const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(void*, const struct H5O_shared_t*);    /* Set shared information */
     htri_t	(*is_shared)(const void*);      /* Is message shared? */
     herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
@@ -403,7 +403,7 @@ H5_DLL herr_t H5O_msg_free_mesg(H5O_mesg_t *mesg);
 H5_DLL htri_t H5O_msg_exists_oh(struct H5O_t *oh, unsigned type_id, int sequence);
 H5_DLL void * H5O_msg_copy_file(const H5O_msg_class_t *copy_type,
     const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared, H5O_copy_t *cpy_info, void *udata);
 H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id,
     unsigned *oh_flags_ptr);
@@ -452,4 +452,5 @@ H5_DLL herr_t H5O_assert(const H5O_t *oh);
 H5_DLL herr_t H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
 #endif /* _H5Opkg_H */
+
 

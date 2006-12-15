@@ -57,7 +57,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_master_table_t *table);
-static H5SM_master_table_t *H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, H5SM_master_table_t *table);
+static H5SM_master_table_t *H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *table);
 static herr_t H5SM_clear_table(H5F_t *f, H5SM_master_table_t *table, hbool_t destroy);
 static herr_t H5SM_dest_table(H5F_t *f, H5SM_master_table_t* table);
 static herr_t H5SM_table_size(const H5F_t *f, const H5SM_master_table_t *table, size_t *size_ptr);
@@ -191,8 +191,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5SM_master_table_t *
-H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, H5SM_master_table_t *table)
+H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, void UNUSED *udata2)
 {
+    H5SM_master_table_t *table = NULL;
     size_t        table_size;          /* Size of SOHM master table on disk */
     uint8_t       *buf=NULL;           /* Reading buffer */
     const uint8_t *p;                  /* Pointer into input buffer */
@@ -203,7 +204,16 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     FUNC_ENTER_NOAPI(H5SM_load_table, NULL)
 
-    HDassert(table);
+    /* Allocate space for the master table in memory */
+    if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Read number of indexes and version from file superblock */
+    table->num_indexes = f->shared->sohm_nindexes;
+    table->version = f->shared->sohm_vers;
+
+    HDassert(addr == f->shared->sohm_addr);
+    HDassert(addr != HADDR_UNDEF);
     HDassert(table->num_indexes > 0);
 
     /* Compute the size of the SOHM table header on disk.  This is the "table" itself

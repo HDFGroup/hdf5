@@ -45,7 +45,7 @@ static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
-static herr_t H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh);
+static void  *H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh);
 static herr_t H5O_fill_new_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -673,26 +673,24 @@ H5O_fill_free (void *mesg)
  *
  * Purpose:	Gets sharing information from the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Shared message on success/NULL on failure
  *
  * Programmer:	James Laird
  *              Tuesday, October 10, 2006
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void *
 H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
 {
     const H5O_fill_new_t  *mesg = (const H5O_fill_new_t *)_mesg;
-    herr_t       ret_value = SUCCEED;
+    void       *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_get_share)
 
     HDassert (mesg);
-    HDassert (sh);
 
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh))
-        ret_value = FAIL;
+    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_new_get_share() */

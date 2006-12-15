@@ -446,7 +446,7 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
                                                       * replacement messages that aren't shared, too. */
 
         /* Extract shared message info from current message */
-        if(H5O_msg_get_share(type->id, mesg, &sh_mesg) < 0)
+        if(NULL == H5O_msg_get_share(type->id, mesg, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Instead of writing the original message, write a shared message */
@@ -1509,12 +1509,17 @@ done:
  * Function:	H5O_msg_get_share
  *
  * Purpose:	Call the 'get_share' method for a
- *              particular class of object header.
+ *              particular class of object header.  Fills SHARE
+ *              with the shared object, or allocated an H5O_shared_t
+ *              message and returns it.
  *
- * Return:	Success:	Non-negative, and SHARE describes the shared
- *				object.
+ *              If SHARE is NULL, the return value must be freed
+ *              with H5O_msg_free.
  *
- *		Failure:	Negative
+ * Return:	Success:	H5O_shared_t describing the shared information
+ *                              for the message.
+ *
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -1522,13 +1527,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+void *
 H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    herr_t ret_value;                   /* Return value */
+    void  *ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_get_share, FAIL)
+    FUNC_ENTER_NOAPI(H5O_msg_get_share, NULL)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1536,11 +1541,10 @@ H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share)
     HDassert(type);
     HDassert(type->get_share);
     HDassert(mesg);
-    HDassert(share);
 
     /* Get shared data for the mesg */
-    if((ret_value = (type->get_share)(mesg, share)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve shared message information")
+    if((ret_value = (type->get_share)(mesg, share)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to retrieve shared message information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1761,6 +1765,9 @@ done:
  * Purpose:     Copies a message to file.  If MESG is is the null pointer then a null
  *              pointer is returned with no error.
  *
+ *              Attempts to share the message in the destination and sets
+ *              SHARED to TRUE or FALSE depending on whether this succeeds.
+ *
  * Return:      Success:        Ptr to the new message
  *
  *              Failure:        NULL
@@ -1772,8 +1779,12 @@ done:
  */
 void *
 H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata)
+    H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared, H5O_copy_t *cpy_info, void *udata)
 {
+    void        *native_mesg=NULL;
+    void        *shared_mesg=NULL;
+    hbool_t      committed;         /* TRUE if message is a committed message */
+    htri_t       try_share_ret;     /* Value returned from H5SM_try_share */
     void        *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_msg_copy_file)
@@ -1787,10 +1798,64 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
     HDassert(file_dst);
     HDassert(cpy_info);
 
-    if(NULL == (ret_value = (copy_type->copy_file)(file_src, mesg_type, native_src, file_dst, dxpl_id, cpy_info, udata)))
+    /* Check if this message is committed.  We'll need to know this later. */
+    committed = FALSE;
+    if(copy_type->id == H5O_SHARED_ID) {
+        H5O_shared_t *shared_mesg = (H5O_shared_t *) native_src;
+
+        if( shared_mesg->flags & H5O_COMMITTED_FLAG) {
+            HDassert(!(shared_mesg->flags & H5O_SHARED_IN_HEAP_FLAG));
+            committed = TRUE;
+        }
+    }
+
+    /* The copy_file callback will return an H5O_shared_t only if the message
+     * to be copied is a committed datatype.
+     */
+    if(NULL == (native_mesg = (copy_type->copy_file)(file_src, mesg_type, native_src, file_dst, dxpl_id, cpy_info, udata)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy object header message to file")
 
+    /* Committed messages are always committed in the destination.  Messages in
+     * the heap are not shared by default--they need to be "re-shared" in the
+     * destination.
+     */
+    if(committed == TRUE)
+        *shared = TRUE;
+    else
+        *shared = FALSE;
+
+    /* If message isn't committed but can be shared, handle with implicit sharing. */
+    if(committed == FALSE && (mesg_type->set_share)) {
+        /* Try to share it in the destination file. */
+        if((try_share_ret = H5SM_try_share(file_dst, dxpl_id, mesg_type->id, native_mesg)) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_WRITEERROR, NULL, "unable to determine if message should be shared")
+
+        /* If it isn't shared, reset its sharing information.  If it is
+         * shared, its sharing information will have been overwritten by
+         * H5SM_try_share.
+         */
+        if(try_share_ret == FALSE) {
+            if(H5O_msg_reset_share(mesg_type->id, native_mesg) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_WRITEERROR, NULL, "unable to reset sharing information in message")
+        }
+        else {
+            /* Get shared message from native message */
+            if(NULL == (shared_mesg = H5O_msg_get_share(mesg_type->id, native_mesg, NULL)))
+                HGOTO_ERROR(H5E_SOHM, H5E_READERROR, NULL, "unable to get shared location from message")
+
+            /* Free native message; the shared message is all we need to return */
+            H5O_msg_free(mesg_type->id, native_mesg);
+
+            native_mesg = shared_mesg;
+            *shared = TRUE;
+        }
+    }
+
+    ret_value = native_mesg;
 done:
+    if(NULL == ret_value) {
+        H5O_msg_free(mesg_type->id, native_mesg);
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_copy_file() */
 
@@ -1846,7 +1911,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
             /* Message is shared. Get shared message, change message type,
              * and use shared information */
             HDmemset(sh_mesg, 0, sizeof(H5O_shared_t));
-            if((orig_type->get_share)(orig_mesg, sh_mesg/*out*/) < 0)
+            if(NULL == (orig_type->get_share)(orig_mesg, sh_mesg/*out*/))
                 HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, UFAIL, "can't get shared message")
 
             *new_type = H5O_MSG_SHARED;
