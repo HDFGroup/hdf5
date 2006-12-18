@@ -1706,7 +1706,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Dense Attribute Storage Creation\n"));
 
     /* Create file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1812,7 +1812,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Opening Attributes in Dense Storage\n"));
 
     /* Create file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1933,7 +1933,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Deleting Attributes in Dense Storage\n"));
 
     /* Create file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1982,6 +1982,23 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset */
+    dataset = H5Dopen(fid, DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Delete attributes until the attributes revert to compact storage again */
     for(u--; u >= min_dense; u--) {
@@ -2099,12 +2116,12 @@ test_attr(void)
         hid_t my_fcpl;
 
         /* Set the FCPL for shared or not */
-        if(new_format) {
+        if(use_shared) {
             MESSAGE(7, ("testing with shared attributes\n"));
             my_fcpl = fcpl2;
         } /* end if */
         else {
-            MESSAGE(7, ("testing with shared attributes\n"));
+            MESSAGE(7, ("testing without shared attributes\n"));
             my_fcpl = fcpl;
         } /* end else */
 

@@ -892,7 +892,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *sh_mesg)
+H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
+    const H5O_shared_t *sh_mesg)
 {
     H5SM_master_table_t  *table = NULL;
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
@@ -984,7 +985,8 @@ H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header, unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags)
+H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
+    unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags)
 {
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;

@@ -940,10 +940,10 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
         /* Free any space referred to in the file from this message */
         if(H5O_delete_mesg(f, dxpl_id, mesg, adj_link) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
-
-        /* Free any native information */
-        H5O_msg_free_mesg(mesg);
     } /* end if */
+
+    /* Free any native information */
+    H5O_msg_free_mesg(mesg);
 
     /* Change message type to nil and zero it */
     mesg->type = H5O_MSG_NULL;

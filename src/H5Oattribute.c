@@ -188,7 +188,8 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
 
     /* Convert message into a null message in the header */
-    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, FALSE) < 0)
+    /* (don't delete attribute's space in the file though) */
+    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
     /* Indicate that the object header was modified */
@@ -225,6 +226,9 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_create)
+#ifdef QAK
+HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name);
+#endif /* QAK */
 
     /* Check arguments */
     HDassert(loc);
@@ -242,7 +246,6 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
 #ifdef QAK
-HDfprintf(stderr, "%s: adding attribute to new-style object header\n", FUNC);
 HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
 HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
 HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);

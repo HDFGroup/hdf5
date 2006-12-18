@@ -1801,13 +1801,13 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
     /* Check if this message is committed.  We'll need to know this later. */
     committed = FALSE;
     if(copy_type->id == H5O_SHARED_ID) {
-        H5O_shared_t *shared_mesg = (H5O_shared_t *) native_src;
+        H5O_shared_t *tmp_shared_mesg = (H5O_shared_t *) native_src;
 
-        if( shared_mesg->flags & H5O_COMMITTED_FLAG) {
-            HDassert(!(shared_mesg->flags & H5O_SHARED_IN_HEAP_FLAG));
+        if( tmp_shared_mesg->flags & H5O_COMMITTED_FLAG) {
+            HDassert(!(tmp_shared_mesg->flags & H5O_SHARED_IN_HEAP_FLAG));
             committed = TRUE;
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     /* The copy_file callback will return an H5O_shared_t only if the message
      * to be copied is a committed datatype.
@@ -1852,10 +1852,11 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
     }
 
     ret_value = native_mesg;
+
 done:
-    if(NULL == ret_value) {
+    if(NULL == ret_value)
         H5O_msg_free(mesg_type->id, native_mesg);
-    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_copy_file() */
 
