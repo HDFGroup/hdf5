@@ -322,7 +322,7 @@ H5HF_tiny_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     HDassert(obj);
 
     /* Call the internal 'op' routine */
-    if(H5HF_tiny_op_real(hdr, id, H5HF_op_memcpy, obj) < 0)
+    if(H5HF_tiny_op_real(hdr, id, H5HF_op_read, obj) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:

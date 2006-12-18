@@ -178,6 +178,10 @@
 #define H5HF_FSPACE_SECT_NORMAL_ROW     2       /* Section is a range of blocks in an indirect block row */
 #define H5HF_FSPACE_SECT_INDIRECT      3       /* Section is a span of blocks in an indirect block */
 
+/* Flags for 'op' operations */
+#define H5HF_OP_MODIFY          0x0001          /* Operation will modify object */
+#define H5HF_OP_FLAGS           (H5HF_OP_MODIFY)        /* Bit-wise OR of all op flags */
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -617,6 +621,8 @@ H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
     const void *obj, void *id);
 H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
+H5_DLL herr_t H5HF_man_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    const void *obj);
 H5_DLL herr_t H5HF_man_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id);
@@ -709,7 +715,8 @@ H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_indirect_t *iblock, unsigned start_entry, unsigned nentries);
 
 /* Internal operator callbacks */
-H5_DLL herr_t H5HF_op_memcpy(const void *obj, size_t obj_len, void *op_data);
+H5_DLL herr_t H5HF_op_read(const void *obj, size_t obj_len, void *op_data);
+H5_DLL herr_t H5HF_op_write(const void *obj, size_t obj_len, void *op_data);
 
 /* Testing routines */
 #ifdef H5HF_TESTING

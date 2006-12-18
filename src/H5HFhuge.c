@@ -589,7 +589,7 @@ static herr_t
 H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     hbool_t is_read, H5HF_operator_t op, void *op_data)
 {
-    void *read_buf;                     /* Pointer to buffer for reading */
+    void *read_buf = NULL;              /* Pointer to buffer for reading */
     haddr_t obj_addr;                   /* Object's address in the file */
     size_t obj_size = 0;                /* Object's size in the file */
     unsigned filter_mask = 0;           /* Filter mask for object (only used for filtered objects) */
@@ -697,11 +697,11 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         } /* end if */
     } /* end if */
 
+done:
     /* Release the buffer for reading */
-    if(hdr->filter_len > 0 || !is_read)
+    if(read_buf && read_buf != op_data)
         H5MM_xfree(read_buf);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_huge_op_real() */
 

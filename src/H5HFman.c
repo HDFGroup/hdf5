@@ -58,7 +58,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id,
-    const uint8_t *id, H5HF_operator_t op, void *op_data);
+    const uint8_t *id, H5HF_operator_t op, void *op_data, unsigned op_flags);
 
 /*********************/
 /* Package Variables */
@@ -246,15 +246,17 @@ done:
  */
 static herr_t
 H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, 
-    H5HF_operator_t op, void *op_data)
+    H5HF_operator_t op, void *op_data, unsigned op_flags)
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
+    H5AC_protect_t dblock_access;       /* Access method for direct block */
+    haddr_t dblock_addr;                /* Direct block address */
+    size_t dblock_size;                 /* Direct block size */
+    unsigned dblock_cache_flags;        /* Flags for unprotecting direct block */
     hsize_t obj_off;                    /* Object's offset in heap */
     size_t obj_len;                     /* Object's length in heap */
     size_t blk_off;                     /* Offset of object in block */
     uint8_t *p;                         /* Temporary pointer to obj info in block */
-    haddr_t dblock_addr;                /* Direct block address */
-    size_t dblock_size;                 /* Direct block size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_op_real)
@@ -265,6 +267,16 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     HDassert(hdr);
     HDassert(id);
     HDassert(op);
+
+    /* Set the access mode for the direct block */
+    if(op_flags & H5HF_OP_MODIFY) {
+        dblock_access = H5AC_WRITE;
+        dblock_cache_flags = H5AC__DIRTIED_FLAG;
+    } /* end if */
+    else {
+        dblock_access = H5AC_READ;
+        dblock_cache_flags = H5AC__NO_FLAGS_SET;
+    } /* end else */
 
     /* Skip over the flag byte */
     id++;
@@ -298,7 +310,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.max_direct_size = %Zu\n", FUNC, hd
         dblock_size = hdr->man_dtable.cparam.start_block_size;
 
         /* Lock direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, NULL, 0, H5AC_READ)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, NULL, 0, dblock_access)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
     } /* end if */
     else {
@@ -327,7 +339,7 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
         } /* end if */
 
         /* Lock direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, H5AC_READ))) {
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, dblock_access))) {
             /* Unlock indirect block */
             if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
@@ -365,7 +377,7 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Zu\n", FUNC, dblock_addr
 
 done:
     /* Unlock direct block */
-    if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, dblock_cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -400,12 +412,50 @@ H5HF_man_read(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, void *obj)
     HDassert(obj);
 
     /* Call the internal 'op' routine routine */
-    if(H5HF_man_op_real(hdr, dxpl_id, id, H5HF_op_memcpy, obj) < 0)
+    if(H5HF_man_op_real(hdr, dxpl_id, id, H5HF_op_read, obj, 0) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_write
+ *
+ * Purpose:	Write an object to a managed heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 18 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    const void *obj)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_write)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Call the internal 'op' routine routine */
+    /* (Casting away const OK - QAK) */
+    if(H5HF_man_op_real(hdr, dxpl_id, id, H5HF_op_write, (void *)obj, H5HF_OP_MODIFY) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -437,7 +487,7 @@ H5HF_man_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     HDassert(op);
 
     /* Call the internal 'op' routine routine */
-    if(H5HF_man_op_real(hdr, dxpl_id, id, op, op_data) < 0)
+    if(H5HF_man_op_real(hdr, dxpl_id, id, op, op_data, 0) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object")
 
 done:

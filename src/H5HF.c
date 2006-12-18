@@ -83,9 +83,9 @@ H5FL_DEFINE_STATIC(H5HF_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_op_memcpy
+ * Function:	H5HF_op_read
  *
- * Purpose:	Performs a 'memcpy' operation for a heap 'op' callback
+ * Purpose:	Performs a 'read' operation for a heap 'op' callback
  *
  * Return:	SUCCEED/FAIL
  *
@@ -96,15 +96,40 @@ H5FL_DEFINE_STATIC(H5HF_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_op_memcpy(const void *obj, size_t obj_len, void *op_data)
+H5HF_op_read(const void *obj, size_t obj_len, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_op_memcpy)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_op_read)
 
-    /* Perform memcpy() */
+    /* Perform "read", using memcpy() */
     HDmemcpy(op_data, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_op_memcpy() */
+} /* end H5HF_op_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_op_write
+ *
+ * Purpose:	Performs a 'write' operation for a heap 'op' callback
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 18 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_op_write(const void *obj, size_t obj_len, void *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_op_write)
+
+    /* Perform "write", using memcpy() */
+    HDmemcpy((void *)obj, op_data, obj_len);    /* Casting away const OK -QAK */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_op_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -516,9 +541,93 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_write
+ *
+ * Purpose:	Write an object from a buffer into a fractal heap
+ *
+ * Notes:	Writing objects in "managed" heap blocks is only storage
+ *		method currently supported.  (Which could be expanded to
+ *		'huge' and 'tiny' objects, with some work)
+ *
+ *		Also, assumes that the 'op' routine modifies the data, and
+ *		marks data to be written back to disk, even if 'op' routine
+ *		didn't actually change anything.  (Which could be modified
+ *		to pass "did_modify" flag to callback, if necessary)
+ *
+ *		Also, assumes that object to write is same size as object in
+ *		heap.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 18 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t UNUSED *id_changed,
+    const void *obj)
+{
+    uint8_t *id = (uint8_t *)_id;       /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HF_write, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Get the ID flags */
+    id_flags = *id;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
+    /* Check type of object in heap */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        /* Operate on object from managed heap blocks */
+        /* (ID can't change and modifying object is "easy" to manage) */
+        if(H5HF_man_write(fh->hdr, dxpl_id, id, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on object from fractal heap")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Check for writing a 'huge' object */
+        /* (which isn't supported yet - ID could change and lots of work to re-compress changed object) */
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'huge' object not supported yet")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Check for writing a 'tiny' object */
+        /* (which isn't supported yet - ID will change) */
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'tiny' object not supported yet")
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_op
  *
  * Purpose:	Perform an operation directly on a heap object
+ *
+ * Note:	The library routines currently assume that the 'op' callback 
+ *		won't modify the object.  This can easily be changed later for
+ *		"managed" heap objects, and, with some difficulty, for 'huge'
+ *		and 'tiny' heap objects.
  *
  * Return:	SUCCEED/FAIL
  *

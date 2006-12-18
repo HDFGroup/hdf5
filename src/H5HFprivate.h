@@ -97,10 +97,10 @@ typedef struct H5HF_t H5HF_t;
 typedef herr_t (*H5HF_operator_t)(const void *obj/*in*/, size_t obj_len,
         void *op_data/*in,out*/);
 
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
+
 
 /***************************************/
 /* Library-private Function Prototypes */
@@ -117,7 +117,9 @@ H5_DLL herr_t H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *id,
     size_t *obj_len_p/*out*/);
 H5_DLL herr_t H5HF_read(H5HF_t *fh, hid_t dxpl_id, const void *id,
     void *obj/*out*/);
-H5_DLL herr_t H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *_id,
+H5_DLL herr_t H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *id, hbool_t *id_changed,
+    const void *obj);
+H5_DLL herr_t H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *id,
     H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
