@@ -376,38 +376,34 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * datatype and dataspace messages themselves, or the size of the "shared"
      * messages if either or both of them are shared.
      */
-    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE)
-    {
+    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE) {
         /* Message wasn't shared after all. Use size of normal datatype
          * message. */
         attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, attr->dt);
-    }
-    else if(tri_ret > 0)
-    {
+    } /* end if */
+    else if(tri_ret > 0) {
         /* Message is shared.  Use size of shared message */
         if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
         attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
-    }
+    } /* end else-if */
     else
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if dataspace is shared")
 
     /* Perform the same test for the dataspace message */
-    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE)
-    {
+    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE) {
         /* Message wasn't shared after all. Use size of normal dataspace
          * message. */
         attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, attr->ds);
-    }
-    else if(tri_ret > 0)
-    {
+    } /* end if */
+    else if(tri_ret > 0) {
         /* Message is shared.  Use size of shared message */
         if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
 
         attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
-    }
+    } /* end else-if */
     else
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if datatype is shared")
 
@@ -531,6 +527,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Go do the real work for opening the attribute */
+/* XXX: Add support & tests for attributes in dense storage */
     if((ret_value = H5A_open(&loc, idx, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
 
@@ -920,9 +917,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     /* Create buffer for data to store on disk */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,size_t);
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
 
-    if(nelmts>0) {
+    if(nelmts > 0) {
         /* Get the memory and file datatype sizes */
         src_type_size = H5T_get_size(attr->dt);
         dst_type_size = H5T_get_size(mem_type);

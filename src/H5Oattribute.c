@@ -268,7 +268,6 @@ HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
         udata.dxpl_id = dxpl_id;
 
         /* Iterate over existing attributes, moving them to dense storage */
-/* XXX: Test this with shared attributes */
         op.lib_op = H5O_attr_to_dense_cb;
         if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
@@ -411,7 +410,6 @@ HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
 #endif /* QAK */
     /* Check for opening attribute with dense storage */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {
-/* XXX: Need to support/test shared attributes in dense storage */
         /* Open attribute in dense storage */
         if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, oh, name)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
@@ -1086,7 +1084,6 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             size_t u;                       /* Local index */
 
             /* Build the table of attributes for this object */
-/* XXX: Test this with shared attributes */
             if(H5A_dense_build_table(loc->file, dxpl_id, oh, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
 
@@ -1155,7 +1152,6 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Check for attributes stored densely */
     if(oh->version > H5O_VERSION_1)
-/* XXX: test this */
         ret_value = (int)oh->nattrs;
     else {
         unsigned u;             /* Local index variable */

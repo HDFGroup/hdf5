@@ -1927,6 +1927,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
     htri_t	is_dense;	/* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
+    int         attr_count;     /* # of attributes */
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1973,6 +1974,11 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         /* Close attribute */
         ret = H5Aclose(attr);
         CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check # of attributes */
+        attr_count = H5Aget_num_attrs(dataset);
+        CHECK(attr_count, FAIL, "H5Aget_num_attrs");
+        VERIFY(attr_count, (u + 1), "H5Aget_num_attrs");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
