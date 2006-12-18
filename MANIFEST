@@ -137,6 +137,7 @@
 ./examples/h5_mount.c
 ./examples/h5_reference.c
 ./examples/h5_ref2reg.c
+./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 
 
