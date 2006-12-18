@@ -1586,7 +1586,7 @@ H5Tcreate(H5T_class_t type, size_t size)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tcreate, FAIL);
-    H5TRACE2("i","Ttz",type,size);
+    H5TRACE2("i", "Ttz", type, size);
 
     /* check args */
     if (size == 0)
@@ -1638,7 +1638,7 @@ H5Tcopy(hid_t type_id)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tcopy, FAIL);
-    H5TRACE1("i","i",type_id);
+    H5TRACE1("i", "i", type_id);
 
     switch (H5I_get_type (type_id)) {
         case H5I_DATATYPE:
@@ -1698,7 +1698,7 @@ H5Tclose(hid_t type_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tclose, FAIL);
-    H5TRACE1("e","i",type_id);
+    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -1741,7 +1741,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     htri_t		ret_value;
 
     FUNC_ENTER_API(H5Tequal, FAIL);
-    H5TRACE2("t","ii",type1_id,type2_id);
+    H5TRACE2("t", "ii", type1_id, type2_id);
 
     /* check args */
     if (NULL == (dt1 = H5I_object_verify(type1_id,H5I_DATATYPE)) ||
@@ -1786,7 +1786,7 @@ H5Tlock(hid_t type_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tlock, FAIL);
-    H5TRACE1("e","i",type_id);
+    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -1826,7 +1826,7 @@ H5Tget_class(hid_t type_id)
     H5T_class_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5Tget_class, H5T_NO_CLASS);
-    H5TRACE1("Tt","i",type_id);
+    H5TRACE1("Tt", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -1910,7 +1910,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tdetect_class, FAIL);
-    H5TRACE2("t","iTt",type,cls);
+    H5TRACE2("t", "iTt", type, cls);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type,H5I_DATATYPE)))
@@ -2012,7 +2012,7 @@ H5Tis_variable_str(hid_t dtype_id)
     htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tis_variable_str, FAIL);
-    H5TRACE1("t","i",dtype_id);
+    H5TRACE1("t", "i", dtype_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(dtype_id,H5I_DATATYPE)))
@@ -2051,7 +2051,7 @@ H5Tget_size(hid_t type_id)
     size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_size, 0);
-    H5TRACE1("z","i",type_id);
+    H5TRACE1("z", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -2100,7 +2100,7 @@ H5Tset_size(hid_t type_id, size_t size)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_size, FAIL);
-    H5TRACE2("e","iz",type_id,size);
+    H5TRACE2("e", "iz", type_id, size);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -2151,7 +2151,7 @@ H5Tget_super(hid_t type)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_super, FAIL);
-    H5TRACE1("i","i",type);
+    H5TRACE1("i", "i", type);
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
@@ -2407,7 +2407,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     herr_t	ret_value=SUCCEED;	/*return value			*/
 
     FUNC_ENTER_API(H5Tregister, FAIL);
-    H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
+    H5TRACE5("e", "Tesiix", pers, name, src_id, dst_id, func);
 
     /* Check args */
     if (H5T_PERS_HARD!=pers && H5T_PERS_SOFT!=pers)
@@ -2556,7 +2556,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tunregister, FAIL);
-    H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
+    H5TRACE5("e", "Tesiix", pers, name, src_id, dst_id, func);
 
     /* Check arguments */
     if (src_id>0 && (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE))))
@@ -2600,7 +2600,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5T_path_t	*path = NULL;
 
     FUNC_ENTER_API(H5Tfind, NULL);
-    H5TRACE3("x","iix",src_id,dst_id,pcdata);
+    H5TRACE3("x", "iix", src_id, dst_id, pcdata);
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2650,7 +2650,7 @@ H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
     H5T_t	*src = NULL, *dst = NULL;
 
     FUNC_ENTER_API(H5Tcompiler_conv, FAIL)
-    H5TRACE2("t","ii",src_id,dst_id);
+    H5TRACE2("t", "ii", src_id, dst_id);
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2702,7 +2702,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tconvert, FAIL);
-    H5TRACE6("e","iizxxi",src_id,dst_id,nelmts,buf,background,dxpl_id);
+    H5TRACE6("e", "iizxxi", src_id, dst_id, nelmts, buf, background, dxpl_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2751,7 +2751,7 @@ H5Tencode(hid_t obj_id, void *buf, size_t *nalloc)
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API (H5Tencode, FAIL)
-    H5TRACE3("e","ix*z",obj_id,buf,nalloc);
+    H5TRACE3("e", "ix*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
     if(NULL == (dtype = H5I_object_verify(obj_id, H5I_DATATYPE)))
@@ -2791,7 +2791,7 @@ H5Tdecode(const void *buf)
     hid_t       ret_value;
 
     FUNC_ENTER_API (H5Tdecode, FAIL);
-    H5TRACE1("i","x",buf);
+    H5TRACE1("i", "x", buf);
 
     if(buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")

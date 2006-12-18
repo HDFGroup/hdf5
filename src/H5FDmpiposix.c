@@ -364,7 +364,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL)
-    H5TRACE3("e","iMcb",fapl_id,comm,use_gpfs);
+    H5TRACE3("e", "iMcb", fapl_id, comm, use_gpfs);
 
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
@@ -423,7 +423,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL)
-    H5TRACE3("e","ixx",fapl_id,comm,use_gpfs);
+    H5TRACE3("e", "ixx", fapl_id, comm, use_gpfs);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")

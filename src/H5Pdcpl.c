@@ -636,7 +636,7 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_layout, FAIL);
-    H5TRACE2("e","iDl",plist_id,layout);
+    H5TRACE2("e", "iDl", plist_id, layout);
 
     /* Check arguments */
     if (layout < 0 || layout >= H5D_NLAYOUTS)
@@ -683,7 +683,7 @@ H5Pget_layout(hid_t plist_id)
     H5D_layout_t   ret_value=H5D_LAYOUT_ERROR;
 
     FUNC_ENTER_API(H5Pget_layout, H5D_LAYOUT_ERROR);
-    H5TRACE1("Dl","i",plist_id);
+    H5TRACE1("Dl", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -731,7 +731,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_chunk, FAIL);
-    H5TRACE3("e","iIs*[a1]h",plist_id,ndims,dim);
+    H5TRACE3("e", "iIs*[a1]h", plist_id, ndims, dim);
 
     /* Check arguments */
     if (ndims <= 0)
@@ -800,7 +800,7 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
     int                 ret_value;
 
     FUNC_ENTER_API(H5Pget_chunk, FAIL);
-    H5TRACE3("Is","iIsx",plist_id,max_ndims,dim);
+    H5TRACE3("Is", "iIsx", plist_id, max_ndims, dim);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -874,7 +874,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_external, FAIL);
-    H5TRACE4("e","isoh",plist_id,name,offset,size);
+    H5TRACE4("e", "isoh", plist_id, name, offset, size);
 
     /* Check arguments */
     if (!name || !*name)
@@ -956,7 +956,7 @@ H5Pget_external_count(hid_t plist_id)
     int ret_value;              /* return value */
 
     FUNC_ENTER_API(H5Pget_external_count, FAIL);
-    H5TRACE1("Is","i",plist_id);
+    H5TRACE1("Is", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1014,7 +1014,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name/*out*
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_external, FAIL);
-    H5TRACE6("e","iIuzxxx",plist_id,idx,name_size,name,offset,size);
+    H5TRACE6("e", "iIuzxxx", plist_id, idx, name_size, name, offset, size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1087,7 +1087,7 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pmodify_filter, FAIL);
-    H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
+    H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
     if (filter<0 || filter>H5Z_FILTER_MAX)
@@ -1170,7 +1170,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_filter, FAIL);
-    H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
+    H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
     if (filter<0 || filter>H5Z_FILTER_MAX)
@@ -1233,7 +1233,7 @@ H5Pget_nfilters(hid_t plist_id)
     int ret_value;              /* return value */
 
     FUNC_ENTER_API(H5Pget_nfilters, FAIL);
-    H5TRACE1("Is","i",plist_id);
+    H5TRACE1("Is", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1553,7 +1553,7 @@ H5Pall_filters_avail(hid_t plist_id)
     hbool_t ret_value = TRUE;   /* return value */
 
     FUNC_ENTER_API(H5Pall_filters_avail, UFAIL)
-    H5TRACE1("t","i",plist_id);
+    H5TRACE1("t", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1595,7 +1595,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(H5Premove_filter, FAIL)
-    H5TRACE2("e","iZf",plist_id,filter);
+    H5TRACE2("e", "iZf", plist_id, filter);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1654,7 +1654,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_deflate, FAIL)
-    H5TRACE2("e","iIu",plist_id,level);
+    H5TRACE2("e", "iIu", plist_id, level);
 
     /* Check arguments */
     if(level>9)
@@ -1710,7 +1710,7 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_szip, FAIL);
-    H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
+    H5TRACE3("e", "iIuIu", plist_id, options_mask, pixels_per_block);
 
     if(H5Zget_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get filter info")
@@ -1780,7 +1780,7 @@ H5Pset_shuffle(hid_t plist_id)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_shuffle, FAIL);
-    H5TRACE1("e","i",plist_id);
+    H5TRACE1("e", "i", plist_id);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
@@ -1826,7 +1826,7 @@ H5Pset_nbit(hid_t plist_id)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_nbit, FAIL);
-    H5TRACE1("e","i",plist_id);
+    H5TRACE1("e", "i", plist_id);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
@@ -1889,7 +1889,7 @@ H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_fac
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_scaleoffset, FAIL);
-    H5TRACE3("e","iZaIs",plist_id,scale_type,scale_factor);
+    H5TRACE3("e", "iZaIs", plist_id, scale_type, scale_factor);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
@@ -1949,7 +1949,7 @@ H5Pset_fletcher32(hid_t plist_id)
     herr_t              ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_fletcher32, FAIL);
-    H5TRACE1("e","i",plist_id);
+    H5TRACE1("e", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -2001,7 +2001,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_fill_value, FAIL);
-    H5TRACE3("e","iix",plist_id,type_id,value);
+    H5TRACE3("e", "iix", plist_id, type_id, value);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -2075,7 +2075,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER_API(H5Pget_fill_value, FAIL);
-    H5TRACE3("e","iix",plist_id,type_id,value);
+    H5TRACE3("e", "iix", plist_id, type_id, value);
 
     /* Check arguments */
     if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -2212,7 +2212,7 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Pfill_value_defined, FAIL);
-    H5TRACE2("e","i*DF",plist_id,status);
+    H5TRACE2("e", "i*DF", plist_id, status);
 
     assert(status);
 
@@ -2258,7 +2258,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
     herr_t ret_value = SUCCEED; /* return value 	 */
 
     FUNC_ENTER_API(H5Pset_alloc_time, FAIL);
-    H5TRACE2("e","iDa",plist_id,alloc_time);
+    H5TRACE2("e", "iDa", plist_id, alloc_time);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -2332,7 +2332,7 @@ H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time/*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(H5Pget_alloc_time, FAIL);
-    H5TRACE2("e","ix",plist_id,alloc_time);
+    H5TRACE2("e", "ix", plist_id, alloc_time);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -2370,7 +2370,7 @@ H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(H5Pset_fill_time, FAIL);
-    H5TRACE2("e","iDf",plist_id,fill_time);
+    H5TRACE2("e", "iDf", plist_id, fill_time);
 
     /* Check arguments */
     if(fill_time<H5D_FILL_TIME_ALLOC || fill_time>H5D_FILL_TIME_IFSET)
@@ -2412,7 +2412,7 @@ H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time/*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(H5Pget_fill_time, FAIL);
-    H5TRACE2("e","ix",plist_id,fill_time);
+    H5TRACE2("e", "ix", plist_id, fill_time);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))

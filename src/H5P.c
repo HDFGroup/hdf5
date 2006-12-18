@@ -856,7 +856,7 @@ H5Pcopy(hid_t id)
     hid_t ret_value=FALSE;      /* return value */
 
     FUNC_ENTER_API(H5Pcopy, FAIL);
-    H5TRACE1("i","i",id);
+    H5TRACE1("i", "i", id);
 
     if (H5P_DEFAULT==id)
         HGOTO_DONE(H5P_DEFAULT);
@@ -1618,8 +1618,8 @@ H5Pcreate_class(hid_t parent, const char *name,
     hid_t	ret_value;                  /* Return value		   */
 
     FUNC_ENTER_API(H5Pcreate_class, FAIL);
-    H5TRACE8("i","isxxxxxx",parent,name,cls_create,create_data,cls_copy,
-             copy_data,cls_close,close_data);
+    H5TRACE8("i", "isxxxxxx", parent, name, cls_create, create_data, cls_copy,
+             copy_data, cls_close, close_data);
 
     /* Check arguments. */
     if (H5P_DEFAULT!=parent && (H5I_GENPROP_CLS!=H5I_get_type(parent)))
@@ -1892,7 +1892,7 @@ H5Pcreate(hid_t cls_id)
     hid_t ret_value;               /* return value */
 
     FUNC_ENTER_API(H5Pcreate, FAIL);
-    H5TRACE1("i","i",cls_id);
+    H5TRACE1("i", "i", cls_id);
 
     /* Check arguments. */
     if (NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
@@ -2951,7 +2951,7 @@ H5Pset(hid_t plist_id, const char *name, void *value)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset, FAIL);
-    H5TRACE3("e","isx",plist_id,name,value);
+    H5TRACE3("e", "isx", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -3101,7 +3101,7 @@ H5Pexist(hid_t id, const char *name)
     htri_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pexist, FAIL);
-    H5TRACE2("t","is",id,name);
+    H5TRACE2("t", "is", id, name);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -3254,7 +3254,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pget_size, FAIL);
-    H5TRACE3("e","is*z",id,name,size);
+    H5TRACE3("e", "is*z", id, name, size);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -3352,7 +3352,7 @@ H5Pget_class(hid_t plist_id)
     hid_t ret_value=FAIL;           /* return value */
 
     FUNC_ENTER_API(H5Pget_class, FAIL);
-    H5TRACE1("i","i",plist_id);
+    H5TRACE1("i", "i", plist_id);
 
     /* Check arguments. */
     if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -3490,7 +3490,7 @@ H5Pget_nprops(hid_t id, size_t *nprops)
     herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pget_nprops, FAIL);
-    H5TRACE2("e","i*z",id,nprops);
+    H5TRACE2("e", "i*z", id, nprops);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -3849,7 +3849,7 @@ H5Pequal(hid_t id1, hid_t id2)
     htri_t ret_value=FALSE;     /* return value */
 
     FUNC_ENTER_API(H5Pequal, FAIL);
-    H5TRACE2("t","ii",id1,id2);
+    H5TRACE2("t", "ii", id1, id2);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
@@ -4003,7 +4003,7 @@ H5Pisa_class(hid_t plist_id, hid_t pclass_id)
     htri_t ret_value;                   /* return value */
 
     FUNC_ENTER_API(H5Pisa_class, FAIL);
-    H5TRACE2("t","ii",plist_id,pclass_id);
+    H5TRACE2("t", "ii", plist_id, pclass_id);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id))
@@ -4386,7 +4386,7 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
     int ret_value;          /* return value */
 
     FUNC_ENTER_API(H5Piterate, FAIL);
-    H5TRACE4("Is","i*Isxx",id,idx,iter_func,iter_data);
+    H5TRACE4("Is", "i*Isxx", id, idx, iter_func, iter_data);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -4776,7 +4776,7 @@ H5Pget(hid_t plist_id, const char *name, void *value)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget, FAIL);
-    H5TRACE3("e","isx",plist_id,name,value);
+    H5TRACE3("e", "isx", plist_id, name, value);
 
     /* Check arguments. */
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -4959,7 +4959,7 @@ H5Premove(hid_t plist_id, const char *name)
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Premove, FAIL);
-    H5TRACE2("e","is",plist_id,name);
+    H5TRACE2("e", "is", plist_id, name);
 
     /* Check arguments. */
     if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -5193,7 +5193,7 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pcopy_prop, FAIL);
-    H5TRACE3("e","iis",dst_id,src_id,name);
+    H5TRACE3("e", "iis", dst_id, src_id, name);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(src_id) && H5I_GENPROP_CLS != H5I_get_type(src_id))
@@ -5304,7 +5304,7 @@ H5Punregister(hid_t pclass_id, const char *name)
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Punregister, FAIL);
-    H5TRACE2("e","is",pclass_id,name);
+    H5TRACE2("e", "is", pclass_id, name);
 
     /* Check arguments. */
     if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -5510,7 +5510,7 @@ H5Pclose(hid_t plist_id)
     herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pclose, FAIL);
-    H5TRACE1("e","i",plist_id);
+    H5TRACE1("e", "i", plist_id);
 
     if (plist_id==H5P_DEFAULT)
         HGOTO_DONE(SUCCEED);
@@ -5813,7 +5813,7 @@ H5Pget_class_parent(hid_t pclass_id)
     hid_t ret_value;       /* return value */
 
     FUNC_ENTER_API(H5Pget_class_parent, FAIL);
-    H5TRACE1("i","i",pclass_id);
+    H5TRACE1("i", "i", pclass_id);
 
     /* Check arguments. */
     if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -5899,7 +5899,7 @@ H5Pclose_class(hid_t cls_id)
     hid_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER_API(H5Pclose_class, FAIL);
-    H5TRACE1("e","i",cls_id);
+    H5TRACE1("e", "i", cls_id);
 
     /* Check arguments */
     if (H5I_GENPROP_CLS != H5I_get_type(cls_id))

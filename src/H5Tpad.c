@@ -76,7 +76,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tget_pad, FAIL)
-    H5TRACE3("e","ixx",type_id,lsb,msb);
+    H5TRACE3("e", "ixx", type_id, lsb, msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -120,7 +120,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_pad, FAIL)
-    H5TRACE3("e","iTpTp",type_id,lsb,msb);
+    H5TRACE3("e", "iTpTp", type_id, lsb, msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

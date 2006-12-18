@@ -78,7 +78,7 @@ H5Tget_cset(hid_t type_id)
     H5T_cset_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_cset, H5T_CSET_ERROR)
-    H5TRACE1("Tc","i",type_id);
+    H5TRACE1("Tc", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -124,7 +124,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_cset, FAIL)
-    H5TRACE2("e","iTc",type_id,cset);
+    H5TRACE2("e", "iTc", type_id, cset);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

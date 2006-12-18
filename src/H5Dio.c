@@ -183,7 +183,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Dfill, FAIL)
-    H5TRACE5("e","xixii",fill,fill_type_id,buf,buf_type_id,space_id);
+    H5TRACE5("e", "xixii", fill, fill_type_id, buf, buf_type_id, space_id);
 
     /* Check args */
     if (buf==NULL)
@@ -465,8 +465,8 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dread, FAIL)
-    H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
-             plist_id,buf);
+    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
+             plist_id, buf);
 
     /* check arguments */
     if(NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
@@ -549,8 +549,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dwrite, FAIL)
-    H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
-             plist_id,buf);
+    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
+             plist_id, buf);
 
     /* check arguments */
     if(NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))

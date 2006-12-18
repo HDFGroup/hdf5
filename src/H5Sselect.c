@@ -292,7 +292,7 @@ H5Sget_select_npoints(hid_t spaceid)
     hssize_t ret_value;         /* return value */
 
     FUNC_ENTER_API(H5Sget_select_npoints, FAIL);
-    H5TRACE1("Hs","i",spaceid);
+    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -364,7 +364,7 @@ H5Sselect_valid(hid_t spaceid)
     htri_t ret_value;     /* return value */
 
     FUNC_ENTER_API(H5Sselect_valid, 0);
-    H5TRACE1("t","i",spaceid);
+    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -515,7 +515,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
-    H5TRACE3("e","i*h*h",spaceid,start,end);
+    H5TRACE3("e", "i*h*h", spaceid, start, end);
 
     /* Check args */
     if(start==NULL || end==NULL)
@@ -1185,7 +1185,7 @@ H5Sget_select_type(hid_t space_id)
     H5S_sel_type        ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5Sget_select_type, H5S_SEL_ERROR);
-    H5TRACE1("St","i",space_id);
+    H5TRACE1("St", "i", space_id);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))

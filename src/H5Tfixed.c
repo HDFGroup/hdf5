@@ -75,7 +75,7 @@ H5Tget_sign(hid_t type_id)
     H5T_sign_t		ret_value;
 
     FUNC_ENTER_API(H5Tget_sign, H5T_SGN_ERROR)
-    H5TRACE1("Ts","i",type_id);
+    H5TRACE1("Ts", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -154,7 +154,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_sign, FAIL)
-    H5TRACE2("e","iTs",type_id,sign);
+    H5TRACE2("e", "iTs", type_id, sign);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

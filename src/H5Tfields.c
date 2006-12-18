@@ -79,7 +79,7 @@ H5Tget_nmembers(hid_t type_id)
     int	ret_value;
 
     FUNC_ENTER_API(H5Tget_nmembers, FAIL)
-    H5TRACE1("Is","i",type_id);
+    H5TRACE1("Is", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -251,7 +251,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     unsigned    i;
 
     FUNC_ENTER_API(H5Tget_member_index, FAIL)
-    H5TRACE2("Is","is",type_id,name);
+    H5TRACE2("Is", "is", type_id, name);
 
     /* Check arguments */
     assert(name);

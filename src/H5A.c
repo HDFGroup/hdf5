@@ -232,6 +232,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate, FAIL)
+    H5TRACE5("i", "isiii", loc_id, name, type_id, space_id, plist_id);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -467,7 +468,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     hid_t		ret_value;
 
     FUNC_ENTER_API(H5Aopen_name, FAIL)
-    H5TRACE2("i","is",loc_id,name);
+    H5TRACE2("i", "is", loc_id, name);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -521,7 +522,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Aopen_idx, FAIL)
-    H5TRACE2("i","iIu",loc_id,idx);
+    H5TRACE2("i", "iIu", loc_id, idx);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -703,7 +704,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     herr_t	    ret_value;
 
     FUNC_ENTER_API(H5Awrite, FAIL)
-    H5TRACE3("e","iix",attr_id,dtype_id,buf);
+    H5TRACE3("e", "iix", attr_id, dtype_id, buf);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -861,7 +862,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
     herr_t		ret_value;
 
     FUNC_ENTER_API(H5Aread, FAIL)
-    H5TRACE3("e","iix",attr_id,dtype_id,buf);
+    H5TRACE3("e", "iix", attr_id, dtype_id, buf);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1005,7 +1006,7 @@ H5Aget_space(hid_t attr_id)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Aget_space, FAIL)
-    H5TRACE1("i","i",attr_id);
+    H5TRACE1("i", "i", attr_id);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1051,7 +1052,7 @@ H5Aget_type(hid_t attr_id)
     hid_t	 ret_value;
 
     FUNC_ENTER_API(H5Aget_type, FAIL)
-    H5TRACE1("i","i",attr_id);
+    H5TRACE1("i", "i", attr_id);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1112,7 +1113,7 @@ H5Aget_create_plist(hid_t attr_id)
     hid_t		ret_value;
 
     FUNC_ENTER_API(H5Aget_create_plist, FAIL)
-    H5TRACE1("i","i",attr_id);
+    H5TRACE1("i", "i", attr_id);
 
     HDassert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
 
@@ -1168,7 +1169,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     ssize_t		ret_value;
 
     FUNC_ENTER_API(H5Aget_name, FAIL)
-    H5TRACE3("Zs","izs",attr_id,buf_size,buf);
+    H5TRACE3("Zs", "izs", attr_id, buf_size, buf);
 
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1223,7 +1224,7 @@ H5Aget_storage_size(hid_t attr_id)
     hsize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aget_storage_size, 0)
-    H5TRACE1("h","i",attr_id);
+    H5TRACE1("h", "i", attr_id);
 
     /* Check args */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1289,7 +1290,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Arename, FAIL)
-    H5TRACE3("e","iss",loc_id,old_name,new_name);
+    H5TRACE3("e", "iss", loc_id, old_name, new_name);
 
     /* check arguments */
     if(!old_name || !new_name)
@@ -1351,7 +1352,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     herr_t	        ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aiterate, FAIL)
-    H5TRACE4("e","i*Iuxx",loc_id,attr_num,op,op_data);
+    H5TRACE4("e", "i*Iuxx", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -1394,7 +1395,7 @@ H5Adelete(hid_t loc_id, const char *name)
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Adelete, FAIL)
-    H5TRACE2("e","is",loc_id,name);
+    H5TRACE2("e", "is", loc_id, name);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
@@ -1434,7 +1435,7 @@ H5Aclose(hid_t attr_id)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Aclose, FAIL)
-    H5TRACE1("e","i",attr_id);
+    H5TRACE1("e", "i", attr_id);
 
     /* check arguments */
     if(NULL == H5I_object_verify(attr_id, H5I_ATTR))

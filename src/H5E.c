@@ -370,7 +370,7 @@ H5Eregister_class(const char *cls_name, const char *lib_name, const char *versio
     hid_t       ret_value;   /* Return value */
 
     FUNC_ENTER_API(H5Eregister_class, FAIL)
-    H5TRACE3("i","sss",cls_name,lib_name,version);
+    H5TRACE3("i", "sss", cls_name, lib_name, version);
 
     /* Check arguments */
     if (cls_name==NULL || lib_name==NULL || version==NULL)
@@ -456,7 +456,7 @@ H5Eunregister_class(hid_t class_id)
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eunregister_class, FAIL)
-    H5TRACE1("e","i",class_id);
+    H5TRACE1("e", "i", class_id);
 
     /* Check arguments */
     if (H5I_ERROR_CLASS != H5I_get_type(class_id))
@@ -535,7 +535,7 @@ H5Eget_class_name(hid_t class_id, char *name, size_t size)
     ssize_t     ret_value;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_class_name, FAIL)
-    H5TRACE3("Zs","isz",class_id,name,size);
+    H5TRACE3("Zs", "isz", class_id, name, size);
 
     /* Get the error class */
     if(NULL==(cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
@@ -647,7 +647,7 @@ H5Eclose_msg(hid_t err_id)
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eclose_msg, FAIL)
-    H5TRACE1("e","i",err_id);
+    H5TRACE1("e", "i", err_id);
 
     /* Check arguments */
     if (H5I_ERROR_MSG != H5I_get_type(err_id))
@@ -714,7 +714,7 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
     hid_t       ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Ecreate_msg, FAIL)
-    H5TRACE3("i","iEts",class_id,msg_type,msg_str);
+    H5TRACE3("i", "iEts", class_id, msg_type, msg_str);
 
     /* Check arguments */
     if(msg_type!=H5E_MAJOR && msg_type!=H5E_MINOR)
@@ -905,7 +905,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     ssize_t      ret_value;     /* Return value */
 
     FUNC_ENTER_API(H5Eget_msg, FAIL)
-    H5TRACE4("Zs","i*Etsz",msg_id,type,msg_str,size);
+    H5TRACE4("Zs", "i*Etsz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if((msg = H5I_object_verify(msg_id, H5I_ERROR_MSG))==NULL)
@@ -1099,7 +1099,7 @@ H5Eset_current_stack(hid_t err_stack)
     herr_t         ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eset_current_stack, FAIL)
-    H5TRACE1("e","i",err_stack);
+    H5TRACE1("e", "i", err_stack);
 
     if(err_stack != H5E_DEFAULT) {
         if((estack = H5I_object_verify(err_stack, H5I_ERROR_STACK))==NULL)
@@ -1201,7 +1201,7 @@ H5Eclose_stack(hid_t stack_id)
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eclose_stack, FAIL)
-    H5TRACE1("e","i",stack_id);
+    H5TRACE1("e", "i", stack_id);
 
     if(H5E_DEFAULT != stack_id) {
         /* Check arguments */
@@ -1278,7 +1278,7 @@ H5Eget_num(hid_t error_stack_id)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eget_num, FAIL)
-    H5TRACE1("Zs","i",error_stack_id);
+    H5TRACE1("Zs", "i", error_stack_id);
 
     /* Need to check for errors */
     if(error_stack_id == H5E_DEFAULT) {
@@ -1353,7 +1353,7 @@ H5Epop(hid_t err_stack, size_t count)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epop, FAIL)
-    H5TRACE2("e","iz",err_stack,count);
+    H5TRACE2("e", "iz", err_stack, count);
 
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT) {
@@ -1448,7 +1448,7 @@ H5Epush(const char *file, const char *func, unsigned line,
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epush, FAIL)
-    H5TRACE6("e","ssIuiis",file,func,line,maj,min,str);
+    H5TRACE6("e", "ssIuiis", file, func, line, maj, min, str);
 
     /* Push the error on the stack */
     if(H5E_push_stack(estack, file, func, line, H5E_ERR_CLS_g, maj, min, str)<0)
@@ -1730,7 +1730,7 @@ H5Eclear_stack(hid_t err_stack)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eclear_stack, FAIL)
-    H5TRACE1("e","i",err_stack);
+    H5TRACE1("e", "i", err_stack);
 
     /* Need to check for errors */
     if(err_stack == H5E_DEFAULT)
@@ -2466,7 +2466,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto, FAIL)
-    H5TRACE2("e","*xx",func,client_data);
+    H5TRACE2("e", "*xx", func, client_data);
 
     /* Retrieve default error stack */
     if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -2506,7 +2506,7 @@ H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto_stack, FAIL)
-    H5TRACE3("e","i*xx",estack_id,func,client_data);
+    H5TRACE3("e", "i*xx", estack_id, func, client_data);
 
     if(estack_id == H5E_DEFAULT) {
     	if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -2597,7 +2597,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eset_auto, FAIL)
-    H5TRACE2("e","xx",func,client_data);
+    H5TRACE2("e", "xx", func, client_data);
 
     if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
@@ -2645,7 +2645,7 @@ H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eset_auto_stack, FAIL)
-    H5TRACE3("e","ixx",estack_id,func,client_data);
+    H5TRACE3("e", "ixx", estack_id, func, client_data);
 
     if(estack_id == H5E_DEFAULT) {
     	if(NULL == (estack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -2776,7 +2776,7 @@ H5Eauto_is_stack(hid_t estack_id, unsigned *is_stack)
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eauto_is_stack, FAIL)
-    H5TRACE2("e","i*Iu",estack_id,is_stack);
+    H5TRACE2("e", "i*Iu", estack_id, is_stack);
 
     if(estack_id == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */

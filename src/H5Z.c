@@ -223,7 +223,7 @@ H5Zregister(const H5Z_class_t *cls)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Zregister, FAIL)
-    H5TRACE1("e","Zc",cls);
+    H5TRACE1("e", "Zc", cls);
 
     /* Check args */
     if (cls==NULL)
@@ -341,7 +341,7 @@ H5Zunregister(H5Z_filter_t id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Zunregister, FAIL)
-    H5TRACE1("e","Zf",id);
+    H5TRACE1("e", "Zf", id);
 
     /* Check args */
     if (id<0 || id>H5Z_FILTER_MAX)
@@ -426,7 +426,7 @@ H5Zfilter_avail(H5Z_filter_t id)
     htri_t ret_value=FALSE;     /* Return value */
 
     FUNC_ENTER_API(H5Zfilter_avail, FAIL)
-    H5TRACE1("t","Zf",id);
+    H5TRACE1("t", "Zf", id);
 
     /* Check args */
     if(id<0 || id>H5Z_FILTER_MAX)

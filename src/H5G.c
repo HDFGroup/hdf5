@@ -161,7 +161,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     hid_t	    ret_value;
 
     FUNC_ENTER_API(H5Gcreate, FAIL)
-    H5TRACE3("i","isz",loc_id,name,size_hint);
+    H5TRACE3("i", "isz", loc_id, name, size_hint);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -293,7 +293,7 @@ H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     hid_t	    ret_value;
 
     FUNC_ENTER_API(H5Gcreate_expand, FAIL)
-    H5TRACE3("i","iii",loc_id,gcpl_id,gapl_id);
+    H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -359,7 +359,7 @@ H5Gopen(hid_t loc_id, const char *name)
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Gopen, FAIL)
-    H5TRACE2("i","is",loc_id,name);
+    H5TRACE2("i", "is", loc_id, name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -437,7 +437,7 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Gopen_expand, FAIL);
-    H5TRACE3("i","isi",loc_id,name,gapl_id);
+    H5TRACE3("i", "isi", loc_id, name, gapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -520,7 +520,7 @@ H5Gget_create_plist(hid_t group_id)
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER_API(H5Gget_create_plist, FAIL)
-    H5TRACE1("i","i",group_id);
+    H5TRACE1("i", "i", group_id);
 
     /* Check args */
     if(NULL == (grp = H5I_object_verify(group_id, H5I_GROUP)))
@@ -727,7 +727,7 @@ H5Gclose(hid_t group_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Gclose, FAIL);
-    H5TRACE1("e","i",group_id);
+    H5TRACE1("e", "i", group_id);
 
     /* Check args */
     if(NULL == H5I_object_verify(group_id,H5I_GROUP))

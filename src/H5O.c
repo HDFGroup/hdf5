@@ -174,7 +174,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen, FAIL)
-    H5TRACE3("i","isi",loc_id,name,lapl_id);
+    H5TRACE3("i", "isi", loc_id, name, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -240,7 +240,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen_by_idx, FAIL)
-    H5TRACE6("i","isLiIohi",loc_id,group_name,idx_type,order,n,lapl_id);
+    H5TRACE6("i", "isIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -327,7 +327,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen_by_addr, FAIL)
-    H5TRACE2("i","ia",loc_id,addr);
+    H5TRACE2("i", "ia", loc_id, addr);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -383,7 +383,7 @@ H5Oincr_refcount(hid_t object_id)
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Oincr_refcount, FAIL)
-    H5TRACE1("e","i",object_id);
+    H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
     if((oloc = H5O_get_loc(object_id)) == NULL)
@@ -424,7 +424,7 @@ H5Odecr_refcount(hid_t object_id)
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Odecr_refcount, FAIL)
-    H5TRACE1("e","i",object_id);
+    H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
     if((oloc = H5O_get_loc(object_id)) == NULL)
@@ -572,7 +572,7 @@ H5Oclose(hid_t object_id)
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Oclose, FAIL)
-    H5TRACE1("e","i",object_id);
+    H5TRACE1("e", "i", object_id);
 
     /* Get the type of the object and close it in the correct way */
     switch(H5I_get_type(object_id))

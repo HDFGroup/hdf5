@@ -95,7 +95,7 @@ H5Tget_offset(hid_t type_id)
     int	ret_value;
 
     FUNC_ENTER_API(H5Tget_offset, -1)
-    H5TRACE1("Is","i",type_id);
+    H5TRACE1("Is", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -159,7 +159,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_offset, FAIL)
-    H5TRACE2("e","iz",type_id,offset);
+    H5TRACE2("e", "iz", type_id, offset);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

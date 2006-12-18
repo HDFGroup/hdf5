@@ -258,7 +258,7 @@ H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pget_version, FAIL);
-    H5TRACE5("e","ixxxx",plist_id,super,freelist,stab,shhdr);
+    H5TRACE5("e", "ixxxx", plist_id, super, freelist, stab, shhdr);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -309,7 +309,7 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_userblock, FAIL);
-    H5TRACE2("e","ih",plist_id,size);
+    H5TRACE2("e", "ih", plist_id, size);
 
     /* Check that the userblock size is a power of two */
     for (i=8; i<8*sizeof(hsize_t); i++) {
@@ -361,7 +361,7 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_userblock, FAIL);
-    H5TRACE2("e","i*h",plist_id,size);
+    H5TRACE2("e", "i*h", plist_id, size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -400,7 +400,7 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_sizes, FAIL);
-    H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
+    H5TRACE3("e", "izz", plist_id, sizeof_addr, sizeof_size);
 
     /* Check arguments */
     if (sizeof_addr) {
@@ -457,7 +457,7 @@ H5Pget_sizes(hid_t plist_id,
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_sizes, FAIL);
-    H5TRACE3("e","ixx",plist_id,sizeof_addr,sizeof_size);
+    H5TRACE3("e", "ixx", plist_id, sizeof_addr, sizeof_size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -514,7 +514,7 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIuIu",plist_id,ik,lk);
+    H5TRACE3("e", "iIuIu", plist_id, ik, lk);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -565,7 +565,7 @@ H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */ , unsigned *lk /*out */ )
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_sym_k, FAIL);
-    H5TRACE3("e","ixx",plist_id,ik,lk);
+    H5TRACE3("e", "ixx", plist_id, ik, lk);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -613,7 +613,7 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_istore_k, FAIL);
-    H5TRACE2("e","iIu",plist_id,ik);
+    H5TRACE2("e", "iIu", plist_id, ik);
 
     /* Check arguments */
     if (ik == 0)
@@ -664,7 +664,7 @@ H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pget_istore_k, FAIL)
-    H5TRACE2("e","ix",plist_id,ik);
+    H5TRACE2("e", "ix", plist_id, ik);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -719,7 +719,7 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
     herr_t          ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesgs, FAIL)
-    H5TRACE3("e","iIu*Iu",plist_id,nindexes,mesg_type_flags);
+    H5TRACE3("e", "iIu*Iu", plist_id, nindexes, mesg_type_flags);
 
     /* Check arguments */
     if(nindexes > H5SM_MAX_NUM_INDEXES)
@@ -778,7 +778,7 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_nindexes, FAIL);
-    H5TRACE2("e","iIu",plist_id,nindexes);
+    H5TRACE2("e", "iIu", plist_id, nindexes);
 
     /* Check argument */
     if (nindexes > H5SM_MAX_NUM_INDEXES)
@@ -816,7 +816,7 @@ H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pget_shared_mesg_nindexes, FAIL)
-    H5TRACE2("e","i*Iu",plist_id,nindexes);
+    H5TRACE2("e", "i*Iu", plist_id, nindexes);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -854,7 +854,7 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL)
-    H5TRACE4("e","iIuIuIu",plist_id,index_num,mesg_type_flags,min_mesg_size);
+    H5TRACE4("e", "iIuIuIu", plist_id, index_num, mesg_type_flags, min_mesg_size);
 
     /* Check arguments */
     if(index_num == 0)
@@ -919,7 +919,8 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_shared_mesg_index, FAIL);
-    H5TRACE4("e","iIu*Iu*Iu",plist_id,index_num,mesg_type_flags,min_mesg_size);
+    H5TRACE4("e", "iIu*Iu*Iu", plist_id, index_num, mesg_type_flags,
+             min_mesg_size);
 
     /* Check arguments */
     if(index_num == 0)
@@ -979,7 +980,7 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_phase_change, FAIL);
-    H5TRACE3("e","iIuIu",plist_id,max_list,min_btree);
+    H5TRACE3("e", "iIuIu", plist_id, max_list, min_btree);
 
     /* Check that values are sensible.  The min_btree value must be no greater
      * than the max list plus one.
@@ -1033,7 +1034,7 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_shared_mesg_phase_change, FAIL);
-    H5TRACE3("e","i*Iu*Iu",plist_id,max_list,min_btree);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, max_list, min_btree);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))

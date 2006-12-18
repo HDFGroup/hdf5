@@ -111,7 +111,7 @@ H5Tvlen_create(hid_t base_id)
     hid_t	ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Tvlen_create, FAIL)
-    H5TRACE1("i","i",base_id);
+    H5TRACE1("i", "i", base_id);
 
     /* Check args */
     if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))

@@ -319,7 +319,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL)
-    H5TRACE3("e","iMcMi",fapl_id,comm,info);
+    H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
     if(fapl_id==H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -390,7 +390,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL)
-    H5TRACE3("e","ixx",fapl_id,comm,info);
+    H5TRACE3("e", "ixx", fapl_id, comm, info);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
@@ -464,7 +464,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio, FAIL)
-    H5TRACE2("e","iDt",dxpl_id,xfer_mode);
+    H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
     if(dxpl_id==H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -514,7 +514,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_dxpl_mpio, FAIL)
-    H5TRACE2("e","ix",dxpl_id,xfer_mode);
+    H5TRACE2("e", "ix", dxpl_id, xfer_mode);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
@@ -661,7 +661,7 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_num, FAIL)
-    H5TRACE2("e","iIu",dxpl_id,num_chunk_per_proc);
+    H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
 
     if(dxpl_id==H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -708,7 +708,7 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_ratio, FAIL)
-    H5TRACE2("e","iIu",dxpl_id,percent_num_proc_per_chunk);
+    H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
 
     if(dxpl_id==H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")

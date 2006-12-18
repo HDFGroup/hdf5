@@ -480,7 +480,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Fmount, FAIL)
-    H5TRACE4("e","isii",loc_id,name,child_id,plist_id);
+    H5TRACE4("e", "isii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -530,7 +530,7 @@ H5Funmount(hid_t loc_id, const char *name)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Funmount, FAIL)
-    H5TRACE2("e","is",loc_id,name);
+    H5TRACE2("e", "is", loc_id, name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

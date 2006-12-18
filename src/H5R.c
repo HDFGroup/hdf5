@@ -287,7 +287,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Rcreate, FAIL)
-    H5TRACE5("e","xisRti",ref,loc_id,name,ref_type,space_id);
+    H5TRACE5("e", "xisRti", ref, loc_id, name, ref_type, space_id);
 
     /* Check args */
     if(ref == NULL)
@@ -493,7 +493,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(H5Rdereference, FAIL)
-    H5TRACE3("i","iRtx",id,ref_type,_ref);
+    H5TRACE3("i", "iRtx", id, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)
@@ -616,7 +616,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(H5Rget_region, FAIL)
-    H5TRACE3("i","iRtx",id,ref_type,ref);
+    H5TRACE3("i", "iRtx", id, ref_type, ref);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)
@@ -763,7 +763,7 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, const void *ref)
     H5G_obj_t ret_value;
 
     FUNC_ENTER_API(H5Rget_obj_type, H5G_UNKNOWN)
-    H5TRACE3("Go","iRtx",id,ref_type,ref);
+    H5TRACE3("Go", "iRtx", id, ref_type, ref);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)
@@ -921,7 +921,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(H5Rget_name, FAIL)
-    H5TRACE5("Zs","iRtxsz",id,ref_type,_ref,name,size);
+    H5TRACE5("Zs", "iRtxsz", id, ref_type, _ref, name, size);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)

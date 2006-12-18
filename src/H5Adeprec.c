@@ -129,7 +129,7 @@ H5Aget_num_attrs(hid_t loc_id)
     int			ret_value;
 
     FUNC_ENTER_API(H5Aget_num_attrs, FAIL)
-    H5TRACE1("Is","i",loc_id);
+    H5TRACE1("Is", "i", loc_id);
 
     /* check arguments */
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))

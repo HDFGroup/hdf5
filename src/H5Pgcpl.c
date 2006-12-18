@@ -145,7 +145,7 @@ H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_local_heap_size_hint, FAIL)
-    H5TRACE2("e","iz",plist_id,size_hint);
+    H5TRACE2("e", "iz", plist_id, size_hint);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
@@ -185,7 +185,7 @@ H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_local_heap_size_hint, FAIL)
-    H5TRACE2("e","ix",plist_id,size_hint);
+    H5TRACE2("e", "ix", plist_id, size_hint);
 
     if(size_hint) {
         H5P_genplist_t *plist;      /* Property list pointer */
@@ -233,7 +233,7 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_link_phase_change, FAIL)
-    H5TRACE3("e","iIuIu",plist_id,max_compact,min_dense);
+    H5TRACE3("e", "iIuIu", plist_id, max_compact, min_dense);
 
     /* Range check values */
     if(max_compact < min_dense)
@@ -282,7 +282,7 @@ H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_link_phase_change, FAIL)
-    H5TRACE3("e","ixx",plist_id,max_compact,min_dense);
+    H5TRACE3("e", "ixx", plist_id, max_compact, min_dense);
 
     /* Get values */
     if(max_compact || min_dense) {
@@ -335,7 +335,7 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_est_link_info, FAIL)
-    H5TRACE3("e","iIuIu",plist_id,est_num_entries,est_name_len);
+    H5TRACE3("e", "iIuIu", plist_id, est_num_entries, est_name_len);
 
     /* Range check values */
     if(est_num_entries > 65535)
@@ -382,7 +382,7 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_est_link_info, FAIL)
-    H5TRACE3("e","ixx",plist_id,est_num_entries,est_name_len);
+    H5TRACE3("e", "ixx", plist_id, est_num_entries, est_name_len);
 
     /* Get values */
     if(est_num_entries || est_name_len) {
@@ -428,6 +428,7 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_link_creation_order, FAIL)
+    H5TRACE2("e", "iIu", plist_id, crt_order_flags);
 
         /* Check for bad combination of flags */
     if(!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
@@ -482,6 +483,7 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_link_creation_order, FAIL)
+    H5TRACE2("e", "ix", plist_id, crt_order_flags);
 
     /* Get values */
     if(crt_order_flags) {

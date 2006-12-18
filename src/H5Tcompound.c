@@ -85,7 +85,7 @@ H5Tget_member_offset(hid_t type_id, unsigned membno)
     size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_offset, 0)
-    H5TRACE2("z","iIu",type_id,membno);
+    H5TRACE2("z", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -162,7 +162,7 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     H5T_class_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_class, H5T_NO_CLASS)
-    H5TRACE2("Tt","iIu",type_id,membno);
+    H5TRACE2("Tt", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -210,7 +210,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_type, FAIL)
-    H5TRACE2("i","iIu",type_id,membno);
+    H5TRACE2("i", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -336,7 +336,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tinsert, FAIL)
-    H5TRACE4("e","iszi",parent_id,name,offset,member_id);
+    H5TRACE4("e", "iszi", parent_id, name, offset, member_id);
 
     /* Check args */
     if (parent_id==member_id)
@@ -381,7 +381,7 @@ H5Tpack(hid_t type_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tpack, FAIL)
-    H5TRACE1("e","i",type_id);
+    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_detect_class(dt,H5T_COMPOUND)<=0)

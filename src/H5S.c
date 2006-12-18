@@ -366,7 +366,7 @@ H5Screate(H5S_class_t type)
     hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Screate, FAIL);
-    H5TRACE1("i","Sc",type);
+    H5TRACE1("i", "Sc", type);
 
     /* Check args */
     if(type<=H5S_NO_CLASS || type> H5S_NULL)  /* don't allow complex dataspace yet */
@@ -482,7 +482,7 @@ H5Sclose(hid_t space_id)
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Sclose, FAIL);
-    H5TRACE1("e","i",space_id);
+    H5TRACE1("e", "i", space_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(space_id,H5I_DATASPACE))
@@ -521,7 +521,7 @@ H5Scopy(hid_t space_id)
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Scopy, FAIL);
-    H5TRACE1("i","i",space_id);
+    H5TRACE1("i", "i", space_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -567,7 +567,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     hid_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Sextent_copy, FAIL);
-    H5TRACE2("e","ii",dst_id,src_id);
+    H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(src_id, H5I_DATASPACE)))
@@ -760,7 +760,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     hssize_t		    ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_npoints, FAIL);
-    H5TRACE1("Hs","i",space_id);
+    H5TRACE1("Hs", "i", space_id);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -864,7 +864,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_ndims, FAIL);
-    H5TRACE1("Is","i",space_id);
+    H5TRACE1("Is", "i", space_id);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -955,7 +955,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_dims, FAIL);
-    H5TRACE3("Is","ixx",space_id,dims,maxdims);
+    H5TRACE3("Is", "ixx", space_id, dims, maxdims);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1219,7 +1219,7 @@ H5Sis_simple(hid_t space_id)
     htri_t		    ret_value;
 
     FUNC_ENTER_API(H5Sis_simple, FAIL);
-    H5TRACE1("t","i",space_id);
+    H5TRACE1("t", "i", space_id);
 
     /* Check args and all the boring stuff. */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
@@ -1270,7 +1270,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Sset_extent_simple, FAIL);
-    H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
+    H5TRACE4("e", "iIs*[a1]h*[a1]h", space_id, rank, dims, max);
 
     /* Check args */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
@@ -1577,7 +1577,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     int		i;
 
     FUNC_ENTER_API(H5Screate_simple, FAIL);
-    H5TRACE3("i","Is*[a0]h*[a0]h",rank,dims,maxdims);
+    H5TRACE3("i", "Is*[a0]h*[a0]h", rank, dims, maxdims);
 
     /* Check arguments */
     if (rank<0)
@@ -1684,7 +1684,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     herr_t      ret_value=SUCCEED;
 
     FUNC_ENTER_API (H5Sencode, FAIL);
-    H5TRACE3("e","ix*z",obj_id,buf,nalloc);
+    H5TRACE3("e", "ix*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
     if (NULL==(dspace=H5I_object_verify(obj_id, H5I_DATASPACE)))
@@ -1797,7 +1797,7 @@ H5Sdecode(const void *buf)
     hid_t       ret_value;
 
     FUNC_ENTER_API (H5Sdecode, FAIL)
-    H5TRACE1("i","x",buf);
+    H5TRACE1("i", "x", buf);
 
     if(buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
@@ -1982,7 +1982,7 @@ H5Sget_simple_extent_type(hid_t sid)
     H5S_t	*space;
 
     FUNC_ENTER_API(H5Sget_simple_extent_type, H5S_NO_CLASS);
-    H5TRACE1("Sc","i",sid);
+    H5TRACE1("Sc", "i", sid);
 
     /* Check arguments */
     if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
@@ -2016,7 +2016,7 @@ H5Sset_extent_none(hid_t space_id)
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Sset_extent_none, FAIL);
-    H5TRACE1("e","i",space_id);
+    H5TRACE1("e", "i", space_id);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2056,7 +2056,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Soffset_simple, FAIL);
-    H5TRACE2("e","i*Hs",space_id,offset);
+    H5TRACE2("e", "i*Hs", space_id, offset);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2218,7 +2218,7 @@ H5Sextent_equal(hid_t space1_id, hid_t space2_id)
     htri_t	ret_value;
 
     FUNC_ENTER_API(H5Sextent_equal, FAIL)
-    H5TRACE2("t","ii",space1_id,space2_id);
+    H5TRACE2("t", "ii", space1_id, space2_id);
 
     /* check args */
     if(NULL == (ds1 = H5I_object_verify(space1_id, H5I_DATASPACE)) ||

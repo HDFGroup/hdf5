@@ -430,8 +430,8 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5set_free_list_limits, FAIL)
-    H5TRACE6("e","IsIsIsIsIsIs",reg_global_lim,reg_list_lim,arr_global_lim,
-             arr_list_lim,blk_global_lim,blk_list_lim);
+    H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim,
+             arr_list_lim, blk_global_lim, blk_list_lim);
 
     /* Call the free list function to actually set the limits */
     if(H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim)<0)
@@ -560,7 +560,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5get_libversion, FAIL)
-    H5TRACE3("e","*Iu*Iu*Iu",majnum,minnum,relnum);
+    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum) *majnum = H5_VERS_MAJOR;
@@ -612,7 +612,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOFS(H5check_version)
-    H5TRACE3("e","IuIuIu",majnum,minnum,relnum);
+    H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
 
     /* Don't check again, if we already have */
     if (checked)

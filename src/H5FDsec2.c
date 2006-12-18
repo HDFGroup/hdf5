@@ -298,7 +298,7 @@ H5Pset_fapl_sec2(hid_t fapl_id)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_sec2, FAIL)
-    H5TRACE1("e","i",fapl_id);
+    H5TRACE1("e", "i", fapl_id);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")

@@ -165,7 +165,7 @@ H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_attr_phase_change, FAIL)
-    H5TRACE3("e","iIuIu",plist_id,max_compact,min_dense);
+    H5TRACE3("e", "iIuIu", plist_id, max_compact, min_dense);
 
     /* Range check values */
     if(max_compact < min_dense)
@@ -209,7 +209,7 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_de
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pget_attr_phase_change, FAIL)
-    H5TRACE3("e","i*Iu*Iu",plist_id,max_compact,min_dense);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
