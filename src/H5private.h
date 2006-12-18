@@ -855,7 +855,9 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvfprintf(F,FMT,A)	vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
-#ifdef H5_HAVE_VSNPRINTF
+#ifdef WIN32
+#define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
+#else
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
 #endif
 #define HDwait(W)		wait(W)
