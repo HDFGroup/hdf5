@@ -464,7 +464,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
             attr_ptr = attr_buf;
 
         /* Create serialized form of attribute or shared message */
-        if(H5O_msg_encode(f, H5O_ATTR_ID, attr_ptr, attr) < 0)
+        if(H5O_msg_encode(f, H5O_ATTR_ID, (unsigned char *)attr_ptr, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
         /* Insert the serialized attribute into the fractal heap */
@@ -499,14 +499,14 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(attr_ptr && attr_ptr != attr_buf)
-        H5FL_BLK_FREE(ser_attr, attr_ptr);
+        (void)H5FL_BLK_FREE(ser_attr, attr_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_insert() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_dense_write_cb
+ * Function:	H5A_dense_write_bt2_cb
  *
  * Purpose:	v2 B-tree 'find' callback to update the data for an attribute
  *
@@ -519,7 +519,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_write_cb(const void *_record, void *_op_data)
+H5A_dense_write_bt2_cb(const void *_record, void *_op_data)
 {
     const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record; /* Record from B-tree */
     H5A_bt2_od_wrt_t *op_data = (H5A_bt2_od_wrt_t *)_op_data;       /* "op data" from v2 B-tree modify */
@@ -527,7 +527,7 @@ H5A_dense_write_cb(const void *_record, void *_op_data)
     hbool_t id_changed = FALSE;         /* Whether the heap ID changed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_write_cb)
+    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_write_bt2_cb)
 
     /*
      * Check arguments.
@@ -559,7 +559,7 @@ H5A_dense_write_cb(const void *_record, void *_op_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_write_cb() */
+} /* end H5A_dense_write_bt2_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -627,7 +627,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
         attr_ptr = attr_buf;
 
     /* Create serialized form of attribute */
-    if(H5O_msg_encode(f, H5O_ATTR_ID, attr_ptr, attr) < 0)
+    if(H5O_msg_encode(f, H5O_ATTR_ID, (unsigned char *)attr_ptr, attr) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
     /* Open the fractal heap */
@@ -654,7 +654,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
     op_data.attr_size = attr_size;
 
     /* Modify attribute through 'name' tracking v2 B-tree */
-    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, H5A_dense_write_cb, &op_data) < 0)
+    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, H5A_dense_write_bt2_cb, &op_data) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
 
 done:
@@ -664,7 +664,7 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(attr_ptr && attr_ptr != attr_buf)
-        H5FL_BLK_FREE(ser_attr, attr_ptr);
+        (void)H5FL_BLK_FREE(ser_attr, attr_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_write() */
@@ -699,7 +699,7 @@ H5A_dense_copy_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
      *  HDF5 routine, it could attempt to re-protect that direct block for the
      *  heap, causing the HDF5 routine called to fail)
      */
-    if(NULL == (udata->attr = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, obj)))
+    if(NULL == (udata->attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
 done:
@@ -926,7 +926,7 @@ H5A_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_remove_fh_cb)
 
     /* Decode attribute */
-    if(NULL == (attr = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, obj)))
+    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Perform the deletion action on the attribute */

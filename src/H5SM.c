@@ -61,9 +61,7 @@ static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *head
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id,
         H5SM_index_header_t *header, unsigned type_id, const H5O_shared_t * mesg,
         unsigned *cache_flags);
-static hsize_t H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
-static ssize_t H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id);
 
 
 /*********************/
@@ -169,7 +167,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     HDassert(table->num_indexes > 0 && table->num_indexes <= H5SM_MAX_NUM_INDEXES);
 
     /* Allocate the SOHM indexes as an array. */
-    if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, table->num_indexes)))
+    if(NULL == (table->indexes = (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for SOHM indexes")
 
     /* Initialize all of the indexes, but don't allocate space for them to
@@ -278,7 +276,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static ssize_t
+ssize_t
 H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
 {
     ssize_t x;
@@ -339,7 +337,7 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 
     /* Look up the master SOHM table */
     if(H5F_addr_defined(f->shared->sohm_addr)) {
-        if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
     } /* end if */
     else
@@ -385,7 +383,7 @@ H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(H5SM_get_fheap_addr, FAIL)
 
     /* Look up the master SOHM table */
-    if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, HADDR_UNDEF, "unable to load SOHM master table")
 
     /* JAMES! */
@@ -447,8 +445,8 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     {
         header->index_type = H5SM_BTREE;
 
-        if(H5B2_create(f, dxpl_id, H5SM_INDEX, H5SM_B2_NODE_SIZE,
-                  H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
+        if(H5B2_create(f, dxpl_id, H5SM_INDEX, (size_t)H5SM_B2_NODE_SIZE,
+                  (size_t)H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
                   H5SM_B2_MERGE_PERCENT, &tree_addr) <0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
@@ -508,10 +506,10 @@ done:
 static haddr_t
 H5SM_create_list(H5F_t *f, H5SM_index_header_t * header, hid_t dxpl_id)
 {
-    H5SM_list_t *list = NULL; /* List of messages */
-    hsize_t x;    /* Counter variable */
-    hsize_t size;             /* Size of list on disk */
-    size_t num_entries;      /* Number of messages to create in list */
+    H5SM_list_t *list = NULL;   /* List of messages */
+    hsize_t x;                  /* Counter variable */
+    hsize_t size = 0;           /* Size of list on disk */
+    size_t num_entries;         /* Number of messages to create in list */
     haddr_t addr = HADDR_UNDEF; /* Address of the list on disk */
     haddr_t ret_value;
 
@@ -525,7 +523,7 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t * header, hid_t dxpl_id)
     /* Allocate list in memory */
     if((list = H5FL_MALLOC(H5SM_list_t)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list")
-    if((list->messages = H5FL_ARR_MALLOC(H5SM_sohm_t, num_entries)) == NULL)
+    if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, num_entries)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for SOHM list")
 
     /* Initialize messages in list */
@@ -629,7 +627,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     }
 
     /* Look up the master SOHM table */
-    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
+    if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the right index for this message type.  If there is no such index
@@ -642,7 +640,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     } /* end if */
 
     /* If the message isn't big enough, don't bother sharing it */
-    if(0 == (mesg_size = H5O_msg_mesg_size(f, type_id, mesg, 0)))
+    if(0 == (mesg_size = H5O_msg_mesg_size(f, type_id, mesg, (size_t)0)))
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
     if(mesg_size < table->indexes[index_num].min_mesg_size)
         HGOTO_DONE(FALSE);
@@ -721,7 +719,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(NULL == (encoding_buf = H5MM_calloc(buf_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding")
 
-    if(H5O_msg_encode(f, type_id, encoding_buf, mesg) < 0)
+    if(H5O_msg_encode(f, type_id, (unsigned char *)encoding_buf, mesg) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "can't encode message to be shared")
 
     /* Open the fractal heap for this index */
@@ -742,13 +740,13 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(header->index_type == H5SM_LIST)
     {
         /* The index is a list; get it from the cache */
-        if (NULL == (list = H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+        if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* JAMES: not very effecient (gets hash value twice, searches list twice).  Refactor. */
         /* See if the message is already in the index and get its location */
         /* JAMES: should return a pointer to the message */
-        list_pos = H5SM_find_in_list(f, list, &key);
+        list_pos = H5SM_find_in_list(list, &key);
         if(list_pos != UFAIL)
         {
             /* The message was in the index.  Increment its reference count. */
@@ -794,8 +792,8 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
             hsize_t     list_size;        /* Size of list on disk */
             haddr_t     tree_addr;
 
-            if(H5B2_create(f, dxpl_id, H5SM_INDEX, H5SM_B2_NODE_SIZE,
-                  H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
+            if(H5B2_create(f, dxpl_id, H5SM_INDEX, (size_t)H5SM_B2_NODE_SIZE,
+                  (size_t)H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
                   H5SM_B2_MERGE_PERCENT, &tree_addr) <0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
@@ -912,7 +910,7 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     HDassert(f->shared->sohm_addr != HADDR_UNDEF);
 
     /* Look up the master SOHM table */
-    if(NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the correct index and try to delete from it */
@@ -945,15 +943,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hsize_t
-H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key)
+size_t
+H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key)
 {
-    hsize_t              x;
-    hsize_t              ret_value = UFAIL;
+    size_t               x;
+    size_t               ret_value = UFAIL;
 
     FUNC_ENTER_NOAPI_NOFUNC(H5SM_find_in_list)
 
-    HDassert(f);
     HDassert(list);
     HDassert(key);
 
@@ -968,6 +965,34 @@ H5SM_find_in_list(H5F_t *f, H5SM_list_t *list, const H5SM_mesg_key_t *key)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_find_in_list */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_get_hash_fh_cb
+ *
+ * Purpose:	Callback for fractal heap operator, to make copy of link when
+ *              when lookup up a link by index
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
+{
+    H5SM_fh_ud_gh_t *udata = (H5SM_fh_ud_gh_t *)_udata;       /* User data for fractal heap 'op' callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_get_hash_fh_cb)
+
+    /* Compute hash value on raw message */
+    udata->hash = H5_checksum_lookup3(obj, obj_len, udata->type_id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_get_hash_fh_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -991,10 +1016,9 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;
     H5SM_sohm_t     message;
-    unsigned char   *buf = NULL;
-    size_t          buf_size;
-    hsize_t         list_pos;     /* Position of the message in the list */
-    H5HF_t         *fheap=NULL;   /* Fractal heap that contains the message */
+    size_t          list_pos = UFAIL;   /* Position of the message in the list */
+    H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
+    H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_delete_from_index, FAIL)
@@ -1005,39 +1029,33 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
     
     /* Open the heap that this message is in */
-    if(NULL == (fheap=H5HF_open(f, dxpl_id, header->heap_addr)))
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
-        /* JAMES: use heap op command */
-    /* Get the message size */
-    if(H5HF_get_obj_len(fheap, dxpl_id, &(mesg->u.heap_id), &buf_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
+    /* Prepare user data for fractal heap 'op' callback */
+    udata.type_id = type_id;
 
-    /* Allocate a buffer to hold the message */
-    if(NULL == (buf = H5MM_malloc(buf_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "couldn't allocate memory")
-
-    /* Read the message to get its hash value */
-    if(H5HF_read(fheap, dxpl_id, &(mesg->u.heap_id), buf) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read message from fractal heap.")
+    /* Compute the hash value for the B-tree lookup */
+    if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
 
 
     /* Set up key for message to be deleted. */
-    key.hash = H5_checksum_lookup3(buf, buf_size, type_id);
+    key.hash = udata.hash;
     key.encoding = NULL;
     key.encoding_size = 0;
-    key.fheap = fheap;      /* JAMES: unused */
+    key.fheap = fheap;
     key.mesg_heap_id = mesg->u.heap_id;
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST)
     {
         /* If the index is stored as a list, get it from the cache */
-        if (NULL == (list = H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+        if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(f, list, &key)) == UFAIL)
+        if((list_pos = H5SM_find_in_list(list, &key)) == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         --(list->messages[list_pos].ref_count);
@@ -1104,7 +1122,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, FAIL, "unable to create shared message list")
 
             HDassert(NULL == list);
-            if(NULL == (list = H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+            if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	        HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
             /* Delete the B-tree and have messages copy themselves to the
@@ -1116,10 +1134,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     } /* end if */
 
 done:
-    /* Free the message buffer */
-    if(buf)
-        H5MM_xfree(buf);
-
     /* Release the SOHM list */
     if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
@@ -1164,7 +1178,7 @@ H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
 
 
     /* Read the rest of the SOHM table information from the cache */
-    if (NULL == (table = H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Return info */
@@ -1210,7 +1224,7 @@ H5SM_reconstitute(H5O_shared_t *sh_mesg, const uint8_t *heap_id)
 
     /* Set flag for shared message */
     sh_mesg->flags = H5O_SHARED_IN_HEAP_FLAG;
-    HDmemcpy(&sh_mesg->u.heap_id, heap_id, H5SM_FHEAP_ID_LEN);
+    HDmemcpy(&sh_mesg->u.heap_id, heap_id, (size_t)H5SM_FHEAP_ID_LEN);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_reconstitute() */

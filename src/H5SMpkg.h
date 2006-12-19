@@ -63,6 +63,10 @@
 #define H5SM_MAX_INDEXES 8
 #define H5SM_MAX_LIST_ELEMS 1000
 
+#define H5SM_B2_NODE_SIZE 512
+#define H5SM_B2_SPLIT_PERCENT 100
+#define H5SM_B2_MERGE_PERCENT 40
+
 /****************************/
 /* Package Typedefs         */
 /****************************/
@@ -95,10 +99,13 @@
  * disk.
  */
 
-/* Declare free lists to manage H5SM structs */
-H5FL_ARR_EXTERN(H5SM_index_header_t);
-H5FL_EXTERN(H5SM_list_t);
-H5FL_ARR_EXTERN(H5SM_sohm_t);
+/* Typedef for a SOHM index node */
+typedef struct {
+  /* JAMES: I think I need message type here, and stored in file. */
+  uint32_t hash;                /* Hash value for OHM */
+  H5SM_fheap_id_t fheap_id;     /* ID of the OHM in the fractal heap */
+  hsize_t ref_count;            /* JAMES TODO: should this be hsize_t? */
+} H5SM_sohm_t;
 
 typedef enum {
   H5SM_BADTYPE = -1,
@@ -147,22 +154,39 @@ typedef struct {
     H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
 } H5SM_master_table_t;
 
+/*
+ * Data exchange structure to pass through the fractal heap layer for the
+ * H5HF_op function when computing a hash value for a message.
+ */
+typedef struct {
+    /* downward (internal) */
+    unsigned    type_id;                /* Message type */
 
-#define H5SM_B2_NODE_SIZE 512
-#define H5SM_B2_SPLIT_PERCENT 100
-#define H5SM_B2_MERGE_PERCENT 40
+    /* upward */
+    uint32_t    hash;                   /* Hash value */
+} H5SM_fh_ud_gh_t;
+
 
 /****************************/
 /* Package Variables        */
 /****************************/
+/* Declare free lists to manage H5SM structs */
+H5FL_ARR_EXTERN(H5SM_index_header_t);
+H5FL_EXTERN(H5SM_list_t);
+H5FL_ARR_EXTERN(H5SM_sohm_t);
+
 H5_DLLVAR const H5AC_class_t H5AC_SOHM_TABLE[1];
 H5_DLLVAR const H5AC_class_t H5AC_SOHM_LIST[1];
-
 H5_DLLVAR const H5B2_class_t H5SM_INDEX[1];
 
 /****************************/
 /* Package Prototypes       */
 /****************************/
+
+/* General routines */
+H5_DLL ssize_t H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id);
+H5_DLL size_t H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key);
+
 /* Encode and decode routines, used for B-tree and cache encoding/decoding */
 H5_DLL herr_t H5SM_message_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -183,4 +207,14 @@ H5_DLL herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 /* H5B2_remove_t callback to add messages to a list index */
 H5_DLL herr_t H5SM_convert_to_list_op(const void * record, void *op_data);
 
-#endif /*_H5SMpkg_H*/
+/* Fractal heap 'op' callback to compute hash value for message "in place" */
+H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata);
+
+/* Testing functions */
+#ifdef H5SM_TESTING
+H5_DLL herr_t H5SM_get_refcount_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
+    const H5O_shared_t *sh_mesg, hsize_t *ref_count);
+#endif /* H5SM_TESTING */
+
+#endif /* _H5SMpkg_H */
+

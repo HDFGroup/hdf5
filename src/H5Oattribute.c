@@ -162,7 +162,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     H5A_t shared_attr;                  /* Copy of shared attribute */
-    H5A_t *attr;                        /* Pointer to attribute to insert */
+    H5A_t *attr = NULL;                 /* Pointer to attribute to insert */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_to_dense_cb)
@@ -174,14 +174,14 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     /* Check for shared attribute */
     if(mesg->flags & H5O_MSG_FLAG_SHARED) {
         /* Read the shared attribute in */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Point attribute to insert at shared attribute read in */
         attr = &shared_attr;
     } /* end if */
     else
-        attr = mesg->native;
+        attr = (H5A_t *)mesg->native;
 
     /* Insert attribute into dense storage */
     if(H5A_dense_insert(udata->f, udata->dxpl_id, oh, mesg->flags, attr) < 0)
@@ -242,7 +242,7 @@ HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name)
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
 #ifdef QAK
@@ -300,7 +300,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_create */
+} /* end H5O_attr_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -318,7 +318,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_open_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
@@ -340,7 +340,7 @@ H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Check for correct attribute message to modify */
@@ -399,7 +399,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
 
 #ifdef QAK
@@ -533,7 +533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
@@ -555,7 +555,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Check for correct attribute message to modify */
@@ -569,12 +569,12 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             else if(shared_mesg < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't share attribute")
 
-            /* Remove the old attribut from the SOHM index */
-            if(H5SM_try_delete(udata->f, udata->dxpl_id, H5O_ATTR_ID, mesg->native) < 0)
+            /* Remove the old attribute from the SOHM index */
+            if(H5SM_try_delete(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const H5O_shared_t *)mesg->native) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, H5_ITER_ERROR, "unable to delete shared attribute in shared storage")
 
             /* Extract shared message info from current attribute */
-            if(NULL == H5O_attr_get_share(udata->attr, mesg->native))
+            if(NULL == H5O_attr_get_share(udata->attr, (H5O_shared_t *)mesg->native))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't get shared info")
 
             /* Indicate that we found the correct attribute */
@@ -643,7 +643,7 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     HDassert(attr);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */
@@ -699,7 +699,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_rename_chk_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
@@ -721,7 +721,7 @@ H5O_attr_rename_chk_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Check for existing attribute with new name */
@@ -767,7 +767,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_rename_mod_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
@@ -789,7 +789,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Check for correct attribute message to modify */
@@ -855,7 +855,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name, const
     HDassert(new_name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */
@@ -931,7 +931,7 @@ H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */
@@ -1023,11 +1023,12 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
 HDfprintf(stderr, "%s: removing a shared attribute not supported yet!\n", FUNC);
 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "deleting a shared attribute not supported yet")
+#ifdef NOT_YET
         /* Check for correct attribute message to modify */
         if(HDstrcmp(shared_attr.name, udata->name) == 0)
             /* Indicate that this message is the attribute to be deleted */
@@ -1035,6 +1036,7 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "deleting a shared attribute not su
 
         /* Release copy of shared attribute */
         H5O_attr_reset(&shared_attr);
+#endif /* NOT_YET */
     } /* end if */
     else {
         /* Check for correct attribute message to modify */
@@ -1094,7 +1096,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */
@@ -1209,7 +1211,7 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
     HDassert(loc);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */
@@ -1247,7 +1249,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_exists_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
@@ -1256,7 +1258,6 @@ H5O_attr_exists_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_exists_cb)
 
     /* check args */
-    HDassert(oh);
     HDassert(mesg);
     HDassert(!udata->found);
 
@@ -1269,7 +1270,7 @@ H5O_attr_exists_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &shared_attr))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
         /* Check for correct attribute message */
@@ -1324,7 +1325,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attributes stored densely */

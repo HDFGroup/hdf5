@@ -17,27 +17,24 @@
 /****************/
 
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg 	  */
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Fpkg.h"		/* File access                          */
 #include "H5SMpkg.h"            /* Shared object header messages        */
 
-#include "H5B2private.h"	/* v2 B-trees				*/
+
 /****************/
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
+
 
 /********************/
 /* Local Prototypes */
@@ -91,8 +88,9 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 {
     const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *) rec1;
     const H5SM_sohm_t *mesg = (const H5SM_sohm_t *) rec2;
-    int64_t hash_diff; /* Has to be able to hold two 32-bit values */
-    herr_t ret_value=0;
+    int64_t hash_diff;  /* Has to be able to hold two 32-bit values */
+    herr_t ret_value = 0;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
     hash_diff = key->hash;
@@ -116,7 +114,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             /* We need to see if this message is in fact the message stored
              * in the heap.  Read it from the heap and compare the two.
              */
-            HDmemset(buf2, 0, H5O_MESG_MAX_SIZE);
+            HDmemset(buf2, 0, (size_t)H5O_MESG_MAX_SIZE);
 
             ret = H5HF_read(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), &buf2);
             HDassert(ret >= 0);
@@ -135,7 +133,6 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_message_compare */
-
 
 
 /*-------------------------------------------------------------------------
@@ -162,7 +159,6 @@ H5SM_message_store(void *native, const void *udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_message_store */
-
 
 
 /*-------------------------------------------------------------------------
@@ -191,7 +187,6 @@ H5SM_message_retrieve(void *udata, const void *native)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_message_retrieve */
-
 
 
 /*-------------------------------------------------------------------------
@@ -252,7 +247,6 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_message_decode */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5SM_message_debug
@@ -303,6 +297,7 @@ herr_t
 H5SM_incr_ref(void *record, void *op_data, hbool_t *changed)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *) record;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_incr_ref)
 
     HDassert(record);
@@ -317,7 +312,6 @@ H5SM_incr_ref(void *record, void *op_data, hbool_t *changed)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -343,6 +337,7 @@ herr_t
 H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *) record;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_decr_ref)
 
     HDassert(record);
@@ -359,7 +354,6 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5SM_convert_to_list_op
  *
@@ -382,6 +376,7 @@ H5SM_convert_to_list_op(const void * record, void *op_data)
     const H5SM_sohm_t *message = (const H5SM_sohm_t *) record;
     const H5SM_list_t *list = (const H5SM_list_t *) op_data;
     hsize_t      x;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_convert_to_list_op)
 
     HDassert(record);
@@ -402,3 +397,4 @@ H5SM_convert_to_list_op(const void * record, void *op_data)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
+

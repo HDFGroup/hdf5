@@ -414,6 +414,7 @@
 ./src/H5Adense.c
 ./src/H5Adeprec.c
 ./src/H5Aint.c
+./src/H5Atest.c
 ./src/H5Apkg.h
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
@@ -643,6 +644,7 @@
 ./src/H5SMcache.c
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
+./src/H5SMtest.c
 ./src/H5ST.c
 ./src/H5STprivate.h
 ./src/H5T.c

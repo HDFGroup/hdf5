@@ -41,7 +41,7 @@ DISTCLEANFILES=H5pubconf.h
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
-        H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c \
+        H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
         H5AC.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c H5CS.c H5D.c H5Dcompact.c H5Dcontig.c \
@@ -71,7 +71,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
         H5Sselect.c H5Stest.c H5SL.c H5SM.c H5SMbtree2.c \
-        H5SMcache.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
+        H5SMcache.c H5SMtest.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c \

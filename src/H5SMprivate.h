@@ -31,14 +31,6 @@
 
 #define H5SM_MAX_NUM_INDEXES 6
 
-/* Typedef for a SOHM index node */
-typedef struct {
-  /* JAMES: I think I need message type here, and stored in file. */
-  uint32_t hash;                /* Hash value for OHM */
-  H5SM_fheap_id_t fheap_id;     /* ID of the OHM in the fractal heap */
-  hsize_t ref_count;            /* JAMES TODO: should this be hsize_t? */
-} H5SM_sohm_t;
-
 /******************************/
 /* Library Private Prototypes */
 /******************************/

@@ -40,7 +40,6 @@ static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_typ
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
 static herr_t H5O_attr_set_share(void *_mesg, const H5O_shared_t *sh);
-static htri_t H5O_attr_is_shared(const void *_mesg);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -1145,7 +1144,7 @@ H5O_attr_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
+htri_t
 H5O_attr_is_shared(const void *_mesg)
 {
     const H5A_t  *mesg = (const H5A_t *)_mesg;

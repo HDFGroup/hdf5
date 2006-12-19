@@ -246,7 +246,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     HDassert((size_t)(p - buf) == H5SM_TABLE_SIZE(f) - H5SM_SIZEOF_CHECKSUM);
 
     /* Allocate space for the index headers in memory*/
-    if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, table->num_indexes)))
+    if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
 
     /* Read in the index headers */
@@ -337,13 +337,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_dest_table(H5F_t *f, H5SM_master_table_t* table)
+H5SM_dest_table(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5SM_dest_table)
 
-    assert(table);
-
-    assert(table->indexes);
+    HDassert(table);
+    HDassert(table->indexes);
 
     H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
 
@@ -623,7 +622,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_dest_list(H5F_t *f, H5SM_list_t* list)
+H5SM_dest_list(H5F_t UNUSED *f, H5SM_list_t* list)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5SM_dest_list)
 
@@ -653,7 +652,7 @@ H5SM_dest_list(H5F_t *f, H5SM_list_t* list)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_size(const H5F_t *f, const H5SM_list_t *list, size_t *size_ptr)
+H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_size)
 
