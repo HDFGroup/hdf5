@@ -90,7 +90,7 @@ typedef struct {
     /* downward (from application) */
     hid_t       gid;                    /* Group ID for application callback */
     hsize_t     skip;                   /* Number of links to skip           */
-    hsize_t     *last_lnk;              /* Pointer to the last link operated on */
+    hsize_t     count;                  /* Count of records operated on      */
     const H5G_link_iterate_t *lnk_op;   /* Callback for each link            */
     void        *op_data;               /* Callback data for each link       */
 
@@ -722,7 +722,7 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_lookup_by_idx() */
@@ -940,8 +940,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
     /* Increment the number of entries passed through */
     /* (whether we skipped them or not) */
-    if(bt2_udata->last_lnk)
-        (*bt2_udata->last_lnk)++;
+    bt2_udata->count++;
 
     /* Check for callback failure and pass along return value */
     if(ret_value < 0)
@@ -983,10 +982,6 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(linfo);
     HDassert(lnk_op && lnk_op->u.lib_op);
 
-    /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
-
     /* Check for skipping too many links */
     if(skip > 0) {
         hsize_t nrec;           /* # of records in v2 B-tree */
@@ -1006,13 +1001,17 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     if(order == H5_ITER_NATIVE) {
         H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
 
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
         /* Construct the user data for v2 B-tree iterator callback */
         udata.f = f;
         udata.dxpl_id = dxpl_id;
         udata.fheap = fheap;
         udata.gid = gid;
         udata.skip = skip;
-        udata.last_lnk = last_lnk;
+        udata.count = 0;
         udata.lnk_op = lnk_op;
         udata.op_data = op_data;
 
@@ -1021,6 +1020,10 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         if((ret_value = H5B2_iterate(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
                 H5G_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_SYM, H5E_BADITER, "link iteration failed");
+
+        /* Update last link looked at */
+        if(last_lnk)
+            *last_lnk = udata.count;
     } /* end if */
     else {
         /* Build the table of links for this group */
@@ -1037,7 +1040,7 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_iterate() */
@@ -1236,7 +1239,7 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_get_name_by_idx() */
@@ -1726,7 +1729,7 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_remove_by_idx() */

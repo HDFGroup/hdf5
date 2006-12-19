@@ -361,11 +361,11 @@ aiter_cb(hid_t UNUSED group, const char *name, void *op_data)
 
         case RET_CHANGE:
             count++;
-            return(count > 10 ? 1: 0);
+            return(count > 10 ? 1 : 0);
 
         case RET_CHANGE2:
             count2++;
-            return(count2 > 10 ? 1: 0);
+            return(count2 > 10 ? 1 : 0);
 
         default:
             printf("invalid iteration command");

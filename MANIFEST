@@ -413,6 +413,7 @@
 ./src/H5Abtree2.c
 ./src/H5Adense.c
 ./src/H5Adeprec.c
+./src/H5Aint.c
 ./src/H5Apkg.h
 ./src/H5Aprivate.h
 ./src/H5Apublic.h

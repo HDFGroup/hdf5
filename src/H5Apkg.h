@@ -119,15 +119,13 @@ typedef struct H5A_bt2_ud_ins_t {
 typedef struct {
     size_t      nattrs;         /* # of attributes in table */
     H5A_t       *attrs;         /* Pointer to array of attributes */
-    uint8_t     *flags;         /* Pointer to array of message flags for attributes */
 } H5A_attr_table_t;
 
 /* Attribute iteration operator for internal library callbacks */
-typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, unsigned mesg_flags,
-    void *op_data);
+typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, void *op_data);
 
 /* Describe kind of callback to make for each attribute */
-typedef struct {
+struct H5A_attr_iter_op_t {
     enum {
         H5A_ATTR_OP_APP,                /* Application callback */
         H5A_ATTR_OP_LIB                 /* Library internal callback */
@@ -136,7 +134,7 @@ typedef struct {
         H5A_operator_t app_op;           /* Application callback for each attribute */
         H5A_lib_iterate_t lib_op;       /* Library internal callback for each attribute */
     } u;
-} H5A_attr_iterate_t;
+};
 
 
 /*****************************/
@@ -169,16 +167,24 @@ H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
 H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const H5A_t *attr);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
-    haddr_t attr_fheap_addr, haddr_t name_bt2_addr, unsigned skip,
-    unsigned *last_attr, const H5A_attr_iterate_t *attr_op, void *op_data);
+    haddr_t attr_fheap_addr, haddr_t name_bt2_addr, H5_iter_order_t order,
+    unsigned skip, unsigned *last_attr, const H5A_attr_iter_op_t *attr_op,
+    void *op_data);
 H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 
 /* Attribute table operations */
-H5_DLL herr_t H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
-    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable);
+H5_DLL herr_t H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable,
+    unsigned *oh_flags);
+H5_DLL herr_t H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, hsize_t nattrs,
+    haddr_t attr_fheap_addr, haddr_t name_bt2_addr, H5_index_t idx_type,
+    H5_iter_order_t order, H5A_attr_table_t *atable);
+H5_DLL herr_t H5A_attr_iterate_table(const H5A_attr_table_t *atable,
+    unsigned skip, unsigned *last_attr, hid_t loc_id,
+    const H5A_attr_iter_op_t *attr_op, void *op_data);
 H5_DLL herr_t H5A_attr_release_table(H5A_attr_table_t *atable);
 
 /* Attribute object header routines */

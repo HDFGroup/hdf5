@@ -1683,6 +1683,65 @@ test_attr_dtype_shared(hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_dense_verify(): Test basic H5A (attribute) code.
+**      Verify attributes on object
+**
+****************************************************************/
+static void
+test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
+{
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    hid_t	attr;	        /* Attribute ID	*/
+    unsigned    value;          /* Attribute value */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Re-open all the attributes by name and verify the data */
+    for(u = 0; u < max_attr; u++) {
+        /* Open attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Aopen_name(loc_id, attrname);
+        CHECK(attr, FAIL, "H5Aopen");
+
+        /* Read data from the attribute */
+        ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
+        CHECK(ret, FAIL, "H5Aread");
+        VERIFY(value, u, "H5Aread");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Re-open all the attributes by index and verify the data */
+    for(u = 0; u < max_attr; u++) {
+        size_t name_len;                /* Length of attribute name */
+        char check_name[ATTR_NAME_LEN]; /* Buffer for checking attribute names */
+
+        /* Open attribute */
+        attr = H5Aopen_idx(loc_id, u);
+        CHECK(attr, FAIL, "H5Aopen_idx");
+
+        /* Verify Name */
+        sprintf(attrname, "attr %02u", u);
+        name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
+        VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
+        if(HDstrcmp(check_name, attrname))
+            TestErrPrintf("attribute name different: attr_name = '%s', should be '%s'\n", check_name, attrname);
+
+        /* Read data from the attribute */
+        ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
+        CHECK(ret, FAIL, "H5Aread");
+        VERIFY(value, u, "H5Aread");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+}   /* test_attr_dense_verify() */
+
+/****************************************************************
+**
 **  test_attr_dense_create(): Test basic H5A (attribute) code.
 **      Tests "dense" attribute storage creation
 **
@@ -1852,6 +1911,9 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         /* Close attribute */
         ret = H5Aclose(attr);
         CHECK(ret, FAIL, "H5Aclose");
+
+        /* Verify attributes written so far */
+        test_attr_dense_verify(dataset, u);
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -1880,24 +1942,8 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 
-    /* Re-open all the attributes and verify the data */
-    for(u = 0; u <= max_compact; u++) {
-        unsigned value;
-
-        /* Open attribute */
-        sprintf(attrname, "attr %02u", u);
-        attr = H5Aopen_name(dataset, attrname);
-        CHECK(attr, FAIL, "H5Aopen");
-
-        /* Read data from the attribute */
-        ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
-        CHECK(ret, FAIL, "H5Aread");
-        VERIFY(value, u, "H5Aread");
-
-        /* Close attribute */
-        ret = H5Aclose(attr);
-        CHECK(ret, FAIL, "H5Aclose");
-    } /* end for */
+    /* Verify all the attributes written */
+    test_attr_dense_verify(dataset, (u + 1));
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1978,7 +2024,7 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         /* Check # of attributes */
         attr_count = H5Aget_num_attrs(dataset);
         CHECK(attr_count, FAIL, "H5Aget_num_attrs");
-        VERIFY(attr_count, (u + 1), "H5Aget_num_attrs");
+        VERIFY(attr_count, (int)(u + 1), "H5Aget_num_attrs");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2012,6 +2058,9 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         sprintf(attrname, "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
+
+        /* Verify attributes still left */
+        test_attr_dense_verify(dataset, u);
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2022,6 +2071,13 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     sprintf(attrname, "attr %02u", u);
     ret = H5Adelete(dataset, attrname);
     CHECK(ret, FAIL, "H5Adelete");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Verify attributes still left */
+    test_attr_dense_verify(dataset, (u - 1));
 
     /* Close Dataset */
     ret = H5Dclose(dataset);

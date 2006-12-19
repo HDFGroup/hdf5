@@ -67,7 +67,8 @@ typedef struct H5A_iter_cb1 {
 
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
     const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
-static hid_t H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
+static herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
+static H5A_t *H5A_open_by_idx(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
 static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
     hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
@@ -515,6 +516,7 @@ hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
     H5G_loc_t	loc;	        /* Object location */
+    H5A_t       *attr = NULL;   /* Attribute opened */
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Aopen_idx, FAIL)
@@ -526,49 +528,51 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-    /* Go do the real work for opening the attribute */
-/* XXX: Add support & tests for attributes in dense storage */
-    if((ret_value = H5A_open(&loc, idx, H5AC_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
+    /* Open the attribute in the object header */
+    if(NULL == (attr = H5A_open_by_idx(&loc, idx, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
+    /* Cleanup on failure */
+    if(ret_value < 0 && attr)
+        (void)H5A_close(attr);
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_open
+ * Function:	H5A_open_common
  *
  * Purpose:
- *      This is the guts of the H5Aopen_xxx functions
+ *      Finishes initializing an attributes the open
+ *      
  * Usage:
- *  herr_t H5A_open (ent, idx)
- *      const H5G_entry_t *ent;   IN: Pointer to symbol table entry for object to attribute
- *      unsigned idx;       IN: index of attribute to open (0-based)
+ *  herr_t H5A_open_common(loc, name, dxpl_id)
+ *      const H5G_loc_t *loc;   IN: Pointer to group location for object
+ *      H5A_t *attr;            IN/OUT: Pointer to attribute to initialize
  *
  * Return: Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		April 2, 1998
+ *		December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
+static herr_t
+H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
-    H5A_t       *attr = NULL;
-    hid_t       ret_value;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_open)
+    FUNC_ENTER_NOAPI_NOINIT(H5A_open_common)
 
     /* check args */
     HDassert(loc);
-
-    /* Read in attribute with H5O_msg_read() */
-    H5_CHECK_OVERFLOW(idx, unsigned, int);
-    if(NULL == (attr = (H5A_t *)H5O_msg_read(loc->oloc, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
-    attr->initialized = TRUE;
+    HDassert(attr);
 
 #if defined(H5_USING_PURIFY) || !defined(NDEBUG)
     /* Clear object location */
@@ -593,17 +597,59 @@ H5A_open(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
-    /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A_open_common() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_open_by_idx
+ *
+ * Purpose:
+ *      Open an attribute according to its index order
+ * Usage:
+ *  herr_t H5A_open (loc, idx)
+ *      const H5G_loc_t *loc;   IN: Pointer to group location for object to open attribute
+ *      unsigned idx;           IN: index of attribute to open (0-based)
+ *
+ * Return: Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		April 2, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5A_t *
+H5A_open_by_idx(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
+{
+    H5A_t       *attr = NULL;
+    H5A_t       *ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5A_open_by_idx)
+
+    /* check args */
+    HDassert(loc);
+
+    /* Read in attribute from object header */
+/* XXX: This uses name index order currently, but should use creation order, once it's implemented */
+    if(NULL == (attr = H5O_attr_open_by_idx(loc->oloc, (hsize_t)idx, dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to load attribute info from object header")
+    attr->initialized = TRUE;
+
+    /* Finish initializing attribute */
+    if(H5A_open_common(loc, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
+
+    /* Set return value */
+    ret_value = attr;
 
 done:
     /* Cleanup on failure */
-    if(ret_value < 0 && attr)
+    if(ret_value == NULL && attr)
         (void)H5A_close(attr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_open() */
+} /* H5A_open_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -638,32 +684,13 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Read in attribute from object header */
-    if(NULL == (attr = H5O_attr_open(loc->oloc, name, dxpl_id)))
+    if(NULL == (attr = H5O_attr_open_by_name(loc->oloc, name, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header")
     attr->initialized = TRUE;
 
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
-    /* Clear object location */
-    if(H5O_loc_reset(&(attr->oloc)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset location")
-
-    /* Clear path name */
-    if(H5G_name_reset(&(attr->path)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset path")
-#endif /* H5_USING_PURIFY */
-
-    /* Deep copy of the symbol table entry */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
-
-    /* Deep copy of the group hier. path */
-    if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
-
-    /* Hold the symbol table entry (and file) open */
-    if(H5O_open(&(attr->oloc)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open")
-    attr->obj_opened = TRUE;
+    /* Finish initializing attribute */
+    if(H5A_open_common(loc, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
 
     /* Set return value */
     ret_value = attr;
@@ -1345,6 +1372,7 @@ herr_t
 H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_loc_t		loc;	        /* Object location */
+    H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     unsigned		start_idx;      /* Index of attribute to start iterating at */
     herr_t	        ret_value;      /* Return value */
 
@@ -1357,9 +1385,14 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
+    /* Build attribute operator info */
+    attr_op.op_type = H5A_ATTR_OP_APP;
+    attr_op.u.app_op = op;
+
     /* Call attribute iteration routine */
     start_idx = (attr_num ? (unsigned)*attr_num : 0);
-    if((ret_value = H5O_attr_iterate(loc_id, loc.oloc, H5AC_ind_dxpl_id, start_idx, attr_num, op, op_data)) < 0)
+/* XXX: Uses "native" name index order currently - should use creation order */
+    if((ret_value = H5O_attr_iterate(loc_id, loc.oloc, H5AC_ind_dxpl_id, H5_ITER_NATIVE, start_idx, attr_num, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
@@ -1475,7 +1508,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 
     /* Allocate attribute structure */
     if(_new_attr == NULL) {
-        if(NULL == (new_attr = H5FL_MALLOC(H5A_t)))
+        if(NULL == (new_attr = H5FL_CALLOC(H5A_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         allocated_attr = TRUE;
     } /* end if */

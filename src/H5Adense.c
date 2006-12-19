@@ -38,7 +38,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"		/* Object headers			*/
 #include "H5SMprivate.h"	/* Shared object header messages        */
 
@@ -74,12 +73,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Data exchange structure to use when building table of attributes for an object */
-typedef struct {
-    H5A_attr_table_t *atable;   /* Pointer to attribute table to build */
-    size_t curr_attr;           /* Current attribute to operate on */
-} H5A_dense_bt_ud_t;
-
 /*
  * Data exchange structure for dense attribute storage.  This structure is
  * passed through the v2 B-tree layer when modifying attributes.
@@ -108,7 +101,7 @@ typedef struct {
     hid_t       loc_id;                 /* Object ID for application callback */
     unsigned    skip;                   /* Number of attributes to skip      */
     unsigned    count;                  /* The # of attributes visited       */
-    const H5A_attr_iterate_t *attr_op;  /* Callback for each attribute       */
+    const H5A_attr_iter_op_t *attr_op;  /* Callback for each attribute       */
     void        *op_data;               /* Callback data for each attribute  */
 
     /* upward */
@@ -140,7 +133,6 @@ typedef struct {
 } H5A_fh_ud_rm_t;
 
 
-
 /********************/
 /* Package Typedefs */
 /********************/
@@ -150,8 +142,6 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
-    H5_iter_order_t order);
 
 /*********************/
 /* Package Variables */
@@ -170,240 +160,6 @@ static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
 /* Declare a free list to manage the serialized attribute information */
 H5FL_BLK_DEFINE(ser_attr);
 
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_dense_build_table_cb
- *
- * Purpose:	Callback routine for building table of attributes from dense
- *              attribute storage.
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5A_dense_build_table_cb(const H5A_t *attr, unsigned mesg_flags, void *_udata)
-{
-    H5A_dense_bt_ud_t *udata = (H5A_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
-    herr_t ret_value = H5_ITER_CONT;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table_cb)
-
-    /* check arguments */
-    HDassert(attr);
-    HDassert(udata);
-    HDassert(udata->curr_attr < udata->atable->nattrs);
-
-    /* Copy attribute information */
-    if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], attr))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
-    udata->atable->flags[udata->curr_attr] = mesg_flags;
-
-    /* Increment number of attributes stored */
-    udata->curr_attr++;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_build_table_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_dense_build_table
- *
- * Purpose:     Builds a table containing a sorted list of attributes for
- *              an object
- *
- * Note:	Used for building table of attributes in non-native iteration
- *              order for an index
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
-    H5_index_t UNUSED idx_type, H5_iter_order_t UNUSED order,
-    H5A_attr_table_t *atable)
-{
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table)
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(atable);
-
-    /* Set size of table */
-    H5_CHECK_OVERFLOW(oh->nattrs, /* From: */ hsize_t, /* To: */ size_t);
-    atable->nattrs = (size_t)oh->nattrs;
-
-    /* Allocate space for the table entries */
-    if(atable->nattrs > 0) {
-        H5A_dense_bt_ud_t udata;       /* User data for iteration callback */
-        H5A_attr_iterate_t attr_op;    /* Attribute operator */
-
-        /* Allocate the table to store the attributes */
-        if((atable->attrs = H5MM_malloc(sizeof(H5A_t) * atable->nattrs)) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if((atable->flags = H5MM_malloc(sizeof(uint8_t) * atable->nattrs)) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Set up user data for iteration */
-        udata.atable = atable;
-        udata.curr_attr = 0;
-
-        /* Build iterator operator */
-        attr_op.op_type = H5A_ATTR_OP_LIB;
-        attr_op.u.lib_op = H5A_dense_build_table_cb;
-
-        /* Iterate over the links in the group, building a table of the link messages */
-        if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, oh->attr_fheap_addr, oh->name_bt2_addr,
-                (unsigned)0, NULL, &attr_op, &udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
-
-        /* Sort attribute table in correct iteration order */
-        if(H5A_attr_sort_table(atable, H5_INDEX_NAME, H5_ITER_INC) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting attribute table")
-    } /* end if */
-    else
-        atable->attrs = NULL;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_build_table() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_attr_cmp_name_inc
- *
- * Purpose:	Callback routine for comparing two attribute names, in
- *              increasing alphabetic order
- *
- * Return:	An integer less than, equal to, or greater than zero if the
- *              first argument is considered to be respectively less than,
- *              equal to, or greater than the second.  If two members compare
- *              as equal, their order in the sorted array is undefined.
- *              (i.e. same as strcmp())
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2005
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
-
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5A_t *)attr1)->name, ((const H5A_t *)attr2)->name))
-} /* end H5A_attr_cmp_name_inc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_attr_sort_table
- *
- * Purpose:     Sort table containing a list of attributes for an object
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
-    H5_iter_order_t order)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_sort_table)
-
-    /* Sanity check */
-    HDassert(atable);
-
-    /* Pick appropriate sorting routine */
-#ifdef NOT_YET
-    if(idx_type == H5_INDEX_NAME) {
-        if(order == H5_ITER_INC)
-#else /* NOT_YET */
-HDassert(idx_type == H5_INDEX_NAME);
-HDassert(order == H5_ITER_INC);
-#endif /* NOT_YET */
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_name_inc);
-#ifdef NOT_YET
-        else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
-        else
-            HDassert(order == H5_ITER_NATIVE);
-    } /* end if */
-    else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
-        if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
-        else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
-        else
-            HDassert(order == H5_ITER_NATIVE);
-    } /* end else */
-#endif /* NOT_YET */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5A_attr_sort_table() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_attr_release_table
- *
- * Purpose:     Release table containing a list of attributes for an object
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A_attr_release_table(H5A_attr_table_t *atable)
-{
-    size_t      u;                      /* Local index variable */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_release_table)
-
-    /* Sanity check */
-    HDassert(atable);
-
-    /* Release attribute info, if any */
-    if(atable->nattrs > 0) {
-        /* Free attribute message information */
-        for(u = 0; u < atable->nattrs; u++)
-            if(H5A_free(&(atable->attrs[u])) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release attribute")
-
-        /* Free table of attributes */
-        H5MM_xfree(atable->attrs);
-        H5MM_xfree(atable->flags);
-    } /* end if */
-    else
-        HDassert(atable->attrs == NULL);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_attr_release_table() */
 
 
 /*-------------------------------------------------------------------------
@@ -996,6 +752,10 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 H5A_dense_copy_fh_cb, &fh_udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, H5_ITER_ERROR, "heap op callback failed")
 
+        /* Check whether we should "reconstitute" the shared message info */
+        if(record->flags & H5O_MSG_FLAG_SHARED)
+            H5SM_reconstitute(&(fh_udata.attr->sh_loc), record->id);
+
         /* Check which type of callback to make */
         switch(bt2_udata->attr_op->op_type) {
             case H5A_ATTR_OP_APP:
@@ -1005,7 +765,7 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */
-                ret_value = (bt2_udata->attr_op->u.lib_op)(fh_udata.attr, record->flags, bt2_udata->op_data);
+                ret_value = (bt2_udata->attr_op->u.lib_op)(fh_udata.attr, bt2_udata->op_data);
         } /* end switch */
 
         /* Release the space allocated for the attribute */
@@ -1040,13 +800,14 @@ done:
  */
 herr_t
 H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr,
-    haddr_t name_bt2_addr, unsigned skip, unsigned *last_attr,
-    const H5A_attr_iterate_t *attr_op, void *op_data)
+    haddr_t name_bt2_addr, H5_iter_order_t order, unsigned skip,
+    unsigned *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5A_bt2_ud_it_t udata;              /* User data for iterator callback */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
-    htri_t attr_sharable;               /* Flag indicating attributes are sharable */
+    H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
+    hsize_t nrec;                       /* # of records in v2 B-tree */
     herr_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_iterate, FAIL)
@@ -1059,61 +820,75 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr
     HDassert(H5F_addr_defined(name_bt2_addr));
     HDassert(attr_op);
 
-    /* Check for skipping too many links */
+    /* Retrieve # of records in name index */
+    /* (# of records in all indices the same) */
+    if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr, &nrec) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
+
+    /* Check for skipping too many attributes */
     if(skip > 0) {
-        hsize_t nrec;           /* # of records in v2 B-tree */
-
-        /* Retrieve # of records in name index */
-        /* (# of records in all indices the same) */
-        if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr, &nrec) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
-
         /* Check for bad starting index */
         if((hsize_t)skip >= nrec)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
     } /* end if */
 
-    /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, attr_fheap_addr)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+    /* Check on iteration order */
+    /* ("native" iteration order is unordered for this attribute storage mechanism) */
+    if(order == H5_ITER_NATIVE) {
+        htri_t attr_sharable;               /* Flag indicating attributes are sharable */
 
-    /* Check if attributes are shared in this file */
-    if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
-
-    /* Get handle for shared object heap, if attributes are sharable */
-    if(attr_sharable) {
-        haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
-
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
-
-        /* Open the fractal heap for shared header messages */
-        if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, attr_fheap_addr)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+        /* Check if attributes are shared in this file */
+        if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
+
+        /* Get handle for shared object heap, if attributes are sharable */
+        if(attr_sharable) {
+            haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
+
+            /* Retrieve the address of the shared object's fractal heap */
+            if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+
+            /* Open the fractal heap for shared header messages */
+            if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+        } /* end if */
+
+        /* Construct the user data for v2 B-tree iterator callback */
+        udata.f = f;
+        udata.dxpl_id = dxpl_id;
+        udata.fheap = fheap;
+        udata.shared_fheap = shared_fheap;
+        udata.loc_id = loc_id;
+        udata.skip = skip;
+        udata.count = 0;
+        udata.attr_op = attr_op;
+        udata.op_data = op_data;
+
+        /* Iterate over the records in the v2 B-tree's "native" order */
+        /* (by hash of name) */
+        if((ret_value = H5B2_iterate(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr,
+                H5A_dense_iterate_bt2_cb, &udata)) < 0)
+            HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
+
+        /* Update last attribute looked at */
+        if(last_attr)
+            *last_attr = udata.count;
     } /* end if */
+    else {
+        /* Build the table of attributes for this object */
+        if(H5A_dense_build_table(f, dxpl_id, nrec, attr_fheap_addr, name_bt2_addr,
+                H5_INDEX_NAME, order, &atable) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes")
 
-    /* Construct the user data for v2 B-tree iterator callback */
-    udata.f = f;
-    udata.dxpl_id = dxpl_id;
-    udata.fheap = fheap;
-    udata.shared_fheap = shared_fheap;
-    udata.loc_id = loc_id;
-    udata.skip = skip;
-    udata.count = 0;
-    udata.attr_op = attr_op;
-    udata.op_data = op_data;
-
-    /* Iterate over the records in the v2 B-tree's "native" order */
-    /* (by hash of name) */
-    if((ret_value = H5B2_iterate(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr,
-            H5A_dense_iterate_bt2_cb, &udata)) < 0)
-        HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
-
-    /* Update last attribute looked at */
-    if(last_attr)
-        *last_attr = udata.count;
+        /* Iterate over attributes in table */
+        if((ret_value = H5A_attr_iterate_table(&atable, skip, last_attr, loc_id, attr_op, op_data)) < 0)
+            HERROR(H5E_ATTR, H5E_CANTNEXT, "iteration operator failed");
+    } /* end else */
 
 done:
     /* Release resources */
@@ -1121,6 +896,8 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    if(atable.attrs && H5A_attr_release_table(&atable) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_iterate() */

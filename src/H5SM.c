@@ -1185,3 +1185,33 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_info() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5SM_reconstitute
+ *
+ * Purpose:     Reconstitute a shared object header message structure from
+ *              a plain heap ID.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, December 18, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_reconstitute(H5O_shared_t *sh_mesg, const uint8_t *heap_id)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_reconstitute)
+
+    /* Sanity check args */
+    HDassert(sh_mesg);
+    HDassert(heap_id);
+
+    /* Set flag for shared message */
+    sh_mesg->flags = H5O_SHARED_IN_HEAP_FLAG;
+    HDmemcpy(&sh_mesg->u.heap_id, heap_id, H5SM_FHEAP_ID_LEN);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_reconstitute() */
+

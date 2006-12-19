@@ -1092,7 +1092,7 @@ H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_share)
 
-    HDassert (mesg);
+    HDassert(mesg);
 
     ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
 
@@ -1120,8 +1120,8 @@ H5O_attr_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_share)
 
-    HDassert (mesg);
-    HDassert (sh);
+    HDassert(mesg);
+    HDassert(sh);
 
     if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
         ret_value = FAIL;
@@ -1159,7 +1159,7 @@ H5O_attr_is_shared(const void *_mesg)
      * library read a "committed attribute" if we ever create one in
      * the future.
      */
-    if(mesg->sh_loc.flags & (H5O_COMMITTED_FLAG | H5O_SHARED_IN_HEAP_FLAG))
+    if(H5O_IS_SHARED(mesg->sh_loc.flags))
         ret_value = TRUE;
     else
         ret_value = FALSE;

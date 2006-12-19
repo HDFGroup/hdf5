@@ -421,14 +421,17 @@ H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *share
 
 /* Attribute operations */
 H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
-H5_DLL H5A_t *H5O_attr_open(const H5O_loc_t *loc, const char *name,
+H5_DLL H5A_t *H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name,
+    hid_t dxpl_id);
+H5_DLL H5A_t *H5O_attr_open_by_idx(const H5O_loc_t *loc, hsize_t n,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
     H5A_t *attr);
 H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
     const char *old_name, const char *new_name);
 H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
-    unsigned skip, unsigned *last_attr, H5A_operator_t op, void *op_data);
+    H5_iter_order_t order, unsigned skip, unsigned *last_attr,
+    const H5A_attr_iter_op_t *op, void *op_data);
 H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
 H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
