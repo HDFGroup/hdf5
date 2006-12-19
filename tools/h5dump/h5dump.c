@@ -96,6 +96,7 @@ static int      xml_name_to_XID(const char *, char *, int , int );
 static void     init_prefix(char **prfx, size_t prfx_len);
 static void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
 
+
 static h5tool_format_t         dataformat = {
     0,				/*raw */
 
@@ -2116,7 +2117,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     outputformat->pindex=display_index;
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
-        outputformat->idx_n_fmt = "%lu";
+        outputformat->idx_n_fmt = HSIZE_T_FORMAT;
         outputformat->idx_sep   = ",";
         outputformat->line_pre  = "%s";
     }
