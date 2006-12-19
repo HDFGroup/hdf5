@@ -244,6 +244,21 @@ SOURCE=..\..\..\src\H5Adeprec.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Aint.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5B.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
