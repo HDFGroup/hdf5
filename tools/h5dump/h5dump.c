@@ -2015,7 +2015,7 @@ dump_dims(hsize_t *s, int dims)
     int i;
 
     for (i = 0; i < dims; i++) {
-        printf("%u", (unsigned int)s[i]);
+        printf(HSIZE_T_FORMAT, s[i]);
 
         if (i + 1 != dims)
             printf(", ");
