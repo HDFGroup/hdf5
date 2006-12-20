@@ -4643,6 +4643,47 @@ test_misc25b(void)
 
 /****************************************************************
 **
+**  test_misc26(): Regression test: ensure that copying filter
+**                      pipelines works properly.
+**
+****************************************************************/
+static void
+test_misc26(void)
+{
+    hid_t dcpl1, dcpl2;         /* Property List IDs */
+    herr_t      ret;            /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Copying filter pipelines\n"));
+
+    /* Create the property list */
+    dcpl1 = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK_I(dcpl1, "H5Pcreate");
+
+    /* Add a filter to the property list */
+    ret = H5Pset_deflate(dcpl1, 1);
+    CHECK_I(ret, "H5Pset_deflate");
+
+    /* Copy the property list */
+    dcpl2 = H5Pcopy(dcpl1);
+    CHECK_I(dcpl2, "H5Pcopy");
+
+    /* Add a filter to the copy */
+    ret = H5Pset_shuffle(dcpl2);
+    CHECK_I(ret, "H5Pset_shuffle");
+
+    /* Close the property lists.  If adding the second filter to
+     * dcpl2 caused it to be in an inconsistent state, closing it
+     * will trip an assert.
+     */
+    ret = H5Pclose(dcpl1);
+    CHECK_I(ret, "H5Pclose");
+    ret = H5Pclose(dcpl2);
+    CHECK_I(ret, "H5Pclose");
+}
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -4680,6 +4721,8 @@ test_misc(void)
     test_misc24();      /* Test inappropriate API opens of objects */
     test_misc25a();     /* Exercise null object header message merge bug */
     test_misc25b();     /* Exercise null object header message merge bug on existing file */
+    test_misc26();      /* Test closing property lists with long filter pipelines */
+
 
 } /* test_misc() */
 
