@@ -206,8 +206,7 @@ static void test_sohm_fcpl(void)
     /* Create a file with this fcpl and make sure that all the values can be
      * retrieved.
      */
-    h5_fixname(FILENAME, H5P_DEFAULT, filename, sizeof filename);
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
 
     fcpl2_id = H5Fget_create_plist(fid);
@@ -224,7 +223,7 @@ static void test_sohm_fcpl(void)
      */
     ret = H5Fclose(fid);
     CHECK_I(ret, "H5Fclose");
-    fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(fid, "H5Fopen");
 
     fcpl2_id = H5Fget_create_plist(fid);
@@ -261,7 +260,7 @@ static void test_sohm_fcpl(void)
     check_fcpl_values(fcpl_id, TEST_NUM_INDEXES, test_type_flags, test_minsizes, TEST_L2B, TEST_B2L);
 
     /* Use the fcpl to create a file and get it back again */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
     fcpl2_id = H5Fget_create_plist(fid);
     CHECK_I(fcpl2_id, "H5Fcreate");
@@ -277,7 +276,7 @@ static void test_sohm_fcpl(void)
      */
     ret = H5Fclose(fid);
     CHECK_I(ret, "H5Fclose");
-    fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(fid, "H5Fopen");
 
     fcpl2_id = H5Fget_create_plist(fid);
@@ -313,11 +312,11 @@ static void test_sohm_fcpl(void)
         CHECK_I(ret, "H5Pset_shared_mesg_index");
         ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_FILL_FLAG, 15 /* JAMES */);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+        fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
         VERIFY(fid, -1, "H5Fcreate");
         ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 15 /* JAMES */);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+        fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
         VERIFY(fid, -1, "H5Fcreate");
 
         /* Test list/btree cutoffs.  We can set these to any positive value,
@@ -337,7 +336,7 @@ static void test_sohm_fcpl(void)
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 11);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
 
     /* Clean up */
