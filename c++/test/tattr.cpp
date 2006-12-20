@@ -76,14 +76,14 @@ const int ATTR2_DIM2 = 2;
 int attr_data2[ATTR2_DIM1][ATTR2_DIM2]={{7614,-416},{197814,-3}}; /* Test data for 2nd attribute */
 
 const H5std_string ATTR3_NAME("Attr3");
-const hsize_t ATTR3_RANK = 3;
+const int ATTR3_RANK = 3;
 const hsize_t ATTR3_DIM1 = 2;
 const hsize_t ATTR3_DIM2 = 2;
 const hsize_t ATTR3_DIM3 = 2;
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0}},{{981724.2,-0.91827},{2.0,23.0}}}; /* Test data for 3rd attribute */
 
 const H5std_string ATTR4_NAME("Attr4");
-const hsize_t ATTR4_RANK = 2;
+const int ATTR4_RANK = 2;
 const hsize_t ATTR4_DIM1 = 2;
 const hsize_t ATTR4_DIM2 = 2;
 
