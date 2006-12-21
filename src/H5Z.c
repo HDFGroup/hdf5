@@ -793,12 +793,12 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
          * a separate block of memory.
          * For each filter, if cd_values points to the internal array
          * _cd_values, the pointer will need to be updated when the
-         * filter struct is reallocated.  Set these pointers to NULL
+         * filter struct is reallocated.  Set these pointers to ~NULL
          * so that we can reset them after reallocating the filters array.
          */
         for(n=0; n<pline->nalloc; ++n) {
             if(pline->filter[n].cd_values == pline->filter[n]._cd_values)
-                pline->filter[n].cd_values = NULL;
+                pline->filter[n].cd_values = (void *) ~((size_t)NULL);
         }
 
 	x.nalloc = MAX(H5Z_MAX_NFILTERS, 2 * pline->nalloc);
@@ -812,7 +812,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
          * data.
          */
         for(n=0; n<pline->nalloc; ++n) {
-            if(NULL == pline->filter[n].cd_values)
+            if(pline->filter[n].cd_values == (void *) ~((size_t) NULL))
                 pline->filter[n].cd_values = pline->filter[n]._cd_values;
         }
     } /* end if */

@@ -287,6 +287,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC25A_ATTR3_LEN       1
 #define MISC25B_FILE            "mergemsg.h5"
 #define MISC25B_GROUP           "grp1"
+#define MISC26_FILE             "dcpl_file"
 
 /****************************************************************
 **
@@ -4650,17 +4651,23 @@ test_misc25b(void)
 static void
 test_misc26(void)
 {
-    hid_t dcpl1, dcpl2;         /* Property List IDs */
+    hid_t fid;          /* File ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t did;          /* Dataset ID */
+    hid_t dcpl1, dcpl2, dcpl3;         /* Property List IDs */
+    hsize_t dims[] = {1};
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Copying filter pipelines\n"));
 
-    /* Create the property list */
+    /* Create the property list.  It needs chunking so we can add filters */
     dcpl1 = H5Pcreate(H5P_DATASET_CREATE);
     CHECK_I(dcpl1, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl1, 1, dims);
+    CHECK_I(ret, "H5Pset_chunk");
 
-    /* Add a filter to the property list */
+    /* Add a filter with a data value to the property list */
     ret = H5Pset_deflate(dcpl1, 1);
     CHECK_I(ret, "H5Pset_deflate");
 
@@ -4668,17 +4675,55 @@ test_misc26(void)
     dcpl2 = H5Pcopy(dcpl1);
     CHECK_I(dcpl2, "H5Pcopy");
 
-    /* Add a filter to the copy */
+    /* Add a filter with no data values to the copy */
     ret = H5Pset_shuffle(dcpl2);
     CHECK_I(ret, "H5Pset_shuffle");
 
-    /* Close the property lists.  If adding the second filter to
-     * dcpl2 caused it to be in an inconsistent state, closing it
-     * will trip an assert.
+    /* Copy the copy */
+    dcpl3 = H5Pcopy(dcpl2);
+    CHECK_I(dcpl3, "H5Pcopy");
+
+    /* Add another filter */
+    ret = H5Pset_deflate(dcpl3, 2);
+    CHECK_I(ret, "H5Pset_deflate");
+
+
+    /* Create a new file and datasets within that file that use these
+     * property lists
      */
+    fid = H5Fcreate(MISC26_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    sid = H5Screate_simple(1, dims, dims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    did = H5Dcreate(fid, "dataset1", H5T_NATIVE_FLOAT, sid, dcpl1);
+    CHECK(did, FAIL, "H5Dcreate");
+    ret = H5Dclose(did);
+    CHECK_I(ret, "H5Dclose");
+
+    did = H5Dcreate(fid, "dataset2", H5T_NATIVE_FLOAT, sid, dcpl2);
+    CHECK(did, FAIL, "H5Dcreate");
+    ret = H5Dclose(did);
+    CHECK_I(ret, "H5Dclose");
+
+    did = H5Dcreate(fid, "dataset3", H5T_NATIVE_FLOAT, sid, dcpl3);
+    CHECK(did, FAIL, "H5Dcreate");
+    ret = H5Dclose(did);
+    CHECK_I(ret, "H5Dclose");
+
+    /* Close the dataspace and file */
+    ret = H5Sclose(sid);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Fclose(fid);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Close the property lists.  */
     ret = H5Pclose(dcpl1);
     CHECK_I(ret, "H5Pclose");
     ret = H5Pclose(dcpl2);
+    CHECK_I(ret, "H5Pclose");
+    ret = H5Pclose(dcpl3);
     CHECK_I(ret, "H5Pclose");
 }
 
@@ -4774,5 +4819,6 @@ cleanup_misc(void)
     HDremove(MISC23_FILE);
     HDremove(MISC24_FILE);
     HDremove(MISC25A_FILE);
+    HDremove(MISC26_FILE);
 }
 
