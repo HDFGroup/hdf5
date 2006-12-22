@@ -2036,7 +2036,7 @@ H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_decode() */
+} /* end H5O_msg_delete() */
 
 
 /*-------------------------------------------------------------------------

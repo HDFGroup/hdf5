@@ -49,6 +49,8 @@ const unsigned test_minsizes[MAX_INDEXES] = {0, 2, 40, 100, 3, 1000};
 #define TEST_B2L 64
 
 #define FILENAME   "tsohm.h5"
+#define FILENAME_SRC   "tsohm_src.h5"
+#define FILENAME_DST   "tsohm_dst.h5"
 
 #define NAME_BUF_SIZE 512
 
@@ -196,7 +198,6 @@ static void test_sohm_fcpl(void)
     hid_t       fcpl_id = -1;
     hid_t       fcpl2_id = -1;
     unsigned    x;
-    char        filename[NAME_BUF_SIZE];
     herr_t	ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
@@ -2617,7 +2618,7 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_delete
+ * Function:    test_sohm_delete
  *
  * Purpose:     Tests shared object header message deletion.
  *
@@ -2718,7 +2719,7 @@ static void test_sohm_delete()
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Use big list indexes */
-    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 4 * DELETE_NUM_MESGS, 0);
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 5000, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
 
@@ -2748,6 +2749,109 @@ static void test_sohm_delete()
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_extlink_helper
+ *
+ * Purpose:     Tests that a dataset created through an external link can
+ *              be opened (that shared messages were created or not and
+ *              were shared in the right file).
+ *
+ * Programmer:  James Laird
+ *              Friday, December 22, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
+{
+    hid_t src_file_id = -1;
+    hid_t dst_file_id = -1;
+    hid_t space_id = -1;
+    hid_t dset_id = -1;
+    hsize_t dims[] = {1, 1};
+    herr_t ret;
+
+    /* Create files */
+    src_file_id = H5Fcreate(FILENAME_SRC, H5F_ACC_TRUNC, src_fcpl_id, H5P_DEFAULT);
+    CHECK_I(src_file_id, "H5Fcreate");
+    dst_file_id = H5Fcreate(FILENAME_DST, H5F_ACC_TRUNC, dst_fcpl_id, H5P_DEFAULT);
+    CHECK_I(dst_file_id, "H5Fcreate");
+
+    /* Create an external link from the source file to the destination file */
+    ret = H5Lcreate_external(FILENAME_DST, "/", src_file_id, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(ret, "H5Lcreate_external");
+
+    /* Create a dataset through the external link */
+    space_id = H5Screate_simple(2, dims, dims);
+    CHECK_I(space_id, "H5Screate_simple");
+    dset_id = H5Dcreate(src_file_id, "ext_link/dataset", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Close the dataset and both files to make sure everything gets flushed 
+     * out of memory
+     */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(src_file_id);
+    CHECK_I(ret, "H5Fclose");
+    ret = H5Fclose(dst_file_id);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Ensure that the dataset can be opened.  If the messages were written in
+     * the wrong file, it'll be impossible to read the dataset's object
+     * header.
+     */
+    dst_file_id = H5Fopen(FILENAME_DST, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK_I(dst_file_id, "H5Fopen");
+    dset_id = H5Dopen(dst_file_id, "dataset");
+    CHECK_I(dset_id, "H5Dopen");
+
+    /* Cleanup */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(dst_file_id);
+    CHECK_I(ret, "H5Fclose");
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_extlink
+ *
+ * Purpose:     Test creating SOHMs through external links (to make sure that
+ *              they're created in the correct file).
+ *
+ * Programmer:  James Laird
+ *              Friday, December 22, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_extlink()
+{
+    hid_t fcpl_id = -1;
+    herr_t ret;
+
+    /* Create fcpl */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK_I(fcpl_id, "H5Pcreate");
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+    /* Test using external links when the source or destination file uses
+     * shared messages
+     */
+    test_sohm_extlink_helper(fcpl_id, H5P_DEFAULT);
+    test_sohm_extlink_helper(H5P_DEFAULT, fcpl_id);
+    test_sohm_extlink_helper(fcpl_id, fcpl_id);
+}
+
+
+
 /****************************************************************
 ** 
 **  test_sohm(): Main Shared Object Header Message testing routine.
@@ -2767,6 +2871,7 @@ test_sohm(void)
                                  * SOHMs, closing and reopening file after
                                  * each write. */
     test_sohm_delete();         /* Test deleting shared messages */
+    test_sohm_extlink();        /* Test SOHMs when external links are used */
 
 } /* test_sohm() */
 
@@ -2789,4 +2894,6 @@ void
 cleanup_sohm(void)
 {
     remove(FILENAME);
+    remove(FILENAME_SRC);
+    remove(FILENAME_DST);
 }
