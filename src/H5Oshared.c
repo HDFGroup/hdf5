@@ -531,10 +531,6 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
         if(H5O_shared_link_adj(f, dxpl_id, shared, -1) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
-    /* JAMES */
-/* JAMES    if((shared->flags & H5O_SHARED_IN_HEAP_FLAG) > 0)
-        H5O_loc_free(&(shared->oloc));
-*/
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_delete() */

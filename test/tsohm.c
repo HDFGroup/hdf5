@@ -142,6 +142,11 @@ typedef struct size2_helper_struct {
     h5_stat_size_t attrs2;
 } size2_helper_struct;
 
+/* Number of distinct messages for the sohm_delete test */
+#define DELETE_NUM_MESGS 7
+#define HALF_DELETE_NUM_MESGS 3
+#define DELETE_DIMS {1,1,1,1,1,1,1}
+
 /****************************************************************
 **
 **  check_fcpl_values(): Helper function for test_sohm_fcpl.
@@ -2429,6 +2434,320 @@ static void test_sohm_size2(int close_reopen)
 
 
 
+/*-------------------------------------------------------------------------
+ * Function:    delete_helper_write
+ *
+ * Purpose:     Creates a dataset and attribute in file FILE_ID using value X
+ *              in the DSPACE_ID and DCPL_ID arrays.
+ *
+ * Programmer:  James Laird
+ *              Tuesday, December 19, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
+{
+    hid_t dset_id = -1;
+    hid_t attr_id = -1;
+    char wdata;
+    herr_t ret;
+
+    /* Create dataset */
+    dset_id = H5Dcreate(file_id, DSETNAME[x], H5T_NATIVE_CHAR, dspace_id[x], dcpl_id[x]);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Write data to dataset */
+    wdata = x + 'a';
+    ret = H5Dwrite(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &wdata);
+    CHECK_I(ret, "H5Dwrite");
+
+    /* Create an attribute on the dataset. */
+    attr_id = H5Acreate(dset_id, "attr_name", H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT);
+    CHECK_I(attr_id, "H5Acreate");
+
+    /* Write to attribute */
+    ret = H5Awrite(attr_id, H5T_NATIVE_CHAR, &wdata); 
+    CHECK_I(ret, "H5Awrite");
+
+    ret = H5Aclose(attr_id);
+    CHECK_I(ret, "H5Aclose");
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    delete_helper_read
+ *
+ * Purpose:     Checks the value of the dataset and attribute created by
+ *              delete_helper_write.
+ *
+ * Programmer:  James Laird
+ *              Tuesday, December 19, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
+{
+    hid_t dset_id = -1;
+    hid_t attr_id = -1;
+    char rdata;
+    herr_t ret;
+
+    /* Open dataset */
+    dset_id = H5Dopen(file_id, DSETNAME[x]);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Read */
+    rdata = '\0';
+    ret = H5Dread(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &rdata);
+    CHECK_I(ret, "H5Dread");
+    VERIFY(rdata, (x + 'a'), "H5Dread");
+
+    /* Open attribute */
+    attr_id = H5Aopen_name(dset_id, "attr_name");
+    CHECK_I(attr_id, "H5Aopen");
+
+    /* Read */
+    rdata = '\0';
+    ret = H5Aread(attr_id, H5T_NATIVE_CHAR, &rdata);
+    CHECK_I(ret, "H5Dread");
+    VERIFY(rdata, (x + 'a'), "H5Dread");
+
+    /* Cleanup */
+    ret = H5Aclose(attr_id);
+    CHECK_I(ret, "H5Aclose");
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    delete_helper
+ *
+ * Purpose:     Creates some shared messages, deletes them, and creates some
+ *              more messages.  The second batch of messages should use the
+ *              space freed by the first batch, so should be about the same
+ *              size as a file that never had the first batch of messages
+ *              created.
+ *
+ *              FCPL_ID is the file creation property list to use.
+ *              DSPACE_ID and DCPL_ID are arrays of different dataspaces
+ *              and property lists with filter pipelines used to create the
+ *              messages.
+ *
+ * Programmer:  James Laird
+ *              Tuesday, December 19, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
+{
+    hid_t file_id=-1;
+    int x;
+    h5_stat_size_t norm_filesize;
+    h5_stat_size_t deleted_filesize;
+    herr_t ret;
+
+    /* Get the size of a "normal" file with no deleted messages */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /* Create batch of messages in the file starting at message 2 */
+    for(x=HALF_DELETE_NUM_MESGS; x<DELETE_NUM_MESGS; ++x) {
+        delete_helper_write(file_id, dspace_id, dcpl_id, x);
+    }
+
+    /* Check that messages can be read */
+    for(x=HALF_DELETE_NUM_MESGS; x<DELETE_NUM_MESGS; ++x) {
+        delete_helper_read(file_id, dspace_id, x);
+    }
+
+    /* Close file and get filesize */
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+    norm_filesize = h5_get_file_size(FILENAME);
+
+
+    /* Create a new file with messages 0 to (HALF_DELETE_NUM_MESGS - 1) */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    for(x=0; x<HALF_DELETE_NUM_MESGS; ++x) {
+        delete_helper_write(file_id, dspace_id, dcpl_id, x);
+    }
+
+    /* Verify each dataset, then delete it (which should delete
+     * its shared messages as well
+     */
+    for(x=0; x<HALF_DELETE_NUM_MESGS; ++x) {
+        delete_helper_read(file_id, dspace_id, x);
+        ret = H5Ldelete(file_id, DSETNAME[x], H5P_DEFAULT);
+        CHECK_I(ret, "H5Ldelete");
+    }
+
+    /* The file is now empty.  Write and verify the second batch of messages
+     * again.
+     */
+    for(x=HALF_DELETE_NUM_MESGS; x<DELETE_NUM_MESGS; ++x) {
+        delete_helper_write(file_id, dspace_id, dcpl_id, x);
+    }
+    for(x=HALF_DELETE_NUM_MESGS; x<DELETE_NUM_MESGS; ++x) {
+        delete_helper_read(file_id, dspace_id, x);
+    }
+
+    /* Close file and get filesize */
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+    deleted_filesize = h5_get_file_size(FILENAME);
+
+    /* The two filesizes should be almost the same */
+    if(norm_filesize > deleted_filesize * OVERHEAD_ALLOWED)
+        VERIFY(0, 1, "h5_get_file_size");
+    if(deleted_filesize > norm_filesize * OVERHEAD_ALLOWED)
+        VERIFY(0, 1, "h5_get_file_size");
+
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_delete
+ *
+ * Purpose:     Tests shared object header message deletion.
+ *
+ *              Creates lots of shared messages, then ensures that they
+ *              can be deleted without corrupting the remaining messages.
+ *              Also checks that indexes convert from B-trees back into
+ *              lists.
+ *
+ * Programmer:  James Laird
+ *              Tuesday, December 19, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_delete()
+{
+    hid_t fcpl_id;
+    /* We'll use dataspaces, filter pipelines, and attributes for this
+     * test.  Create a number of distinct messages of each type.
+     */
+    hid_t dspace_id[DELETE_NUM_MESGS] = {0};
+    hid_t dcpl_id[DELETE_NUM_MESGS] = {0};
+    int x;
+    hsize_t dims[] = DELETE_DIMS;
+    herr_t ret;
+
+    /* Create a number of different dataspaces.
+     * For simplicity, each dataspace has only one element.
+     */
+   for(x=0; x<DELETE_NUM_MESGS; ++x) {
+        dspace_id[x] = H5Screate_simple(x + 1, dims, dims);
+        CHECK_I(dspace_id[x], "H5Screate_simple");        
+    }
+
+    /* Create a number of different filter pipelines. */
+    dcpl_id[0] = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK_I(dcpl_id[0], "H5Pcreate");
+
+    ret = H5Pset_chunk(dcpl_id[0], 1, dims);
+    CHECK_I(ret, "H5Pset_chunk");
+    ret = H5Pset_shuffle(dcpl_id[0]);
+    CHECK_I(ret, "H5Pset_shuffle");
+
+    for(x=1; x<DELETE_NUM_MESGS; x+=2) {
+        dcpl_id[x] = H5Pcopy(dcpl_id[x-1]);
+        CHECK_I(dcpl_id[x], "H5Pcopy");
+        ret = H5Pset_chunk(dcpl_id[x], x+1, dims);
+        CHECK_I(ret, "H5Pset_chunk");
+        ret = H5Pset_deflate(dcpl_id[x], 1);
+        CHECK_I(ret, "H5Pset_deflate");
+
+        dcpl_id[x+1] = H5Pcopy(dcpl_id[x]);
+        CHECK_I(dcpl_id[x+1], "H5Pcopy");
+        ret = H5Pset_chunk(dcpl_id[x+1], x+2, dims);
+        CHECK_I(ret, "H5Pset_chunk");
+        ret = H5Pset_shuffle(dcpl_id[x+1]);
+        CHECK_I(ret, "H5Pset_shuffle");
+    }
+
+    /* Create an fcpl where all messages are shared in the same index */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK_I(fcpl_id, "H5Pcreate");
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+
+    /* Use big list indexes */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 4 * DELETE_NUM_MESGS, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    /* Test that messages can be created and deleted properly */
+    delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+
+    /* Use B-tree indexes */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+
+    /* Use small list indexes that will convert from lists to B-trees and back */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, HALF_DELETE_NUM_MESGS, HALF_DELETE_NUM_MESGS - 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+
+    /* Use two indexes */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+    /* Use big list indexes */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 4 * DELETE_NUM_MESGS, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+
+    /* Use B-tree indexes */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+
+    /* Set phase change values so that one index converts to a B-tree and one doesn't */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, HALF_DELETE_NUM_MESGS + 1, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+    /* Cleanup */
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
+
+    for(x=DELETE_NUM_MESGS - 1; x>=0; --x) {
+        ret = H5Sclose(dspace_id[x]);
+        CHECK_I(ret, "H5Sclose");
+        ret = H5Pclose(dcpl_id[x]);
+        CHECK_I(ret, "H5Pclose");
+    }
+}
+
+
 /****************************************************************
 ** 
 **  test_sohm(): Main Shared Object Header Message testing routine.
@@ -2444,7 +2763,10 @@ test_sohm(void)
     test_sohm_size1();          /* Tests the sizes of files with one SOHM */
     test_sohm_attrs();          /* Tests shared messages in attributes */
     test_sohm_size2(0);         /* Tests the sizes of files with multiple SOHMs */
-    test_sohm_size2(1);         /* Tests the sizes of files with multiple SOHMs */
+    test_sohm_size2(1);         /* Tests the sizes of files with multiple
+                                 * SOHMs, closing and reopening file after
+                                 * each write. */
+    test_sohm_delete();         /* Test deleting shared messages */
 
 } /* test_sohm() */
 

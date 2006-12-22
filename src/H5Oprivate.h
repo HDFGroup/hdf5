@@ -432,6 +432,7 @@ H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, unsigned char *buf, const void *obj);
 H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
     const unsigned char *buf);
+H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg);
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,

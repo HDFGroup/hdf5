@@ -19,7 +19,6 @@
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg 	  */
 
-
 /***********/
 /* Headers */
 /***********/
@@ -31,7 +30,6 @@
 #include "H5MFprivate.h"        /* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5SMpkg.h"            /* Shared object header messages        */
-
 
 /****************/
 /* Local Macros */
@@ -60,7 +58,7 @@ static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *head
      unsigned type_id, void *mesg, unsigned *cache_flags_ptr);
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id,
         H5SM_index_header_t *header, unsigned type_id, const H5O_shared_t * mesg,
-        unsigned *cache_flags);
+        unsigned *cache_flags, void ** buf);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 
 
@@ -896,6 +894,8 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_master_table_t  *table = NULL;
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t               index_num;
+    void                 *mesg_buf = NULL;
+    void                 *native_mesg = NULL;
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_try_delete, FAIL)
@@ -918,13 +918,42 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
 
     /* JAMES: this triggers some warning on heping.  "overflow in implicit constant conversion" */
-    if(H5SM_delete_from_index(f, dxpl_id, &(table->indexes[index_num]), type_id, sh_mesg, &cache_flags) < 0)
+    /* If mesg_buf is not NULL, the message's reference count has reached
+     * zero and any file space it uses needs to be freed.  mesg_buf holds the
+     * serialized form of the message.
+     */
+    if(H5SM_delete_from_index(f, dxpl_id, &(table->indexes[index_num]), type_id, sh_mesg, &cache_flags, &mesg_buf) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete mesage from SOHM index")
 
-done:
     /* Release the master SOHM table */
+    if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+
+    table = NULL;
+
+    /* If buf was allocated, delete the message it holds.  This message may
+     * reference other shared messages that also need to be deleted, so the
+     * master table needs to be unprotected when we do this.
+     */
+    if(mesg_buf) {
+        if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type_id, mesg_buf)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode shared message.")
+
+        if(H5O_msg_delete(f, dxpl_id, type_id, native_mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete shared message.")
+    }
+
+done:
+    /* Release the master SOHM table on error */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+
+    if(native_mesg)
+        H5O_msg_free(type_id, native_mesg);
+
+    /* Free buf */
+    if(mesg_buf)
+        H5MM_xfree(mesg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_try_delete() */
@@ -998,8 +1027,11 @@ H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:    H5SM_delete_from_index
  *
- * Purpose:     Given a SOHM message, delete it from this index.
- * JAMES: is the message necessarily in the index?  Also, name this "dec ref count" or something.
+ * Purpose:     Decrement the reference count for a particular message in this
+ *              index.  If the reference count reaches zero, allocate a buffer
+ *              to hold the serialized form of this message so that any
+ *              resources it uses can be freed.
+ * JAMES: rename buf
  *
  * Return:      Non-negative on success
  *              Negative on failure
@@ -1011,7 +1043,7 @@ H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
  */
 static herr_t
 H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
-    unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags)
+    unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags, void ** buf)
 {
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;
@@ -1027,6 +1059,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(mesg);
     HDassert(cache_flags);
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
+    HDassert(*buf == NULL);
     
     /* Open the heap that this message is in */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
@@ -1076,6 +1109,24 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     /* If the ref count is zero, delete the message from the index */
     if(message.ref_count <= 0)
     {
+        size_t buf_size;
+
+        /* Close the message being deleted, since it may need to adjust
+         * other reference counts (e.g., an attribute needs to free its
+         * shared datatype).
+         */
+        /* Get the size of the message in the heap */
+        if(H5HF_get_obj_len(fheap, dxpl_id, &(message.fheap_id), &buf_size) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
+
+        /* Allocate a buffer to hold the message */
+        if(NULL == (*buf = H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        /* Retrieve the message from the heap */
+        if(H5HF_read(fheap, dxpl_id, &(message.fheap_id), *buf) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
+
         /* Remove the message from the heap */
         if(H5HF_remove(fheap, dxpl_id, &(message.fheap_id)) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "unable to remove message from heap")
@@ -1142,6 +1193,9 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
+    /* Free the serialized message buffer on error */
+    if(ret_value < 0 && *buf)
+        H5MM_xfree(*buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
 

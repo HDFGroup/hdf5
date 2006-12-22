@@ -562,6 +562,24 @@ H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
         if(HDstrcmp(shared_attr.name, udata->attr->name) == 0) {
             htri_t shared_mesg;         /* Whether the message should be shared */
 
+            /* Re-share attribute's datatype and dataspace to increment their
+             * reference count if they're shared.
+             * Otherwise they may be deleted when the old attribute
+             * message is deleted.
+             */
+            if(H5SM_try_share(udata->f, udata->dxpl_id, H5O_DTYPE_ID, udata->attr->dt) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_BADMESG, H5_ITER_ERROR, "error trying to re-share attribute datatype")
+            if(H5SM_try_share(udata->f, udata->dxpl_id, H5O_SDSPACE_ID, udata->attr->ds) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_BADMESG, H5_ITER_ERROR, "error trying to re-share attribute datatype")
+
+            /* Likewise, increment reference count if this attribute has a named datatype */
+            /* JAMES: this is identical to the attr_link callback. */
+            if(H5T_committed(udata->attr->dt)) {
+                /* Increment the reference count on the shared datatype */
+                if(H5T_link(udata->attr->dt,1,udata->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+            } /* end if */
+
             /* Store new version of message as a SOHM */
             /* (should always work, since we're not changing the size of the attribute) */
             if((shared_mesg = H5SM_try_share(udata->f, udata->dxpl_id, H5O_ATTR_ID, udata->attr)) == 0)

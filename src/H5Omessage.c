@@ -2000,6 +2000,46 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_msg_delete
+ *
+ * Purpose:     Calls a message's delete callback.
+ *
+ *              JAMES: this is mostly redundant with H5O_delete_mesg below,
+ *              but H5O_delete_mesg only works on messages in object headers
+ *              (i.e., not shared messages).
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  James Laird
+ *              December 21, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg)
+{
+    const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
+    herr_t ret_value = SUCCEED;                    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_delete, NULL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+
+    /* delete */
+    if((type->del) && (type->del)(f, dxpl_id, mesg, 1) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_decode() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_delete_mesg
  *
  * Purpose:	Internal function to:
