@@ -74,7 +74,7 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
 ///		its overloaded below as StrType(0, size).
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
+StrType::StrType( const PredType& pred_type, const size_t& size ) : AtomType()
 {
    // use DataType::copy to make a copy of the string predefined type
    // then set its length
@@ -179,7 +179,7 @@ void StrType::setCset( H5T_cset_t cset ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	StrType::getCset
+// Function:	StrType::getStrpad
 ///\brief	Retrieves the storage mechanism for of this string datatype.
 ///\return	String storage mechanism, which can be:
 ///		\li \c H5T_STR_NULLTERM (0) - Null terminate (as C does)

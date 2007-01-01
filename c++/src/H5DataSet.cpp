@@ -220,7 +220,7 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf )
+void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf )
 {
    // Obtain identifiers for C API
    hid_t type_id = type.getId();
@@ -229,6 +229,34 @@ void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList
 
    herr_t ret_value = H5Dvlen_reclaim( type_id, space_id, xfer_plist_id, buf );
    if( ret_value < 0 )
+   {
+      throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet::vlenReclaim
+///\brief	Reclaims VL datatype memory buffers.
+///\param	type - IN: Datatype, which is the datatype stored in the buffer
+///\param	space - IN: Selection for the memory buffer to free the
+///		VL datatypes within
+///\param	xfer_plist - IN: Property list used to create the buffer
+///\param	buf - IN: Pointer to the buffer to be reclaimed
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - 2000
+//\parDescription
+//		This function has better prototype for the users than the
+//		other, which might be removed at some point. BMR - 2006/12/20
+//--------------------------------------------------------------------------
+void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist)
+{
+   // Obtain identifiers for C API
+   hid_t type_id = type.getId();
+   hid_t space_id = space.getId();
+   hid_t xfer_plist_id = xfer_plist.getId();
+
+   herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+   if (ret_value < 0)
    {
       throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
    }

@@ -26,7 +26,7 @@ class H5_DLLCPP StrType : public AtomType {
 	StrType(const PredType& pred_type);
 
 	// Creates a string type with specified length - may be obsolete
-	StrType(const PredType& pred_type, const size_t size);
+	StrType(const PredType& pred_type, const size_t& size);
 
 	// Creates a string type with specified length
 	StrType(const int dummy, const size_t& size);
