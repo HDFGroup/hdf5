@@ -77,11 +77,12 @@ main(int argc, char *argv[])
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
     // testing reference functionalities in trefer.cpp
     AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
+    // testing variable-length strings in tvlstr.cpp
+    AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
 /* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
     AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
-    AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
     AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
