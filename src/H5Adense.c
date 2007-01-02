@@ -1203,7 +1203,7 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     HDassert(oh);
 
 /* XXX: iterate through name index v2 B-tree and delete shared attributes */
-/* XXX: we need to delete shared/unshared attributes that use shared & committed components also */
+/* XXX: we need to delete shared & unshared attributes that use shared & committed components also */
 
     /* Delete name index v2 B-tree */
     if(H5B2_delete(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, NULL, NULL) < 0)
