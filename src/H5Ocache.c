@@ -153,6 +153,20 @@ H5O_flush_msgs(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                     encode = H5O_MSG_SHARED->encode;
                 else
                     encode = curr_msg->type->encode;
+/* XXX: fix me */
+#ifdef NOT_YET
+if(!(curr_msg->flags & H5O_FLAG_SHARED)) {
+    size_t msg_size;
+
+    HDfprintf(stderr, "%s: curr_msg->type->name = '%s'\n", FUNC, curr_msg->type->name);
+    HDfprintf(stderr, "%s: curr_msg->raw_size = %Zu\n", FUNC, curr_msg->raw_size);
+    msg_size = curr_msg->type->raw_size(f, curr_msg->native);
+    HDfprintf(stderr, "%s: msg_size = %Zu\n", FUNC, msg_size);
+    if(msg_size > curr_msg->raw_size)
+        HDfprintf(stderr, "%s: YOW!\n", FUNC);
+} /* end if */
+#endif /* NOT_YET */
+
                 if((encode)(f, curr_msg->raw, curr_msg->native) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
             } /* end if */

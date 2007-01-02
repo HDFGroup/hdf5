@@ -1357,6 +1357,21 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_msg_class_t *type, int overwrite,
     } /* end if */
 
     /* Check for creating new message */
+/* XXX: fix me */
+#ifdef NOT_YET
+HDfprintf(stderr, "%s: overwrite = %d\n", FUNC, overwrite);
+if(overwrite >= 0 && !(oh->mesg[idx].flags & H5O_FLAG_SHARED)) {
+    H5O_mesg_t *curr_msg = &oh->mesg[idx];
+    size_t msg_size;
+
+    HDfprintf(stderr, "%s: curr_msg->type->name = '%s'\n", FUNC, curr_msg->type->name);
+    HDfprintf(stderr, "%s: curr_msg->raw_size = %Zu\n", FUNC, curr_msg->raw_size);
+    msg_size = curr_msg->type->raw_size(ent->file, mesg);
+    HDfprintf(stderr, "%s: msg_size = %Zu\n", FUNC, msg_size);
+    if(msg_size > curr_msg->raw_size)
+        HDfprintf(stderr, "%s: YOW!\n", FUNC);
+} /* end if */
+#endif /* NOT_YET */
     if(overwrite < 0) {
         /* Create a new message */
         if((idx=H5O_new_mesg(ent->file,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)
