@@ -50,9 +50,12 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Returns the amount of storage size required for this dataset.
 	hsize_t getStorageSize() const;
 
-	// not yet implemented??
+	// Returns the number of bytes required to store VL data.
 	hsize_t getVlenBufSize( DataType& type, DataSpace& space ) const;
-	void vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf ) const;
+
+	// Reclaims VL datatype memory buffers.
+	static void vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf );
+	static void vlenReclaim(void *buf, const DataType& type, const DataSpace& space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT);
 
 	// Reads the data of this dataset and stores it in the provided buffer.
 	// The memory and file dataspaces and the transferring property list
@@ -77,7 +80,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 
 	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const; // will be obsolete
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const; // will be obsolete
