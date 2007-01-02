@@ -165,7 +165,7 @@ H5_DLL herr_t H5A_close(H5A_t *attr);
 H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
-    const H5A_t *attr);
+    H5A_t *attr);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     haddr_t attr_fheap_addr, haddr_t name_bt2_addr, H5_iter_order_t order,
     unsigned skip, unsigned *last_attr, const H5A_attr_iter_op_t *attr_op,
@@ -190,8 +190,13 @@ H5_DLL herr_t H5A_attr_release_table(H5A_attr_table_t *atable);
 /* Attribute object header routines */
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
 H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-H5_DLL htri_t H5O_attr_is_shared(const void *_mesg);
+H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 H5_DLL void *H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh);
+H5_DLL htri_t H5O_attr_is_shared(const void *_mesg);
+
+/* Attribute operations */
+H5_DLL herr_t H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr, 
+    const H5O_shared_t *sh_mesg);
 
 /* Testing functions */
 #ifdef H5A_TESTING

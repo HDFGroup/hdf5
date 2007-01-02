@@ -519,6 +519,56 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_attr_update_shared
+ *
+ * Purpose:	Update a shared attribute.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jan  2 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr, 
+    const H5O_shared_t *sh_mesg)
+{
+    htri_t shared_mesg;                 /* Whether the message should be shared */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_update_shared)
+
+    /* check args */
+    HDassert(f);
+    HDassert(attr);
+    HDassert(sh_mesg);
+
+    /* Increment reference count on attribute components */
+    /* (Otherwise they may be deleted when the old attribute
+     * message is deleted.)
+     */
+    if(H5O_attr_link(f, dxpl_id, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
+
+    /* Store new version of message as a SOHM */
+    /* (should always work, since we're not changing the size of the attribute) */
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, H5O_ATTR_ID, attr)) == 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "attribute changed sharing status")
+    else if(shared_mesg < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't share attribute")
+
+    /* Remove the old attribute from the SOHM index */
+    if(H5SM_try_delete(f, dxpl_id, H5O_ATTR_ID, sh_mesg) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to delete shared attribute in shared storage")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_update_shared() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_attr_write_cb
  *
  * Purpose:	Object header iterator callback routine to update an
@@ -560,36 +610,9 @@ H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
 
         /* Check for correct attribute message to modify */
         if(HDstrcmp(shared_attr.name, udata->attr->name) == 0) {
-            htri_t shared_mesg;         /* Whether the message should be shared */
-
-            /* Re-share attribute's datatype and dataspace to increment their
-             * reference count if they're shared.
-             * Otherwise they may be deleted when the old attribute
-             * message is deleted.
-             */
-            if(H5SM_try_share(udata->f, udata->dxpl_id, H5O_DTYPE_ID, udata->attr->dt) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_BADMESG, H5_ITER_ERROR, "error trying to re-share attribute datatype")
-            if(H5SM_try_share(udata->f, udata->dxpl_id, H5O_SDSPACE_ID, udata->attr->ds) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_BADMESG, H5_ITER_ERROR, "error trying to re-share attribute datatype")
-
-            /* Likewise, increment reference count if this attribute has a named datatype */
-            /* JAMES: this is identical to the attr_link callback. */
-            if(H5T_committed(udata->attr->dt)) {
-                /* Increment the reference count on the shared datatype */
-                if(H5T_link(udata->attr->dt,1,udata->dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-            } /* end if */
-
-            /* Store new version of message as a SOHM */
-            /* (should always work, since we're not changing the size of the attribute) */
-            if((shared_mesg = H5SM_try_share(udata->f, udata->dxpl_id, H5O_ATTR_ID, udata->attr)) == 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "attribute changed sharing status")
-            else if(shared_mesg < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't share attribute")
-
-            /* Remove the old attribute from the SOHM index */
-            if(H5SM_try_delete(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const H5O_shared_t *)mesg->native) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, H5_ITER_ERROR, "unable to delete shared attribute in shared storage")
+            /* Update the shared attribute in the SOHM info */
+            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, udata->attr, (const H5O_shared_t *)mesg->native) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
 
             /* Extract shared message info from current attribute */
             if(NULL == H5O_attr_get_share(udata->attr, (H5O_shared_t *)mesg->native))

@@ -2156,8 +2156,8 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     is_dense = H5O_is_attr_dense_test(dataset2);
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
-    /* Add attributes to each dataset, until just before converting to dense storage */
-    for(u = 0; u < max_compact; u++) {
+    /* Add attributes to each dataset, until after converting to dense storage */
+    for(u = 0; u < max_compact * 2; u++) {
         /* Create attribute name */
         sprintf(attrname, "attr %02u", u);
 
@@ -2182,6 +2182,13 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         /* Close attribute */
         ret = H5Aclose(attr);
         CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        is_dense = H5O_is_attr_dense_test(dataset);
+        if(u < max_compact)
+            VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+        else
+            VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
 
 
         /* Create attribute on second dataset */
@@ -2210,73 +2217,14 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
         /* Close attribute */
         ret = H5Aclose(attr);
         CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        is_dense = H5O_is_attr_dense_test(dataset2);
+        if(u < max_compact)
+            VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+        else
+            VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
     } /* end for */
-
-    /* Check on dataset's attribute storage status */
-    is_dense = H5O_is_attr_dense_test(dataset);
-    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
-
-#ifdef NOT_YET
-    /* Add one more attribute, to push into "dense" storage */
-
-    /* Create attribute name */
-    sprintf(attrname, "attr %02u", u);
-
-    /* Create attribute */
-    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate");
-
-    /* Check that attribute is shared */
-    is_shared = H5A_is_shared_test(attr);
-    VERIFY(is_shared, TRUE, "H5A_is_shared_test");
-
-    /* Check refcount for attribute */
-    ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-    CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-    VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
-
-    /* Check on dataset's attribute storage status */
-    is_dense = H5O_is_attr_dense_test(dataset);
-    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
-
-    /* Write data into the attribute */
-    attr_value = u + 1;
-    ret = H5Awrite(attr, H5T_NATIVE_UINT, &attr_value);
-    CHECK(ret, FAIL, "H5Awrite");
-
-    /* Close attribute */
-    ret = H5Aclose(attr);
-    CHECK(ret, FAIL, "H5Aclose");
-
-
-    /* Create attribute on second dataset */
-    attr = H5Acreate(dataset2, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate");
-
-    /* Check that attribute is shared */
-    is_shared = H5A_is_shared_test(attr);
-    VERIFY(is_shared, TRUE, "H5A_is_shared_test");
-
-    /* Check refcount for attribute */
-    ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-    CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-    VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
-
-    /* Write data into the attribute */
-    attr_value = u + 1;
-    ret = H5Awrite(attr, H5T_NATIVE_UINT, &attr_value);
-    CHECK(ret, FAIL, "H5Awrite");
-
-    /* Check refcount for attribute */
-    ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-    CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-    VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
-
-    /* Close attribute */
-    ret = H5Aclose(attr);
-    CHECK(ret, FAIL, "H5Aclose");
-#endif /* NOT_YET */
-
 
     /* Close dataspace */
     ret = H5Sclose(sid);

@@ -79,11 +79,11 @@
  */
 typedef struct H5A_bt2_od_wrt_t {
     /* downward */
+    H5F_t  *f;                  /* Pointer to file that fractal heap is in */
+    hid_t dxpl_id;              /* DXPL for operation */
     H5HF_t *fheap;              /* Fractal heap handle to operate on */
     H5HF_t *shared_fheap;       /* Fractal heap handle for shared messages */
-    hid_t dxpl_id;              /* DXPL for operation */
-    void *attr_buf;             /* Pointer to encoded attribute to store */
-    size_t attr_size;           /* Size of encode attribute */
+    H5A_t  *attr;               /* Attribute to write */
 } H5A_bt2_od_wrt_t;
 
 /*
@@ -508,7 +508,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_write_bt2_cb
  *
- * Purpose:	v2 B-tree 'find' callback to update the data for an attribute
+ * Purpose:	v2 B-tree 'modify' callback to update the data for an attribute
  *
  * Return:	Success:	0
  *		Failure:	1
@@ -519,12 +519,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_write_bt2_cb(const void *_record, void *_op_data)
+H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 {
-    const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record; /* Record from B-tree */
+    H5A_dense_bt2_name_rec_t *record = (H5A_dense_bt2_name_rec_t *)_record; /* Record from B-tree */
     H5A_bt2_od_wrt_t *op_data = (H5A_bt2_od_wrt_t *)_op_data;       /* "op data" from v2 B-tree modify */
-    H5HF_t *fheap;                      /* Fractal heap handle for attribute storage */
-    hbool_t id_changed = FALSE;         /* Whether the heap ID changed */
+    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
+    void *attr_ptr = NULL;              /* Pointer to serialized attribute */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_write_bt2_cb)
@@ -536,28 +536,67 @@ H5A_dense_write_bt2_cb(const void *_record, void *_op_data)
     HDassert(op_data);
 
     /* Check for modifying shared attribute */
-    if(record->flags & H5O_MSG_FLAG_SHARED)
-        fheap = op_data->shared_fheap;
-    else
-        fheap = op_data->fheap;
+    if(record->flags & H5O_MSG_FLAG_SHARED) {
+        H5O_shared_t sh_mesg;           /* Shared object header message */
+
+        /* Extract shared message info from current attribute */
+        if(NULL == H5O_attr_get_share(op_data->attr, &sh_mesg))
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared info")
+
+        /* Update the shared attribute in the SOHM info */
+        if(H5O_attr_update_shared(op_data->f, op_data->dxpl_id, op_data->attr, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute in shared storage")
+
+        /* Extract new shared message info from updated attribute */
+        if(NULL == H5O_attr_get_share(op_data->attr, &sh_mesg))
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared info")
+
+        /* Update record's heap ID */
+        HDmemcpy(record->id, &op_data->attr->sh_loc.u.heap_id, sizeof(record->id));
+
+        /* Note that the record changed */
+        *changed = TRUE;
+    } /* end if */
+    else {
+        size_t attr_size;               /* Size of serialized attribute in the heap */
+
+        /* Find out the size of buffer needed for serialized attribute */
+        if((attr_size = H5O_msg_raw_size(op_data->f, H5O_ATTR_ID, op_data->attr)) == 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get attribute size")
+
+        /* Allocate space for serialized attribute, if necessary */
+        if(attr_size > sizeof(attr_buf)) {
+            if(NULL == (attr_ptr = H5FL_BLK_MALLOC(ser_attr, attr_size)))
+                HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
+        } /* end if */
+        else
+            attr_ptr = attr_buf;
+
+        /* Create serialized form of attribute */
+        if(H5O_msg_encode(op_data->f, H5O_ATTR_ID, (unsigned char *)attr_ptr, op_data->attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
 /* Sanity check */
 #ifndef NDEBUG
 {
     size_t obj_len;             /* Length of existing encoded attribute */
 
-    if(H5HF_get_obj_len(fheap, op_data->dxpl_id, record->id, &obj_len) < 0)
+    if(H5HF_get_obj_len(op_data->fheap, op_data->dxpl_id, record->id, &obj_len) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get object size")
-    HDassert(obj_len == op_data->attr_size);
+    HDassert(obj_len == attr_size);
 }
 #endif /* NDEBUG */
-    /* Update existing attribute in heap */
-    /* (would be more efficient as fractal heap 'op' callback, but leave that for later -QAK) */
-    /* (Casting away const OK - QAK) */
-    if(H5HF_write(fheap, op_data->dxpl_id, (void *)record->id, &id_changed, op_data->attr_buf) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute in heap")
+        /* Update existing attribute in heap */
+        /* (would be more efficient as fractal heap 'op' callback, but leave that for later -QAK) */
+        if(H5HF_write(op_data->fheap, op_data->dxpl_id, record->id, changed, attr_ptr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute in heap")
+    } /* end else */
 
 done:
+    /* Release resources */
+    if(attr_ptr && attr_ptr != attr_buf)
+        (void)H5FL_BLK_FREE(ser_attr, attr_ptr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_write_bt2_cb() */
 
@@ -576,15 +615,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
+H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5A_bt2_od_wrt_t op_data;           /* "Op data" for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
-    size_t attr_size;                   /* Size of serialized attribute in the heap */
-    uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
-    void *attr_ptr = NULL;              /* Pointer to serialized attribute */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -614,22 +650,6 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
     } /* end if */
 
-    /* Find out the size of buffer needed for serialized attribute */
-    if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, attr)) == 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get attribute size")
-
-    /* Allocate space for serialized attribute, if necessary */
-    if(attr_size > sizeof(attr_buf)) {
-        if(NULL == (attr_ptr = H5FL_BLK_MALLOC(ser_attr, attr_size)))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end if */
-    else
-        attr_ptr = attr_buf;
-
-    /* Create serialized form of attribute */
-    if(H5O_msg_encode(f, H5O_ATTR_ID, (unsigned char *)attr_ptr, attr) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
-
     /* Open the fractal heap */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, oh->attr_fheap_addr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
@@ -646,15 +666,15 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const H5A_t *attr)
     udata.found_op = NULL;
     udata.found_op_data = NULL;
 
-    /* Create the "op_data" for the v2 B-tree record 'find' callback */
+    /* Create the "op_data" for the v2 B-tree record 'modify' callback */
+    op_data.f = f;
+    op_data.dxpl_id = dxpl_id;
     op_data.fheap = fheap;
     op_data.shared_fheap = shared_fheap;
-    op_data.dxpl_id = dxpl_id;
-    op_data.attr_buf = attr_ptr;
-    op_data.attr_size = attr_size;
+    op_data.attr = attr;
 
     /* Modify attribute through 'name' tracking v2 B-tree */
-    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, H5A_dense_write_bt2_cb, &op_data) < 0)
+    if(H5B2_modify(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata, H5A_dense_write_bt2_cb, &op_data) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
 
 done:
@@ -663,8 +683,6 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
-    if(attr_ptr && attr_ptr != attr_buf)
-        (void)H5FL_BLK_FREE(ser_attr, attr_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_write() */

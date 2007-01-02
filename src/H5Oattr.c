@@ -33,7 +33,6 @@ static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
 static void *H5O_attr_copy(const void *_mesg, void *_dest);
 static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_free(void *mesg);
-static herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
@@ -706,12 +705,10 @@ done:
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
+herr_t
+H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -722,10 +719,20 @@ H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
     HDassert(f);
     HDassert(attr);
 
+    /* Re-share attribute's datatype and dataspace to increment their
+     * reference count if they're shared.
+     * Otherwise they may be deleted when the attribute
+     * message is deleted.
+     */
+    if(H5SM_try_share(f, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute datatype")
+    if(H5SM_try_share(f, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute dataspace")
+
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
-        if(H5T_link(attr->dt,1,dxpl_id) < 0)
+        if(H5T_link(attr->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 

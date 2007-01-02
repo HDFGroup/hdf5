@@ -796,7 +796,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
             /* Insert each record into the new B-tree */
-            for(x=0; x<header->list_to_btree; x++)
+            for(x = 0; x < header->list_to_btree; x++)
             {
                 /* JAMES: I'd like to stop relying on H5O_HASH_UNDEF */
                 if(list->messages[x].hash != H5O_HASH_UNDEF)
@@ -826,15 +826,15 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         /* Insert the new message into the SOHM index */
         if(header->index_type == H5SM_LIST)
         {
-            for(x=0; x<header->list_to_btree; x++)
+            for(x = 0; x < header->list_to_btree; x++)
             {
-              if(list->messages[x].hash == H5O_HASH_UNDEF) /* JAMES: is this a valid test? */
-              {
+                if(list->messages[x].hash == H5O_HASH_UNDEF) /* JAMES: is this a valid test? */
+                {
                   list->messages[x].fheap_id = shared.u.heap_id;
                   list->messages[x].hash = key.hash;
                   list->messages[x].ref_count = 1;
                   break;
-              }
+                }
             }
         }
         else /* Index is a B-tree */
@@ -941,7 +941,7 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 
         if(H5O_msg_delete(f, dxpl_id, type_id, native_mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete shared message.")
-    }
+    } /* end if */
 
 done:
     /* Release the master SOHM table on error */
