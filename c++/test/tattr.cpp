@@ -1104,7 +1104,7 @@ test_attr_dtype_shared(void)
 	DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
 
 	// Open attribute
-	Attribute *attr2 = new Attribute (dset.openAttribute(ATTR1_NAME));
+	Attribute *attr2 = new Attribute (dset2->openAttribute(ATTR1_NAME));
 
 	// Read data from the attribute
 	attr2->read(PredType::NATIVE_INT, &rdata);

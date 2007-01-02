@@ -74,7 +74,7 @@ dsets_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tattr.$(OBJEXT) \
 	tfile.$(OBJEXT) th5s.$(OBJEXT) trefer.$(OBJEXT) \
-	h5cpputil.$(OBJEXT)
+	tvlstr.$(OBJEXT) h5cpputil.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -346,7 +346,7 @@ TEST_PROG = dsets testhdf5
 LDADD = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
 dsets_SOURCES = dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES = testhdf5.cpp tattr.cpp tfile.cpp th5s.cpp trefer.cpp \
-	h5cpputil.cpp
+	tvlstr.cpp h5cpputil.cpp
 
 
 # Tell conclude.am that these are C++ tests.
@@ -428,6 +428,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/th5s.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trefer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
