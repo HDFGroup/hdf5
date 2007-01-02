@@ -169,6 +169,19 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                     encode = H5O_MSG_SHARED->encode;
                 else
                     encode = curr_msg->type->encode;
+/* XXX: fix me */
+#ifdef NOT_YET
+if(!(curr_msg->flags & H5O_MSG_FLAG_SHARED)) {
+    size_t msg_size;
+
+    HDfprintf(stderr, "%s: curr_msg->type->name = '%s'\n", FUNC, curr_msg->type->name);
+    HDfprintf(stderr, "%s: curr_msg->raw_size = %Zu\n", FUNC, curr_msg->raw_size);
+    msg_size = curr_msg->type->raw_size(f, curr_msg->native);
+    HDfprintf(stderr, "%s: msg_size = %Zu\n", FUNC, msg_size);
+    if(msg_size > curr_msg->raw_size)
+        HDfprintf(stderr, "%s: YOW!\n", FUNC);
+} /* end if */
+#endif /* NOT_YET */
                 if((encode)(f, curr_msg->raw, curr_msg->native) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
             } /* end if */
@@ -512,7 +525,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_MSG_CONT->decode)(f, dxpl_id, oh->mesg[curmesg].raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, oh->mesg[curmesg].raw);
                 cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
 
                 /* Save 'native' form of continuation message */
@@ -749,7 +762,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
     } /* end for */
     if(oh->chunk)
-        oh->chunk = H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
+        oh->chunk = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
 
     /* destroy messages */
     for(u = 0; u < oh->nmesgs; u++) {
@@ -759,7 +772,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         H5O_msg_free_mesg(&oh->mesg[u]);
     } /* end for */
     if(oh->mesg)
-        oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
+        oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
 
     /* destroy object header */
     H5FL_FREE(H5O_t,oh);
