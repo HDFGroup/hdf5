@@ -43,7 +43,6 @@
 /****************/
 /* Local Macros */
 /****************/
-#define H5F_TABLEBUF_SIZE  H5SM_TABLE_SIZEOF_MAGIC + 20 + (H5SM_MAX_NINDEXES * 29)
 /* JAMES: should this change according to address size? */
 #define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5SM_MAX_LIST_ELEMS * 16
 
@@ -124,7 +123,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     HDassert(table);
 
     if (table->cache_info.is_dirty) {
-        uint8_t buf[H5F_TABLEBUF_SIZE];  /* Temporary buffer */   /* JAMES This is big. Do I need to use H5FL_BLK_MALLOC instead? */
+        uint8_t *buf;                /* Temporary buffer */
         uint8_t  *p;                 /* Pointer into raw data buffer */
         size_t	 size;               /* Header size on disk */
         uint32_t computed_chksum;    /* Computed metadata checksum value */
@@ -132,6 +131,10 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
         /* Encode the master table and all of the index headers as one big blob */
         size = H5SM_TABLE_SIZE(f) + (H5SM_INDEX_HEADER_SIZE(f) * table->num_indexes);
+
+        /* Allocate the buffer */ /* JAMES: use H5FL_BLK_MALLOC instead? */
+        if(NULL == (buf = HDmalloc(size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Encode the master table */
         p = buf;
