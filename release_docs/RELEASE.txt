@@ -73,6 +73,11 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed potential file corruption bug which could overwrite a portion
+            of an object's header when an attribute was renamed.  If the new
+            name for the attribute was longer than the old name, it's possible
+            that the attribute could grow enough to overwrite another message
+            in the object's header.  QAK - 2007/01/02
         - Fixed file corruption bug which could write an incorrect number of
             messages to an object's header under certain circumstances.
             Generally, the sequence of actions to generate this bug looks

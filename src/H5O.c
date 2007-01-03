@@ -1348,30 +1348,45 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_msg_class_t *type, int overwrite,
     } /* end for */
 
     /* Was the right message found? */
-    if(overwrite >= 0 && (idx >= oh->nmesgs || sequence != overwrite)) {
-	/* But can we insert a new one with this sequence number? */
-	if(overwrite == sequence + 1)
-	    overwrite = -1;
-	else
-	    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found")
+    if(overwrite >= 0) {
+        /* Check if we are trying to create a new message */
+        if(idx >= oh->nmesgs || sequence != overwrite) {
+            /* But can we insert a new one with this sequence number? */
+            if(overwrite == sequence + 1)
+                overwrite = -1;
+            else
+                HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found")
+        } /* end if */
+        else if(!(oh->mesg[idx].flags & H5O_FLAG_SHARED)) {
+            H5O_mesg_t *curr_msg = &oh->mesg[idx];      /* Message to overwrite */
+            size_t msg_size;    /* Size of modified message */
+
+            /* Get the size of the modified message */
+            msg_size = curr_msg->type->raw_size(ent->file, mesg);
+
+            /* Adjust size for alignment, if necessary */
+            msg_size = H5O_ALIGN(msg_size);
+
+            /* Check if message grew */
+            if(msg_size > curr_msg->raw_size) {
+                /* Free any native information */
+                H5O_free_mesg(curr_msg);
+
+                /* Change message type to nil and zero it */
+                curr_msg->type = H5O_MSG_NULL;
+                HDmemset(curr_msg->raw, 0, curr_msg->raw_size);
+
+                /* Indicate that the message was modified */
+                curr_msg->dirty = TRUE;
+
+                /* Indicate that new space should be allocated for the modified message */
+                sequence = overwrite - 1;
+                overwrite = -1;
+            } /* end if */
+        } /* end if */
     } /* end if */
 
     /* Check for creating new message */
-/* XXX: fix me */
-#ifdef NOT_YET
-HDfprintf(stderr, "%s: overwrite = %d\n", FUNC, overwrite);
-if(overwrite >= 0 && !(oh->mesg[idx].flags & H5O_FLAG_SHARED)) {
-    H5O_mesg_t *curr_msg = &oh->mesg[idx];
-    size_t msg_size;
-
-    HDfprintf(stderr, "%s: curr_msg->type->name = '%s'\n", FUNC, curr_msg->type->name);
-    HDfprintf(stderr, "%s: curr_msg->raw_size = %Zu\n", FUNC, curr_msg->raw_size);
-    msg_size = curr_msg->type->raw_size(ent->file, mesg);
-    HDfprintf(stderr, "%s: msg_size = %Zu\n", FUNC, msg_size);
-    if(msg_size > curr_msg->raw_size)
-        HDfprintf(stderr, "%s: YOW!\n", FUNC);
-} /* end if */
-#endif /* NOT_YET */
     if(overwrite < 0) {
         /* Create a new message */
         if((idx=H5O_new_mesg(ent->file,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)

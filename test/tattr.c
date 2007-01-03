@@ -181,9 +181,7 @@ test_attr_basic_write(void)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* change attribute name */
-HDfprintf(stderr, "Before renaming attribute\n");
     ret=H5Arename(dataset, ATTR1_NAME, ATTR_TMP_NAME);
-HDfprintf(stderr, "After renaming attribute\n");
     CHECK(ret, FAIL, "H5Arename");
 
     /* Open attribute again */
@@ -250,12 +248,6 @@ HDfprintf(stderr, "After renaming attribute\n");
     /* Close attribute */
     ret=H5Aclose(attr2);
     CHECK(ret, FAIL, "H5Aclose");
-
-#ifndef OLD_WAY
-    /* change first attribute back to the original name */
-    ret=H5Arename(dataset, ATTR_TMP_NAME, ATTR1_NAME);
-    CHECK(ret, FAIL, "H5Arename");
-#endif /* OLD_WAY */
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -344,11 +336,7 @@ test_attr_basic_read(void)
     VERIFY(ret, 2, "H5Aget_num_attrs");
 
     /* Open an attribute for the dataset */
-#ifndef OLD_WAY
-    attr=H5Aopen_name(dataset,ATTR1_NAME);
-#else /* OLD_WAY */
-    attr=H5Aopen_name(dataset,ATTR_TMP_NAME);
-#endif /* OLD_WAY */
+    attr = H5Aopen_name(dataset, ATTR_TMP_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
