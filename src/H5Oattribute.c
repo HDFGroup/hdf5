@@ -853,29 +853,55 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribu
             /* Mark message as dirty */
             mesg->dirty = TRUE;
 
-            /* Check for attribute name getting longer */
-            if(HDstrlen(udata->new_name) > HDstrlen(udata->old_name)) {
-                /* Increment attribute count */
-                /* (must be incremented before call to H5O_msg_append_real(), in order for
-                 *      sanity checks to pass - QAK)
-                 */
-                if(oh->version > H5O_VERSION_1)
-                    oh->nattrs++;
+            /* Check for attribute message changing size */
+            if(HDstrlen(udata->new_name) != HDstrlen(udata->old_name)) {
+                H5A_t *attr;            /* Attribute to re-add */
 
-                /* Append attribute to object header */
-                if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, 0, 0, mesg->native, oh_flags_ptr) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate attribute in header")
+                /* Take ownership of the message's native info (the attribute) 
+                 *      so any shared objects in the file aren't adjusted (and
+                 *      possibly deleted) when the message is released.
+                 */
+                /* (We do this more complicated sequence of actions because the
+                 *      simpler solution of adding the modified attribute first
+                 *      and then deleting the old message can re-allocate the
+                 *      list of messages during the "add the modified attribute"
+                 *      step, invalidating the message pointer we have here - QAK)
+                 */
+                attr = mesg->native;
+                mesg->native = NULL;
 
                 /* If the later version of the object header format, decrement attribute */
-                /* (must be decremented before call to H5O_release_mesg(), in order for
-                 *      sanity checks to pass - QAK)
+                /* (must be decremented before call to H5O_release_mesg(),
+                 *      so that the sanity checks pass - QAK)
                  */
                 if(oh->version > H5O_VERSION_1)
                     oh->nattrs--;
 
-                /* Convert message into a null message (i.e. delete it) */
-                if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, TRUE) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+                /* Delete old attribute */
+                /* (doesn't decrement the link count on shared components becuase
+                 *      the "native" pointer has been reset)
+                 */
+                if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE, FALSE) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release previous attribute")
+
+                /* Increment attribute count */
+                /* (must be incremented before call to H5O_msg_append_real(),
+                 *      so that the sanity checks pass - QAK)
+                 */
+                if(oh->version > H5O_VERSION_1)
+                    oh->nattrs++;
+
+                /* Append renamed attribute to object header */
+                /* (increments the link count on shared components) */
+                if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, 0, 0, attr, oh_flags_ptr) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate renamed attribute in header")
+
+                /* Decrement the link count on shared components */
+                if(H5O_attr_delete(udata->f, udata->dxpl_id, attr, TRUE) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to delete attribute")
+
+                /* Release the local copy of the attribute */
+                H5O_msg_free_real(H5O_MSG_ATTR, attr);
             } /* end if */
 
             /* Indicate that we found an existing attribute with the old name */
