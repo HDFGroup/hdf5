@@ -1508,7 +1508,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 
     /* Allocate attribute structure */
     if(_new_attr == NULL) {
-        if(NULL == (new_attr = H5FL_CALLOC(H5A_t)))
+        if(NULL == (new_attr = H5FL_MALLOC(H5A_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         allocated_attr = TRUE;
     } /* end if */

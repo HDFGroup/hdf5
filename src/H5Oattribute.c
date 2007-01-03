@@ -808,7 +808,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_rename_mod_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
+H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
@@ -850,11 +850,36 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribu
             H5MM_xfree(((H5A_t *)mesg->native)->name);
             ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
 
-            /* Indicate that we found an existing attribute with the old name*/
-            udata->found = TRUE;
-
             /* Mark message as dirty */
             mesg->dirty = TRUE;
+
+            /* Check for attribute name getting longer */
+            if(HDstrlen(udata->new_name) > HDstrlen(udata->old_name)) {
+                /* Increment attribute count */
+                /* (must be incremented before call to H5O_msg_append_real(), in order for
+                 *      sanity checks to pass - QAK)
+                 */
+                if(oh->version > H5O_VERSION_1)
+                    oh->nattrs++;
+
+                /* Append attribute to object header */
+                if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, 0, 0, mesg->native, oh_flags_ptr) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate attribute in header")
+
+                /* If the later version of the object header format, decrement attribute */
+                /* (must be decremented before call to H5O_release_mesg(), in order for
+                 *      sanity checks to pass - QAK)
+                 */
+                if(oh->version > H5O_VERSION_1)
+                    oh->nattrs--;
+
+                /* Convert message into a null message (i.e. delete it) */
+                if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, TRUE) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
+            } /* end if */
+
+            /* Indicate that we found an existing attribute with the old name */
+            udata->found = TRUE;
 
             /* Stop iterating */
             ret_value = H5_ITER_STOP;
