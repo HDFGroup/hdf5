@@ -22,29 +22,23 @@
 
 #include "testhdf5.h"
 
-/* Maximum number of SOHM indexes in a file.  Should correspond
- * to H5SM_MAX_NUM_INDEXES
- */
-/* JAMES: get these three from default fcpl */
-#define MAX_INDEXES 6
-
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
-const unsigned def_type_flags[MAX_INDEXES] = {0,0,0,0,0,0};
-const unsigned def_minsizes[MAX_INDEXES] = {250,250,250,250,250,250};
+const unsigned def_type_flags[H5SM_MAX_NINDEXES] = {0,0,0,0,0,0};
+const unsigned def_minsizes[H5SM_MAX_NINDEXES] = {250,250,250,250,250,250};
 #define DEF_L2B 50
 #define DEF_B2L 40
 
 /* Non-default SOHM values for testing */
 /* JAMES: make these defined in function */
 #define TEST_NUM_INDEXES 4
-const unsigned test_type_flags[MAX_INDEXES] =
+const unsigned test_type_flags[H5SM_MAX_NINDEXES] =
                 {H5O_MESG_FILL_FLAG,
                  H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG,
                  H5O_MESG_SDSPACE_FLAG,
                  H5O_MESG_PLINE_FLAG,
                  0, 0};
-const unsigned test_minsizes[MAX_INDEXES] = {0, 2, 40, 100, 3, 1000};
+const unsigned test_minsizes[H5SM_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
 #define TEST_L2B 65
 #define TEST_B2L 64
 
@@ -299,12 +293,16 @@ static void test_sohm_fcpl(void)
 
     /* Test giving bogus values to H5P* functions */
     H5E_BEGIN_TRY {
+        /* Trying to create too many indexes should fail */
+        ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5SM_MAX_NINDEXES + 1);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_nindexes");
+
         /* Trying to set index 0 or an index higher than the current number
          * of indexes should fail.
          */
-        ret = H5Pset_shared_mesg_index(fcpl_id, 0, 0, 15 /* JAMES */);
+        ret = H5Pset_shared_mesg_index(fcpl_id, 0, 0, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
-        ret = H5Pset_shared_mesg_index(fcpl_id, MAX_INDEXES + 1, 0, 15);
+        ret = H5Pset_shared_mesg_index(fcpl_id, H5SM_MAX_NINDEXES + 1, 0, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
         ret = H5Pset_shared_mesg_index(fcpl_id, TEST_NUM_INDEXES + 1, 0, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
@@ -331,7 +329,15 @@ static void test_sohm_fcpl(void)
          */
         ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 12);
         VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
+        /* Setting them to extremely large values should also fail */
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS + 1, 0);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, H5SM_MAX_LIST_ELEMS + 10);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS, H5SM_MAX_LIST_ELEMS+1);
+        VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
     } H5E_END_TRY
+
 
     /* Actually, the list max can be exactly 1 greater than the
      * btree min, but no more.  Also, the errors above shouldn't
@@ -344,6 +350,20 @@ static void test_sohm_fcpl(void)
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
+    ret = H5Fclose(fid);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Test edge cases; H5SM_MAX_NINDEXES and H5SM_MAX_LIST_ELEMS should be
+     * valid values.  Also, creating a file with uninitialized indexes
+     * (indexes 3-5) should work.
+     */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5SM_MAX_NINDEXES);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS, H5SM_MAX_LIST_ELEMS);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(fid, "H5Fcreate");
+
 
     /* Clean up */
     ret = H5Pclose(fcpl_id);

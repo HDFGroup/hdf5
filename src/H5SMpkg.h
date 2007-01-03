@@ -60,9 +60,6 @@
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)                              \
          + H5SM_SIZEOF_CHECKSUM                /* Checksum */
 
-#define H5SM_MAX_INDEXES 8
-#define H5SM_MAX_LIST_ELEMS 1000
-
 #define H5SM_B2_NODE_SIZE 512
 #define H5SM_B2_SPLIT_PERCENT 100
 #define H5SM_B2_MERGE_PERCENT 40

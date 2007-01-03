@@ -67,7 +67,7 @@ static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 /*********************/
 
 H5FL_DEFINE(H5SM_master_table_t);
-H5FL_ARR_DEFINE(H5SM_index_header_t, H5SM_MAX_INDEXES);
+H5FL_ARR_DEFINE(H5SM_index_header_t, H5SM_MAX_NINDEXES);
 H5FL_DEFINE(H5SM_list_t);
 H5FL_ARR_DEFINE(H5SM_sohm_t, H5SM_MAX_LIST_ELEMS);
 
@@ -105,8 +105,8 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     haddr_t table_addr = HADDR_UNDEF;
     unsigned num_indexes;
     unsigned list_to_btree, btree_to_list;
-    unsigned index_type_flags[H5SM_MAX_NUM_INDEXES];
-    unsigned minsizes[H5SM_MAX_NUM_INDEXES];
+    unsigned index_type_flags[H5SM_MAX_NINDEXES];
+    unsigned minsizes[H5SM_MAX_NINDEXES];
     unsigned type_flags_used;
     unsigned x;
     hsize_t table_size;
@@ -135,7 +135,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM message min sizes")
 
     /* Verify that values are valid */
-    if(num_indexes > H5SM_MAX_NUM_INDEXES)
+    if(num_indexes > H5SM_MAX_NINDEXES)
         HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "number of indexes in property list is too large")
 
     /* Check that type flags weren't duplicated anywhere */
@@ -162,7 +162,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
      * min.
      */
     HDassert(list_to_btree + 1 >= btree_to_list);
-    HDassert(table->num_indexes > 0 && table->num_indexes <= H5SM_MAX_NUM_INDEXES);
+    HDassert(table->num_indexes > 0 && table->num_indexes <= H5SM_MAX_NINDEXES);
 
     /* Allocate the SOHM indexes as an array. */
     if(NULL == (table->indexes = (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))

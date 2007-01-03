@@ -75,9 +75,9 @@
 /* Definitions for shared object header messages */
 #define H5F_CRT_SHMSG_NINDEXES_SIZE    sizeof(unsigned)
 #define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
-#define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
+#define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5SM_MAX_NINDEXES])
 #define H5F_CRT_SHMSG_INDEX_TYPES_DEF  {0,0,0,0,0,0}
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5SM_MAX_NUM_INDEXES])
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5SM_MAX_NINDEXES])
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF {250,250,250,250,250,250}
 /* Definitions for shared object header list/btree phase change cutoffs */
 #define H5F_CRT_SHMSG_LIST_MAX_SIZE     sizeof(unsigned)
@@ -158,8 +158,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned objectdir_ver = H5F_CRT_OBJ_DIR_VERS_DEF;  /* Default object directory version # */
     unsigned sharedheader_ver = H5F_CRT_SHARE_HEAD_VERS_DEF;    /* Default shared header message version # */
     unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
-    unsigned sohm_index_flags[H5SM_MAX_NUM_INDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
-    unsigned sohm_index_minsizes[H5SM_MAX_NUM_INDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
+    unsigned sohm_index_flags[H5SM_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
+    unsigned sohm_index_minsizes[H5SM_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
     unsigned sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
     unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -689,7 +689,7 @@ done:
  *              for this file.
  *
  *              NINDEXES is the number of indexes for this file; it should
- *              be between 0 and H5SM_MAX_NUM_INDEXES.  If nindexes is 0,
+ *              be between 0 and H5SM_MAX_NINDEXES.  If nindexes is 0,
  *              SOHMs will be disabled for this file.
  *
  *              MESG_TYPE_FLAGS is an array of message type flags (using
@@ -711,7 +711,7 @@ herr_t
 H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_flags[])
 {
     unsigned        i;
-    unsigned        type_flags[H5SM_MAX_NUM_INDEXES]; /* Full-sized array */
+    unsigned        type_flags[H5SM_MAX_NINDEXES]; /* Full-sized array */
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned        flags_used; /* type flags already specified.
                                  * Used to make sure a flag isn't used twice.
@@ -722,7 +722,7 @@ H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_
     H5TRACE3("e", "iIu*Iu", plist_id, nindexes, mesg_type_flags);
 
     /* Check arguments */
-    if(nindexes > H5SM_MAX_NUM_INDEXES)
+    if(nindexes > H5SM_MAX_NINDEXES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is too large");
     if(nindexes > 0 && !mesg_type_flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no type flags specified");
@@ -781,8 +781,8 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
     H5TRACE2("e", "iIu", plist_id, nindexes);
 
     /* Check argument */
-    if (nindexes > H5SM_MAX_NUM_INDEXES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is greater than H5SM_MAX_NUM_INDEXES");
+    if (nindexes > H5SM_MAX_NINDEXES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is greater than H5SM_MAX_NINDEXES");
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
@@ -849,8 +849,8 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned    nindexes;               /* Number of SOHM indexes */
-    unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
-    unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
+    unsigned    type_flags[H5SM_MAX_NINDEXES]; /* Array of mesg_type_flags*/
+    unsigned    minsizes[H5SM_MAX_NINDEXES]; /* Array of min_mesg_sizes*/
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL)
@@ -914,8 +914,8 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned    nindexes;               /* Number of SOHM indexes */
-    unsigned    type_flags[H5SM_MAX_NUM_INDEXES]; /* Array of mesg_type_flags*/
-    unsigned    minsizes[H5SM_MAX_NUM_INDEXES]; /* Array of min_mesg_sizes*/
+    unsigned    type_flags[H5SM_MAX_NINDEXES]; /* Array of mesg_type_flags*/
+    unsigned    minsizes[H5SM_MAX_NINDEXES]; /* Array of min_mesg_sizes*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_shared_mesg_index, FAIL);
@@ -989,10 +989,10 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
      */
     if(max_list + 1 < min_btree)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "minimum B-tree value is greater than maximum list value")
-    if(max_list > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max list value must be < 65536")
-    if(min_btree > 65535)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min btree value must be < 65536")
+    if(max_list > H5SM_MAX_LIST_ELEMS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "max list value is larger than H5SM_MAX_LIST_ELEMS")
+    if(min_btree > H5SM_MAX_LIST_ELEMS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min btree value is larger than H5SM_MAX_LIST_ELEMS")
 
     /* Avoid the strange case where max_list == 0 and min_btree == 1, so deleting the
      * last message in a B-tree makes it become an empty list.

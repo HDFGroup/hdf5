@@ -29,8 +29,6 @@
 /* Library Private Typedefs */
 /****************************/
 
-#define H5SM_MAX_NUM_INDEXES 6
-
 /******************************/
 /* Library Private Prototypes */
 /******************************/

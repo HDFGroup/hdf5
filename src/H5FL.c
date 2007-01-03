@@ -1503,11 +1503,11 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
         if(H5FL_arr_init(head)<0)
             HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'array' blocks")
 
+    /* Sanity check that the number of elements is supported */
+    assert(elem<=(unsigned) head->maxelem);
+
     /* Get the set of the memory block */
     mem_size=head->list_arr[elem].size;
-
-    /* Sanity check that the number of elements is supported */
-    assert((int)elem<=head->maxelem);
 
     /* Check for nodes available on the free list first */
     if(head->list_arr[elem].list!=NULL) {

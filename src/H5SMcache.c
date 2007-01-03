@@ -43,7 +43,7 @@
 /****************/
 /* Local Macros */
 /****************/
-#define H5F_TABLEBUF_SIZE  H5SM_TABLE_SIZEOF_MAGIC + 20 + (H5SM_MAX_INDEXES * 26)
+#define H5F_TABLEBUF_SIZE  H5SM_TABLE_SIZEOF_MAGIC + 20 + (H5SM_MAX_NINDEXES * 26)
 /* JAMES: should this change according to address size? */
 #define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5SM_MAX_LIST_ELEMS * 16
 

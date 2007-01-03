@@ -59,6 +59,13 @@
 #define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
 
+/* Maximum shared message values.  Number of indexes is 8 to allow room to add
+ * new types of messages.
+ */
+/* JAMES: make these H5O* */
+#define H5SM_MAX_NINDEXES 8
+#define H5SM_MAX_LIST_ELEMS 5000
+
 /*******************/
 /* Public Typedefs */
 /*******************/
