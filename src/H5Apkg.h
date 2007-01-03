@@ -166,6 +166,8 @@ H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     H5A_t *attr);
+H5_DLL herr_t H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    const char *old_name, const char *new_name);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     haddr_t attr_fheap_addr, haddr_t name_bt2_addr, H5_iter_order_t order,
     unsigned skip, unsigned *last_attr, const H5A_attr_iter_op_t *attr_op,

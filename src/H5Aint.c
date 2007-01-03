@@ -126,7 +126,7 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     /* Check for re-allocating table */
     if(udata->curr_attr == udata->atable->nattrs) {
         size_t n = MAX(1, 2 * udata->atable->nattrs);
-        H5A_t *table = H5MM_realloc(udata->atable->attrs,
+        H5A_t *table = (H5A_t *)H5MM_realloc(udata->atable->attrs,
                                           n * sizeof(H5A_t));
 
         if(!table)
@@ -142,11 +142,11 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
 	 * message in the global heap or some other object header.
 	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, mesg->native, H5O_MSG_ATTR, &udata->atable->attrs[udata->curr_attr]))
+        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &udata->atable->attrs[udata->curr_attr]))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to read shared attribute")
     } /* end if */
     else {
-        if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], mesg->native))
+        if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
     } /* end else */
 
@@ -300,7 +300,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, hsize_t nattrs, haddr_t attr_fhea
         H5A_attr_iter_op_t attr_op;    /* Attribute operator */
 
         /* Allocate the table to store the attributes */
-        if((atable->attrs = H5MM_malloc(sizeof(H5A_t) * atable->nattrs)) == NULL)
+        if((atable->attrs = (H5A_t *)H5MM_malloc(sizeof(H5A_t) * atable->nattrs)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */

@@ -527,7 +527,7 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
- *		Jan  2 2006
+ *		Jan  2 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -547,7 +547,7 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr,
 
     /* Increment reference count on attribute components */
     /* (Otherwise they may be deleted when the old attribute
-     * message is deleted.)
+     * message is removed from the shared message storage.)
      */
     if(H5O_attr_link(f, dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
@@ -559,7 +559,7 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr,
     else if(shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't share attribute")
 
-    /* Remove the old attribute from the SOHM index */
+    /* Remove the old attribute from the SOHM storage */
     if(H5SM_try_delete(f, dxpl_id, H5O_ATTR_ID, sh_mesg) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to delete shared attribute in shared storage")
 
@@ -610,11 +610,11 @@ H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
 
         /* Check for correct attribute message to modify */
         if(HDstrcmp(shared_attr.name, udata->attr->name) == 0) {
-            /* Update the shared attribute in the SOHM info */
+            /* Update the shared attribute in the SOHM storage */
             if(H5O_attr_update_shared(udata->f, udata->dxpl_id, udata->attr, (const H5O_shared_t *)mesg->native) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
 
-            /* Extract shared message info from current attribute */
+            /* Extract updated shared message info from modified attribute */
             if(NULL == H5O_attr_get_share(udata->attr, (H5O_shared_t *)mesg->native))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't get shared info")
 
@@ -799,6 +799,11 @@ done:
  * Purpose:	Object header iterator callback routine to change name of
  *              attribute during rename
  *
+ * Note:	This routine doesn't currently allow an attribute to change
+ *              its "shared" status, if the name change would cause a size
+ *              difference that would put it into a different category.
+ *              Something for later...
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -835,9 +840,23 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
         /* Check for correct attribute message to modify */
         if(HDstrcmp(shared_attr.name, udata->old_name) == 0) {
-/* XXX: fix me */
-HDfprintf(stderr, "%s: renaming a shared attribute not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribute not supported yet")
+            /* Change the name for the attribute */
+            H5MM_xfree(shared_attr.name);
+            shared_attr.name = H5MM_xstrdup(udata->new_name);
+
+            /* Mark message as dirty */
+            mesg->dirty = TRUE;
+
+            /* Update the shared attribute in the SOHM storage */
+            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, &shared_attr, (const H5O_shared_t *)mesg->native) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
+
+            /* Extract updated shared message info from modified attribute */
+            if(NULL == H5O_attr_get_share(&shared_attr, (H5O_shared_t *)mesg->native))
+                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, H5_ITER_ERROR, "can't get shared info")
+
+            /* Indicate that we found the correct attribute */
+            udata->found = TRUE;
         } /* end if */
 
         /* Release copy of shared attribute */
@@ -867,7 +886,7 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribu
                  *      list of messages during the "add the modified attribute"
                  *      step, invalidating the message pointer we have here - QAK)
                  */
-                attr = mesg->native;
+                attr = (H5A_t *)mesg->native;
                 mesg->native = NULL;
 
                 /* If the later version of the object header format, decrement attribute */
@@ -897,6 +916,7 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribu
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate renamed attribute in header")
 
                 /* Decrement the link count on shared components */
+                /* (to balance all the link count adjustments out) */
                 if(H5O_attr_delete(udata->f, udata->dxpl_id, attr, TRUE) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to delete attribute")
 
@@ -906,14 +926,17 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, H5_ITER_ERROR, "renaming a shared attribu
 
             /* Indicate that we found an existing attribute with the old name */
             udata->found = TRUE;
-
-            /* Stop iterating */
-            ret_value = H5_ITER_STOP;
-
-            /* Indicate that the object header was modified */
-            *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
         } /* end if */
     } /* end else */
+
+    /* Set common info, if we found the correct attribute */
+    if(udata->found) {
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+
+        /* Indicate that the object header was modified */
+        *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -933,7 +956,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name, const char *new_name)
+H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
+    const char *new_name)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
@@ -952,9 +976,9 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name, const
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {
-/* XXX: fix me */
-HDfprintf(stderr, "%s: renaming attributes in dense storage not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "renaming attributes in dense storage not supported yet")
+        /* Rename the attribute data in dense storage */
+        if(H5A_dense_rename(loc->file, dxpl_id, oh, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
     } /* end if */
     else {
         H5O_iter_ren_t udata;           /* User data for callback */
@@ -1118,6 +1142,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
+/* XXX: fix me */
 HDfprintf(stderr, "%s: removing a shared attribute not supported yet!\n", FUNC);
 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "deleting a shared attribute not supported yet")
 #ifdef NOT_YET

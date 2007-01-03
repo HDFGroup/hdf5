@@ -331,7 +331,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         H5P_genplist_t  *ac_plist;      /* ACPL Property list */
 
         /* Get a local copy of the attribute creation property list */
-        if(NULL == (ac_plist = H5I_object(acpl_id)))
+        if(NULL == (ac_plist = (H5P_genplist_t *)H5I_object(acpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->encoding)) < 0)
@@ -1142,15 +1142,15 @@ H5Aget_create_plist(hid_t attr_id)
     HDassert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
 
     /* Get attribute and default attribute creation property list*/
-    if(NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (plist = H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
 
     /* Create the property list object to return */
     if((new_plist_id = H5P_copy_plist(plist)) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
-    if(NULL == (new_plist = H5I_object(new_plist_id)))
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_plist_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Set the character encoding on the new property list */

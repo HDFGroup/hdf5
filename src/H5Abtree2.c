@@ -36,6 +36,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5SMprivate.h"	/* Shared object header messages        */
 
 
 /****************/
@@ -56,6 +57,7 @@ typedef struct H5A_fh_ud_cmp_t {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     const char  *name;                  /* Name of attribute to compare      */
+    const H5A_dense_bt2_name_rec_t *record;     /* v2 B-tree record for attribute */
     H5B2_found_t found_op;              /* Callback when correct attribute is found */
     void        *found_op_data;         /* Callback data when correct attribute is found */
 
@@ -141,16 +143,22 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_fh_name_cmp)
 
     /* Decode link information */
-    if(NULL == (attr = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, obj)))
+    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Compare the string values */
     udata->cmp = HDstrcmp(udata->name, attr->name);
 
     /* Check for correct attribute & callback to make */
-    if(udata->cmp == 0 && udata->found_op)
+    if(udata->cmp == 0 && udata->found_op) {
+        /* Check whether we should "reconstitute" the shared message info */
+        if(udata->record->flags & H5O_MSG_FLAG_SHARED)
+            H5SM_reconstitute(&(attr->sh_loc), udata->record->id);
+
+        /* Make callback */
         if((udata->found_op)(attr, udata->found_op_data) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPERATE, FAIL, "attribute found callback failed")
+    } /* end if */
 
 done:
     /* Release the space allocated for the attrbute */
@@ -260,6 +268,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
         fh_udata.f = bt2_udata->f;
         fh_udata.dxpl_id = bt2_udata->dxpl_id;
         fh_udata.name = bt2_udata->name;
+        fh_udata.record = bt2_rec;
         fh_udata.found_op = bt2_udata->found_op;
         fh_udata.found_op_data = bt2_udata->found_op_data;
 

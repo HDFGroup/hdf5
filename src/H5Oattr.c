@@ -181,18 +181,18 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
+	if (NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
-        if((attr->dt = H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL)) == NULL)
+        if((attr->dt = (H5T_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
 
         /* Free the shared information */
         H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
-        if((attr->dt = (H5O_MSG_DTYPE->decode)(f, dxpl_id, p)) == NULL)
+        if((attr->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, p)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2)
@@ -210,18 +210,18 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_MSG_SHARED->decode) (f, dxpl_id, p)))
+	if (NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
-        if((extent= H5O_shared_read(f, dxpl_id, shared, H5O_MSG_SDSPACE, NULL))==NULL)
+        if((extent= (H5S_extent_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_SDSPACE, NULL))==NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
         /* Free the shared information */
         H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
-        if((extent = (H5O_MSG_SDSPACE->decode)(f, dxpl_id, p)) == NULL)
+        if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, p)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
     } /* end else */
 
@@ -473,7 +473,7 @@ H5O_attr_copy(const void *_src, void *_dst)
     HDassert(_src);
 
     /* copy */
-    if(NULL == (ret_value = H5A_copy(_dst, _src)))
+    if(NULL == (ret_value = (H5A_t *)H5A_copy((H5A_t *)_dst, (const H5A_t *)_src)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute")
 
 done:
@@ -1065,9 +1065,9 @@ done:
         if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(buf)
-        H5FL_BLK_FREE(attr_buf, buf);
+        buf = H5FL_BLK_FREE(attr_buf, buf);
     if(reclaim_buf)
-        H5FL_BLK_FREE(attr_buf, reclaim_buf);
+        reclaim_buf = H5FL_BLK_FREE(attr_buf, reclaim_buf);
 
     /* Release destination attribute information on failure */
     if(!ret_value)
