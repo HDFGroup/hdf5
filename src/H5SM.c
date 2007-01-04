@@ -427,7 +427,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 
     HDassert(header);
     HDassert(header->index_addr == HADDR_UNDEF);
-    HDassert(header->btree_to_list <= header->list_to_btree);
+    HDassert(header->btree_to_list <= header->list_to_btree + 1);
 
     /* In most cases, the index starts as a list */
     if(header->list_to_btree > 0)
@@ -812,6 +812,12 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 	        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
             list = NULL;
 
+            /* JAMES: same as list deletion in try_delete? */
+            /* Remove the list from the cache */
+            if(H5AC_expunge_entry(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache")
+
+            /* Free the list's space on disk */
             list_size = H5SM_LIST_SIZE(f, header->list_to_btree);
             if(H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, header->index_addr, list_size) < 0)
 	        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to free shared message list")
@@ -1147,13 +1153,53 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         --header->num_messages;
         *cache_flags |= H5AC__DIRTIED_FLAG;
 
-        /* If we've just passed the btree-to-list cutoff, convert this B-tree
-         * into a list
+        /* If there are no messages left in the index, delete it 
+         * JAMES: make this a separate function
          */
-        /* JAMES: there's an off-by-one error here */
+        if(header->num_messages <=0) {
+
+            if(header->index_type == H5SM_LIST) { 
+                hsize_t     list_size;        /* Size of list on disk */
+
+                /* Remove the list from the cache */
+                HDassert(list);
+                if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG) < 0)
+	            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
+                list = NULL;
+                if(H5AC_expunge_entry(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache")
+
+                /* Free the file space used */
+                list_size = H5SM_LIST_SIZE(f, header->list_to_btree);
+                if(H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, header->index_addr, list_size) < 0)
+	            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to free shared message list")
+
+            } else {
+                HDassert(header->index_type == H5SM_BTREE);
+
+                if(H5B2_delete(f, dxpl_id, H5SM_INDEX, header->index_addr, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
+            }
+
+            /* Free the fractal heap */
+            /* Release the fractal heap if we opened it */
+            HDassert(fheap);
+            if(H5HF_close(fheap, dxpl_id) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+            fheap = NULL;
+            if(H5HF_delete(f, dxpl_id, header->heap_addr) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
+
+            header->index_addr = HADDR_UNDEF;
+            header->heap_addr = HADDR_UNDEF;
+
+        } else if(header->index_type == H5SM_BTREE && header->num_messages < header->btree_to_list)
+        /* JAMES: there's an off-by-one error here? */
         /* JAMES: make this a separate function */
-        if(header->index_type == H5SM_BTREE && header->num_messages < header->btree_to_list)
         {
+            /* Otherwise, if we've just passed the btree-to-list cutoff, convert
+             * this B-tree into a list
+             */
             /* Remember the btree address for this index; we'll overwrite the
              * address in the index header
              */

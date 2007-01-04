@@ -2769,6 +2769,166 @@ static void test_sohm_delete()
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_delete_revert_helper
+ *
+ * Purpose:     Tests that shared object header message deletion returns
+ *              the file to its previous state using the supplied FCPL.
+ *
+ *              Creates shared messages and then deletes them.  Ensures
+ *              that the file has not grown in size.
+ *
+ * Programmer:  James Laird
+ *              Wednesday, January 3, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_delete_revert_helper(hid_t fcpl_id)
+{
+    hid_t file_id;
+    hid_t dspace_id;
+    hid_t dset_id;
+    hsize_t dims[1] = {1};
+    h5_stat_size_t initial_filesize, deleted_filesize;
+    herr_t ret;
+
+    /* Create a dataspace for later */
+    dspace_id = H5Screate_simple(1, dims, dims);
+    CHECK_I(dspace_id, "H5Screate_simple");
+
+    /* Create a file using the FCPL supplied*/
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /* Close the file and get its size */
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+    initial_filesize = h5_get_file_size(FILENAME);
+
+
+    /* Re-create the file and create a dataset in it */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    dset_id = H5Dcreate(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Close the dataset and delete it */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Ldelete(file_id, "dset", H5P_DEFAULT);
+    CHECK_I(ret, "H5Ldelete");
+
+    /* Close the file and get its size */
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+    deleted_filesize = h5_get_file_size(FILENAME);
+
+    VERIFY(deleted_filesize, initial_filesize, "h5_get_file_size");
+
+
+    /* Repeat, creating two datasets in the file */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /* Create and close the first dataset */
+    dset_id = H5Dcreate(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate");
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+
+    /* Create and close the second.  These messages should be shared */
+    dset_id = H5Dcreate(file_id, "dset2", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate");
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+
+    /* Delete both datasets */
+    ret = H5Ldelete(file_id, "dset", H5P_DEFAULT);
+    CHECK_I(ret, "H5Ldelete");
+    ret = H5Ldelete(file_id, "dset2", H5P_DEFAULT);
+    CHECK_I(ret, "H5Ldelete");
+
+    /* Close the file and get its size */
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+    deleted_filesize = h5_get_file_size(FILENAME);
+
+    VERIFY(deleted_filesize, initial_filesize, "h5_get_file_size");
+
+
+    /* Cleanup */
+    ret = H5Sclose(dspace_id);
+    CHECK_I(ret, "H5Sclose");
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_delete_revert
+ *
+ * Purpose:     Calls test_sohm_delete_revert_helper with different FCPLs.
+ *
+ * Programmer:  James Laird
+ *              Wednesday, January 3, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_delete_revert()
+{
+    hid_t fcpl_id;
+    herr_t ret;
+
+    /* Create an fcpl with messages in two indexes */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK_I(fcpl_id, "H5Pcreate");
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG, 10);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_SDSPACE_FLAG, 10);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+    /* Call the helper function to test this FCPL. */
+    test_sohm_delete_revert_helper(fcpl_id);
+
+    /* Try using B-trees */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    test_sohm_delete_revert_helper(fcpl_id);
+
+
+    /* Try sharing all messages */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 10);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 5);
+
+    test_sohm_delete_revert_helper(fcpl_id);
+
+    /* Try using B-trees */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    test_sohm_delete_revert_helper(fcpl_id);
+
+    /* There should be at least two messages in the test (datatype and
+     * dataspace).  Use an index that will transition from a list to
+     * a B-tree and back.
+     */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1, 2);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    test_sohm_delete_revert_helper(fcpl_id);
+
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:    test_sohm_extlink_helper
  *
@@ -2891,6 +3051,8 @@ test_sohm(void)
                                  * SOHMs, closing and reopening file after
                                  * each write. */
     test_sohm_delete();         /* Test deleting shared messages */
+    test_sohm_delete_revert();  /* Test that a file with SOHMs becomes an
+                                 * empty file again when they are deleted. */
     test_sohm_extlink();        /* Test SOHMs when external links are used */
 
 } /* test_sohm() */
