@@ -317,9 +317,6 @@ int do_copy_objects(hid_t fidin,
  void     *buf=NULL;      /* buffer for raw data */
  void     *sm_buf=NULL;   /* buffer for raw data */
  unsigned i;
-#if defined(H5REPACK_GETTIME)
- time_t start_time, finish_time, time_secs;
-#endif
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -389,9 +386,6 @@ int do_copy_objects(hid_t fidin,
    {
     int j;
 
-#if defined(H5REPACK_GETTIME)
-    time( &start_time );  
-#endif
     if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
      goto error;
     if ((f_space_id=H5Dget_space(dset_in))<0)
@@ -659,11 +653,6 @@ int do_copy_objects(hid_t fidin,
     if (H5Dclose(dset_in)<0)
      goto error;
 
-#if defined(H5REPACK_GETTIME)
-    time( &finish_time ); 
-    time_secs = finish_time-start_time;
-    printf("time1=%d secs\n",time_secs);
-#endif
 
     }
   /*-------------------------------------------------------------------------
@@ -673,10 +662,6 @@ int do_copy_objects(hid_t fidin,
     else 
     {
      hid_t        pid;
-     
-#if defined(H5REPACK_GETTIME)
-     time( &start_time );  
-#endif
      
      /* create property to pass copy options */
      if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
@@ -698,13 +683,6 @@ int do_copy_objects(hid_t fidin,
      /* close property */
      if (H5Pclose(pid)<0)
       goto error;
-     
-#if defined(H5REPACK_GETTIME)
-     time( &finish_time ); 
-     time_secs = finish_time-start_time;
-     printf("time2=%d secs\n",time_secs);
-#endif
-
      
     } /* end do we have request for filter/chunking */
 
