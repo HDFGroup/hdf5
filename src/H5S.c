@@ -1247,6 +1247,10 @@ H5Sis_simple(hid_t space_id)
     dimensions in the DIMS array are used as the maximum dimensions.
     Currently, only the first dimension in the array (the slowest) may be
     unlimited in size.
+ MODIFICATIONS
+    Christian Chilan 01/05/2007 
+    Verifies that each element of DIMS is not equal to H5S_UNLIMITED.
+
 --------------------------------------------------------------------------*/
 herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
@@ -1268,6 +1272,8 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     if (dims) {
         for (u=0; u<rank; u++) {
+            if (H5S_UNLIMITED==dims[u])
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "current dimension must have a specific size, not H5S_UNLIMITED");
             if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) && dims[u]==0)
                 HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension size");
         }
@@ -1549,7 +1555,10 @@ done:
  * Programmer:	Quincey Koziol
  *		Tuesday, January  27, 1998
  *
- * Modifications:
+ * Modifications: Christian Chilan 01/05/2007
+ *                Verifies that each element of DIMS is not equal to
+ *                H5S_UNLIMITED. 
+ *              
  *
  *-------------------------------------------------------------------------
  */
@@ -1573,6 +1582,8 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     /* Check whether the current dimensions are valid */
     for (i=0; i<rank; i++) {
+        if (H5S_UNLIMITED==dims[i])
+            HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "current dimension must have a specific size, not H5S_UNLIMITED");
         if (maxdims) {
             if (H5S_UNLIMITED!=maxdims[i] && maxdims[i]<dims[i])
                 HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "maxdims is smaller than dims");
