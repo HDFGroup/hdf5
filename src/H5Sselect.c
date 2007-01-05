@@ -355,6 +355,8 @@ H5S_get_select_npoints(const H5S_t *space)
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
+    Christian Chilan 01/05/2007
+    Changed the error return value from 0 to FAIL.
 --------------------------------------------------------------------------*/
 htri_t
 H5Sselect_valid(hid_t spaceid)
@@ -362,12 +364,12 @@ H5Sselect_valid(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     htri_t ret_value;     /* return value */
 
-    FUNC_ENTER_API(H5Sselect_valid, 0);
+    FUNC_ENTER_API(H5Sselect_valid, FAIL);
     H5TRACE1("t","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     ret_value = H5S_SELECT_VALID(space);
 
