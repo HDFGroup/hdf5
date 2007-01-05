@@ -73,6 +73,9 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
+            be returned (0) instead of FAIL on error confitions such as the
+            selection or extent not being defined. CMC - 2007/01/05
         - Fixed potential file corruption bug which could overwrite a portion
             of an object's header when an attribute was renamed.  If the new
             name for the attribute was longer than the old name, it's possible
