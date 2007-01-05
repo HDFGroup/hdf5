@@ -20,9 +20,6 @@
 *
 *************************************************************/
 
-/* JAMES: try writing a second value to an existing shared attribute.
- * Does modifying attributes work? */
-
 #include "testhdf5.h"
 #include "h5test.h"
 #include "hdf5.h"

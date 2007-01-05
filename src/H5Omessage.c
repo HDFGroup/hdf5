@@ -1537,6 +1537,7 @@ H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(type_id != H5O_SHARED_ID);
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(type->get_share);
@@ -1576,11 +1577,10 @@ H5O_msg_is_shared(unsigned type_id, const void *mesg)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(type_id != H5O_SHARED_ID);
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(mesg);
-
-    HDassert(type_id != H5O_SHARED_ID); /* JAMES: check for this mistake elsewhere, too */
 
     /* If there is no is_shared function, then obviously it's not a shared message! */
     if(!(type->is_shared))
@@ -1617,6 +1617,7 @@ H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg)
     /* Check args */
     HDassert(share);
     HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(type_id != H5O_SHARED_ID);
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(type->set_share);
@@ -1659,6 +1660,7 @@ H5O_msg_reset_share(unsigned type_id, void *mesg)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(type_id != H5O_SHARED_ID);
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
     HDassert(type->set_share);

@@ -93,6 +93,12 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
+    /* JAMES: might be able to spare a sentinel byte instead of worrying about
+     * refcounts.  Here, we need to find a deleted message in a B-tree to
+     * actually delete it.
+     */
+    /* JAMES HDassert(mesg->ref_count > 0); */
+
     hash_diff = key->hash;
     hash_diff -= mesg->hash;
 
@@ -383,11 +389,12 @@ H5SM_convert_to_list_op(const void * record, void *op_data)
     HDassert(op_data);
 
     /* Insert this message into the list */
-    for(x=0; x<list->header->list_to_btree; x++)
+    for(x=0; x<list->header->list_max; x++)
     {
-        if(list->messages[x].hash == H5O_HASH_UNDEF) /* JAMES: is this a valid test? */
+        if(list->messages[x].ref_count == 0)
         {
             HDmemcpy(&(list->messages[x]), message, sizeof(H5SM_sohm_t));
+            HDassert(list->messages[x].ref_count > 0);
             break;
         }
     }

@@ -76,9 +76,7 @@ typedef uint64_t H5SM_fheap_id_t;
 #define H5O_UPDATE_TIME         0x01u
 
 /* Hash value constants */
-/* JAMES: undefined hash value may not be great */
 #define H5O_HASH_SIZE 32
-#define H5O_HASH_UNDEF ((uint32_t)FAIL)
 
 /* ========= Object Creation properties ============ */
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */

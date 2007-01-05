@@ -151,8 +151,8 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
             UINT16ENCODE(p, table->indexes[x].mesg_types);    /* Type of messages in the index */
             UINT32ENCODE(p, table->indexes[x].min_mesg_size); /* Minimum size of message to share */
-            UINT16ENCODE(p, table->indexes[x].list_to_btree);  /* List cutoff; fewer than this number and index becomes a list */
-            UINT16ENCODE(p, table->indexes[x].btree_to_list);  /* B-tree cutoff; more than this number and index becomes a B-tree */
+            UINT16ENCODE(p, table->indexes[x].list_max);  /* List cutoff; fewer than this number and index becomes a list */
+            UINT16ENCODE(p, table->indexes[x].btree_min);  /* B-tree cutoff; more than this number and index becomes a B-tree */
             UINT16ENCODE(p, table->indexes[x].num_messages);   /* Number of messages shared */
             H5F_addr_encode(f, &p, table->indexes[x].index_addr); /* Address of the actual index */
             H5F_addr_encode(f, &p, table->indexes[x].heap_addr); /* Address of the index's heap */
@@ -258,8 +258,8 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
         UINT16DECODE(p, table->indexes[x].mesg_types);
         UINT32DECODE(p, table->indexes[x].min_mesg_size);
-        UINT16DECODE(p, table->indexes[x].list_to_btree);
-        UINT16DECODE(p, table->indexes[x].btree_to_list);
+        UINT16DECODE(p, table->indexes[x].list_max);
+        UINT16DECODE(p, table->indexes[x].btree_min);
         UINT16DECODE(p, table->indexes[x].num_messages);
         H5F_addr_decode(f, &p, &(table->indexes[x].index_addr));
         H5F_addr_decode(f, &p, &(table->indexes[x].heap_addr));
@@ -435,8 +435,8 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         /* Write messages from the messages array to disk */
         /* JAMES: we have to search the whole array.  not the best way to do it; could go until we've written
          * num_messages */
-        for(x=0; x<list->header->list_to_btree; x++) {
-            if(list->messages[x].fheap_id != 0 && list->messages[x].hash != H5O_HASH_UNDEF) {
+        for(x=0; x<list->header->list_max; x++) {
+            if(list->messages[x].ref_count > 0) {
               /* JAMES: use H5SM_message_encode here */
               UINT32ENCODE(p, list->messages[x].hash);  /* Read the hash value for this message */
               UINT32ENCODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
@@ -501,7 +501,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
-    if((list->messages = H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_to_btree)) == NULL)
+    if((list->messages = H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_max)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
 
     list->header = header;
@@ -552,11 +552,9 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
 
     /* Initialize the rest of the array */
-    for(x=header->num_messages; x<header->list_to_btree; x++)
+    for(x=header->num_messages; x<header->list_max; x++)
     {
-        list->messages[x].fheap_id = 0; /* JAMES: would making this one operation make it faster? */
         list->messages[x].ref_count = 0;
-        list->messages[x].hash = H5O_HASH_UNDEF;
     }
 
     ret_value = list;
@@ -666,7 +664,7 @@ H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5SM_LIST_SIZE(f, list->header->list_to_btree); /* JAMES: might want to have variable-sized lists */
+    *size_ptr = H5SM_LIST_SIZE(f, list->header->list_max); /* JAMES: might want to have variable-sized lists */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_list_size */

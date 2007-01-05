@@ -1787,7 +1787,6 @@ test_misc11(void)
     unsigned stab;              /* Symbol table entry version # */
     unsigned shhdr;             /* Shared object header version # */
     unsigned nindexes;          /* Shared message number of indexes */
-/* JAMES: add more SOHM properties here */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */

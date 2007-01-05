@@ -30,7 +30,6 @@ const unsigned def_minsizes[H5SM_MAX_NINDEXES] = {250,250,250,250,250,250};
 #define DEF_B2L 40
 
 /* Non-default SOHM values for testing */
-/* JAMES: make these defined in function */
 #define TEST_NUM_INDEXES 4
 const unsigned test_type_flags[H5SM_MAX_NINDEXES] =
                 {H5O_MESG_FILL_FLAG,
@@ -909,7 +908,8 @@ static void test_sohm_size1(void)
     /* Both sohm files should be bigger than a normal file when empty.
      * It's hard to say whether a B-tree with no nodes allocated should be
      * smaller than a list with SOHM_HELPER_NUM_DTYPES elements.
-     * JAMES: The sizes here shouldn't really be 1
+     * The sizes here shouldn't really be 1; it's just used to ensure that the
+     * error code triggers.
      */
     if(sohm_empty_filesize <= norm_empty_filesize)
         VERIFY(sohm_empty_filesize, 1, "H5Fclose");
@@ -1330,7 +1330,6 @@ size2_helper(hid_t fcpl_id, int test_file_closing)
     char fill2[DTYPE2_SIZE];
 
     /* Create a file and get its size */
-    /* JAMES: is fixname needed at all? */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
 
@@ -3068,6 +3067,7 @@ test_sohm(void)
     test_sohm_delete_revert();  /* Test that a file with SOHMs becomes an
                                  * empty file again when they are deleted. */
     test_sohm_extlink();        /* Test SOHMs when external links are used */
+    /* JAMES: try extending dataspaces, overwriting attributes */
 
 } /* test_sohm() */
 

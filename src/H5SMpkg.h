@@ -40,8 +40,8 @@
 #define H5SM_MASTER_TABLE_VERSION	0	/* Version of the Shared Object Header Message Master Table*/
 
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
-         + 4                      /* reference count*/                       \
-         + 8)    /* JAMES: size of heap ID on disk */
+         + 4                        /* reference count*/                     \
+         + 8)                       /* JAMES: size of heap ID on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + 1                                   /* Table version */           \
@@ -54,7 +54,6 @@
          + H5F_SIZEOF_ADDR(f) /* Location of list or B-tree */               \
          + H5F_SIZEOF_ADDR(f)) /* Address of heap */
 
-/* JAMES: add checksum? */
 #define H5SM_LIST_SIZE(f, num_mesg) H5SM_LIST_SIZEOF_MAGIC                   \
          + 1        /* List version */                                       \
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)                              \
@@ -98,10 +97,9 @@
 
 /* Typedef for a SOHM index node */
 typedef struct {
-  /* JAMES: I think I need message type here, and stored in file. */
   uint32_t hash;                /* Hash value for OHM */
   H5SM_fheap_id_t fheap_id;     /* ID of the OHM in the fractal heap */
-  hsize_t ref_count;            /* JAMES TODO: should this be hsize_t? */
+  hsize_t ref_count;            /* Number of times this message is used */
 } H5SM_sohm_t;
 
 typedef enum {
@@ -123,8 +121,8 @@ typedef struct {
 typedef struct {
   unsigned mesg_types;          /* Bit flag vector of message types */
   size_t min_mesg_size;         /* number of messages being tracked */
-  size_t list_to_btree;         /* >= this many messages, index with a B-tree */
-  size_t btree_to_list;         /* <= this many messages, index with a list again */
+  size_t list_max;         /* >= this many messages, index with a B-tree */
+  size_t btree_min;         /* <= this many messages, index with a list again */
   size_t num_messages;          /* number of messages being tracked */
   H5SM_index_type_t index_type; /* Is the index a list or a B-tree? */
   haddr_t index_addr;           /* Address of the actual index (list or B-tree) */
