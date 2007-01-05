@@ -5448,7 +5448,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
 {
     hid_t fid = -1;                     /* File ID */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
@@ -5463,7 +5463,7 @@ test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     addr_reset();
 
     /* create source file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
 
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -5521,7 +5521,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_copy_old_layout(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+test_copy_old_layout(hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
@@ -7196,8 +7196,8 @@ main(void)
 #endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += test_copy_exist(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_same_file_named_datatype(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_old_layout(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
+            nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
             nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Ocopy(): without attributes");
             nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, "H5Ocopy(): with missing groups");
             nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");

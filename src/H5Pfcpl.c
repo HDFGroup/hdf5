@@ -683,78 +683,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_shared_mesgs
- *
- * Purpose:	Configure implicity shared object header message settings
- *              for this file.
- *
- *              NINDEXES is the number of indexes for this file; it should
- *              be between 0 and H5SM_MAX_NINDEXES.  If nindexes is 0,
- *              SOHMs will be disabled for this file.
- *
- *              MESG_TYPE_FLAGS is an array of message type flags (using
- *              the values defined in H5SMpublic.h) with NINDEXES entries.
- *              These flags determine which types of message are stored in
- *              which index.  Any types of message that are not assigned
- *              to an index will not be shared in this file.  Each message
- *              type should be assigned to only one index, though each
- *              index can store more than one type of message.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_shared_mesgs(hid_t plist_id, unsigned nindexes, const unsigned mesg_type_flags[])
-{
-    unsigned        i;
-    unsigned        type_flags[H5SM_MAX_NINDEXES]; /* Full-sized array */
-    H5P_genplist_t *plist;      /* Property list pointer */
-    unsigned        flags_used; /* type flags already specified.
-                                 * Used to make sure a flag isn't used twice.
-                                 */
-    herr_t          ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pset_shared_mesgs, FAIL)
-    H5TRACE3("e", "iIu*Iu", plist_id, nindexes, mesg_type_flags);
-
-    /* Check arguments */
-    if(nindexes > H5SM_MAX_NINDEXES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of indexes is too large");
-    if(nindexes > 0 && !mesg_type_flags)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no type flags specified");
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    flags_used = H5O_MESG_NONE_FLAG;
-    for(i = 0; i < nindexes; i++) {
-        if(mesg_type_flags[i] == H5O_MESG_NONE_FLAG)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "at least one flag must be set");
-        if(mesg_type_flags[i] != (mesg_type_flags[i] & H5O_MESG_ALL_FLAG))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid mesg type flag set");
-        if(mesg_type_flags[i] & flags_used)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "flag set for two different indexes");
-        type_flags[i] = mesg_type_flags[i]; /* Store message types dimensions */
-        flags_used |= mesg_type_flags[i]; /* Make sure the user doesn't re-use a flag */
-    } /* end for */
-
-    /* Set properties in property list */
-    if(H5P_set(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes");
-    if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes");
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_shared_mesgs() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Pset_shared_mesg_nindexes
  *
  * Purpose:	Set the number of Shared Object Header Message (SOHM)

@@ -143,6 +143,18 @@ typedef struct size2_helper_struct {
 #define HALF_DELETE_NUM_MESGS 3
 #define DELETE_DIMS {1,1,1,1,1,1,1}
 
+/* Helper function prototypes */
+static hid_t make_dtype_1(void);
+static hid_t make_dtype_2(void);
+static hid_t close_reopen_file(hid_t file, const char* filename);
+static void test_sohm_attrs(void);
+static void size2_verify(void);
+static void test_sohm_delete(void);
+static void test_sohm_delete_revert(void);
+static void test_sohm_extlink(void);
+
+
+
 /****************************************************************
 **
 **  check_fcpl_values(): Helper function for test_sohm_fcpl.
@@ -390,13 +402,13 @@ static void test_sohm_fcpl(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-make_dtype_1()
+static hid_t
+make_dtype_1(void)
 {
     hid_t dtype1_id = -1;
     hid_t str_id = -1;
 
-   /* Create compound datatype.  If the user asked for it, check hash value at each step */
+   /* Create compound datatype. */
     if((dtype1_id = H5Tcreate( H5T_COMPOUND, sizeof(struct dtype1_struct)))<0) TEST_ERROR
 
     if(H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT)<0) TEST_ERROR
@@ -433,10 +445,6 @@ error:
  *              shared object header messages. The important thing is that
  *              the datatypes must take a lot of space to store on disk.
  *
- *              If record_hash is true, uses fid to record hash values
- *              of the intermediate datatypes in the global hash history
- *              table.  Otherwise, fid is ignored.
- *
  * Return:      Success:        datatype ID (should be closed by calling function)
  *              Failure:        negative
  *
@@ -447,8 +455,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-make_dtype_2()
+static hid_t
+make_dtype_2(void)
 {
     hid_t dtype2_id = -1;
     hid_t enum_id= -1;
@@ -512,7 +520,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 close_reopen_file(hid_t file, const char* filename)
 {
     if(H5Fclose(file) < 0) goto error;
@@ -544,13 +552,15 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-size1_helper(hid_t file, char* filename, int test_file_closing)
+size1_helper(hid_t file, const char* filename, int test_file_closing)
 {
     dtype1_struct wdata = {11, "string", 22, 33, 44, 55, 66, 77, 88, 0.0};
     dtype1_struct rdata;
-    hid_t       dtype1_id, dup_tid, type_id;
-    hid_t       space_id;
-    hid_t       dset_id;
+    hid_t       dtype1_id = -1;
+    hid_t       dup_tid = -1;
+    hid_t       type_id = -1;
+    hid_t       space_id = -1;
+    hid_t       dset_id = -1;
     hsize_t     dim1[1];
     int         x;
 
@@ -1045,7 +1055,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
  *
  *-------------------------------------------------------------------------
  */
-static void test_sohm_attrs()
+static void test_sohm_attrs(void)
 {
     hid_t fcpl_id;
     herr_t ret;
@@ -1290,7 +1300,8 @@ static void size2_verify_plist2(hid_t plist)
  *
  *-------------------------------------------------------------------------
  */
-static size2_helper_struct size2_helper(hid_t fcpl_id, int test_file_closing)
+static size2_helper_struct
+size2_helper(hid_t fcpl_id, int test_file_closing)
 {
     hid_t       file_id = -1;
     hid_t       dtype1_id=-1;
@@ -1336,8 +1347,8 @@ static size2_helper_struct size2_helper(hid_t fcpl_id, int test_file_closing)
     /* Create two large datatype messages */
     dtype1_id=make_dtype_1();
     CHECK_I(dtype1_id, "make_dtype_1");
-    dtype2_id=make_dtype_2(0, file_id);
-    CHECK_I(dtype2_id, "make_dtype_1");
+    dtype2_id=make_dtype_2();
+    CHECK_I(dtype2_id, "make_dtype_2");
 
     /* Create some large dataspaces */
     dspace1_id=H5Screate_simple(rank1, dims, dims);
@@ -1667,7 +1678,7 @@ static size2_helper_struct size2_helper(hid_t fcpl_id, int test_file_closing)
  *
  *-------------------------------------------------------------------------
  */
-static void size2_verify()
+static void size2_verify(void)
 {
     hid_t file_id = -1;
     hid_t dset_id=-1;
@@ -2654,7 +2665,8 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
  *
  *-------------------------------------------------------------------------
  */
-static void test_sohm_delete()
+static void
+test_sohm_delete(void)
 {
     hid_t fcpl_id;
     /* We'll use dataspaces, filter pipelines, and attributes for this
@@ -2878,7 +2890,8 @@ static void test_sohm_delete_revert_helper(hid_t fcpl_id)
  *
  *-------------------------------------------------------------------------
  */
-static void test_sohm_delete_revert()
+static void
+test_sohm_delete_revert(void)
 {
     hid_t fcpl_id;
     herr_t ret;
@@ -3009,7 +3022,8 @@ static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
  *
  *-------------------------------------------------------------------------
  */
-static void test_sohm_extlink()
+static void
+test_sohm_extlink(void)
 {
     hid_t fcpl_id = -1;
     herr_t ret;

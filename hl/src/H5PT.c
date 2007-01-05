@@ -148,6 +148,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
     return H5I_INVALID_HID;
 }
 
+#ifdef H5_VLPT_ENABLED
 /*-------------------------------------------------------------------------
  * Function: H5PTcreate_vl
  *
@@ -195,6 +196,7 @@ out:
     H5PTclose(ret_value);
   return H5I_BADID;
 }
+#endif /* H%_VLPT_ENABLED */
 
 /*-------------------------------------------------------------------------
  * Function: H5PTopen
@@ -713,6 +715,7 @@ herr_t H5PTis_valid(hid_t table_id)
   return 0;
 }
 
+#ifdef H5_VLPT_ENABLED
 /*-------------------------------------------------------------------------
  * Function: H5PTis_varlen
  *
@@ -815,3 +818,5 @@ out:
   H5E_END_TRY
   return -1;
 }
+
+#endif /* H5_VLPT_ENABLED */

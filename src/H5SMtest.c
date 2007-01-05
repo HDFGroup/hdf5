@@ -114,7 +114,7 @@ H5SM_get_refcount_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5HF_t *fheap = NULL;               /* Fractal heap that contains shared messages */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
     H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
-    H5SM_index_header_t *header;        /* Index header for message type */
+    H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
     H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
     H5SM_sohm_t message;                /* Record for shared message */

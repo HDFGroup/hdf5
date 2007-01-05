@@ -63,6 +63,8 @@ static particle_t testPart[NRECORDS] = {
 
 /*-------------------------------------------------------------------------
  * function that compares one particle
+ * Comparing floating point should be safe here; HDF5 should store the
+ * fields verbatim and not lose any bits.  -JML
  *-------------------------------------------------------------------------
  */
 static int cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf )
