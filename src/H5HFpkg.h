@@ -71,8 +71,8 @@
     )
 
 /* Flags for status byte */
-#define H5HF_HDR_FLAGS_HUGE_ID_WRAPPED 0x01
-#define H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS 0x02
+#define H5HF_HDR_FLAGS_HUGE_ID_WRAPPED 0x01     /* "huge" object IDs have wrapped */
+#define H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS 0x02    /* checksum direct blocks */
 
 /* Size of the fractal heap header on disk */
 /* (this is the fixed-len portion, the variable-len I/O filter information
@@ -348,6 +348,7 @@ typedef struct H5HF_hdr_t {
     H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      file_rc;        /* Reference count of files using heap header */
+    hbool_t     pending_delete; /* Heap is pending deletion */
     size_t      sizeof_size;    /* Size of file sizes */
     size_t      sizeof_addr;    /* Size of file addresses */
     struct H5HF_indirect_t *root_iblock;    /* Pointer to pinned root indirect block */
@@ -569,6 +570,7 @@ H5_DLL herr_t H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr);
 H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF_hdr_empty(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* Indirect block routines */
 H5_DLL herr_t H5HF_iblock_incr(H5HF_indirect_t *iblock);

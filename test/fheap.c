@@ -2136,6 +2136,155 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_delete_open
+ *
+ * Purpose:	Delete opened fractal heap (& open deleted heap)
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, January  5, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_create_t test_cparam;          /* Creation parameters for heap */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    H5HF_t      *fh2 = NULL;            /* 2nd fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    h5_stat_size_t       empty_size;    /* Size of a file with an empty heap */
+    h5_stat_size_t       file_size;     /* Size of file currently */
+    fheap_heap_state_t state;           /* State of fractal heap */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of a file w/no heap*/
+    if((empty_size = h5_get_file_size(filename)) < 0)
+        TEST_ERROR
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        STACK_ERROR
+
+    /* Display test banner */
+    TESTING("deleting open fractal heap");
+
+    /* Create heap */
+    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+        FAIL_STACK_ERROR
+    if(H5HF_get_id_len(fh, &id_len) < 0)
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        TEST_ERROR
+    if(H5HF_get_heap_addr(fh, &fh_addr) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        TEST_ERROR
+    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    if(check_stats(fh, &state))
+        TEST_ERROR
+
+    /* Open the heap again */
+    if(NULL == (fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Request that the heap be deleted */
+    if(H5HF_delete(f, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+        FAIL_STACK_ERROR
+
+    /* Query the type of address mapping */
+    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    if(H5HF_get_cparam_test(fh2, &test_cparam) < 0)
+        FAIL_STACK_ERROR
+    if(H5HF_cmp_cparam_test(cparam, &test_cparam))
+        TEST_ERROR
+
+    /* Close the second fractal heap wrapper */
+    if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    fh2 = NULL;
+
+    /* Try re-opening the heap again (should fail, as heap will be deleted) */
+    H5E_BEGIN_TRY {
+        fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+    } H5E_END_TRY;
+    if(fh2) {
+        /* Close opened heap */
+        H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
+
+        /* Indicate error */
+        TEST_ERROR
+    } /* end if */
+
+    /* Close the first fractal heap wrapper */
+    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+#ifdef QAK
+    /* Try re-opening the heap again (should fail, as heap is now deleted) */
+    H5E_BEGIN_TRY {
+        fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+    } H5E_END_TRY;
+    if(fh) {
+        /* Close opened heap */
+        H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+
+        /* Indicate error */
+        TEST_ERROR
+    } /* end if */
+#endif /* QAK */
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) < 0)
+        TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(fh)
+            H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+        if(fh2)
+            H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_delete_open() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_id_limits
  *
  * Purpose:	Test limits for heap ID lengths
@@ -14989,6 +15138,7 @@ error:
 } /* test_random_pow2() */
 #endif /* QAK */
 
+#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	test_write
@@ -15194,6 +15344,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_write() */
+#endif /* QAK */
 
 #ifndef QAK
 
@@ -15453,6 +15604,7 @@ curr_test = FHEAP_TEST_NORMAL;
         nerrors += test_create(fapl, &small_cparam, &tparam);
         nerrors += test_reopen(fapl, &small_cparam, &tparam);
         nerrors += test_open_twice(fapl, &small_cparam, &tparam);
+        nerrors += test_delete_open(fapl, &small_cparam, &tparam);
         nerrors += test_id_limits(fapl, &small_cparam);
         nerrors += test_filtered_create(fapl, &small_cparam);
 
@@ -15812,6 +15964,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
+#ifndef QAK
         /* Test object writing support */
 
         /* Basic object writing */
@@ -15823,6 +15976,9 @@ HDfprintf(stderr, "Uncomment tests!\n");
 
         /* Reset block compression */
         tparam.comp = FHEAP_TEST_NO_COMPRESS;
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK */
 #ifndef QAK
     } /* end for */
 #endif /* QAK */

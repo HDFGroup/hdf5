@@ -240,6 +240,10 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fspace);
 #endif /* QAK */
 
+    /* Check for pending heap deletion */
+    if(hdr->pending_delete)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, NULL, "can't open fractal heap pending deletion")
+
     /* Create fractal heap info */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
@@ -771,6 +775,8 @@ done:
 herr_t
 H5HF_close(H5HF_t *fh, hid_t dxpl_id)
 {
+    hbool_t pending_delete = FALSE;     /* Whether the heap is pending deletion */
+    haddr_t heap_addr = HADDR_UNDEF;    /* Address of heap (for deletion) */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_close, FAIL)
@@ -819,11 +825,36 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
          */
         if(H5HF_huge_term(fh->hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release 'huge' object info")
+
+        /* Check for pending heap deletion */
+        if(fh->hdr->pending_delete) {
+            /* Set local info, so heap deletion can occur after decrementing the
+             *  header's ref count
+             */
+            pending_delete = TRUE;
+            heap_addr = fh->hdr->heap_addr;
+        } /* end if */
     } /* end if */
 
     /* Decrement the reference count on the heap header */
     if(H5HF_hdr_decr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+
+    /* Check for pending heap deletion */
+    if(pending_delete) {
+        H5HF_hdr_t *hdr;            /* Another pointer to fractal heap header */
+
+        /* Lock the heap header into memory */
+        if(NULL == (hdr = H5AC_protect(fh->f, dxpl_id, H5AC_FHEAP_HDR, heap_addr, NULL, NULL, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+
+        /* Set the shared heap header's file context for this operation */
+        hdr->f = fh->f;
+
+        /* Delete heap, starting with header (unprotects header) */
+        if(H5HF_hdr_delete(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
+    } /* end if */
 
     /* Release the fractal heap wrapper */
     H5FL_FREE(H5HF_t, fh);
@@ -869,72 +900,13 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 
     /* Check for files using shared heap header */
     if(hdr->file_rc)
-        HGOTO_ERROR(H5E_HEAP, H5E_OBJOPEN, FAIL, "heap still open")
-
-    /* Check for free space manager for heap */
-    /* (must occur before attempting to delete the heap, so indirect blocks
-     *  will get unpinned)
-     */
-    if(H5F_addr_defined(hdr->fs_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);
-#endif /* QAK */
-        /* Delete free space manager for heap */
-        if(H5HF_space_delete(hdr, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
+        hdr->pending_delete = TRUE;
+    else {
+        /* Delete heap now, starting with header (unprotects header) */
+        if(H5HF_hdr_delete(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
+        hdr = NULL;
     } /* end if */
-
-    /* Check for root direct/indirect block */
-    if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable.table_addr);
-#endif /* QAK */
-        if(hdr->man_dtable.curr_root_rows == 0) {
-            hsize_t dblock_size;        /* Size of direct block */
-
-            /* Check for I/O filters on this heap */
-            if(hdr->filter_len > 0) {
-                dblock_size = (hsize_t)hdr->pline_root_direct_size;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_root_direct_size);
-#endif /* QAK */
-
-                /* Reset the header's pipeline information */
-                hdr->pline_root_direct_size = 0;
-                hdr->pline_root_direct_filter_mask = 0;
-            } /* end else */
-            else
-                dblock_size = (hsize_t)hdr->man_dtable.cparam.start_block_size;
-
-            /* Delete root direct block */
-            if(H5HF_man_dblock_delete(f, dxpl_id, hdr->man_dtable.table_addr, dblock_size) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root direct block")
-        } /* end if */
-        else {
-            /* Delete root indirect block */
-            if(H5HF_man_iblock_delete(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root indirect block")
-        } /* end else */
-    } /* end if */
-
-    /* Check for 'huge' objects in heap */
-    if(H5F_addr_defined(hdr->huge_bt2_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
-#endif /* QAK */
-        /* Delete huge objects in heap and their tracker */
-        if(H5HF_huge_delete(hdr, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
-    } /* end if */
-
-    /* Release header's disk space */
-    if(H5MF_xfree(f, H5FD_MEM_FHEAP_HDR, dxpl_id, fh_addr, (hsize_t)hdr->heap_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
-
-    /* Finished deleting header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
-    hdr = NULL;
 
 done:
     /* Unprotect the header, if an error occurred */

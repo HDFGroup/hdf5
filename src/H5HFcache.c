@@ -307,6 +307,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
 
     /* Heap status flags */
     /* (bit 0: "huge" object IDs have wrapped) */
+    /* (bit 1: checksum direct blocks) */
     heap_flags = *p++;
     hdr->huge_ids_wrapped = heap_flags & H5HF_HDR_FLAGS_HUGE_ID_WRAPPED;
     hdr->checksum_dblocks = heap_flags & H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS;
@@ -491,6 +492,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 
         /* Heap status flags */
         /* (bit 0: "huge" object IDs have wrapped) */
+        /* (bit 1: checksum direct blocks) */
         heap_flags = 0;
         heap_flags |= (hdr->huge_ids_wrapped ?  H5HF_HDR_FLAGS_HUGE_ID_WRAPPED : 0);
         heap_flags |= (hdr->checksum_dblocks ?  H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS : 0);

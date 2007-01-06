@@ -1481,3 +1481,117 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_empty() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_delete
+ *
+ * Purpose:	Delete a fractal heap, starting with the header
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jan  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5HF_hdr_delete, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(!hdr->file_rc);
+
+#ifndef NDEBUG
+{
+    unsigned hdr_status = 0;         /* Heap header's status in the metadata cache */
+
+    /* Check the heap header's status in the metadata cache */
+    if(H5AC_get_entry_status(hdr->f, hdr->heap_addr, &hdr_status) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for heap header")
+
+    /* Sanity checks on heap header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+} /* end block */
+#endif /* NDEBUG */
+
+    /* Check for free space manager for heap */
+    /* (must occur before attempting to delete the heap, so indirect blocks
+     *  will get unpinned)
+     */
+    if(H5F_addr_defined(hdr->fs_addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);
+#endif /* QAK */
+        /* Delete free space manager for heap */
+        if(H5HF_space_delete(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
+    } /* end if */
+
+    /* Check for root direct/indirect block */
+    if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable.table_addr);
+#endif /* QAK */
+        if(hdr->man_dtable.curr_root_rows == 0) {
+            hsize_t dblock_size;        /* Size of direct block */
+
+            /* Check for I/O filters on this heap */
+            if(hdr->filter_len > 0) {
+                dblock_size = (hsize_t)hdr->pline_root_direct_size;
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_root_direct_size);
+#endif /* QAK */
+
+                /* Reset the header's pipeline information */
+                hdr->pline_root_direct_size = 0;
+                hdr->pline_root_direct_filter_mask = 0;
+            } /* end else */
+            else
+                dblock_size = (hsize_t)hdr->man_dtable.cparam.start_block_size;
+
+            /* Delete root direct block */
+            if(H5HF_man_dblock_delete(hdr->f, dxpl_id, hdr->man_dtable.table_addr, dblock_size) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root direct block")
+        } /* end if */
+        else {
+            /* Delete root indirect block */
+            if(H5HF_man_iblock_delete(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root indirect block")
+        } /* end else */
+    } /* end if */
+
+    /* Check for 'huge' objects in heap */
+    if(H5F_addr_defined(hdr->huge_bt2_addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
+#endif /* QAK */
+        /* Delete huge objects in heap and their tracker */
+        if(H5HF_huge_delete(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
+    } /* end if */
+
+    /* Release header's disk space */
+    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_HDR, dxpl_id, hdr->heap_addr, (hsize_t)hdr->heap_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
+
+    /* Finished deleting header */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
+    hdr = NULL;
+
+done:
+    /* Unprotect the header, if an error occurred */
+    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_delete() */
+
