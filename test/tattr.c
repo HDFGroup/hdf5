@@ -40,6 +40,14 @@
 #define H5A_TESTING
 #include "H5Apkg.h"		/* Attributes	 			*/
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 #define FILENAME   "tattr.h5"
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN   16
@@ -1581,8 +1589,7 @@ test_attr_dtype_shared(hid_t fapl)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-/* JAMES: this becomes 2    VERIFY(statbuf.nlink, 3, "H5Acreate");
-*/
+    VERIFY(statbuf.nlink, 3, "H5Acreate");
     /* Close attribute */
     ret=H5Aclose(attr_id);
     CHECK(ret, FAIL, "H5Aclose");
@@ -1603,8 +1610,8 @@ test_attr_dtype_shared(hid_t fapl)
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
-/* JAMES: this becomes 2    VERIFY(statbuf.nlink, 3, "H5Acreate");
-*/
+    VERIFY(statbuf.nlink, 3, "H5Acreate");
+
     /* Write data into the attribute */
     ret=H5Awrite(attr_id,H5T_NATIVE_INT,&data);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1866,14 +1873,10 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
+/* XXX: Add similar check to other tests that use new storage */
     /* Check size of file */
     filesize = h5_get_file_size(FILENAME);
-#ifdef LATER
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
-#else /* LATER */
-/* XXX: Add similar check to other tests that use new storage */
-HDfprintf(stderr, "Check skipped - fix after ISOHM code deletes empty indices\n");
-#endif /* LATER */
 }   /* test_attr_dense_create() */
 
 /****************************************************************
@@ -2109,6 +2112,18 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     /* Verify attributes still left */
     test_attr_dense_verify(dataset, (u - 1));
 
+    /* Delete another attribute, to verify deletion in compact storage */
+    sprintf(attrname, "attr %02u", (u - 1));
+    ret = H5Adelete(dataset, attrname);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Verify attributes still left */
+    test_attr_dense_verify(dataset, (u - 2));
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -2254,6 +2269,115 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
 
 /****************************************************************
 **
+**  test_attr_dense_unlink(): Test basic H5A (attribute) code.
+**      Tests unlinking object with attributes in "dense" storage
+**
+****************************************************************/
+static void
+test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    max_compact;    /* Maximum # of attributes to store compactly */
+    unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    unsigned    u;              /* Local index variable */
+    int         attr_count;     /* # of attributes */
+    size_t      mesg_count;     /* # of shared messages */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Unlinking Object with Attributes in Dense Storage\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Query the group creation properties */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Retrieve limits for compact/dense attribute storage */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+#ifdef QAK
+HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
+#endif /* QAK */
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add attributes, until well into dense storage */
+    for(u = 0; u < (max_compact * 2); u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check # of attributes */
+        attr_count = H5Aget_num_attrs(dataset);
+        CHECK(attr_count, FAIL, "H5Aget_num_attrs");
+        VERIFY(attr_count, (int)(u + 1), "H5Aget_num_attrs");
+    } /* end for */
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Unlink dataset */
+    ret = H5Gunlink(fid, DSET1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Check on dataset's attribute storage status */
+    ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);
+    CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
+    VERIFY(mesg_count, 0, "H5F_get_sohm_mesg_count_test");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_dense_unlink() */
+
+/****************************************************************
+**
 **  test_attr_shared_write(): Test basic H5A (attribute) code.
 **      Tests writing to shared attributes in "compact" & "dense" storage
 **
@@ -2395,7 +2519,6 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_shared_write() */
-#endif /* QAK */
 
 /****************************************************************
 **
@@ -2628,6 +2751,182 @@ HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_shared_rename() */
+#endif /* QAK */
+
+/****************************************************************
+**
+**  test_attr_shared_delete(): Test basic H5A (attribute) code.
+**      Tests deleting shared attributes in "compact" & "dense" storage
+**
+****************************************************************/
+static void
+test_attr_shared_delete(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset, dataset2;	/* Dataset ID2			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute on first dataset */
+    unsigned    max_compact;    /* Maximum # of attributes to store compactly */
+    unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    htri_t	is_shared;	/* Is attributes shared? */
+    hsize_t     shared_refcount;        /* Reference count of shared attribute */
+    unsigned    attr_value;     /* Attribute value */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deleting Shared Attributes in Compact & Dense Storage\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Set up to query the object creation properties */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Create datasets */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset2, FAIL, "H5Dcreate");
+
+    /* Retrieve limits for compact/dense attribute storage */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+#ifdef QAK
+HDfprintf(stderr, "max_compact = %u, min_dense = %u\n", max_compact, min_dense);
+#endif /* QAK */
+
+    /* Check on datasets' attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+    is_dense = H5O_is_attr_dense_test(dataset2);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add attributes to each dataset, until after converting to dense storage */
+/* XXX: Test with shared & committed datatype/dataspace also */
+    for(u = 0; u < max_compact * 2; u++) {
+        /* Create attribute name */
+        sprintf(attrname, "attr %02u", u);
+
+        /* Create attribute on first dataset */
+        attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Check that attribute is shared */
+        is_shared = H5A_is_shared_test(attr);
+        VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+
+        /* Check refcount for attribute */
+        ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+        CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+        VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+
+        /* Write data into the attribute */
+        attr_value = u + 1;
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &attr_value);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        is_dense = H5O_is_attr_dense_test(dataset);
+        if(u < max_compact)
+            VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+        else
+            VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+
+        /* Create attribute on second dataset */
+        attr = H5Acreate(dataset2, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Check that attribute is shared */
+        is_shared = H5A_is_shared_test(attr);
+        VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+
+        /* Check refcount for attribute */
+        ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+        CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+        VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+
+        /* Write data into the attribute */
+        attr_value = u + 1;
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &attr_value);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Check refcount for attribute */
+        ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+        CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+        VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        is_dense = H5O_is_attr_dense_test(dataset2);
+        if(u < max_compact)
+            VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+        else
+            VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+    } /* end for */
+
+    /* Delete attributes from second dataset */
+    for(u = 0; u < max_compact * 2; u++) {
+        /* Create attribute name */
+        sprintf(attrname, "attr %02u", u);
+
+        /* Delete second dataset's attribute */
+        ret = H5Adelete(dataset2, attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
+
+        /* Check refcount on attributes now */
+
+        /* Check refcount on first dataset's attribute */
+        attr = H5Aopen_name(dataset, attrname);
+        CHECK(attr, FAIL, "H5Aopen_name");
+
+        /* Check that attribute is shared */
+        is_shared = H5A_is_shared_test(attr);
+        VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+
+        /* Check refcount for attribute */
+        ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+        CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+        VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Datasets */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(dataset2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_shared_delete() */
 
 /****************************************************************
 **
@@ -2732,14 +3031,14 @@ test_attr(void)
         test_attr_dense_open(my_fcpl, fapl2);           /* Test opening attributes in dense storage */
         test_attr_dense_delete(my_fcpl, fapl2);         /* Test deleting attributes in dense storage */
         test_attr_dense_rename(my_fcpl, fapl2);         /* Test renaming attributes in dense storage */
-/* XXX: Remove attribute */
-/* XXX: Unlink object */
+        test_attr_dense_unlink(my_fcpl, fapl2);         /* Test unlinking object with attributes in dense storage */
     } /* end for */
 
     /* Tests with both "new format" and "shared" attributes */
     test_attr_shared_write(fcpl2, fapl2);               /* Test writing to shared attributes in compact & dense storage */
-    test_attr_shared_rename(fcpl2, fapl2);               /* Test writing to shared attributes in compact & dense storage */
-/* XXX: Removing attribute */
+    test_attr_shared_rename(fcpl2, fapl2);              /* Test renaming shared attributes in compact & dense storage */
+    test_attr_shared_delete(fcpl2, fapl2);              /* Test deleting shared attributes in compact & dense storage */
+/* XXX: Unlinking object */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */

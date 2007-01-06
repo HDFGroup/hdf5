@@ -195,5 +195,11 @@ H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
 H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
 H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 
+/* Testing functions */
+#ifdef H5F_TESTING
+H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id,
+    size_t *mesg_count);
+#endif /* H5F_TESTING */
+
 #endif /* _H5Fpkg_H */
 

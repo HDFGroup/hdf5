@@ -14,11 +14,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Atest.c
- *			Dec 18 2006
+ * Created:		H5Ftest.c
+ *			Jan  3 2007
  *			Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Attribute testing routines.
+ * Purpose:		File testing routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -27,8 +27,8 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
-#define H5A_TESTING		/*suppress warning about H5A testing funcs*/
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg  */
+#define H5F_TESTING		/*suppress warning about H5F testing funcs*/
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg  */
 #define H5SM_TESTING		/*suppress warning about H5SM testing funcs*/
 
@@ -37,8 +37,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5SMpkg.h"            /* Shared object header messages        */
 
@@ -79,72 +79,36 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_is_shared_test
+ * Function:	H5F_get_sohm_mesg_count_test
  *
- * Purpose:     Check if an attribute is shared
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5A_is_shared_test(hid_t attr_id)
-{
-    H5A_t	*attr;                  /* Attribute object for ID */
-    htri_t	ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_is_shared_test)
-
-    /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-
-    /* Check if attribute is shared */
-    ret_value = H5O_attr_is_shared(attr);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_is_shared_test() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_get_shared_rc_test
- *
- * Purpose:     Retrieve the refcount for a shared attribute
+ * Purpose:     Retrieve the number of shared messages of a given type in a file
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
+ *	        Jan  3, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
+H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
+    size_t *mesg_count)
 {
-    H5A_t	*attr;                  /* Attribute object for ID */
+    H5F_t	*file;                  /* File info */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_get_shared_rc_test)
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_sohm_mesg_count_test)
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
-    /* Sanity check */
-    HDassert(H5O_attr_is_shared(attr));
-
-    /* Retrieve ref count for shared attribute */
-    if(H5SM_get_refcount_test(attr->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,
-            &attr->sh_loc, ref_count) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
+    /* Retrieve count for message type */
+    if(H5SM_get_mesg_count_test(file, H5AC_ind_dxpl_id, type_id, mesg_count) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve shared message count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_get_shared_rc_test() */
+} /* end H5F_get_sohm_mesg_count_test() */
 

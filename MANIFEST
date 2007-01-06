@@ -472,6 +472,7 @@
 ./src/H5Fpkg.h
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
+./src/H5Ftest.c
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h

@@ -150,8 +150,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, February 19, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -161,8 +159,8 @@ H5F_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_term_interface)
 
-    if (H5_interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_FILE))!=0) {
+    if(H5_interface_initialize_g) {
+	if((n = H5I_nmembers(H5I_FILE)) != 0) {
             H5I_clear_type(H5I_FILE, FALSE);
 	} else {
             /* Make certain we've cleaned up all the shared file objects */
@@ -171,10 +169,11 @@ H5F_term_interface(void)
 	    H5I_dec_type_ref(H5I_FILE);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
-	}
-    }
+	} /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
-}
+} /* H5F_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -190,40 +189,31 @@ H5F_term_interface(void)
  *
  * Programmer:	Unknown
  *
- * Modifications:
- *
- * 	Robb Matzke, 18 Feb 1998
- *	Calls H5P_copy_plist() to copy the property list and H5P_close() to free
- *	that property list if an error occurs.
- *
- *	Raymond Lu, Oct 14, 2001
- *	Changed to generic property list.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5F_t		*file = NULL;
-    H5P_genplist_t *plist;              /* Property list */
-    hid_t		ret_value;
+    H5F_t *file;                /* File info */
+    H5P_genplist_t *plist;      /* Property list */
+    hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Fget_create_plist, FAIL)
     H5TRACE1("i", "i", file_id);
 
     /* check args */
-    if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(NULL == (plist = H5I_object(file->shared->fcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Create the property list object to return */
-    if((ret_value=H5P_copy_plist(plist)) < 0)
+    if((ret_value = H5P_copy_plist(plist)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fget_create_plist() */
 
 
 /*-------------------------------------------------------------------------
@@ -245,36 +235,19 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, February 18, 1998
  *
- * Modifications:
- *		Raymond Lu, Oct 23, 2001
- *		Changed file access property list to the new generic
- * 		property list.
- *
- *              Bill Wendling, Apr 21, 2003
- *              Fixed bug where the driver ID and info in the property
- *              list were being overwritten but the original ID and info
- *              weren't being close.
- *
- *		J Mainzer, Mar 10, 2005
- *		Updated function for changes in the property list entries
- *		used by the new metadata cache.
- *
- *		Quincey Koziol, May 25, 2005
- *		Extracted guts into new internal routine.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5F_t		*f = NULL;
-    hid_t		ret_value = SUCCEED;
+    H5F_t *f;           /* File info */
+    hid_t ret_value;    /* Return value */
 
     FUNC_ENTER_API(H5Fget_access_plist, FAIL)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
-    if (NULL==(f=H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (f = H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve the file's access property list */

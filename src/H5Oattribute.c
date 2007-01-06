@@ -1142,10 +1142,6 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &shared_attr))
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5_ITER_ERROR, "unable to read shared attribute")
 
-/* XXX: fix me */
-HDfprintf(stderr, "%s: removing a shared attribute not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "deleting a shared attribute not supported yet")
-#ifdef NOT_YET
         /* Check for correct attribute message to modify */
         if(HDstrcmp(shared_attr.name, udata->name) == 0)
             /* Indicate that this message is the attribute to be deleted */
@@ -1153,7 +1149,6 @@ HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "deleting a shared attribute not su
 
         /* Release copy of shared attribute */
         H5O_attr_reset(&shared_attr);
-#endif /* NOT_YET */
     } /* end if */
     else {
         /* Check for correct attribute message to modify */
@@ -1275,15 +1270,22 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
             /* If ok, insert attributes as object header messages */
             if(can_convert) {
-                /* Insert attribute messages into object header */
-                /* (Set the "shared" message flag for all attributes added -
-                 *      attributes that are actually shared will be converted
-                 *      to shared messages and attributes that are not shared
-                 *      will have the flag turned off -QAK)
-                 */
-                for(u = 0; u < oh->nattrs; u++)
-                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, H5O_MSG_FLAG_SHARED, H5O_UPDATE_TIME, &(atable.attrs[u]), &oh_flags) < 0)
+                /* Iterate over attributes, to put them into header */
+                for(u = 0; u < oh->nattrs; u++) {
+                    htri_t shared_mesg;     /* Should this message be stored in the Shared Message table? */
+                    unsigned mesg_flags = 0;    /* Message flags for attribute */
+
+                    /* Should this message be written as a SOHM? */
+                    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, H5O_ATTR_ID, &(atable.attrs[u]))) > 0)
+                        /* Mark the message as shared */
+                        mesg_flags |= H5O_MSG_FLAG_SHARED;
+                    else if(shared_mesg < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
+
+                    /* Insert attribute message into object header */
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, mesg_flags, H5O_UPDATE_TIME, &(atable.attrs[u]), &oh_flags) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
+                } /* end for */
 
                 /* Remove the dense storage */
                 if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
