@@ -5566,8 +5566,8 @@ corder_transition(hid_t fapl)
     unsigned	nlinks;		        /* Number of link messages in group's header */
     hsize_t     name_count;             /* # of records in name index */
     hsize_t     corder_count;           /* # of records in creation order index */
-    off_t       empty_size;             /* Size of empty file */
-    off_t       file_size;              /* Size of file after operating on it */
+    h5_stat_size_t       empty_size;             /* Size of empty file */
+    h5_stat_size_t       file_size;              /* Size of file after operating on it */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename[NAME_BUF_SIZE];/* File name */
     unsigned    u;                      /* Local index variable */
@@ -5797,8 +5797,8 @@ corder_delete(hid_t fapl)
     hsize_t     name_count;             /* # of records in name index */
     hsize_t     corder_count;           /* # of records in creation order index */
     hbool_t     reopen_file;            /* Whether to re-open the file before deleting group */
-    off_t       empty_size;             /* Size of empty file */
-    off_t       file_size;              /* Size of file after operating on it */
+    h5_stat_size_t       empty_size;             /* Size of empty file */
+    h5_stat_size_t       file_size;              /* Size of file after operating on it */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename[NAME_BUF_SIZE];/* File name */
     unsigned    u;                      /* Local index variable */
@@ -7116,7 +7116,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     herr_t      ret;                    /* Generic return value */
 
     /* Iterate over links in group */
-    iter_info->nskipped = skip = 0;
+    iter_info->nskipped = (unsigned)(skip = 0);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -7146,7 +7146,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
 
     /* Skip over some links in group */
-    iter_info->nskipped = skip = max_links / 2;
+    iter_info->nskipped = (unsigned)(skip = max_links / 2);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -7208,7 +7208,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
 
     /* Iterate over links in group, stopping in the middle */
-    iter_info->nskipped = skip = 0;
+    iter_info->nskipped = (unsigned)(skip = 0);
     iter_info->order = order;
     iter_info->stop = 3;
     iter_info->ncalled = 0;
@@ -7564,7 +7564,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     herr_t      ret;                    /* Generic return value */
 
     /* Iterate over links in group */
-    iter_info->nskipped = skip = 0;
+    iter_info->nskipped = (unsigned)(skip = 0);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -7594,7 +7594,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
 
     /* Skip over some links in group */
-    iter_info->nskipped = skip = max_links / 2;
+    iter_info->nskipped = (unsigned)(skip = max_links / 2);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -7656,7 +7656,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
 
     /* Iterate over links in group, stopping in the middle */
-    iter_info->nskipped = skip = 0;
+    iter_info->nskipped = (unsigned)(skip = 0);
     iter_info->order = order;
     iter_info->stop = 3;
     iter_info->ncalled = 0;

@@ -123,7 +123,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
      */                                                                          \
     for(i = 0; i < sizeof(type); i++)                                            \
         ((unsigned char *)&cd_values[H5Z_SCALEOFFSET_PARM_FILVAL])[i] =          \
-        (fill_val & ((type)0xff << i*8)) >> i*8;                                 \
+        (unsigned char)((fill_val & ((type)0xff << i*8)) >> i*8);                                 \
 }
 
 /* Set the fill value parameter in cd_values[] for unsigned integer type */
@@ -427,13 +427,13 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
 {                                                                                     \
    if(sizeof(type)==sizeof(int))                                                      \
       for(i = 0; i < sizeof(int); i++)                                                \
-         ((unsigned char *)minval)[i] = (*(int *)&min & ((int)0xff << i*8)) >> i*8;   \
+         ((unsigned char *)minval)[i] = (unsigned char)((*(int *)&min & ((int)0xff << i*8)) >> i*8);   \
    else if(sizeof(type)==sizeof(long))                                                \
       for(i = 0; i < sizeof(long); i++)                                               \
-         ((unsigned char *)minval)[i] = (*(long *)&min & ((long)0xff << i*8)) >> i*8; \
+         ((unsigned char *)minval)[i] = (unsigned char)((*(long *)&min & ((long)0xff << i*8)) >> i*8); \
    else if(sizeof(type)==sizeof(long_long))                                           \
       for(i = 0; i < sizeof(long_long); i++)                                          \
-         ((unsigned char *)minval)[i] = (*(long_long *)&min & ((long_long)0xff << i*8)) >> i*8;\
+         ((unsigned char *)minval)[i] = (unsigned char)((*(long_long *)&min & ((long_long)0xff << i*8)) >> i*8);\
    else                                                                               \
       HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")\
 }

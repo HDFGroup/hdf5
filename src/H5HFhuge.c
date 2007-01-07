@@ -632,7 +632,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
-            obj_size = found_rec.len;
+            H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
             filter_mask = found_rec.filter_mask;
         } /* end if */
         else {
@@ -649,7 +649,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
-            obj_size = found_rec.len;
+            H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
         } /* end else */
     } /* end else */
 
