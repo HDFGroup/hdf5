@@ -933,11 +933,8 @@ int
 H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
-    unsigned oh_flags = H5AC__NO_FLAGS_SET; /* used to indicate whether the
-                                            * object was deleted as a result
-                                            * of this action.
-                                            */
-    int	ret_value = FAIL;
+    unsigned oh_flags = H5AC__NO_FLAGS_SET; /* Whether the object was deleted  */
+    int	ret_value;                          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_link, FAIL)
 

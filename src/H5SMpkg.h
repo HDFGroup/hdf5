@@ -97,24 +97,24 @@
 
 /* Typedef for a SOHM index node */
 typedef struct {
-    uint32_t hash;                /* Hash value for OHM */
-    H5SM_fheap_id_t fheap_id;     /* ID of the OHM in the fractal heap */
-    hsize_t ref_count;            /* Number of times this message is used */
+    uint32_t hash;		/* Hash value for OHM */
+    H5SM_fheap_id_t fheap_id;	/* ID of the OHM in the fractal heap */
+    hsize_t ref_count;		/* Number of times this message is used */
 } H5SM_sohm_t;
 
 typedef enum {
     H5SM_BADTYPE = -1,
-    H5SM_LIST,    /* Index is an unsorted list */
-    H5SM_BTREE    /* Index is a sorted B-tree */
+    H5SM_LIST,    		/* Index is an unsorted list */
+    H5SM_BTREE    		/* Index is a sorted B-tree */
 } H5SM_index_type_t;
 
 /* Typedef for searching an index (list or B-tree) */
 typedef struct {
-    uint32_t hash;    /* The hash value for this message */
-    const void *encoding; /* The message encoded */
-    size_t encoding_size; /* Size of the encoding */
-    H5HF_t *fheap;    /* The heap for this message type, open. */
-    H5SM_fheap_id_t mesg_heap_id; /* The heap_id for this message */
+    uint32_t hash;    			/* The hash value for this message */
+    const void *encoding; 		/* The message encoded */
+    size_t encoding_size; 		/* Size of the encoding */
+    H5HF_t *fheap;    			/* The heap for this message type, open. */
+    H5SM_fheap_id_t mesg_heap_id;	/* The heap_id for this message */
 } H5SM_mesg_key_t;
 
 /* Typedef for a SOHM index header */
@@ -207,8 +207,6 @@ H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
 
 /* Testing functions */
 #ifdef H5SM_TESTING
-H5_DLL herr_t H5SM_get_refcount_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
-    const H5O_shared_t *sh_mesg, hsize_t *ref_count);
 H5_DLL herr_t H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     size_t *mesg_count);
 #endif /* H5SM_TESTING */

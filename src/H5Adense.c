@@ -801,9 +801,29 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
 
     /* Should this attribute be written as a SOHM? */
     /* (allows for attributes that change "shared" status) */
-    if((shared_mesg = H5SM_try_share(f, dxpl_id, H5O_ATTR_ID, attr_copy)) > 0)
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, H5O_ATTR_ID, attr_copy)) > 0) {
+        hsize_t attr_rc;                /* Attribute's ref count in shared message storage */
+
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
+
+        /* Retrieve ref count for shared attribute */
+        if(H5SM_get_refcount(f, dxpl_id, H5O_ATTR_ID, &attr_copy->sh_loc, &attr_rc) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
+
+        /* If the newly shared attribute needs to share "ownership" of the shared
+         *      components (ie. its reference count is 1), increment the reference
+         *      count on any shared components of the attribute, so that they won't
+         *      be removed from the file.  (Essentially a "copy on write" operation).
+         *
+         *      *ick* -QAK, 2007/01/08
+         */
+        if(attr_rc == 1) {
+            /* Increment reference count on attribute components */
+            if(H5O_attr_link(f, dxpl_id, attr_copy) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
+        } /* end if */
+    } /* end if */
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 

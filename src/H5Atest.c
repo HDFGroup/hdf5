@@ -29,8 +29,6 @@
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
 #define H5A_TESTING		/*suppress warning about H5A testing funcs*/
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg  */
-#define H5SM_TESTING		/*suppress warning about H5SM testing funcs*/
 
 
 /***********/
@@ -40,7 +38,7 @@
 #include "H5Apkg.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5SMpkg.h"            /* Shared object header messages        */
+#include "H5SMprivate.h"        /* Shared object header messages        */
 
 
 /****************/
@@ -140,7 +138,7 @@ H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     HDassert(H5O_attr_is_shared(attr));
 
     /* Retrieve ref count for shared attribute */
-    if(H5SM_get_refcount_test(attr->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,
+    if(H5SM_get_refcount(attr->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,
             &attr->sh_loc, ref_count) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
 

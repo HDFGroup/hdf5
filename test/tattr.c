@@ -1590,6 +1590,7 @@ test_attr_dtype_shared(hid_t fapl)
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
     CHECK(ret, FAIL, "H5Gget_objinfo");
     VERIFY(statbuf.nlink, 3, "H5Acreate");
+
     /* Close attribute */
     ret=H5Aclose(attr_id);
     CHECK(ret, FAIL, "H5Aclose");
@@ -2661,7 +2662,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Writing to Shared Attributes in Compact & Dense Storage\n"));
 
     /* Loop over type of shared components */
-    for(test_shared = 0; test_shared < 1; test_shared++) {
+    for(test_shared = 0; test_shared < 2; test_shared++) {
         /* Make copy of file creation property list */
         my_fcpl = H5Pcopy(fcpl);
         CHECK(my_fcpl, FAIL, "H5Pcopy");
@@ -2686,9 +2687,9 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 /* Make attributes & datatypes > 1 byte shared (i.e. all of them :-) */
                 ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)2);
                 CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-                ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_ATTR_FLAG, (unsigned)1);
+                ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)1);
                 CHECK_I(ret, "H5Pset_shared_mesg_index");
-                ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_DTYPE_FLAG, (unsigned)1);
+                ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
                 CHECK_I(ret, "H5Pset_shared_mesg_index");
                 break;
         } /* end switch */

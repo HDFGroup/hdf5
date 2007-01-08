@@ -406,8 +406,7 @@ H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
 {
     int ret_value;      /* Return value */
 
-    /* Use no-init for efficiency */
-    FUNC_ENTER_NOAPI(H5T_link,FAIL)
+    FUNC_ENTER_NOAPI(H5T_link, FAIL)
 
     HDassert(type);
     HDassert(type->sh_loc.flags & H5O_COMMITTED_FLAG);

@@ -235,9 +235,54 @@ HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name)
     HDassert(attr);
 
     /* Should this message be written as a SOHM? */
-    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, H5O_ATTR_ID, attr)) > 0)
+    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, H5O_ATTR_ID, attr)) > 0) {
+        hsize_t attr_rc;                /* Attribute's ref count in shared message storage */
+
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
+
+        /* Check whether datatype is committed */
+        /* (to maintain ref. count incr/decr similarity with "shared message"
+         *      type of datatype sharing)
+         */
+        if(H5T_committed(attr->dt)) {
+            /* Increment the reference count on the shared datatype */
+            if(H5T_link(attr->dt, 1, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+        } /* end if */
+
+        /* Retrieve ref count for shared attribute */
+        if(H5SM_get_refcount(loc->file, dxpl_id, H5O_ATTR_ID, &attr->sh_loc, &attr_rc) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
+
+        /* If this is not the first copy of the attribute in the shared message
+         *      storage, decrement the reference count on any shared components
+         *      of the attribute.  This is done because the shared message
+         *      storage's "try delete" call doesn't call the message class's
+         *      "delete" callback until the reference count drops to zero.
+         *      However, attributes have already increased the reference
+         *      count on shared components before passing the attribute
+         *      to the shared message code to manage, causing an assymetry
+         *      in the reference counting for any shared components.
+         *
+         *      The alternate solution is to have the shared message's "try
+         *      delete" code always call the message class's "delete" callback,
+         *      even when the reference count is positive.  This can be done
+         *      without an appreciable performance hit (by using H5HF_op() in
+         *      the shared message comparison v2 B-tree callback), but it has
+         *      the undesirable side-effect of leaving the reference count on
+         *      the attribute's shared components artificially (and possibly
+         *      misleadingly) high, because there's only one shared attribute
+         *      referencing the shared components, not <refcount for the
+         *      shared attribute> objects referencing the shared components.
+         *
+         *      *ick* -QAK, 2007/01/08
+         */
+        if(attr_rc > 1) {
+            if(H5O_attr_delete(loc->file, dxpl_id, attr, TRUE) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+        } /* end if */
+    } /* end if */
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
@@ -535,6 +580,7 @@ herr_t
 H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr, 
     const H5O_shared_t *sh_mesg)
 {
+    hsize_t attr_rc;                    /* Attribute's ref count in shared message storage */
     htri_t shared_mesg;                 /* Whether the message should be shared */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -545,19 +591,29 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr,
     HDassert(attr);
     HDassert(sh_mesg);
 
-    /* Increment reference count on attribute components */
-    /* (Otherwise they may be deleted when the old attribute
-     * message is removed from the shared message storage.)
-     */
-    if(H5O_attr_link(f, dxpl_id, attr) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
-
     /* Store new version of message as a SOHM */
     /* (should always work, since we're not changing the size of the attribute) */
     if((shared_mesg = H5SM_try_share(f, dxpl_id, H5O_ATTR_ID, attr)) == 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "attribute changed sharing status")
     else if(shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't share attribute")
+
+    /* Retrieve shared message storage ref count for new shared attribute */
+    if(H5SM_get_refcount(f, dxpl_id, H5O_ATTR_ID, &attr->sh_loc, &attr_rc) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
+
+    /* If the newly shared attribute needs to share "ownership" of the shared
+     *      components (ie. its reference count is 1), increment the reference
+     *      count on any shared components of the attribute, so that they won't
+     *      be removed from the file.  (Essentially a "copy on write" operation).
+     *
+     *      *ick* -QAK, 2007/01/08
+     */
+    if(attr_rc == 1) {
+        /* Increment reference count on attribute components */
+        if(H5O_attr_link(f, dxpl_id, attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
+    } /* end if */
 
     /* Remove the old attribute from the SOHM storage */
     if(H5SM_try_delete(f, dxpl_id, H5O_ATTR_ID, sh_mesg) < 0)

@@ -41,7 +41,6 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5SMprivate.h"	/* Shared Messages			*/
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/

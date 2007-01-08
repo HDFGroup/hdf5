@@ -662,23 +662,23 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
      * shared there.
      */
     if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
     if(tri_ret > 0)
     {
         if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
-        if(H5SM_try_delete(f, H5AC_dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "can't remove datatype from SOHM heap")
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
+        if(H5SM_try_delete(f, dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from SOHM heap")
     } /* end if */
 
     if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't tell if dataspace is shared")
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if dataspace is shared")
     if(tri_ret > 0)
     {
         if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
-        if(H5SM_try_delete(f, H5AC_dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_SOHM, FAIL, "can't remove dataspace from SOHM heap")
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
+        if(H5SM_try_delete(f, dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_SOHM, FAIL, "can't remove dataspace from SOHM heap")
     } /* end if */
 
     /* Check whether datatype is shared */
@@ -686,7 +686,7 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
         /* Decrement the reference count on the shared datatype, if requested */
         if(adj_link)
             if(H5T_link(attr->dt, -1, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+                HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -733,7 +733,7 @@ H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
         if(H5T_link(attr->dt, 1, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -1155,7 +1155,6 @@ htri_t
 H5O_attr_is_shared(const void *_mesg)
 {
     const H5A_t  *mesg = (const H5A_t *)_mesg;
-    htri_t       ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_is_shared)
 
@@ -1165,12 +1164,7 @@ H5O_attr_is_shared(const void *_mesg)
      * library read a "committed attribute" if we ever create one in
      * the future.
      */
-    if(H5O_IS_SHARED(mesg->sh_loc.flags))
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
 } /* end H5O_attr_is_shared */
 
 
