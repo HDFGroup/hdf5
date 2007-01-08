@@ -365,11 +365,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Check if any of the pieces should be (or are already) shared in the
      * SOHM table */
     /* Data type */
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_DTYPE_ID, attr->dt) <0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed")
 
     /* Data space */
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_SDSPACE_ID, attr->ds) <0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
 
 

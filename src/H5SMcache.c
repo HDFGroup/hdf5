@@ -122,7 +122,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     HDassert(H5F_addr_defined(addr));
     HDassert(table);
 
-    if (table->cache_info.is_dirty) {
+    if(table->cache_info.is_dirty) {
         uint8_t *buf;                /* Temporary buffer */
         uint8_t  *p;                 /* Pointer into raw data buffer */
         size_t	 size;               /* Header size on disk */
@@ -133,7 +133,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         size = H5SM_TABLE_SIZE(f) + (H5SM_INDEX_HEADER_SIZE(f) * table->num_indexes);
 
         /* Allocate the buffer */ /* JAMES: use H5FL_BLK_MALLOC instead? */
-        if(NULL == (buf = HDmalloc(size)))
+        if(NULL == (buf = H5MM_malloc(size)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Encode the master table */
@@ -168,7 +168,10 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to save sohm table to disk")
 
 	table->cache_info.is_dirty = FALSE;
-    }
+
+        /* Free buffer */
+        H5MM_xfree(buf);
+    } /* end if */
 
     if(destroy)
         if(H5SM_dest_table(f, table) < 0)
