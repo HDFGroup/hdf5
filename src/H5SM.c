@@ -106,7 +106,7 @@ H5FL_ARR_DEFINE(H5SM_sohm_t, H5O_SHMESG_MAX_LIST_SIZE);
  */
 herr_t
 H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
-{    
+{
     H5SM_master_table_t *table = NULL;
     haddr_t table_addr = HADDR_UNDEF;
     unsigned num_indexes;
@@ -346,7 +346,7 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
     } /* end if */
     else
         /* No shared messages of any type */
-        HGOTO_DONE(FALSE)       
+        HGOTO_DONE(FALSE)
 
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
@@ -377,28 +377,34 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, hid_t dxpl_id)
+herr_t
+H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_addr)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
     ssize_t index_num;                  /* Which index */
-    haddr_t ret_value;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5SM_get_fheap_addr, FAIL)
 
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(fheap_addr);
+
     /* Look up the master SOHM table */
     if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, HADDR_UNDEF, "unable to load SOHM master table")
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
+    /* Look up index for message type */
     if((index_num = H5SM_get_index(table, type_id)) < 0)
-	HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, HADDR_UNDEF, "unable to find correct SOHM index")
+	HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to find correct SOHM index")
 
-    ret_value = table->indexes[index_num].heap_addr;
+    /* Retrieve heap address for index */
+    *fheap_addr = table->indexes[index_num].heap_addr;
 
 done:
     /* Release the master SOHM table */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, HADDR_UNDEF, "unable to close SOHM master table")
+	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_fheap_addr() */
@@ -492,7 +498,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM_create_index
+ * Function:    H5SM_delete_index
  *
  * Purpose:     De-allocates storage for an index whose header is HEADER.
  *
@@ -519,7 +525,7 @@ H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id, hbool_t 
     FUNC_ENTER_NOAPI(H5SM_delete_index, FAIL)
 
     /* Determine whether index is a list or a B-tree. */
-    if(header->index_type == H5SM_LIST) { 
+    if(header->index_type == H5SM_LIST) {
         /* Eject entry from cache */
         if(H5AC_expunge_entry(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache")
@@ -749,7 +755,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
      */
     if(H5B2_delete(f, dxpl_id, H5SM_INDEX, btree_addr, H5SM_convert_to_list_op, list) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
- 
+
 done:
     /* Release the SOHM list from the cache */
     if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
@@ -784,7 +790,6 @@ htri_t
 H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
 {
     size_t              mesg_size;
-    htri_t              tri_ret;
     H5SM_master_table_t *table = NULL;
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
@@ -804,21 +809,20 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
      */
     if(type_id == H5O_DTYPE_ID)
     {
+        htri_t              tri_ret;
+
         /* Don't share immutable datatypes */
         if((tri_ret = H5T_is_immutable((H5T_t*) mesg)) > 0)
-        {
-            HGOTO_DONE(FALSE);
-        }
-        else if(tri_ret <0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")        
+            HGOTO_DONE(FALSE)
+        else if(tri_ret < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
+
         /* Don't share committed datatypes */
         if((tri_ret = H5T_committed((H5T_t*) mesg)) > 0)
-        {
-            HGOTO_DONE(FALSE);
-        }
-        else if(tri_ret <0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is comitted")        
-    }
+            HGOTO_DONE(FALSE)
+        else if(tri_ret < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is comitted")
+    } /* end if */
 
     /* Look up the master SOHM table */
     if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
@@ -1094,7 +1098,6 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     /* Release the master SOHM table */
     if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
-
     table = NULL;
 
     /* If buf was allocated, delete the message it holds.  This message may
@@ -1226,7 +1229,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(cache_flags);
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
     HDassert(*buf == NULL);
-    
+
     /* Open the heap that this message is in */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
@@ -1266,7 +1269,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     {
         HDassert(header->index_type == H5SM_BTREE);
 
-        /* If this returns failure, it means that the message wasn't found. 
+        /* If this returns failure, it means that the message wasn't found.
          * If it succeeds, a copy of the modified message will be returned. */
         if(H5B2_modify(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_decr_ref, &message) <0)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
@@ -1311,8 +1314,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         --header->num_messages;
         *cache_flags |= H5AC__DIRTIED_FLAG;
 
-        /* If there are no messages left in the index, delete it 
-         */
+        /* If there are no messages left in the index, delete it */
         if(header->num_messages <=0) {
 
             /* Unprotect cache and release heap */

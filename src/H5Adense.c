@@ -112,7 +112,7 @@ typedef struct {
 /*
  * Data exchange structure to pass through the fractal heap layer for the
  * H5HF_op function when copying an attribute stored in densely stored attributes.
- * (or the shared object heap)
+ * (or the shared message heap)
  */
 typedef struct {
     /* downward (internal) */
@@ -331,13 +331,13 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -411,13 +411,13 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -629,13 +629,13 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -761,13 +761,13 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -964,13 +964,13 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr
         if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-        /* Get handle for shared object heap, if attributes are sharable */
+        /* Get handle for shared message heap, if attributes are sharable */
         if(attr_sharable) {
             haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-            /* Retrieve the address of the shared object's fractal heap */
-            if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+            /* Retrieve the address of the shared message's fractal heap */
+            if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
             /* Open the fractal heap for shared header messages */
             if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -1106,13 +1106,13 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -1188,13 +1188,13 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
         /* Open the fractal heap for shared header messages */
         if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
@@ -1334,17 +1334,20 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared object heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are sharable */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 
-        /* Retrieve the address of the shared object's fractal heap */
-        if(HADDR_UNDEF == (shared_fheap_addr = H5SM_get_fheap_addr(f, H5O_ATTR_ID, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared object heap address")
+        /* Retrieve the address of the shared message's fractal heap */
+        if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
 
-        /* Open the fractal heap for shared header messages */
-        if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+        /* Check if there are any shared messages currently */
+        if(H5F_addr_defined(shared_fheap_addr)) {
+            /* Open the fractal heap for shared header messages */
+            if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+        } /* end if */
     } /* end if */
 
     /* Create the "udata" information for v2 B-tree 'delete' */

@@ -37,7 +37,7 @@
 #include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5SMprivate.h"        /*JAMES: for H5SM_get_fheap_addr.  Change this? */
+#include "H5SMprivate.h"        /* Shared messages			*/
 
 static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, const uint8_t*);
 static herr_t H5O_shared_encode(H5F_t*, uint8_t*, const void*);
@@ -139,7 +139,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         size_t buf_size;
 
         /* Retrieve the fractal heap address for shared messages */
-        if((fheap_addr = H5SM_get_fheap_addr(f, type->id, dxpl_id)) == HADDR_UNDEF)
+        if(H5SM_get_fheap_addr(f, dxpl_id, type->id, &fheap_addr) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get fheap address for shared messages")
 
         /* Open the fractal heap */

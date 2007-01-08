@@ -1241,10 +1241,9 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
     /* Check for shifting from dense storage back to compact storage */
-    if(H5F_addr_defined(oh->attr_fheap_addr) && oh->nattrs < oh->min_dense) {
+    if(H5F_addr_defined(oh->attr_fheap_addr) && (oh->nattrs == 0 || oh->nattrs < oh->min_dense)) {
         /* Check if there's no more attributes */
         if(oh->nattrs == 0) {
-/* XXX: Test this */
             /* Delete the dense storage */
             if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
