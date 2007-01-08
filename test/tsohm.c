@@ -24,20 +24,20 @@
 
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
-const unsigned def_type_flags[H5SM_MAX_NINDEXES] = {0,0,0,0,0,0};
-const unsigned def_minsizes[H5SM_MAX_NINDEXES] = {250,250,250,250,250,250};
+const unsigned def_type_flags[H5O_SHMESG_MAX_NINDEXES] = {0,0,0,0,0,0};
+const unsigned def_minsizes[H5O_SHMESG_MAX_NINDEXES] = {250,250,250,250,250,250};
 #define DEF_L2B 50
 #define DEF_B2L 40
 
 /* Non-default SOHM values for testing */
 #define TEST_NUM_INDEXES 4
-const unsigned test_type_flags[H5SM_MAX_NINDEXES] =
+const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] =
                 {H5O_MESG_FILL_FLAG,
                  H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG,
                  H5O_MESG_SDSPACE_FLAG,
                  H5O_MESG_PLINE_FLAG,
                  0, 0};
-const unsigned test_minsizes[H5SM_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
+const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
 #define TEST_L2B 65
 #define TEST_B2L 64
 
@@ -55,7 +55,7 @@ const unsigned test_minsizes[H5SM_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
 
 typedef struct dtype1_struct {
     int    i1;
-    char   str[10]; /* JAMES */
+    char   str[10];
     int    i2;
     int    i3;
     int    i4;
@@ -176,12 +176,12 @@ static void check_fcpl_values(hid_t fcpl_id, const unsigned nindexes_in,
     VERIFY(num_indexes, nindexes_in, "H5Pget_shared_mesg_nindexes");
 
     /* Verify index flags and minsizes are set */
-    for(x=1; x<=num_indexes; ++x)
+    for(x=0; x<num_indexes; ++x)
     {
         ret = H5Pget_shared_mesg_index(fcpl_id, x, &index_flags, &min_mesg_size);
         CHECK_I(ret, "H5Pget_shared_mesg_index");
-        VERIFY(index_flags, flags_in[x-1], "H5Pget_shared_mesg_index");
-        VERIFY(min_mesg_size, minsizes_in[x-1], "H5Pget_shared_mesg_index");
+        VERIFY(index_flags, flags_in[x], "H5Pget_shared_mesg_index");
+        VERIFY(min_mesg_size, minsizes_in[x], "H5Pget_shared_mesg_index");
     }
 
     /* Check list-to-btree and btree-to-list values */
@@ -259,9 +259,9 @@ static void test_sohm_fcpl(void)
     /* Set up index values */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, TEST_NUM_INDEXES);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    for(x=1; x<=TEST_NUM_INDEXES; ++x)
+    for(x=0; x<TEST_NUM_INDEXES; ++x)
     {
-        ret = H5Pset_shared_mesg_index(fcpl_id, x, test_type_flags[x-1], test_minsizes[x-1]);
+        ret = H5Pset_shared_mesg_index(fcpl_id, x, test_type_flags[x], test_minsizes[x]);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
     }
 
@@ -305,31 +305,32 @@ static void test_sohm_fcpl(void)
     /* Test giving bogus values to H5P* functions */
     H5E_BEGIN_TRY {
         /* Trying to create too many indexes should fail */
-        ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5SM_MAX_NINDEXES + 1);
+        ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5O_SHMESG_MAX_NINDEXES + 1);
         VERIFY(ret, -1, "H5Pset_shared_mesg_nindexes");
 
-        /* Trying to set index 0 or an index higher than the current number
+        /* Trying to set index to an index higher than the current number
          * of indexes should fail.
          */
-        ret = H5Pset_shared_mesg_index(fcpl_id, 0, 0, 15);
+        ret = H5Pset_shared_mesg_index(fcpl_id, H5O_SHMESG_MAX_NINDEXES, 0, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
-        ret = H5Pset_shared_mesg_index(fcpl_id, H5SM_MAX_NINDEXES + 1, 0, 15);
-        VERIFY(ret, -1, "H5Pset_shared_mesg_index");
-        ret = H5Pset_shared_mesg_index(fcpl_id, TEST_NUM_INDEXES + 1, 0, 15);
+        ret = H5Pset_shared_mesg_index(fcpl_id, TEST_NUM_INDEXES, 0, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
 
         /* Setting an unknown flag (all flags + 1) should fail */
         ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG + 1, 15);
         VERIFY(ret, -1, "H5Pset_shared_mesg_index");
 
-        /* Try setting two different indexes to hold fill messages */
-        ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        /* Try setting two different indexes to hold fill messages.  They
+         * should hold even very small messages for testing, even though we
+         * wouldn't really want to share such tiny messages in the real world.
+         */
+        ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_FILL_FLAG, 15);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
-        ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_FILL_FLAG, 15);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
         VERIFY(fid, -1, "H5Fcreate");
-        ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 15 /* JAMES */);
+        ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 15);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
         VERIFY(fid, -1, "H5Fcreate");
@@ -341,11 +342,11 @@ static void test_sohm_fcpl(void)
         ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 12);
         VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
         /* Setting them to extremely large values should also fail */
-        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS + 1, 0);
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5O_SHMESG_MAX_LIST_SIZE + 1, 0);
         VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
-        ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, H5SM_MAX_LIST_ELEMS + 10);
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, H5O_SHMESG_MAX_LIST_SIZE + 10);
         VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
-        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS, H5SM_MAX_LIST_ELEMS+1);
+        ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5O_SHMESG_MAX_LIST_SIZE, H5O_SHMESG_MAX_LIST_SIZE+1);
         VERIFY(ret, -1, "H5Pset_shared_mesg_phase_change");
     } H5E_END_TRY
 
@@ -355,7 +356,7 @@ static void test_sohm_fcpl(void)
      * have corrupted the fcpl, although we do need to reset the
      * second index that we changed above.
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, test_type_flags[1], 15 /* JAMES */);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, test_type_flags[1], 15 /* JAMES */);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 11);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -364,13 +365,13 @@ static void test_sohm_fcpl(void)
     ret = H5Fclose(fid);
     CHECK_I(ret, "H5Fclose");
 
-    /* Test edge cases; H5SM_MAX_NINDEXES and H5SM_MAX_LIST_ELEMS should be
+    /* Test edge cases; H5O_SHMESG_MAX_NINDEXES and H5O_SHMESG_MAX_LIST_SIZE should be
      * valid values.  Also, creating a file with uninitialized indexes
      * (indexes 3-5) should work.
      */
-    ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5SM_MAX_NINDEXES);
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5O_SHMESG_MAX_NINDEXES);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5SM_MAX_LIST_ELEMS, H5SM_MAX_LIST_ELEMS);
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, H5O_SHMESG_MAX_LIST_SIZE, H5O_SHMESG_MAX_LIST_SIZE);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
@@ -796,7 +797,7 @@ static void test_sohm_size1(void)
     /* Tests one index holding only datatype messages */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, num_indexes);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, index_flags, min_mesg_size);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, index_flags, min_mesg_size);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, list_max, btree_min);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -849,7 +850,7 @@ static void test_sohm_size1(void)
     /* Tests one index holding only datatype messages */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, num_indexes);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, index_flags, min_mesg_size);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, index_flags, min_mesg_size);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -1075,42 +1076,42 @@ static void test_sohm_attrs(void)
     /* Run tests with only one kind of message to be shared */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ATTR_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ATTR_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     /* Verify */
     sohm_attr_helper(fcpl_id);
 
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
 
     /* Run with any two types shared */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ATTR_FLAG | H5O_MESG_DTYPE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ATTR_FLAG | H5O_MESG_DTYPE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
     
     /* Run test with all three kinds of message shared */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
@@ -1119,19 +1120,19 @@ static void test_sohm_attrs(void)
     /* Try using two indexes */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ATTR_FLAG | H5O_MESG_DTYPE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ATTR_FLAG | H5O_MESG_DTYPE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_SDSPACE_FLAG, 2);
-    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-
-    sohm_attr_helper(fcpl_id);
-
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
 
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_ATTR_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG, 2);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+
+    sohm_attr_helper(fcpl_id);
+
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ATTR_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
@@ -1140,7 +1141,7 @@ static void test_sohm_attrs(void)
     /* One index for each kind of message */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 3);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 3, H5O_MESG_SDSPACE_FLAG, 2);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_SDSPACE_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     sohm_attr_helper(fcpl_id);
@@ -1932,7 +1933,7 @@ static void test_sohm_size2(int close_reopen)
 
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Set the indexes to use a medium-sized list */
@@ -1983,11 +1984,11 @@ static void test_sohm_size2(int close_reopen)
     /* JAMES: should be zero-indexed? */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 3);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 3, H5O_MESG_ATTR_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_ATTR_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Use lists that are the same size as the "medium" list on the previous
@@ -2012,18 +2013,12 @@ static void test_sohm_size2(int close_reopen)
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
     /* Edit the same property list (this should work) and don't share all messages.
-     * Also create one index that holds no messages, to make sure this doesn't
-     * break anything.
      */
-    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 3);
-    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_PLINE_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_PLINE_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-/* JAMES    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_NONE_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 100000);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-*/
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 100000);
-    ret = H5Pset_shared_mesg_index(fcpl_id, 3, H5O_MESG_ATTR_FLAG | H5O_MESG_SDSPACE_FLAG, 20);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_ATTR_FLAG | H5O_MESG_SDSPACE_FLAG, 20);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Use "normal-sized" lists. */
@@ -2044,7 +2039,7 @@ static void test_sohm_size2(int close_reopen)
     /* Change the second index to hold only gigantic messages.  Result should
      * be the same as the previous file.
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 100000);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG, 100000);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     share_some_toobig_index = size2_helper(fcpl_id, close_reopen);
@@ -2058,14 +2053,14 @@ static void test_sohm_size2(int close_reopen)
      * as one gains from sharing them.
      */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG | H5O_MESG_SDSPACE_FLAG, 1);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG | H5O_MESG_SDSPACE_FLAG, 1);
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1000, 900);
 
     share_tiny_index = size2_helper(fcpl_id, close_reopen);
     size2_verify();
 
     /* Create the same file but don't share the really tiny messages */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG | H5O_MESG_SDSPACE_FLAG, 100);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG | H5O_MESG_SDSPACE_FLAG, 100);
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1000, 900);
 
     type_space_index = size2_helper(fcpl_id, close_reopen);
@@ -2715,7 +2710,7 @@ test_sohm_delete(void)
     CHECK_I(fcpl_id, "H5Pcreate");
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 16);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
 
@@ -2744,9 +2739,9 @@ test_sohm_delete(void)
     /* Use two indexes */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 16);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_DTYPE_FLAG, 16);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Use big list indexes */
@@ -2900,9 +2895,9 @@ test_sohm_delete_revert(void)
     CHECK_I(fcpl_id, "H5Pcreate");
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_DTYPE_FLAG, 10);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG, 10);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 2, H5O_MESG_SDSPACE_FLAG, 10);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_SDSPACE_FLAG, 10);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Call the helper function to test this FCPL. */
@@ -2917,7 +2912,7 @@ test_sohm_delete_revert(void)
     /* Try sharing all messages */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 10);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 10);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 5);
 
@@ -3032,7 +3027,7 @@ test_sohm_extlink(void)
     CHECK_I(fcpl_id, "H5Pcreate");
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ALL_FLAG, 16);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Test using external links when the source or destination file uses

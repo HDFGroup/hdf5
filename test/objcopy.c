@@ -7115,7 +7115,7 @@ main(void)
         /* Create an FCPL with sharing enabled */
         if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
         if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
-        if(H5Pset_shared_mesg_index(fcpl_shared, 1, H5O_MESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
+        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_MESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
 
         /* Test in all configurations */
         for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {

@@ -44,7 +44,7 @@
 /* Local Macros */
 /****************/
 /* JAMES: should this change according to address size? */
-#define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5SM_MAX_LIST_ELEMS * 16
+#define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5O_SHMESG_MAX_LIST_SIZE * 16
 
 #define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
 

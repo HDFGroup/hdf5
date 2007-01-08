@@ -372,12 +372,12 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
      * fcpl */
     if(shared->sohm_addr != HADDR_UNDEF)
     {
-        unsigned index_flags[H5SM_MAX_NINDEXES] = {0};
-        unsigned minsizes[H5SM_MAX_NINDEXES] = {0};
+        unsigned index_flags[H5O_SHMESG_MAX_NINDEXES] = {0};
+        unsigned minsizes[H5O_SHMESG_MAX_NINDEXES] = {0};
         unsigned sohm_l2b;           /* SOHM list-to-btree cutoff    */
         unsigned sohm_b2l;           /* SOHM btree-to-list cutoff    */
 
-        HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5SM_MAX_NINDEXES);
+        HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5O_SHMESG_MAX_NINDEXES);
 
         /* Read in the shared OH message information if there is any */
         if(H5SM_get_info(f, index_flags, minsizes, &sohm_l2b, &sohm_b2l, dxpl_id) < 0)

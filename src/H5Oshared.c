@@ -223,9 +223,6 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared, int adj
     /* check args */
     HDassert(f);
     HDassert(shared);
-    /* JAMES
-     * NEW THOUGHT: I should increment SOHM ref count here (or in a parallel function)
-     */
 
     /*
      * The shared message is stored in some other object header.
@@ -561,10 +558,6 @@ H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     /* check args */
     HDassert(f);
     HDassert(shared);
-
-    /* JAMES_HEAP: see comment in link_adj.  Unneccessary except for shared attributes, I think,
-     * and they may yet take care of themselves.
-     */
 
     /* Increment the reference count on the shared object */
     if(H5O_shared_link_adj(f, dxpl_id, shared, 1) < 0)

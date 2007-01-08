@@ -62,9 +62,8 @@
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
  */
-/* JAMES: make these H5O* */
-#define H5SM_MAX_NINDEXES 8
-#define H5SM_MAX_LIST_ELEMS 5000
+#define H5O_SHMESG_MAX_NINDEXES 8
+#define H5O_SHMESG_MAX_LIST_SIZE 5000
 
 /*******************/
 /* Public Typedefs */

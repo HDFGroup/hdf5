@@ -307,8 +307,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* JAMES: this will probably get put through its paces when extending shared
- * dataspaces */
 herr_t
 H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
    unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id)
@@ -1362,7 +1360,6 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
             } /* end if */
             else {
                 /* If the message is shared, get the real message it points to */
-                /* JAMES: test */
                 if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
                     if(NULL == (native_mesg = H5O_shared_read(f, dxpl_id,
                                 idx_msg->native, idx_msg->type, NULL)))

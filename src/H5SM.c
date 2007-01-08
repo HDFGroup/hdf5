@@ -73,9 +73,9 @@ static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 /*********************/
 
 H5FL_DEFINE(H5SM_master_table_t);
-H5FL_ARR_DEFINE(H5SM_index_header_t, H5SM_MAX_NINDEXES);
+H5FL_ARR_DEFINE(H5SM_index_header_t, H5O_SHMESG_MAX_NINDEXES);
 H5FL_DEFINE(H5SM_list_t);
-H5FL_ARR_DEFINE(H5SM_sohm_t, H5SM_MAX_LIST_ELEMS);
+H5FL_ARR_DEFINE(H5SM_sohm_t, H5O_SHMESG_MAX_LIST_SIZE);
 
 
 /*****************************/
@@ -111,8 +111,8 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     haddr_t table_addr = HADDR_UNDEF;
     unsigned num_indexes;
     unsigned list_max, btree_min;
-    unsigned index_type_flags[H5SM_MAX_NINDEXES];
-    unsigned minsizes[H5SM_MAX_NINDEXES];
+    unsigned index_type_flags[H5O_SHMESG_MAX_NINDEXES];
+    unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];
     unsigned type_flags_used;
     unsigned x;
     hsize_t table_size;
@@ -141,7 +141,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM message min sizes")
 
     /* Verify that values are valid */
-    if(num_indexes > H5SM_MAX_NINDEXES)
+    if(num_indexes > H5O_SHMESG_MAX_NINDEXES)
         HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "number of indexes in property list is too large")
 
     /* Check that type flags weren't duplicated anywhere */
@@ -168,7 +168,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
      * min.
      */
     HDassert(list_max + 1 >= btree_min);
-    HDassert(table->num_indexes > 0 && table->num_indexes <= H5SM_MAX_NINDEXES);
+    HDassert(table->num_indexes > 0 && table->num_indexes <= H5O_SHMESG_MAX_NINDEXES);
 
     /* Allocate the SOHM indexes as an array. */
     if(NULL == (table->indexes = (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
@@ -439,7 +439,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     {
         header->index_type = H5SM_LIST;
 
-        if((list_addr = H5SM_create_list(f, header, dxpl_id)) == HADDR_UNDEF)  /* JAMES: only allocate part of the list? */
+        if((list_addr = H5SM_create_list(f, header, dxpl_id)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "list creation failed for SOHM index")
 
         header->index_addr = list_addr;
@@ -937,7 +937,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
-        /* JAMES: not very effecient (gets hash value twice, searches list twice).  Refactor. */
+        /* JAMES: not very efficient (gets hash value twice, searches list twice).  Refactor. */
         /* See if the message is already in the index and get its location */
         /* JAMES: should return a pointer to the message */
         list_pos = H5SM_find_in_list(list, &key);

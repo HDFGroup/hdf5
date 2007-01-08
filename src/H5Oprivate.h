@@ -46,19 +46,12 @@ typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_t H5O_t;
 
 /* JAMES: should these be in H5SM_private?  or renamed? */
-/* JAMES: causes errors encoding/decoding if this is wrong.  Can't be constant. */
+/* Fractal heap ID type for shared message heap IDs.  The length of a heap ID
+ * depends on how the heap is configured; currently they're always stored in
+ * 8-byte fields, although only seven bytes are used.
+ */
 #define H5SM_FHEAP_ID_LEN 7
-
-/* JAMES: not great? */
 typedef uint64_t H5SM_fheap_id_t;
-
-
-/* JAMES for debugging */
-#define PRINT_BUF(buf, size)                \
-    if(1) { size_t x;               \
-        for(x=0; x<size; ++x) {     \
-            printf("%d ", *(((uint8_t *) buf) + x)); \
-        } printf("\n"); }
 
 
 /* Object header macros */
@@ -150,7 +143,6 @@ typedef struct H5O_shared_t {
         H5O_loc_t	oloc;		/*object location info		     */
         H5SM_fheap_id_t heap_id;        /* ID within the SOHM heap           */
     } u;
-    /* JAMES: add hash value? */
 } H5O_shared_t;
 
 
