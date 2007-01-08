@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-snap12 released on Sun Dec 24 18:49:13 CST 2006
+HDF5 version 1.6.6-snap13 released on Sun Jan  7 23:43:24 CST 2007
 ================================================================================
 
 INTRODUCTION
@@ -73,6 +73,14 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
+            be returned (0) instead of FAIL on error confitions such as the
+            selection or extent not being defined. CMC - 2007/01/05
+        - Fixed potential file corruption bug which could overwrite a portion
+            of an object's header when an attribute was renamed.  If the new
+            name for the attribute was longer than the old name, it's possible
+            that the attribute could grow enough to overwrite another message
+            in the object's header.  QAK - 2007/01/02
         - Fixed file corruption bug which could write an incorrect number of
             messages to an object's header under certain circumstances.
             Generally, the sequence of actions to generate this bug looks
