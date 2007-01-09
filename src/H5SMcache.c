@@ -22,28 +22,19 @@
 /***********/
 /* Headers */
 /***********/
-/* JAMES: these need to go first or else FILE isn't defined in H5Fpkg.h */
-/* JAMES: which of these are really needed?  H5Fpkg.h, even? */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"		/* Attributes				*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 #include "H5Fpkg.h"		/* File access                          */
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5FOprivate.h"        /* File objects                         */
-#include "H5HLprivate.h"	/* Local heaps				*/
-#include "H5MFprivate.h"        /* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
 #include "H5SMpkg.h"            /* Shared object header messages        */
-#include "H5FDprivate.h"	/* File drivers				*/
 
 /****************/
 /* Local Macros */
 /****************/
-/* JAMES: should this change according to address size? */
+/* JAMES: should this change according to address size? 
+    Answer: shouldn't use this ever anyway.
+    */
 #define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5O_SHMESG_MAX_LIST_SIZE * 16
 
 #define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
@@ -641,8 +632,6 @@ H5SM_dest_list(H5F_t UNUSED *f, H5SM_list_t* list)
 } /* end H5SM_dest_list */
 
 
-/* JAMES: should this number be constant, or should it increase and decrease as
- * messages are added and removed? */
 /*-------------------------------------------------------------------------
  * Function:	H5SM_list_size
  *

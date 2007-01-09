@@ -35,15 +35,21 @@
 /* Local Typedefs */
 /******************/
 
+/* Udata struct for call to H5SM_btree_compare_cb */
+typedef struct H5SM_compare_udata {
+    H5SM_mesg_key_t *key;   /* Key; compare this against record in heap */
+    herr_t ret;            /* Return value; set this to result of memcmp */
+} H5SM_compare_udata;
 
 /********************/
 /* Local Prototypes */
 /********************/
 
 /* JAMES: name these as "H5SM_btree_store", etc? */
-static herr_t H5SM_message_store(void *native, const void *udata);
-static herr_t H5SM_message_retrieve(void *udata, const void *native);
-static herr_t H5SM_message_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+static herr_t H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata);
+static herr_t H5SM_btree_store(void *native, const void *udata);
+static herr_t H5SM_btree_retrieve(void *udata, const void *native);
+static herr_t H5SM_btree_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *_udata);
 
 
@@ -51,21 +57,59 @@ static herr_t H5SM_message_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
 /* Library Private Variables */
 /*****************************/
 /* v2 B-tree class for SOHM indexes*/
-const H5B2_class_t H5SM_INDEX[1]={{     /* B-tree class information */
-    H5B2_SOHM_INDEX_ID,                 /* Type of B-tree */
-    sizeof(H5SM_sohm_t),                /* Size of native record */
-    H5SM_message_store,                 /* Record storage callback */
-    H5SM_message_retrieve,              /* Record retrieval callback */
-    H5SM_message_compare,               /* Record comparison callback */
-    H5SM_message_encode,                /* Record encoding callback */
-    H5SM_message_decode,                /* Record decoding callback */
-    H5SM_message_debug                  /* Record debugging callback */
+const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
+    H5B2_SOHM_INDEX_ID,               /* Type of B-tree */
+    sizeof(H5SM_sohm_t),              /* Size of native record */
+    H5SM_btree_store,                 /* Record storage callback */
+    H5SM_btree_retrieve,              /* Record retrieval callback */
+    H5SM_message_compare,             /* Record comparison callback */
+    H5SM_message_encode,              /* Record encoding callback */
+    H5SM_message_decode,              /* Record decoding callback */
+    H5SM_btree_debug                  /* Record debugging callback */
 }};
 
 /*******************/
 /* Local Variables */
 /*******************/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_btree_compare_cb
+ *
+ * Purpose:	Callback for H5HF_op, used in H5SM_btree_compare_cb below.
+ *              Determines whether the search key passed in in _UDATA is
+ *              equal to OBJ or not.
+ *
+ *              Passes back the result in _UDATA->RET
+ *
+ * Return:	Negative on error, non-negative on success
+ *
+ * Programmer:	James Laird
+ *              Monday, January 8, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
+{
+    H5SM_compare_udata *udata = (H5SM_compare_udata *)_udata;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_compare_cb)
+
+    /* If the encoding sizes are different, it's not the same object */
+    if(udata->key->encoding_size != obj_len) {
+        if(udata->key->encoding_size > obj_len)
+            udata->ret = 1;
+        else
+            udata->ret = -1;
+    } else {
+        /* Sizes are the same.  Return result of memcmp */
+        udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5SM_message_compare
@@ -91,7 +135,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
     int64_t hash_diff;  /* Has to be able to hold two 32-bit values */
     herr_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_message_compare)
 
     /* JAMES: might be able to spare a sentinel byte instead of worrying about
      * refcounts.  Here, we need to find a deleted message in a B-tree to
@@ -114,19 +158,21 @@ H5SM_message_compare(const void *rec1, const void *rec2)
         }
         else
         {
-            unsigned char buf2[H5O_MESG_MAX_SIZE];
+            /* Hash values match, but we don't have a heap ID for the key.
+             * Compare the encoded message with the one in the heap.
+             */
+            /* JAMES: can we hold off encoding until now? */
+            H5SM_compare_udata udata;
             herr_t ret;
 
-            /* We need to see if this message is in fact the message stored
-             * in the heap.  Read it from the heap and compare the two.
-             */
-            HDmemset(buf2, 0, (size_t)H5O_MESG_MAX_SIZE);
+            /* Casting away const OK.  -JML */
+            udata.key = key;
 
-            ret = H5HF_read(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), &buf2);
+            /* Call heap op routine with comparison callback */
+            ret = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), H5SM_btree_compare_cb, &udata);
             HDassert(ret >= 0);
 
-            /* JAMES: I think I want to use in-heap callback here. */
-            ret_value = HDmemcmp(key->encoding, buf2, key->encoding_size);
+            ret_value = udata.ret;
         }
     }
     else {
@@ -142,7 +188,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_message_store
+ * Function:	H5SM_btree_store
  *
  * Purpose:	Store a H5SM_sohm_t SOHM message in the B-tree by copying it
  *              from UDATA to NATIVE.
@@ -156,19 +202,19 @@ H5SM_message_compare(const void *rec1, const void *rec2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_message_store(void *native, const void *udata)
+H5SM_btree_store(void *native, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_store)
 
     /* Copy the source message to the B-tree */
     *(H5SM_sohm_t *)native = *(const H5SM_sohm_t *)udata;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_store */
+} /* end H5SM_btree_store */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_message_retrieve
+ * Function:	H5SM_btree_retrieve
  *
  * Purpose:	Retrieve a H5SM_sohm_t SOHM message from the B-tree by
  *              copying it from NATIVE to UDATA.
@@ -184,15 +230,15 @@ H5SM_message_store(void *native, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_message_retrieve(void *udata, const void *native)
+H5SM_btree_retrieve(void *udata, const void *native)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_retrieve)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_retrieve)
 
     /* Copy the B-tree's native message to the udata buffer */
     *(H5SM_sohm_t *)udata = *(const H5SM_sohm_t *)native;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_retrieve */
+} /* end H5SM_btree_retrieve */
 
 
 /*-------------------------------------------------------------------------
@@ -237,7 +283,7 @@ H5SM_message_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_nrecord)
  *
  *-------------------------------------------------------------------------
  */
-/* JAMES: can we combine this with H5SMcache functions? */
+/* JAMES: move to H5SM.c or something */
 herr_t
 H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 {
@@ -255,7 +301,7 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_message_debug
+ * Function:	H5SM_btree_debug
  *
  * Purpose:	Print debugging information for a H5SM_sohm_t.
  *
@@ -268,18 +314,18 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_message_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5SM_btree_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     int indent, int fwidth, const void *record, const void UNUSED *_udata)
 {
     const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_debug)
 
     HDfprintf(stream, "%*s%-*s {%a, %lo, %Hu}\n", indent, "", fwidth, "Record:",
         sohm->fheap_id, sohm->hash, sohm->ref_count);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_debug */
+} /* end H5SM_btree_debug */
 
 
 /*-------------------------------------------------------------------------
@@ -361,7 +407,7 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_convert_to_list_op
+ * Function:	H5SM_btree_convert_to_list_op
  *
  * Purpose:	An H5B2_remove_t callback function to convert a SOHM
  *              B-tree index to a list.
@@ -377,13 +423,13 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_convert_to_list_op(const void * record, void *op_data)
+H5SM_btree_convert_to_list_op(const void * record, void *op_data)
 {
     const H5SM_sohm_t *message = (const H5SM_sohm_t *) record;
     const H5SM_list_t *list = (const H5SM_list_t *) op_data;
     hsize_t      x;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_convert_to_list_op)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_convert_to_list_op)
 
     HDassert(record);
     HDassert(op_data);

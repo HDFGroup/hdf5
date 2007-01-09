@@ -356,7 +356,7 @@ static void test_sohm_fcpl(void)
      * have corrupted the fcpl, although we do need to reset the
      * second index that we changed above.
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, test_type_flags[1], 15 /* JAMES */);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, test_type_flags[1], 15);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 11);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -1981,7 +1981,6 @@ static void test_sohm_size2(int close_reopen)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     CHECK_I(fcpl_id, "H5Pcreate");
 
-    /* JAMES: should be zero-indexed? */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 3);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG, 20);

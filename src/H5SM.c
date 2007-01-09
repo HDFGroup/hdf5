@@ -753,7 +753,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
     /* Delete the B-tree and have messages copy themselves to the
      * list as they're deleted
      */
-    if(H5B2_delete(f, dxpl_id, H5SM_INDEX, btree_addr, H5SM_convert_to_list_op, list) < 0)
+    if(H5B2_delete(f, dxpl_id, H5SM_INDEX, btree_addr, H5SM_btree_convert_to_list_op, list) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
 done:

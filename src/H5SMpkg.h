@@ -200,7 +200,7 @@ H5_DLL herr_t H5SM_incr_ref(void *record, void *op_data, hbool_t *changed);
 H5_DLL herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 
 /* H5B2_remove_t callback to add messages to a list index */
-H5_DLL herr_t H5SM_convert_to_list_op(const void * record, void *op_data);
+H5_DLL herr_t H5SM_btree_convert_to_list_op(const void * record, void *op_data);
 
 /* Fractal heap 'op' callback to compute hash value for message "in place" */
 H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata);
