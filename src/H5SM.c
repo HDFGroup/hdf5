@@ -58,13 +58,13 @@ static herr_t H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header,
                                 hid_t dxpl_id, hbool_t delete_heap);
 static haddr_t H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id);
 static herr_t H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
-                           H5SM_list_t **_list, hid_t dxpl_id);
+                           H5SM_list_t **_list, H5HF_t *fheap, hid_t dxpl_id);
 static herr_t H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_id);
 static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
      unsigned type_id, void *mesg, unsigned *cache_flags_ptr);
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id,
         H5SM_index_header_t *header, unsigned type_id, const H5O_shared_t * mesg,
-        unsigned *cache_flags, void ** buf);
+        unsigned *cache_flags, void ** encoded_mesg);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 
 
@@ -660,10 +660,11 @@ done:
  */
 herr_t
 H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
-                           H5SM_list_t **_list, hid_t dxpl_id)
+                           H5SM_list_t **_list, H5HF_t *fheap, hid_t dxpl_id)
 {
     H5SM_index_header_t temp_header;
     H5SM_list_t *list;
+    H5SM_mesg_key_t key;
     haddr_t     tree_addr;
     size_t      x;
     herr_t      ret_value = SUCCEED;
@@ -685,11 +686,20 @@ H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
     /* Insert each record into the new B-tree */
     for(x = 0; x < header->list_max; x++)
     {
+        /* Set up key values that all messages will use.  Since these messages
+         * are in the heap, they have a heap ID and no encoding.
+         */
+        key.encoding = NULL;
+        key.encoding_size = 0;
+        key.fheap = fheap;
+
         if(list->messages[x].ref_count > 0)
         {
-            if(H5B2_insert(f, dxpl_id, H5SM_INDEX, tree_addr, &(list->messages[x])) < 0)
+            key.message = list->messages[x];
+            /* JAMES: need ref count! And test, if not having refcount doesn't break any tests. */
+
+            if(H5B2_insert(f, dxpl_id, H5SM_INDEX, tree_addr, &key) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
-            HDassert(list->messages[x].ref_count > 0);
         }
     }
 
@@ -925,11 +935,13 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Set up a key for the message to be written */
-    key.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
+    key.message.fheap_id = 0; /* Message doesn't yet have a heap ID */
+    key.message.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
+    key.message.ref_count = 1;
+
     key.encoding = encoding_buf;
     key.encoding_size = buf_size;
     key.fheap = fheap;
-    key.mesg_heap_id = 0; /* JAMES: Message doesn't yet have a heap ID */
 
     /* Assume the message is already in the index and try to increment its
      * reference count.  If this fails, the message isn't in the index after
@@ -977,16 +989,16 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         if((mesg_size = H5O_msg_raw_size(f, type_id, mesg)) == 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get size of message")
 
-        /* JAMES: fix memory problem */
-        shared.u.heap_id = 0;
-
-        if(H5HF_insert(fheap, dxpl_id, mesg_size, key.encoding, &(shared.u.heap_id)) < 0)
+        /* Put the message in the heap and record its new heap ID */
+        if(H5HF_insert(fheap, dxpl_id, mesg_size, key.encoding, &shared.u.heap_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
+
+        key.message.fheap_id = shared.u.heap_id;
 
         /* Check whether the list has grown enough that it needs to become a B-tree */
         if(header->index_type == H5SM_LIST && header->num_messages >= header->list_max)
         {
-            if(H5SM_convert_list_to_btree(f, header, &list, dxpl_id) < 0)
+            if(H5SM_convert_list_to_btree(f, header, &list, fheap, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to convert list to B-tree")
         }
 
@@ -1000,22 +1012,17 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
             {
                 if(list->messages[x].ref_count == 0)
                 {
-                  list->messages[x].fheap_id = shared.u.heap_id;
-                  list->messages[x].hash = key.hash;
-                  list->messages[x].ref_count = 1;
+                  list->messages[x] = key.message;
+                  HDassert(list->messages[x].ref_count > 0);
                   break;
                 }
             }
         }
         else /* Index is a B-tree */
         {
-            H5SM_sohm_t message;
             HDassert(header->index_type == H5SM_BTREE);
-            message.fheap_id = shared.u.heap_id;
-            message.hash = key.hash;
-            message.ref_count = 1;
 
-            if(H5B2_insert(f, dxpl_id, H5SM_INDEX, header->index_addr, &message) < 0)
+            if(H5B2_insert(f, dxpl_id, H5SM_INDEX, header->index_addr, &key) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
         }
 
@@ -1199,8 +1206,8 @@ H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
  * Purpose:     Decrement the reference count for a particular message in this
  *              index.  If the reference count reaches zero, allocate a buffer
  *              to hold the serialized form of this message so that any
- *              resources it uses can be freed.
- * JAMES: rename buf
+ *              resources it uses can be freed, and return this buffer in
+ *              ENCODED_MESG.
  *
  * Return:      Non-negative on success
  *              Negative on failure
@@ -1212,11 +1219,12 @@ H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
  */
 static herr_t
 H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
-    unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags, void ** buf)
+    unsigned type_id, const H5O_shared_t * mesg, unsigned *cache_flags,
+    void ** /*out*/ encoded_mesg)
 {
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;
-    H5SM_sohm_t     message;
+    H5SM_sohm_t     message;            /* Deleted message returned from index */
     size_t          list_pos = UFAIL;   /* Position of the message in the list */
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
     H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
@@ -1228,7 +1236,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(mesg);
     HDassert(cache_flags);
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
-    HDassert(*buf == NULL);
+    HDassert(*encoded_mesg == NULL);
 
     /* Open the heap that this message is in */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
@@ -1243,11 +1251,13 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
 
     /* Set up key for message to be deleted. */
-    key.hash = udata.hash;
+    key.message.fheap_id = mesg->u.heap_id;
+    key.message.hash = udata.hash;
+    key.message.ref_count = 0;  /* Refcount isn't relevant here */
+
     key.encoding = NULL;
     key.encoding_size = 0;
     key.fheap = fheap;
-    key.mesg_heap_id = mesg->u.heap_id;
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST)
@@ -1289,17 +1299,10 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
 
         /* Allocate a buffer to hold the message */
-        if(NULL == (*buf = H5MM_malloc(buf_size)))
+        if(NULL == (*encoded_mesg = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-        /* Retrieve the message from the heap */
-        if(H5HF_read(fheap, dxpl_id, &(message.fheap_id), *buf) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
-
-        /* Remove the message from the heap */
-        if(H5HF_remove(fheap, dxpl_id, &(message.fheap_id)) < 0)
-            HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "unable to remove message from heap")
-
+        /* Remove the message from the index */
         if(header->index_type == H5SM_LIST)
         {
             list->messages[list_pos].ref_count = 0;
@@ -1310,9 +1313,21 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, FAIL, "unable to delete message")
         }
 
-        /* Update the index header, so set its dirty flag */
+        /* Updated the index header, so set its dirty flag */
         --header->num_messages;
         *cache_flags |= H5AC__DIRTIED_FLAG;
+
+
+        /* Retrieve the message from the heap so we can return it (to free any
+         * other messages it may reference)
+         */
+        if(H5HF_read(fheap, dxpl_id, &(message.fheap_id), *encoded_mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
+
+        /* Remove the message from the heap */
+        if(H5HF_remove(fheap, dxpl_id, &(message.fheap_id)) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "unable to remove message from heap")
+
 
         /* If there are no messages left in the index, delete it */
         if(header->num_messages <=0) {
@@ -1332,7 +1347,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "can't delete empty index")
 
         } else if(header->index_type == H5SM_BTREE && header->num_messages < header->btree_min)
-        /* JAMES: there's an off-by-one error here? */
         {
             /* Otherwise, if we've just passed the btree-to-list cutoff, convert
              * this B-tree into a list
@@ -1352,8 +1366,8 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
     /* Free the serialized message buffer on error */
-    if(ret_value < 0 && *buf)
-        H5MM_xfree(*buf);
+    if(ret_value < 0 && *encoded_mesg)
+        H5MM_xfree(*encoded_mesg);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
 
@@ -1497,7 +1511,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
     H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
-    H5SM_sohm_t message;                /* Record for shared message */
+    H5SM_sohm_t message;                /* Shared message returned from callback */
     ssize_t index_num;                  /* Table index for message type */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1529,11 +1543,13 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
 
     /* Set up key for message to locate */
-    key.hash = udata.hash;
+    key.message.fheap_id = sh_mesg->u.heap_id;
+    key.message.hash = udata.hash;
+    key.message.ref_count = 0; /* Ref count isn't needed to find message */
+
     key.encoding = NULL;
     key.encoding_size = 0;
     key.fheap = fheap;
-    key.mesg_heap_id = sh_mesg->u.heap_id;
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {

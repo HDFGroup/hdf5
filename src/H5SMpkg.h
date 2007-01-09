@@ -110,11 +110,12 @@ typedef enum {
 
 /* Typedef for searching an index (list or B-tree) */
 typedef struct {
-    uint32_t hash;    			/* The hash value for this message */
-    const void *encoding; 		/* The message encoded */
-    size_t encoding_size; 		/* Size of the encoding */
+    H5SM_sohm_t message;                /* The message to find/insert.
+                                         * If the message doesn't yet have a
+                                         * heap ID, the heap ID will be 0. */
+    const void *encoding; 		/* The message encoded, or NULL */
+    size_t encoding_size; 		/* Size of the encoding, or 0 */
     H5HF_t *fheap;    			/* The heap for this message type, open. */
-    H5SM_fheap_id_t mesg_heap_id;	/* The heap_id for this message */
 } H5SM_mesg_key_t;
 
 /* Typedef for a SOHM index header */

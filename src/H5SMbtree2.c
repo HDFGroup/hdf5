@@ -45,7 +45,6 @@ typedef struct H5SM_compare_udata {
 /* Local Prototypes */
 /********************/
 
-/* JAMES: name these as "H5SM_btree_store", etc? */
 static herr_t H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata);
 static herr_t H5SM_btree_store(void *native, const void *udata);
 static herr_t H5SM_btree_retrieve(void *udata, const void *native);
@@ -143,7 +142,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
      */
     /* JAMES HDassert(mesg->ref_count > 0); */
 
-    hash_diff = key->hash;
+    hash_diff = key->message.hash;
     hash_diff -= mesg->hash;
 
     /* If the hash values match, make sure the messages are really the same */
@@ -154,7 +153,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
         /* JAMES: not a great test.  Use a flag instead? */
         if(key->encoding_size == 0)
         {
-            ret_value = (herr_t) (key->mesg_heap_id - mesg->fheap_id);
+            ret_value = (herr_t) (key->message.fheap_id - mesg->fheap_id);
         }
         else
         {
@@ -190,8 +189,9 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 /*-------------------------------------------------------------------------
  * Function:	H5SM_btree_store
  *
- * Purpose:	Store a H5SM_sohm_t SOHM message in the B-tree by copying it
- *              from UDATA to NATIVE.
+ * Purpose:	Store a H5SM_sohm_t SOHM message in the B-tree.  The message
+ *              comes in UDATA as a H5SM_mesg_key_t* and is copied to
+ *              NATIVE as a H5SM_sohm_t.
  *
  * Return:	Non-negative on success
  *              Negative on failure
@@ -204,10 +204,12 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 static herr_t
 H5SM_btree_store(void *native, const void *udata)
 {
+    H5SM_mesg_key_t *key = (H5SM_mesg_key_t *)udata;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_store)
 
     /* Copy the source message to the B-tree */
-    *(H5SM_sohm_t *)native = *(const H5SM_sohm_t *)udata;
+    *(H5SM_sohm_t *)native = key->message;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_btree_store */
