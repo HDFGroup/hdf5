@@ -696,7 +696,6 @@ H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
         if(list->messages[x].ref_count > 0)
         {
             key.message = list->messages[x];
-            /* JAMES: need ref count! And test, if not having refcount doesn't break any tests. */
 
             if(H5B2_insert(f, dxpl_id, H5SM_INDEX, tree_addr, &key) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
@@ -955,7 +954,6 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
         /* JAMES: not very efficient (gets hash value twice, searches list twice).  Refactor. */
         /* See if the message is already in the index and get its location */
-        /* JAMES: should return a pointer to the message */
         list_pos = H5SM_find_in_list(list, &key);
         if(list_pos != UFAIL)
         {
@@ -981,16 +979,11 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(!found)
     {
         hsize_t     x;                /* Counter variable */
-        size_t      mesg_size;        /* Size of the message on disk */
 
         /* JAMES: wrap this in a function call? */
 
-        /* Encode the message and get its size */ /* JAMES: already have this */
-        if((mesg_size = H5O_msg_raw_size(f, type_id, mesg)) == 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get size of message")
-
         /* Put the message in the heap and record its new heap ID */
-        if(H5HF_insert(fheap, dxpl_id, mesg_size, key.encoding, &shared.u.heap_id) < 0)
+        if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
 
         key.message.fheap_id = shared.u.heap_id;
@@ -1044,7 +1037,7 @@ done:
 	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
 
     if(encoding_buf)
-        H5MM_free(encoding_buf);
+        encoding_buf = H5MM_xfree(encoding_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_write_mesg() */
@@ -1129,7 +1122,7 @@ done:
 
     /* Free buf */
     if(mesg_buf)
-        H5MM_xfree(mesg_buf);
+        mesg_buf = H5MM_xfree(mesg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_try_delete() */
@@ -1368,6 +1361,7 @@ done:
     /* Free the serialized message buffer on error */
     if(ret_value < 0 && *encoded_mesg)
         *encoded_mesg = H5MM_xfree(*encoded_mesg);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
 

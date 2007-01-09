@@ -138,6 +138,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
         /* Encode each index header */
         for(x=0; x<table->num_indexes; ++x) {
+            *p++ = H5SM_LIST_VERSION;   /* Encode version for this list. */
             *p++ = table->indexes[x].index_type;      /* Is message index a list or a B-tree? */
 
             UINT16ENCODE(p, table->indexes[x].mesg_types);    /* Type of messages in the index */
@@ -248,8 +249,10 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     /* Read in the index headers */
     for(x=0; x<table->num_indexes; ++x) {
-        table->indexes[x].index_type= *p++;  /* type of the index (list or B-tree) */
+        if (H5SM_LIST_VERSION != *p++)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad shared message list version number")
 
+        table->indexes[x].index_type= *p++;  /* type of the index (list or B-tree) */
         UINT16DECODE(p, table->indexes[x].mesg_types);
         UINT32DECODE(p, table->indexes[x].min_mesg_size);
         UINT16DECODE(p, table->indexes[x].list_max);
@@ -410,6 +413,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         size_t	size;               /* Header size on disk */
         uint32_t computed_chksum;   /* Computed metadata checksum value */
         hsize_t x;
+        hsize_t mesgs_written;
 
         /* JAMES: consider only writing as many messages as necessary, and then adding a
          * blank "end of list" message or something?
@@ -423,20 +427,20 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         HDmemcpy(p, H5SM_LIST_MAGIC, (size_t)H5SM_LIST_SIZEOF_MAGIC);
         p += H5SM_LIST_SIZEOF_MAGIC;
 
-        /* Encode version */
-        *p++ = H5SM_LIST_VERSION;
-
         /* Write messages from the messages array to disk */
-        /* JAMES: we have to search the whole array.  not the best way to do it; could go until we've written
-         * num_messages */
-        for(x=0; x<list->header->list_max; x++) {
+        mesgs_written = 0;
+        for(x=0; x<list->header->list_max && mesgs_written < list->header->num_messages; x++) {
             if(list->messages[x].ref_count > 0) {
               /* JAMES: use H5SM_message_encode here */
               UINT32ENCODE(p, list->messages[x].hash);  /* Read the hash value for this message */
               UINT32ENCODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
               UINT64ENCODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
+
+              ++mesgs_written;
             }
         }
+
+        HDassert(mesgs_written == list->header->num_messages);
 
         /* Compute checksum on buffer */
         computed_chksum = H5_checksum_metadata(buf, (size - H5SM_SIZEOF_CHECKSUM), 0);
@@ -517,10 +521,6 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     if(HDmemcmp(p, H5SM_LIST_MAGIC, (size_t)H5SM_LIST_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
     p += H5SM_LIST_SIZEOF_MAGIC;
-
-    /* Check version JAMES: should be in master table, not list */
-    if (H5SM_LIST_VERSION != *p++)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "wrong shared message list version number")
 
     /* Read messages into the list array */
     for(x=0; x<header->num_messages; x++)

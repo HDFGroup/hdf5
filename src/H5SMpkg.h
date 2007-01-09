@@ -41,13 +41,14 @@
 
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
          + 4                        /* reference count*/                     \
-         + 8)                       /* JAMES: size of heap ID on disk */
+         + sizeof(H5SM_fheap_id_t)) /* size of heap ID on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + 1                                   /* Table version */           \
          + H5SM_SIZEOF_CHECKSUM)               /* Checksum */
 
 #define H5SM_INDEX_HEADER_SIZE(f) (1 /* Whether index is a list or B-tree */ \
+         + 1         /* Version of index format */                           \
          + 2         /* Type of messages stored in the index */              \
          + 4         /* Minimum size of messages to share */                 \
          + (3 * 2)   /* B-tree cutoff, list cutoff, # of shared messages */  \
@@ -55,7 +56,6 @@
          + H5F_SIZEOF_ADDR(f)) /* Address of heap */
 
 #define H5SM_LIST_SIZE(f, num_mesg) H5SM_LIST_SIZEOF_MAGIC                   \
-         + 1        /* List version */                                       \
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg)                              \
          + H5SM_SIZEOF_CHECKSUM                /* Checksum */
 

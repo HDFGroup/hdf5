@@ -45,10 +45,9 @@
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_t H5O_t;
 
-/* JAMES: should these be in H5SM_private?  or renamed? */
 /* Fractal heap ID type for shared message heap IDs.  The length of a heap ID
- * depends on how the heap is configured; currently they're always stored in
- * 8-byte fields, although only seven bytes are used.
+ * depends on how the heap is configured; currently they're seven bytes long
+ * but are stored in 8-byte fields in memory.
  */
 #define H5SM_FHEAP_ID_LEN 7
 typedef uint64_t H5SM_fheap_id_t;

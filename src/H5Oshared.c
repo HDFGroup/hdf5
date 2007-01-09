@@ -201,6 +201,12 @@ done:
  * Purpose:	Changes the link count for the object referenced by a shared
  *              message.
  *
+ *              This function changes the object header link count and is
+ *              only relevant for committed messages.  Messages shared in
+ *              the heap are re-shared each time they're written, so their
+ *              reference count is stored in the file-wide shared message
+ *              index and is changed in a different place in the code.
+ *
  * Return:	Success:	New link count
  *
  *		Failure:	Negative
@@ -546,7 +552,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* JAMES: this is where shared messages increment their links */
 static herr_t
 H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
@@ -726,8 +731,6 @@ H5O_shared_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_debug)
-
-    /* JAMES_HEAP: this oughta change, too, of course. */
 
     /* Check args */
     HDassert(f);

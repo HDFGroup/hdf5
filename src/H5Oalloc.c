@@ -670,11 +670,11 @@ H5O_alloc_new_chunk(H5F_t *f,
                    (found_attr < 0 ||
                     oh->mesg[u].raw_size < oh->mesg[found_attr].raw_size))
                 found_attr = u;
-/*	} else if(H5O_LINK_ID == msg_id) {
+	} else if(H5O_LINK_ID == msg_id) {
             if(oh->mesg[u].raw_size >= cont_size &&
                    (found_link < 0 ||
                     oh->mesg[u].raw_size < oh->mesg[found_link].raw_size))
-                found_link = u; JAMES */
+                found_link = u;
 	} else {
             if(oh->mesg[u].raw_size >= cont_size &&
                    (found_other < 0 ||
