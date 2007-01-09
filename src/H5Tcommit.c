@@ -304,7 +304,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t dxpl_id, hid_t tcpl_id, hid_t UNUSED 
 
     /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
      * after committed to disk, change its size back as in memory. */
-    if(H5T_set_loc(type, NULL, H5T_LOC_MEMORY)<0)
+    if(H5T_set_loc(type, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
 
 done:
@@ -783,7 +783,7 @@ H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id)
     H5T_t	*dt = NULL;
     H5T_t	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_open_oid, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_open_oid)
 
     HDassert(loc);
 

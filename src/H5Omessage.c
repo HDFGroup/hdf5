@@ -215,11 +215,13 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     HDassert(oh_flags_ptr);
 
     /* Should this message be written as a SOHM? */
-    if((shared_mesg = H5SM_try_share(f, dxpl_id, type_id, mesg)) > 0)
-        /* Mark the message as shared */
-        mesg_flags |= H5O_MSG_FLAG_SHARED;
-    else if(shared_mesg < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
+    if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
+        if((shared_mesg = H5SM_try_share(f, dxpl_id, type_id, mesg)) > 0)
+            /* Mark the message as shared */
+            mesg_flags |= H5O_MSG_FLAG_SHARED;
+        else if(shared_mesg < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
+    } /* end if */
 
     /* Append new message to object header */
     if(H5O_msg_append_real(f, dxpl_id, oh, type, mesg_flags, update_flags, mesg, oh_flags_ptr) < 0)
@@ -335,11 +337,13 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Should this message be written as a SOHM? */
-    if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) > 0)
-        /* Mark the message as shared */
-        mesg_flags |= H5O_MSG_FLAG_SHARED;
-    else if(shared_mesg < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
+    if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
+        if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) > 0)
+            /* Mark the message as shared */
+            mesg_flags |= H5O_MSG_FLAG_SHARED;
+        else if(shared_mesg < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
+    } /* end if */
 
     /* Protect the object header */
     if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
