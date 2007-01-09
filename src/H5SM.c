@@ -1367,7 +1367,7 @@ done:
 
     /* Free the serialized message buffer on error */
     if(ret_value < 0 && *encoded_mesg)
-        H5MM_xfree(*encoded_mesg);
+        *encoded_mesg = H5MM_xfree(*encoded_mesg);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
 

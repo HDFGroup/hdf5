@@ -1302,7 +1302,7 @@ H5A_dense_delete_bt2_cb(const void *_record, void *_bt2_udata)
     } /* end if */
     else {
         /* Perform the deletion action on the attribute */
-        /* (takes care of shared & committed datatype/dataspace components) */
+        /* (takes care of shared/committed datatype & dataspace components) */
         if(H5O_attr_delete(bt2_udata->f, bt2_udata->dxpl_id, fh_udata.attr, TRUE) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     } /* end else */

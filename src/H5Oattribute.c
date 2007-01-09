@@ -241,16 +241,6 @@ HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name)
         /* Mark the message as shared */
         mesg_flags |= H5O_MSG_FLAG_SHARED;
 
-        /* Check whether datatype is committed */
-        /* (to maintain ref. count incr/decr similarity with "shared message"
-         *      type of datatype sharing)
-         */
-        if(H5T_committed(attr->dt)) {
-            /* Increment the reference count on the shared datatype */
-            if(H5T_link(attr->dt, 1, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-        } /* end if */
-
         /* Retrieve ref count for shared attribute */
         if(H5SM_get_refcount(loc->file, dxpl_id, H5O_ATTR_ID, &attr->sh_loc, &attr_rc) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")

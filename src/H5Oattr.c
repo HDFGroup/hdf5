@@ -54,7 +54,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     H5O_attr_reset,		/* reset method                 */
     H5O_attr_free,	        /* free method			*/
     H5O_attr_delete,		/* file delete method		*/
-    H5O_attr_link,		/* link method			*/
+    NULL /* H5O_attr_link */,		/* link method			*/
     H5O_attr_get_share,		/* get share method		*/
     H5O_attr_set_share,		/* set share method		*/
     H5O_attr_is_shared,		/*is shared method		*/
@@ -668,7 +668,7 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
         if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
         if(H5SM_try_delete(f, dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from SOHM heap")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from heap")
     } /* end if */
 
     if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
@@ -678,7 +678,7 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
         if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
         if(H5SM_try_delete(f, dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_SOHM, FAIL, "can't remove dataspace from SOHM heap")
+            HGOTO_ERROR(H5E_ATTR, H5E_SOHM, FAIL, "can't remove dataspace from shared storage")
     } /* end if */
 
     /* Check whether datatype is shared */

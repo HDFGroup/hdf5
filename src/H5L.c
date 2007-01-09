@@ -2096,9 +2096,8 @@ H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 
     /* Set up user data for unlink operation */
     udata.dxpl_id = dxpl_id;
-
     if(H5G_traverse(loc, norm_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_cb, &udata, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "can't unlink object")
 
 done:
     /* Free the normalized path name */

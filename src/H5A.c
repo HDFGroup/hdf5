@@ -383,6 +383,16 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, attr->dt);
     } /* end if */
     else if(tri_ret > 0) {
+        /* Check whether datatype is committed & increment ref count */
+        /* (to maintain ref. count incr/decr similarity with "shared message"
+         *      type of datatype sharing)
+         */
+        if(H5T_committed(attr->dt)) {
+            /* Increment the reference count on the shared datatype */
+            if(H5T_link(attr->dt, 1, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+        } /* end if */
+
         /* Message is shared.  Use size of shared message */
         if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")

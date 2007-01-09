@@ -1400,7 +1400,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     /* Check for dense attribute storage & delete it if necessary */
     if(oh->version > H5O_VERSION_1 && H5F_addr_defined(oh->attr_fheap_addr)) {
         if(H5A_dense_delete(f, dxpl_id, oh) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
     } /* end if */
 
     /* Free main (first) object header "chunk" */
