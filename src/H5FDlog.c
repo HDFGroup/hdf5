@@ -1210,8 +1210,10 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
     assert(buf);
 
     /* Verify that we are writing out the type of data we allocated in this location */
-    assert(type==H5FD_MEM_DEFAULT || type==(H5FD_mem_t)file->flavor[addr] || (H5FD_mem_t)file->flavor[addr]==H5FD_MEM_DEFAULT);
-    assert(type==H5FD_MEM_DEFAULT || type==(H5FD_mem_t)file->flavor[(addr+size)-1] || (H5FD_mem_t)file->flavor[(addr+size)-1]==H5FD_MEM_DEFAULT);
+    if(file->flavor) {
+        assert(type==H5FD_MEM_DEFAULT || type==(H5FD_mem_t)file->flavor[addr] || (H5FD_mem_t)file->flavor[addr]==H5FD_MEM_DEFAULT);
+        assert(type==H5FD_MEM_DEFAULT || type==(H5FD_mem_t)file->flavor[(addr+size)-1] || (H5FD_mem_t)file->flavor[(addr+size)-1]==H5FD_MEM_DEFAULT);
+    } /* end if */
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
