@@ -665,10 +665,19 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
     if(tri_ret > 0)
     {
-        if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
-            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
-        if(H5SM_try_delete(f, dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from heap")
+        /* Check whether datatype is shared */
+        if(H5T_committed(attr->dt)) {
+            /* Decrement the reference count on the shared datatype, if requested */
+            if(adj_link)
+                if(H5T_link(attr->dt, -1, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+        } /* end if */
+        else {
+            if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
+                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
+            if(H5SM_try_delete(f, dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from heap")
+        } /* end else */
     } /* end if */
 
     if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
@@ -679,14 +688,6 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
         if(H5SM_try_delete(f, dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_SOHM, FAIL, "can't remove dataspace from shared storage")
-    } /* end if */
-
-    /* Check whether datatype is shared */
-    if(H5T_committed(attr->dt)) {
-        /* Decrement the reference count on the shared datatype, if requested */
-        if(adj_link)
-            if(H5T_link(attr->dt, -1, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
 
 done:
@@ -724,17 +725,18 @@ H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
      * Otherwise they may be deleted when the attribute
      * message is deleted.
      */
-    if(H5SM_try_share(f, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute datatype")
-    if(H5SM_try_share(f, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute dataspace")
-
     /* Check whether datatype is shared */
     if(H5T_committed(attr->dt)) {
         /* Increment the reference count on the shared datatype */
         if(H5T_link(attr->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
     } /* end if */
+    else {
+        if(H5SM_try_share(f, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute datatype")
+    } /* end else */
+    if(H5SM_try_share(f, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

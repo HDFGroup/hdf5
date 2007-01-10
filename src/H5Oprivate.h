@@ -49,7 +49,7 @@ typedef struct H5O_t H5O_t;
  * depends on how the heap is configured; currently they're seven bytes long
  * but are stored in 8-byte fields in memory.
  */
-#define H5SM_FHEAP_ID_LEN 7
+#define H5SM_FHEAP_ID_LEN 8
 typedef uint64_t H5SM_fheap_id_t;
 
 

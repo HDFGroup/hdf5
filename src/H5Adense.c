@@ -51,7 +51,7 @@
 #define H5A_FHEAP_MAN_WIDTH                     4
 #define H5A_FHEAP_MAN_START_BLOCK_SIZE          512
 #define H5A_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
-#define H5A_FHEAP_MAN_MAX_INDEX                 32
+#define H5A_FHEAP_MAN_MAX_INDEX                 40
 #define H5A_FHEAP_MAN_START_ROOT_ROWS           1
 #define H5A_FHEAP_CHECKSUM_DBLOCKS              TRUE
 #define H5A_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
@@ -823,6 +823,12 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
             if(H5O_attr_link(f, dxpl_id, attr_copy) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
         } /* end if */
+    } /* end if */
+    else if(shared_mesg == 0) {
+        /* Increment reference count on attribute components */
+        /* (so that they aren't deleted when the attribute is removed shortly) */
+        if(H5O_attr_link(f, dxpl_id, attr_copy) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
     } /* end if */
     else if(shared_mesg < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")

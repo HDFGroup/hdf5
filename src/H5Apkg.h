@@ -51,7 +51,7 @@
 /**************************/
 
 /* Standard length of fractal heap ID for attribute */
-#define H5A_DENSE_FHEAP_ID_LEN  7
+#define H5A_DENSE_FHEAP_ID_LEN  8
 
 
 /****************************/

@@ -957,14 +957,10 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                     oh->nattrs++;
 
                 /* Append renamed attribute to object header */
-                /* (increments the link count on shared components) */
+                /* (doesn't increment the link count on shared components because
+                 *      attributes no longer have a 'link' callback) */
                 if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, 0, 0, attr, oh_flags_ptr) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate renamed attribute in header")
-
-                /* Decrement the link count on shared components */
-                /* (to balance all the link count adjustments out) */
-                if(H5O_attr_delete(udata->f, udata->dxpl_id, attr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to delete attribute")
 
                 /* Release the local copy of the attribute */
                 H5O_msg_free_real(H5O_MSG_ATTR, attr);
@@ -1324,6 +1320,12 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
                     if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, H5O_ATTR_ID, &(atable.attrs[u]))) > 0)
                         /* Mark the message as shared */
                         mesg_flags |= H5O_MSG_FLAG_SHARED;
+                    else if(shared_mesg == 0) {
+                        /* Increment reference count on attribute components */
+                        /* (so that they aren't deleted when the dense attribute storage is deleted) */
+                        if(H5O_attr_link(loc->file, dxpl_id, &(atable.attrs[u])) < 0)
+                            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
+                    } /* end if */
                     else if(shared_mesg < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 

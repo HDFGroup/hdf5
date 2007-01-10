@@ -2931,7 +2931,6 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_shared_write() */
-#endif /* QAK */
 
 /****************************************************************
 **
@@ -2981,9 +2980,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Loop over type of shared components */
-    for(test_shared = 0; test_shared < 1; test_shared++) {
-HDfprintf(stderr, "Fix Loop!\n");
-HDfprintf(stderr, "test_shared = %u\n", test_shared);
+    for(test_shared = 0; test_shared < 3; test_shared++) {
         /* Make copy of file creation property list */
         my_fcpl = H5Pcopy(fcpl);
         CHECK(my_fcpl, FAIL, "H5Pcopy");
@@ -3311,6 +3308,7 @@ HDfprintf(stderr, "test_shared = %u\n", test_shared);
             CHECK(ret, FAIL, "H5Aclose");
         } /* end for */
 
+
         /* Close attribute's datatype */
         ret = H5Tclose(attr_tid);
         CHECK(ret, FAIL, "H5Tclose");
@@ -3374,8 +3372,8 @@ HDfprintf(stderr, "test_shared = %u\n", test_shared);
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_shared_rename() */
+#endif /* QAK */
 
-#ifndef QAK
 /****************************************************************
 **
 **  test_attr_shared_delete(): Test basic H5A (attribute) code.
@@ -3389,7 +3387,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     hid_t	my_fcpl;	/* File creation property list ID */
     hid_t	dataset, dataset2;	/* Dataset IDs			*/
     hid_t	attr_tid;	/* Attribute's datatype ID	*/
-    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	sid, big_sid;	/* Dataspace IDs		*/
+    hsize_t	big_dims[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};   /* Dimensions for "big" attribute */
     hid_t	attr;	        /* Attribute ID			*/
     hid_t	dcpl;	        /* Dataset creation property list ID */
     char	attrname[NAME_BUF_SIZE];        /* Name of attribute on first dataset */
@@ -3399,6 +3398,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     htri_t	is_shared;	/* Is attributes shared? */
     hsize_t     shared_refcount;        /* Reference count of shared attribute */
     unsigned    attr_value;     /* Attribute value */
+    unsigned	big_value[SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3];   /* Data for "big" attribute */
     size_t      mesg_count;     /* # of shared messages */
     unsigned    test_shared;    /* Index over shared component type */
     unsigned    u;              /* Local index variable */
@@ -3407,7 +3407,18 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Deleting Shared Attributes in Compact & Dense Storage\n"));
+    MESSAGE(5, ("Testing Deleting Shared & Unshared Attributes in Compact & Dense Storage\n"));
+
+    /* Initialize "big" attribute data */
+    HDmemset(big_value, 1, sizeof(big_value));
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create "big" dataspace for "large" attributes */
+    big_sid = H5Screate_simple(SPACE1_RANK, big_dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Loop over type of shared components */
     for(test_shared = 0; test_shared < 3; test_shared++) {
@@ -3420,19 +3431,28 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         CHECK(attr_tid, FAIL, "H5Tcopy");
 
         /* Special setup for each type of shared components */
-        if(test_shared != 0) {
+        if(test_shared == 0) {
+            /* Make attributes > 500 bytes shared */
+            ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
+            CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+        } /* end if */
+        else {
             /* Set up copy of file creation property list */
 
-            /* Make attributes, datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)3);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)1);
+
+            /* Make attributes > 500 bytes shared */
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+
+            /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
-        } /* end if */
+        } /* end else */
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, my_fcpl, fapl);
@@ -3472,10 +3492,6 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             CHECK(attr_tid, FAIL, "H5Topen");
         } /* end if */
 
-        /* Create dataspace for dataset */
-        sid = H5Screate(H5S_SCALAR);
-        CHECK(sid, FAIL, "H5Screate");
-
         /* Set up to query the object creation properties */
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
         CHECK(dcpl, FAIL, "H5Pcreate");
@@ -3514,23 +3530,45 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             /* Create attribute name */
             sprintf(attrname, "attr %02u", u);
 
-            /* Create attribute on first dataset */
-            attr = H5Acreate(dataset, attrname, attr_tid, sid, H5P_DEFAULT);
-            CHECK(attr, FAIL, "H5Acreate");
+            /* Alternate between creating "small" & "big" attributes */
+            if(u % 2) {
+                /* Create "small" attribute on first dataset */
+                attr = H5Acreate(dataset, attrname, attr_tid, sid, H5P_DEFAULT);
+                CHECK(attr, FAIL, "H5Acreate");
 
-            /* Check that attribute is shared */
-            is_shared = H5A_is_shared_test(attr);
-            VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                /* Check that attribute is not shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
 
-            /* Check refcount for attribute */
-            ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-            CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-            VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                /* Write data into the attribute */
+                attr_value = u + 1;
+                ret = H5Awrite(attr, attr_tid, &attr_value);
+                CHECK(ret, FAIL, "H5Awrite");
+            } /* end if */
+            else {
+                /* Create "big" attribute on first dataset */
+                attr = H5Acreate(dataset, attrname, attr_tid, big_sid, H5P_DEFAULT);
+                CHECK(attr, FAIL, "H5Acreate");
 
-            /* Write data into the attribute */
-            attr_value = u + 1;
-            ret = H5Awrite(attr, attr_tid, &attr_value);
-            CHECK(ret, FAIL, "H5Awrite");
+                /* Check that attribute is shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+
+                /* Check refcount for attribute */
+                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+
+                /* Write data into the attribute */
+                big_value[0] = u + 1;
+                ret = H5Awrite(attr, attr_tid, big_value);
+                CHECK(ret, FAIL, "H5Awrite");
+
+                /* Check refcount for attribute */
+                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+            } /* end else */
 
             /* Close attribute */
             ret = H5Aclose(attr);
@@ -3544,28 +3582,45 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
 
 
-            /* Create attribute on second dataset */
-            attr = H5Acreate(dataset2, attrname, attr_tid, sid, H5P_DEFAULT);
-            CHECK(attr, FAIL, "H5Acreate");
+            /* Alternate between creating "small" & "big" attributes */
+            if(u % 2) {
+                /* Create "small" attribute on second dataset */
+                attr = H5Acreate(dataset2, attrname, attr_tid, sid, H5P_DEFAULT);
+                CHECK(attr, FAIL, "H5Acreate");
 
-            /* Check that attribute is shared */
-            is_shared = H5A_is_shared_test(attr);
-            VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                /* Check that attribute is not shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
 
-            /* Check refcount for attribute */
-            ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-            CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-            VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                /* Write data into the attribute */
+                attr_value = u + 1;
+                ret = H5Awrite(attr, attr_tid, &attr_value);
+                CHECK(ret, FAIL, "H5Awrite");
+            } /* end if */
+            else {
+                /* Create "big" attribute on second dataset */
+                attr = H5Acreate(dataset2, attrname, attr_tid, big_sid, H5P_DEFAULT);
+                CHECK(attr, FAIL, "H5Acreate");
 
-            /* Write data into the attribute */
-            attr_value = u + 1;
-            ret = H5Awrite(attr, attr_tid, &attr_value);
-            CHECK(ret, FAIL, "H5Awrite");
+                /* Check that attribute is shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
 
-            /* Check refcount for attribute */
-            ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-            CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-            VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                /* Check refcount for attribute */
+                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+
+                /* Write data into the attribute */
+                big_value[0] = u + 1;
+                ret = H5Awrite(attr, attr_tid, big_value);
+                CHECK(ret, FAIL, "H5Awrite");
+
+                /* Check refcount for attribute */
+                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+            } /* end else */
 
             /* Close attribute */
             ret = H5Aclose(attr);
@@ -3578,10 +3633,6 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             else
                 VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
         } /* end for */
-
-        /* Close attribute's datatype */
-        ret = H5Tclose(attr_tid);
-        CHECK(ret, FAIL, "H5Tclose");
 
 
         /* Delete attributes from second dataset */
@@ -3600,14 +3651,21 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             attr = H5Aopen_name(dataset, attrname);
             CHECK(attr, FAIL, "H5Aopen_name");
 
-            /* Check that attribute is shared */
-            is_shared = H5A_is_shared_test(attr);
-            VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+            if(u % 2) {
+                /* Check that attribute is not shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+            } /* end if */
+            else {
+                /* Check that attribute is shared */
+                is_shared = H5A_is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
 
-            /* Check refcount for attribute */
-            ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-            CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-            VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                /* Check refcount for attribute */
+                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+            } /* end else */
 
             /* Close attribute */
             ret = H5Aclose(attr);
@@ -3615,15 +3673,30 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         } /* end for */
 
 
-        /* Close dataspace */
-        ret = H5Sclose(sid);
-        CHECK(ret, FAIL, "H5Sclose");
+        /* Close attribute's datatype */
+        ret = H5Tclose(attr_tid);
+        CHECK(ret, FAIL, "H5Tclose");
 
         /* Close Datasets */
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
         ret = H5Dclose(dataset2);
         CHECK(ret, FAIL, "H5Dclose");
+
+        /* Check on shared message status now */
+        if(test_shared != 0) {
+            if(test_shared == 1) {
+                /* Check on datatype storage status */
+                ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
+                CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
+                VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
+            } /* end if */
+
+            /* Check on dataspace storage status */
+            ret = H5F_get_sohm_mesg_count_test(fid, H5O_SDSPACE_ID, &mesg_count);
+            CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
+            VERIFY(mesg_count, 2, "H5F_get_sohm_mesg_count_test");
+        } /* end if */
 
         /* Unlink datasets with attributes */
         ret = H5Gunlink(fid, DSET1_NAME);
@@ -3656,8 +3729,15 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     /* Check size of file */
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
+
+    /* Close dataspaces */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(big_sid);
+    CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_shared_delete() */
 
+#ifndef QAK
 /****************************************************************
 **
 **  test_attr_shared_unlink(): Test basic H5A (attribute) code.
@@ -4056,7 +4136,7 @@ test_attr(void)
     test_attr_shared_unlink(fcpl2, fapl2);              /* Test unlinking object with shared attributes in compact & dense storage */
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
-    test_attr_shared_rename(fcpl2, fapl2);              /* Test renaming shared attributes in compact & dense storage */
+    test_attr_shared_delete(fcpl2, fapl2);              /* Test deleting shared attributes in compact & dense storage */
 #endif /* QAK */
 
     /* Close  FCPLs */

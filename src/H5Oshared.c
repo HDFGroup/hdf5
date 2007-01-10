@@ -318,7 +318,7 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
          */
         if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
             HDassert(version >= H5O_SHARED_VERSION_3 );
-            HDmemcpy(&(mesg->u.heap_id), buf, (size_t) H5SM_FHEAP_ID_LEN);
+            HDmemcpy(&(mesg->u.heap_id), buf, sizeof(mesg->u.heap_id));
         }
         else {
             /* The H5O_COMMITTED_FLAG should be set if this message
@@ -395,7 +395,7 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
      * object header that holds it.
      */
     if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
-        HDmemcpy(buf, &(mesg->u.heap_id), (size_t) H5SM_FHEAP_ID_LEN);
+        HDmemcpy(buf, &(mesg->u.heap_id), sizeof(mesg->u.heap_id));
     }
      else {
         H5F_addr_encode(f, &buf, mesg->u.oloc.addr);

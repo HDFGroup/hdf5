@@ -38,7 +38,7 @@
 #define H5SM_FHEAP_MAN_WIDTH                     4
 #define H5SM_FHEAP_MAN_START_BLOCK_SIZE          1024
 #define H5SM_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
-#define H5SM_FHEAP_MAN_MAX_INDEX                 32
+#define H5SM_FHEAP_MAN_MAX_INDEX                 40
 #define H5SM_FHEAP_MAN_START_ROOT_ROWS           1
 #define H5SM_FHEAP_CHECKSUM_DBLOCKS              TRUE
 #define H5SM_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
@@ -486,6 +486,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
     HDassert(fheap_id_len == H5SM_FHEAP_ID_LEN);
+    HDassert(sizeof(H5SM_fheap_id_t) == H5SM_FHEAP_ID_LEN);
 #endif /* NDEBUG */
 
 done:
@@ -1145,22 +1146,21 @@ size_t
 H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key)
 {
     size_t               x;
-    size_t               ret_value = UFAIL;
+    size_t               ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5SM_find_in_list)
+    FUNC_ENTER_NOAPI(H5SM_find_in_list, UFAIL)
 
     HDassert(list);
     HDassert(key);
 
     for(x = 0; x < list->header->list_max; x++)
-    {
-        if((list->messages[x].ref_count > 0 )&& 0 == H5SM_message_compare(key, &(list->messages[x])))
-        {
-          ret_value = x;
-          break;
-        }
-    }
+        if((list->messages[x].ref_count > 0) && 0 == H5SM_message_compare(key, &(list->messages[x])))
+            HGOTO_DONE(x)
 
+    /* If we reached this point, we didn't find the message */
+    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, UFAIL, "message not in list")
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_find_in_list */
 
@@ -1323,7 +1323,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
 
         /* If there are no messages left in the index, delete it */
-        if(header->num_messages <=0) {
+        if(header->num_messages == 0) {
 
             /* Unprotect cache and release heap */
             if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG) < 0)
@@ -1444,7 +1444,7 @@ H5SM_reconstitute(H5O_shared_t *sh_mesg, const uint8_t *heap_id)
 
     /* Set flag for shared message */
     sh_mesg->flags = H5O_SHARED_IN_HEAP_FLAG;
-    HDmemcpy(&sh_mesg->u.heap_id, heap_id, (size_t)H5SM_FHEAP_ID_LEN);
+    HDmemcpy(&sh_mesg->u.heap_id, heap_id, sizeof(sh_mesg->u.heap_id));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_reconstitute() */
