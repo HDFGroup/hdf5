@@ -1266,7 +1266,7 @@ dump_dataset_values(hid_t dset)
     sprintf(fmt_double, "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
 
-    info.dset_format =  "DSET-%lu:"H5_PRINTF_HADDR_FMT"-";
+    info.dset_format =  "DSET-%s ";
     info.dset_hidefileno = 0;
 
     info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
