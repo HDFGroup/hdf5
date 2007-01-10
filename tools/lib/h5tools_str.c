@@ -844,17 +844,15 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         } else {
-            haddr_t objno;              /* Compact form of object's location */
+            char name[1024];
 
             obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
             region = H5Rget_region(container, H5R_DATASET_REGION, vp);
             H5Gget_objinfo(obj, ".", FALSE, &sb);
-
-            objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
-            if (info->dset_hidefileno)
-                h5tools_str_append(str, info->dset_format, objno);
-            else
-                h5tools_str_append(str, info->dset_format, sb.fileno[0], objno);
+            
+            /* get name of the dataset the region reference points to using H5Rget_name */
+            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*)name, 1024);
+            h5tools_str_append(str, info->dset_format, name);
 
             h5tools_str_dump_region(str, region, info);
             H5Sclose(region);

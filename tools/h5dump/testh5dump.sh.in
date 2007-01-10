@@ -338,6 +338,9 @@ TOOLTEST tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
       rm -f $srcdir/../testfiles/out[1-4].bin
    fi
 
+# test for dataset region references 
+TOOLTEST tregref.ddl tdatareg.h5
+
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
 fi

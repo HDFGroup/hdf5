@@ -158,7 +158,7 @@ static h5tool_format_t         dataformat = {
     " "H5_PRINTF_HADDR_FMT,	/*obj_format */
 
     1,				/*dset_hidefileno */
-    "DATASET "H5_PRINTF_HADDR_FMT" ",		/*dset_format */
+    "DATASET %s ",  /*dset_format */
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
@@ -242,7 +242,7 @@ static h5tool_format_t         xml_dataformat = {
     " "H5_PRINTF_HADDR_FMT,	/*obj_format */
 
     1,				/*dset_hidefileno */
-    "DATASET "H5_PRINTF_HADDR_FMT" ",		/*dset_format */
+    "DATASET %s ",  /*dset_format */
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
