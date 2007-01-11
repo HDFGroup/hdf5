@@ -634,7 +634,6 @@ H5O_fill_new_free (void *mesg)
 
     HDassert(mesg);
 
-    /* JAMES: should this free the O_loc? */
     H5FL_FREE(H5O_fill_new_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

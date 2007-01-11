@@ -104,6 +104,7 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
 static herr_t
 H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_master_table_t *table)
 {
+    uint8_t *buf=NULL;                /* Temporary buffer */
     herr_t          ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_flush_table, FAIL)
@@ -114,7 +115,6 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     HDassert(table);
 
     if(table->cache_info.is_dirty) {
-        uint8_t *buf;                /* Temporary buffer */
         uint8_t  *p;                 /* Pointer into raw data buffer */
         size_t	 size;               /* Header size on disk */
         uint32_t computed_chksum;    /* Computed metadata checksum value */
@@ -133,8 +133,6 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         /* Encode magic number */
         HDmemcpy(p, H5SM_TABLE_MAGIC, (size_t)H5SM_TABLE_SIZEOF_MAGIC);
         p += H5SM_TABLE_SIZEOF_MAGIC;
-
-        *p++ = table->version; /* Version */
 
         /* Encode each index header */
         for(x=0; x<table->num_indexes; ++x) {
@@ -161,8 +159,6 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
 	table->cache_info.is_dirty = FALSE;
 
-        /* Free buffer */
-        H5MM_xfree(buf);
     } /* end if */
 
     if(destroy)
@@ -170,6 +166,9 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTFREE, FAIL, "unable to destroy sohm table")
 
 done:
+    /* Free buffer if allocated */
+    buf = H5MM_xfree(buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_table */
 
@@ -208,7 +207,6 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     /* Read number of indexes and version from file superblock */
     table->num_indexes = f->shared->sohm_nindexes;
-    table->version = f->shared->sohm_vers;
 
     HDassert(addr == f->shared->sohm_addr);
     HDassert(addr != HADDR_UNDEF);
@@ -219,8 +217,8 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
      */
     table_size = H5SM_TABLE_SIZE(f) + (table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
 
-    /* Allocate temporary buffer */
-    if(NULL == (buf = HDmalloc(table_size)))
+    /* Allocate temporary buffer */ /* JAMES: FL_BLK? */
+    if(NULL == (buf = H5MM_malloc(table_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read header from disk */
@@ -233,10 +231,6 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     if(HDmemcmp(p, H5SM_TABLE_MAGIC, (size_t)H5SM_TABLE_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM table signature");
     p += H5SM_TABLE_SIZEOF_MAGIC;
-
-    /* Version number */
-    if (table->version != *p++)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "wrong SOHM table version number")
 
     /* Don't count the checksum in the table size yet, since it comes after
      * all of the index headers
@@ -278,9 +272,8 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     ret_value = table;
 
 done:
-    /* Free buffer if it was allocated */
-    if(buf)
-        HDfree(buf);
+    /* Free buffer if allocated */
+    buf = H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_load_table */ 
@@ -397,6 +390,7 @@ H5SM_table_size(const H5F_t *f, const H5SM_master_table_t *table, size_t *size_p
 static herr_t
 H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_list_t *list)
 {
+    uint8_t *buf=NULL;               /* Temporary buffer */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_flush_list, FAIL)
@@ -408,17 +402,18 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
     HDassert(list->header);
 
     if (list->cache_info.is_dirty) {
-        uint8_t buf[H5F_LISTBUF_SIZE];  /* Temporary buffer */   /* JAMES Do I need to use H5FL_BLK_MALLOC instead? */
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t	size;               /* Header size on disk */
         uint32_t computed_chksum;   /* Computed metadata checksum value */
         hsize_t x;
         hsize_t mesgs_written;
 
-        /* JAMES: consider only writing as many messages as necessary, and then adding a
-         * blank "end of list" message or something?
-         */
         size = H5SM_LIST_SIZE(f, list->header->num_messages);
+
+        /* Allocate temporary buffer */
+        /* JAMES: is BLK_MALLOC somehow better for this? */
+        if(NULL == (buf = H5MM_malloc(size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Encode the list */
         p = buf;
@@ -431,12 +426,11 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         mesgs_written = 0;
         for(x=0; x<list->header->list_max && mesgs_written < list->header->num_messages; x++) {
             if(list->messages[x].ref_count > 0) {
-              /* JAMES: use H5SM_message_encode here */
-              UINT32ENCODE(p, list->messages[x].hash);  /* Read the hash value for this message */
-              UINT32ENCODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
-              UINT64ENCODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
+                if(H5SM_message_encode(f, p, &(list->messages[x]))< 0)
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to write shared message to disk")
 
-              ++mesgs_written;
+                p+=H5SM_SOHM_ENTRY_SIZE(f);
+                ++mesgs_written;
             }
         }
 
@@ -459,6 +453,9 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTFREE, FAIL, "unable to destroy list")
 
 done:
+    /* Free buffer if allocated */
+    buf = H5MM_xfree(buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_list */
 
@@ -509,7 +506,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     /* Allocate temporary buffer */
     /* JAMES: is BLK_MALLOC somehow better for this? */
-    if(NULL == (buf = HDmalloc(size)))
+    if(NULL == (buf = H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read list from disk */
@@ -519,15 +516,15 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     /* Check magic number */
     if(HDmemcmp(p, H5SM_LIST_MAGIC, (size_t)H5SM_LIST_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature");
     p += H5SM_LIST_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
     for(x=0; x<header->num_messages; x++)
     {
-        UINT32DECODE(p, list->messages[x].hash);  /* Read the hash value for this message */
-        UINT32DECODE(p, list->messages[x].ref_count);  /* Read the reference count for this message */
-        UINT64DECODE(p, list->messages[x].fheap_id); /* Get the heap ID for the message */
+        if(H5SM_message_decode(f, p, &(list->messages[x])) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message");
+        p += H5SM_SOHM_ENTRY_SIZE(f);
     }
 
     /* Read in checksum */
@@ -553,8 +550,8 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     ret_value = list;
 done:
-    if(buf)
-        HDfree(buf);
+    /* Free buffer if allocated */
+    buf = H5MM_xfree(buf);
 
     if(ret_value == NULL) {
         if(list) {

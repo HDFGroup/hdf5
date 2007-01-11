@@ -37,14 +37,11 @@
 #define H5SM_TABLE_SIZEOF_MAGIC 4
 #define H5SM_SIZEOF_CHECKSUM 4
 
-#define H5SM_MASTER_TABLE_VERSION	0	/* Version of the Shared Object Header Message Master Table*/
-
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
          + 4                        /* reference count*/                     \
          + sizeof(H5SM_fheap_id_t)) /* size of heap ID on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
-         + 1                                   /* Table version */           \
          + H5SM_SIZEOF_CHECKSUM)               /* Checksum */
 
 #define H5SM_INDEX_HEADER_SIZE(f) (1 /* Whether index is a list or B-tree */ \
@@ -145,7 +142,6 @@ typedef struct {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
-    unsigned version;               /* Version of the table struct */
     uint8_t num_indexes;            /* Number of indexes */
     H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
 } H5SM_master_table_t;

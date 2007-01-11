@@ -579,22 +579,19 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     current_pos = oh_dst->chunk[0].image;
 
-    /* Copy the message header.  Most of this will be overwritten when
-     * the header is flushed to disk, but later versions have a
-     * magic number that isn't.
+    /* Copy the header.  Most of this (number of messages, etc.) will be
+     * overwritten when the header is flushed to disk, but later versions have
+     * a magic number that isn't.
      */
     HDmemcpy(current_pos, oh_src->chunk[0].image,
             (size_t)(H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst)));
     current_pos += H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
-    /* JAMES: include this in loop above?  Doesn't take deleted messages
-     * into account
-     */
     /* Copy each message that wasn't dirtied above */
     null_msgs = 0;
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
         /* Skip any deleted or NULL messages in the source unless the
-         * preserve_null flag is set
+         * preserve_null flag is set.
          */
         if(FALSE == cpy_info->preserve_null) {
             while(deleted[mesgno + null_msgs]) {

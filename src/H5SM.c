@@ -157,10 +157,6 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
      */
     HDassert(num_indexes < 256);
     table->num_indexes = num_indexes;
-    table->version = H5SM_MASTER_TABLE_VERSION;
-
-    f->shared->sohm_nindexes = table->num_indexes;
-    f->shared->sohm_vers = table->version;
 
     /* Check that list and btree cutoffs make sense.  There can't be any
      * values greater than the list max but less than the btree min; the
@@ -463,9 +459,6 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     }
 
     /* Create a heap to hold the shared messages that the list or B-tree will index */
-    /* JAMES: this should happen first, so that the list/btree size can scale depending
-     * on how big a heap pointer is.
-     */
     HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
     fheap_cparam.managed.width = H5SM_FHEAP_MAN_WIDTH;
     fheap_cparam.managed.start_block_size = H5SM_FHEAP_MAN_START_BLOCK_SIZE;
@@ -828,6 +821,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
 
         /* Don't share committed datatypes */
+        /* JAMES: Quincey says this check isn't working! */
         if((tri_ret = H5T_committed((H5T_t*) mesg)) > 0)
             HGOTO_DONE(FALSE)
         else if(tri_ret < 0)
@@ -1418,6 +1412,64 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_message_encode
+ *
+ * Purpose:	Serialize a H5SM_sohm_t struct into a buffer RAW.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_message_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_nrecord)
+{
+    const H5SM_sohm_t *message = (const H5SM_sohm_t *)_nrecord;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_encode)
+
+    /* Encode the SOHM's fields */
+    UINT32ENCODE(raw, message->hash);
+    UINT32ENCODE(raw, message->ref_count);
+    UINT64ENCODE(raw, message->fheap_id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_message_encode */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_message_decode
+ *
+ * Purpose:	Read an encoded SOHM message from RAW into an H5SM_sohm_t struct.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
+{
+    H5SM_sohm_t *message = (H5SM_sohm_t *)_nrecord;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
+
+    /* Encode the SOHM's fields */
+    UINT32DECODE(raw, message->hash);
+    UINT32DECODE(raw, message->ref_count);
+    UINT64DECODE(raw, message->fheap_id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_message_decode */
 
 
 /*-------------------------------------------------------------------------

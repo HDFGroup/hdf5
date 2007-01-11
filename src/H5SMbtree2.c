@@ -244,65 +244,6 @@ H5SM_btree_retrieve(void *udata, const void *native)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_message_encode
- *
- * Purpose:	Serialize the SOHM message.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_message_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_nrecord)
-{
-    const H5SM_sohm_t *message = (const H5SM_sohm_t *)_nrecord;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_encode)
-
-    /* Encode the SOHM's fields */
-    UINT32ENCODE(raw, message->hash);
-    UINT32ENCODE(raw, message->ref_count);
-    UINT64ENCODE(raw, message->fheap_id);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_encode */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_message_decode
- *
- * Purpose:	Read an encoded SOHM message into an H5SM_sohm_t struct.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-/* JAMES: move to H5SM.c or something */
-herr_t
-H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
-{
-    H5SM_sohm_t *message = (H5SM_sohm_t *)_nrecord;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
-
-    /* Encode the SOHM's fields */
-    UINT32DECODE(raw, message->hash);
-    UINT32DECODE(raw, message->ref_count);
-    UINT64DECODE(raw, message->fheap_id);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_decode */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5SM_btree_debug
  *
  * Purpose:	Print debugging information for a H5SM_sohm_t.

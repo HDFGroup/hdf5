@@ -135,11 +135,14 @@ typedef struct H5O_copy_t {
  * Shared object message.
  * This needs to go first because other messages can be shared and
  * include a H5O_shared_t struct
+ * The oloc shouldn't ever be holding open a file; if it ever is (if
+ * H5O_loc_hold_file was ever called on it) it won't be closed properly,
+ * since shared messages don't close their olocs.
  */
 typedef struct H5O_shared_t {
     unsigned flags;             /* flags describing how message is shared */
     union {
-        H5O_loc_t	oloc;		/*object location info		     */
+        H5O_loc_t	oloc;		/* object location info		     */
         H5SM_fheap_id_t heap_id;        /* ID within the SOHM heap           */
     } u;
 } H5O_shared_t;

@@ -895,7 +895,7 @@ static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t	*f = NULL, *ret_value;
-    unsigned    sohm_indexes; /* JAMES: necessary? */
+    unsigned    sohm_indexes;
     unsigned    super_vers = HDF5_SUPERBLOCK_VERSION_DEF;
     H5P_genplist_t *plist;              /* Property list */
 
@@ -917,7 +917,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
-	f->shared->sohm_vers = 0;
+	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
 	f->shared->sohm_nindexes = 0;
 	f->shared->driver_addr = HADDR_UNDEF;
         f->shared->lf = lf;
@@ -954,6 +954,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          */
         if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &sohm_indexes)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
+        HDassert(sohm_indexes < 255);
+        f->shared->sohm_nindexes = sohm_indexes;
 
         if(sohm_indexes > 0) {
             super_vers= HDF5_SUPERBLOCK_VERSION_2; /* Super block version 2 */
@@ -1249,9 +1251,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
-    H5P_genplist_t     *c_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
-    unsigned            num_sohm_indexes;   /*number of SOHM indexes        */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
@@ -1381,19 +1381,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(H5F_init_superblock(file, dxpl_id) == 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
-         /* Create the Shared Object Header Message table and register it with the
-          * metadata cache */
-         /* JAMES: hack.  Should check f->shared directly? */
-        if(NULL == (c_plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+        /* Create the Shared Object Header Message table and register it with the
+         * metadata cache, if this file supports shared messages */
+        if(file->shared->sohm_nindexes > 0) {
+            H5P_genplist_t     *c_plist;            /*file creation property list     */
+            if(NULL == (c_plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
-        if(H5P_get(c_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &num_sohm_indexes)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SOHM information")
-
-        if(num_sohm_indexes > 0)
-        {
-          if(H5SM_init(file, c_plist, dxpl_id) <0)
-              HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create SOHM table")
+            if(H5SM_init(file, c_plist, dxpl_id) <0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create SOHM table")
         }
 
         /* Create and open the root group */

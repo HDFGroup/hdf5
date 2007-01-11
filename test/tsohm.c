@@ -3038,6 +3038,172 @@ test_sohm_extlink(void)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_extend_dset_helper
+ *
+ * Purpose:     Tests extending a dataset's dataspace.
+ *
+ * Programmer:  James Laird
+ *              Wednesday, January 10, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_sohm_extend_dset_helper(hid_t fcpl_id)
+{
+    hid_t file_id = -1;
+    hid_t space_id = -1;
+    hid_t dcpl_id = -1;
+    hid_t dset_id = -1;
+    hsize_t dims1[] = {1, 2};
+    hsize_t max_dims1[] = {H5S_UNLIMITED, 2};
+    hsize_t dims2[] = {5, 2};
+    long data[10] = {0};
+    herr_t ret;
+
+    /* Create file */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /* Create property list with chunking */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK_I(dcpl_id, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl_id, 2, dims1);
+    CHECK_I(ret, "H5Pset_chunk");
+
+    /* Create a dataspace and a dataset*/
+    space_id = H5Screate_simple(2, dims1, max_dims1);
+    CHECK_I(space_id, "H5Screate_simple");
+    dset_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, space_id, dcpl_id);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Extend the dataset */
+    ret = H5Dextend(dset_id, dims2);
+    CHECK_I(ret, "H5Dclose");
+
+    /* Write some garbage to the dataset */
+    ret = H5Dwrite(dset_id, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    CHECK_I(ret, "H5Dwrite");
+
+    /* Close the dataset and file */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+
+
+    /* Create a new dataset in a new file, but this time close it before
+     * extending it to make sure that the old dataspace is written to
+     * disk.
+     */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+    dset_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, space_id, dcpl_id);
+    CHECK_I(dset_id, "H5Dcreate");
+
+    /* Close and re-open file and dataset */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fopen");
+    dset_id = H5Dopen(file_id, "dataset");
+    CHECK_I(dset_id, "H5Dopen");
+
+    /* Extend the dataset */
+    ret = H5Dextend(dset_id, dims2);
+    CHECK_I(ret, "H5Dclose");
+
+    /* Write some garbage to the dataset */
+    ret = H5Dwrite(dset_id, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    CHECK_I(ret, "H5Dwrite");
+
+    /* Close the dataset and file */
+    ret = H5Dclose(dset_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Cleanup */
+    ret = H5Sclose(space_id);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Pclose(dcpl_id);
+    CHECK_I(ret, "H5Pclose");
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_sohm_extend_dset
+ *
+ * Purpose:     Test extended shared dataspaces.  An extended dataset's
+ *              dataspace will change, possibly confusing the shared message
+ *              code.
+ *
+ * Programmer:  James Laird
+ *              Wednesday, January 10, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+test_sohm_extend_dset(void)
+{
+    hid_t fcpl_id = -1;
+    herr_t ret;
+
+    /* Create fcpl */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK_I(fcpl_id, "H5Pcreate");
+
+    /* Test extending datasets with different FCPLs */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+
+    /* No shared messages */
+    test_sohm_extend_dset_helper(fcpl_id);
+
+
+    /* Only dataspaces */
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+    test_sohm_extend_dset_helper(fcpl_id);
+
+    /* All messages */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 16);
+    CHECK_I(ret, "H5Pset_shared_mesg_index");
+
+    test_sohm_extend_dset_helper(fcpl_id);
+
+
+    /* All messages in lists */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 100, 50);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    test_sohm_extend_dset_helper(fcpl_id);
+
+
+    /* All messages in lists converted to B-trees */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    test_sohm_extend_dset_helper(fcpl_id);
+
+
+    /* All messages in B-trees */
+    ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+
+    test_sohm_extend_dset_helper(fcpl_id);
+}
+
+
 
 /****************************************************************
 ** 
@@ -3061,7 +3227,7 @@ test_sohm(void)
     test_sohm_delete_revert();  /* Test that a file with SOHMs becomes an
                                  * empty file again when they are deleted. */
     test_sohm_extlink();        /* Test SOHMs when external links are used */
-    /* JAMES: try extending dataspaces, overwriting attributes */
+    test_sohm_extend_dset();    /* Test extending shared datasets */
 
 } /* test_sohm() */
 

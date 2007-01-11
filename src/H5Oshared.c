@@ -207,8 +207,7 @@ done:
  *              reference count is stored in the file-wide shared message
  *              index and is changed in a different place in the code.
  *
- * Return:	Success:	New link count
- *
+ * Return:	Success:	New link count, or 1 for messages in heap
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -245,8 +244,11 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared, int adj
     }
     else
     {
+        /* Messages in the heap don't have file object ref counts; they
+         * return 1 as a dummy value.
+         */
         HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
-        ret_value = 1; /* JAMES temp refcount*/
+        ret_value = 1;
     }
 
 done:

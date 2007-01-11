@@ -366,11 +366,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     UINT16ENCODE(p, attr->dt_size);
     UINT16ENCODE(p, attr->ds_size);
 
-    /*
-     * Encode the character encoding used for the attribute's name
-     * Also add several "reserved" fields to pad to 16 bytes.
-     */
-    /* JAMES: only do this if flag says to? */
+    /* The character encoding for the attribute's name, in later versions */
     if(version >= H5O_ATTR_VERSION_3)
         *p++ = attr->encoding;
 
@@ -873,7 +869,6 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     } /* end if */
 
     /* Copy the dataspace for the attribute */
-	/* JAMES: does this need to be copy_file? */
     attr_dst->ds = H5S_copy(attr_src->ds, FALSE);
     HDassert(attr_dst->ds);
 

@@ -441,11 +441,13 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
          * though, and that the library doesn't try to reset the current
          * message like it would in a normal overwrite (this message is
          * realy a shared pointer, not a real message).
-         * JAMES: will this break if a shared message is overwritten with a larger
-         * non-shared message?
+         *
+         * Note that this only works when shared messages are replaced by other
+         * shared messages.  Currently, messages can't shrink once they've
+         * been written to object headers so this is a safe assumption (for
+         * now).
          */
-        HDassert(H5O_msg_is_shared(type->id, mesg) > 0); /* JAMES: this should work with
-                                                      * replacement messages that aren't shared, too. */
+        HDassert(H5O_msg_is_shared(type->id, mesg) > 0);
 
         /* Extract shared message info from current message */
         if(NULL == H5O_msg_get_share(type->id, mesg, &sh_mesg))
@@ -2007,9 +2009,10 @@ done:
  *
  * Purpose:     Calls a message's delete callback.
  *
- *              JAMES: this is mostly redundant with H5O_delete_mesg below,
+ *              This is mostly redundant with H5O_delete_mesg below,
  *              but H5O_delete_mesg only works on messages in object headers
- *              (i.e., not shared messages).
+ *              (while the shared message code needs to delete messages in
+ *              the heap).
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -2084,11 +2087,10 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
         } /* end if */
 
-        /* Check if this message needs to be removed from the SOHM table */
-        /* JAMES: there should be a callback, maybe in H5O_shared_delete, to fiddle w/ the ref. count.
-        * We shouldn't need to do a search in the SOHM table on delete. */
+        /* Check if this message needs to be removed from the SOHM table if
+         * it's a shared message.
+         */
         if(type == H5O_MSG_SHARED) {
-            /* The native message here is actually a shared message.    */
             if(H5SM_try_delete(f, dxpl_id, mesg->type->id, mesg->native) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
         } /* end if */
