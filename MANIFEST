@@ -1776,6 +1776,7 @@
 ./windows/test/vfddll/vfddll.dsp
 ./windows/test/hdf5test.bat
 ./windows/test/hdf5timingtest.bat
+./windows/test/testerr.bat
 
 #windows tools
 ./windows/tools/testfiles/binread/binread.dsp
