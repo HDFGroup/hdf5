@@ -87,15 +87,15 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dcompact.lo H5Dcontig.lo \
 	H5Defl.lo H5Dio.lo H5Distore.lo H5Dmpio.lo H5Doh.lo \
 	H5Dselect.lo H5Dtest.lo H5E.lo H5F.lo H5Fdbg.lo H5Ffake.lo \
-	H5Fmount.lo H5Fsfile.lo H5Fsuper.lo H5Ftest.lo H5FD.lo H5FDcore.lo \
-	H5FDdirect.lo H5FDfamily.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
-	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDstdio.lo \
-	H5FDstream.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
-	H5FSsection.lo H5G.lo H5Gbtree2.lo H5Gcompact.lo H5Gdense.lo \
-	H5Gdeprec.lo H5Gent.lo H5Glink.lo H5Gloc.lo H5Gname.lo \
-	H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo H5Gtest.lo \
-	H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo \
-	H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
+	H5Fmount.lo H5Fsfile.lo H5Fsuper.lo H5Ftest.lo H5FD.lo \
+	H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDlog.lo H5FDmpi.lo \
+	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo \
+	H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo H5FS.lo \
+	H5FScache.lo H5FSdbg.lo H5FSsection.lo H5G.lo H5Gbtree2.lo \
+	H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Glink.lo \
+	H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo \
+	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
+	H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
 	H5HFiblock.lo H5HFiter.lo H5HFman.lo H5HFsection.lo \
 	H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HFtiny.lo H5HG.lo \
 	H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo H5MM.lo \

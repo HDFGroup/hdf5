@@ -2607,7 +2607,7 @@ if test "$DIRECT_VFD" = "yes"; then
              close(fid);  
              remove("tst_file"); 
              exit (0);
-          }], [hdf5_direct_io=yes], [hdf5_direct_io=no],)])
+          }], AC_TRY_LINK(, [posix_memalign()], [hdf5_direct_io=yes], [hdf5_direct_io=no]), [hdf5_direct_io=no],)])
 
    if test ${hdf5_direct_io} = "yes"; then
       AC_MSG_RESULT([yes])
