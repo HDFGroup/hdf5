@@ -288,9 +288,10 @@ fheap%2\%1\fheap%2
 
 echo.
 echo ============================
-echo Testing ./testerror.sh  
+echo Testing ./testerr.bat  
 echo ============================
 
+call testerr %1 %2
 echo.
 echo ============================
 echo Testing talign 

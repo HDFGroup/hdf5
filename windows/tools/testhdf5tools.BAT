@@ -53,9 +53,13 @@ call stattest %1 %2
 
 set p2=%2
 if "%2"=="dll" (
-echo "DLL version is not available for h5copy,h5jam or h5unjam, SKIP the test"
+echo "DLL version is not available for h5copy,h5jam or h5unjam, SKIP the test" >>toolstest_%1%2.txt
 )	else (
 	call jamtest %1 %2
+        @more jamtest%2_%1.txt >> toolstest_%1%2.txt
+        @del jamtest%2_%1.txt
 	call copytest %1 %2
+        @more copytest%2_%1.txt >> toolstest_%1%2.txt
+        @del copytest%2_%1.txt
 )
 

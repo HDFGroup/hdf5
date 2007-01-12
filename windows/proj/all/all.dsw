@@ -419,6 +419,18 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name vfddll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name error_api
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name error_apidll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name error_compat
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name error_compatdll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -946,6 +958,78 @@ Package=<4>
 ###############################################################################
 
 Project: "enumdll"="..\..\test\enumdll\enumdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_api"="..\..\test\error_api\error_api.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_apidll"="..\..\test\error_apidll\error_apidll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_compat"="..\..\test\error_compat\error_compat.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_compatdll"="..\..\test\error_compatdll\error_compatdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
