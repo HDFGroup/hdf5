@@ -38,6 +38,7 @@
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"
 #include "H5MFprivate.h"
+#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
 
 
 /*-------------------------------------------------------------------------
@@ -234,14 +235,16 @@ done:
 hbool_t
 H5MF_alloc_overflow(H5F_t *f, hsize_t size)
 {
-    hsize_t space_needed;       /* Accumulator variable */
-    size_t c;                   /* Local index variable */
+    hsize_t space_needed = 0;    /* Accumulator variable */
+    H5FD_mem_t type;             /* Type of memory */
+    size_t c;                    /* Local index variable */
     hbool_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5MF_alloc_overflow)
 
     /* Start with the current end of the file's address. */
     space_needed = (hsize_t)H5F_get_eoa(f);
+
     HDassert(H5F_addr_defined(space_needed));
 
     /* Subtract the file's base address to get the actual amount of

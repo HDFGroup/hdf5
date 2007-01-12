@@ -152,8 +152,8 @@ static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
 static herr_t H5FD_stdio_close(H5FD_t *lf);
 static int H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_stdio_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_stdio_get_eoa(const H5FD_t *_file);
-static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr);
+static haddr_t H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_stdio_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
@@ -538,12 +538,16 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
  *              Monday, August  2, 1999
  *
  * Modifications:
- *      Stolen from the sec2 driver - QAK, 10/18/99
+ *              Stolen from the sec2 driver - QAK, 10/18/99
+ *
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_get_eoa(const H5FD_t *_file)
+H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*unused*/ type)
 {
     const H5FD_stdio_t	*file = (const H5FD_stdio_t *)_file;
 
@@ -569,12 +573,15 @@ H5FD_stdio_get_eoa(const H5FD_t *_file)
  *              Thursday, July 29, 1999
  *
  * Modifications:
- *      Stolen from the sec2 driver - QAK, 10/18/99
+ *              Stolen from the sec2 driver - QAK, 10/18/99
  *
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr)
+H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*unused*/ type, haddr_t addr)
 {
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
 

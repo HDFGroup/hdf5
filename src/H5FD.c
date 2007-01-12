@@ -2117,7 +2117,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
-    eoa = file->cls->get_eoa(file);
+    eoa = file->cls->get_eoa(file, type);
 
 #ifdef H5F_DEBUG
     if(file->alignment * file->threshold != 1 && H5DEBUG(F))
@@ -2138,7 +2138,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
         eoa += wasted;
 
-        if(file->cls->set_eoa(file, eoa) < 0)
+        if(file->cls->set_eoa(file, type, eoa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
     } /* end if */
 
@@ -2149,7 +2149,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     ret_value = eoa;
     eoa += size;
 
-    if(file->cls->set_eoa(file, eoa) < 0)
+    if(file->cls->set_eoa(file, type, eoa) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
 
     /* Free the wasted memory */
@@ -2440,9 +2440,9 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
         if(file->cls->get_eoa) {
             haddr_t     eoa;
 
-            eoa = file->cls->get_eoa(file);
+            eoa = file->cls->get_eoa(file, type);
             if(eoa == (last->addr+last->size)) {
-                if(file->cls->set_eoa(file, last->addr) < 0)
+                if(file->cls->set_eoa(file, type, last->addr) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
                 /* Remove this free block from the list */
@@ -2618,7 +2618,7 @@ H5FD_can_extend(const H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size,
     FUNC_ENTER_NOAPI(H5FD_can_extend, FAIL)
 
     /* Retrieve the end of the address space */
-    if(HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
+    if(HADDR_UNDEF==(eoa=H5FD_get_eoa(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
     /* Check if the block is exactly at the end of the file */
@@ -2713,7 +2713,7 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* Retrieve the end of the address space */
-    if(HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
+    if(HADDR_UNDEF==(eoa=H5FD_get_eoa(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
     /* Map request type to free list */
@@ -2760,7 +2760,7 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n
 
         /* Extend the file */
         eoa += extra_requested;
-        if(file->cls->set_eoa(file, eoa) < 0)
+        if(file->cls->set_eoa(file, type, eoa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
 
         /* Update the metadata and/or small data block */
@@ -2835,11 +2835,14 @@ done:
  *              Friday, July 30, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FDget_eoa(H5FD_t *file)
+H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
 {
     haddr_t	ret_value;
 
@@ -2849,9 +2852,11 @@ H5FDget_eoa(H5FD_t *file)
     /* Check args */
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer")
+    if(type<H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type")
 
     /* The real work */
-    if(HADDR_UNDEF==(ret_value=H5FD_get_eoa(file)))
+    if(HADDR_UNDEF==(ret_value=H5FD_get_eoa(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed")
 
 done:
@@ -2872,11 +2877,14 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FD_get_eoa(const H5FD_t *file)
+H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 {
     haddr_t	ret_value;
 
@@ -2884,7 +2892,7 @@ H5FD_get_eoa(const H5FD_t *file)
     assert(file && file->cls);
 
     /* Dispatch to driver */
-    if(HADDR_UNDEF==(ret_value=(file->cls->get_eoa)(file)))
+    if(HADDR_UNDEF==(ret_value=(file->cls->get_eoa)(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
 done:
@@ -2916,11 +2924,14 @@ done:
  *              Friday, July 30, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDset_eoa(H5FD_t *file, haddr_t addr)
+H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -2930,12 +2941,14 @@ H5FDset_eoa(H5FD_t *file, haddr_t addr)
     /* Check args */
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if(type<H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type")
 
     if(!H5F_addr_defined(addr) || addr>file->maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")
 
     /* The real work */
-    if(H5FD_set_eoa(file, addr) < 0)
+    if(H5FD_set_eoa(file, type, addr) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed")
 
 done:
@@ -2956,11 +2969,14 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_set_eoa(H5FD_t *file, haddr_t addr)
+H5FD_set_eoa(H5FD_t *file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -2970,7 +2986,7 @@ H5FD_set_eoa(H5FD_t *file, haddr_t addr)
     assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
 
     /* Dispatch to driver */
-    if((file->cls->set_eoa)(file, addr) < 0)
+    if((file->cls->set_eoa)(file, type, addr) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
 
 done:
@@ -3801,6 +3817,12 @@ done:
  * Programmer:  Quincey Koziol
  *              Monday, October  6, 2003
  *
+ * Modifications:
+ *              Raymond Lu
+ *              5 January 2007
+ *              Due to the complexity EOA for Multi driver, this function
+ *              is made failed for now.
+ * 
  *-------------------------------------------------------------------------
  */
 hssize_t
@@ -3812,7 +3834,7 @@ H5FD_get_freespace(const H5FD_t *file)
     hsize_t ma_size = 0;        /* Size of "metadata aggregator" */
     haddr_t sda_addr = HADDR_UNDEF;    /* Base "small data aggregator" address */
     hsize_t sda_size = 0;       /* Size of "small data aggregator" */
-    haddr_t eoa;                /* End of allocated space in the file */
+    haddr_t eoa = 0;            /* End of allocated space in the file */
     hssize_t ret_value = 0;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_get_freespace, FAIL)
@@ -3821,8 +3843,13 @@ H5FD_get_freespace(const H5FD_t *file)
     HDassert(file);
     HDassert(file->cls);
 
+    /* Multi driver doesn't support this function because of the complexity.
+     * It doesn't have eoa for the whole file. */
+    if(file->driver_id == H5FD_MULTI)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "Multi driver doesn't support this function")
+    
     /* Retrieve the 'eoa' for the file */
-    eoa = file->cls->get_eoa(file);
+    eoa = file->cls->get_eoa(file, H5FD_MEM_DEFAULT);
 
     /* Check for aggregating metadata allocations */
     if(file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {

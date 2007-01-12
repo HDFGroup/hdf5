@@ -631,7 +631,7 @@ main(int argc, char *argv[])
 
 	    addr = 8 * ((uint64_t)1<<30);	/*8 GB */
 	    f=H5I_object(file);
-	    if (H5FDset_eoa(f->shared->lf, addr)<0) {
+	    if (H5FDset_eoa(f->shared->lf, H5FD_MEM_DEFAULT, addr)<0) {
 		printf("Cannot create large file family\n");
 		exit(1);
 	    }

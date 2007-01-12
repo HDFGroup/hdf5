@@ -120,7 +120,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
         start_p = p = sbuf;
         buf_size=sizeof(sbuf);
 
-        if (H5FD_set_eoa(lf, shared->super_addr + fixed_size) < 0 ||
+        if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, shared->super_addr + fixed_size) < 0 ||
                 H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr, fixed_size, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
     } else {
@@ -216,7 +216,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
 
     /* The buffer (buf) is either passed in or the "local_buf" variable now */
     if(!buf) {
-        if (H5FD_set_eoa(lf, shared->super_addr + fixed_size+variable_size) < 0 ||
+        if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, shared->super_addr + fixed_size+variable_size) < 0 ||
                 H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr + fixed_size,
                           variable_size, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read superblock")
@@ -292,7 +292,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
             driver_p = p = dbuf;
             dbuf_size=sizeof(dbuf);
 
-            if (H5FD_set_eoa(lf, drv_addr + 16) < 0 ||
+            if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, drv_addr + 16) < 0 ||
                     H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr, (size_t)16, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read driver information block")
         } /* end if */
@@ -319,7 +319,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
         assert((driver_size + 16) <= dbuf_size);
 
         if(!buf) {
-            if (H5FD_set_eoa(lf, drv_addr + 16 + driver_size) < 0 ||
+            if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, drv_addr + 16 + driver_size) < 0 ||
                     H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read file driver information")
         } /* end if */
@@ -365,7 +365,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
      * Tell the file driver how much address space has already been
      * allocated so that it knows how to allocate additional memory.
      */
-    if (H5FD_set_eoa(lf, stored_eoa) < 0)
+    if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
 
     /* Decode shared object header message information and store it in the
@@ -595,7 +595,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
       *p++ = f->shared->sohm_vers;
       *p++ = f->shared->sohm_nindexes;
     }
-    H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
+    H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER));
     H5F_addr_encode(f, &p, f->shared->driver_addr);
     if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp))<0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")

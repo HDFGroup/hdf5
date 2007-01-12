@@ -921,6 +921,7 @@ static herr_t
 test_multi(void)
 {
     hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
+    hid_t       root, attr, aspace, atype;
     hid_t       access_fapl = -1;
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
@@ -931,7 +932,9 @@ test_multi(void)
     const char  *memb_name[H5FD_MEM_NTYPES];
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2]={MULTI_SIZE, MULTI_SIZE};
+    hsize_t     adims[1]={1};
     char        dname[]="dataset";
+    char        meta[] = "this is some metadata on this file";
     int         i, j;
     int         buf[MULTI_SIZE][MULTI_SIZE];
 
@@ -945,19 +948,30 @@ test_multi(void)
     HDmemset(memb_addr, 0, sizeof memb_addr);
     HDmemset(sv, 0, sizeof sv);
 
-    for(mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt))
+    for(mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt] = H5FD_MEM_SUPER;
+    }
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+    memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
+    memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
     sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
+    sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
+    memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
+    memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/4;
+ 
     sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+
+    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
+    memb_addr[H5FD_MEM_GHEAP] = HADDR_MAX*3/4;
+
 
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE)<0)
         TEST_ERROR;
@@ -968,6 +982,7 @@ test_multi(void)
 
     if(H5Fclose(file)<0)
         TEST_ERROR;
+
 
     /* Test wrong ways to reopen multi files */
     if(test_multi_opens(filename)<0)
@@ -994,11 +1009,12 @@ test_multi(void)
         TEST_ERROR;
 
     /* Before any data is written, the raw data file is empty.  So
-     * the file size is only the size of metadata file.  It's supposed
-     * to be 800 bytes.
+     * the file size is only the size of b-tree + HADDR_MAX/4.
      */
-    if(file_size < (KB / 2) || file_size > KB)
+#ifdef H5_HAVE_LARGE_HSIZET
+    if(file_size < HADDR_MAX/4 || file_size > HADDR_MAX/2)
         TEST_ERROR;
+#endif /* H5_HAVE_LARGE_HSIZET */
 
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
         TEST_ERROR;
@@ -1044,6 +1060,39 @@ test_multi(void)
         TEST_ERROR;
     if(H5Pclose(fapl2)<0)
         TEST_ERROR;
+
+    /* Create and write attribute for the root group. */
+    if((root = H5Gopen(file, "/"))<0)
+        TEST_ERROR;
+
+    /* Attribute string. */
+    if((atype = H5Tcopy(H5T_C_S1))<0)
+        TEST_ERROR;
+
+    if(H5Tset_size(atype, strlen(meta) + 1)<0)
+        TEST_ERROR;
+
+    if(H5Tset_strpad(atype, H5T_STR_NULLTERM)<0)
+        TEST_ERROR;
+
+    /* Create and write attribute */
+    if((aspace = H5Screate_simple(1, adims, NULL))<0)
+        TEST_ERROR;
+
+    if((attr = H5Acreate(root, "Metadata", atype, aspace, H5P_DEFAULT))<0)
+        TEST_ERROR;
+
+    if(H5Awrite(attr, atype, meta)<0)
+        TEST_ERROR;
+
+    /* Close IDs */
+    if(H5Tclose(atype)<0)
+        TEST_ERROR;
+    if(H5Sclose(aspace)<0)
+        TEST_ERROR;
+    if(H5Aclose(attr)<0)
+        TEST_ERROR;
+
     if(H5Fclose(file)<0)
         TEST_ERROR;
 

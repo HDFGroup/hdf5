@@ -766,7 +766,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
 
     /* Find the least N such that 2^N is larger than the file size */
     if (HADDR_UNDEF==(addr=H5FD_get_eof(file)) ||
-            HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
+            HADDR_UNDEF==(eoa=H5FD_get_eoa(file, H5FD_MEM_SUPER)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to obtain EOF/EOA value")
     for (maxpow=0; addr; maxpow++)
         addr>>=1;
@@ -778,7 +778,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
      */
     for (n=8; n<maxpow; n++) {
 	addr = (8==n) ? 0 : (haddr_t)1 << n;
-	if (H5FD_set_eoa(file, addr+H5F_SIGNATURE_LEN) < 0)
+	if (H5FD_set_eoa(file, H5FD_MEM_SUPER, addr+H5F_SIGNATURE_LEN) < 0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to set EOA value for file signature")
 	if (H5FD_read(file, H5FD_MEM_SUPER, dxpl_id, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to read file signature")
@@ -791,7 +791,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
      * failure.
      */
     if (n>=maxpow) {
-	(void)H5FD_set_eoa(file, eoa); /* Ignore return value */
+	(void)H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa); /* Ignore return value */
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to find a valid file signature")
     }
 
@@ -2718,7 +2718,7 @@ H5F_get_eoa(const H5F_t *f)
     assert(f->shared);
 
     /* Dispatch to driver */
-    if (HADDR_UNDEF==(ret_value=H5FD_get_eoa(f->shared->lf)))
+    if (HADDR_UNDEF==(ret_value=H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
 done:

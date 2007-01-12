@@ -97,8 +97,8 @@ static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
 static herr_t H5FD_family_close(H5FD_t *_file);
 static int H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_family_get_eoa(const H5FD_t *_file);
-static herr_t H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa);
+static haddr_t H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa);
 static haddr_t H5FD_family_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -1012,11 +1012,14 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_family_get_eoa(const H5FD_t *_file)
+H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t ret_value;   /* Return value */
@@ -1044,11 +1047,14 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
+H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     haddr_t		addr=eoa;
@@ -1087,11 +1093,11 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
         /* Set the EOA marker for the member */
         H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
         if (addr>(haddr_t)file->memb_size) {
-            if(H5FD_set_eoa(file->memb[u], (haddr_t)file->memb_size)<0)
+            if(H5FD_set_eoa(file->memb[u], type, (haddr_t)file->memb_size)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set file eoa")
             addr -= file->memb_size;
         } else {
-            if(H5FD_set_eoa(file->memb[u], addr)<0)
+            if(H5FD_set_eoa(file->memb[u], type, addr)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set file eoa")
             addr = 0;
         }

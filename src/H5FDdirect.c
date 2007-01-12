@@ -160,8 +160,8 @@ static H5FD_t *H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id,
 static herr_t H5FD_direct_close(H5FD_t *_file);
 static int H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_direct_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_direct_get_eoa(const H5FD_t *_file);
-static herr_t H5FD_direct_set_eoa(H5FD_t *_file, haddr_t addr);
+static haddr_t H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr);
 static haddr_t H5FD_direct_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_direct_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_direct_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
@@ -717,11 +717,14 @@ done:
  *              Wednesday, 20 September 2006
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_direct_get_eoa(const H5FD_t *_file)
+H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_direct_t	*file = (const H5FD_direct_t*)_file;
     haddr_t ret_value;  /* Return value */
@@ -751,11 +754,14 @@ done:
  *              Wednesday, 20 September 2006
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_direct_set_eoa(H5FD_t *_file, haddr_t addr)
+H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     herr_t ret_value=SUCCEED;   /* Return value */

@@ -171,8 +171,8 @@ static H5FD_t *H5FD_stream_open (const char *name, unsigned flags,
 static herr_t  H5FD_stream_flush (H5FD_t *_stream, hid_t dxpl_id, unsigned closing);
 static herr_t  H5FD_stream_close (H5FD_t *_stream);
 static herr_t H5FD_stream_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_stream_get_eoa (const H5FD_t *_stream);
-static herr_t  H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr);
+static haddr_t H5FD_stream_get_eoa (const H5FD_t *_stream, H5FD_mem_t type);
+static herr_t  H5FD_stream_set_eoa (H5FD_t *_stream, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_stream_get_eof (const H5FD_t *_stream);
 static herr_t  H5FD_stream_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t  H5FD_stream_read (H5FD_t *_stream, H5FD_mem_t type,
@@ -897,11 +897,14 @@ done:
  *                Tuesday, September 12, 2000
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stream_get_eoa (const H5FD_t *_stream)
+H5FD_stream_get_eoa (const H5FD_t *_stream, H5FD_mem_t UNUSED type)
 {
   const H5FD_stream_t *stream = (const H5FD_stream_t *) _stream;
   haddr_t ret_value;            /* Return value */
@@ -930,11 +933,14 @@ done:
  *                Tuesday, September 12, 2000
  *
  * Modifications:
+ *              Raymond Lu
+ *              21 Dec. 2006
+ *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr)
+H5FD_stream_set_eoa (H5FD_t *_stream, H5FD_mem_t UNUSED type, haddr_t addr)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
     herr_t      ret_value=SUCCEED;       /* Return value */

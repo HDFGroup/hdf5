@@ -552,6 +552,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed the MULTI driver problem (Bug #731) that corruptted the data.
+            SLU - 2007/1/12
         - Fixed file corruption bug which could write an incorrect number of
             messages to an object's header under certain circumstances.
             Generally, the sequence of actions to generate this bug looks

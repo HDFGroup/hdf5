@@ -3026,10 +3026,13 @@ void gent_multi(void)
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
         memb_fapl[mt] = H5P_DEFAULT;
+        memb_map[mt] = mt;
         sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
         memb_name[mt] = sv[mt];
+/*printf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
         memb_addr[mt] = MAX(mt - 1,0) * (HADDR_MAX / 10);
     }
+    memb_map[H5FD_MEM_DEFAULT] = H5FD_MEM_SUPER;
 
     H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
                       memb_addr, FALSE);
@@ -3047,6 +3050,7 @@ void gent_multi(void)
               dset[i][j] = i + j;
 
     H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
+
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(fid);
