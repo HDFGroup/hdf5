@@ -57,6 +57,7 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
     NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
+    NULL,		    	/*can share method		*/
     NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */

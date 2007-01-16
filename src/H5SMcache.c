@@ -32,11 +32,6 @@
 /****************/
 /* Local Macros */
 /****************/
-/* JAMES: should this change according to address size? 
-    Answer: shouldn't use this ever anyway.
-    */
-#define H5F_LISTBUF_SIZE  H5SM_LIST_SIZEOF_MAGIC + H5O_SHMESG_MAX_LIST_SIZE * 16
-
 #define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
 
 /******************/
@@ -79,6 +74,9 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
       (H5AC_clear_func_t)H5SM_clear_list,
       (H5AC_size_func_t) H5SM_list_size,
 }};
+
+/* Declare a free list to manage data to/from disk */
+H5FL_BLK_DEFINE_STATIC(shared_mesg_cache);
 
 /*****************************/
 /* Library Private Variables */
@@ -123,8 +121,8 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         /* Encode the master table and all of the index headers as one big blob */
         size = H5SM_TABLE_SIZE(f) + (H5SM_INDEX_HEADER_SIZE(f) * table->num_indexes);
 
-        /* Allocate the buffer */ /* JAMES: use H5FL_BLK_MALLOC instead? */
-        if(NULL == (buf = H5MM_malloc(size)))
+        /* Allocate the buffer */
+        if(NULL == (buf = H5FL_BLK_MALLOC(shared_mesg_cache, size)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Encode the master table */
@@ -167,7 +165,8 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 
 done:
     /* Free buffer if allocated */
-    buf = H5MM_xfree(buf);
+    if(buf)
+        H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_table */
@@ -217,8 +216,8 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
      */
     table_size = H5SM_TABLE_SIZE(f) + (table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
 
-    /* Allocate temporary buffer */ /* JAMES: FL_BLK? */
-    if(NULL == (buf = H5MM_malloc(table_size)))
+    /* Allocate temporary buffer */
+    if(NULL == (buf = H5FL_BLK_MALLOC(shared_mesg_cache, table_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read header from disk */
@@ -273,7 +272,8 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
 done:
     /* Free buffer if allocated */
-    buf = H5MM_xfree(buf);
+    if(buf)
+        H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_load_table */ 
@@ -411,9 +411,8 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         size = H5SM_LIST_SIZE(f, list->header->num_messages);
 
         /* Allocate temporary buffer */
-        /* JAMES: is BLK_MALLOC somehow better for this? */
-        if(NULL == (buf = H5MM_malloc(size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        if(NULL == (buf = H5FL_BLK_MALLOC(shared_mesg_cache, size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Encode the list */
         p = buf;
@@ -454,7 +453,8 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 
 done:
     /* Free buffer if allocated */
-    buf = H5MM_xfree(buf);
+    if(buf)
+        H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_list */
@@ -490,7 +490,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     HDassert(header);
 
-    /* Allocate space for the SOHM list data structure and initialize list JAMES don't need to initialize all of list */
+    /* Allocate space for the SOHM list data structure */
     if(NULL == (list = H5FL_MALLOC(H5SM_list_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
@@ -505,8 +505,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     size = H5SM_LIST_SIZE(f, header->num_messages);
 
     /* Allocate temporary buffer */
-    /* JAMES: is BLK_MALLOC somehow better for this? */
-    if(NULL == (buf = H5MM_malloc(size)))
+    if(NULL == (buf = H5FL_BLK_MALLOC(shared_mesg_cache, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read list from disk */
@@ -551,7 +550,8 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     ret_value = list;
 done:
     /* Free buffer if allocated */
-    buf = H5MM_xfree(buf);
+    if(buf)
+        H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     if(ret_value == NULL) {
         if(list) {
@@ -653,7 +653,7 @@ H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5SM_LIST_SIZE(f, list->header->list_max); /* JAMES: might want to have variable-sized lists */
+    *size_ptr = H5SM_LIST_SIZE(f, list->header->list_max);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_list_size */

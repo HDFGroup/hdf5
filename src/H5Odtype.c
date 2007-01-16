@@ -35,7 +35,8 @@ static herr_t H5O_dtype_reset(void *_mesg);
 static herr_t H5O_dtype_free(void *_mesg);
 static void *H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
-static herr_t H5O_dtype_is_shared(const void *_mesg);
+static htri_t H5O_dtype_can_share(const void *_mesg);
+static htri_t H5O_dtype_is_shared(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
@@ -59,6 +60,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     NULL,			/* link method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
+    H5O_dtype_can_share,	/* can share method		*/
     H5O_dtype_is_shared,	/* is shared method		*/
     H5O_dtype_pre_copy_file,	/* pre copy native value to file */
     H5O_dtype_copy_file,	/* copy native value to file    */
@@ -1343,6 +1345,51 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_set_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_can_share
+ *
+ * Purpose:	Determines if this datatype is allowed to be shared or
+ *              not.  Immutable datatypes or datatypes that are already 
+ *              shared cannot be shared (again).
+ *
+ * Return:	TRUE if datatype can be shared
+ *              FALSE if datatype may not shared
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Monday, October 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_dtype_can_share(const void *_mesg)
+{
+    const H5T_t	*mesg = (const H5T_t *)_mesg;
+    htri_t tri_ret;
+    htri_t ret_value = TRUE;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_can_share)
+
+    HDassert(mesg);
+
+    /* Don't share immutable datatypes */
+    if((tri_ret = H5T_is_immutable(mesg)) > 0)
+        HGOTO_DONE(FALSE)
+    else if(tri_ret < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
+
+    /* Don't share committed datatypes */
+    if((tri_ret = H5T_committed(mesg)) > 0)
+        HGOTO_DONE(FALSE)
+    else if(tri_ret < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dtype_can_share() */
+
 
 
 /*-------------------------------------------------------------------------

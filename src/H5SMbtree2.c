@@ -150,9 +150,9 @@ H5SM_message_compare(const void *rec1, const void *rec2)
         /* Compare either the heap_ids directly (if the key has one)
          * or the encoded buffers
          */
-        /* JAMES: not a great test.  Use a flag instead? */
         if(key->encoding_size == 0)
         {
+            HDassert(key->encoding == NULL);
             ret_value = (herr_t) (key->message.fheap_id - mesg->fheap_id);
         }
         else
@@ -160,7 +160,6 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             /* Hash values match, but we don't have a heap ID for the key.
              * Compare the encoded message with the one in the heap.
              */
-            /* JAMES: can we hold off encoding until now? */
             H5SM_compare_udata udata;
             herr_t ret;
 

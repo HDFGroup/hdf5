@@ -142,6 +142,9 @@ typedef struct size2_helper_struct {
 #define HALF_DELETE_NUM_MESGS 3
 #define DELETE_DIMS {1,1,1,1,1,1,1}
 
+/* Number of dimensions in extend_dset test */
+#define EXTEND_NDIMS 2
+
 /* Helper function prototypes */
 static hid_t make_dtype_1(void);
 static hid_t make_dtype_2(void);
@@ -3053,13 +3056,17 @@ test_sohm_extlink(void)
 static void test_sohm_extend_dset_helper(hid_t fcpl_id)
 {
     hid_t file_id = -1;
-    hid_t space_id = -1;
+    hid_t orig_space_id = -1;
+    hid_t space1_id, space2_id;
     hid_t dcpl_id = -1;
-    hid_t dset_id = -1;
+    hid_t dset1_id, dset2_id;
     hsize_t dims1[] = {1, 2};
-    hsize_t max_dims1[] = {H5S_UNLIMITED, 2};
+    hsize_t max_dims[] = {H5S_UNLIMITED, 2};
     hsize_t dims2[] = {5, 2};
+    hsize_t out_dims[2];
+    hsize_t out_maxdims[2];
     long data[10] = {0};
+    int x;
     herr_t ret;
 
     /* Create file */
@@ -3073,62 +3080,142 @@ static void test_sohm_extend_dset_helper(hid_t fcpl_id)
     CHECK_I(ret, "H5Pset_chunk");
 
     /* Create a dataspace and a dataset*/
-    space_id = H5Screate_simple(2, dims1, max_dims1);
-    CHECK_I(space_id, "H5Screate_simple");
-    dset_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, space_id, dcpl_id);
-    CHECK_I(dset_id, "H5Dcreate");
+    orig_space_id = H5Screate_simple(EXTEND_NDIMS, dims1, max_dims);
+    CHECK_I(orig_space_id, "H5Screate_simple");
+    dset1_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
+    CHECK_I(dset1_id, "H5Dcreate");
 
-    /* Extend the dataset */
-    ret = H5Dextend(dset_id, dims2);
+    /* Create another dataset with the same dataspace */
+    dset2_id = H5Dcreate(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
+    CHECK_I(dset2_id, "H5Dcreate");
+
+    /* Extend the first dataset */
+    ret = H5Dextend(dset1_id, dims2);
+    CHECK_I(ret, "H5Dextend");
+
+    /* Get the dataspaces from the datasets */
+    space1_id = H5Dget_space(dset1_id);
+    CHECK_I(space1_id, "H5Dget_space");
+    space2_id = H5Dget_space(dset2_id);
+    CHECK_I(space2_id, "H5Dget_space");
+
+    /* Verify the dataspaces */
+    ret = H5Sget_simple_extent_dims(space1_id, out_dims, out_maxdims);
+    CHECK_I(ret, "H5Sget_simple_extent_dims");
+
+    for(x=0; x<EXTEND_NDIMS; ++x) {
+        VERIFY(out_dims[x], dims2[x], "H5Sget_simple_extent_dims");
+        VERIFY(out_maxdims[x], max_dims[x], "H5Sget_simple_extent_dims");
+    }
+
+    ret = H5Sget_simple_extent_dims(space2_id, out_dims, out_maxdims);
+    CHECK_I(ret, "H5Sget_simple_extent_dims");
+
+    for(x=0; x<EXTEND_NDIMS; ++x) {
+        VERIFY(out_dims[x], dims1[x], "H5Sget_simple_extent_dims");
+        VERIFY(out_maxdims[x], max_dims[x], "H5Sget_simple_extent_dims");
+    }
+
+    /* Close both dataspaces */
+    ret = H5Sclose(space1_id);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Sclose(space2_id);
+    CHECK_I(ret, "H5Sclose");
+
+    /* Close the datasets and file */
+    ret = H5Dclose(dset1_id);
     CHECK_I(ret, "H5Dclose");
-
-    /* Write some garbage to the dataset */
-    ret = H5Dwrite(dset_id, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-    CHECK_I(ret, "H5Dwrite");
-
-    /* Close the dataset and file */
-    ret = H5Dclose(dset_id);
+    ret = H5Dclose(dset2_id);
     CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
 
 
-    /* Create a new dataset in a new file, but this time close it before
-     * extending it to make sure that the old dataspace is written to
+    /* Create new datasets in a new file, but this time close them before
+     * extending to make sure that the old dataspaces are written to
      * disk.
      */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
-    dset_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, space_id, dcpl_id);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset1_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
+    CHECK_I(dset1_id, "H5Dcreate");
+    dset2_id = H5Dcreate(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
+    CHECK_I(dset2_id, "H5Dcreate");
 
-    /* Close and re-open file and dataset */
-    ret = H5Dclose(dset_id);
+    /* Close and re-open file and datasets */
+    ret = H5Dclose(dset1_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Dclose(dset2_id);
     CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
 
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");
-    dset_id = H5Dopen(file_id, "dataset");
-    CHECK_I(dset_id, "H5Dopen");
+    dset1_id = H5Dopen(file_id, "dataset");
+    CHECK_I(dset1_id, "H5Dopen");
+    dset2_id = H5Dopen(file_id, "dataset2");
+    CHECK_I(dset2_id, "H5Dopen");
 
-    /* Extend the dataset */
-    ret = H5Dextend(dset_id, dims2);
+    /* Extend the first dataset */
+    ret = H5Dextend(dset1_id, dims2);
+    CHECK_I(ret, "H5Dextend");
+
+    /* Close and re-open file and datasets */
+    ret = H5Dclose(dset1_id);
     CHECK_I(ret, "H5Dclose");
+    ret = H5Dclose(dset2_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Fclose(file_id);
+    CHECK_I(ret, "H5Fclose");
 
-    /* Write some garbage to the dataset */
-    ret = H5Dwrite(dset_id, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-    CHECK_I(ret, "H5Dwrite");
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fopen");
+    dset1_id = H5Dopen(file_id, "dataset");
+    CHECK_I(dset1_id, "H5Dopen");
+    dset2_id = H5Dopen(file_id, "dataset2");
+    CHECK_I(dset2_id, "H5Dopen");
 
-    /* Close the dataset and file */
-    ret = H5Dclose(dset_id);
+
+    /* Get the dataspaces from the datasets */
+    space1_id = H5Dget_space(dset1_id);
+    CHECK_I(space1_id, "H5Dget_space");
+    space2_id = H5Dget_space(dset2_id);
+    CHECK_I(space2_id, "H5Dget_space");
+
+    /* Verify the dataspaces */
+    ret = H5Sget_simple_extent_dims(space1_id, out_dims, out_maxdims);
+    CHECK_I(ret, "H5Sget_simple_extent_dims");
+
+    for(x=0; x<EXTEND_NDIMS; ++x) {
+        VERIFY(out_dims[x], dims2[x], "H5Sget_simple_extent_dims");
+        VERIFY(out_maxdims[x], max_dims[x], "H5Sget_simple_extent_dims");
+    }
+
+    ret = H5Sget_simple_extent_dims(space2_id, out_dims, out_maxdims);
+    CHECK_I(ret, "H5Sget_simple_extent_dims");
+
+    for(x=0; x<EXTEND_NDIMS; ++x) {
+        VERIFY(out_dims[x], dims1[x], "H5Sget_simple_extent_dims");
+        VERIFY(out_maxdims[x], max_dims[x], "H5Sget_simple_extent_dims");
+    }
+
+    /* Close both dataspaces */
+    ret = H5Sclose(space1_id);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Sclose(space2_id);
+    CHECK_I(ret, "H5Sclose");
+
+    /* Close the datasets and file */
+    ret = H5Dclose(dset1_id);
+    CHECK_I(ret, "H5Dclose");
+    ret = H5Dclose(dset2_id);
     CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
 
     /* Cleanup */
-    ret = H5Sclose(space_id);
+    ret = H5Sclose(orig_space_id);
     CHECK_I(ret, "H5Sclose");
     ret = H5Pclose(dcpl_id);
     CHECK_I(ret, "H5Pclose");

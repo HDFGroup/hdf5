@@ -796,6 +796,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     H5SM_master_table_t *table = NULL;
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
+    htri_t              tri_ret;
     herr_t              ret_value = TRUE;
 
     FUNC_ENTER_NOAPI(H5SM_try_share, FAIL)
@@ -805,28 +806,12 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     if(f->shared->sohm_addr == HADDR_UNDEF)
         HGOTO_DONE(FALSE);
 
-    /* Type-specific checks */
-    /* JAMES: should this go here? Should there be a "can share" callback? */
-    /* QAK: Yes, a "can share" callback would be very good here, this chunk of
-     *          code is really violating the encapsulation of the datatype class
-     */
-    if(type_id == H5O_DTYPE_ID)
-    {
-        htri_t              tri_ret;
+    /* Type-specific check */
+    if((tri_ret = H5O_msg_can_share(type_id, mesg)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can_share callback returned error")
 
-        /* Don't share immutable datatypes */
-        if((tri_ret = H5T_is_immutable((H5T_t*) mesg)) > 0)
-            HGOTO_DONE(FALSE)
-        else if(tri_ret < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
-
-        /* Don't share committed datatypes */
-        /* JAMES: Quincey says this check isn't working! */
-        if((tri_ret = H5T_committed((H5T_t*) mesg)) > 0)
-            HGOTO_DONE(FALSE)
-        else if(tri_ret < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is comitted")
-    } /* end if */
+    if(tri_ret == FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Look up the master SOHM table */
     if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
@@ -901,6 +886,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     H5HF_t                *fheap = NULL;         /* Fractal heap handle */
     size_t                buf_size;         /* Size of the encoded message */
     void *                encoding_buf=NULL; /* Buffer for encoded message */
+    size_t               empty_pos=UFAIL;   /* Empty entry in list */
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_write_mesg, FAIL)
@@ -947,9 +933,11 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
-        /* JAMES: not very efficient (gets hash value twice, searches list twice).  Refactor. */
-        /* See if the message is already in the index and get its location */
-        list_pos = H5SM_find_in_list(list, &key);
+        /* See if the message is already in the index and get its location.
+         * Also record the first empty list position we find in case we need it
+         * later.
+         */
+        list_pos = H5SM_find_in_list(list, &key, &empty_pos);
         if(list_pos != UFAIL)
         {
             /* The message was in the index.  Increment its reference count. */
@@ -973,10 +961,6 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     /* If the message isn't in the list, add it */
     if(!found)
     {
-        hsize_t     x;                /* Counter variable */
-
-        /* JAMES: wrap this in a function call? */
-
         /* Put the message in the heap and record its new heap ID */
         if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
@@ -991,20 +975,19 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         }
 
 
-        /* JAMES: should be H5SM_insert or something */
-        /* Find an empty spot in the list for the message JAMES: combine this with the previous traversal */
         /* Insert the new message into the SOHM index */
         if(header->index_type == H5SM_LIST)
         {
-            for(x = 0; x < header->list_max; x++)
-            {
-                if(list->messages[x].ref_count == 0)
-                {
-                  list->messages[x] = key.message;
-                  HDassert(list->messages[x].ref_count > 0);
-                  break;
-                }
+            /* Index is a list.  Find an empty spot if we haven't already */
+            if(empty_pos == UFAIL) {
+                if((H5SM_find_in_list(list, NULL, &empty_pos) == UFAIL) || empty_pos == UFAIL)
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
             }
+
+            /* Insert message into list */
+            HDassert(list->messages[empty_pos].ref_count == 0);
+            list->messages[empty_pos] = key.message;
+            HDassert(list->messages[empty_pos].ref_count > 0);
         }
         else /* Index is a B-tree */
         {
@@ -1082,7 +1065,6 @@ H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     if((index_num = H5SM_get_index(table, type_id)) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
 
-    /* JAMES: this triggers some warning on heping.  "overflow in implicit constant conversion" */
     /* If mesg_buf is not NULL, the message's reference count has reached
      * zero and any file space it uses needs to be freed.  mesg_buf holds the
      * serialized form of the message.
@@ -1126,10 +1108,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5SM_find_in_list
  *
- * Purpose:     Find a message's location in a list
+ * Purpose:     Find a message's location in a list.  Also find the first
+ *              empty location in the list (since if we don't find the
+ *              message, we may want to insert it into an open spot).
+ *
+ *              If KEY is NULL, simply find the first empty location in the
+ *              list.
+ *
+ *              If EMPTY_POS is NULL, don't store anything in it.
  *
  * Return:      Message's position in the list on success
  *              UFAIL if message couldn't be found
+ *              empty_pos set to position of empty message or UFAIL.
  *
  * Programmer:  James Laird
  *              Tuesday, May 2, 2006
@@ -1137,7 +1127,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key)
+H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos)
 {
     size_t               x;
     size_t               ret_value;
@@ -1145,11 +1135,23 @@ H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key)
     FUNC_ENTER_NOAPI(H5SM_find_in_list, UFAIL)
 
     HDassert(list);
-    HDassert(key);
+    /* Both key and empty_pos can be NULL, but not both! */
+    HDassert(key || empty_pos);
 
-    for(x = 0; x < list->header->list_max; x++)
-        if((list->messages[x].ref_count > 0) && 0 == H5SM_message_compare(key, &(list->messages[x])))
+    /* Initialize empty_pos to an invalid value */
+    if(empty_pos)
+        *empty_pos = UFAIL;
+
+    /* Find the first (only) message equal to the key passed in.
+     * Also record the first empty position we find.
+     */
+    for(x = 0; x < list->header->list_max; x++) {
+        if(key && (list->messages[x].ref_count > 0) &&
+                (0 == H5SM_message_compare(key, &(list->messages[x]))))
             HGOTO_DONE(x)
+        else if(empty_pos && *empty_pos == UFAIL && list->messages[x].ref_count == 0)
+            *empty_pos = x;
+    }
 
     /* If we reached this point, we didn't find the message */
     HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, UFAIL, "message not in list")
@@ -1254,7 +1256,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(list, &key)) == UFAIL)
+        if((list_pos = H5SM_find_in_list(list, &key, NULL)) == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         --(list->messages[list_pos].ref_count);
@@ -1606,7 +1608,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(list, &key)) == UFAIL)
+        if((list_pos = H5SM_find_in_list(list, &key, NULL)) == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         /* Copy the message */

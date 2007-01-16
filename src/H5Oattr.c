@@ -57,6 +57,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     NULL /* H5O_attr_link */,		/* link method			*/
     H5O_attr_get_share,		/* get share method		*/
     H5O_attr_set_share,		/* set share method		*/
+    NULL,		    	/*can share method		*/
     H5O_attr_is_shared,		/*is shared method		*/
     H5O_attr_pre_copy_file,	/* pre copy native value to file */
     H5O_attr_copy_file,		/* copy native value to file    */

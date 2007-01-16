@@ -54,6 +54,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     NULL,			/* link method			*/
     H5O_sdspace_get_share,    	/* get share method			*/
     H5O_sdspace_set_share,	/* set share method			*/
+    NULL,		    	/*can share method		*/
     H5O_sdspace_is_shared,	/* is shared method			*/
     H5O_sdspace_pre_copy_file,	/* pre copy native value to file */
     NULL,			/* copy native value to file    */

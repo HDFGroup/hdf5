@@ -1556,6 +1556,58 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_msg_can_share
+ *
+ * Purpose:     Call the 'can share' method for a
+ *              particular class of object header.  This returns TRUE
+ *              if the message is allowed to be put in the shared message
+ *              heap and false otherwise (e.g., for committed or immutable
+ *              datatypes).
+ *
+ * Return:      Object can be shared:        TRUE
+ *              Object cannot be shared:    FALSE
+ *
+ * Programmer:  James Laird
+ *              January 12 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_msg_can_share(unsigned type_id, const void *mesg)
+{
+    const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_can_share)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    HDassert(type_id != H5O_SHARED_ID);
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(mesg);
+
+    /* If the message doesn't have an is_shared callback, it's not sharable
+     * and thus can't be shared.
+     */
+    /* If there is a can_share callback, use it */
+    if((type->can_share))
+        ret_value = (type->can_share)(mesg);
+    else {
+        /* Otherwise, the message can be shared if messages of this type are
+         * shareable in general; i.e., if they have a set_share callback
+         */
+        if(type->set_share)
+            ret_value = TRUE;
+        else
+            ret_value = FALSE;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_can_share() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_msg_is_shared
  *
  * Purpose:     Call the 'is_shared' method for a

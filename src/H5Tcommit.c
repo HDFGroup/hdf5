@@ -134,25 +134,22 @@ done:
     /* If the datatype was committed but couldn't be linked, we need to return it to the state it was in
      * before it was committed. */
     if(TRUE == uncommit) {
-#ifdef JAMES
-        /* JAMES: I'm not convinced that this really works anyway */
-	if(type->shared->state == H5T_STATE_OPEN && type->sh_loc.flags & H5O_COMMITTED_FLAG)) {
+	if(type->shared->state == H5T_STATE_OPEN && type->sh_loc.flags & H5O_COMMITTED_FLAG) {
             /* Remove the datatype from the list of opened objects in the file */
-            if(H5FO_top_decr(type->oloc.file, type->oloc.addr) < 0)
+            if(H5FO_top_decr(type->sh_loc.u.oloc.file, type->sh_loc.u.oloc.addr) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-            if(H5FO_delete(type->oloc.file, H5AC_dxpl_id, type->oloc.addr) < 0)
+            if(H5FO_delete(type->sh_loc.u.oloc.file, H5AC_dxpl_id, type->sh_loc.u.oloc.addr) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
-	    if(H5O_close(&(type->oloc)) < 0)
+	    if(H5O_close(&(type->sh_loc.u.oloc)) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
-            if(H5O_delete(file, H5AC_dxpl_id, type->oloc.addr) < 0)
+            if(H5O_delete(file, H5AC_dxpl_id, type->sh_loc.u.oloc.addr) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
             /* Mark datatype as being back in memory */
             if(H5T_set_loc(type, file, H5T_LOC_MEMORY))
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
-	    type->oloc.addr = HADDR_UNDEF;
+	    type->sh_loc.flags = H5O_NOT_SHARED;
             type->shared->state = old_state;
 	} /* end if */
-#endif /* JAMES */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)

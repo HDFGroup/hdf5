@@ -66,6 +66,7 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     NULL,			/* link method				*/
     H5O_fill_new_get_share,	/* get share method			*/
     H5O_fill_new_set_share,	/* set share method			*/
+    NULL,		    	/*can share method		*/
     H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
     NULL,			/* copy native value to file		*/
@@ -88,6 +89,7 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     NULL,			/* link method				*/
     H5O_fill_new_get_share,	/* get share method			*/
     H5O_fill_new_set_share,	/* set share method			*/
+    NULL,		    	/*can share method		*/
     H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
     NULL,			/* copy native value to file		*/

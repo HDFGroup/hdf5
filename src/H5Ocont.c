@@ -58,6 +58,7 @@ const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     H5O_cont_delete,		/* file delete method		*/
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
+    NULL,		    	/*can share method		*/
     NULL,		    	/*set share method		*/
     NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */

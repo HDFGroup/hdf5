@@ -58,6 +58,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     NULL,			/* link method			*/
     H5O_pline_get_share,	/* get share method		*/
     H5O_pline_set_share,	/* set share method		*/
+    NULL,		    	/*can share method		*/
     H5O_pline_is_shared,	/* is shared method		*/
     H5O_pline_pre_copy_file,	/* pre copy native value to file */
     NULL,			/* copy native value to file    */

@@ -419,6 +419,7 @@ H5_DLL size_t H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *me
     size_t extra_raw);
 H5_DLL void *H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share);
 H5_DLL htri_t H5O_msg_is_shared(unsigned type_id, const void *mesg);
+H5_DLL htri_t H5O_msg_can_share(unsigned type_id, const void *mesg);
 H5_DLL herr_t H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg);
 H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, unsigned char *buf, const void *obj);

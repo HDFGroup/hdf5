@@ -67,6 +67,7 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
     H5O_shared_link,		/*link method				*/
     NULL,			/*get share method			*/
     NULL, 			/*set share method			*/
+    NULL,		    	/*can share method		*/
     NULL, 			/*is shared method		*/
     H5O_shared_pre_copy_file,	/* pre copy native value to file */
     H5O_shared_copy_file,	/* copy native value to file    */
@@ -381,8 +382,7 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
      */
-    /* JAMES: also use "use latest version" flag here */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG || H5F_USE_LATEST_FORMAT(f)) {
         version = H5O_SHARED_VERSION;
     }
     else {
