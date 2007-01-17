@@ -534,7 +534,6 @@ test_compact_io(hid_t fapl)
 {
     hid_t       file, dataset, space, plist;
     hsize_t     dims[2];
-    herr_t      status;
     int         wbuf[16][8], rbuf[16][8];
     char	filename[1024];
     int         i, j, n;

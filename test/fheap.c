@@ -1031,7 +1031,7 @@ fill_heap(H5HF_t *fh, hid_t dxpl, unsigned block_row, size_t obj_size,
     HDassert(obj_size + 256 < shared_obj_size_g);
 
     /* Initialize starting information */
-    data_size = DBLOCK_FREE(fh, block_row);
+    data_size = (size_t)DBLOCK_FREE(fh, block_row);
     wobj = shared_wobj_g;
     curr_id_ptr = shared_ids_g;
     curr_len_ptr = shared_lens_g;
@@ -1221,8 +1221,8 @@ fill_root_row(H5HF_t *fh, hid_t dxpl, unsigned row, size_t obj_size,
     HDassert(state);
 
     /* Get some information for the heap */
-    block_size = DBLOCK_SIZE(fh, row);
-    block_free = DBLOCK_FREE(fh, row);
+    block_size = (size_t)DBLOCK_SIZE(fh, row);
+    block_free = (size_t)DBLOCK_FREE(fh, row);
     width = DTABLE_WIDTH(fh);
 
     /* Compute the number of rows to expand heap by */
@@ -1311,7 +1311,7 @@ fill_partial_row(H5HF_t *fh, hid_t dxpl, unsigned row, unsigned width,
     HDassert(state);
 
     /* Get some information for the heap */
-    block_size = DBLOCK_SIZE(fh, row);
+    block_size = (size_t)DBLOCK_SIZE(fh, row);
 
     /* Loop over filling direct blocks, until indirect row is full */
     for(u = 0; u < width; u++) {
@@ -6415,7 +6415,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     TESTING("removing single larger object from absolute heap");
 
     /* Set up object to insert */
-    obj_len = DBLOCK_SIZE(fh, 2) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -6579,7 +6579,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TESTING("removing two larger objects from absolute heap (reverse)")
 
     /* Set up first object to insert */
-    obj_len = DBLOCK_SIZE(fh, 2) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -6602,7 +6602,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Set up second object to insert */
-    obj_len = DBLOCK_SIZE(fh, 4) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 4) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -6815,7 +6815,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TESTING("removing three larger objects from absolute heap (reverse)")
 
     /* Set up first object to insert */
-    obj_len = DBLOCK_SIZE(fh, 2) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -6838,7 +6838,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Set up second object to insert */
-    obj_len = DBLOCK_SIZE(fh, 4) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 4) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -6862,7 +6862,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Set up third object to insert */
-    obj_len = DBLOCK_SIZE(fh, 7) + 1;
+    obj_len = (size_t)DBLOCK_SIZE(fh, 7) + 1;
     obj = shared_wobj_g;
 
     /* Insert object into heap */
@@ -7668,7 +7668,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     if(begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
         TEST_ERROR
 
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -7748,7 +7748,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
 
     /* Insert object too large for starting block size */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -7764,7 +7764,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* Insert an object to fill up the heap block just created */
-    obj_size = DBLOCK_FREE(fh, 2) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 2) - obj_size;
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -7848,7 +7848,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
 
 
     /* Insert object too large for starting block size */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -7864,7 +7864,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* Insert an object to fill up the heap block just created */
-    obj_size = DBLOCK_FREE(fh, 2) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 2) - obj_size;
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -7970,7 +7970,7 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the second object
      */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -8069,7 +8069,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the second object
      */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     state.man_size += (cparam->managed.width - 1) * DBLOCK_SIZE(fh, 0);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
@@ -8085,7 +8085,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
         TEST_ERROR
 
     /* Insert an object to fill up the (smaller) heap block just created */
-    obj_size = DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
+    obj_size = (size_t)DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8094,7 +8094,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
         TEST_ERROR
 
     /* Fill remainder of 2 * start size block */
-    obj_size = DBLOCK_FREE(fh, 2) - (DBLOCK_SIZE(fh, 0) + 1);
+    obj_size = (size_t)DBLOCK_FREE(fh, 2) - ((size_t)DBLOCK_SIZE(fh, 0) + 1);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8225,7 +8225,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
@@ -8241,7 +8241,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
         TEST_ERROR
 
     /* Insert an object to fill up the (smaller) heap block just created */
-    obj_size = DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
+    obj_size = (size_t)DBLOCK_FREE(fh, 0) - SMALL_OBJ_SIZE1;
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8250,7 +8250,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
         TEST_ERROR
 
     /* Insert object to fill remainder of 4 * start size block */
-    obj_size = DBLOCK_FREE(fh, 3) - (DBLOCK_SIZE(fh, 2) + 1);
+    obj_size = (size_t)DBLOCK_FREE(fh, 3) - ((size_t)DBLOCK_SIZE(fh, 2) + 1);
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8376,7 +8376,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 1);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 2);
     state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, 3);
@@ -8392,7 +8392,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* Insert object to fill remainder of 4 * start size block */
-    obj_size = DBLOCK_FREE(fh, 3) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 3) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8507,7 +8507,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
     /* Insert object to extend root block to middle of root direct blocks
      */
-    obj_size = DBLOCK_SIZE(fh, row - 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, row - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, row - 1);
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -8523,7 +8523,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
      * block, to force extension of root indirect block that covers the first
      * row of indirect blocks in root indirect block
      */
-    obj_size = DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
     for(v = 0; v < cparam->managed.width; v++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, num_direct_rows - 1);
         if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
@@ -8544,7 +8544,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     /* Insert large object, to force creation of indirect blocks with
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_direct_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_direct_rows - 1);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -8630,7 +8630,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -8650,7 +8650,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
         TEST_ERROR
 
     /* Insert an object to fill up the (biggest) heap block created */
-    obj_size = DBLOCK_FREE(fh, 3) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 3) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8761,7 +8761,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -8771,7 +8771,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -8899,7 +8899,7 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -8912,7 +8912,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9036,7 +9036,7 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -9049,7 +9049,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9058,7 +9058,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object too large for initial block size in skipped indirect blocks */
-    obj_size = DBLOCK_SIZE(fh, 3) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 3) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -9071,7 +9071,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (medium) block just created */
-    obj_size = DBLOCK_FREE(fh, 4) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 4) - obj_size;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -9083,7 +9083,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Finish off blocks in row of medium block size (just to make row filling easier below) */
-    obj_size = DBLOCK_FREE(fh, 4);
+    obj_size = (size_t)DBLOCK_FREE(fh, 4);
     for(u = 1; u < cparam->managed.width; u++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 4);
         if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
@@ -9206,7 +9206,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     /* Insert large object, to force creation of indirect block and
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9216,7 +9216,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
         TEST_ERROR
 
     /* Insert an object to fill up the (biggest) heap block created */
-    obj_size = DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9360,7 +9360,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     /* Insert large object, to force creation of two rows of indirect blocks and
      * range of skipped blocks that are too small to hold the large object
      */
-    obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, max_dblock_rows - 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 1);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9370,7 +9370,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
         TEST_ERROR
 
     /* Insert an object to fill up the (biggest) heap block created */
-    obj_size = DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, max_dblock_rows - 1) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9382,7 +9382,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
      * previously skipped, but is small enough to fit into second row of
      * skipped blocks.
      */
-    obj_size = DBLOCK_SIZE(fh, max_dblock_rows - 3) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, max_dblock_rows - 3) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, max_dblock_rows - 2);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9392,7 +9392,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
         TEST_ERROR
 
     /* Insert an object to fill up the (2nd biggest) heap block created */
-    obj_size = DBLOCK_FREE(fh, max_dblock_rows - 2) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, max_dblock_rows - 2) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9542,7 +9542,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9552,7 +9552,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, 3) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 3) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9679,7 +9679,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, 2) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 2) + 1;
     state.man_alloc_size += DBLOCK_SIZE(fh, 3);
     if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -9689,7 +9689,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, 3) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 3) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9822,7 +9822,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -9835,7 +9835,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -9977,7 +9977,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -9990,7 +9990,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows + 1) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows + 1) - obj_size;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10147,7 +10147,7 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10160,7 +10160,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10317,7 +10317,7 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10330,7 +10330,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10475,7 +10475,7 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10488,7 +10488,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10653,7 +10653,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10666,7 +10666,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -10866,7 +10866,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -10879,7 +10879,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -11063,7 +11063,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -11076,7 +11076,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -11296,7 +11296,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
      * range of skipped (indirect) blocks that are too small to hold the large
      * object
      */
-    obj_size = DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
 HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 #endif /* QAK */
@@ -11309,7 +11309,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
         TEST_ERROR
 
     /* Insert object to fill space in (large) block created */
-    obj_size = DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows) - obj_size;
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -11420,7 +11420,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
      * share them with other objects of the same size, until the next larger
      * block size is reached.
      */
-    obj_size = DBLOCK_SIZE(fh, 0) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) / 2;
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
     for(u = 0; u < cparam->managed.width; u++) {
@@ -11460,7 +11460,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Go back and fill in direct blocks of initial block size (which have large free space in them) */
-    obj_size = DBLOCK_FREE(fh, 0) - obj_size;
+    obj_size = (size_t)DBLOCK_FREE(fh, 0) - obj_size;
     for(u = 0; u < cparam->managed.width; u++)
         if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
             TEST_ERROR
@@ -11473,7 +11473,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Fill in 2 * start_block_size block */
-    obj_size = DBLOCK_FREE(fh, 2) - (DBLOCK_SIZE(fh, 0) / 2);
+    obj_size = (size_t)DBLOCK_FREE(fh, 2) - ((size_t)DBLOCK_SIZE(fh, 0) / 2);
     if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
 
@@ -11555,7 +11555,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     /* Insert objects small enough to fit into each direct block, but not to
      * share them with other objects of the same size.
      */
-    obj_size = DBLOCK_SIZE(fh, 0) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) / 2;
     state.man_size = DBLOCK_SIZE(fh, 0);
     state.man_free_space = DBLOCK_FREE(fh, 0);
     /* First row */
@@ -11589,7 +11589,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* Rows 3-4 */
     for(u = 0; u < 2; u++) {
-        obj_size = DBLOCK_SIZE(fh, u + 2) / 2;
+        obj_size = (size_t)DBLOCK_SIZE(fh, u + 2) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u + 2);
             if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
@@ -11609,7 +11609,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* Rows 5-8 */
     for(u = 0; u < 4; u++) {
-        obj_size = DBLOCK_SIZE(fh, u + 4) / 2;
+        obj_size = (size_t)DBLOCK_SIZE(fh, u + 4) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u + 4);
             if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
@@ -11628,7 +11628,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     } /* end for */
 
     /* Row 9 (last direct block row) */
-    obj_size = DBLOCK_SIZE(fh, 8) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 8) / 2;
     for(v = 0; v < cparam->managed.width; v++) {
         state.man_alloc_size += DBLOCK_SIZE(fh, 8);
         if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
@@ -11641,7 +11641,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
     /* Go back and backfill all root block's direct blocks */
     for(u = 0; u < root_direct_rows; u++) {
-        obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
+        obj_size = (size_t)DBLOCK_FREE(fh, u) - ((size_t)DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
             if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
@@ -11740,7 +11740,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
      * share them with other objects of the same size.
      */
     for(u = 0; u < num_first_indirect_rows; u++) {
-        obj_size = DBLOCK_SIZE(fh, u) / 2;
+        obj_size = (size_t)DBLOCK_SIZE(fh, u) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u);
             if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
@@ -11754,7 +11754,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
 
     /* Go back and backfill all 2nd level indirect block's direct blocks */
     for(u = 0; u < num_first_indirect_rows; u++) {
-        obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
+        obj_size = (size_t)DBLOCK_FREE(fh, u) - ((size_t)DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
             if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
@@ -11859,7 +11859,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
      * share them with other objects of the same size.
      */
     for(u = 0; u < root_direct_rows; u++) {
-        obj_size = DBLOCK_SIZE(fh, u) / 2;
+        obj_size = (size_t)DBLOCK_SIZE(fh, u) / 2;
         for(v = 0; v < cparam->managed.width; v++) {
             state.man_alloc_size += DBLOCK_SIZE(fh, u);
             if(add_obj(fh, dxpl, (size_t)10, obj_size, &state, &keep_ids))
@@ -11873,7 +11873,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
 
     /* Go back and backfill all 3rd level indirect block's direct blocks */
     for(u = 0; u < root_direct_rows; u++) {
-        obj_size = DBLOCK_FREE(fh, u) - (DBLOCK_SIZE(fh, u) / 2);
+        obj_size = (size_t)DBLOCK_FREE(fh, u) - ((size_t)DBLOCK_SIZE(fh, u) / 2);
         for(v = 0; v < cparam->managed.width; v++)
             if(add_obj(fh, dxpl, (size_t)20, obj_size, &state, &keep_ids))
                 TEST_ERROR
@@ -12759,7 +12759,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id4) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id4, &obj_type) < 0)
@@ -12796,7 +12796,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
-    obj_size = DBLOCK_SIZE(fh, 3) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 3) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id5) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id5, &obj_type) < 0)
@@ -13811,7 +13811,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
-    obj_size = DBLOCK_SIZE(fh, 0) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id4) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id4, &obj_type) < 0)
@@ -13855,7 +13855,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
-    obj_size = DBLOCK_SIZE(fh, 3) + 1;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 3) + 1;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id5) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id5, &obj_type) < 0)
@@ -14293,7 +14293,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
 
 
     /* Insert object small enough to fit into direct heap block */
-    obj_size = DBLOCK_SIZE(fh, 0) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) / 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id, &obj_type) < 0)
@@ -14463,7 +14463,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 
 
     /* Insert object #1, small enough to fit into direct heap block */
-    obj_size = DBLOCK_SIZE(fh, 0) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) / 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id1) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id1, &obj_type) < 0)
@@ -14476,7 +14476,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         TEST_ERROR
 
     /* Insert object #2, small enough to fit into direct heap block */
-    obj_size = DBLOCK_SIZE(fh, 0) / 2;
+    obj_size = (size_t)DBLOCK_SIZE(fh, 0) / 2;
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, heap_id2) < 0)
         FAIL_STACK_ERROR
     if(H5HF_get_id_type_test(heap_id2, &obj_type) < 0)

@@ -281,14 +281,14 @@ addr_to_type_and_index(haddr_t addr,
 
     if ( addr >= PICO_ALT_BASE_ADDR ) {
 
-        idx = (addr - alt_base_addrs[type]) / entry_sizes[type];
+        idx = (int32_t)((addr - alt_base_addrs[type]) / entry_sizes[type]);
         HDassert( ( idx >= 0 ) && ( idx <= max_indices[type] ) );
         HDassert( !((entries[type])[idx].at_main_addr) );
         HDassert( addr == (entries[type])[idx].alt_addr );
 
     } else {
 
-        idx = (addr - base_addrs[type]) / entry_sizes[type];
+        idx = (int32_t)((addr - base_addrs[type]) / entry_sizes[type]);
         HDassert( ( idx >= 0 ) && ( idx <= max_indices[type] ) );
         HDassert( (entries[type])[idx].at_main_addr );
         HDassert( addr == (entries[type])[idx].main_addr );
