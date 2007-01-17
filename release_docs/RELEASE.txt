@@ -552,6 +552,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
+            be returned (0) instead of FAIL on error conditions such as the
+            selection or extent not being defined. CMC - 2007/01/17
         - Fixed the MULTI driver problem (Bug #731) that corruptted the data.
             SLU - 2007/1/12
         - Fixed file corruption bug which could write an incorrect number of
