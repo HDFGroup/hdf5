@@ -4573,7 +4573,7 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
-    hid_t gid_sub = -1, gid_sub2;               /* Sub-group IDs */
+    hid_t gid_sub = -1, gid_sub2=-1;            /* Sub-group IDs */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
 
@@ -4688,7 +4688,7 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
-    hid_t gid_sub = -1, gid_sub2;               /* Sub-group IDs */
+    hid_t gid_sub = -1, gid_sub2=-1;            /* Sub-group IDs */
     unsigned u, v;                              /* Local index variables */
     char objname[NAME_BUF_SIZE];                /* Object name buffer */
     char src_filename[NAME_BUF_SIZE];
@@ -5589,30 +5589,6 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_old_layout */
-
-
-/*-------------------------------------------------------------------------
- * Function:    test_copy_mount
- *
- * Purpose:     Test copying objects between mounted files
- *
- * Return:      Success:        0
- *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_copy_mount(hid_t UNUSED fapl)
-{
-    TESTING("H5Ocopy(): objects between mounted files");
-
-    SKIPPED();
-    puts("    Not tested yet!!");
-    return 0;
-} /* end test_copy_mount */
 
 
 /*-------------------------------------------------------------------------
