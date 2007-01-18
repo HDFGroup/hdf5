@@ -834,7 +834,7 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     /* Don't have an opened group location for copy */
     H5O_loc_reset(&(attr_dst->oloc));
     H5G_name_reset(&(attr_dst->path));
-    attr_dst->obj_opened = 0;
+    attr_dst->obj_opened = FALSE;
 
     /* Copy attribute's name */
     attr_dst->name = H5MM_strdup(attr_src->name);
@@ -1205,12 +1205,12 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 	    "Name:",
 	    mesg->name);
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	    "Initialized:",
-	    (unsigned int)mesg->initialized);
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    mesg->initialized);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	    "Object opened:",
-	    (unsigned int)mesg->obj_opened);
+	    mesg->obj_opened);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	    "Object:",
 	    mesg->oloc.addr);

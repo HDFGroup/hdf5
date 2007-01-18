@@ -35,6 +35,11 @@
 /* Local Macros */
 /****************/
 /* Values used to create the SOHM heaps */
+/* (Note that these parameters have been tuned so that the resulting heap ID
+ *      is exactly 8 bytes.  This is an efficient size and is also the same as
+ *      the size of the attribute heap IDs, think carefully before changing it.
+ *      -QAK)
+ */
 #define H5SM_FHEAP_MAN_WIDTH                     4
 #define H5SM_FHEAP_MAN_START_BLOCK_SIZE          1024
 #define H5SM_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)

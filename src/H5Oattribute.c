@@ -252,7 +252,7 @@ HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name)
          *      "delete" callback until the reference count drops to zero.
          *      However, attributes have already increased the reference
          *      count on shared components before passing the attribute
-         *      to the shared message code to manage, causing an assymetry
+         *      to the shared message code to manage, causing an asymmetry
          *      in the reference counting for any shared components.
          *
          *      The alternate solution is to have the shared message's "try

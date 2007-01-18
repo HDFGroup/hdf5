@@ -48,6 +48,11 @@
 /****************/
 
 /* Fractal heap creation parameters for "dense" attribute storage */
+/* (Note that these parameters have been tuned so that the resulting heap ID
+ *      is exactly 8 bytes.  This is an efficient size and is also the same as
+ *      the size of the shared message heap IDs, think carefully before
+ *      changing it. -QAK)
+ */
 #define H5A_FHEAP_MAN_WIDTH                     4
 #define H5A_FHEAP_MAN_START_BLOCK_SIZE          512
 #define H5A_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)

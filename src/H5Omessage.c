@@ -103,7 +103,7 @@ static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
     const H5O_msg_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
     const H5O_msg_class_t **new_type, const void **new_mesg, hid_t dxpl_id,
     unsigned *oh_flags_ptr);
-static herr_t H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned flags,
     unsigned update_flags, unsigned *oh_flags_ptr);
 
@@ -272,8 +272,8 @@ H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *t
     if((idx = H5O_new_mesg(f, oh, &mesg_flags, type, mesg, &sh_mesg, &new_type, &new_mesg, dxpl_id, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "unable to create new message")
 
-    /* Write the information to the message */
-    if(H5O_write_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
+    /* Copy the information for the message */
+    if(H5O_copy_mesg(f, dxpl_id, oh, idx, new_type, new_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -458,8 +458,8 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
         write_mesg = &sh_mesg;
     } /* end if */
 
-    /* Write the information to the message */
-    if(H5O_write_mesg(f, dxpl_id, oh, idx, write_type, write_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
+    /* Copy the information for the message */
+    if(H5O_copy_mesg(f, dxpl_id, oh, idx, write_type, write_mesg, mesg_flags, update_flags, oh_flags_ptr) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -2001,9 +2001,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_write_mesg
+ * Function:	H5O_copy_mesg
  *
- * Purpose:	Write message to object header
+ * Purpose:	Make a copy of the native object for an object header's
+ *              native message info
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2013,14 +2014,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
     unsigned update_flags, unsigned *oh_flags_ptr)
 {
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_write_mesg)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_mesg)
 
     /* check args */
     HDassert(f);
@@ -2032,10 +2033,10 @@ H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     /* Set pointer to the correct message */
     idx_msg = &oh->mesg[idx];
 
-    /* Reset existing native information */
+    /* Reset existing native information for the header's message */
     H5O_msg_reset_real(type, idx_msg->native);
 
-    /* Copy the native value for the message */
+    /* Copy the native object for the message */
     if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
 
@@ -2053,7 +2054,7 @@ H5O_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_write_mesg() */
+} /* end H5O_copy_mesg() */
 
 
 /*-------------------------------------------------------------------------

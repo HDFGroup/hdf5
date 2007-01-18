@@ -65,13 +65,13 @@ struct H5A_t {
     H5O_loc_t   oloc;       /* Object location for object attribute is on */
     H5G_name_t  path;       /* Group hierarchy path */
     char        *name;      /* Attribute's name */
+    H5T_cset_t  encoding;   /* Character encoding of attribute name */
     H5T_t       *dt;        /* Attribute's datatype */
     size_t      dt_size;    /* Size of datatype on disk */
     H5S_t       *ds;        /* Attribute's dataspace */
     size_t      ds_size;    /* Size of dataspace on disk */
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
-    H5T_cset_t  encoding;   /* Character encoding of attribute */
     H5O_shared_t sh_loc;    /* Location of shared message */
 };
 
