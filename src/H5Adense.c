@@ -419,7 +419,6 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
     /* Get handle for shared message heap, if attributes are sharable */
-    /* JAMES: does this work if only very large attributes are shared? */
     if(attr_sharable) {
         haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
 

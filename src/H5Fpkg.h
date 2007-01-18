@@ -58,9 +58,58 @@
 #  undef H5F_DEBUG
 #endif
 
-/* Maximum size of super-block buffer */
-#define H5F_SUPERBLOCK_SIZE  130
-#define H5F_DRVINFOBLOCK_SIZE  1024
+/* Superblock sizes for various versions */
+/* Checksum size in the file */
+#define H5F_SIZEOF_CHKSUM 4
+
+/* Fixed-size portion at the beginning of all superblocks */
+#define H5F_SUPERBLOCK_FIXED_SIZE ( H5F_SIGNATURE_LEN                   \
+        + 3 /* superblock, freespace, and root group versions */        \
+        + 1 /* reserved */                                              \
+        + 3 /* shared header vers, size of address, size of lengths */  \
+        + 1 /* reserved */                                              \
+        + 4 /* group leaf k, group internal k */                        \
+        + 4) /* consistency flags */
+
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V0(f)                                \
+        ( H5F_SIZEOF_ADDR(f) /* base address */                         \
+        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
+        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
+        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
+        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
+
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V1(f)                                \
+        ( 2 /* indexed B-tree internal k */                             \
+        + 2 /* reserved */                                              \
+        + H5F_SIZEOF_ADDR(f) /* base address */                         \
+        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
+        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
+        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
+        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
+
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V2(f)                                \
+        ( 2 /* indexed B-tree internal k */                             \
+        + H5F_SIZEOF_ADDR(f) /* base address */                         \
+        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
+        + H5F_SIZEOF_ADDR(f) /* shared message table address */         \
+        + 2 /* shared message version and number of indexes */          \
+        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
+        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
+        + H5G_SIZEOF_ENTRY(f) /* root group ptr */                      \
+        + H5F_SIZEOF_CHKSUM)
+
+#define H5F_SUPERBLOCK_SIZE(v, f) ( H5F_SUPERBLOCK_FIXED_SIZE           \
+        + (v == 0 ? H5F_SUPERBLOCK_VARLEN_SIZE_V0(f) : 0)               \
+        + (v == 1 ? H5F_SUPERBLOCK_VARLEN_SIZE_V1(f) : 0)               \
+        + (v == 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(f) : 0))
+
+
+#define H5F_DRVINFOBLOCK_HDR_SIZE 16
+#define H5F_DRVINFO_CHKSUM(v) (v == 0 ? 0 : H5F_SIZEOF_CHKSUM)
+
+/* Maximum size of super-block buffers */
+#define H5F_MAX_SUPERBLOCK_SIZE  134
+#define H5F_MAX_DRVINFOBLOCK_SIZE  1024
 
 /* Define the HDF5 file signature */
 #define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
@@ -98,8 +147,6 @@ typedef struct H5F_file_t {
     haddr_t	driver_addr;	/* File driver information block address*/
     hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2 */
 
-    unsigned	super_chksum;	/* Superblock checksum                  */
-    unsigned	drvr_chksum;	/* Driver info block checksum           */
     H5AC_t      *cache;		/* The object cache			*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
