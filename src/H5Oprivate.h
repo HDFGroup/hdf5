@@ -198,13 +198,14 @@ typedef struct H5O_fill_t {
  */
 
 typedef struct H5O_fill_new_t {
+    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
+
     H5T_t		*type;		/*type. Null implies same as dataset */
     ssize_t		size;		/*number of bytes in the fill value  */
     void		*buf;		/*the fill value		     */
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
-    H5O_shared_t        sh_loc;         /*location of shared message         */
 } H5O_fill_new_t;
 
 /*
@@ -336,10 +337,11 @@ typedef struct H5O_ginfo_t {
  * (Data structure in memory)
  */
 typedef struct H5O_pline_t {
+    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
+
     size_t	nalloc;			/*num elements in `filter' array     */
     size_t	nused;			/*num filters defined		     */
     H5Z_filter_info_t *filter;		/*array of filters		     */
-    H5O_shared_t        sh_loc;         /*location of shared message         */
 } H5O_pline_t;
 
 /*

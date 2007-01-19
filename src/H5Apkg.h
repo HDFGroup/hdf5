@@ -57,6 +57,8 @@
 
 /* Define the main attribute structure */
 struct H5A_t {
+    H5O_shared_t sh_loc;    /* Shared message info (must be first) */
+
     hbool_t     initialized;/* Indicate whether the attribute has been modified */
     hbool_t     obj_opened; /* Object header entry opened? */
     H5O_loc_t   oloc;       /* Object location for object attribute is on */
@@ -69,7 +71,6 @@ struct H5A_t {
     size_t      ds_size;    /* Size of dataspace on disk */
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
-    H5O_shared_t sh_loc;    /* Location of shared message */
     H5O_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
 };
 

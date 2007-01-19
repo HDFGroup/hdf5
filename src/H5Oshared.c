@@ -169,9 +169,17 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type->id, buf)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
 
-        /* Copy this message to the user's buffer */
-        if(NULL == (ret_value = (type->copy)(native_mesg, mesg)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
+        /* Check if there is a user buffer to fill */
+        if(mesg) {
+            /* Copy this message to the user's buffer */
+            if(NULL == (ret_value = (type->copy)(native_mesg, mesg)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
+        } /* end if */
+        else {
+            /* Otherwise, take ownership of the decoded native message */
+            ret_value = native_mesg;
+            native_mesg = NULL;
+        } /* end else */
     } /* end if */
     else {
         HDassert(shared->flags & H5O_COMMITTED_FLAG);
@@ -652,7 +660,6 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     HDassert(shared_src);
     HDassert(file_dst);
     HDassert(cpy_info);
-
 
     /* Committed shared messages create a shared message at the destination
      * and also copy the committed object that they point to.

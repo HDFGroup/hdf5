@@ -38,13 +38,14 @@
  */
 /* Extent container */
 struct H5S_extent_t {
-    H5S_class_t	type;   /* Type of extent */
-    hsize_t nelem;      /* Number of elements in extent */
+    H5O_shared_t sh_loc;        /* Shared message info (must be first) */
 
-    unsigned rank;      /* Number of dimensions */
-    hsize_t *size;      /* Current size of the dimensions */
-    hsize_t *max;       /* Maximum size of the dimensions */
-    H5O_shared_t        sh_loc; /* location of this message if shared */
+    H5S_class_t	type;           /* Type of extent */
+    hsize_t nelem;              /* Number of elements in extent */
+
+    unsigned rank;              /* Number of dimensions */
+    hsize_t *size;              /* Current size of the dimensions */
+    hsize_t *max;               /* Maximum size of the dimensions */
 };
 
 /*

@@ -186,7 +186,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
+	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
@@ -215,11 +215,11 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if (NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
+	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
-        if((extent= (H5S_extent_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_SDSPACE, NULL))==NULL)
+        if((extent = (H5S_extent_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_SDSPACE, NULL))==NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
         /* Free the shared information */
@@ -272,7 +272,7 @@ done:
  PURPOSE
     Encode a simple attribute message
  USAGE
-    herr_t H5O_attr_encode(f, raw_size, p, mesg)
+    herr_t H5O_attr_encode(f, p, mesg)
         H5F_t *f;         IN: pointer to the HDF5 file struct
         const uint8 *p;         IN: the raw information buffer
         const void *mesg;       IN: Pointer to the simple datatype struct

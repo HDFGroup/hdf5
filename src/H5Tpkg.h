@@ -326,9 +326,10 @@ typedef struct H5T_shared_t {
 } H5T_shared_t;
 
 struct H5T_t {
-    H5T_shared_t   *shared; /* all other information */
-    H5G_name_t      path;   /* group hier. path if the type is a named type */
-    H5O_shared_t    sh_loc; /* shared object message if this is a shared type*/
+    H5O_shared_t    sh_loc;     /* Shared message info (must be first) */
+
+    H5T_shared_t   *shared;     /* all other information */
+    H5G_name_t      path;       /* group hier. path if the type is a named type */
 };
 
 /* A compound datatype member */
