@@ -60,6 +60,8 @@
 #define H5SM_B2_SPLIT_PERCENT 100
 #define H5SM_B2_MERGE_PERCENT 40
 
+#define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
+
 /****************************/
 /* Package Typedefs         */
 /****************************/

@@ -748,7 +748,7 @@ H5O_shared_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
     if(mesg->flags & H5O_COMMITTED_FLAG)
     {
         HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Sharing method",
+                "Sharing method:",
                 "Obj Hdr");
         HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                 "Object address:",
@@ -757,7 +757,7 @@ H5O_shared_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
     else
     {
         HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Sharing method",
+                "Sharing method:",
                 "SOHM Heap");
         HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                 "Heap ID:",

@@ -1629,3 +1629,155 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_refcount() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5SM_table_debug
+ *
+ * Purpose:     Print debugging information for the master table.
+ *
+ *              If table_vers and num_indexes are not UFAIL, they are used
+ *              instead of the values in the superblock.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  James Laird
+ *              Thursday, January 18, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
+                         FILE *stream, int indent, int fwidth,
+                         unsigned table_vers, unsigned num_indexes)
+{
+    H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    unsigned x;                         /* Counter variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5SM_table_debug, FAIL)
+
+    HDassert(f);
+    HDassert(table_addr != HADDR_UNDEF);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    /* If table_vers and num_indexes are UFAIL, replace them with values from
+     * userblock
+     */
+    if(table_vers == UFAIL)
+        table_vers = f->shared->sohm_vers;
+    else if(table_vers = f->shared->sohm_vers)
+	HDfprintf(stream, "*** SOHM TABLE VERSION DOESN'T MATCH VERSION IN SUPERBLOCK!\n");
+    if(num_indexes == UFAIL)
+        num_indexes = f->shared->sohm_nindexes;
+    else if(num_indexes = f->shared->sohm_nindexes)
+	HDfprintf(stream, "*** NUMBER OF SOHM INDEXES DOESN'T MATCH VALUE IN SUPERBLOCK!\n");
+
+    /* Check arguments.  Version must be 0, the only version implemented so far */
+    if(table_vers > HDF5_SHAREDHEADER_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown shared message table version")
+    if(num_indexes == 0 || num_indexes > H5O_SHMESG_MAX_NINDEXES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of indexes must be between 1 and H5O_SHMESG_MAX_NINDEXES")
+
+    /* Look up the master SOHM table */
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
+
+    HDfprintf(stream, "%*sShared Message Master Table...\n", indent, "");
+    for(x=0; x<num_indexes; ++x) {
+        HDfprintf(stream, "%*sIndex %d...\n", indent, "", x);
+        HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth,
+                "SOHM Index Type:",
+                (table->indexes[x].index_type == H5SM_LIST ? "List" :
+                (table->indexes[x].index_type == H5SM_BTREE ? "B-Tree" : "Unknown")));
+
+        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+                "Address of index:", table->indexes[x].index_addr);
+        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+                "Address of index's heap:", table->indexes[x].heap_addr);
+        HDfprintf(stream, "%*s%-*s 0x%08x\n", indent + 3, "", fwidth,
+                "Message type flags:", table->indexes[x].mesg_types);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+                "Minimum size of messages:", table->indexes[x].min_mesg_size);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+                "Number of messages:", table->indexes[x].num_messages);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+                "Maximum list size:", table->indexes[x].list_max);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+                "Minimum B-tree size:", table->indexes[x].btree_min);
+    }
+
+done:
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5SM_list_debug
+ *
+ * Purpose:     Print debugging information for a SOHM list.
+ *
+ *              Relies on the list version and number of messages passed in.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  James Laird
+ *              Thursday, January 18, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
+                         FILE *stream, int indent, int fwidth,
+                         unsigned table_vers, size_t num_messages)
+{
+
+    H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
+    H5SM_index_header_t header;         /* A "false" header used to read the list */
+    unsigned x;                         /* Counter variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5SM_list_debug, FAIL)
+
+    HDassert(f);
+    HDassert(num_messages != HADDR_UNDEF);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    /* Check arguments.  Version must be 0, the only version implemented so far */
+    if(table_vers > H5SM_LIST_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown shared message list version")
+    if(num_messages == 0 || num_messages > H5O_SHMESG_MAX_LIST_SIZE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of indexes must be between 1 and H5O_SHMESG_MAX_NINDEXES")
+
+    /* Create a temporary header using the arguments.  The cache needs this to load the list. */
+    HDmemset(&header, 0, sizeof(H5SM_index_header_t));
+    header.list_max = header.num_messages = num_messages;
+    header.index_type = H5SM_LIST;
+    header.index_addr = list_addr;
+
+    /* Get the list from the cache */
+    if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, list_addr, NULL, &header, H5AC_READ)))
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
+
+    HDfprintf(stream, "%*sShared Message List Index...\n", indent, "");
+    for(x=0; x<num_messages; ++x) {
+        HDfprintf(stream, "%*sShared Object Header Message %d...\n", indent, "", x);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+                "Heap ID:", list->messages[x].fheap_id);
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth, /* JAMES: better flag for this? */
+                "Hash value:", list->messages[x].hash);
+        HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
+                "Reference count:", list->messages[x].ref_count);
+    }
+
+done:
+    if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, list_addr, list, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+

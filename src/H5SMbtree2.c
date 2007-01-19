@@ -264,7 +264,7 @@ H5SM_btree_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_debug)
 
-    HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth, "Record:",
+    HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth, "Shared Message:",
         sohm->fheap_id, sohm->hash, sohm->ref_count);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

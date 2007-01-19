@@ -32,7 +32,6 @@
 /****************/
 /* Local Macros */
 /****************/
-#define H5SM_LIST_VERSION	0	/* Verion of Shared Object Header Message List Indexes */
 
 /******************/
 /* Local Typedefs */
@@ -118,6 +117,11 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         uint32_t computed_chksum;    /* Computed metadata checksum value */
         int      x;                  /* Counter variable */
 
+        /* Verify that we're writing version 0 of the table; this is the only
+         * version defined so far.
+         */
+        HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
+
         /* Encode the master table and all of the index headers as one big blob */
         size = H5SM_TABLE_SIZE(f) + (H5SM_INDEX_HEADER_SIZE(f) * table->num_indexes);
 
@@ -199,6 +203,11 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     H5SM_master_table_t *ret_value;
 
     FUNC_ENTER_NOAPI(H5SM_load_table, NULL)
+
+    /* Verify that we're reading version 0 of the table; this is the only
+        * version defined so far.
+        */
+    HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
     if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))

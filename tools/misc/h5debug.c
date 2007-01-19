@@ -30,6 +30,7 @@
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5SM_PACKAGE		/*suppress error about including H5SMpkg  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"		/* B-trees				*/
@@ -45,6 +46,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SMpkg.h"		/* Implicitly shared messages		*/
 
 /* File drivers */
 #include "H5FDfamily.h"
@@ -232,6 +234,10 @@ main(int argc, char *argv[])
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR);
                 break;
 
+            case H5B2_SOHM_INDEX_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX);
+                break;
+
             default:
                 fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
@@ -275,6 +281,10 @@ main(int argc, char *argv[])
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
+            case H5B2_SOHM_INDEX_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2, (unsigned)extra3);
+                break;
+
             default:
                 fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
@@ -315,6 +325,10 @@ main(int argc, char *argv[])
 
             case H5B2_FHEAP_HUGE_FILT_DIR_ID:
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_SOHM_INDEX_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2);
                 break;
 
             default:
@@ -379,6 +393,28 @@ main(int argc, char *argv[])
         } /* end if */
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
+
+    } else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5SM_TABLE_SIZEOF_MAGIC)) {
+        /*
+         * Debug shared message master table.
+         */
+
+        status = H5SM_table_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
+
+    } else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5SM_LIST_SIZEOF_MAGIC)) {
+        /*
+         * Debug shared message list index.
+         */
+
+        /* Check for enough valid parameters */
+        if(extra2 == 0) {
+            fprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
+            fprintf(stderr, "Shared message list usage:\n");
+            fprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC)) {
         /*
