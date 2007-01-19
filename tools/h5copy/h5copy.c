@@ -54,7 +54,7 @@ static struct long_options l_opts[] = {
 static void
 usage (void)
 {
- fprintf(stderr, "\
+ fprintf(stdout, "\
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
       -i, --input        input file name\n\
@@ -322,14 +322,13 @@ main (int argc, const char *argv[])
  /* create property to pass copy options */
  if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
   goto error;
- 
+
  /* set options for object copy */
  if (flag)
  {
   if ( H5Pset_copy_object(pid, flag) < 0) 
    goto error;
  }
-
 
 /*-------------------------------------------------------------------------
  * do the copy
@@ -342,8 +341,6 @@ main (int argc, const char *argv[])
               pid,            /* Properties which apply to the copy   */
               H5P_DEFAULT)<0) /* Properties which apply to the new hard link */              
               goto error;
-
-  
  
  /* close property */
  if (H5Pclose(pid)<0)
