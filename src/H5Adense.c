@@ -47,20 +47,6 @@
 /* Local Macros */
 /****************/
 
-/* Fractal heap creation parameters for "dense" attribute storage */
-/* (Note that these parameters have been tuned so that the resulting heap ID
- *      is exactly 8 bytes.  This is an efficient size and is also the same as
- *      the size of the shared message heap IDs, think carefully before
- *      changing it. -QAK)
- */
-#define H5A_FHEAP_MAN_WIDTH                     4
-#define H5A_FHEAP_MAN_START_BLOCK_SIZE          512
-#define H5A_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
-#define H5A_FHEAP_MAN_MAX_INDEX                 40
-#define H5A_FHEAP_MAN_START_ROOT_ROWS           1
-#define H5A_FHEAP_CHECKSUM_DBLOCKS              TRUE
-#define H5A_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
-
 /* v2 B-tree creation macros for 'name' field index */
 #define H5A_NAME_BT2_NODE_SIZE          512
 #define H5A_NAME_BT2_MERGE_PERC         40
@@ -177,7 +163,6 @@ H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     H5HF_create_t fheap_cparam;         /* Fractal heap creation parameters */
     H5HF_t *fheap;                      /* Fractal heap handle */
-    size_t fheap_id_len;                /* Fractal heap ID length */
     size_t bt2_rrec_size;               /* v2 B-tree raw record size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -192,13 +177,13 @@ H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     /* Set fractal heap creation parameters */
 /* XXX: Give some control of these to applications? */
     HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
-    fheap_cparam.managed.width = H5A_FHEAP_MAN_WIDTH;
-    fheap_cparam.managed.start_block_size = H5A_FHEAP_MAN_START_BLOCK_SIZE;
-    fheap_cparam.managed.max_direct_size = H5A_FHEAP_MAN_MAX_DIRECT_SIZE;
-    fheap_cparam.managed.max_index = H5A_FHEAP_MAN_MAX_INDEX;
-    fheap_cparam.managed.start_root_rows = H5A_FHEAP_MAN_START_ROOT_ROWS;
-    fheap_cparam.checksum_dblocks = H5A_FHEAP_CHECKSUM_DBLOCKS;
-    fheap_cparam.max_man_size = H5A_FHEAP_MAX_MAN_SIZE;
+    fheap_cparam.managed.width = H5O_FHEAP_MAN_WIDTH;
+    fheap_cparam.managed.start_block_size = H5O_FHEAP_MAN_START_BLOCK_SIZE;
+    fheap_cparam.managed.max_direct_size = H5O_FHEAP_MAN_MAX_DIRECT_SIZE;
+    fheap_cparam.managed.max_index = H5O_FHEAP_MAN_MAX_INDEX;
+    fheap_cparam.managed.start_root_rows = H5O_FHEAP_MAN_START_ROOT_ROWS;
+    fheap_cparam.checksum_dblocks = H5O_FHEAP_CHECKSUM_DBLOCKS;
+    fheap_cparam.max_man_size = H5O_FHEAP_MAX_MAN_SIZE;
 
     /* Create fractal heap for storing attributes */
     if(NULL == (fheap = H5HF_create(f, dxpl_id, &fheap_cparam)))
@@ -211,14 +196,19 @@ H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 HDfprintf(stderr, "%s: oh->attr_fheap_addr = %a\n", FUNC, oh->attr_fheap_addr);
 #endif /* QAK */
 
+#ifndef NDEBUG
+{
+    size_t fheap_id_len;                /* Fractal heap ID length */
+
     /* Retrieve the heap's ID length in the file */
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
-    HDassert(fheap_id_len == H5A_DENSE_FHEAP_ID_LEN);
-    HDassert(fheap_id_len == H5SM_FHEAP_ID_LEN);        /* Need to be interchangable -QAK */
+    HDassert(fheap_id_len == H5O_FHEAP_ID_LEN);
 #ifdef QAK
 HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 #endif /* QAK */
+}
+#endif /* NDEBUG */
 
     /* Close the fractal heap */
     if(H5HF_close(fheap, dxpl_id) < 0)
@@ -227,7 +217,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
     /* Create the name index v2 B-tree */
     bt2_rrec_size = 4 +                 /* Name's hash value */
             1 +                         /* Message flags */
-            fheap_id_len;               /* Fractal heap ID */
+            H5O_FHEAP_ID_LEN;           /* Fractal heap ID */
     if(H5B2_create(f, dxpl_id, H5A_BT2_NAME,
             (size_t)H5A_NAME_BT2_NODE_SIZE, bt2_rrec_size,
             H5A_NAME_BT2_SPLIT_PERC, H5A_NAME_BT2_MERGE_PERC,
@@ -243,7 +233,7 @@ HDfprintf(stderr, "%s: oh->name_bt2_addr = %a\n", FUNC, oh->name_bt2_addr);
     if(linfo->index_corder) {
         /* Create the creation order index v2 B-tree */
         bt2_rrec_size = 8 +             /* Creation order value */
-                fheap_id_len;           /* Fractal heap ID */
+                H5O_FHEAP_ID_LEN;       /* Fractal heap ID */
         if(H5B2_create(f, dxpl_id, H5A_BT2_CORDER,
                 (size_t)H5A_CORDER_BT2_NODE_SIZE, bt2_rrec_size,
                 H5A_CORDER_BT2_SPLIT_PERC, H5A_CORDER_BT2_MERGE_PERC,
@@ -398,7 +388,6 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
     H5A_bt2_ud_ins_t udata;             /* User data for v2 B-tree insertion */
     H5HF_t *fheap = NULL;               /* Fractal heap handle for attributes */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
-    uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID of attribute to insert    */
     H5O_shared_t sh_mesg;               /* Shared object header message */
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     void *attr_ptr = NULL;              /* Pointer to serialized message */
@@ -447,7 +436,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message")
 
         /* Use heap ID for shared message heap */
-        udata.id = (const uint8_t *)&sh_mesg.u.heap_id;
+        udata.id = sh_mesg.u.heap_id;
     } /* end if */
     else {
         size_t attr_size;                   /* Size of serialized attribute in the heap */
@@ -469,11 +458,9 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
         /* Insert the serialized attribute into the fractal heap */
-        if(H5HF_insert(fheap, dxpl_id, attr_size, attr_ptr, id) < 0)
+        /* (sets the heap ID in the user data) */
+        if(H5HF_insert(fheap, dxpl_id, attr_size, attr_ptr, &udata.id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert attribute into fractal heap")
-
-        /* Use heap ID for attribute heap */
-        udata.id = id;
     } /* end else */
 
     /* Create the callback information for v2 B-tree record insertion */
@@ -553,7 +540,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
             HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared info")
 
         /* Update record's heap ID */
-        HDmemcpy(record->id, &op_data->attr->sh_loc.u.heap_id, sizeof(record->id));
+        record->id = op_data->attr->sh_loc.u.heap_id;
 
         /* Note that the record changed */
         *changed = TRUE;
@@ -582,14 +569,14 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 {
     size_t obj_len;             /* Length of existing encoded attribute */
 
-    if(H5HF_get_obj_len(op_data->fheap, op_data->dxpl_id, record->id, &obj_len) < 0)
+    if(H5HF_get_obj_len(op_data->fheap, op_data->dxpl_id, &record->id, &obj_len) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get object size")
     HDassert(obj_len == attr_size);
 }
 #endif /* NDEBUG */
         /* Update existing attribute in heap */
         /* (would be more efficient as fractal heap 'op' callback, but leave that for later -QAK) */
-        if(H5HF_write(op_data->fheap, op_data->dxpl_id, record->id, changed, attr_ptr) < 0)
+        if(H5HF_write(op_data->fheap, op_data->dxpl_id, &record->id, changed, attr_ptr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute in heap")
     } /* end else */
 
@@ -910,8 +897,7 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
         fh_udata.attr = NULL;
 
         /* Call fractal heap 'op' routine, to copy the attribute information */
-        if(H5HF_op(fheap, bt2_udata->dxpl_id, record->id,
-                H5A_dense_copy_fh_cb, &fh_udata) < 0)
+        if(H5HF_op(fheap, bt2_udata->dxpl_id, &record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, H5_ITER_ERROR, "heap op callback failed")
 
         /* Check which type of callback to make */
@@ -1098,7 +1084,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
         /* Remove record from fractal heap */
-        if(H5HF_remove(bt2_udata->fheap, bt2_udata->dxpl_id, record->id) < 0)
+        if(H5HF_remove(bt2_udata->fheap, bt2_udata->dxpl_id, &record->id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from fractal heap")
     } /* end else */
 
@@ -1316,7 +1302,7 @@ H5A_dense_delete_bt2_cb(const void *_record, void *_bt2_udata)
     fh_udata.attr = NULL;
 
     /* Call fractal heap 'op' routine, to copy the attribute information */
-    if(H5HF_op(fheap, bt2_udata->dxpl_id, record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
+    if(H5HF_op(fheap, bt2_udata->dxpl_id, &record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, FAIL, "heap op callback failed")
 
     /* Check for shared attribute */

@@ -36,10 +36,10 @@
 /******************/
 
 /* Udata struct for call to H5SM_btree_compare_cb */
-typedef struct H5SM_compare_udata {
+typedef struct H5SM_compare_udata_t {
     H5SM_mesg_key_t *key;   /* Key; compare this against record in heap */
     herr_t ret;            /* Return value; set this to result of memcmp */
-} H5SM_compare_udata;
+} H5SM_compare_udata_t;
 
 /********************/
 /* Local Prototypes */
@@ -91,7 +91,7 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
 static herr_t
 H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
 {
-    H5SM_compare_udata *udata = (H5SM_compare_udata *)_udata;
+    H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *)_udata;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_compare_cb)
@@ -108,7 +108,8 @@ H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5SM_btree_compare_cb() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5SM_message_compare
@@ -134,7 +135,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
     int64_t hash_diff;  /* Has to be able to hold two 32-bit values */
     herr_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_message_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
     /* JAMES: might be able to spare a sentinel byte instead of worrying about
      * refcounts.  Here, we need to find a deleted message in a B-tree to
@@ -146,7 +147,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
     hash_diff -= mesg->hash;
 
     /* If the hash values match, make sure the messages are really the same */
-    if(0 == hash_diff)     {
+    if(0 == hash_diff) {
         /* Compare either the heap_ids directly (if the key has one)
          * or the encoded buffers
          */
@@ -154,13 +155,13 @@ H5SM_message_compare(const void *rec1, const void *rec2)
         {
             HDassert(key->encoding == NULL);
             ret_value = (herr_t) (key->message.fheap_id - mesg->fheap_id);
-        }
+        } /* end if */
         else
         {
             /* Hash values match, but we don't have a heap ID for the key.
              * Compare the encoded message with the one in the heap.
              */
-            H5SM_compare_udata udata;
+            H5SM_compare_udata_t udata;
             herr_t ret;
 
             /* Casting away const OK.  -JML */
@@ -171,8 +172,8 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             HDassert(ret >= 0);
 
             ret_value = udata.ret;
-        }
-    }
+        } /* end else */
+    } /* end if */
     else {
         /* Compress 64-bit hash_diff to fit in an herr_t */
         if(hash_diff > 0)
@@ -203,7 +204,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 static herr_t
 H5SM_btree_store(void *native, const void *udata)
 {
-    H5SM_mesg_key_t *key = (H5SM_mesg_key_t *)udata;
+    const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *)udata;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_store)
 
@@ -263,7 +264,7 @@ H5SM_btree_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_debug)
 
-    HDfprintf(stream, "%*s%-*s {%a, %lo, %Hu}\n", indent, "", fwidth, "Record:",
+    HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth, "Record:",
         sohm->fheap_id, sohm->hash, sohm->ref_count);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -302,10 +303,10 @@ H5SM_incr_ref(void *record, void *op_data, hbool_t *changed)
     *changed = TRUE;
 
     if(op_data)
-       *(H5SM_fheap_id_t *)op_data = message->fheap_id;
+       *(H5O_fheap_id_t *)op_data = message->fheap_id;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5SM_incr_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -345,7 +346,7 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
        *(H5SM_sohm_t *)op_data = *message;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5SM_decr_ref() */
 
 
 /*-------------------------------------------------------------------------

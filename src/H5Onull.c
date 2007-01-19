@@ -31,23 +31,25 @@
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_NULL[1] = {{
-    H5O_NULL_ID,            /*message id number             */
-    "null",                 /*message name for debugging    */
-    0,                      /*native message size           */
-    NULL,                   /*no decode method              */
-    NULL,                   /*no encode method              */
-    NULL,                   /*no copy method                */
-    NULL,                   /*no size method                */
-    NULL,                   /*no reset method               */
-    NULL,                   /*no free method                */
-    NULL,		    /*no file delete method         */
-    NULL,		    /*no link method		    */
-    NULL,		    /*no get share method	    */
-    NULL,	            /*no set share method	    */
-    NULL,	            /*no is_shared method	    */
-    NULL,		    /*no pre copy native value to file */
-    NULL,		    /*no copy native value to file    */
-    NULL,		    /*no post copy native value to file    */
-    NULL                    /*no debug method               */
+    H5O_NULL_ID,            	/*message id number             */
+    "null",                 	/*message name for debugging    */
+    0,                      	/*native message size           */
+    NULL,                   	/*no decode method              */
+    NULL,                   	/*no encode method              */
+    NULL,                   	/*no copy method                */
+    NULL,                   	/*no size method                */
+    NULL,                   	/*no reset method               */
+    NULL,                   	/*no free method                */
+    NULL,		    	/*no file delete method         */
+    NULL,		    	/*no link method		*/
+    NULL,		    	/*no get share method	        */
+    NULL,	            	/*no set share method	        */
+    NULL,	            	/*no is_shared method	        */
+    NULL,		    	/*no pre copy native value to file */
+    NULL,		    	/*no copy native value to file  */
+    NULL,		    	/*no post copy native value to file */
+    NULL,			/*no get creation index		*/
+    NULL,			/*no set creation index		*/
+    NULL                    	/*no debug method               */
 }};
 

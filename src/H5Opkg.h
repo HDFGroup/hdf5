@@ -30,6 +30,8 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	32		/*min obj header data size	     */
+#define H5O_MSG_TYPES   19              /* # of types of messages            */
+#define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
 
@@ -55,7 +57,7 @@
  */
 #define H5O_ALIGN_OLD(X)	(8 * (((X) + 7) / 8))
 #define H5O_ALIGN_VERS(V, X)						      \
-     (((V) == H5O_VERSION_1) ?						      \
+    (((V) == H5O_VERSION_1) ?						      \
 		H5O_ALIGN_OLD(X)					      \
         :								      \
 		(X)							      \
@@ -78,100 +80,106 @@
 /*
  * Size of object header prefix.
  */
-#define H5O_SIZEOF_HDR_VERS(V,SOFS,SOFA)				      \
-     (((V) == H5O_VERSION_1) ?						      \
-        H5O_ALIGN_OLD(1 +	/*version number	*/		      \
-                  1 +		/*reserved 		*/		      \
-                  2 +		/*number of messages	*/		      \
-                  4 +		/*reference count	*/		      \
-                  4)		/*chunk data size	*/		      \
+#define H5O_SIZEOF_HDR(O)						      \
+    (((O)->version == H5O_VERSION_1)  					      \
+        ?								      \
+            H5O_ALIGN_OLD(1 +	/*version number	*/		      \
+                1 +		/*reserved 		*/		      \
+                2 +		/*number of messages	*/		      \
+                4 +		/*reference count	*/		      \
+                4)		/*chunk data size	*/		      \
         :								      \
-		(H5O_SIZEOF_MAGIC +	/*magic number  	*/	      \
-                  1 +		/*version number 	*/		      \
-                  2 +		/*number of messages	*/		      \
-                  4 +		/*reference count	*/		      \
-                  4 +		/*access time		*/		      \
-                  4 +		/*modification time	*/		      \
-                  4 +		/*change time		*/		      \
-                  4 +		/*birth time		*/		      \
-                  2 +		/*max compact attributes	*/	      \
-                  2 +		/*min dense attributes	*/		      \
-                  (SOFS) +	/*# of attributes	*/		      \
-                  (SOFA) +	/*addr of attribute heap	*/	      \
-                  (SOFA) +	/*addr of attribute name index	*/	      \
-                  4 +		/*chunk data size	*/		      \
-                  H5O_SIZEOF_CHKSUM)	/*checksum size	        */	      \
+            (H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
+                1 +		/*version number 	*/		      \
+                1 +		/*flags		 	*/		      \
+                2 +		/*number of messages	*/		      \
+                4 +		/*reference count	*/		      \
+                4 +		/*access time		*/		      \
+                4 +		/*modification time	*/		      \
+                4 +		/*change time		*/		      \
+                4 +		/*birth time		*/		      \
+                2 +		/*max compact attributes	*/	      \
+                2 +		/*min dense attributes	*/		      \
+                (O)->sizeof_size +	/*# of attributes	*/		      \
+                (O)->sizeof_addr +	/*addr of attribute heap	*/	      \
+                (O)->sizeof_addr +	/*addr of attribute name index	*/	      \
+                2 +		/*max attr. creation index	*/	      \
+                4 +		/*chunk data size	*/		      \
+                H5O_SIZEOF_CHKSUM)	/*checksum size	        */	      \
     )
-#define H5O_SIZEOF_HDR_OH(O)						      \
-     H5O_SIZEOF_HDR_VERS((O)->version, (O)->sizeof_size, (O)->sizeof_addr)
-#define H5O_SIZEOF_HDR_F(F)						      \
-     H5O_SIZEOF_HDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1, H5F_SIZEOF_SIZE(F), H5F_SIZEOF_ADDR(F))
 
 /*
  * Size of object header message prefix
  */
 #define H5O_SIZEOF_MSGHDR_VERS(V)					      \
-     (((V) == H5O_VERSION_1) ?						      \
-         H5O_ALIGN_OLD(2 +	/*message type		*/			      \
-                   2 +	/*sizeof message data	*/			      \
-                   1 +	/*flags              	*/			      \
-                   3)	/*reserved		*/			      \
+    (((V) == H5O_VERSION_1)  						      \
+        ?								      \
+            H5O_ALIGN_OLD(2 +	/*message type		*/		      \
+                2 +		/*sizeof message data	*/		      \
+                1 +		/*flags              	*/		      \
+                3)		/*reserved		*/		      \
         :								      \
-                (1 +	/*message type		*/			      \
-                   2 + 	/*sizeof message data	*/			      \
-                   1)	/*flags              	*/			      \
+            (1 +		/*message type		*/		      \
+                2 + 		/*sizeof message data	*/		      \
+                1 +		/*flags              	*/		      \
+                2)		/*creation index     	*/		      \
     )
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
-     H5O_SIZEOF_MSGHDR_VERS((O)->version)
+    H5O_SIZEOF_MSGHDR_VERS((O)->version)
 #define H5O_SIZEOF_MSGHDR_F(F)						      \
-     H5O_SIZEOF_MSGHDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
+    H5O_SIZEOF_MSGHDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
 
 /*
  * Size of chunk "header" for each chunk
  */
 #define H5O_SIZEOF_CHKHDR_VERS(V)					      \
-     (((V) == H5O_VERSION_1) ?						      \
-                   0 +	/*no magic #  */				      \
-                   0 	/*no checksum */				      \
+    (((V) == H5O_VERSION_1)  						      \
+        ?								      \
+            0 +		/*no magic #  */				      \
+                0 	/*no checksum */				      \
         :								      \
-                   H5O_SIZEOF_MAGIC + 	/*magic #  */			      \
-                   H5O_SIZEOF_CHKSUM 	/*checksum */			      \
+            H5O_SIZEOF_MAGIC + 		/*magic #  */			      \
+                H5O_SIZEOF_CHKSUM 	/*checksum */			      \
     )
 #define H5O_SIZEOF_CHKHDR_OH(O)						      \
-     H5O_SIZEOF_CHKHDR_VERS((O)->version)
+    H5O_SIZEOF_CHKHDR_VERS((O)->version)
 
 /*
  * Size of checksum for each chunk
  */
 #define H5O_SIZEOF_CHKSUM_VERS(V)					      \
-     (((V) == H5O_VERSION_1) ?						      \
-                   0 	/*no checksum */				      \
+    (((V) == H5O_VERSION_1)  						      \
+        ?								      \
+            0 		/*no checksum */				      \
         :								      \
-                   H5O_SIZEOF_CHKSUM 	/*checksum */			      \
+            H5O_SIZEOF_CHKSUM 		/*checksum */			      \
     )
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
-     H5O_SIZEOF_CHKSUM_VERS((O)->version)
+    H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
 
+/* The "message class" type */
 struct H5O_msg_class_t {
-    unsigned	id;				 /*message type ID on disk   */
-    const char	*name;				 /*for debugging             */
-    size_t	native_size;			 /*size of native message    */
+    unsigned	id;				/*message type ID on disk   */
+    const char	*name;				/*for debugging             */
+    size_t	native_size;			/*size of native message    */
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
-    void	*(*copy)(const void *, void *);  /*copy native value         */
+    void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof encoded message	*/
-    herr_t	(*reset)(void *);		 /*free nested data structs  */
-    herr_t	(*free)(void *);		 /*free main data struct  */
+    herr_t	(*reset)(void *);		/*free nested data structs  */
+    herr_t	(*free)(void *);		/*free main data struct  */
     herr_t	(*del)(H5F_t *, hid_t, const void *, hbool_t); /* Delete space in file referenced by this message */
     herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
     void	*(*get_share)(const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(void*, const struct H5O_shared_t*);    /* Set shared information */
-    htri_t	(*can_share)(const void*);      /* Is message allowed to be shared? */
-    htri_t	(*is_shared)(const void*);      /* Is message shared? */
+    htri_t	(*can_share)(const void *);	/* Is message allowed to be shared? */
+    htri_t	(*is_shared)(const void *);	/* Is message shared? */
     herr_t	(*pre_copy_file)(H5F_t *, const H5O_msg_class_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, const H5O_msg_class_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
     herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
+    herr_t      (*get_crt_index)(const void *, H5O_crt_idx_t *);	/* Get message's creation index */
+    herr_t      (*set_crt_index)(void *, H5O_crt_idx_t);	/* Set message's creation index */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 };
 
@@ -179,6 +187,7 @@ typedef struct H5O_mesg_t {
     const H5O_msg_class_t	*type;	/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
     uint8_t		flags;		/*message flags			     */
+    H5O_crt_idx_t       crt_idx;        /*message creation index	     */
     unsigned		chunkno;	/*chunk number for this mesg	     */
     void		*native;	/*native format message		     */
     uint8_t		*raw;		/*ptr to raw data		     */
@@ -204,6 +213,7 @@ struct H5O_t {
     /* Object information (stored) */
     unsigned	version;		/*version number		     */
     unsigned	nlink;			/*link count			     */
+    unsigned	flags;			/*flags				     */
 
     /* Time information (stored, for versions > 1) */
     time_t      atime;                  /*access time 			     */
@@ -217,8 +227,9 @@ struct H5O_t {
     hsize_t     nattrs;                 /* Number of attributes in the group */
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
+    H5O_crt_idx_t max_attr_crt_idx;     /* Maximum attribute creation index used */
 
-    /* Message management (stored, in chunks) */
+    /* Message management (stored, encoded in chunks) */
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
@@ -272,7 +283,7 @@ typedef union {
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
 
 /* Header message ID to class mapping */
-H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[19];
+H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];
 
 /* Header object ID to class mapping */
 H5_DLLVAR const H5O_obj_class_t *const H5O_obj_class_g[3];

@@ -64,6 +64,8 @@ const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL, 		 	/* post copy native value to file    */
+    NULL,			/* get creation index		*/
+    NULL,			/* set creation index		*/
     H5O_cont_debug         	/*debugging                     */
 }};
 

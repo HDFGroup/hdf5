@@ -50,9 +50,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* Standard length of fractal heap ID for attribute */
-#define H5A_DENSE_FHEAP_ID_LEN  8
-
 
 /****************************/
 /* Package Private Typedefs */
@@ -73,6 +70,7 @@ struct H5A_t {
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
     H5O_shared_t sh_loc;    /* Location of shared message */
+    H5O_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
 };
 
 /* Typedefs for "dense" attribute storage */
@@ -81,7 +79,7 @@ struct H5A_t {
 /* Typedef for native 'name' field index records in the v2 B-tree */
 /* (Keep 'id' field first so generic record handling in callbacks works) */
 typedef struct H5A_dense_bt2_name_rec_t {
-    uint8_t id[H5A_DENSE_FHEAP_ID_LEN]; /* Heap ID for link */
+    H5O_fheap_id_t id;                  /* Heap ID for attribute */
     uint8_t flags;                      /* Message flags for attribute */
     uint32_t hash;                      /* Hash of 'name' field value */
 } H5A_dense_bt2_name_rec_t;
@@ -112,7 +110,7 @@ typedef struct H5A_bt2_ud_common_t {
 typedef struct H5A_bt2_ud_ins_t {
     /* downward */
     H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
-    const uint8_t *id;                  /* Heap ID of attribute to insert    */
+    H5O_fheap_id_t id;                  /* Heap ID of attribute to insert    */
 } H5A_bt2_ud_ins_t;
 
 /* Data structure to hold table of attributes for an object */

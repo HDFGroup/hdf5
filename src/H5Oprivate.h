@@ -45,13 +45,20 @@
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_t H5O_t;
 
-/* Fractal heap ID type for shared message heap IDs.  The length of a heap ID
- * depends on how the heap is configured; currently they're seven bytes long
- * but are stored in 8-byte fields in memory.
+/* Values used to create the shared message & attribute heaps */
+/* (Note that these parameters have been tuned so that the resulting heap ID
+ *      is exactly 8 bytes.  This is an efficient size as it can be stored
+ *      directly in an 8 byte integer in memory, think carefully before changing it.
+ *      -QAK)
  */
-#define H5SM_FHEAP_ID_LEN 8
-typedef uint64_t H5SM_fheap_id_t;
-
+#define H5O_FHEAP_MAN_WIDTH                     4
+#define H5O_FHEAP_MAN_START_BLOCK_SIZE          1024
+#define H5O_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
+#define H5O_FHEAP_MAN_MAX_INDEX                 40
+#define H5O_FHEAP_MAN_START_ROOT_ROWS           1
+#define H5O_FHEAP_CHECKSUM_DBLOCKS              TRUE
+#define H5O_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
+#define H5O_FHEAP_ID_LEN                        8
 
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
@@ -76,6 +83,12 @@ typedef uint64_t H5SM_fheap_id_t;
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
+
+/* Typedef for creation indexes */
+typedef uint32_t H5O_crt_idx_t;
+
+/* Fractal heap ID type for shared message & attribute heap IDs. */
+typedef uint64_t H5O_fheap_id_t;
 
 /* The object location information for an object */
 typedef struct H5O_loc_t {
@@ -143,7 +156,7 @@ typedef struct H5O_shared_t {
     unsigned flags;             /* flags describing how message is shared */
     union {
         H5O_loc_t	oloc;		/* object location info		     */
-        H5SM_fheap_id_t heap_id;        /* ID within the SOHM heap           */
+        H5O_fheap_id_t  heap_id;        /* ID within the SOHM heap           */
     } u;
 } H5O_shared_t;
 

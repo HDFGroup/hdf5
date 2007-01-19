@@ -30,6 +30,9 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5O_init_interface
+
 /***********/
 /* Headers */
 /***********/
@@ -64,8 +67,6 @@
 /********************/
 
 static hid_t H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id);
-static herr_t H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
-    hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 static const H5O_obj_class_t *H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
@@ -139,6 +140,31 @@ H5FL_EXTERN(time_t);
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_init_interface
+ *
+ * Purpose:	Initialize information specific to H5O interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 18, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_init_interface)
+
+    /* H5O interface sanity checks */
+    HDassert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
+    HDassert(sizeof(H5O_fheap_id_t) == H5O_FHEAP_ID_LEN);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -620,7 +646,9 @@ herr_t
 H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     H5O_loc_t *loc/*out*/)
 {
-    haddr_t	header;                 /* Address of object header */
+    H5O_t      *oh = NULL;
+    haddr_t     oh_addr;                /* Address of initial object header */
+    size_t      oh_size;                /* Size of initial object header */
     herr_t      ret_value = SUCCEED;    /* return value */
 
     FUNC_ENTER_NOAPI(H5O_create, FAIL)
@@ -628,69 +656,17 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     /* check args */
     HDassert(f);
     HDassert(loc);
+    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
 
-    /* allocate disk space for header and first chunk */
-    if(HADDR_UNDEF == (header = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id,
-            (hsize_t)H5O_SIZEOF_HDR_F(f) + size_hint)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header header")
-
-    /* initialize the object header */
-    if(H5O_new(f, dxpl_id, header, size_hint, ocpl_id, loc) != SUCCEED)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_new
- *
- * Purpose:	Initialize a new object header, sets the link count to 0,
- *              and caches the header. The object header is opened for
- *              write access and should eventually be closed by calling
- *              H5O_close().
- *
- * Return:	Success:    SUCCEED, the LOC argument contains
- *                          information about the object header,
- *                          including its address.
- *		Failure:    FAIL
- *
- * Programmer:	Bill Wendling
- *		1, November 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
-    hid_t ocpl_id, H5O_loc_t *loc/*out*/)
-{
-    H5O_t      *oh = NULL;
-    size_t      oh_size;                /* Size of initial object header */
-    herr_t      ret_value = SUCCEED;    /* return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_new)
-
-    /* check args */
-    HDassert(f);
-    HDassert(loc);
-    HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
-
-    /* Set up object location */
-    loc->file = f;
-    loc->addr = header;
-
     /* Allocate the object header and fill in header fields */
-    if(NULL == (oh = H5FL_MALLOC(H5O_t)))
+    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize rudimentary information object object header */
     oh->version = H5F_USE_LATEST_FORMAT(f) ? H5O_VERSION_LATEST : H5O_VERSION_1;
-    oh->nlink = 0;
-    oh->skipped_mesg_size = 0;
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -714,7 +690,6 @@ H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
 
         /* Set starting values for attribute info */
-        oh->nattrs = 0;
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
     } /* end if */
@@ -723,16 +698,17 @@ H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
         /* Reset unused attribute fields */
-        oh->max_compact = 0;
-        oh->min_dense = 0;
-        oh->nattrs = 0;
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
     } /* end else */
 
     /* Compute total size of initial object header */
     /* (i.e. object header prefix and first chunk) */
-    oh_size = H5O_SIZEOF_HDR_OH(oh) + chunk_size;
+    oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
+
+    /* Allocate disk space for header and first chunk */
+    if(HADDR_UNDEF == (oh_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)oh_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header header")
 
     /* Create the chunk list */
     oh->nchunks = oh->alloc_nchunks = 1;
@@ -741,7 +717,7 @@ H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
 
     /* Initialize the first chunk */
     oh->chunk[0].dirty = TRUE;
-    oh->chunk[0].addr = loc->addr;
+    oh->chunk[0].addr = oh_addr;
     oh->chunk[0].size = oh_size;
     oh->chunk[0].gap = 0;
 
@@ -764,26 +740,29 @@ H5O_new(H5F_t *f, hid_t dxpl_id, haddr_t header, size_t chunk_size,
     oh->mesg[0].type = H5O_MSG_NULL;
     oh->mesg[0].dirty = TRUE;
     oh->mesg[0].native = NULL;
-    oh->mesg[0].raw = oh->chunk[0].image + (H5O_SIZEOF_HDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)) + H5O_SIZEOF_MSGHDR_OH(oh);
-    oh->mesg[0].raw_size = chunk_size - H5O_SIZEOF_MSGHDR_OH(oh);
+    oh->mesg[0].raw = oh->chunk[0].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)) + H5O_SIZEOF_MSGHDR_OH(oh);
+    oh->mesg[0].raw_size = size_hint - H5O_SIZEOF_MSGHDR_OH(oh);
     oh->mesg[0].chunkno = 0;
 
     /* Cache object header */
-    if(H5AC_set(f, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+
+    /* Set up object location */
+    loc->file = f;
+    loc->addr = oh_addr;
 
     /* Open it */
     if(H5O_open(loc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header")
 
 done:
-    if(ret_value < 0 && oh) {
+    if(ret_value < 0 && oh)
         if(H5O_dest(f, oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_new() */
+} /* end H5O_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -802,21 +781,24 @@ done:
 herr_t
 H5O_open(const H5O_loc_t *loc)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_open)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_open, FAIL)
 
     /* Check args */
     HDassert(loc);
     HDassert(loc->file);
 
 #ifdef H5O_DEBUG
-    if (H5DEBUG(O))
+    if(H5DEBUG(O))
 	HDfprintf(H5DEBUG(O), "> %a\n", loc->addr);
 #endif
 
     /* Increment open-lock counters */
     loc->file->nopen_objs++;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 
 
@@ -1848,7 +1830,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 
     /* Iterate over all the messages, accumulating message size & type information */
     oinfo->num_attrs = 0;
-    oinfo->hdr.meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    oinfo->hdr.meta_space = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     oinfo->hdr.mesg_space = 0;
     oinfo->hdr.free_space = 0;
     oinfo->hdr.msg_present = 0;

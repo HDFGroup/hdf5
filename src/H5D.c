@@ -1195,7 +1195,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     /* fill value variables */
     H5D_fill_time_t	fill_time;
     H5O_fill_t		*fill_prop;     /* Pointer to dataset's fill value information */
-    H5O_fill_new_t      fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_ALLOC, TRUE};
+    H5O_fill_new_t      fill;           /* Default fill value */
     H5D_fill_value_t	fill_status;
 
     struct H5O_t       *oh = NULL;      /* Pointer to dataset's object header */
@@ -1207,6 +1207,12 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     /* Sanity checking */
     HDassert(file);
     HDassert(dset);
+
+    /* Portably initialize the fill value */
+    HDmemset(&fill, 0, sizeof(H5O_fill_new_t));
+    fill.alloc_time = H5D_ALLOC_TIME_LATE;
+    fill.fill_time = H5D_FILL_TIME_ALLOC;
+    fill.fill_defined = TRUE;
 
     /* Set some location variables, for convenience */
     oloc = &dset->oloc;
@@ -1858,7 +1864,7 @@ done:
 static herr_t
 H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 {
-    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_IFSET, TRUE};
+    H5O_fill_new_t      fill;           /* Default fill value */
     unsigned    alloc_time_state;       /* Allocation time state */
     H5O_fill_t     *fill_prop;          /* Pointer to dataset's fill value area */
     H5O_pline_t  pline;                 /* I/O pipeline information */
@@ -1869,6 +1875,12 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 
     /* check args */
     HDassert(dataset);
+
+    /* Portably initialize the fill value */
+    HDmemset(&fill, 0, sizeof(H5O_fill_new_t));
+    fill.alloc_time = H5D_ALLOC_TIME_LATE;
+    fill.fill_time = H5D_FILL_TIME_ALLOC;
+    fill.fill_defined = TRUE;
 
     /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
     if(NULL == (dataset->shared = H5D_new(H5P_DATASET_CREATE_DEFAULT, FALSE, FALSE)))

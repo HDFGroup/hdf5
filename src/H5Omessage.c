@@ -61,6 +61,13 @@
         HDassert(decode_type->decode);                                        \
         if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
+                                                                              \
+        /* Set the message's "creation index", if it has one */		      \
+        if((MSG)->type->set_crt_index) {				      \
+            /* Set the creation index for the message */		      \
+            if(((MSG)->type->set_crt_index)((MSG)->native, (MSG)->crt_idx) < 0) \
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, ERR, "unable to set creation index") \
+        } /* end if */							      \
     } /* end if */
 
 
@@ -1367,8 +1374,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
             else {
                 /* If the message is shared, get the real message it points to */
                 if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
-                    if(NULL == (native_mesg = H5O_shared_read(f, dxpl_id,
-                                idx_msg->native, idx_msg->type, NULL)))
+                    if(NULL == (native_mesg = H5O_shared_read(f, dxpl_id, idx_msg->native, idx_msg->type, NULL)))
                         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message")
                     native_mesg_alloc = TRUE;
                 } /* end if */
@@ -1835,8 +1841,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_type, H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared, H5O_copy_t *cpy_info, void *udata)
+H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_type,
+    H5F_t *file_src, void *native_src, H5F_t *file_dst, hid_t dxpl_id,
+    hbool_t *shared, H5O_copy_t *cpy_info, void *udata)
 {
     void        *native_mesg=NULL;
     void        *shared_mesg=NULL;
@@ -1848,8 +1855,8 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
 
     /* check args */
     HDassert(copy_type);
-    HDassert(mesg_type);
     HDassert(copy_type->copy_file);
+    HDassert(mesg_type);
     HDassert(file_src);
     HDassert(native_src);
     HDassert(file_dst);
@@ -1990,6 +1997,13 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
     /* Allocate space in the object header for the message */
     if((ret_value = H5O_alloc(f, dxpl_id, oh, orig_type, size, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "unable to allocate space for message")
+
+    /* Get the message's "creation index", if it has one */
+    if(orig_type->get_crt_index) {
+        /* Retrieve the creation index for the message */
+        if((orig_type->get_crt_index)(orig_mesg, &oh->mesg[ret_value].crt_idx) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, UFAIL, "unable to retrieve creation index")
+    } /* end if */
 
     /* Increment any links in message */
     if((*new_type)->link && ((*new_type)->link)(f, dxpl_id, (*new_mesg)) < 0)
@@ -2138,6 +2152,13 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
             HDassert(type->decode);
             if(NULL == (mesg->native = (type->decode)(f, dxpl_id, mesg->raw)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
+
+            /* Set the message's "creation index", if it has one */
+            if(mesg->type->set_crt_index) {
+                /* Set the creation index for the message */
+                if((mesg->type->set_crt_index)(mesg->native, mesg->crt_idx) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set creation index")
+            } /* end if */
         } /* end if */
 
         /* Check if this message needs to be removed from the SOHM table if

@@ -34,19 +34,6 @@
 /****************/
 /* Local Macros */
 /****************/
-/* Values used to create the SOHM heaps */
-/* (Note that these parameters have been tuned so that the resulting heap ID
- *      is exactly 8 bytes.  This is an efficient size and is also the same as
- *      the size of the attribute heap IDs, think carefully before changing it.
- *      -QAK)
- */
-#define H5SM_FHEAP_MAN_WIDTH                     4
-#define H5SM_FHEAP_MAN_START_BLOCK_SIZE          1024
-#define H5SM_FHEAP_MAN_MAX_DIRECT_SIZE           (64 * 1024)
-#define H5SM_FHEAP_MAN_MAX_INDEX                 40
-#define H5SM_FHEAP_MAN_START_ROOT_ROWS           1
-#define H5SM_FHEAP_CHECKSUM_DBLOCKS              TRUE
-#define H5SM_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
 
 
 /******************/
@@ -430,9 +417,6 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     haddr_t tree_addr=HADDR_UNDEF;   /* Address of SOHM B-tree */
     H5HF_create_t fheap_cparam;      /* Fractal heap creation parameters */
     H5HF_t *fheap = NULL;
-#ifndef NDEBUG
-    size_t fheap_id_len;             /* Size of a fractal heap ID */
-#endif /* NDEBUG */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_create_index, FAIL)
@@ -465,14 +449,14 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 
     /* Create a heap to hold the shared messages that the list or B-tree will index */
     HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
-    fheap_cparam.managed.width = H5SM_FHEAP_MAN_WIDTH;
-    fheap_cparam.managed.start_block_size = H5SM_FHEAP_MAN_START_BLOCK_SIZE;
-    fheap_cparam.managed.max_direct_size = H5SM_FHEAP_MAN_MAX_DIRECT_SIZE;
-    fheap_cparam.managed.max_index = H5SM_FHEAP_MAN_MAX_INDEX;
-    fheap_cparam.managed.start_root_rows = H5SM_FHEAP_MAN_START_ROOT_ROWS;
-    fheap_cparam.checksum_dblocks = H5SM_FHEAP_CHECKSUM_DBLOCKS;
+    fheap_cparam.managed.width = H5O_FHEAP_MAN_WIDTH;
+    fheap_cparam.managed.start_block_size = H5O_FHEAP_MAN_START_BLOCK_SIZE;
+    fheap_cparam.managed.max_direct_size = H5O_FHEAP_MAN_MAX_DIRECT_SIZE;
+    fheap_cparam.managed.max_index = H5O_FHEAP_MAN_MAX_INDEX;
+    fheap_cparam.managed.start_root_rows = H5O_FHEAP_MAN_START_ROOT_ROWS;
+    fheap_cparam.checksum_dblocks = H5O_FHEAP_CHECKSUM_DBLOCKS;
     fheap_cparam.id_len = 0;
-    fheap_cparam.max_man_size = H5SM_FHEAP_MAX_MAN_SIZE;
+    fheap_cparam.max_man_size = H5O_FHEAP_MAX_MAN_SIZE;
     if(NULL == (fheap = H5HF_create(f, dxpl_id, &fheap_cparam)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to create fractal heap")
 
@@ -480,11 +464,14 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
 
 #ifndef NDEBUG
+{
+    size_t fheap_id_len;             /* Size of a fractal heap ID */
+
     /* Sanity check ID length */
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
-    HDassert(fheap_id_len == H5SM_FHEAP_ID_LEN);
-    HDassert(sizeof(H5SM_fheap_id_t) == H5SM_FHEAP_ID_LEN);
+    HDassert(fheap_id_len == H5O_FHEAP_ID_LEN);
+}
 #endif /* NDEBUG */
 
 done:
@@ -1493,17 +1480,16 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_reconstitute(H5O_shared_t *sh_mesg, const uint8_t *heap_id)
+H5SM_reconstitute(H5O_shared_t *sh_mesg, H5O_fheap_id_t heap_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_reconstitute)
 
     /* Sanity check args */
     HDassert(sh_mesg);
-    HDassert(heap_id);
 
     /* Set flag for shared message */
     sh_mesg->flags = H5O_SHARED_IN_HEAP_FLAG;
-    HDmemcpy(&sh_mesg->u.heap_id, heap_id, sizeof(sh_mesg->u.heap_id));
+    sh_mesg->u.heap_id = heap_id;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_reconstitute() */

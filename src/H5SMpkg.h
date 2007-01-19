@@ -39,7 +39,7 @@
 
 #define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
          + 4                        /* reference count*/                     \
-         + sizeof(H5SM_fheap_id_t)) /* size of heap ID on disk */
+         + sizeof(H5O_fheap_id_t))  /* size of heap ID on disk */
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + H5SM_SIZEOF_CHECKSUM)               /* Checksum */
@@ -95,7 +95,7 @@
 /* Typedef for a SOHM index node */
 typedef struct {
     uint32_t hash;		/* Hash value for OHM */
-    H5SM_fheap_id_t fheap_id;	/* ID of the OHM in the fractal heap */
+    H5O_fheap_id_t fheap_id;	/* ID of the OHM in the fractal heap */
     hsize_t ref_count;		/* Number of times this message is used */
 } H5SM_sohm_t;
 

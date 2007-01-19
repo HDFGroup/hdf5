@@ -142,6 +142,10 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 *p++ = 0; /*reserved*/
                 *p++ = 0; /*reserved*/
             } /* end for */
+            /* Only encode creation index for version 2+ of format */
+            else {
+                UINT16ENCODE(p, curr_msg->crt_idx);
+            } /* end else */
             HDassert(p == curr_msg->raw);
 
 #ifndef NDEBUG
@@ -273,6 +277,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         oh->version = *p++;
         if(H5O_VERSION_2 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = *p++;
     } /* end if */
     else {
         /* Version */
@@ -304,6 +311,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         H5F_DECODE_LENGTH(f, p, oh->nattrs);
         H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
         H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
+        UINT16DECODE(p, oh->max_attr_crt_idx);
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -315,6 +323,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         oh->nattrs = 0;
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
+        oh->max_attr_crt_idx = 0;
     } /* end else */
 
     /* First chunk size */
@@ -361,7 +370,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         if(chunkno == 0) {
             /* First chunk's 'image' includes room for the object header prefix */
             oh->chunk[0].addr = addr;
-            oh->chunk[0].size = chunk_size + H5O_SIZEOF_HDR_OH(oh);
+            oh->chunk[0].size = chunk_size + H5O_SIZEOF_HDR(oh);
         } /* end if */
         else {
             oh->chunk[chunkno].addr = chunk_addr;
@@ -416,6 +425,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             size_t	mesg_size;      /* Size of message read in */
             unsigned	id;             /* ID (type) of current message */
             uint8_t	flags;          /* Flags for current message */
+            H5O_crt_idx_t crt_idx = 0;  /* Creation index for current message */
 
             /* Decode message prefix info */
             if(oh->version == H5O_VERSION_1)
@@ -427,6 +437,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    flags = *p++;
             if(oh->version == H5O_VERSION_1)
                 p += 3; /*reserved*/
+            else
+                UINT16DECODE(p, crt_idx);
 
             /* Try to detect invalidly formatted object header message that
              *  extends past end of chunk.
@@ -470,6 +482,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                     oh->mesg[mesgno].type = H5O_msg_class_g[id];
                     oh->mesg[mesgno].dirty = FALSE;
                     oh->mesg[mesgno].flags = flags;
+                    oh->mesg[mesgno].crt_idx = crt_idx;
                     oh->mesg[mesgno].native = NULL;
                     oh->mesg[mesgno].raw = (uint8_t *)p;        /* Casting away const OK - QAK */
                     oh->mesg[mesgno].raw_size = mesg_size;
@@ -615,6 +628,9 @@ H5O_assert(oh);
             /* Version */
             *p++ = oh->version;
 
+            /* Flags */
+            *p++ = oh->flags;
+
             /* Number of messages */
             UINT16ENCODE(p, oh->nmesgs);
 
@@ -633,9 +649,10 @@ H5O_assert(oh);
             H5F_ENCODE_LENGTH(f, p, oh->nattrs);
             H5F_addr_encode(f, &p, oh->attr_fheap_addr);
             H5F_addr_encode(f, &p, oh->name_bt2_addr);
+            UINT16ENCODE(p, oh->max_attr_crt_idx);
 
             /* Chunk size */
-            UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh)));
+            UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));
         } /* end if */
         else {
             /* Version */
@@ -651,13 +668,13 @@ H5O_assert(oh);
             UINT32ENCODE(p, oh->nlink);
 
             /* First chunk size */
-            UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR_OH(oh)));
+            UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));
 
             /* Zero to alignment */
-            HDmemset(p, 0, (size_t)(H5O_SIZEOF_HDR_OH(oh) - 12));
-            p += (size_t)(H5O_SIZEOF_HDR_OH(oh) - 12);
+            HDmemset(p, 0, (size_t)(H5O_SIZEOF_HDR(oh) - 12));
+            p += (size_t)(H5O_SIZEOF_HDR(oh) - 12);
         } /* end else */
-        HDassert((size_t)(p - oh->chunk[0].image) == (size_t)(H5O_SIZEOF_HDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+        HDassert((size_t)(p - oh->chunk[0].image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
         /* Mark chunk 0 as dirty, since the object header prefix has been updated */
         /* (this could be more sophisticated and track whether any prefix fields
@@ -752,27 +769,31 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     HDassert(oh->cache_info.is_dirty == FALSE);
 
     /* destroy chunks */
-    for(u = 0; u < oh->nchunks; u++) {
-        /* Verify that chunk is clean */
-        HDassert(oh->chunk[u].dirty == 0);
+    if(oh->chunk) {
+        for(u = 0; u < oh->nchunks; u++) {
+            /* Verify that chunk is clean */
+            HDassert(oh->chunk[u].dirty == 0);
 
-        oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
-    } /* end for */
-    if(oh->chunk)
+            oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
+        } /* end for */
+
         oh->chunk = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
+    } /* end if */
 
     /* destroy messages */
-    for(u = 0; u < oh->nmesgs; u++) {
-        /* Verify that message is clean */
-        HDassert(oh->mesg[u].dirty == 0);
+    if(oh->mesg) {
+        for(u = 0; u < oh->nmesgs; u++) {
+            /* Verify that message is clean */
+            HDassert(oh->mesg[u].dirty == 0);
 
-        H5O_msg_free_mesg(&oh->mesg[u]);
-    } /* end for */
-    if(oh->mesg)
+            H5O_msg_free_mesg(&oh->mesg[u]);
+        } /* end for */
+
         oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
+    } /* end if */
 
     /* destroy object header */
-    H5FL_FREE(H5O_t,oh);
+    H5FL_FREE(H5O_t, oh);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dest() */

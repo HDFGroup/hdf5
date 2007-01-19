@@ -193,7 +193,7 @@ H5A_dense_btree2_name_store(void *_nrecord, const void *_udata)
     /* Copy user information info native record */
     nrecord->hash = udata->common.name_hash;
     nrecord->flags = udata->common.flags;
-    HDmemcpy(nrecord->id, udata->id, (size_t)H5A_DENSE_FHEAP_ID_LEN);
+    nrecord->id = udata->id;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_store() */
@@ -283,7 +283,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
         HDassert(fheap);
 
         /* Check if the user's link and the B-tree's link have the same name */
-        status = H5HF_op(fheap, bt2_udata->dxpl_id, bt2_rec->id, H5A_dense_fh_name_cmp, &fh_udata);
+        status = H5HF_op(fheap, bt2_udata->dxpl_id, &bt2_rec->id, H5A_dense_fh_name_cmp, &fh_udata);
         HDassert(status >= 0);
 
         /* Callback will set comparison value */
@@ -318,7 +318,7 @@ H5A_dense_btree2_name_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_n
     /* Encode the record's fields */
     UINT32ENCODE(raw, nrecord->hash)
     *raw++ = nrecord->flags;
-    HDmemcpy(raw, nrecord->id, (size_t)H5A_DENSE_FHEAP_ID_LEN);
+    UINT64ENCODE(raw, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_encode() */
@@ -347,7 +347,7 @@ H5A_dense_btree2_name_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_n
     /* Decode the record's fields */
     UINT32DECODE(raw, nrecord->hash)
     nrecord->flags = *raw++;
-    HDmemcpy(nrecord->id, raw, (size_t)H5A_DENSE_FHEAP_ID_LEN);
+    UINT64DECODE(raw, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_decode() */
@@ -371,15 +371,11 @@ H5A_dense_btree2_name_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dx
     int indent, int fwidth, const void *_nrecord, const void UNUSED *_udata)
 {
     const H5A_dense_bt2_name_rec_t *nrecord = (const H5A_dense_bt2_name_rec_t *)_nrecord;
-    unsigned u;                 /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_name_debug)
 
-    HDfprintf(stream, "%*s%-*s {%lx, ", indent, "", fwidth, "Record:",
-        nrecord->hash);
-    for(u = 0; u < H5A_DENSE_FHEAP_ID_LEN; u++)
-        HDfprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5A_DENSE_FHEAP_ID_LEN - 1) ? " " : ", "));
-    HDfprintf(stderr, "%02x}\n", nrecord->flags);
+    HDfprintf(stream, "%*s%-*s {%lx, %Hx, %02x}", indent, "", fwidth, "Record:",
+        nrecord->hash, nrecord->id, nrecord->flags);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_debug() */

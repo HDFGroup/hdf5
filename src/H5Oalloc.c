@@ -838,12 +838,8 @@ done:
  *-------------------------------------------------------------------------
  */
 unsigned
-H5O_alloc(H5F_t *f,
-          hid_t dxpl_id,
-          H5O_t *oh,
-          const H5O_msg_class_t *type,
-          size_t size,
-          unsigned * oh_flags_ptr)
+H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
+    size_t size, unsigned * oh_flags_ptr)
 {
     size_t      aligned_size = H5O_ALIGN_OH(oh, size);
     unsigned    idx;            /* Index of message which fits allocation */

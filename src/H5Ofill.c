@@ -71,6 +71,8 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     NULL,			/* pre copy native value to file	*/
     NULL,			/* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
+    NULL,			/* get creation index		*/
+    NULL,			/* set creation index		*/
     H5O_fill_debug              /*debug the message			*/
 }};
 
@@ -94,6 +96,8 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     NULL,			/* pre copy native value to file	*/
     NULL,			/* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
+    NULL,			/* get creation index		*/
+    NULL,			/* set creation index		*/
     H5O_fill_new_debug		/*debug the message			*/
 }};
 

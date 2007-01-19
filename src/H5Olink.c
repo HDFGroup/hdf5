@@ -74,6 +74,8 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
     H5O_link_pre_copy_file,	/* pre copy native value to file */
     H5O_link_copy_file,		/* copy native value to file    */
     H5O_link_post_copy_file,	/* post copy native value to file    */
+    NULL,			/* get creation index		*/
+    NULL,			/* set creation index		*/
     H5O_link_debug          	/*debug the message             */
 }};
 

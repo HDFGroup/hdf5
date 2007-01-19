@@ -39,6 +39,8 @@ static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_typ
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
 static herr_t H5O_attr_set_share(void *_mesg, const H5O_shared_t *sh);
+static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_crt_idx_t *crt_idx);
+static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_crt_idx_t crt_idx);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -62,6 +64,8 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     H5O_attr_pre_copy_file,	/* pre copy native value to file */
     H5O_attr_copy_file,		/* copy native value to file    */
     NULL,			/* post copy native value to file    */
+    NULL /* H5O_attr_get_crt_index */,	/* get creation index		*/
+    NULL /* H5O_attr_set_crt_index */,	/* set creation index		*/
     H5O_attr_debug		/* debug the message            */
 }};
 
@@ -741,6 +745,96 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_attr_get_share
+ *
+ * Purpose:	Gets sharing information from the message
+ *
+ * Return:	Shared message on success/NULL on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 17, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
+{
+    const H5A_t  *mesg = (const H5A_t *)_mesg;
+    void         *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_share)
+
+    HDassert(mesg);
+
+    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_get_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_set_share
+ *
+ * Purpose:	Sets sharing information for the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Tuesday, October 10, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
+{
+    H5A_t  *mesg = (H5A_t *)_mesg;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_share)
+
+    HDassert(mesg);
+    HDassert(sh);
+
+    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
+        ret_value = FAIL;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_set_share() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_is_shared
+ *
+ * Purpose:	Determines if this attribute is shared (committed or a SOHM)
+ *              or not.
+ *
+ * Return:	TRUE if attribute is shared
+ *              FALSE if attribute is not shared
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *		Tuesday, October 17, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_attr_is_shared(const void *_mesg)
+{
+    const H5A_t  *mesg = (const H5A_t *)_mesg;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_is_shared)
+
+    HDassert(mesg);
+
+    /* Attributes can't currently be committed, but this should let the
+     * library read a "committed attribute" if we ever create one in
+     * the future.
+     */
+    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
+} /* end H5O_attr_is_shared */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_attr_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
@@ -914,9 +1008,8 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
         /* Compute shared message size for dataspace */
         attr_dst->ds_size = H5O_msg_raw_size(file_dst, H5O_SHARED_ID, &sh_mesg);
     }
-    else {
+    else
         attr_dst->ds_size = H5O_msg_raw_size(file_dst, H5O_SDSPACE_ID, attr_src->ds);
-    }
     HDassert(attr_dst->ds_size > 0);
 
     /* Compute the size of the data */
@@ -1077,93 +1170,62 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_get_share
+ * Function:	H5O_attr_get_crt_index
  *
- * Purpose:	Gets sharing information from the message
+ * Purpose:	Get creation index from the message
  *
- * Return:	Shared message on success/NULL on failure
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
- * Programmer:	James Laird
- *              Tuesday, October 17, 2006
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5O_attr_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
+herr_t
+H5O_attr_get_crt_index(const void *_mesg, H5O_crt_idx_t *crt_idx /*out*/)
 {
-    const H5A_t  *mesg = (const H5A_t *)_mesg;
-    void         *ret_value = NULL;
+    const H5A_t  *attr = (const H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_share)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_crt_index)
 
-    HDassert(mesg);
+    HDassert(attr);
+    HDassert(crt_idx);
 
-    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
+    /* Get the attribute's creation index */
+    *crt_idx = attr->crt_idx;
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_get_share() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_attr_get_crt_index() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_set_share
+ * Function:	H5O_attr_set_crt_index
  *
- * Purpose:	Sets sharing information for the message
+ * Purpose:	Set creation index from the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
- * Programmer:	James Laird
- *              Tuesday, October 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_attr_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
-{
-    H5A_t  *mesg = (H5A_t *)_mesg;
-    herr_t       ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_share)
-
-    HDassert(mesg);
-    HDassert(sh);
-
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
-        ret_value = FAIL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_set_share() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_attr_is_shared
- *
- * Purpose:	Determines if this attribute is shared (committed or a SOHM)
- *              or not.
- *
- * Return:	TRUE if attribute is shared
- *              FALSE if attribute is not shared
- *              Negative on failure
- *
- * Programmer:	James Laird
- *		Tuesday, October 17, 2006
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5O_attr_is_shared(const void *_mesg)
+herr_t
+H5O_attr_set_crt_index(void *_mesg, H5O_crt_idx_t crt_idx)
 {
-    const H5A_t  *mesg = (const H5A_t *)_mesg;
+    H5A_t  *attr = (H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_is_shared)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_crt_index)
 
-    HDassert(mesg);
+    HDassert(attr);
 
-    /* Attributes can't currently be committed, but this should let the
-     * library read a "committed attribute" if we ever create one in
-     * the future.
-     */
-    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
-} /* end H5O_attr_is_shared */
+    /* Set the creation index */
+    attr->crt_idx = crt_idx;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_attr_set_crt_index() */
 
 
 /*--------------------------------------------------------------------------

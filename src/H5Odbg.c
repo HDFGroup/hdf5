@@ -104,7 +104,7 @@ H5O_assert(const H5O_t *oh)
 
     /* Initialize the tracking variables */
     hdr_size = 0;
-    meta_space = H5O_SIZEOF_HDR_OH(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    meta_space = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     mesg_space = 0;
     free_space = 0;
     num_attrs = 0;
@@ -163,7 +163,7 @@ H5O_assert(const H5O_t *oh)
         /* Make certain that the message is completely in a chunk message area */
         HDassert(curr_msg->raw_size <= (oh->chunk[curr_msg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
         if(curr_msg->chunkno == 0)
-            HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+            HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         else
             HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         HDassert(curr_msg->raw + curr_msg->raw_size <= (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
@@ -273,7 +273,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	      oh->version);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Header size (in bytes):",
-	      (unsigned)H5O_SIZEOF_HDR_OH(oh));
+	      (unsigned)H5O_SIZEOF_HDR(oh));
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of links:",
 	      oh->nlink);
@@ -343,7 +343,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	if(0 == i) {
             if(H5F_addr_ne(oh->chunk[i].addr, addr))
                 HDfprintf(stream, "*** WRONG ADDRESS!\n");
-            chunk_size = oh->chunk[i].size - H5O_SIZEOF_HDR_OH(oh);
+            chunk_size = oh->chunk[i].size - H5O_SIZEOF_HDR(oh);
         } /* end if */
         else
             chunk_size = oh->chunk[i].size;

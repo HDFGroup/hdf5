@@ -427,7 +427,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
-    /* Create the attribute on the object */
+    /* Insert the attribute into the object header */
     if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create attribute in object header")
 

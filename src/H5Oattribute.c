@@ -311,6 +311,16 @@ HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
     /* Increment attribute count */
     oh->nattrs++;
 
+    /* Check if the object is tracking creation order on attributes */
+    if(oh->flags & H5P_CRT_ORDER_TRACKED) {
+        /* Check for attribute creation order index on the object wrapping around */
+        if(oh->max_attr_crt_idx == H5O_MAX_CRT_ORDER_IDX)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINC, FAIL, "Attribute creation index can't be incremented")
+
+        /* Set the creation order index on the attribute & incr. creation order index */
+        attr->crt_idx = oh->max_attr_crt_idx++;
+    } /* end if */
+
     /* Check for storing attribute with dense storage */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {
         /* Insert attribute into dense storage */

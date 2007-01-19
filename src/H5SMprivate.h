@@ -41,7 +41,7 @@ H5_DLL herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
 H5_DLL htri_t H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     haddr_t *fheap_addr);
-H5_DLL herr_t H5SM_reconstitute(H5O_shared_t *sh_mesg, const uint8_t *heap_id);
+H5_DLL herr_t H5SM_reconstitute(H5O_shared_t *sh_mesg, H5O_fheap_id_t heap_id);
 H5_DLL herr_t H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const H5O_shared_t *sh_mesg, hsize_t *ref_count);
 

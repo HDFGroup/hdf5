@@ -72,6 +72,8 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
     H5O_shared_pre_copy_file,	/* pre copy native value to file */
     H5O_shared_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file    */
+    NULL,			/* get creation index		*/
+    NULL,			/* set creation index		*/
     H5O_shared_debug	    	/*debug method				*/
 }};
 
@@ -83,7 +85,7 @@ const H5O_msg_class_t H5O_MSG_SHARED[1] = {{
 
 /* Newest version, which recognizes messages that are stored in the heap */
 #define H5O_SHARED_VERSION_3	3
-#define H5O_SHARED_VERSION	H5O_SHARED_VERSION_3
+#define H5O_SHARED_VERSION_LATEST	H5O_SHARED_VERSION_3
 
 /* Size of stack buffer for serialized messages */
 #define H5O_MESG_BUF_SIZE               128
@@ -288,20 +290,19 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
     HDassert(buf);
 
     /* Decode */
-    if(NULL == (mesg = H5MM_calloc (sizeof(H5O_shared_t))))
+    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_shared_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
     version = *buf++;
-    if(version < H5O_SHARED_VERSION_1 || version > H5O_SHARED_VERSION)
+    if(version < H5O_SHARED_VERSION_1 || version > H5O_SHARED_VERSION_LATEST)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message")
 
     /* Get the shared information flags
      * Flags are unused before version 3.
      */
-    if(version >= H5O_SHARED_VERSION_2) {
+    if(version >= H5O_SHARED_VERSION_2)
         mesg->flags = *buf++;
-    }
     else {
         mesg->flags = H5O_COMMITTED_FLAG;
         buf++;
@@ -312,9 +313,8 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
         buf += 6;
 
     /* Body */
-    if(version == H5O_SHARED_VERSION_1) {
+    if(version == H5O_SHARED_VERSION_1)
         H5G_obj_ent_decode(f, &buf, &(mesg->u.oloc));
-    }
     else if (version >= H5O_SHARED_VERSION_2) {
         /* If this message is in the heap, copy a heap ID.
          * Otherwise, it is a named datatype, so copy an H5O_loc_t.
@@ -382,9 +382,8 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
      */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG || H5F_USE_LATEST_FORMAT(f)) {
-        version = H5O_SHARED_VERSION;
-    }
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG || H5F_USE_LATEST_FORMAT(f))
+        version = H5O_SHARED_VERSION_LATEST;
     else {
         HDassert(mesg->flags & H5O_COMMITTED_FLAG);
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
@@ -396,12 +395,10 @@ H5O_shared_encode(H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     /* Encode either the heap ID of the message or the address of the
      * object header that holds it.
      */
-    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
+    if(mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
         HDmemcpy(buf, &(mesg->u.heap_id), sizeof(mesg->u.heap_id));
-    }
-     else {
+    else
         H5F_addr_encode(f, &buf, mesg->u.oloc.addr);
-    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_shared_encode() */
@@ -480,15 +477,15 @@ H5O_shared_size(const H5F_t *f, const void *_mesg)
     if(shared->flags & H5O_COMMITTED_FLAG)
     {
         ret_value = 1 +			/*version			*/
-                1 +				/*the flags field		*/
-                H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
+            1 +				/*the flags field		*/
+            H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
     }
     else
     {
         HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
         ret_value = 1 +			/*version			*/
-                1 +				/*the flags field	*/
-                H5SM_FHEAP_ID_LEN;		/* Shared in the heap   */
+            1 +				/*the flags field	*/
+            H5O_FHEAP_ID_LEN;		/* Shared in the heap   */
     }
 
     FUNC_LEAVE_NOAPI(ret_value);

@@ -331,12 +331,12 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
 
     /* Allocate the destination object header and fill in header fields */
-    if(NULL == (oh_dst = H5FL_MALLOC(H5O_t)))
+    if(NULL == (oh_dst = H5FL_CALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize header information */
     oh_dst->version = oh_src->version;
-    oh_dst->nlink = 0;
+    oh_dst->flags = oh_src->flags;
     oh_dst->skipped_mesg_size = oh_src->skipped_mesg_size;
     oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);
     oh_dst->sizeof_addr = H5F_SIZEOF_ADDR(oloc_dst->file);
@@ -412,7 +412,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         }
         HDassert(copy_type);
 
-        if(copy_type->pre_copy_file ) {
+        if(copy_type->pre_copy_file) {
             /*
              * Decode the message if necessary.  If the message is shared then do
              * a shared message, ignoring the message type.
@@ -547,7 +547,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Calculate how big the destination object header will be on disk.
      * This isn't necessarily the same size as the original.
      */
-    dst_oh_size = H5O_SIZEOF_HDR_OH(oh_dst);
+    dst_oh_size = H5O_SIZEOF_HDR(oh_dst);
 
     /* Add space for messages. */
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
@@ -573,7 +573,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * treatment.  This has to happen after the destination header has been
      * allocated.
      */
-    HDassert(H5O_SIZEOF_HDR_OH(oh_src) == H5O_SIZEOF_HDR_OH(oh_dst));
+    HDassert(H5O_SIZEOF_HDR(oh_src) == H5O_SIZEOF_HDR(oh_dst));
     HDassert(H5O_SIZEOF_MSGHDR_OH(oh_src) == H5O_SIZEOF_MSGHDR_OH(oh_dst));
     msghdr_size = H5O_SIZEOF_MSGHDR_OH(oh_src);
 
@@ -584,8 +584,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * a magic number that isn't.
      */
     HDmemcpy(current_pos, oh_src->chunk[0].image,
-            (size_t)(H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst)));
-    current_pos += H5O_SIZEOF_HDR_OH(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
+            (size_t)(H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst)));
+    current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
     /* Copy each message that wasn't dirtied above */
     null_msgs = 0;
