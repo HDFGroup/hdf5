@@ -22,8 +22,8 @@ MANIFEST=/tmp/H5_MANIFEST.$$
 
 # function definitions
 
-GETSVNENTRIES ()
-# Purpose: Extract filenames from the svn entries file
+GETSVNENTRIES_13 ()
+# Purpose: Extract filenames from the svn v1.3.* entries file
 # $1: directory name in which the svn entries is.
 # steps:
 # 1. remove all single line entries so that step 2 does not fail on them. 
@@ -47,6 +47,29 @@ a
 g/.*name="/s///
 g/".*/s///
 g/^$/d
+w
+q
+EOF
+cat $SVNENTRY
+rm $SVNENTRY
+}
+
+GETSVNENTRIES_14 ()
+# Purpose: Extract filenames from the svn v1.4.* entries file
+# $1: directory name in which the svn entries is.
+# steps:
+# 1. all valid files are followed by a line containing "file" only.
+# 2. find them by looking for "file" first, then mark its preceding line as
+#    wanted.
+# 3. remove all non-marked line.
+{
+SVNENTRY=/tmp/H5_SVNENTRY.$$
+cp $1/entries $SVNENTRY
+chmod u+w $SVNENTRY	# entries file is not writable.
+ed - $SVNENTRY <<EOF
+g/^file$/-s/^/%WANTED%/
+v/%WANTED%/d
+%s/%WANTED%//
 w
 q
 EOF
@@ -88,10 +111,26 @@ for file in `cat $MANIFEST`; do
     fi
 done
 
+# According to svn version, figure out the right version of GETSVNENTRIES
+# to use.
+svnversion=`svn --version --quiet`
+
+case "$svnversion" in
+1.4.*)
+    getsvnentries=GETSVNENTRIES_14
+    ;;
+1.3.*)
+    getsvnentries=GETSVNENTRIES_13
+    ;;
+*)	#default to 1.3
+    getsvnentries=GETSVNENTRIES_13
+    ;;
+esac
+
 for svn in `find . -type d -name .svn -print`; do
     path=`echo $svn |sed 's/\/.svn//'`
-    for file in `GETSVNENTRIES $svn`; do
-	if (grep $path/$file$ $MANIFEST >/dev/null); then
+    for file in `$getsvnentries $svn`; do
+	if (grep ^$path/$file$ $MANIFEST >/dev/null); then
 	    :
 	else
 	    echo "+ $path/$file"
