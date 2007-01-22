@@ -290,8 +290,12 @@ echo.
 echo ============================
 echo Testing ./testerr.bat  
 echo ============================
+echo Test skipped because sed is not universal supported.
+echo To test the HDF5 error API, you need to have sed on your machine.
+echo Please remove echo on the following line in this batch file to do the test.
+echo.
 
-call testerr %1 %2
+echo call testerr %1 %2
 echo.
 echo ============================
 echo Testing talign 
