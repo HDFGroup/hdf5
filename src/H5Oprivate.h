@@ -182,31 +182,24 @@ typedef struct H5O_linfo_t {
 } H5O_linfo_t;
 
 /*
- * Fill Value Message. (Old)
- * (Data structure in memory)
- */
-typedef struct H5O_fill_t {
-    H5T_t               *type;          /*type. Null implies same as dataset */
-    size_t              size;           /*number of bytes in the fill value  */
-    void                *buf;           /*the fill value                     */
-} H5O_fill_t;
-
-/*
- * New Fill Value Message.  The new fill value message is fill value plus
+ * New Fill Value Message.
+ * (Data structure in memory for both "old" and "new" fill value messages)
+ *
+ * The new fill value message is fill value plus
  * space allocation time, fill value writing time, whether fill
  * value is defined, and the location of the message if it's shared
  */
 
-typedef struct H5O_fill_new_t {
+typedef struct H5O_fill_t {
+    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
+
     H5T_t		*type;		/*type. Null implies same as dataset */
     ssize_t		size;		/*number of bytes in the fill value  */
     void		*buf;		/*the fill value		     */
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
-
-    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
-} H5O_fill_new_t;
+} H5O_fill_t;
 
 /*
  * Link message.
@@ -467,7 +460,8 @@ H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 
 /* Fill value operators */
-H5_DLL herr_t H5O_fill_convert(void *_fill, H5T_t *type, hid_t dxpl_id);
+H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
+H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
 
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);

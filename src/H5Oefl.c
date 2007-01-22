@@ -269,36 +269,34 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     size_t		u;              /* Local index variable */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy)
 
     /* check args */
-    assert(mesg);
-    if (!dest) {
-	if (NULL==(dest = H5MM_calloc(sizeof(H5O_efl_t))) ||
-                NULL==(dest->slot=H5MM_malloc(mesg->nalloc* sizeof(H5O_efl_entry_t))))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-    } else if (dest->nalloc<mesg->nalloc) {
+    HDassert(mesg);
+    if(!dest) {
+	if(NULL == (dest = H5MM_calloc(sizeof(H5O_efl_t))) ||
+                NULL == (dest->slot = H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    } else if(dest->nalloc < mesg->nalloc) {
 	H5MM_xfree(dest->slot);
-	if (NULL==(dest->slot = H5MM_malloc(mesg->nalloc*
-					    sizeof(H5O_efl_entry_t))))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	if(NULL == (dest->slot = H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     }
     dest->heap_addr = mesg->heap_addr;
     dest->nalloc = mesg->nalloc;
     dest->nused = mesg->nused;
 
-    for (u = 0; u < mesg->nused; u++) {
+    for(u = 0; u < mesg->nused; u++) {
 	dest->slot[u] = mesg->slot[u];
-	dest->slot[u].name = H5MM_xstrdup (mesg->slot[u].name);
-    }
+	dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name);
+    } /* end for */
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_efl_copy() */
 
 
 /*-------------------------------------------------------------------------

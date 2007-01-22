@@ -141,20 +141,20 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
     int         mpi_rank=(-1);  /* This process's rank  */
     int         mpi_code;       /* MPI return code */
-    unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
-    unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
+    hbool_t     blocks_written = FALSE; /* Flag to indicate that chunk was actually written */
+    hbool_t     using_mpi = FALSE;      /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif /* H5_HAVE_PARALLEL */
-    int         non_zero_fill_f=(-1);   /* Indicate that a non-zero fill-value was used */
-    herr_t	ret_value=SUCCEED;	/* Return value */
+    int         non_zero_fill_f = (-1); /* Indicate that a non-zero fill-value was used */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_contig_fill, FAIL)
 
     /* Check args */
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(dset && H5D_CONTIGUOUS==dset->shared->layout.type);
-    assert(H5F_addr_defined(dset->shared->layout.u.contig.addr));
-    assert(dset->shared->layout.u.contig.size>0);
-    assert(dset->shared->space);
+    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
+    HDassert(H5F_addr_defined(dset->shared->layout.u.contig.addr));
+    HDassert(dset->shared->layout.u.contig.size > 0);
+    HDassert(dset->shared->space);
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
@@ -168,7 +168,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank")
 
         /* Set the MPI-capable file driver flag */
-        using_mpi=1;
+        using_mpi = TRUE;
 
         /* Fill the DXPL cache values for later use */
         if (H5D_get_dxpl_cache(H5AC_ind_dxpl_id,&dxpl_cache)<0)
@@ -188,61 +188,61 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     store.contig.dset_size=dset->shared->layout.u.contig.size;
 
     /* Get size of elements */
-    elmt_size=H5T_get_size(dset->shared->type);
-    assert(elmt_size>0);
+    elmt_size = H5T_get_size(dset->shared->type);
+    HDassert(elmt_size > 0);
 
     /* Get the number of elements in the dataset's dataspace */
     snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
-    assert(snpoints>=0);
-    H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
+    HDassert(snpoints >= 0);
+    H5_ASSIGN_OVERFLOW(npoints, snpoints, hssize_t, size_t);
 
     /* If fill value is not library default, use it to set the element size */
-    if(dset->shared->fill.buf)
-        elmt_size=dset->shared->fill.size;
+    if(dset->shared->dcpl_cache.fill.buf)
+        elmt_size = dset->shared->dcpl_cache.fill.size;
 
     /*
      * Fill the entire current extent with the fill value.  We can do
      * this quite efficiently by making sure we copy the fill value
      * in relatively large pieces.
      */
-    ptsperbuf = MAX(1, bufsize/elmt_size);
-    bufsize = ptsperbuf*elmt_size;
+    ptsperbuf = MAX(1, bufsize / elmt_size);
+    bufsize = ptsperbuf * elmt_size;
 
     /* Fill the buffer with the user's fill value */
-    if(dset->shared->fill.buf) {
+    if(dset->shared->dcpl_cache.fill.buf) {
         /* Allocate temporary buffer */
-        if ((buf=H5FL_BLK_MALLOC(non_zero_fill,bufsize))==NULL)
+        if(NULL == (buf = H5FL_BLK_MALLOC(non_zero_fill, bufsize)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer")
 
-        H5V_array_fill(buf, dset->shared->fill.buf, elmt_size, ptsperbuf);
+        H5V_array_fill(buf, dset->shared->dcpl_cache.fill.buf, elmt_size, ptsperbuf);
 
         /* Indicate that a non-zero fill buffer was used */
-        non_zero_fill_f=1;
+        non_zero_fill_f = 1;
     } /* end if */
     else {      /* Fill the buffer with the default fill value */
         htri_t buf_avail;
 
         /* Check if there is an already zeroed out buffer available */
-        buf_avail=H5FL_BLK_AVAIL(zero_fill,bufsize);
-        assert(buf_avail!=FAIL);
+        buf_avail = H5FL_BLK_AVAIL(zero_fill, bufsize);
+        HDassert(buf_avail != FAIL);
 
         /* Allocate temporary buffer (zeroing it if no buffer is available) */
         if(!buf_avail)
-            buf=H5FL_BLK_CALLOC(zero_fill,bufsize);
+            buf = H5FL_BLK_CALLOC(zero_fill, bufsize);
         else
-            buf=H5FL_BLK_MALLOC(zero_fill,bufsize);
-        if(buf==NULL)
+            buf = H5FL_BLK_MALLOC(zero_fill, bufsize);
+        if(buf == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer")
 
         /* Indicate that a zero fill buffer was used */
-        non_zero_fill_f=0;
+        non_zero_fill_f = 0;
     } /* end else */
 
     /* Start at the beginning of the dataset */
     offset = 0;
 
     /* Loop through writing the fill value to the dataset */
-    while (npoints>0) {
+    while(npoints > 0) {
           size = MIN(ptsperbuf, npoints) * elmt_size;
 
 #ifdef H5_HAVE_PARALLEL
@@ -250,18 +250,17 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
             if(using_mpi) {
                 /* Write the chunks out from only one process */
                 /* !! Use the internal "independent" DXPL!! -QAK */
-                if(H5_PAR_META_WRITE==mpi_rank) {
-                    if (H5D_contig_write(dset, dxpl_cache, H5AC_ind_dxpl_id, &store, offset, size, buf)<0)
+                if(H5_PAR_META_WRITE == mpi_rank)
+                    if(H5D_contig_write(dset, dxpl_cache, H5AC_ind_dxpl_id, &store, offset, size, buf) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
-                } /* end if */
 
                 /* Indicate that blocks are being written */
-                blocks_written=1;
+                blocks_written = TRUE;
             } /* end if */
             else {
 #endif /* H5_HAVE_PARALLEL */
-                H5_CHECK_OVERFLOW(size,size_t,hsize_t);
-                if (H5D_contig_write(dset, dxpl_cache, dxpl_id, &store, offset, size, buf)<0)
+                H5_CHECK_OVERFLOW(size, size_t, hsize_t);
+                if(H5D_contig_write(dset, dxpl_cache, dxpl_id, &store, offset, size, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
 #ifdef H5_HAVE_PARALLEL
             } /* end else */
@@ -279,19 +278,19 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
          * still writing out fill values and other processes race ahead to data
          * in, getting bogus data.
          */
-        if (MPI_SUCCESS != (mpi_code=MPI_Barrier(mpi_comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(mpi_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
     /* Free the buffer for fill values */
-    if (buf) {
-        assert(non_zero_fill_f>=0);
+    if(buf) {
+        HDassert(non_zero_fill_f >= 0);
         if(non_zero_fill_f)
-            H5FL_BLK_FREE(non_zero_fill,buf);
+            H5FL_BLK_FREE(non_zero_fill, buf);
         else
-            H5FL_BLK_FREE(zero_fill,buf);
+            H5FL_BLK_FREE(zero_fill, buf);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -313,16 +312,16 @@ done:
 herr_t
 H5D_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_contig_delete, FAIL)
 
     /* check args */
-    assert(f);
-    assert(layout);
+    HDassert(f);
+    HDassert(layout);
 
     /* Free the file space for the chunk */
-    if (H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.addr, layout->u.contig.size)<0)
+    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.addr, layout->u.contig.size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
 
 done:

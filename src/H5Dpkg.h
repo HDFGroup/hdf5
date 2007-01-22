@@ -159,12 +159,6 @@ typedef struct H5D_shared_t {
     H5O_layout_t        layout;         /* data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
 
-    /* Cache some frequently accessed values from the DCPL */
-    H5O_efl_t           efl;            /* External file list information */
-    H5D_alloc_time_t    alloc_time;     /* Dataset allocation time      */
-    H5D_fill_time_t	fill_time;	/* Dataset fill value writing time */
-    H5O_fill_t          fill;           /* Dataset fill value information */
-
     /* Buffered/cached information for types of raw data storage*/
     struct {
         H5D_rdcdc_t     contig;         /* Information about contiguous data */

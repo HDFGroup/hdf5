@@ -44,27 +44,27 @@ typedef enum H5D_layout_t {
 
 /* Values for the space allocation time property */
 typedef enum H5D_alloc_time_t {
-    H5D_ALLOC_TIME_ERROR	=-1,
-    H5D_ALLOC_TIME_DEFAULT  	=0,
-    H5D_ALLOC_TIME_EARLY	=1,
-    H5D_ALLOC_TIME_LATE	=2,
-    H5D_ALLOC_TIME_INCR	=3
+    H5D_ALLOC_TIME_ERROR	= -1,
+    H5D_ALLOC_TIME_DEFAULT  	= 0,
+    H5D_ALLOC_TIME_EARLY	= 1,
+    H5D_ALLOC_TIME_LATE		= 2,
+    H5D_ALLOC_TIME_INCR		= 3
 } H5D_alloc_time_t;
 
 /* Values for the status of space allocation */
 typedef enum H5D_space_status_t {
-    H5D_SPACE_STATUS_ERROR	=-1,
-    H5D_SPACE_STATUS_NOT_ALLOCATED	=0,
-    H5D_SPACE_STATUS_PART_ALLOCATED	=1,
-    H5D_SPACE_STATUS_ALLOCATED		=2
+    H5D_SPACE_STATUS_ERROR		= -1,
+    H5D_SPACE_STATUS_NOT_ALLOCATED	= 0,
+    H5D_SPACE_STATUS_PART_ALLOCATED	= 1,
+    H5D_SPACE_STATUS_ALLOCATED		= 2
 } H5D_space_status_t;
 
 /* Values for time of writing fill value property */
 typedef enum H5D_fill_time_t {
-    H5D_FILL_TIME_ERROR	=-1,
-    H5D_FILL_TIME_ALLOC =0,
-    H5D_FILL_TIME_NEVER	=1,
-    H5D_FILL_TIME_IFSET	=2
+    H5D_FILL_TIME_ERROR	= -1,
+    H5D_FILL_TIME_ALLOC = 0,
+    H5D_FILL_TIME_NEVER	= 1,
+    H5D_FILL_TIME_IFSET	= 2
 } H5D_fill_time_t;
 
 /* Values for fill value status */

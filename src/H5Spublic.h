@@ -83,7 +83,7 @@ typedef enum {
     H5S_SEL_POINTS	= 1,    /* Sequence of points selected	*/
     H5S_SEL_HYPERSLABS  = 2,    /* "New-style" hyperslab selection defined	*/
     H5S_SEL_ALL		= 3,    /* Entire extent selected	*/
-    H5S_SEL_N		= 4	/*THIS MUST BE LAST		*/
+    H5S_SEL_N			/*THIS MUST BE LAST		*/
 }H5S_sel_type;
 
 #ifdef __cplusplus

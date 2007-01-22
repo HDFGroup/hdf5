@@ -1189,7 +1189,7 @@ test_vltypes_compound_vlstr(void)
     hsize_t	maxdims[] = {H5S_UNLIMITED};
     hsize_t	size[] = {SPACE1_DIM1};
     hsize_t	offset[] = {0};
-    unsigned    i,j,k;                  /* counting variables */
+    unsigned    i,j;                    /* counting variables */
     s2          *t1, *t2;               /* Temporary pointer to VL information */
     int		val;
     herr_t	ret;		        /* Generic return value		*/

@@ -474,29 +474,29 @@
  * A macro for detecting over/under-flow when casting between types
  */
 #ifndef NDEBUG
-#define H5_CHECK_OVERFLOW(var,vartype,casttype) \
-{                                               \
-    casttype _tmp_overflow=(casttype)(var);     \
-    assert((var)==(vartype)_tmp_overflow);      \
+#define H5_CHECK_OVERFLOW(var, vartype, casttype) \
+{                                                 \
+    casttype _tmp_overflow = (casttype)(var);     \
+    assert((var) == (vartype)_tmp_overflow);      \
 }
 #else /* NDEBUG */
-#define H5_CHECK_OVERFLOW(var,vartype,casttype)
+#define H5_CHECK_OVERFLOW(var, vartype, casttype)
 #endif /* NDEBUG */
 
 /*
  * A macro for detecting over/under-flow when assigning between types
  */
 #ifndef NDEBUG
-#define H5_ASSIGN_OVERFLOW(var,expr,exprtype,vartype)   \
+#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
 {                                                       \
-    exprtype _tmp_overflow=(exprtype)(expr);              \
-    vartype _tmp_overflow2=(vartype)(_tmp_overflow);  \
-    assert((vartype)_tmp_overflow==_tmp_overflow2);    \
-    (var)=_tmp_overflow2;                               \
+    srctype _tmp_overflow = (srctype)(src);             \
+    dsttype _tmp_overflow2 = (dsttype)(_tmp_overflow);  \
+    assert((dsttype)_tmp_overflow == _tmp_overflow2);   \
+    (dst) = _tmp_overflow2;                             \
 }
 #else /* NDEBUG */
-#define H5_ASSIGN_OVERFLOW(var,expr,exprtype,vartype)   \
-    (var)=(vartype)(expr);
+#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
+    (dst) = (dsttype)(src);
 #endif /* NDEBUG */
 
 /*

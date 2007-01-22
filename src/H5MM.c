@@ -239,8 +239,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 10 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -249,8 +247,8 @@ H5MM_xfree(void *mem)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xfree);
 
-    if (mem)
+    if(mem)
         HDfree(mem);
 
     FUNC_LEAVE_NOAPI(NULL);
-}
+} /* end H5MM_xfree() */
