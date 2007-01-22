@@ -62,6 +62,9 @@ GETSVNENTRIES_14 ()
 # 2. find them by looking for "file" first, then mark its preceding line as
 #    wanted.
 # 3. remove all non-marked line.
+# 4. insert a blank line because some entries files has no kind="file"
+#    entry and ed does not like to do g on an empty file.
+# 5. remove the marks.
 {
 SVNENTRY=/tmp/H5_SVNENTRY.$$
 cp $1/entries $SVNENTRY
@@ -69,7 +72,10 @@ chmod u+w $SVNENTRY	# entries file is not writable.
 ed - $SVNENTRY <<EOF
 g/^file$/-s/^/%WANTED%/
 v/%WANTED%/d
-%s/%WANTED%//
+a
+
+.
+g/^%WANTED%/s///
 w
 q
 EOF
@@ -111,21 +117,22 @@ for file in `cat $MANIFEST`; do
     fi
 done
 
-# According to svn version, figure out the right version of GETSVNENTRIES
-# to use.
-svnversion=`svn --version --quiet`
-
-case "$svnversion" in
-1.4.*)
+# Inspect the .svn/entries to figure out what version of svn file entry is
+# used.
+# The following algorithm is formed via reverse engineering.
+# I don't know what the official svn format is if such a specification exists.
+# Algorithm:
+# If the first line of the file has 'xml version="1.0"' in it, it is created
+# by svn 1.3 or older; else if it has '^file$' in it, it is created by svn 1.4.
+svn_entry_file=.svn/entries
+if head -1 $svn_entry_file | grep 'xml version="1.0"' > /dev/null 2>&1;then
+    getsvnentries=GETSVNENTRIES_13
+elif grep '^file$' $svn_entry_file > /dev/null 2>&1; then
     getsvnentries=GETSVNENTRIES_14
-    ;;
-1.3.*)
-    getsvnentries=GETSVNENTRIES_13
-    ;;
-*)	#default to 1.3
-    getsvnentries=GETSVNENTRIES_13
-    ;;
-esac
+else
+    echo "Unknow svn entries format. Aborted"
+    exit 1
+fi
 
 for svn in `find . -type d -name .svn -print`; do
     path=`echo $svn |sed 's/\/.svn//'`
