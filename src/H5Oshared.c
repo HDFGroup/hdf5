@@ -268,6 +268,80 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_shared_decode_new
+ *
+ * Purpose:	Decodes a shared object message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, January 22, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_shared_decode_new(H5F_t *f, const uint8_t *buf, H5O_shared_t *sh_mesg)
+{
+    unsigned version;           /* Shared message version */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_decode_new)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(buf);
+    HDassert(sh_mesg);
+
+    /* Version */
+    version = *buf++;
+    if(version < H5O_SHARED_VERSION_1 || version > H5O_SHARED_VERSION_LATEST)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad version number for shared object message")
+
+    /* Get the shared information flags
+     * Flags are unused before version 3.
+     */
+    if(version >= H5O_SHARED_VERSION_2)
+        sh_mesg->flags = *buf++;
+    else {
+        sh_mesg->flags = H5O_COMMITTED_FLAG;
+        buf++;
+    } /* end else */
+
+    /* Skip reserved bytes (for version 1) */
+    if(version == H5O_SHARED_VERSION_1)
+        buf += 6;
+
+    /* Body */
+    if(version == H5O_SHARED_VERSION_1)
+        H5G_obj_ent_decode(f, &buf, &(sh_mesg->u.oloc));
+    else if (version >= H5O_SHARED_VERSION_2) {
+        /* If this message is in the heap, copy a heap ID.
+         * Otherwise, it is a named datatype, so copy an H5O_loc_t.
+         */
+        if(sh_mesg->flags & H5O_SHARED_IN_HEAP_FLAG) {
+            HDassert(version >= H5O_SHARED_VERSION_3 );
+            HDmemcpy(&(sh_mesg->u.heap_id), buf, sizeof(sh_mesg->u.heap_id));
+        }
+        else {
+            /* The H5O_COMMITTED_FLAG should be set if this message
+             * is from an older version before the flag existed.
+             */
+            if(version < H5O_SHARED_VERSION_3)
+                sh_mesg->flags = H5O_COMMITTED_FLAG;
+
+            HDassert(sh_mesg->flags & H5O_COMMITTED_FLAG);
+
+            H5F_addr_decode(f, &buf, &(sh_mesg->u.oloc.addr));
+            sh_mesg->u.oloc.file = f;
+        } /* end else */
+    } /* end else if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_decode_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_shared_decode
  *
  * Purpose:	Decodes a shared object message and returns it.
@@ -349,13 +423,61 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
     ret_value = mesg;
 
 done:
-    if(ret_value == NULL) {
+    if(ret_value == NULL)
         if(mesg != NULL)
             H5MM_xfree(mesg);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_shared_encode_new
+ *
+ * Purpose:	Encodes message _MESG into buffer BUF.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April  2, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_shared_encode_new(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg)
+{
+    unsigned    version;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_encode_new)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(buf);
+    HDassert(sh_mesg);
+
+    /* If this message is shared in the heap, we need to use version 3 of the
+     * encoding and encode the SHARED_IN_HEAP flag.
+     */
+    if(sh_mesg->flags & H5O_SHARED_IN_HEAP_FLAG || H5F_USE_LATEST_FORMAT(f))
+        version = H5O_SHARED_VERSION_LATEST;
+    else {
+        HDassert(sh_mesg->flags & H5O_COMMITTED_FLAG);
+        version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
+    } /* end else */
+
+    *buf++ = version;
+    *buf++ = (unsigned)sh_mesg->flags;
+
+    /* Encode either the heap ID of the message or the address of the
+     * object header that holds it.
+     */
+    if(sh_mesg->flags & H5O_SHARED_IN_HEAP_FLAG)
+        HDmemcpy(buf, &(sh_mesg->u.heap_id), sizeof(sh_mesg->u.heap_id));
+    else
+        H5F_addr_encode(f, &buf, sh_mesg->u.oloc.addr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_shared_encode_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -461,6 +583,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_shared_size_new
+ *
+ * Purpose:	Returns the length of a shared object message.
+ *
+ * Return:	Success:	Length
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April  2, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_shared_size_new(const H5F_t *f, const H5O_shared_t *sh_mesg)
+{
+    size_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size_new)
+
+    if(sh_mesg->flags & H5O_COMMITTED_FLAG) {
+        ret_value = 1 +			/*version			*/
+            1 +				/*the flags field		*/
+            H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
+    } /* end if */
+    else {
+        HDassert(sh_mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
+        ret_value = 1 +			/*version			*/
+            1 +				/*the flags field	*/
+            H5O_FHEAP_ID_LEN;		/* Shared in the heap   */
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_size_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_shared_size
  *
  * Purpose:	Returns the length of a shared object message.
@@ -477,27 +635,67 @@ done:
 static size_t
 H5O_shared_size(const H5F_t *f, const void *_mesg)
 {
-    const H5O_shared_t       *shared = (const H5O_shared_t *) _mesg;
-    size_t	ret_value;
+    const H5O_shared_t *shared = (const H5O_shared_t *)_mesg;
+    size_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size)
 
-    if(shared->flags & H5O_COMMITTED_FLAG)
-    {
+    if(shared->flags & H5O_COMMITTED_FLAG) {
         ret_value = 1 +			/*version			*/
             1 +				/*the flags field		*/
             H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
-    }
-    else
-    {
+    } /* end if */
+    else {
         HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
         ret_value = 1 +			/*version			*/
             1 +				/*the flags field	*/
             H5O_FHEAP_ID_LEN;		/* Shared in the heap   */
-    }
+    } /* end else */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_shared_delete_new
+ *
+ * Purpose:     Free file space referenced by message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, September 26, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg, hbool_t adj_link)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_delete_new)
+
+    /* check args */
+    HDassert(f);
+    HDassert(sh_mesg);
+
+    /* 
+     * Committed datatypes increment the OH of the original message when they
+     * are written (in H5O_shared_link) and decrement it here.
+     * SOHMs in the heap behave differently; their refcount is incremented
+     * during H5SM_share when they are going to be written (in H5O_msg_append
+     * or H5O_msg_write). Their refcount in the SOHM indexes still needs to
+     * be decremented when they're deleted (in H5O_shared_link_adj).
+     */
+
+    /* Decrement the reference count on the shared object, if requested */
+    if(adj_link)
+        if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, -1) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_delete_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -515,8 +713,7 @@ H5O_shared_size(const H5F_t *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, 
-    hbool_t adj_link)
+H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5O_shared_t       *shared = (const H5O_shared_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -544,6 +741,39 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_shared_link_new
+ *
+ * Purpose:     Increment reference count on any objects referenced by
+ *              message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, September 26, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_new)
+
+    /* check args */
+    HDassert(f);
+    HDassert(sh_mesg);
+
+    /* Increment the reference count on the shared object */
+    if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, 1) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_link_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -629,6 +859,91 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_shared_copy_file_new
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              November 1, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_shared_copy_file_new(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+    const H5O_shared_t *shared_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
+    void *udata)
+{
+    H5O_shared_t        *shared_dst = NULL;     /* The destination message if
+                                                 * it is a shared message */
+    void                *dst_mesg = NULL;       /* The destination message if
+                                                 * it's an unshared message */
+    void                *ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_copy_file_new)
+
+    /* check args */
+    HDassert(shared_src);
+    HDassert(file_dst);
+    HDassert(cpy_info);
+
+HDfprintf(stderr, "%s: Copying shared messages not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "copying shared messages not supported yet")
+
+    /* Committed shared messages create a shared message at the destination
+     * and also copy the committed object that they point to.
+     * SOHMs actually write a non-shared message at the destination.
+     */
+    if(shared_src->flags & H5O_COMMITTED_FLAG) {
+        /* Allocate space for the destination message */
+        if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Reset group entry for new object */
+        H5O_loc_reset(&(shared_dst->u.oloc));
+        shared_dst->u.oloc.file = file_dst;
+    
+        /* Set flags for new shared object */
+        shared_dst->flags = shared_src->flags;
+
+        /* Copy the shared object from source to destination */
+        if(H5O_copy_header_map(&(shared_src->u.oloc), &(shared_dst->u.oloc), dxpl_id, cpy_info, FALSE) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
+
+        /* Set return value */
+        ret_value = shared_dst;
+    } /* end if */
+    else {
+        HDassert(shared_src->flags & H5O_SHARED_IN_HEAP_FLAG);
+
+        /* Read the shared message to get the original message */
+        if(NULL == (dst_mesg = H5O_shared_read(file_src, dxpl_id, shared_src, mesg_type, NULL)))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to read shared message")
+
+        if(mesg_type->copy_file) {
+            /* Copy the original, un-shared message and return it */
+            ret_value = (mesg_type->copy_file)(file_src, mesg_type, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
+            H5O_msg_free(mesg_type->id, dst_mesg);
+        } /* end else */
+        else
+            ret_value = dst_mesg;
+    } /* end else */
+
+done:
+    if(!ret_value) {
+        if(shared_dst)
+            H5O_msg_free(H5O_SHARED_ID, shared_dst);
+        if(dst_mesg)
+            H5O_msg_free(mesg_type->id, dst_mesg);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_shared_copy_file_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_shared_copy_file
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
@@ -665,8 +980,7 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
      * and also copy the committed object that they point to.
      * SOHMs actually write a non-shared message at the destination.
      */
-    if(shared_src->flags & H5O_COMMITTED_FLAG)
-    {
+    if(shared_src->flags & H5O_COMMITTED_FLAG) {
         /* Allocate space for the destination message */
         if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -684,9 +998,8 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
 
         /* Set return value */
         ret_value = shared_dst;
-    }
-    else
-    {
+    } /* end if */
+    else {
         HDassert(shared_src->flags & H5O_SHARED_IN_HEAP_FLAG);
 
         /* Read the shared message to get the original message */
@@ -697,20 +1010,18 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
             /* Copy the original, un-shared message and return it */
             ret_value = (mesg_type->copy_file)(file_src, mesg_type, dst_mesg, file_dst, dxpl_id, cpy_info, udata);
             H5O_msg_free(mesg_type->id, dst_mesg);
-        }
-        else {
+        } /* end else */
+        else
             ret_value = dst_mesg;
-        }
-    }
+    } /* end else */
 
 done:
-    if(!ret_value)
-    {
+    if(!ret_value) {
         if(shared_dst)
             H5O_msg_free(H5O_SHARED_ID, shared_dst);
         if(dst_mesg)
             H5O_msg_free(mesg_type->id, dst_mesg);
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_shared_copy_file() */

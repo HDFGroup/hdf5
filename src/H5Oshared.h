@@ -13,15 +13,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol <koziol@hdfgroup.org>
- *             Friday, January 19, 2007
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		Friday, January 19, 2007
+ *
+ * Purpose:	This file contains inline definitions for "generic" routines
+ *		supporting a "shared message interface" (ala Java) for object
+ *		header messages that can be shared.  This interface is
+ *              dependent on a bunch of macros being defined which define
+ *              the name of the interface and "real" methods which need to
+ *              be implemented for each message class that supports the
+ *              shared message interface.
  */
+
 #ifndef H5Oshared_H
 #define H5Oshared_H
-
-/* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
 
 
 /*-------------------------------------------------------------------------
@@ -63,12 +68,12 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p
         H5O_shared_t sh_mesg;           /* Shared message info */
 
         /* Retrieve shared message info by decoding info in buffer */
-        if(H5O_shared_decode(f, p, &sh_mesg) < 0)
+        if(H5O_shared_decode_new(f, p, &sh_mesg) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Retrieve actual native message by reading it through shared info */
         if(NULL == (ret_value = H5O_shared_read(f, dxpl_id, &sh_mesg, H5O_SHARED_TYPE, NULL)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTREAD, NULL, "unable to retrieve native message")
+	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to retrieve native message")
     } /* end if */
     else {
         /* Decode native message directly */
@@ -119,12 +124,12 @@ H5O_SHARED_ENCODE(H5F_t *f, uint8_t *p, const void *_mesg)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Encode shared message into buffer */
-        if(H5O_shared_encode(f, p, sh_mesg) < 0)
+        if(H5O_shared_encode_new(f, p, sh_mesg) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode shared message")
     } /* end if */
     else {
         /* Encode native message directly */
-        if(H5O_SHARED_ENCODE_REAL(f, p, _mesg) < )
+        if(H5O_SHARED_ENCODE_REAL(f, p, _mesg) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode native message")
     } /* end else */
 
@@ -171,7 +176,7 @@ H5O_SHARED_SIZE(const H5F_t *f, const void *_mesg)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Retrieve encoded size of shared message */
-        if(0 == (ret_value = H5O_shared_size(f, sh_mesg)))
+        if(0 == (ret_value = H5O_shared_size_new(f, sh_mesg)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, 0, "unable to retrieve encoded size of shared message")
     } /* end if */
     else {
@@ -204,8 +209,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline herr_t
-H5O_SHARED_DELETE(const H5F_t *f, hid_t dxpl_id, const void *_mesg,
-    hbool_t adj_link)
+H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -225,7 +229,7 @@ H5O_SHARED_DELETE(const H5F_t *f, hid_t dxpl_id, const void *_mesg,
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Decrement the reference count on the shared message/object */
-        if(H5O_shared_delete(f, dxpl_id, sh_mesg, adj_link) < 0)
+        if(H5O_shared_delete_new(f, dxpl_id, sh_mesg, adj_link) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for shared message")
     } /* end if */
     else {
@@ -258,7 +262,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline herr_t
-H5O_SHARED_LINK(const H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_SHARED_LINK(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -278,7 +282,7 @@ H5O_SHARED_LINK(const H5F_t *f, hid_t dxpl_id, const void *_mesg)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Increment the reference count on the shared message/object */
-        if(H5O_shared_link(f, dxpl_id, sh_mesg) < 0)
+        if(H5O_shared_link_new(f, dxpl_id, sh_mesg) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for shared message")
     } /* end if */
     else {
@@ -332,13 +336,13 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Copy the shared message to another file */
-        if(NULL == (ret_value = H5O_shared_copy_file(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
+        if(NULL == (ret_value = H5O_shared_copy_file_new(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy shared message to another file")
     } /* end if */
     else {
         /* Decrement the reference count on the native message directly */
         /* Copy the native message directly to another file */
-        if(NULL == (ret_value = H5O_SHARED_LINK_REAL(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
+        if(NULL == (ret_value = H5O_SHARED_COPY_FILE_REAL(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message to another file")
     } /* end else */
 

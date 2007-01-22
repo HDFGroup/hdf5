@@ -430,6 +430,16 @@ H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, void *mesg);
+H5_DLL herr_t H5O_shared_decode_new(H5F_t *f, const uint8_t *buf, H5O_shared_t *sh_mesg);
+H5_DLL herr_t H5O_shared_encode_new(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg);
+H5_DLL size_t H5O_shared_size_new(const H5F_t *f, const H5O_shared_t *sh_mesg);
+H5_DLL herr_t H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
+    hbool_t adj_link);
+H5_DLL herr_t H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg);
+H5_DLL void *H5O_shared_copy_file_new(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+    const H5O_shared_t *shared_src, H5F_t *file_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info, void *udata);
+
 
 /* Attribute operations */
 H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
