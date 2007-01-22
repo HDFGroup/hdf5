@@ -234,7 +234,9 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
         case H5O_DTYPE_ID:
             *type_flag = H5O_MESG_DTYPE_FLAG;
             break;
+#ifdef NOT_YET
         case H5O_FILL_ID:
+#endif /* NOT_YET */
         case H5O_FILL_NEW_ID:
             *type_flag = H5O_MESG_FILL_FLAG;
             break;
