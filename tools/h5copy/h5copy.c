@@ -137,6 +137,10 @@ static int parse_flag(const char* str_flag, unsigned *flag)
  {
   fla = H5O_COPY_ALL;
  }
+ else  if (strcmp(str_flag,"nullmsg")==0)
+ {
+  fla = H5O_COPY_PRESERVE_NULL_FLAG;
+ }
  else
  {
   printf("Error in input flag\n");
