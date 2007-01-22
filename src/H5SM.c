@@ -234,6 +234,7 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
         case H5O_DTYPE_ID:
             *type_flag = H5O_MESG_DTYPE_FLAG;
             break;
+        case H5O_FILL_ID:
         case H5O_FILL_NEW_ID:
             *type_flag = H5O_MESG_FILL_FLAG;
             break;
@@ -285,13 +286,8 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
      * searched them all.
      */
     for(x = 0; x < table->num_indexes; ++x)
-    {
         if(table->indexes[x].mesg_types & type_flag)
-        {
-            ret_value = x;
-            break;
-        }
-    }
+            HGOTO_DONE(x)
 
     /* At this point, ret_value is either the location of the correct
      * index or it's still FAIL because we didn't find an index.
@@ -801,12 +797,11 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     /* Type-specific check */
     if((tri_ret = H5O_msg_can_share(type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can_share callback returned error")
-
     if(tri_ret == FALSE)
         HGOTO_DONE(FALSE);
 
     /* Look up the master SOHM table */
-    if (NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the right index for this message type.  If there is no such index
