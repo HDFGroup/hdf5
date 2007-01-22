@@ -76,7 +76,7 @@
 #define H5D_CRT_EXT_FILE_LIST_CMP  H5P_dcrt_ext_file_list_cmp
 /* Definitions for data filter pipeline */
 #define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
-#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL, {0, {{NULL, HADDR_UNDEF, FALSE}}}}
+#define H5D_CRT_DATA_PIPELINE_DEF  {{0, {{NULL, HADDR_UNDEF, FALSE}}}, 0, 0, NULL}
 #define H5D_CRT_DATA_PIPELINE_CMP  H5P_dcrt_data_pipeline_cmp
 
 

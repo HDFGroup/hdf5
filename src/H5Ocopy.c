@@ -478,8 +478,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* If we're preserving deleted messages, set their types to 'NULL'
          * in the destination.
          */
-        if(cpy_info->preserve_null && deleted[mesgno])
+        if(cpy_info->preserve_null && deleted[mesgno]) {
             mesg_dst->type = H5O_MSG_NULL;
+            mesg_dst->flags = 0;
+        }
 
         /* Check for shared message to operate on */
         /* (Use destination message, in case the message has been removed (i.e
