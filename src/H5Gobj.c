@@ -277,7 +277,7 @@ H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp, H5O_loc_t *oloc)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_ent_encode(H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
+H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
