@@ -96,13 +96,13 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                     */
     "fill",                     /*message name for debugging            */
     sizeof(H5O_fill_t),		/*native message size                   */
-    H5O_fill_decode,            /*decode message                        */
-    H5O_fill_encode,            /*encode message                        */
+    H5O_fill_decode,		/*decode message                        */
+    H5O_fill_encode,		/*encode message                        */
     H5O_fill_new_copy,          /*copy the native value                 */
-    H5O_fill_size,              /*raw message size			*/
+    H5O_fill_size,		/*raw message size			*/
     H5O_fill_new_reset,         /*free internal memory			*/
     H5O_fill_new_free,		/* free method				*/
-    NULL,		        /* file delete method			*/
+    NULL,			/* file delete method			*/
     NULL,			/* link method				*/
     H5O_fill_new_get_share,	/* get share method			*/
     H5O_fill_new_set_share,	/* set share method			*/
@@ -124,17 +124,17 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_fill_new_decode,	/*decode message			*/
     H5O_fill_new_encode,	/*encode message			*/
     H5O_fill_new_copy,		/*copy the native value			*/
-    H5O_fill_new_size,		/*raw message size			*/
+    H5O_fill_new_size,	/*raw message size			*/
     H5O_fill_new_reset,		/*free internal memory			*/
     H5O_fill_new_free,		/* free method				*/
-    NULL,		        /* file delete method			*/
-    NULL,			/* link method				*/
+    NULL,	/* file delete method			*/
+    NULL,	/* link method				*/
     H5O_fill_new_get_share,	/* get share method			*/
     H5O_fill_new_set_share,	/* set share method			*/
     NULL,		    	/*can share method		*/
     H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
-    NULL,			/* copy native value to file		*/
+    NULL, /* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
@@ -264,7 +264,10 @@ H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flag
         if(NULL == (mesg->buf = H5MM_malloc((size_t)mesg->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
         HDmemcpy(mesg->buf, p, (size_t)mesg->size);
+        mesg->fill_defined = TRUE;
     } /* end if */
+    else
+        mesg->size = (-1);
 
     /* Set return value */
     ret_value = (void*)mesg;
@@ -397,12 +400,8 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
     if(!dest && NULL == (dest = H5FL_MALLOC(H5O_fill_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message")
 
-    /* Copy fill value attributes */
+    /* Shallow copy basic fields */
     *dest = *mesg;
-
-    /* Copy shared message information */
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), &(dest->sh_loc)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to copy fill value shared info");
 
     /* Copy data type of fill value */
     if(mesg->type) {
@@ -530,7 +529,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
     if(fill->buf)
         fill->buf = H5MM_xfree(fill->buf);
-    fill->size = -1;
+    fill->size = 0;
     if(fill->type) {
 	H5T_close(fill->type);
 	fill->type = NULL;

@@ -3846,33 +3846,33 @@ htri_t
 H5Pequal(hid_t id1, hid_t id2)
 {
     void *obj1, *obj2;          /* Property objects to compare */
-    htri_t ret_value=FALSE;     /* return value */
+    htri_t ret_value = FALSE;     /* return value */
 
-    FUNC_ENTER_API(H5Pequal, FAIL);
+    FUNC_ENTER_API(H5Pequal, FAIL)
     H5TRACE2("t", "ii", id1, id2);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
             || (H5I_GENPROP_LST != H5I_get_type(id2) && H5I_GENPROP_CLS != H5I_get_type(id2)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects")
     if (H5I_get_type(id1) != H5I_get_type(id2))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects")
     if(NULL == (obj1 = H5I_object(id1)) || NULL == (obj2 = H5I_object(id2)))
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist")
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id1)) {
-        if(H5P_cmp_plist(obj1,obj2)==0)
-            ret_value=TRUE;
+        if(H5P_cmp_plist(obj1, obj2) == 0)
+            ret_value = TRUE;
     } /* end if */
     /* Must be property classes */
     else {
-        if(H5P_cmp_class(obj1,obj2)==0)
+        if(H5P_cmp_class(obj1, obj2) == 0)
             ret_value=TRUE;
     } /* end else */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pequal() */
 
 

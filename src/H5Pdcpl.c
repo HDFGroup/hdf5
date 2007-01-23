@@ -2018,6 +2018,8 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value")
         HDmemcpy(fill.buf, value, (size_t)fill.size);
     }  /* end if */
+    else
+        fill.size = (-1);
 
     /* Update fill value in property list */
     if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
