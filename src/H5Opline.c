@@ -64,20 +64,20 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_PLINE_ID,		/* message id number		*/
     "filter pipeline",		/* message name for debugging	*/
     sizeof(H5O_pline_t),	/* native message size		*/
-    H5O_pline_decode,		/* decode message		*/
-    H5O_pline_encode,		/* encode message		*/
+    H5O_pline_shared_decode,	/* decode message		*/
+    H5O_pline_shared_encode,	/* encode message		*/
     H5O_pline_copy,		/* copy the native value	*/
-    H5O_pline_size,		/* size of raw message		*/
+    H5O_pline_shared_size,	/* size of raw message		*/
     H5O_pline_reset,		/* reset method			*/
     H5O_pline_free,		/* free method			*/
-    NULL,		        /* file delete method		*/
-    NULL,			/* link method			*/
+    H5O_pline_shared_delete,    /* file delete method		*/
+    H5O_pline_shared_link,	/* link method			*/
     H5O_pline_get_share,	/* get share method		*/
     H5O_pline_set_share,	/* set share method		*/
     NULL,		    	/*can share method		*/
     H5O_pline_is_shared,	/* is shared method		*/
     H5O_pline_pre_copy_file,	/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
+    H5O_pline_shared_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/

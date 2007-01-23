@@ -65,15 +65,9 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p
 
     /* Check for shared message */
     if(mesg_flags & H5O_MSG_FLAG_SHARED) {
-        H5O_shared_t sh_mesg;           /* Shared message info */
-
-        /* Retrieve shared message info by decoding info in buffer */
-        if(H5O_shared_decode_new(f, p, &sh_mesg) < 0)
+        /* Retrieve native message info indirectly through shared message */
+        if(NULL == (ret_value = H5O_shared_decode_new(f, dxpl_id, p, H5O_SHARED_TYPE)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
-
-        /* Retrieve actual native message by reading it through shared info */
-        if(NULL == (ret_value = H5O_shared_read(f, dxpl_id, &sh_mesg, H5O_SHARED_TYPE, NULL)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to retrieve native message")
     } /* end if */
     else {
         /* Decode native message directly */
@@ -316,7 +310,7 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *_native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata)
 {
-    const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_native_src;     /* Pointer to shared message portion of actual message */
+    void *dst_mesg = NULL;      /* Destination message */
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_COPY_FILE)
@@ -328,22 +322,32 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
 #error "Need to define H5O_SHARED_COPY_FILE macro!"
 #endif /* H5O_SHARED_COPY_FILE */
 
-    /* Check for shared message */
-    if(H5O_IS_SHARED(sh_mesg->flags)) {
-        /* Copy the shared message to another file */
-        if(NULL == (ret_value = H5O_shared_copy_file_new(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy shared message to another file")
-    } /* end if */
 #ifdef H5O_SHARED_COPY_FILE_REAL
-    else {
-        /* Decrement the reference count on the native message directly */
-        /* Copy the native message directly to another file */
-        if(NULL == (ret_value = H5O_SHARED_COPY_FILE_REAL(file_src, mesg_type, _native_src, file_dst, dxpl_id, cpy_info, udata)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message to another file")
-    } /* end else */
+    /* Call native message's copy file callback to copy the message */
+    if(NULL == (dst_mesg = H5O_SHARED_COPY_FILE_REAL(file_src, H5O_SHARED_TYPE, _native_src, file_dst, dxpl_id, cpy_info, udata)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message to another file")
+#else /* H5O_SHARED_COPY_FILE_REAL */
+    /* No copy file callback defined, just copy the message itself */
+    if(NULL == (dst_mesg = (H5O_SHARED_TYPE->copy)(_native_src, NULL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy native message")
 #endif /* H5O_SHARED_COPY_FILE_REAL */
 
+    /* Reset shared message info for new message */
+    HDmemset(dst_mesg, 0, sizeof(H5O_shared_t));
+
+    /* Handle sharing destination message */
+    if(H5O_shared_copy_file_new(file_src, file_dst, dxpl_id, H5O_SHARED_TYPE,
+            _native_src, dst_mesg, cpy_info, udata) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "unable to determine if message should be shared")
+
+    /* Set return value */
+    ret_value = dst_mesg;
+
 done:
+    if(!ret_value)
+        if(dst_mesg)
+            H5O_msg_free(H5O_SHARED_TYPE->id, dst_mesg);
+    
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_SHARED_COPY_FILE() */
 

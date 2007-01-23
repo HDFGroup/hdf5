@@ -175,7 +175,7 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                     encode = curr_msg->type->encode;
 #ifndef NDEBUG
 /* Sanity check that the message won't overwrite past it's allocated space */
-if(!(curr_msg->flags & H5O_MSG_FLAG_SHARED)) {
+if(!(curr_msg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(curr_msg->type)) {
     size_t msg_size;
 
     msg_size = curr_msg->type->raw_size(f, curr_msg->native);
