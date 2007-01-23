@@ -28,7 +28,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static void *H5O_dtype_copy(const void *_mesg, void *_dest);
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
@@ -122,12 +122,6 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *		Robb Matzke, Thursday, May 20, 1999
- *		Added support for bitfields and opaque datatypes.
- *
- *		Raymond Lu.  Monday, Mar 13, 2006
- *		Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -944,9 +938,10 @@ done:
     Decode a message and return a pointer to a memory struct
 	with the decoded information
  USAGE
-    void *H5O_dtype_decode(f, raw_size, p)
+    void *H5O_dtype_decode(f, dxpl_id, mesg_flags, p)
 	H5F_t *f;		IN: pointer to the HDF5 file struct
-	size_t raw_size;	IN: size of the raw information buffer
+        hid_t dxpl_id;          IN: DXPL for any I/O
+        unsigned mesg_flags;    IN: Message flags to influence decoding
 	const uint8 *p;		IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
@@ -956,7 +951,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags, const uint8_t *p)
 {
     H5T_t	*dt = NULL;
     void        *ret_value;     /* Return value */

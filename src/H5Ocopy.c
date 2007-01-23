@@ -420,7 +420,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             if(NULL == mesg_src->native) {
                 /* Decode the message if necessary */
                 HDassert(copy_type->decode);
-                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->raw)))
+                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->flags, mesg_src->raw)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
             } /* end if (NULL == mesg_src->native) */
 
@@ -502,7 +502,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             if(NULL == mesg_src->native) {
                 /* Decode the message if necessary */
                 HDassert(copy_type->decode);
-                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->raw)))
+                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_dst->flags, mesg_src->raw)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
             } /* end if (NULL == mesg_src->native) */
 

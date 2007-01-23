@@ -20,12 +20,10 @@
  *
  * Purpose:             Group Information messages.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -34,7 +32,7 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_ginfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ginfo_size(const H5F_t *f, const void *_mesg);
@@ -92,12 +90,11 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_ginfo_t         *ginfo = NULL;  /* Pointer to group information message */
     unsigned char       flags;          /* Flags for encoding group info */

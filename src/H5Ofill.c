@@ -26,16 +26,16 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object header functions                 */
+#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
 
-static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
-static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
@@ -105,6 +105,50 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
 /* Declare a free list to manage the H5O_fill_t struct */
 H5FL_DEFINE(H5O_fill_t);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_FILL
+#define H5O_SHARED_DECODE		H5O_fill_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_fill_decode
+#define H5O_SHARED_ENCODE		H5O_fill_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_fill_encode
+#define H5O_SHARED_SIZE			H5O_fill_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_fill_size
+#define H5O_SHARED_DELETE		H5O_fill_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_LINK			H5O_fill_shared_link
+#undef H5O_SHARED_LINK_REAL
+#define H5O_SHARED_COPY_FILE		H5O_fill_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
+/* Set up & include shared message "interface" info */
+/* (Kludgy 'undef's in order to re-include the H5Oshared.h header) */
+#undef H5O_SHARED_TYPE
+#define H5O_SHARED_TYPE			H5O_MSG_FILL_NEW
+#undef H5O_SHARED_DECODE
+#define H5O_SHARED_DECODE		H5O_fill_new_shared_decode
+#undef H5O_SHARED_DECODE_REAL
+#define H5O_SHARED_DECODE_REAL		H5O_fill_new_decode
+#undef H5O_SHARED_ENCODE
+#define H5O_SHARED_ENCODE		H5O_fill_new_shared_encode
+#undef H5O_SHARED_ENCODE_REAL
+#define H5O_SHARED_ENCODE_REAL		H5O_fill_new_encode
+#undef H5O_SHARED_SIZE
+#define H5O_SHARED_SIZE			H5O_fill_new_shared_size
+#undef H5O_SHARED_SIZE_REAL
+#define H5O_SHARED_SIZE_REAL		H5O_fill_new_size
+#undef H5O_SHARED_DELETE
+#define H5O_SHARED_DELETE		H5O_fill_new_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#undef H5O_SHARED_LINK
+#define H5O_SHARED_LINK			H5O_fill_new_shared_link
+#undef H5O_SHARED_LINK_REAL
+#undef H5O_SHARED_COPY_FILE
+#define H5O_SHARED_COPY_FILE		H5O_fill_new_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#undef H5Oshared_H
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_decode
@@ -120,12 +164,11 @@ H5FL_DEFINE(H5O_fill_t);
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_fill_t	*mesg = NULL;
     int		version;
@@ -195,7 +238,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_fill_t *mesg = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */

@@ -163,10 +163,10 @@ struct H5O_msg_class_t {
     unsigned	id;				/*message type ID on disk   */
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
-    void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
-    herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
+    void	*(*decode)(H5F_t*, hid_t, unsigned, const uint8_t *);
+    herr_t	(*encode)(H5F_t*, uint8_t*, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
-    size_t	(*raw_size)(const H5F_t*, const void*);/*sizeof encoded message	*/
+    size_t	(*raw_size)(const H5F_t *, const void *);/*sizeof encoded message	*/
     herr_t	(*reset)(void *);		/*free nested data structs  */
     herr_t	(*free)(void *);		/*free main data struct  */
     herr_t	(*del)(H5F_t *, hid_t, const void *, hbool_t); /* Delete space in file referenced by this message */

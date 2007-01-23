@@ -18,13 +18,13 @@
  * Purpose:	The object modification time message.
  */
 
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 #if defined (WIN32) && !defined (__MWERKS__)
 #include <sys/types.h>
@@ -32,11 +32,11 @@
 #endif
 
 
-static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_mtime_new_size(const H5F_t *f, const void *_mesg);
 
-static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(const H5F_t *f, const void *_mesg);
@@ -120,12 +120,11 @@ H5FL_DEFINE(time_t);
  *		koziol@ncsa.uiuc.edu
  *		Jan  3 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     time_t	*mesg;
     uint32_t    tmp_time;       /* Temporary copy of the time */
@@ -174,12 +173,11 @@ done:
  *		matzke@llnl.gov
  *		Jul 24 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     time_t	*mesg, the_time;
     int	i;

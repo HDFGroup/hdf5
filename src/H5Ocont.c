@@ -36,7 +36,7 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
@@ -86,12 +86,11 @@ H5FL_DEFINE(H5O_cont_t);
  *              matzke@llnl.gov
  *              Aug  6 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_cont_t             *cont = NULL;
     void                   *ret_value;

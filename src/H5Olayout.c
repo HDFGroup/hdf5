@@ -19,8 +19,7 @@
  */
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
-
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
@@ -31,8 +30,9 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
+
 /* PRIVATE PROTOTYPES */
-static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
@@ -94,24 +94,11 @@ H5FL_DEFINE(H5O_layout_t);
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- * 	Robb Matzke, 1998-07-20
- *	Rearranged the message to add a version number at the beginning.
- *
- *      Raymond Lu, 2002-2-26
- *      Added version number 2 case depends on if space has been allocated
- *      at the moment when layout header message is updated.
- *
- *      Quincey Koziol, 2004-5-21
- *      Added version number 3 case to straighten out problems with contiguous
- *      layout's sizes (was encoding them as 4-byte values when they were
- *      really n-byte values (where n usually is 8)) and additionally clean up
- *      the information written out.
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_layout_t           *mesg = NULL;
     unsigned               u;

@@ -25,8 +25,8 @@
  *		the global heap.
  */
 
-#define H5F_PACKAGE	/*suppress error about including H5Fpkg	  */
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -39,7 +39,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
 
-static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, const uint8_t*);
+static void *H5O_shared_decode(H5F_t*, hid_t dxpl_id, unsigned mesg_flags, const uint8_t*);
 static herr_t H5O_shared_encode(H5F_t*, uint8_t*, const void*);
 static void *H5O_shared_copy(const void *_mesg, void *_dest);
 static size_t H5O_shared_size(const H5F_t*, const void *_mesg);
@@ -353,13 +353,11 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
  *
- * Modifications:
- *	Robb Matzke, 1998-07-20
- *	Added a version number to the beginning of the message.
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf)
+H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *buf)
 {
     H5O_shared_t	*mesg = NULL;
     unsigned		version;

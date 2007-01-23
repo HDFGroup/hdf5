@@ -20,21 +20,19 @@
  *
  * Purpose:             Object name message.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(const H5F_t *f, const void *_mesg);
@@ -82,12 +80,11 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  *              matzke@llnl.gov
  *              Aug 12 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_name_t          *mesg;
     void                *ret_value;     /* Return value */

@@ -28,7 +28,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest);
 static size_t H5O_efl_size(const H5F_t *f, const void *_mesg);
@@ -79,14 +79,11 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
  * Programmer:	Robb Matzke
  *		Tuesday, November 25, 1997
  *
- * Modifications:
- *	Robb Matzke, 1998-07-20
- *	Rearranged the message to add a version number near the beginning.
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
+H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_efl_t		*mesg = NULL;
     int			version;

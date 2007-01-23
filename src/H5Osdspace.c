@@ -25,7 +25,7 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_sdspace_copy(const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size(const H5F_t *f, const void *_mesg);
@@ -107,9 +107,10 @@ H5FL_ARR_EXTERN(hsize_t);
     Decode a simple dimensionality message and return a pointer to a memory
 	struct with the decoded information
  USAGE
-    void *H5O_sdspace_decode(f, raw_size, p)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	size_t raw_size;	IN: size of the raw information buffer
+    void *H5O_sdspace_decode(f, dxpl_id, mesg_flags, p)
+	H5F_t *f;	        IN: pointer to the HDF5 file struct
+        hid_t dxpl_id;          IN: DXPL for any I/O
+        unsigned mesg_flags;    IN: Message flags to influence decoding
 	const uint8 *p;		IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
@@ -117,23 +118,10 @@ H5FL_ARR_EXTERN(hsize_t);
 	This function decodes the "raw" disk form of a simple dimensionality
     message into a struct in memory native format.  The struct is allocated
     within this function using malloc() and is returned to the caller.
-
- MODIFICATIONS
-	Robb Matzke, 1998-04-09
-	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
-	instead of just four bytes.
-
-  	Robb Matzke, 1998-07-20
-        Added a version number and reformatted the message for aligment.
-
-        Raymond Lu
-        April 8, 2004
-        Added the type of dataspace into this header message using a reserved
-        byte.
-
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5S_extent_t	*sdim = NULL;/* New extent dimensionality structure */
     void		*ret_value;

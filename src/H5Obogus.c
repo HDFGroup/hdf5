@@ -24,22 +24,20 @@
  *                      correct operation when parsing unknown object header
  *                      messages.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                 */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 #ifdef H5O_ENABLE_BOGUS
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_bogus_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_bogus_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags, const uint8_t *p);
 static herr_t H5O_bogus_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_bogus_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_bogus_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
@@ -83,14 +81,13 @@ const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
  *              koziol@ncsa.uiuc.edu
  *              Jan 21 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p)
+H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
-    H5O_bogus_t *mesg=NULL;
+    H5O_bogus_t *mesg = NULL;
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_bogus_decode);

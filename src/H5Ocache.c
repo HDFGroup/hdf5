@@ -535,7 +535,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, oh->mesg[curmesg].raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, 0, oh->mesg[curmesg].raw);
                 cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
 
                 /* Save 'native' form of continuation message */

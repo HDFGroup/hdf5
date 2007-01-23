@@ -59,7 +59,7 @@
                                                                               \
         /* Decode the message */                                              \
         HDassert(decode_type->decode);                                        \
-        if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->raw))) \
+        if(NULL == ((MSG)->native = (decode_type->decode)((F), (DXPL), (MSG)->flags, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
                                                                               \
         /* Set the message's "creation index", if it has one */		      \
@@ -1814,7 +1814,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *b
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, 0, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:
@@ -2150,7 +2150,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
         /* Decode the message if necessary. */
         if(NULL == mesg->native) {
             HDassert(type->decode);
-            if(NULL == (mesg->native = (type->decode)(f, dxpl_id, mesg->raw)))
+            if(NULL == (mesg->native = (type->decode)(f, dxpl_id, mesg->flags, mesg->raw)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
 
             /* Set the message's "creation index", if it has one */

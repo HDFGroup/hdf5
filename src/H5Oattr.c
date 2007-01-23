@@ -29,7 +29,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static void *H5O_attr_copy(const void *_mesg, void *_dest);
 static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_free(void *mesg);
@@ -119,33 +119,21 @@ H5FL_EXTERN(H5S_extent_t);
     Decode a attribute message and return a pointer to a memory struct
         with the decoded information
  USAGE
-    void *H5O_attr_decode(f, raw_size, p)
+    void *H5O_attr_decode(f, dxpl_id, mesg_flags, p)
         H5F_t *f;               IN: pointer to the HDF5 file struct
-        size_t raw_size;        IN: size of the raw information buffer
-        const uint8_t *p;         IN: the raw information buffer
+        hid_t dxpl_id;          IN: DXPL for any I/O
+        unsigned mesg_flags;    IN: Message flags to influence decoding
+        const uint8_t *p;       IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
         This function decodes the "raw" disk form of a attribute message
     into a struct in memory native format.  The struct is allocated within this
     function using malloc() and is returned to the caller.
- *
- * Modifications:
- * 	Robb Matzke, 17 Jul 1998
- *	Added padding for alignment.
- *
- * 	Robb Matzke, 20 Jul 1998
- *	Added a version number at the beginning.
- *
- *	Raymond Lu, 8 April 2004
- *	Changed Dataspace operation on H5S_simple_t to H5S_extent_t.
- *
- *      James Laird, 15 November 2005
- *      Added character encoding (version 3)
- *
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
+H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    const uint8_t *p)
 {
     H5A_t		*attr = NULL;
     H5S_extent_t	*extent;	/*extent dimensionality information  */
@@ -202,7 +190,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
+	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, mesg_flags, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
@@ -213,7 +201,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
-        if((attr->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, p)) == NULL)
+        if((attr->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, mesg_flags, p)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     } /* end else */
     if(version < H5O_ATTR_VERSION_2)
@@ -227,11 +215,11 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
     if(NULL == (attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if (flags & H5O_ATTR_FLAG_SPACE_SHARED) {
+    if(flags & H5O_ATTR_FLAG_SPACE_SHARED) {
 	H5O_shared_t *shared;   /* Shared information */
 
         /* Get the shared information */
-	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, p)))
+	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, mesg_flags, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* Get the actual datatype information */
@@ -242,7 +230,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p)
         H5O_msg_free_real(H5O_MSG_SHARED, shared);
     } /* end if */
     else {
-        if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, p)) == NULL)
+        if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, mesg_flags, p)) == NULL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
     } /* end else */
 

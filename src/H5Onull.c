@@ -23,10 +23,10 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 
 /* This message derives from H5O message class */

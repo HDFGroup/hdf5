@@ -77,7 +77,7 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p
     } /* end if */
     else {
         /* Decode native message directly */
-        if(NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, dxpl_id, p)))
+        if(NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, dxpl_id, mesg_flags, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode native message")
     } /* end else */
 

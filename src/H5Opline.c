@@ -30,7 +30,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p);
+static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
@@ -85,6 +85,22 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
 /* Declare a free list to manage the H5O_pline_t struct */
 H5FL_DEFINE(H5O_pline_t);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_PLINE
+#define H5O_SHARED_DECODE		H5O_pline_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_pline_decode
+#define H5O_SHARED_ENCODE		H5O_pline_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_pline_encode
+#define H5O_SHARED_SIZE			H5O_pline_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_pline_size
+#define H5O_SHARED_DELETE		H5O_pline_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_LINK			H5O_pline_shared_link
+#undef H5O_SHARED_LINK_REAL
+#define H5O_SHARED_COPY_FILE		H5O_pline_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_pline_decode
@@ -100,7 +116,8 @@ H5FL_DEFINE(H5O_pline_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p)
+H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+    const uint8_t *p)
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
     H5Z_filter_info_t   *filter;                /* Filter to decode */

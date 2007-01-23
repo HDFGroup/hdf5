@@ -1349,7 +1349,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                         /* Decode current continuation message if necessary */
                         if(NULL == cont_msg->native) {
                             HDassert(H5O_MSG_CONT->decode);
-                            cont_msg->native = (H5O_MSG_CONT->decode)(f, dxpl_id, cont_msg->raw);
+                            cont_msg->native = (H5O_MSG_CONT->decode)(f, dxpl_id, 0, cont_msg->raw);
                             if(NULL == cont_msg->native)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
                         } /* end if */
