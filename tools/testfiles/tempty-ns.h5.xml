@@ -2,7 +2,7 @@
 Expected output for 'h5dump --xml -X thing: tempty.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:HDF5-File xmlns:thing="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<thing:HDF5-File xmlns:thing="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5File http://hdfgroup.org/DTDs/HDF5-File.xsd">
 <thing:RootGroup OBJ-XID="xid_928" H5Path="/">
    <thing:Dataset Name="Dataset1.0" OBJ-XID="xid_976" H5Path= "/Dataset1.0" Parents="xid_928" H5ParentPaths="/">
       <thing:StorageLayout>
