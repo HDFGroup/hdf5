@@ -2847,7 +2847,7 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
     haddr_t	ret_value;
 
     FUNC_ENTER_API(H5FDget_eoa, HADDR_UNDEF)
-    H5TRACE1("a", "x", file);
+    H5TRACE2("a", "xMt", file, type);
 
     /* Check args */
     if(!file || !file->cls)
@@ -2936,7 +2936,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDset_eoa, FAIL)
-    H5TRACE2("e", "xa", file, addr);
+    H5TRACE3("e", "xMta", file, type, addr);
 
     /* Check args */
     if(!file || !file->cls)

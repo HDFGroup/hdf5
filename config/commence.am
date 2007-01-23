@@ -19,7 +19,6 @@
 # Shell commands used in Makefiles
 RM=rm -f
 CP=cp
-TIME=time
 
 # Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
 # on at least one machine configure fails to detect its existence (janus).

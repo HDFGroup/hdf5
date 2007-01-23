@@ -221,6 +221,7 @@ SIZE_T = @SIZE_T@
 STATIC_SHARED = @STATIC_SHARED@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
+TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
@@ -284,7 +285,6 @@ target_alias = @target_alias@
 # Shell commands used in Makefiles
 RM = rm -f
 CP = cp
-TIME = time
 
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.

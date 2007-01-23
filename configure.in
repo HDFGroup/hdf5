@@ -522,6 +522,26 @@ if test "X${TR_TEST}" != "XTEST"; then
 fi
 
 
+dnl ----------------------------------------------------------------------
+dnl Check that time can be used with srcdir.  This is okay on most systems,
+dnl but seems to cause problems on Cygwin.
+dnl The solution on Cygwin is not to record execution time for tests.
+AC_MSG_CHECKING([if srcdir= and time commands work together])
+
+AC_SUBST([TIME])
+TIME=time
+dnl TIME_TEST=`foo="bar" ${TIME} echo 'baz' | grep ^baz`
+${TIME} echo 'baz' >& temp.out
+TIME_TEST=`grep ^baz temp.out`
+rm temp.out
+if test "X${TIME_TEST}" = "Xbaz"; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  TIME=
+fi
+
+
 dnl The following variables are used to distinguish between building a
 dnl serial and parallel library.
 dnl
