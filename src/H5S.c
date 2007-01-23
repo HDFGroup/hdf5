@@ -602,20 +602,20 @@ herr_t
 H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
     unsigned u;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL)
 
     /* Copy the regular fields */
-    dst->type=src->type;
-    dst->nelem=src->nelem;
-    dst->rank=src->rank;
+    dst->type = src->type;
+    dst->nelem = src->nelem;
+    dst->rank = src->rank;
 
     switch (src->type) {
         case H5S_NULL:
         case H5S_SCALAR:
-            dst->size=NULL;
-            dst->max=NULL;
+            dst->size = NULL;
+            dst->max = NULL;
             break;
 
         case H5S_SIMPLE:
@@ -636,17 +636,17 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
             break;
 
         default:
-            assert("unknown data space type" && 0);
+            HDassert("unknown data space type" && 0);
             break;
-    }
+    } /* end switch */
 
     /* Copy the shared object info */
     if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(src->sh_loc), &(dst->sh_loc)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extent_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -676,25 +676,25 @@ H5S_copy(const H5S_t *src, hbool_t share_selection)
     H5S_t		   *dst = NULL;
     H5S_t		   *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_copy, NULL);
+    FUNC_ENTER_NOAPI(H5S_copy, NULL)
 
-    if (NULL==(dst = H5FL_MALLOC(H5S_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (dst = H5FL_MALLOC(H5S_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the source dataspace's extent */
-    if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
+    if(H5S_extent_copy(&(dst->extent), &(src->extent)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Copy the source dataspace's selection */
-    if (H5S_select_copy(dst,src,share_selection)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy select");
+    if(H5S_select_copy(dst, src, share_selection) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy select")
 
     /* Set the return value */
-    ret_value=dst;
+    ret_value = dst;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_copy() */
 
 
 /*-------------------------------------------------------------------------

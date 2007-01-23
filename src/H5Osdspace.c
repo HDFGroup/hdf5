@@ -39,6 +39,22 @@ static herr_t H5O_sdspace_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_SDSPACE
+#define H5O_SHARED_DECODE		H5O_sdspace_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_sdspace_decode
+#define H5O_SHARED_ENCODE		H5O_sdspace_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_sdspace_encode
+#define H5O_SHARED_SIZE			H5O_sdspace_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_sdspace_size
+#define H5O_SHARED_DELETE		H5O_sdspace_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_LINK			H5O_sdspace_shared_link
+#undef H5O_SHARED_LINK_REAL
+#define H5O_SHARED_COPY_FILE		H5O_sdspace_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
@@ -82,22 +98,6 @@ H5FL_EXTERN(H5S_extent_t);
 
 /* Declare external the free list for hsize_t arrays */
 H5FL_ARR_EXTERN(hsize_t);
-
-/* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE			H5O_MSG_SDSPACE
-#define H5O_SHARED_DECODE		H5O_sdspace_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_sdspace_decode
-#define H5O_SHARED_ENCODE		H5O_sdspace_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_sdspace_encode
-#define H5O_SHARED_SIZE			H5O_sdspace_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_sdspace_size
-#define H5O_SHARED_DELETE		H5O_sdspace_shared_delete
-#undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK			H5O_sdspace_shared_link
-#undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE		H5O_sdspace_shared_copy_file
-#undef H5O_SHARED_COPY_FILE_REAL
-#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 
 /*--------------------------------------------------------------------------

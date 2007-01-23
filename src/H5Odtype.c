@@ -45,6 +45,22 @@ static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_ty
 static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_DTYPE
+#define H5O_SHARED_DECODE		H5O_dtype_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_dtype_decode
+#define H5O_SHARED_ENCODE		H5O_dtype_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_dtype_encode
+#define H5O_SHARED_SIZE			H5O_dtype_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_dtype_size
+#define H5O_SHARED_DELETE		H5O_dtype_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_LINK			H5O_dtype_shared_link
+#undef H5O_SHARED_LINK_REAL
+#define H5O_SHARED_COPY_FILE		H5O_dtype_shared_copy_file
+#define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,		/* message id number		*/
@@ -94,22 +110,6 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
 /* The latest version of the format.  Look through the 'encode helper' routine
  *      and 'size' callback for places to change when updating this. */
 #define H5O_DTYPE_VERSION_LATEST H5O_DTYPE_VERSION_3
-
-/* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE			H5O_MSG_DTYPE
-#define H5O_SHARED_DECODE		H5O_dtype_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_dtype_decode
-#define H5O_SHARED_ENCODE		H5O_dtype_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_dtype_encode
-#define H5O_SHARED_SIZE			H5O_dtype_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_dtype_size
-#define H5O_SHARED_DELETE		H5O_dtype_shared_delete
-#undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK			H5O_dtype_shared_link
-#undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE		H5O_dtype_shared_copy_file
-#define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
-#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 
 /*-------------------------------------------------------------------------

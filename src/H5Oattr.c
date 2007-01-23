@@ -44,6 +44,22 @@ static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_crt_idx_t crt_idx);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_ATTR
+#define H5O_SHARED_DECODE		H5O_attr_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_attr_decode
+#define H5O_SHARED_ENCODE		H5O_attr_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_attr_encode
+#define H5O_SHARED_SIZE			H5O_attr_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_attr_size
+#define H5O_SHARED_DELETE		H5O_attr_shared_delete
+#define H5O_SHARED_DELETE_REAL		H5O_attr_delete
+#define H5O_SHARED_LINK			H5O_attr_shared_link
+#define H5O_SHARED_LINK_REAL		H5O_attr_link
+#define H5O_SHARED_COPY_FILE		H5O_attr_shared_copy_file
+#define H5O_SHARED_COPY_FILE_REAL	H5O_attr_copy_file
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     H5O_ATTR_ID,		/* message id number            */
@@ -94,22 +110,6 @@ H5FL_EXTERN(H5S_t);
 
 /* Declare external the free list for H5S_extent_t's */
 H5FL_EXTERN(H5S_extent_t);
-
-/* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE			H5O_MSG_ATTR
-#define H5O_SHARED_DECODE		H5O_attr_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_attr_decode
-#define H5O_SHARED_ENCODE		H5O_attr_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_attr_encode
-#define H5O_SHARED_SIZE			H5O_attr_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_attr_size
-#define H5O_SHARED_DELETE		H5O_attr_shared_delete
-#define H5O_SHARED_DELETE_REAL		H5O_attr_delete
-#define H5O_SHARED_LINK			H5O_attr_shared_link
-#define H5O_SHARED_LINK_REAL		H5O_attr_link
-#define H5O_SHARED_COPY_FILE		H5O_attr_shared_copy_file
-#define H5O_SHARED_COPY_FILE_REAL	H5O_attr_copy_file
-#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 
 /*--------------------------------------------------------------------------

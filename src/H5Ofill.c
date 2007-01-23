@@ -47,6 +47,50 @@ static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
+/* Set up & include shared message "interface" info */
+#define H5O_SHARED_TYPE			H5O_MSG_FILL
+#define H5O_SHARED_DECODE		H5O_fill_shared_decode
+#define H5O_SHARED_DECODE_REAL		H5O_fill_decode
+#define H5O_SHARED_ENCODE		H5O_fill_shared_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_fill_encode
+#define H5O_SHARED_SIZE			H5O_fill_shared_size
+#define H5O_SHARED_SIZE_REAL		H5O_fill_size
+#define H5O_SHARED_DELETE		H5O_fill_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_LINK			H5O_fill_shared_link
+#undef H5O_SHARED_LINK_REAL
+#define H5O_SHARED_COPY_FILE		H5O_fill_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
+/* Set up & include shared message "interface" info */
+/* (Kludgy 'undef's in order to re-include the H5Oshared.h header) */
+#undef H5O_SHARED_TYPE
+#define H5O_SHARED_TYPE			H5O_MSG_FILL_NEW
+#undef H5O_SHARED_DECODE
+#define H5O_SHARED_DECODE		H5O_fill_new_shared_decode
+#undef H5O_SHARED_DECODE_REAL
+#define H5O_SHARED_DECODE_REAL		H5O_fill_new_decode
+#undef H5O_SHARED_ENCODE
+#define H5O_SHARED_ENCODE		H5O_fill_new_shared_encode
+#undef H5O_SHARED_ENCODE_REAL
+#define H5O_SHARED_ENCODE_REAL		H5O_fill_new_encode
+#undef H5O_SHARED_SIZE
+#define H5O_SHARED_SIZE			H5O_fill_new_shared_size
+#undef H5O_SHARED_SIZE_REAL
+#define H5O_SHARED_SIZE_REAL		H5O_fill_new_size
+#undef H5O_SHARED_DELETE
+#define H5O_SHARED_DELETE		H5O_fill_new_shared_delete
+#undef H5O_SHARED_DELETE_REAL
+#undef H5O_SHARED_LINK
+#define H5O_SHARED_LINK			H5O_fill_new_shared_link
+#undef H5O_SHARED_LINK_REAL
+#undef H5O_SHARED_COPY_FILE
+#define H5O_SHARED_COPY_FILE		H5O_fill_new_shared_copy_file
+#undef H5O_SHARED_COPY_FILE_REAL
+#undef H5Oshared_H
+#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
+
 /* This message derives from H5O message class, for old fill value before version 1.5 */
 const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                     */
@@ -104,50 +148,6 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
 
 /* Declare a free list to manage the H5O_fill_t struct */
 H5FL_DEFINE(H5O_fill_t);
-
-/* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE			H5O_MSG_FILL
-#define H5O_SHARED_DECODE		H5O_fill_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_fill_decode
-#define H5O_SHARED_ENCODE		H5O_fill_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_fill_encode
-#define H5O_SHARED_SIZE			H5O_fill_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_fill_size
-#define H5O_SHARED_DELETE		H5O_fill_shared_delete
-#undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK			H5O_fill_shared_link
-#undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE		H5O_fill_shared_copy_file
-#undef H5O_SHARED_COPY_FILE_REAL
-#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
-
-/* Set up & include shared message "interface" info */
-/* (Kludgy 'undef's in order to re-include the H5Oshared.h header) */
-#undef H5O_SHARED_TYPE
-#define H5O_SHARED_TYPE			H5O_MSG_FILL_NEW
-#undef H5O_SHARED_DECODE
-#define H5O_SHARED_DECODE		H5O_fill_new_shared_decode
-#undef H5O_SHARED_DECODE_REAL
-#define H5O_SHARED_DECODE_REAL		H5O_fill_new_decode
-#undef H5O_SHARED_ENCODE
-#define H5O_SHARED_ENCODE		H5O_fill_new_shared_encode
-#undef H5O_SHARED_ENCODE_REAL
-#define H5O_SHARED_ENCODE_REAL		H5O_fill_new_encode
-#undef H5O_SHARED_SIZE
-#define H5O_SHARED_SIZE			H5O_fill_new_shared_size
-#undef H5O_SHARED_SIZE_REAL
-#define H5O_SHARED_SIZE_REAL		H5O_fill_new_size
-#undef H5O_SHARED_DELETE
-#define H5O_SHARED_DELETE		H5O_fill_new_shared_delete
-#undef H5O_SHARED_DELETE_REAL
-#undef H5O_SHARED_LINK
-#define H5O_SHARED_LINK			H5O_fill_new_shared_link
-#undef H5O_SHARED_LINK_REAL
-#undef H5O_SHARED_COPY_FILE
-#define H5O_SHARED_COPY_FILE		H5O_fill_new_shared_copy_file
-#undef H5O_SHARED_COPY_FILE_REAL
-#undef H5Oshared_H
-#include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 
 /*-------------------------------------------------------------------------

@@ -97,7 +97,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_ATTR,		/*0x000C Attribute list			*/
     H5O_MSG_NAME,		/*0x000D Object name			*/
     H5O_MSG_MTIME,		/*0x000E Object modification date and time */
-    H5O_MSG_SHARED,		/*0x000F Shared header message		*/
+    H5O_MSG_SHARED,		/*0x000F Shared header message (shouldn't be in file) */
     H5O_MSG_CONT,		/*0x0010 Object header continuation	*/
     H5O_MSG_STAB,		/*0x0011 Symbol table			*/
     H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
