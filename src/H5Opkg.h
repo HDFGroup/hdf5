@@ -157,6 +157,11 @@
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
     H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
+/* Temporary macro to define which message classes are using the "new"
+ * shared message "interface" for their methods.
+ */
+#define H5O_NEW_SHARED(T)       0
+
 
 /* The "message class" type */
 struct H5O_msg_class_t {

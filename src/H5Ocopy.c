@@ -397,7 +397,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HDassert(!mesg_src->dirty);     /* Should be cleared by earlier call to flush messages */
 
         /* Check for shared message to operate on */
-        if(mesg_src->flags & H5O_MSG_FLAG_SHARED)
+        if((mesg_src->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_src->type))
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_src->type;
@@ -487,7 +487,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* (Use destination message, in case the message has been removed (i.e
             *      converted to a nil message) in the destination -QAK)
             */
-        if(mesg_dst->flags & H5O_MSG_FLAG_SHARED)
+        if((mesg_dst->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_dst->type))
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_dst->type;
@@ -523,17 +523,21 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                 /* Recompute shared message size (mesg_dst->native is really
                  * an H5O_shared_t)
                  */
-                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                        H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, mesg_dst->native));
-            }
+                if(!H5O_NEW_SHARED(mesg_dst->type))
+                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                            H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, mesg_dst->native));
+            } /* end if */
             else if(shared == FALSE && (mesg_dst->flags & H5O_MSG_FLAG_SHARED)) {
                 /* Unset shared flag */
                 mesg_dst->flags &= ~H5O_MSG_FLAG_SHARED;
 
-                /* Recompute native message size */
-                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
-            }
+                /* Recompute native message size (msg_dest->native is no longer
+                 * an H5O_shared_t)
+                 */
+                if(!H5O_NEW_SHARED(mesg_dst->type))
+                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+            } /* end else */
 
             /* Mark the message in the destination as dirty, so it'll get encoded when the object header is flushed */
             mesg_dst->dirty = TRUE;
@@ -659,7 +663,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* (Use destination message, in case the message has been removed (i.e
          *      converted to a nil message) in the destination -QAK)
          */
-        if(mesg_dst->flags & H5O_MSG_FLAG_SHARED)
+        if((mesg_dst->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_dst->type))
             copy_type = H5O_MSG_SHARED;
         else
             copy_type = mesg_dst->type;

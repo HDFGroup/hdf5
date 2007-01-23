@@ -411,7 +411,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 
 	/* decode the message */
-	if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
+	if((oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[i].type)) {
 	    decode = H5O_MSG_SHARED->decode;
 	    debug = H5O_MSG_SHARED->debug;
 	} else {
@@ -432,7 +432,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
 
 	/* If the message is shared then also print the pointed-to message */
-	if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
+	if((oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[i].type)) {
 	    H5O_shared_t *shared = (H5O_shared_t*)(oh->mesg[i].native);
 	    void *mesg;
 

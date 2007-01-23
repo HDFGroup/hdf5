@@ -52,7 +52,7 @@
         const H5O_msg_class_t	*decode_type;                                 \
                                                                               \
         /* Check for shared message */                                        \
-        if((MSG)->flags & H5O_MSG_FLAG_SHARED)                                \
+        if(((MSG)->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED((MSG)->type))                                \
             decode_type = H5O_MSG_SHARED;                                     \
         else                                                                  \
             decode_type = (MSG)->type;                                        \
@@ -205,7 +205,6 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned *oh_flags_ptr)
 {
     const H5O_msg_class_t *type;        /* Original H5O class type for the ID */
-    htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_msg_append, FAIL)
@@ -223,6 +222,8 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
 
     /* Should this message be written as a SOHM? */
     if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
+        htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
+
         if((shared_mesg = H5SM_try_share(f, dxpl_id, type_id, mesg)) > 0)
             /* Mark the message as shared */
             mesg_flags |= H5O_MSG_FLAG_SHARED;
@@ -323,7 +324,6 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
     H5O_t *oh = NULL;                   /* Object header to use */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Flags to unprotect object header */
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    htri_t shared_mesg;                 /* Whether the message should be shared */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_msg_write, FAIL)
@@ -343,13 +343,17 @@ H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
     if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
-    /* Should this message be written as a SOHM? */
-    if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
-        if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) > 0)
-            /* Mark the message as shared */
-            mesg_flags |= H5O_MSG_FLAG_SHARED;
-        else if(shared_mesg < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
+    if(!H5O_NEW_SHARED(type)) {
+        /* Should this message be written as a SOHM? */
+        if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
+            htri_t shared_mesg;                 /* Whether the message should be shared */
+
+            if((shared_mesg = H5SM_try_share(loc->file, dxpl_id, type_id, mesg)) > 0)
+                /* Mark the message as shared */
+                mesg_flags |= H5O_MSG_FLAG_SHARED;
+            else if(shared_mesg < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
+        } /* end if */
     } /* end if */
 
     /* Protect the object header */
@@ -429,40 +433,54 @@ H5O_msg_write_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found")
 
     /* Check for modifying a constant message */
-    if(oh->mesg[idx].flags & H5O_MSG_FLAG_CONSTANT) {
+    if(idx_msg->flags & H5O_MSG_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify constant message")
-    } else if(oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) {
+    } else if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
         /* This message is shared, but it's being modified.  This is valid if
          * it's shared in the heap .
          * First, make sure it's not a committed message; these can't ever
          * be modified.
          */
-        HDassert(!(((H5O_shared_t *)oh->mesg[idx].native)->flags & H5O_COMMITTED_FLAG));
+        HDassert(!(((H5O_shared_t *)idx_msg->native)->flags & H5O_COMMITTED_FLAG));
 
         /* Remove the old message from the SOHM index */
-        if(H5SM_try_delete(f, dxpl_id, oh->mesg[idx].type->id, oh->mesg[idx].native) < 0)
+        if(H5SM_try_delete(f, dxpl_id, idx_msg->type->id, idx_msg->native) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
 
-        /* Now this message is no longer shared and we can safely overwrite it.
-         * We need to make sure that the message we're writing is shared,
-         * though, and that the library doesn't try to reset the current
-         * message like it would in a normal overwrite (this message is
-         * realy a shared pointer, not a real message).
-         *
-         * Note that this only works when shared messages are replaced by other
-         * shared messages.  Currently, messages can't shrink once they've
-         * been written to object headers so this is a safe assumption (for
-         * now).
-         */
-        HDassert(H5O_msg_is_shared(type->id, mesg) > 0);
+        if(H5O_NEW_SHARED(type)) {
+            /* Should this message be written as a SOHM? */
+            if(!(mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
+                htri_t shared_mesg;                 /* Whether the message should be shared */
 
-        /* Extract shared message info from current message */
-        if(NULL == H5O_msg_get_share(type->id, mesg, &sh_mesg))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
+                if((shared_mesg = H5SM_try_share(f, dxpl_id, idx_msg->type->id, mesg)) > 0)
+                    /* Mark the message as shared */
+                    mesg_flags |= H5O_MSG_FLAG_SHARED;
+                else if(shared_mesg < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
+            } /* end if */
+        } /* end if */
+        else {
+            /* Now this message is no longer shared and we can safely overwrite it.
+             * We need to make sure that the message we're writing is shared,
+             * though, and that the library doesn't try to reset the current
+             * message like it would in a normal overwrite (this message is
+             * really a shared pointer, not a real message).
+             *
+             * Note that this only works when shared messages are replaced by other
+             * shared messages.  Currently, messages can't shrink once they've
+             * been written to object headers so this is a safe assumption (for
+             * now).
+             */
+            HDassert(H5O_msg_is_shared(type->id, mesg) > 0);
 
-        /* Instead of writing the original message, write a shared message */
-        write_type = H5O_MSG_SHARED;
-        write_mesg = &sh_mesg;
+            /* Extract shared message info from current message */
+            if(NULL == H5O_msg_get_share(type->id, mesg, &sh_mesg))
+                HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't get shared message")
+
+            /* Instead of writing the original message, write a shared message */
+            write_type = H5O_MSG_SHARED;
+            write_mesg = &sh_mesg;
+        } /* end else */
     } /* end if */
 
     /* Copy the information for the message */
@@ -590,7 +608,7 @@ H5O_msg_read_real(H5F_t *f, H5O_t *oh, unsigned type_id, int sequence,
     H5O_LOAD_NATIVE(f, dxpl_id, &(oh->mesg[idx]), NULL)
 
     /* Read the message in */
-    if(oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) {
+    if((oh->mesg[idx].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[idx].flags)) {
 	/*
 	 * If the message is shared then then the native pointer points to an
 	 * H5O_MSG_SHARED message.  We use that information to look up the real
@@ -745,7 +763,7 @@ H5O_msg_free_mesg(H5O_mesg_t *mesg)
     HDassert(mesg);
 
     /* Free any native information */
-    if(mesg->flags & H5O_MSG_FLAG_SHARED)
+    if((mesg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg->type))
         mesg->native = H5O_msg_free_real(H5O_MSG_SHARED, mesg->native);
     else
         mesg->native = H5O_msg_free_real(mesg->type, mesg->native);
@@ -1373,7 +1391,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
             } /* end if */
             else {
                 /* If the message is shared, get the real message it points to */
-                if(idx_msg->flags & H5O_MSG_FLAG_SHARED) {
+                if((idx_msg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(idx_msg->type)) {
                     if(NULL == (native_mesg = H5O_shared_read(f, dxpl_id, idx_msg->native, idx_msg->type, NULL)))
                         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to read shared message")
                     native_mesg_alloc = TRUE;
@@ -1865,9 +1883,9 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
     /* Check if this message is committed.  We'll need to know this later. */
     committed = FALSE;
     if(copy_type->id == H5O_SHARED_ID) {
-        H5O_shared_t *tmp_shared_mesg = (H5O_shared_t *) native_src;
+        H5O_shared_t *tmp_shared_mesg = (H5O_shared_t *)native_src;
 
-        if( tmp_shared_mesg->flags & H5O_COMMITTED_FLAG) {
+        if(tmp_shared_mesg->flags & H5O_COMMITTED_FLAG) {
             HDassert(!(tmp_shared_mesg->flags & H5O_SHARED_IN_HEAP_FLAG));
             committed = TRUE;
         } /* end if */
@@ -1901,7 +1919,7 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
         if(try_share_ret == FALSE) {
             if(H5O_msg_reset_share(mesg_type->id, native_mesg) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_WRITEERROR, NULL, "unable to reset sharing information in message")
-        }
+        } /* end if */
         else {
             /* Get shared message from native message */
             if(NULL == (shared_mesg = H5O_msg_get_share(mesg_type->id, native_mesg, NULL)))
@@ -1912,8 +1930,8 @@ H5O_msg_copy_file(const H5O_msg_class_t *copy_type, const H5O_msg_class_t *mesg_
 
             native_mesg = shared_mesg;
             *shared = TRUE;
-        }
-    }
+        } /* end else */
+    } /* end if */
 
     ret_value = native_mesg;
 
@@ -1961,7 +1979,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
     HDassert(oh_flags_ptr);
 
     /* Check for shared message */
-    if(*mesg_flags & H5O_MSG_FLAG_SHARED) {
+    if((*mesg_flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(orig_type)) {
         if((NULL == orig_type->is_shared) || (NULL == orig_type->get_share))
             HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable")
         if((is_shared = (orig_type->is_shared)(orig_mesg)) == FALSE) {
@@ -2140,7 +2158,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg, hbool_t adj_link)
     HDassert(mesg);
 
     /* Get the message to free's type */
-    if(mesg->flags & H5O_MSG_FLAG_SHARED)
+    if((mesg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg->type))
         type = H5O_MSG_SHARED;
     else
         type = mesg->type;

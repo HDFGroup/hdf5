@@ -169,7 +169,7 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 HDassert(curr_msg->raw_size == H5O_ALIGN_OH(oh, curr_msg->raw_size));
                 HDassert(curr_msg->raw + curr_msg->raw_size <=
                        oh->chunk[curr_msg->chunkno].image + (oh->chunk[curr_msg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
-                if(curr_msg->flags & H5O_MSG_FLAG_SHARED)
+                if((curr_msg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(curr_msg->type))
                     encode = H5O_MSG_SHARED->encode;
                 else
                     encode = curr_msg->type->encode;
