@@ -19,9 +19,6 @@
 # checked back into the source repository.
 #
 
-
-CHECKVAL=check
-
 # function definitions
 TIMESTAMP()
 {
@@ -66,6 +63,9 @@ METHODS="gzip bzip2 md5 doc"
 
 # Use User's MAKE if set.  Else use generic make.
 MAKE=${MAKE:-make}
+
+# Default check action.
+CHECKVAL=check
 
 #
 # Command options
@@ -187,11 +187,11 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ReleaseDir="$1"
 	    ;;
-	--*)
-	    OP_CONFIGURE="$OP_CONFIGURE $1"
-	    ;;
 	check-vfd)
 	    CHECKVAL=check-vfd
+	    ;;
+	--*)
+	    OP_CONFIGURE="$OP_CONFIGURE $1"
 	    ;;
 	op-configure)
 	    shift
@@ -309,7 +309,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     TIMESTAMP "checkout"
     # If there is a Makefile in ${CURRENT}, the last test done in it
     # has not been distclean'ed.  They would interfere with other
-    # --srcdir build since make considers the files in ${CURRENT} 
+    # --srcdir build since make considers the files in ${CURRENT}
     # take precedence over files in its own build-directory.  Run
     # a "make distclean" to clean them all out.  This is not really
     # part of the "checkout" functions but this is the most convenient
@@ -389,7 +389,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} && \
 	    TIMESTAMP "make" && \
 	    ${MAKE} && \
-	    TIMESTAMP "check" && \
+	    TIMESTAMP ${CHECKVAL} && \
 	    ${MAKE} ${CHECKVAL} && \
 	    TIMESTAMP "install" && \
 	    ${MAKE} install-all && \
@@ -413,7 +413,12 @@ fi # Test the HDF5 library
 if [ -n "$DEPLOYDIRNAME" ]; then
     if [ "$snapshot" = "yes" ]; then
 	TIMESTAMP "deploy"
-	if (cd ${TESTDIR} && ${CURRENT}/bin/deploy ${deploydir}/${DEPLOYDIRNAME}); then
+        if (cd ${TESTDIR} &&
+            ${CURRENT}/bin/deploy ${deploydir}/${DEPLOYDIRNAME} && \
+            TIMESTAMP "clean" && \
+            ${MAKE} clean && \
+            TIMESTAMP "check-install prefix=${deploydir}/${DEPLOYDIRNAME}" && \
+            ${MAKE} check-install prefix=${deploydir}/${DEPLOYDIRNAME}); then
 	    :	#continue
 	else
 	    errcode=$?
@@ -439,7 +444,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
 	    bin/release -d $ReleaseDir $METHODS
 	    perl bin/h5vers -i
-	    svn -q commit -m "Snapshot $RELEASE_VERSION"   
+	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
     fi
