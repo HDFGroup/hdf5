@@ -585,12 +585,12 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     current_pos = oh_dst->chunk[0].image;
 
-    /* Copy the header.  Most of this (number of messages, etc.) will be
-     * overwritten when the header is flushed to disk, but later versions have
-     * a magic number that isn't.
+    /* Write the magic number for versions > 1 and skip the rest of the
+     * header.  This will be written when the header is flushed to disk.
      */
-    HDmemcpy(current_pos, oh_src->chunk[0].image,
-            (size_t)(H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst)));
+    if(oh_dst->version > H5O_VERSION_1)
+        HDmemcpy(current_pos, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC); 
+
     current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
     /* Copy each message that wasn't dirtied above */

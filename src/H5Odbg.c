@@ -248,8 +248,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     unsigned	i, chunkno;
     size_t	mesg_total = 0, chunk_total = 0;
     int		*sequence;
-    void	*(*decode)(H5F_t*, hid_t, const uint8_t*);
-    herr_t      (*debug)(H5F_t*, hid_t, const void*, FILE*, int, int)=NULL;
+    const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5O_debug_real, FAIL)
@@ -412,22 +411,18 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 
 	/* decode the message */
 	if((oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[i].type)) {
-	    decode = H5O_MSG_SHARED->decode;
-	    debug = H5O_MSG_SHARED->debug;
+            debug_type = H5O_MSG_SHARED;
 	} else {
-	    decode = oh->mesg[i].type->decode;
-	    debug = oh->mesg[i].type->debug;
+            debug_type = oh->mesg[i].type;
 	} /* end else */
-	if(NULL==oh->mesg[i].native && decode)
-	    oh->mesg[i].native = (decode)(f, dxpl_id, oh->mesg[i].raw);
-	if(NULL == oh->mesg[i].native)
-	    debug = NULL;
+	if(NULL==oh->mesg[i].native && debug_type->decode)
+            oh->mesg[i].native = (debug_type->decode)(f, dxpl_id, oh->mesg[i].flags, oh->mesg[i].raw);
 
 	/* print the message */
 	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Message Information:");
-	if(debug)
-	    (debug)(f, dxpl_id, oh->mesg[i].native, stream, indent + 6, MAX(0, fwidth - 6));
+	if(debug_type->debug && oh->mesg[i].native != NULL)
+	    (debug_type->debug)(f, dxpl_id, oh->mesg[i].native, stream, indent + 6, MAX(0, fwidth - 6));
 	else
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
 
@@ -443,6 +438,12 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	} /* end if */
     } /* end for */
     sequence = H5MM_xfree(sequence);
+
+    /* Chunk 0 has header information.  Count this in the size of the chunk
+     * when we check its size below.
+     */
+    if(chunkno == 0)
+        mesg_total += H5O_SIZEOF_HDR(oh);
 
     if(mesg_total != chunk_total)
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");

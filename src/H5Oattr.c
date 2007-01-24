@@ -965,11 +965,26 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
         /* Copy the shared object from source to destination */
         if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
-    } /* end if */
+    } else {
+        /* If the datatype is not named, it may have been shared in the
+         * source file's heap.  Un-share it for now. We'll try to shared
+         * it in the destination file below.
+         */
+        if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->dt) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
+    }
+    /* end if */
 
     /* Copy the dataspace for the attribute */
     attr_dst->ds = H5S_copy(attr_src->ds, FALSE);
     HDassert(attr_dst->ds);
+
+    /* Reset the dataspace's sharing in the source file before trying to share
+     * it in the destination.
+     */
+    if(H5O_msg_reset_share(H5O_SDSPACE_ID, attr_dst->ds) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset dataspace sharing")
+
 
     /* Try to share both the datatype and dataset.  This does nothing if the
      * datatype is committed or sharing is disabled.
