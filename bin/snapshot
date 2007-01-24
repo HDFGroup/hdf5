@@ -49,9 +49,8 @@ echo ===Dumping environment variables===
 printenv | sort
 echo ===Done Dumping environment variables===
 
-# Where are the snapshots stored?
-ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
-ARCHIVES=$ARCHIVES_default
+# snapshots release directory.  Default relative to $BASEDIR.
+ReleaseDir_default=release_dir
 
 # Where is the zlib library?
 # At NCSA, half of the machines have it in /usr/lib, the other half at
@@ -175,15 +174,15 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ZLIB="$1"
 	    ;;
-	archive)
+	releasedir)
 	    shift
 	    if [ $# -lt 1 ]; then
-		echo "Archive pathname missing"
+		echo "Release directory name missing"
 		errcode=1
 		cmd="help"
 		break
 	    fi
-	    ARCHIVES="$1"
+	    ReleaseDir="$1"
 	    ;;
 	--*)
 	    OP_CONFIGURE="$OP_CONFIGURE $1"
@@ -213,7 +212,7 @@ if [ "$cmd" = help ]; then
     cat <<EOF
 Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
 	[clean] [distclean] [echo] [deploy <dir>] [deploydir <dir>]
-	[zlib <zlib_path>] [archive <arch_path>] [srcdirname <dir>]
+	[zlib <zlib_path>] [releasedir <dir>] [srcdirname <dir>]
 	[op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
@@ -245,9 +244,9 @@ Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
     zlib <zlib_path>:
               Use <zlib_path> as the ZLIB locations
               [Default is $ZLIB_default]
-    archive <arch_path>:
-              Use <arch_path> as the release ARCHIVE area
-              [Default is $ARCHIVES_default]
+    releasedir <dir>:
+              Use <dir> as the release directory
+              [Default is $ReleaseDir_default]
     op-configure <option>:
               Pass <option> to the configure command
               E.g., "snapshot op-configure --enable-parallel"
@@ -282,6 +281,7 @@ fi
 
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
+ReleaseDir=${ReleaseDir:=${BASEDIR}/${ReleaseDir_default}}
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 if [ $H5VERSION != hdf5 ]; then
     SVNVERSION="hdf5/branches/$H5VERSION"
@@ -435,8 +435,8 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    set -e
 	    cd ${CURRENT}
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
-	    echo "Making snapshot release ($RELEASE_VERSION) to ${ARCHIVES}..."
-	    bin/release -d $ARCHIVES $METHODS
+	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
+	    bin/release -d $ReleaseDir $METHODS
 	    perl bin/h5vers -i
 	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
