@@ -64,6 +64,9 @@ METHODS="gzip bzip2 md5"
 # Use User's MAKE if set.  Else use generic make.
 MAKE=${MAKE:-make}
 
+# Default check action.
+CHECKVAL=check
+
 #
 # Command options
 cmd="all"
@@ -184,6 +187,9 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ReleaseDir="$1"
 	    ;;
+	check-vfd)
+	    CHECKVAL=check-vfd
+	    ;;
 	--*)
 	    OP_CONFIGURE="$OP_CONFIGURE $1"
 	    ;;
@@ -303,7 +309,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     TIMESTAMP "checkout"
     # If there is a Makefile in ${CURRENT}, the last test done in it
     # has not been distclean'ed.  They would interfere with other
-    # --srcdir build since make considers the files in ${CURRENT} 
+    # --srcdir build since make considers the files in ${CURRENT}
     # take precedence over files in its own build-directory.  Run
     # a "make distclean" to clean them all out.  This is not really
     # part of the "checkout" functions but this is the most convenient
@@ -383,14 +389,14 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} && \
 	    TIMESTAMP "make" && \
 	    ${MAKE} && \
-	    TIMESTAMP "check" && \
-	    ${MAKE} check && \
+	    TIMESTAMP ${CHECKVAL} && \
+	    ${MAKE} ${CHECKVAL} && \
 	    TIMESTAMP "install" && \
-	    ${MAKE} install install-doc && \
+	    ${MAKE} install-all && \
 	    TIMESTAMP "check-install" && \
 	    ${MAKE} check-install && \
 	    TIMESTAMP "uninstall" && \
-	    ${MAKE} uninstall uninstall-doc); then
+	    ${MAKE} uninstall-all); then
 	    :
 	else
 	    errcode=$?
@@ -410,10 +416,10 @@ if [ -n "$DEPLOYDIRNAME" ]; then
         if (cd ${TESTDIR} &&
             ${CURRENT}/bin/deploy ${deploydir}/${DEPLOYDIRNAME} && \
             TIMESTAMP "clean" && \
-            ${MAKE} clean && \ 
+            ${MAKE} clean && \
             TIMESTAMP "check-install prefix=${deploydir}/${DEPLOYDIRNAME}" && \
             ${MAKE} check-install prefix=${deploydir}/${DEPLOYDIRNAME}); then
-            :   #continue
+	    :	#continue
 	else
 	    errcode=$?
 	    exit $errcode
