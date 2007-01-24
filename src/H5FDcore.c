@@ -434,7 +434,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* If an existing file is opened, load the whole file into memory. */
     if(!(H5F_ACC_CREAT & flags)) {
-        unsigned char *x;
+        unsigned char *x=NULL;
         size_t size;
 
         if (HDfstat(file->fd, &sb)<0)

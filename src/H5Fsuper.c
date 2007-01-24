@@ -256,7 +256,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
 
     /* Compute super block checksum for versions greater than 1 */
     if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
-        computed_chksum = H5_checksum_metadata(sbuf, (p - sbuf), 0);
+        computed_chksum = H5_checksum_metadata(sbuf, (unsigned) (p - sbuf), 0);
         /* Read stored super block checksum */
         UINT32DECODE(p, read_chksum);
 
@@ -264,7 +264,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "bad checksum on superblock")
     }
 
-    HDassert(p - sbuf == H5F_SUPERBLOCK_SIZE(super_vers, f));
+    HDassert((unsigned) (p - sbuf) == H5F_SUPERBLOCK_SIZE(super_vers, f));
 
     /*
      * Check if superblock address is different from base address and
@@ -360,7 +360,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "bad checksum on driver information block")
         }
  
-        HDassert(p - dbuf == driver_size + H5F_DRVINFOBLOCK_HDR_SIZE + H5F_DRVINFO_CHKSUM(drv_vers));
+        HDassert((unsigned) (p - dbuf) == driver_size + H5F_DRVINFOBLOCK_HDR_SIZE + H5F_DRVINFO_CHKSUM(drv_vers));
     } /* end if */
 
     /*

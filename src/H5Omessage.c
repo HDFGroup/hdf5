@@ -1366,7 +1366,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
-    void               *native_mesg;    /* Native, readable message */
+    void               *native_mesg=NULL; /* Native, readable message */
     hbool_t             native_mesg_alloc = FALSE;  /* True if native_mesg needs to be freed */
     herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
