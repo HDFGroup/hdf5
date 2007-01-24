@@ -218,7 +218,7 @@ if [ "$cmd" = help ]; then
     cat <<EOF
 Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
 	[clean] [distclean] [echo] [deploy <dir>] [deploydir <dir>]
-	[zlib <zlib_path>] [releasedir <dir>] [srcdirname <dir>]
+	[zlib <zlib_path>] [releasedir <dir>] [srcdirname <dir>] [check-vfd]
 	[op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
@@ -253,6 +253,8 @@ Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
     releasedir <dir>:
               Use <dir> as the release directory
               [Default is $ReleaseDir_default]
+    check-vfd:
+	      Run make check-vfd instead of just make check.
     op-configure <option>:
               Pass <option> to the configure command
               E.g., "snapshot op-configure --enable-parallel"
