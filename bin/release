@@ -119,7 +119,7 @@ check=yes
 today=`date +%Y%m%d`
 pmode='no'
 tmpdir="../#release_tmp.$$"	# tmp work directory
-DOC_URL=http://sleipnir/svn/repos/hdf5doc/trunk
+DOC_URL=http://svn.hdfgroup.uiuc.edu/hdf5doc/trunk
 CPPLUS_RM_NAME=cpplus_RM
 
 # Restore previous Version information
@@ -264,9 +264,9 @@ for comp in $methods; do
 	doc)
 	    test "$verbose" && echo "   Creating docs..." 1>&2
 	    # Check out docs from svn repo
-	    (cd $tmpdir; svn co $DOC_URL > /dev/null)
+	    (cd $tmpdir; svn co $DOC_URL > /dev/null) || exit 1
 	    # Create doxygen C++ RM
-	    (cd c++/src && doxygen cpp_doc_config >& /dev/null ) || exit 1
+	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
 	    rm -rf $tmpdir/trunk/html/$CPPLUS_RM_NAME
 	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/trunk/html/$CPPLUS_RM_NAME
