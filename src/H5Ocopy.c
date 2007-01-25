@@ -481,6 +481,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         if(cpy_info->preserve_null && deleted[mesgno]) {
             mesg_dst->type = H5O_MSG_NULL;
             mesg_dst->flags = 0;
+            mesg_dst->dirty = 1;
         }
 
         /* Check for shared message to operate on */
