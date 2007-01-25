@@ -530,10 +530,8 @@ AC_MSG_CHECKING([if srcdir= and time commands work together])
 
 AC_SUBST([TIME])
 TIME=time
-dnl TIME_TEST=`foo="bar" ${TIME} echo 'baz' | grep ^baz`
-${TIME} echo 'baz' >& temp.out
-TIME_TEST=`grep ^baz temp.out`
-rm temp.out
+TIME_TEST=`foo="bar" ${TIME} echo 'baz' 2> /dev/null | grep baz`
+
 if test "X${TIME_TEST}" = "Xbaz"; then
   AC_MSG_RESULT([yes])
 else
