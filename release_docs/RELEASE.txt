@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-alpha5snap0 currently under development
+HDF5 version 1.8.0-alpha5snap1 currently under development
 ================================================================================
 
 INTRODUCTION
