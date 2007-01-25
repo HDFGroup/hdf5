@@ -780,40 +780,39 @@ TABLE.list TD { border:none; }
             ASCII.  
             </P>
             <P>
-            For example, the various versions of the <em>family driver</em> 
-            will be identified by <code>NCSAfami</code>, <code>NCSAfam0</code>,
-            <code>NCSAfam1</code>, etc. 
-            (<code>NCSAfami</code> is simply <code>NCSAfamily</code> truncated 
+            For example, the various versions of the <em>multi driver</em> 
+            will be identified by <code>NCSAmult</code>.
+            (<code>NCSAmult</code> is simply <code>NCSAmulti</code> truncated 
             to eight characters.  Subsequent identifiers will be created by
             substituting sequential numerical values for the final character, 
-            starting with zero.)
+            starting with zero.) <em>multi driver</em> is the only default driver that
+            is encoded in this field.
             </P>
             <P>
             Identification for user-defined drivers 
-            is arbitrary but should be unique and avoid the four character
-            prefix "NCSA".
+            is eight-byte long and arbitrary but should be unique and avoid 
+            the four character prefix "NCSA".
             </P>
           </td>
         </tr>
 
         <tr valign=top>
           <td>Driver Information</td>
-          <td>Driver information is stored in a format defined by the
-            file driver and encoded/decoded by the driver callbacks
-            invoked from the <code>H5FD_sb_encode</code> and
-            <code>H5FD_sb_decode</code> functions.</td>
+          <td>Driver information is encoded/decoded in a format defined by the
+            file driver. <em>multi driver</em> is the only default driver that has driver
+            information stored in this field.  Its format is explained in the 
+            following block.</td>
         </tr>
       </table>
     </div>
 
     <BR>
-    <P>For the Version 1.6.5 of the library, the MULTI driver is the only one that has some 
-    information saved in <em>Driver Information</em> field.  It has the following format:</P>
+    <P><em>Multi driver</em> has the following format:</P>
 
     <div align=center>
       <table class=format>
 	<caption>
-	  MULTI Driver Message
+	  Multi Driver Message
 	</caption>
 
 	<tr>
@@ -881,13 +880,51 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Member Mapping</td>
-	  <td><P>MULTI File Driver allows maximal 6 files to be created.
-	    They are for super block, B-tree, raw data, global heap, local heap,
-	    and object header.  More than type of data can be mapped to the same file.  
-	    These <em>Member Mapping</em> fields contains this kind of information.
-	    The default value for these mapping fields is <em>H5FD_MEM_DEFAULT</em>.  
-	    Please see the Reference Manual of <em>H5FDset_fapl_multi</em> for details.
-	  </P></td>
+	  <td><P><em>Multi driver</em> enables different types of HDF5 data and 
+            metadata to be written to separate files. These files are viewed by the
+            library as a single virtual HDF5 file with a single file address.
+            It allows maximal 6 files to be created.
+	    In sequence, these <em>Member Mapping</em> fields are for super block, 
+            B-tree, raw data, global heap, local heap,
+	    and object header.  More than one type of data can be written to the 
+            same file.</P>  
+	    <P>These <em>Member Mapping</em> fields are integer values from 1 to 6 
+            indicating how the data can be mapped to or merged with another type of
+            data.
+	        <table class=list>
+                    <tr>
+                    <th width="30%">Member Mapping</th>
+                    <th align=left>Description</th>
+                    </tr>
+                    <tr>
+                        <td align=center>1</td>
+                        <td>The super block data.</td>
+                    </tr>
+                    <tr>
+                        <td align=center>2</td>
+                        <td>The B-tree data.</td>
+                    </tr>
+                    <tr>
+                        <td align=center>3</td>
+                        <td>The raw data.</td>
+                    </tr>
+                    <tr>
+                        <td align=center>4</td>
+                        <td>The global heap data.</td>
+                    </tr>
+                    <tr>
+                        <td align=center>5</td>
+                        <td>The local heap data.</td>
+                    </tr>
+                    <tr>
+                        <td align=center>6</td>
+                        <td>The object header data.</td>
+                    </tr>
+                </table></P>
+            For example, if the third field has the value 3 and all the rest have the 
+            value 1, it means there are two files, one for raw data, one for super block,
+            B-tree, global heap, local heap, and object header.
+          </td>
 	</tr>
 
 	<tr>
@@ -897,19 +934,28 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Address of Member File</td>
-	  <td><P>Specifies the virtual address, from <em>0</em> (zero) to <em>HADDR_MAX</em>, 
+	  <td><P>Specifies the virtual address. A normally eight-byte integer with 
+            the value from <em>0</em> (zero) to maximal value, 
 	    at which the member file starts.</P></td>
 	</tr>
 
 	<tr>
 	  <td>End of Address for Member File</td>
-	  <td><P>The end of allocated address for the member file.</P></td>
+	  <td><P>The end of allocated address for the member file. A normally eight-byte 
+            integer value.</P></td>
 	</tr>
 
 	<tr>
 	  <td>Name of Member File</td>
 	  <td><P>The null-terminated name of member file.  Its length should be multiples of 
-	    8 bytes.  Additional bytes will be padded with <em>0</em>s.</P></td> 
+	    8 bytes.  Additional bytes will be padded with <em>NULL</em>s. The default naming
+            convention is <em>%%s-X.h5</em>, where <em>X</em> is one of the letters 
+            <em>s</em> (for super block), <em>b</em> (for B-tree), <em>r</em> (for raw data),
+            <em>g</em> (for global heap), <em>l</em> (for local heap), and <em>o</em> (for 
+            object header). The name for the whole HDF5 file will substitute the <em>%s</em>
+            in the string. 
+          </P>
+          </td> 
 	</tr>
       </table>
     </div>
