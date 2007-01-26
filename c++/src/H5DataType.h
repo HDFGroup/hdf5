@@ -34,16 +34,21 @@ class H5_DLLCPP DataType : public H5Object {
 	// Closes this datatype.
 	virtual void close();
 
-	// Copies an existing datatype to this datatype object
-	void copy( const DataType& like_type );
+	// Copies an existing datatype to this datatype object.
+	void copy(const DataType& like_type);
+
+	// Copies the datatype of dset to this datatype object.
+	void copy(const DataSet& dset);
 
 	// Returns the datatype class identifier.
 	H5T_class_t getClass() const;
 
 	// Commits a transient datatype to a file; this datatype becomes
 	// a named datatype which can be accessed from the location.
-	void commit( CommonFG& loc, const char* name ) const;
-	void commit( CommonFG& loc, const H5std_string& name ) const;
+	void commit( H5File& loc, const char* name);
+	void commit( H5File& loc, const H5std_string& name);
+	void commit( H5Object& loc, const char* name);
+	void commit( H5Object& loc, const H5std_string& name);
 
 	// Determines whether this datatype is a named datatype or
 	// a transient datatype.
@@ -54,7 +59,7 @@ class H5_DLLCPP DataType : public H5Object {
 	H5T_conv_t find( const DataType& dest, H5T_cdata_t **pcdata ) const;
 
 	// Converts data from between specified datatypes.
-	void convert( const DataType& dest, size_t nelmts, void *buf, void *background, PropList& plist ) const;
+	void convert( const DataType& dest, size_t nelmts, void *buf, void *background, const PropList& plist=PropList::DEFAULT) const;
 
 	// Assignment operator
 	DataType& operator=( const DataType& rhs );
@@ -118,6 +123,8 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
+   private:
+	void p_commit(hid_t loc_id, const char* name);
 };
 #ifndef H5_NO_NAMESPACE
 }

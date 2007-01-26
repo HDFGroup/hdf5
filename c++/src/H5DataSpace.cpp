@@ -136,10 +136,8 @@ void DataSpace::copy( const DataSpace& like_space )
 DataSpace& DataSpace::operator=( const DataSpace& rhs )
 {
     if (this != &rhs)
-    {
-	copy(rhs);
-	return(*this);
-    }
+        copy(rhs);
+    return(*this);
 }
 
 //--------------------------------------------------------------------------

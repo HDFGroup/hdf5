@@ -265,9 +265,19 @@ PredType& PredType::operator=( const PredType& rhs )
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // These dummy functions do not inherit from DataType - they'll
 // throw an DataTypeIException if invoked.
+void PredType::commit( H5File& loc, const char* name )
+{
+   throw DataTypeIException("PredType::commit", "Error: Attempted to commit a predefined datatype.  Invalid operation!" );
+}
+
+void PredType::commit( H5File& loc, const H5std_string& name )
+{
+   commit( loc, name.c_str());
+}
+
 void PredType::commit( H5Object& loc, const char* name )
 {
-   throw DataTypeIException("PredType::commit", "Attempting to commit a predefined datatype.  This operation is invalid" );
+   throw DataTypeIException("PredType::commit", "Error: Attempted to commit a predefined datatype.  Invalid operation!" );
 }
 
 void PredType::commit( H5Object& loc, const H5std_string& name )

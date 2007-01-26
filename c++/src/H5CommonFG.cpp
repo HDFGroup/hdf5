@@ -983,8 +983,8 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
     }
 
     // now, allocate C buffer to get the name
-    char* name_C = new char[name_len];
-    name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, name_len);
+    char* name_C = new char[name_len+1];
+    name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, name_len+1);
 
     // clean up and return the string
     H5std_string name = H5std_string(name_C);

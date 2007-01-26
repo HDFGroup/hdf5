@@ -25,12 +25,18 @@
 #include "H5PropList.h"
 #include "H5DataSpace.h"
 #include "H5Object.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5DxferProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
 #include "H5private.h"
+#include "H5AbstractDs.h"
+#include "H5DataSet.h"
+#include "H5File.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -133,6 +139,31 @@ void DataType::copy( const DataType& like_type )
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataType::copy
+///\brief	Copies the datatype of the given dataset to this datatype object
+///\param	dset - IN: Dataset 
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+///\parDescription
+///		The resulted dataset will be transient and modifiable.
+//--------------------------------------------------------------------------
+void DataType::copy(const DataSet& dset)
+{
+    // close the current data type before copying dset's datatype to this object
+    try {
+	close();
+    }
+    catch (Exception close_error) {
+	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
+    }
+
+    // call C routine to copy the datatype
+    id = H5Tcopy( dset.getId() );
+    if( id < 0 )
+	throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataType::operator=
 ///\brief	Assignment operator
 ///\param	rhs - IN: Reference to the existing datatype
@@ -175,24 +206,41 @@ bool DataType::operator==(const DataType& compared_type ) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataType::p_commit (private)
+//\brief	Commits a transient datatype to a file, creating a new
+//		named datatype
+//\param	loc_id - IN: The id of either a file, group, dataset, named 
+//			 datatype, or attribute.
+//\param	name - IN: Name of the datatype
+//\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+// Modification:
+//		Copied from DataType::commit and made into private function
+//		to be commonly used by several overloads of DataType::commit.
+//		BMR - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::p_commit(hid_t loc_id, const char* name)
+{
+   // Call C routine to commit the transient datatype
+   herr_t ret_value = H5Tcommit(loc_id, name, id);
+   if( ret_value < 0 )
+   {
+      throw DataTypeIException(inMemFunc("p_commit"), "H5Tcommit failed");
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataType::commit
 ///\brief	Commits a transient datatype to a file, creating a new
 ///		named datatype
-///\param	loc - IN: Either a file or a group
+///\param	loc - IN: A file
 ///\param	name - IN: Name of the datatype
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit(CommonFG& loc, const char* name) const
+void DataType::commit(H5File& loc, const char* name)
 {
-   hid_t loc_id = loc.getLocId(); // get location id for C API
-
-   // Call C routine to commit the transient datatype
-   herr_t ret_value = H5Tcommit( loc_id, name, id );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException(inMemFunc("commit"), "H5Tcommit failed");
-   }
+   p_commit(loc.getLocId(), name);
 }
 
 //--------------------------------------------------------------------------
@@ -202,9 +250,35 @@ void DataType::commit(CommonFG& loc, const char* name) const
 ///		argument \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit(CommonFG& loc, const H5std_string& name) const
+void DataType::commit(H5File& loc, const H5std_string& name)
 {
-   commit( loc, name.c_str() );
+   p_commit(loc.getLocId(), name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	Commits a transient datatype to a file, creating a new
+///		named datatype
+///\param	loc - IN: Either a group, dataset, named datatype, or attribute.
+///\param	name - IN: Name of the datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::commit(H5Object& loc, const char* name)
+{
+   p_commit(loc.getId(), name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::commit
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in the type of the
+///		argument \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::commit(H5Object& loc, const H5std_string& name)
+{
+   p_commit(loc.getId(), name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -264,7 +338,7 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *background, PropList& plist ) const
+void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *background, const PropList& plist ) const
 {
    // Get identifiers for C API
    hid_t dest_id = dest.getId();

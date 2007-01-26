@@ -220,6 +220,8 @@ class H5_DLLCPP PredType : public AtomType {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// These dummy functions do not inherit from DataType - they'll
 	// throw a DataTypeIException if invoked.
+	void commit( H5File& loc, const H5std_string& name );
+	void commit( H5File& loc, const char* name );
 	void commit( H5Object& loc, const H5std_string& name );
 	void commit( H5Object& loc, const char* name );
 	bool committed();
