@@ -522,7 +522,7 @@ uninstall-am: uninstall-info-am uninstall-local
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
 # How to build programs using h5c++
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP) $(LIBH5CPP_HL)
+$(EXTRA_PROG): $(H5CPP)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take

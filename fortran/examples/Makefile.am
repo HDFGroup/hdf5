@@ -53,10 +53,11 @@ attrexample.chkexe_: rwdsetexample.chkexe_
 
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)
 if BUILD_PARALLEL_CONDITIONAL
+$(EXTRA_PROG): $(H5FC_PP)
 	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 else
+$(EXTRA_PROG): $(H5FC)
 	$(H5FC) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 endif
 

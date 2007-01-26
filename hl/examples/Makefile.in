@@ -529,8 +529,9 @@ uninstall-am: uninstall-info-am uninstall-local
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
 # Additional dependencies for each program are listed below.
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5_HL)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@$(EXTRA_PROG): $(H5CC_PP)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+@BUILD_PARALLEL_CONDITIONAL_FALSE@$(EXTRA_PROG): $(H5CC)
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 
 # ex_lite2 uses a file created by ex_lite1

@@ -528,9 +528,9 @@ uninstall-am: uninstall-info-am uninstall-local
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
 # Tell automake how to build examples using h5fc
-# Additional dependencies for the examples are listed below
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5F) $(LIBH5F_HL)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@$(EXTRA_PROG): $(H5FC_PP)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+@BUILD_PARALLEL_CONDITIONAL_FALSE@$(EXTRA_PROG): $(H5FC)
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5FC) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 
 # How to create EXAMPLEDIR if it doesn't already exist

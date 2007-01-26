@@ -39,11 +39,12 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c
 
-# Additional dependencies for each program are listed below.
-$(EXTRA_PROG): $(LIBHDF5)
+# How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL
+$(EXTRA_PROG): $(H5CC_PP)
 	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 else
+$(EXTRA_PROG): $(H5CC)
 	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 

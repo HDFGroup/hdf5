@@ -533,9 +533,10 @@ uninstall-am: uninstall-info-am uninstall-local
         build-tests check-clean check-install check-p check-s check-vfd \
         install-doc lib progs tests uninstall-doc _exec_check-s _test
 
-# Additional dependencies for each program are listed below.
-$(EXTRA_PROG): $(LIBHDF5)
+# How to build examples, using installed version of h5cc
+@BUILD_PARALLEL_CONDITIONAL_TRUE@$(EXTRA_PROG): $(H5CC_PP)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+@BUILD_PARALLEL_CONDITIONAL_FALSE@$(EXTRA_PROG): $(H5CC)
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 
 # Two of the examples depend on files created by other examples.

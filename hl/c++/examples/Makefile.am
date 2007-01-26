@@ -34,7 +34,7 @@ HDF_CXX=yes
 EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++
 
 # How to build programs using h5c++
-$(EXTRA_PROG): $(LIBHDF5) $(LIBH5CPP) $(LIBH5CPP_HL)
+$(EXTRA_PROG): $(H5CPP)
 	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take
