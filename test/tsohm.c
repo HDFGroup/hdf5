@@ -150,6 +150,7 @@ static hid_t make_dtype_1(void);
 static hid_t make_dtype_2(void);
 static hid_t close_reopen_file(hid_t file, const char* filename);
 static void test_sohm_attrs(void);
+static void size2_dump_struct(size2_helper_struct *sizes);
 static void size2_verify(void);
 static void test_sohm_delete(void);
 static void test_sohm_delete_revert(void);
@@ -1280,6 +1281,32 @@ static void size2_verify_plist2(hid_t plist)
 
     ret = memcmp(&fill2, &fill2_correct, DTYPE2_SIZE);
     VERIFY(ret, 0, memcmp);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    size2_dump_struct
+ *
+ * Purpose:     A debugging function to print the contents of a
+ *              size2_helper_struct (which holds the various sizes for a
+ *              given file during the size2_helper function).
+ *
+ * Programmer:  James Laird
+ *              Friday, January 26, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+size2_dump_struct(size2_helper_struct *sizes)
+{
+  printf("   empty size: %llu\n", sizes->empty_size);
+  printf("first dataset: %llu \tdelta: %llu\n", sizes->first_dset, sizes->first_dset - sizes->empty_size);
+  printf("      dsets 1: %llu \tdelta: %llu\n", sizes->dsets1, sizes->dsets1 - sizes->first_dset);
+  printf("      dsets 2: %llu \tdelta: %llu\n", sizes->dsets2, sizes->dsets2 - sizes->dsets1);
+  printf("  interleaved: %llu \tdelta: %llu\n", sizes->interleaved, sizes->interleaved - sizes->dsets2);
+  printf("   attributes: %llu \tdelta: %llu\n", sizes->attrs1, sizes->attrs1 - sizes->interleaved);
+  printf(" attributes 2: %llu \tdelta: %llu\n", sizes->attrs2, sizes->attrs2 - sizes->attrs1);
 }
 
 /*-------------------------------------------------------------------------
@@ -3065,7 +3092,6 @@ static void test_sohm_extend_dset_helper(hid_t fcpl_id)
     hsize_t dims2[] = {5, 2};
     hsize_t out_dims[2];
     hsize_t out_maxdims[2];
-    long data[10] = {0};
     int x;
     herr_t ret;
 
