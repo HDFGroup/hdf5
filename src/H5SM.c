@@ -1664,11 +1664,11 @@ H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
      */
     if(table_vers == UFAIL)
         table_vers = f->shared->sohm_vers;
-    else if(table_vers = f->shared->sohm_vers)
+    else if(table_vers != f->shared->sohm_vers)
 	HDfprintf(stream, "*** SOHM TABLE VERSION DOESN'T MATCH VERSION IN SUPERBLOCK!\n");
     if(num_indexes == UFAIL)
         num_indexes = f->shared->sohm_nindexes;
-    else if(num_indexes = f->shared->sohm_nindexes)
+    else if(num_indexes != f->shared->sohm_nindexes)
 	HDfprintf(stream, "*** NUMBER OF SOHM INDEXES DOESN'T MATCH VALUE IN SUPERBLOCK!\n");
 
     /* Check arguments.  Version must be 0, the only version implemented so far */
