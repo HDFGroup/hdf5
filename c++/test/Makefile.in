@@ -73,8 +73,9 @@ am__DEPENDENCIES_3 = $(top_builddir)/src/libhdf5.la
 dsets_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tattr.$(OBJEXT) \
-	tfile.$(OBJEXT) th5s.$(OBJEXT) trefer.$(OBJEXT) \
-	tvlstr.$(OBJEXT) h5cpputil.$(OBJEXT)
+	tcompound.$(OBJEXT) tfile.$(OBJEXT) th5s.$(OBJEXT) \
+	trefer.$(OBJEXT) ttypes.$(OBJEXT) tvlstr.$(OBJEXT) \
+	h5cpputil.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -229,7 +230,6 @@ SIZE_T = @SIZE_T@
 STATIC_SHARED = @STATIC_SHARED@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
-TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
@@ -293,6 +293,7 @@ target_alias = @target_alias@
 # Shell commands used in Makefiles
 RM = rm -f
 CP = cp
+TIME = time
 
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
@@ -345,8 +346,8 @@ TEST_PROG = dsets testhdf5
 # The tests depend on the hdf5 library, test library, and the c++ library
 LDADD = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
 dsets_SOURCES = dsets.cpp h5cpputil.cpp
-testhdf5_SOURCES = testhdf5.cpp tattr.cpp tfile.cpp th5s.cpp trefer.cpp \
-	tvlstr.cpp h5cpputil.cpp
+testhdf5_SOURCES = testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp th5s.cpp \
+	trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 
 # Tell conclude.am that these are C++ tests.
@@ -424,10 +425,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5cpputil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcompound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/th5s.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trefer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 
 .cpp.o:

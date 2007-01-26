@@ -97,9 +97,9 @@ int test_report( int nerrors, const H5std_string& testname )
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message)
 {
-    if (GetTestVerbosity()>=VERBO_HI)
+    //if (GetTestVerbosity()>=VERBO_HI)
     {
-        cerr << "--> From " << where << " at line " << line
+        cerr << "ERROR>>> From " << where << " at line " << line
              << " in " << file_name << " - " << message << endl << endl;
     }
 }

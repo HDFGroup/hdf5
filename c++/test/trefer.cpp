@@ -12,13 +12,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/***********************************************************
-*
-* Test program:	 trefer
-*
-* Test the Reference functionality
-*
-*************************************************************/
+/*****************************************************************************
+   FILE
+   trefer.cpp - HDF5 C++ testing the functionalities associated with the C
+		Reference interface (H5R)
+
+ ***************************************************************************/
 
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
@@ -38,7 +37,7 @@
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif
 
 #include "h5cpputil.h"  // C++ utilility header file
@@ -230,7 +229,7 @@ test_reference_obj(void)
 	// Dereference group object by ctor and using dataset to specify 
 	// location
 	Group new_group(dataset, &rbuf[2]);
-	H5std_string read_comment3 = group.getComment(".", 10);
+	H5std_string read_comment3 = new_group.getComment(".", 10);
 	verify_val(read_comment3, write_comment, "Group::getComment", __LINE__, __FILE__);
 	group.close();
 
