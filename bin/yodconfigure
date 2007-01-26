@@ -18,8 +18,15 @@
 #
 # Author: Albert Cheng
 
+if [ "$1" = -f ]; then
+    FORCEMODE=yes
+    echo turn FORCEMODE to $FORCEMODE
+    shift
+fi
+
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <configure file>"
+    echo "Usage: $0 [-f] <configure file>"
+    echo "   -f   apply the change even if it has been applied already."
     exit 1
 fi
 confile=$1
@@ -29,8 +36,18 @@ if [ ! -w $confile ]; then
     exit 1
 fi
 
+ACTRY_NAME="ACTRY()"
+if grep ^"$ACTRY_NAME"$ $confile >/dev/null 2>&1 && [ "$FORCEMODE" != yes ]; then
+    echo "$0: $confile is already yodconfigure ready.  Use -f to force yodconfigure again."
+    exit 1
+fi
+
 # Insert the ACTRY function after the 1st line which is the #!/bin/sh.
 # Change all "eval $ac_try" commands to call ACTRY.
+# auto-configure have changed the ac_try syntax from 'eval $ac_try' to
+# 'eval "$ac_try"'.  Thus requiring two very similar global-substitute.
+# The single quotes around EOF tell shell NOT to expand or do substitution in
+# the body of ed input.
 #
 ed - $confile <<'EOF'
 1a
@@ -51,7 +68,9 @@ else
     $*
 fi
 }
+# === end of ACTRY inserted by yodconfigure ====
 .
+g/eval $ac_try/s/eval/eval ACTRY/
 g/eval "$ac_try"/s/eval/eval ACTRY/
 w
 q
