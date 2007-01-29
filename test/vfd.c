@@ -356,6 +356,9 @@ error:
  *              Wednesday, June 23, 2004
  *              Added test for H5Fget_filesize.
  *
+ *              Raymond Lu, 2006-11-30
+ *              Enabled the driver to read an existing file depending on 
+ *              the setting of the backing_store and file open flags.
  *-------------------------------------------------------------------------
  */
 static herr_t
