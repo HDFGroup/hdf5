@@ -172,6 +172,9 @@ New Features
 
     Library:
     --------
+       - Enabled the CORE driver to read an existing file depending on 
+            the setting of the backing_store for H5Pset_fapl_core and file 
+            open flags. - SLU - 2006/11/30
        - Added new H5Gget_info_by_idx() routine to query the information about
             a group according to the order within an index.
             - QAK - 2006/11/27
