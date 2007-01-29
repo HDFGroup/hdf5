@@ -1,6 +1,18 @@
 HDF5 version 1.8.0-alpha6snap0 currently under development
 ================================================================================
 
+===========================================================================
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+
+This code is currently using interim file format changes that will
+certainly change before the final 1.8.0 release.  Please feel free to
+test everything out (in fact, we'd welcome that!), but do _NOT_ keep any
+of the files produced as they will not be readable by later versions of
+the HDF5 software.
+
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+===========================================================================
+
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and

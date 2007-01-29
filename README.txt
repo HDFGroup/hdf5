@@ -2,6 +2,18 @@ HDF5 version 1.8.0-alpha6snap0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
+===========================================================================
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+
+This code is currently using interim file format changes that will
+certainly change before the final 1.8.0 release.  Please feel free to
+test everything out (in fact, we'd welcome that!), but do _NOT_ keep any
+of the files produced as they will not be readable by later versions of
+the HDF5 software.
+
+WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
+===========================================================================
+
 This release is almost fully functional for the entire API defined in the
 documentation, see the RELEASE.txt file in the release_docs directory for information
 specific to this release of the library.  The INSTALL file contains
@@ -10,7 +22,7 @@ file contains instructions on installing the parallel version of the
 library.  The INSTALL* files can be found in the release_docs/ directory.
 
 Documentation for this release can be found at the following URL:
-http://hdf.ncsa.uiuc.edu/HDF5/release/alpha/obtain518.html
+http://hdfgroup.org/HDF5/release/alpha/obtain518.html
 
 Four mailing lists are currently set up for use with the HDF5
 library.
@@ -24,15 +36,15 @@ library.
    hdf5announce - For announcements of HDF5 related developments,
 		  not a discussion list.
 
-   hdf5cvs      - For checkin notices of code development on the library,
+   hdf5repo     - For checkin notices of code development on the library,
 		  not a discussion list.
 
-To subscribe to a list, send mail to "majordomo@ncsa.uiuc.edu",
-with "subscribe <list>" in the _body_, not the Subject, of the message.
-E.g., subscribe hdf5 
+To subscribe to a list, send mail to "<list>-subscribe@hdfgroup.org".
+where <list> is the name of the list.
+E.g., mail hdf5-subscribe@hdfgroup.org
 
-Messages to be sent to the list should be sent to "<list>@ncsa.uiuc.edu".
+Messages to be sent to the list should be sent to "<list>@hdfgroup.org".
 
-The HDF5 website is located at http://hdf.ncsa.uiuc.edu/HDF5/
+The HDF5 website is located at http://hdfgroup.org/HDF5/
 
-Bugs should be reported to hdfhelp@ncsa.uiuc.edu.
+Bugs should be reported to help@hdfgroup.org.
