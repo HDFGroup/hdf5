@@ -169,6 +169,33 @@ void DSetCreatPropList::setDeflate( int level ) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DSetCreatPropList::setSzip
+///\brief	Sets up for the use of the SZIP compression filter.
+///\param	options_mask     - IN: A bit-mask conveying the desired SZIP 
+///			options.  Valid values are H5_SZIP_EC_OPTION_MASK 
+///			and H5_SZIP_NN_OPTION_MASK.
+///\param	pixels_per_block - IN: Number of pixels or data elements in 
+///			each data block.
+///\exception	H5::PropListIException
+///\par Description
+///		The associate C function sets an SZIP compression filter, 
+///		H5Z_FILTER_SZIP, for a dataset.  For more information about
+///		SZIP and usage, please refer to the C layer Reference 
+///		Manual at:
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetSzip
+// Programmer	Binh-Minh Ribler - Jan, 2007
+//--------------------------------------------------------------------------
+void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_per_block) const
+{
+    herr_t ret_value = H5Pset_szip(id, options_mask, pixels_per_block);
+    if( ret_value < 0 )
+    {
+	throw PropListIException("DSetCreatPropList::setSzip",
+		"H5Pset_szip failed");
+    }
+}
+
+//--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setFillValue
 ///\brief	Sets a dataset fill value
 ///\param	fvalue_type - IN: Data type for the value passed via \a value
@@ -438,7 +465,7 @@ bool DSetCreatPropList::allFiltersAvail()
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetShuffle
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setShuffle()
+void DSetCreatPropList::setShuffle() const
 {
    herr_t ret_value = H5Pset_shuffle(id);
    if( ret_value < 0 )
@@ -550,7 +577,7 @@ void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time)
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setFletcher32()
+void DSetCreatPropList::setFletcher32() const
 {
    herr_t ret_value = H5Pset_fletcher32(id);
    if( ret_value < 0 )

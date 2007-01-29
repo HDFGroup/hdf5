@@ -95,13 +95,16 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	void setExternal( const char* name, off_t offset, hsize_t size ) const;
 
 	// Adds a filter to the filter pipeline.
-	void setFilter( H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
+	void setFilter( H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0, const unsigned int cd_values[] = NULL) const;
 
 	// Sets Fletcher32 checksum of EDC for this property list.
-	void setFletcher32();
+	void setFletcher32() const;
 
 	// Sets method of the shuffle filter.
-	void setShuffle();
+	void setShuffle() const;
+
+	// Sets SZIP compression method.
+	void setSzip(unsigned int options_mask, unsigned int pixels_per_block) const;
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
