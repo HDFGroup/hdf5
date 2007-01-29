@@ -83,6 +83,7 @@ main(int argc, char *argv[])
     AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
     AddTest("types", test_types, cleanup_types,  "Generic Data Types", NULL);
     AddTest("compound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
+    AddTest("filter", test_filters, cleanup_filters,  "Various Filters", NULL);
 /* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);

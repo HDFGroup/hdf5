@@ -36,6 +36,7 @@ using std::endl;
 
 #define SUBTEST(WHAT)   {printf("   Subtest: %-52s",WHAT); fflush(stdout);}
 
+int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
 int test_report (int, const H5std_string&);
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");
@@ -96,6 +97,7 @@ class InvalidActionException : public Exception {
 void test_attr(void);
 void test_compound(void);
 void test_file(void);
+void test_filters(void);
 void test_h5s(void);
 void test_reference(void);
 void test_types(void);
@@ -105,6 +107,7 @@ void test_vlstrings(void);
 void cleanup_attr(void);
 void cleanup_compound(void);
 void cleanup_file(void);
+void cleanup_filters(void);
 void cleanup_h5s(void);
 void cleanup_reference(void);
 void cleanup_types(void);

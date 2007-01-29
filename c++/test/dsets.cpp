@@ -182,41 +182,6 @@ test_create( H5File& file)
 }   // test_create
 
 /*-------------------------------------------------------------------------
- * Function:	check_values
- *
- * Purpose:	Checks a read value against the written value.  If they are
- *		different, the function will print out a message and the
- *		different values.  This function is made to reuse the code
- *		segment that is used in various places throughout
- *		test_compression and in test_simple_io.  Where the C version
- *		of this code segment "goto error," this function will
- *		return -1.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Binh-Minh Ribler (using C code segment for checking values)
- *		Friday, February 6, 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-check_values (hsize_t i, hsize_t j, int apoint, int acheck)
-{
-    if (apoint != acheck)
-    {
-	cerr << "    Read different values than written.\n" << endl;
-	cerr << "    At index " << (unsigned long)i << "," <<
-   	(unsigned long)j << endl;
-	return -1;
-    }
-    return 0;
-} // check_values
-
-/*-------------------------------------------------------------------------
  * Function:	test_simple_io
  *
  * Purpose:	Tests simple I/O.  That is, reading and writing a complete
