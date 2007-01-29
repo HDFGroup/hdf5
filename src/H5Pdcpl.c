@@ -60,7 +60,7 @@
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
 #define H5D_CRT_FILL_VALUE_DEF     {{0, {{NULL, HADDR_UNDEF, FALSE}}}, NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_IFSET, FALSE}
-#define H5D_CRT_FILL_VALUE_CMP     H5P_dcrt_fill_value_cmp
+#define H5D_CRT_FILL_VALUE_CMP     H5P_fill_value_cmp
 /* Definitions for space allocation time state */
 #define H5D_CRT_ALLOC_TIME_STATE_SIZE   sizeof(unsigned)
 #define H5D_CRT_ALLOC_TIME_STATE_DEF    1
@@ -97,7 +97,6 @@ static herr_t H5P_dcrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_dat
 static herr_t H5P_dcrt_close(hid_t dxpl_id, void *close_data);
 
 /* Property callbacks */
-static int H5P_dcrt_fill_value_cmp(const void *value1, const void *value2, size_t size);
 static int H5P_dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static int H5P_dcrt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
 
@@ -307,7 +306,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_dcrt_fill_value_cmp
+ * Function:       H5P_fill_value_cmp
  *
  * Purpose:        Callback routine which is called whenever the fill value
  *                 property in the dataset creation property list is compared.
@@ -321,15 +320,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
-H5P_dcrt_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED size)
+int
+H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED size)
 {
     const H5O_fill_t *fill1 = (const H5O_fill_t *)_fill1,     /* Create local aliases for values */
         *fill2 = (const H5O_fill_t *)_fill2;
     int cmp_value;              /* Value from comparison */
     herr_t ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_dcrt_fill_value_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_fill_value_cmp)
 
     /* Sanity check */
     HDassert(fill1);
@@ -364,7 +363,7 @@ H5P_dcrt_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED si
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_dcrt_fill_value_cmp() */
+} /* end H5P_fill_value_cmp() */
 
 
 /*-------------------------------------------------------------------------

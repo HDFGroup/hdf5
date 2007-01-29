@@ -1740,7 +1740,7 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
     FUNC_ENTER_NOAPI(H5SM_list_debug, FAIL)
 
     HDassert(f);
-    HDassert(num_messages != HADDR_UNDEF);
+    HDassert(list_addr != HADDR_UNDEF);
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);

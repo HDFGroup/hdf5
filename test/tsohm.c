@@ -2963,8 +2963,8 @@ test_sohm_delete_revert(void)
     ret = H5Pclose(fcpl_id);
     CHECK_I(ret, "H5Pclose");
 }
-
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_sohm_extlink_helper
  *

@@ -1977,7 +1977,6 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
     const void **new_mesg, hid_t dxpl_id, unsigned *oh_flags_ptr)
 {
     size_t	size;                   /* Size of space allocated for object header */
-    htri_t      is_shared;              /* Is this a shared message? */
     unsigned    ret_value = UFAIL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_new_mesg)
@@ -1995,6 +1994,8 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
 
     /* Check for shared message */
     if((*mesg_flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(orig_type)) {
+        htri_t      is_shared;              /* Is this a shared message? */
+
         if((NULL == orig_type->is_shared) || (NULL == orig_type->get_share))
             HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable")
         if((is_shared = (orig_type->is_shared)(orig_mesg)) == FALSE) {

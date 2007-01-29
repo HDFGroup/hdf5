@@ -220,7 +220,7 @@ H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Decrement the reference count on the shared message/object */
-        if(H5O_shared_delete_new(f, dxpl_id, sh_mesg, adj_link) < 0)
+        if(H5O_shared_delete_new(f, dxpl_id, sh_mesg, H5O_SHARED_TYPE, adj_link) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for shared message")
     } /* end if */
 #ifdef H5O_SHARED_DELETE_REAL
@@ -272,7 +272,7 @@ H5O_SHARED_LINK(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Increment the reference count on the shared message/object */
-        if(H5O_shared_link_new(f, dxpl_id, sh_mesg) < 0)
+        if(H5O_shared_link_new(f, dxpl_id, sh_mesg, H5O_SHARED_TYPE) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for shared message")
     } /* end if */
 #ifdef H5O_SHARED_LINK_REAL

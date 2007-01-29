@@ -160,7 +160,7 @@
 /* Temporary macro to define which message classes are using the "new"
  * shared message "interface" for their methods.
  */
-#define H5O_NEW_SHARED(T)       (T == H5O_MSG_PLINE)
+#define H5O_NEW_SHARED(T)       ((T) == H5O_MSG_PLINE || (T) == H5O_MSG_FILL_NEW || (T) == H5O_MSG_FILL)
 
 
 /* The "message class" type */
@@ -439,8 +439,9 @@ H5_DLL void * H5O_shared_decode_new(H5F_t *f, hid_t dxpl_id, const uint8_t *buf,
 H5_DLL herr_t H5O_shared_encode_new(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg);
 H5_DLL size_t H5O_shared_size_new(const H5F_t *f, const H5O_shared_t *sh_mesg);
 H5_DLL herr_t H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
-    hbool_t adj_link);
-H5_DLL herr_t H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg);
+    const H5O_msg_class_t *mesg_type, hbool_t adj_link);
+H5_DLL herr_t H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
+    const H5O_msg_class_t *mesg_type);
 H5_DLL herr_t H5O_shared_copy_file_new(H5F_t *file_src, H5F_t *file_dst, hid_t dxpl_id,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
     H5O_copy_t *cpy_info, void *udata);

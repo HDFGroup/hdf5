@@ -1879,9 +1879,9 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
             } /* end switch */ /*lint !e788 All appropriate cases are covered */
         } /* end if */
 
- 	/* If size is 0, make it -1 for undefined. */
+        /* If "old" fill value size is 0 (undefined), map it to -1 */
         if(fill_prop->size == 0)
-	    fill_prop->size = (size_t)-1;
+            fill_prop->size = (size_t)-1;
     } /* end if */
     alloc_time_state = 0;
     if((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
@@ -1889,11 +1889,13 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
             || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
 
-    /* Set revised fill value properties */
-    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set fill value")
-    if(H5P_set(plist, H5D_CRT_ALLOC_TIME_STATE_NAME, &alloc_time_state) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set allocation time state")
+    /* Set revised fill value properties, if they are different from the defaults */
+    if(H5P_fill_value_cmp(&H5D_def_dset.dcpl_cache.fill, fill_prop, sizeof(H5O_fill_t))) {
+        if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set fill value")
+        if(H5P_set(plist, H5D_CRT_ALLOC_TIME_STATE_NAME, &alloc_time_state) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set allocation time state")
+    } /* end if */
 
     /* Get the external file list message, which might not exist.  Space is
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */

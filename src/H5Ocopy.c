@@ -524,7 +524,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                 /* Recompute shared message size (mesg_dst->native is really
                  * an H5O_shared_t)
                  */
-                if(!H5O_NEW_SHARED(mesg_dst->type))
+                if(H5O_NEW_SHARED(mesg_dst->type))
+                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+                else
                     mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
                             H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, mesg_dst->native));
             } /* end if */
@@ -535,9 +538,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                 /* Recompute native message size (msg_dest->native is no longer
                  * an H5O_shared_t)
                  */
-                if(!H5O_NEW_SHARED(mesg_dst->type))
-                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
             } /* end else */
 
             /* Mark the message in the destination as dirty, so it'll get encoded when the object header is flushed */
@@ -591,7 +593,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      */
     if(oh_dst->version > H5O_VERSION_1)
         HDmemcpy(current_pos, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC); 
-
     current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
     /* Copy each message that wasn't dirtied above */
@@ -604,8 +605,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             while(deleted[mesgno + null_msgs]) {
                 ++null_msgs;
                 HDassert(mesgno + null_msgs < oh_src->nmesgs);
-            }
-        }
+            } /* end while */
+        } /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
@@ -615,10 +616,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             /* Copy the message header plus the message's raw data. */
             HDmemcpy(current_pos, mesg_src->raw - msghdr_size,
                     msghdr_size + mesg_src->raw_size);
-        }
+        } /* end if */
         mesg_dst->raw = current_pos + msghdr_size;
         current_pos += mesg_dst->raw_size + msghdr_size;
-    }
+    } /* end for */
 
     /* Make sure we filled the chunk, except for room at the end for a checksum */
     HDassert(current_pos + H5O_SIZEOF_CHKSUM_OH(oh_dst) == dst_oh_size + oh_dst->chunk[0].image);
@@ -653,8 +654,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             while(deleted[mesgno + null_msgs]) {
                 ++null_msgs;
                 HDassert(mesgno + null_msgs < oh_src->nmesgs);
-            }
-        }
+            } /* end while */
+        } /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);

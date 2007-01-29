@@ -3852,10 +3852,10 @@ H5Pequal(hid_t id1, hid_t id2)
     H5TRACE2("t", "ii", id1, id2);
 
     /* Check arguments. */
-    if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
+    if((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
             || (H5I_GENPROP_LST != H5I_get_type(id2) && H5I_GENPROP_CLS != H5I_get_type(id2)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects")
-    if (H5I_get_type(id1) != H5I_get_type(id2))
+    if(H5I_get_type(id1) != H5I_get_type(id2))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects")
     if(NULL == (obj1 = H5I_object(id1)) || NULL == (obj2 = H5I_object(id2)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist")
@@ -3868,7 +3868,7 @@ H5Pequal(hid_t id1, hid_t id2)
     /* Must be property classes */
     else {
         if(H5P_cmp_class(obj1, obj2) == 0)
-            ret_value=TRUE;
+            ret_value = TRUE;
     } /* end else */
 
 done:

@@ -207,6 +207,69 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_shared_link_adj_new
+ *
+ * Purpose:	Changes the link count for the object referenced by a shared
+ *              message.
+ *
+ *              This function changes the object header link count and is
+ *              only relevant for committed messages.  Messages shared in
+ *              the heap are re-shared each time they're written, so their
+ *              reference count is stored in the file-wide shared message
+ *              index and is changed in a different place in the code.
+ *
+ * Return:	Success:	New link count, or 1 for messages in heap
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Sep 26 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5O_shared_link_adj_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
+    const H5O_msg_class_t *type, int adjust)
+{
+    int ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_adj_new)
+
+    /* check args */
+    HDassert(f);
+    HDassert(shared);
+
+    /*
+     * The shared message is stored in some other object header.
+     * The other object header must be in the same file as the
+     * new object header. Adjust the reference count on that
+     * object header.
+     */
+    if(shared->flags & H5O_COMMITTED_FLAG) {
+        if(shared->u.oloc.file->shared != f->shared)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")
+        if((ret_value = H5O_link(&(shared->u.oloc), adjust, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
+    } /* end if */
+    else {
+        if(adjust < 0) {
+            if(H5SM_try_delete(f, dxpl_id, type->id, shared) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
+        } /* end if */
+
+        /* Messages in the heap don't have file object ref counts; they
+         * return 1 as a dummy value.
+         */
+        HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
+        ret_value = 1;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_link_adj_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_shared_link_adj
  *
  * Purpose:	Changes the link count for the object referenced by a shared
@@ -246,21 +309,19 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared, int adj
      * new object header. Adjust the reference count on that
      * object header.
      */
-    if(shared->flags & H5O_COMMITTED_FLAG)
-    {
+    if(shared->flags & H5O_COMMITTED_FLAG) {
         if(shared->u.oloc.file->shared != f->shared)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")
         if((ret_value = H5O_link(&(shared->u.oloc), adjust, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
-    }
-    else
-    {
+    } /* end if */
+    else {
         /* Messages in the heap don't have file object ref counts; they
          * return 1 as a dummy value.
          */
         HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
         ret_value = 1;
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -672,7 +733,8 @@ H5O_shared_size(const H5F_t *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg, hbool_t adj_link)
+H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
+    const H5O_msg_class_t *type, hbool_t adj_link)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -693,7 +755,7 @@ H5O_shared_delete_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg, hboo
 
     /* Decrement the reference count on the shared object, if requested */
     if(adj_link)
-        if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, -1) < 0)
+        if(H5O_shared_link_adj_new(f, dxpl_id, sh_mesg, type, -1) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
@@ -760,7 +822,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg)
+H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
+    const H5O_msg_class_t *type)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -771,7 +834,7 @@ H5O_shared_link_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg)
     HDassert(sh_mesg);
 
     /* Increment the reference count on the shared object */
-    if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, 1) < 0)
+    if(H5O_shared_link_adj_new(f, dxpl_id, sh_mesg, type, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
@@ -877,7 +940,7 @@ done:
 herr_t
 H5O_shared_copy_file_new(H5F_t *file_src, H5F_t *file_dst, hid_t dxpl_id,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-    H5O_copy_t *cpy_info, void *udata)
+    H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     const H5O_shared_t  *shared_src = (const H5O_shared_t *)_native_src; /* Alias to shared info in native source */
     H5O_shared_t        *shared_dst = (H5O_shared_t *)_native_dst; /* Alias to shared info in native destination message */
