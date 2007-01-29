@@ -48,7 +48,7 @@ const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000}
 #define NAME_BUF_SIZE 512
 
 /* How much overhead counts as "not much" when converting B-trees, etc. */
-#define OVERHEAD_ALLOWED 1.1
+#define OVERHEAD_ALLOWED 1.15
 
 #define NUM_DATASETS 10
 #define NUM_ATTRIBUTES 100
@@ -1282,6 +1282,7 @@ static void size2_verify_plist2(hid_t plist)
     ret = memcmp(&fill2, &fill2_correct, DTYPE2_SIZE);
     VERIFY(ret, 0, memcmp);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    size2_dump_struct
@@ -1308,6 +1309,7 @@ size2_dump_struct(size2_helper_struct *sizes)
   printf("   attributes: %llu \tdelta: %llu\n", sizes->attrs1, sizes->attrs1 - sizes->interleaved);
   printf(" attributes 2: %llu \tdelta: %llu\n", sizes->attrs2, sizes->attrs2 - sizes->attrs1);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    size2_helper

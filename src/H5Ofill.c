@@ -96,20 +96,20 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                     */
     "fill",                     /*message name for debugging            */
     sizeof(H5O_fill_t),		/*native message size                   */
-    H5O_fill_decode,		/*decode message                        */
-    H5O_fill_encode,		/*encode message                        */
+    H5O_fill_shared_decode,		/*decode message                        */
+    H5O_fill_shared_encode,		/*encode message                        */
     H5O_fill_new_copy,          /*copy the native value                 */
-    H5O_fill_size,		/*raw message size			*/
+    H5O_fill_shared_size,		/*raw message size			*/
     H5O_fill_new_reset,         /*free internal memory			*/
     H5O_fill_new_free,		/* free method				*/
-    NULL,			/* file delete method			*/
-    NULL,			/* link method				*/
+    H5O_fill_shared_delete,	/* file delete method			*/
+    H5O_fill_shared_link,	/* link method				*/
     H5O_fill_new_get_share,	/* get share method			*/
     H5O_fill_new_set_share,	/* set share method			*/
     NULL,		    	/*can share method		*/
     H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
-    NULL,			/* copy native value to file		*/
+    H5O_fill_shared_copy_file,	/* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
