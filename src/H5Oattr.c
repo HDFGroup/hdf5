@@ -215,24 +215,9 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
     if(NULL == (attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if(flags & H5O_ATTR_FLAG_SPACE_SHARED) {
-	H5O_shared_t *shared;   /* Shared information */
-
-        /* Get the shared information */
-	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, mesg_flags, p)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
-
-        /* Get the actual datatype information */
-        if((extent = (H5S_extent_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_SDSPACE, NULL))==NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
-
-        /* Free the shared information */
-        H5O_msg_free_real(H5O_MSG_SHARED, shared);
-    } /* end if */
-    else {
-        if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, mesg_flags, p)) == NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
-    } /* end else */
+    /* Decode attribute's dataspace extent */
+    if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_SPACE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), p)) == NULL)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
     /* Copy the extent information to the dataspace */
     HDmemcpy(&(attr->ds->extent), extent, sizeof(H5S_extent_t));
@@ -668,8 +653,7 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
      */
     if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
-    if(tri_ret > 0)
-    {
+    else if(tri_ret > 0) {
         /* Check whether datatype is shared */
         if(H5T_committed(attr->dt)) {
             /* Decrement the reference count on the shared datatype, if requested */
@@ -685,15 +669,9 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
         } /* end else */
     } /* end if */
 
-    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if dataspace is shared")
-    if(tri_ret > 0)
-    {
-        if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
-            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from dataspace")
-        if(H5SM_try_delete(f, dxpl_id, H5O_SDSPACE_ID, &sh_mesg) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_SOHM, FAIL, "can't remove dataspace from shared storage")
-    } /* end if */
+    /* Decrement reference count on dataspace in file */
+    if((H5O_MSG_SDSPACE->del)(f, dxpl_id, attr->ds, adj_link) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust dataspace link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

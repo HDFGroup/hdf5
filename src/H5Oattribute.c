@@ -226,9 +226,6 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_create)
-#ifdef QAK
-HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name);
-#endif /* QAK */
 
     /* Check arguments */
     HDassert(loc);
@@ -280,19 +277,11 @@ HDfprintf(stderr, "%s: adding attribute, attr->name = '%s'\n", FUNC, attr->name)
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
-#ifdef QAK
-HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
-HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
-HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
-#endif /* QAK */
     /* Check for switching to "dense" attribute storage */
     if(oh->version > H5O_VERSION_1 && oh->nattrs == oh->max_compact &&
             !H5F_addr_defined(oh->attr_fheap_addr)) {
         H5O_iter_cvt_t udata;           /* User data for callback */
         H5O_mesg_operator_t op;         /* Wrapper for operator */
-#ifdef QAK
-HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
-#endif /* QAK */
 
         /* Create dense storage for attributes */
         if(H5A_dense_create(loc->file, dxpl_id, oh) < 0)
@@ -324,9 +313,6 @@ HDfprintf(stderr, "%s: converting attributes to dense storage\n", FUNC);
     /* Check for storing attribute with dense storage */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {
         /* Insert attribute into dense storage */
-#ifdef QAK
-HDfprintf(stderr, "%s: inserting attribute to dense storage\n", FUNC);
-#endif /* QAK */
         if(H5A_dense_insert(loc->file, dxpl_id, oh, mesg_flags, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
     } /* end if */
@@ -447,12 +433,6 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
 
-#ifdef QAK
-HDfprintf(stderr, "%s: opening attribute to new-style object header\n", FUNC);
-HDfprintf(stderr, "%s: oh->nattrs = %Hu\n", FUNC, oh->nattrs);
-HDfprintf(stderr, "%s: oh->max_compact = %u\n", FUNC, oh->max_compact);
-HDfprintf(stderr, "%s: oh->min_dense = %u\n", FUNC, oh->min_dense);
-#endif /* QAK */
     /* Check for opening attribute with dense storage */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {
         /* Open attribute in dense storage */

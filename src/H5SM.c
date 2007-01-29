@@ -234,7 +234,9 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
         case H5O_DTYPE_ID:
             *type_flag = H5O_MESG_DTYPE_FLAG;
             break;
+#ifdef NOT_YET
         case H5O_FILL_ID:
+#endif /* NOT_YET */
         case H5O_FILL_NEW_ID:
             *type_flag = H5O_MESG_FILL_FLAG;
             break;
@@ -753,7 +755,7 @@ done:
         HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to unprotect SOHM index")
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5SM_convert_btree_to_list() */
 
 
 /*-------------------------------------------------------------------------
@@ -865,15 +867,17 @@ static herr_t
 H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
      unsigned type_id, void *mesg, unsigned *cache_flags_ptr)
 {
+    H5O_shared_t *sh_mesg = (H5O_shared_t *)mesg;       /* Pointer to message's shared message info */
+    unsigned old_sh_mesg_flags;             /* Message's current shared message flags */
     H5SM_list_t           *list = NULL;     /* List index */
-    H5SM_mesg_key_t       key;      /* Key used to search the index */
+    H5SM_mesg_key_t       key;              /* Key used to search the index */
     H5O_shared_t          shared;           /* Shared H5O message */
     hsize_t               list_pos;         /* Position in a list index */
     hbool_t               found = FALSE;    /* Was the message in the index? */
-    H5HF_t                *fheap = NULL;         /* Fractal heap handle */
+    H5HF_t                *fheap = NULL;    /* Fractal heap handle */
     size_t                buf_size;         /* Size of the encoded message */
-    void *                encoding_buf=NULL; /* Buffer for encoded message */
-    size_t               empty_pos=UFAIL;   /* Empty entry in list */
+    void *                encoding_buf = NULL; /* Buffer for encoded message */
+    size_t                empty_pos = UFAIL; /* Empty entry in list */
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_write_mesg, FAIL)
@@ -882,20 +886,24 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(header);
     HDassert(header->index_type != H5SM_BADTYPE);
 
-    /* Set up a shared message so that we can make this message shared once it's
-     * written to the index.  This message is always stored to the heap, not to
-     * an object header.
+    /* Preserve message's shared message info while getting the
+     *  "real" encoded size & buffer (*ick* - QAK)
+     *  (XXX: Harmless but ugly for message classes that aren't using shared
+     *          message method interface yet - QAK)
      */
-    shared.flags = H5O_SHARED_IN_HEAP_FLAG;
+    old_sh_mesg_flags = sh_mesg->flags;
+    sh_mesg->flags = 0;
 
     /* Encode the message to be written */
     if((buf_size = H5O_msg_raw_size(f, type_id, mesg)) <= 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADSIZE, FAIL, "can't find message size")
     if(NULL == (encoding_buf = H5MM_calloc(buf_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding")
-
     if(H5O_msg_encode(f, type_id, (unsigned char *)encoding_buf, mesg) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "can't encode message to be shared")
+
+    /* Restore message's shared message info (*ick* - QAK) */
+    sh_mesg->flags = old_sh_mesg_flags;
 
     /* Open the fractal heap for this index */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
@@ -917,7 +925,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(header->index_type == H5SM_LIST)
     {
         /* The index is a list; get it from the cache */
-        if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* See if the message is already in the index and get its location.
@@ -933,8 +941,8 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
             /* Set up the shared location to point to the shared location */
             shared.u.heap_id = list->messages[list_pos].fheap_id;
             found = TRUE;
-        }
-    }
+        } /* end if */
+    } /* end if */
     else /* Index is a B-tree */
     {
         HDassert(header->index_type == H5SM_BTREE);
@@ -943,7 +951,13 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         /* If it succeeds, the heap_id in the shared struct will be set */
         if(H5B2_modify(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_incr_ref, &shared.u.heap_id) >= 0)
 	    found = TRUE;
-    }
+    } /* end else */
+
+    /* Set up a shared message so that we can make this message shared once it's
+     * written to the index.  This message is always stored to the heap, not to
+     * an object header.
+     */
+    shared.flags = H5O_SHARED_IN_HEAP_FLAG;
 
     /* If the message isn't in the list, add it */
     if(!found)
@@ -1239,7 +1253,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     if(header->index_type == H5SM_LIST)
     {
         /* If the index is stored as a list, get it from the cache */
-        if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
+        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, NULL, header, H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
@@ -1280,9 +1294,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
 
         /* Remove the message from the index */
         if(header->index_type == H5SM_LIST)
-        {
             list->messages[list_pos].ref_count = 0;
-        }
         else
         {
             if(H5B2_remove(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, NULL, NULL) < 0)
@@ -1756,7 +1768,7 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
     header.index_addr = list_addr;
 
     /* Get the list from the cache */
-    if (NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, list_addr, NULL, &header, H5AC_READ)))
+    if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, list_addr, NULL, &header, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
     HDfprintf(stream, "%*sShared Message List Index...\n", indent, "");

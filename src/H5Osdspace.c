@@ -30,7 +30,7 @@ static herr_t H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_sdspace_copy(const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_reset(void *_mesg);
-static herr_t H5O_sdspace_free (void *_mesg);
+static herr_t H5O_sdspace_free(void *_mesg);
 static void *H5O_sdspace_get_share(const void *_mesg, H5O_shared_t *sh);
 static herr_t H5O_sdspace_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_sdspace_is_shared(const void *_mesg);
@@ -60,20 +60,20 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
     "dataspace",	    	/* message name for debugging	   	*/
     sizeof(H5S_extent_t),   	/* native message size		    	*/
-    H5O_sdspace_decode,	    	/* decode message			*/
-    H5O_sdspace_encode,	    	/* encode message			*/
+    H5O_sdspace_shared_decode,	/* decode message			*/
+    H5O_sdspace_shared_encode,	/* encode message			*/
     H5O_sdspace_copy,	    	/* copy the native value		*/
-    H5O_sdspace_size,	    	/* size of symbol table entry	    	*/
+    H5O_sdspace_shared_size,	/* size of symbol table entry	    	*/
     H5O_sdspace_reset,	    	/* default reset method		    	*/
     H5O_sdspace_free,		/* free method				*/
-    NULL,		        /* file delete method		*/
-    NULL,			/* link method			*/
+    H5O_sdspace_shared_delete,	/* file delete method		*/
+    H5O_sdspace_shared_link,	/* link method			*/
     H5O_sdspace_get_share,    	/* get share method			*/
     H5O_sdspace_set_share,	/* set share method			*/
     NULL,		    	/*can share method		*/
     H5O_sdspace_is_shared,	/* is shared method			*/
     H5O_sdspace_pre_copy_file,	/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
+    H5O_sdspace_shared_copy_file,/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
