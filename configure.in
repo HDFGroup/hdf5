@@ -1876,6 +1876,7 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
+  /bin/rm a.out
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
