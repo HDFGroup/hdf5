@@ -196,7 +196,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 done:
     /* Release resources */
     if(buf && buf != mesg_buf)
-        H5FL_BLK_FREE(ser_mesg, buf);
+        buf = H5FL_BLK_FREE(ser_mesg, buf);
     if(native_mesg)
         H5O_msg_free(type->id, native_mesg);
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
@@ -218,7 +218,7 @@ done:
  *              reference count is stored in the file-wide shared message
  *              index and is changed in a different place in the code.
  *
- * Return:	Success:	New link count, or 1 for messages in heap
+ * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -227,11 +227,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static herr_t
 H5O_shared_link_adj_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type, int adjust)
 {
-    int ret_value;     /* Return value */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_adj_new)
 
@@ -239,29 +239,33 @@ H5O_shared_link_adj_new(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     HDassert(f);
     HDassert(shared);
 
-    /*
-     * The shared message is stored in some other object header.
-     * The other object header must be in the same file as the
-     * new object header. Adjust the reference count on that
-     * object header.
-     */
+    /* Check for type of shared message */
     if(shared->flags & H5O_COMMITTED_FLAG) {
+        /*
+         * The shared message is stored in some other object header.
+         * The other object header must be in the same file as the
+         * new object header. Adjust the reference count on that
+         * object header.
+         */
         if(shared->u.oloc.file->shared != f->shared)
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")
-        if((ret_value = H5O_link(&(shared->u.oloc), adjust, dxpl_id)) < 0)
+        if(H5O_link(&(shared->u.oloc), adjust, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
     } /* end if */
     else {
+        HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
+
+        /* Check for decrementing reference count on shared message */
         if(adjust < 0) {
             if(H5SM_try_delete(f, dxpl_id, type->id, shared) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to delete message from SOHM table")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to delete message from SOHM table")
         } /* end if */
-
-        /* Messages in the heap don't have file object ref counts; they
-         * return 1 as a dummy value.
-         */
-        HDassert(shared->flags & H5O_SHARED_IN_HEAP_FLAG);
-        ret_value = 1;
+        /* Check for incrementing reference count on message */
+        else if(adjust > 0) {
+            /* Casting away const OK -QAK */
+            if(H5SM_try_share(f, dxpl_id, type->id, (void *)shared) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "error trying to share message")
+        } /* end if */
     } /* end else */
 
 done:
@@ -395,6 +399,7 @@ H5O_shared_decode_new(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg
 
             H5F_addr_decode(f, &buf, &sh_mesg.u.oloc.addr);
             sh_mesg.u.oloc.file = f;
+            sh_mesg.u.oloc.holding_file = FALSE;
         } /* end else */
     } /* end else if */
 
@@ -436,7 +441,7 @@ H5O_shared_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     HDassert(buf);
 
     /* Decode */
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_shared_t))))
+    if(NULL == (mesg = (H5O_shared_t *)H5MM_calloc(sizeof(H5O_shared_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
@@ -625,7 +630,7 @@ H5O_shared_copy(const void *_mesg, void *_dest)
 
     /* check args */
     HDassert(mesg);
-    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_shared_t))))
+    if(!dest && NULL == (dest = (H5O_shared_t *)H5MM_malloc(sizeof(H5O_shared_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
@@ -1020,7 +1025,7 @@ H5O_shared_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
      */
     if(shared_src->flags & H5O_COMMITTED_FLAG) {
         /* Allocate space for the destination message */
-        if(NULL == (shared_dst = H5MM_malloc(sizeof(H5O_shared_t))))
+        if(NULL == (shared_dst = (H5O_shared_t *)H5MM_malloc(sizeof(H5O_shared_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Reset group entry for new object */

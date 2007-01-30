@@ -375,7 +375,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         UINT32DECODE(p, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if(NULL == (pline = H5O_msg_decode(hdr->f, dxpl_id, H5O_PLINE_ID, p)))
+        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, dxpl_id, H5O_PLINE_ID, p)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
         p += hdr->filter_len;
 
@@ -416,7 +416,7 @@ HDfprintf(stderr, "%s: hdr->fspace = %p\n", FUNC, hdr->fspace);
 
 done:
     if(buf)
-        H5FL_BLK_FREE(header_block, buf);
+        buf = H5FL_BLK_FREE(header_block, buf);
     if(!ret_value && hdr)
         (void)H5HF_cache_hdr_dest(f, hdr);
 
@@ -530,7 +530,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
             UINT32ENCODE(p, hdr->pline_root_direct_filter_mask);
 
             /* Encode I/O filter information */
-            if(H5O_msg_encode(hdr->f, H5O_PLINE_ID, p, &(hdr->pline)) < 0)
+            if(H5O_msg_encode(hdr->f, H5O_PLINE_ID, FALSE, p, &(hdr->pline)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "can't encode I/O pipeline fiters")
             p += hdr->filter_len;
         } /* end if */
@@ -546,7 +546,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_HDR, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap header to disk")
 
-        H5FL_BLK_FREE(header_block, buf);
+        buf = H5FL_BLK_FREE(header_block, buf);
 
 	hdr->dirty = FALSE;
 	hdr->cache_info.is_dirty = FALSE;
@@ -866,7 +866,7 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
 done:
     /* Free buffer */
 /* XXX: Keep buffer around? */
-    H5FL_BLK_FREE(indirect_block, buf);
+    buf = H5FL_BLK_FREE(indirect_block, buf);
 
     if(!ret_value && iblock)
         (void)H5HF_cache_iblock_dest(f, iblock);
@@ -1013,7 +1013,7 @@ HDfprintf(stderr, "%s: iblock->filt_ents[%Zu] = {%Zu, %x}\n", FUNC, u, iblock->f
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap indirect block to disk")
 
         /* Free buffer */
-        H5FL_BLK_FREE(indirect_block, buf);
+        buf = H5FL_BLK_FREE(indirect_block, buf);
 
         /* Reset dirty flags */
 	iblock->cache_info.is_dirty = FALSE;
@@ -1620,7 +1620,7 @@ HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
 
     /* Free block's buffer */
-    H5FL_BLK_FREE(direct_block, dblock->blk);
+    dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
 
     /* Free fractal heap direct block info */
     H5FL_FREE(H5HF_direct_t, dblock);

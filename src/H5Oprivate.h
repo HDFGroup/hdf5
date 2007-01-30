@@ -422,7 +422,8 @@ H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequ
     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
     void *op_data, hid_t dxpl_id);
-H5_DLL size_t H5O_msg_raw_size(const H5F_t *f, unsigned type_id, const void *mesg);
+H5_DLL size_t H5O_msg_raw_size(const H5F_t *f, unsigned type_id,
+    hbool_t disable_shared, const void *mesg);
 H5_DLL size_t H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *mesg,
     size_t extra_raw);
 H5_DLL void *H5O_msg_get_share(unsigned type_id, const void *mesg, H5O_shared_t *share);
@@ -430,7 +431,8 @@ H5_DLL htri_t H5O_msg_is_shared(unsigned type_id, const void *mesg);
 H5_DLL htri_t H5O_msg_can_share(unsigned type_id, const void *mesg);
 H5_DLL herr_t H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg);
 H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
-H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, unsigned char *buf, const void *obj);
+H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
+    unsigned char *buf, const void *obj);
 H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
     const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg);

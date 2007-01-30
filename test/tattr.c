@@ -2918,11 +2918,11 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-    } /* end for */
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    } /* end for */
 
     /* Close dataspaces */
     ret = H5Sclose(sid);
@@ -3359,11 +3359,11 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-    } /* end for */
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    } /* end for */
 
     /* Close dataspaces */
     ret = H5Sclose(sid);
@@ -3722,11 +3722,11 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-    } /* end for */
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    } /* end for */
 
     /* Close dataspaces */
     ret = H5Sclose(sid);
@@ -4071,11 +4071,11 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-    } /* end for */
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    } /* end for */
 
     /* Close dataspaces */
     ret = H5Sclose(sid);

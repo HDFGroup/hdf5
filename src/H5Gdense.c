@@ -394,7 +394,7 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
 #endif /* QAK */
 
     /* Find out the size of buffer needed for serialized link */
-    if((link_size = H5O_msg_raw_size(f, H5O_LINK_ID, lnk)) == 0)
+    if((link_size = H5O_msg_raw_size(f, H5O_LINK_ID, FALSE, lnk)) == 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size")
 #ifdef QAK
 HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDstrlen(lnk->name), link_size);
@@ -409,7 +409,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
         link_ptr = link_buf;
 
     /* Create serialized form of link */
-    if(H5O_msg_encode(f, H5O_LINK_ID, link_ptr, lnk) < 0)
+    if(H5O_msg_encode(f, H5O_LINK_ID, FALSE, link_ptr, lnk) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode link")
 
     /* Open the fractal heap */

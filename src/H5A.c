@@ -291,7 +291,6 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
     H5A_t	    *attr = NULL;
-    H5O_shared_t     sh_mesg;
     htri_t           tri_ret;           /* htri_t return value */
     hid_t	     ret_value;         /* Return value */
 
@@ -302,9 +301,6 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     HDassert(name);
     HDassert(type);
     HDassert(space);
-
-    /* Reset shared message information */
-    HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
 
     /* Check for existing attribute with same name */
     /* (technically, the "attribute create" operation will fail for a duplicated
@@ -373,50 +369,22 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
 
 
+    /* Check whether datatype is committed & increment ref count
+     * (to maintain ref. count incr/decr similarity with "shared message"
+     *      type of datatype sharing)
+     */
+    if(H5T_committed(attr->dt)) {
+        /* Increment the reference count on the shared datatype */
+        if(H5T_link(attr->dt, 1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+    } /* end if */
+
     /* Compute the size of pieces on disk.  This is either the size of the
      * datatype and dataspace messages themselves, or the size of the "shared"
      * messages if either or both of them are shared.
      */
-    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) == FALSE) {
-        /* Message wasn't shared after all. Use size of normal datatype
-         * message. */
-        attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, attr->dt);
-    } /* end if */
-    else if(tri_ret > 0) {
-        /* Check whether datatype is committed & increment ref count */
-        /* (to maintain ref. count incr/decr similarity with "shared message"
-         *      type of datatype sharing)
-         */
-        if(H5T_committed(attr->dt)) {
-            /* Increment the reference count on the shared datatype */
-            if(H5T_link(attr->dt, 1, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-        } /* end if */
-
-        /* Message is shared.  Use size of shared message */
-        if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
-
-        attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
-    } /* end else-if */
-    else
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if dataspace is shared")
-
-    /* Perform the same test for the dataspace message */
-    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds)) == FALSE) {
-        /* Message wasn't shared after all. Use size of normal dataspace
-         * message. */
-        attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, attr->ds);
-    } /* end if */
-    else if(tri_ret > 0) {
-        /* Message is shared.  Use size of shared message */
-        if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr->ds, &sh_mesg))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't get size of shared message")
-
-        attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SHARED_ID, &sh_mesg);
-    } /* end else-if */
-    else
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "couldn't determine if datatype is shared")
+    attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, FALSE, attr->dt);
+    attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, FALSE, attr->ds);
 
     HDassert(attr->dt_size > 0);
     HDassert(attr->ds_size > 0);

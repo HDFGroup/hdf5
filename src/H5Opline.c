@@ -151,7 +151,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
     /* Allocate array for filters */
     pline->nalloc = pline->nused;
-    if(NULL == (pline->filter = H5MM_calloc(pline->nalloc * sizeof(pline->filter[0]))))
+    if(NULL == (pline->filter = (H5Z_filter_info_t *)H5MM_calloc(pline->nalloc * sizeof(pline->filter[0]))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Decode filters */
@@ -184,7 +184,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
             /* Allocate space for the filter name, or use the internal buffer */
             if(actual_name_length > H5Z_COMMON_NAME_LEN) {
-                filter->name = H5MM_malloc(actual_name_length);
+                filter->name = (char *)H5MM_malloc(actual_name_length);
                 if(NULL == filter->name)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name")
             } /* end if */
@@ -201,7 +201,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
             /* Allocate space for the client data elements, or use the internal buffer */
             if(filter->cd_nelmts > H5Z_COMMON_CD_VALUES) {
-                filter->cd_values = H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
+                filter->cd_values = (unsigned *)H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
                 if(NULL == filter->cd_values)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data")
             } /* end if */
@@ -374,7 +374,7 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
     dst->nalloc = dst->nused;
     if(dst->nalloc) {
         /* Allocate array to hold filters */
-	if(NULL == (dst->filter = H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]))))
+	if(NULL == (dst->filter = (H5Z_filter_info_t *)H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Deep-copy filters */
@@ -390,7 +390,7 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
 
                 /* Allocate space for the filter name, or use the internal buffer */
                 if(namelen > H5Z_COMMON_NAME_LEN) {
-                    dst->filter[i].name = H5MM_malloc(namelen);
+                    dst->filter[i].name = (char *)H5MM_malloc(namelen);
                     if(NULL == dst->filter[i].name)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name")
 
@@ -405,7 +405,7 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
             if(src->filter[i].cd_nelmts > 0) {
                 /* Allocate space for the client data elements, or use the internal buffer */
                 if(src->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES) {
-                    if(NULL == (dst->filter[i].cd_values = H5MM_malloc(src->filter[i].cd_nelmts* sizeof(unsigned))))
+                    if(NULL == (dst->filter[i].cd_values = (unsigned *)H5MM_malloc(src->filter[i].cd_nelmts* sizeof(unsigned))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
                     HDmemcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
@@ -529,16 +529,16 @@ H5O_pline_reset(void *mesg)
         if(pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
             HDassert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
         if(pline->filter[i].name != pline->filter[i]._name)
-            pline->filter[i].name = H5MM_xfree(pline->filter[i].name);
+            pline->filter[i].name = (char *)H5MM_xfree(pline->filter[i].name);
         if(pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
             HDassert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
         if(pline->filter[i].cd_values != pline->filter[i]._cd_values)
-            pline->filter[i].cd_values = H5MM_xfree(pline->filter[i].cd_values);
+            pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
     } /* end for */
 
     /* Free filter array */
     if(pline->filter)
-        pline->filter = H5MM_xfree(pline->filter);
+        pline->filter = (H5Z_filter_info_t *)H5MM_xfree(pline->filter);
 
     /* Reset # of filters */
     pline->nused = pline->nalloc = 0;
@@ -606,7 +606,7 @@ H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *ty
      * the object copying process.
      */
     if(udata)
-        if(NULL == (udata->src_pline = H5O_pline_copy(pline_src, NULL)))
+        if(NULL == (udata->src_pline = (H5O_pline_t *)H5O_pline_copy(pline_src, NULL)))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to copy")
 
 done:

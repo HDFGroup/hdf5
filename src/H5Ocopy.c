@@ -314,7 +314,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(cpy_info);
 
     /* Get source object header */
-    if(NULL == (oh_src = H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh_src = (H5O_t *)H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Get pointer to object class for this object */
@@ -380,7 +380,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-     if(NULL == (deleted = HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+     if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
      HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
@@ -526,10 +526,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                  */
                 if(H5O_NEW_SHARED(mesg_dst->type))
                     mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, FALSE, mesg_dst->native));
                 else
                     mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                            H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, mesg_dst->native));
+                            H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, FALSE, mesg_dst->native));
             } /* end if */
             else if(shared == FALSE && (mesg_dst->flags & H5O_MSG_FLAG_SHARED)) {
                 /* Unset shared flag */
@@ -539,7 +539,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                  * an H5O_shared_t)
                  */
                 mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, mesg_dst->native));
+                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, FALSE, mesg_dst->native));
             } /* end else */
 
             /* Mark the message in the destination as dirty, so it'll get encoded when the object header is flushed */
@@ -592,7 +592,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * header.  This will be written when the header is flushed to disk.
      */
     if(oh_dst->version > H5O_VERSION_1)
-        HDmemcpy(current_pos, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC); 
+        HDmemcpy(current_pos, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC); 
     current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
     /* Copy each message that wasn't dirtied above */
@@ -936,7 +936,7 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     HDassert(dst_name);
 
     /* Get the copy property list */
-    if(NULL == (ocpy_plist = H5I_object(ocpypl_id)))
+    if(NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve the copy parameters */
@@ -1106,7 +1106,7 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(src_oloc.file, dxpl_id, &hobjid, NULL, &buf_size)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(src_oloc.file, dxpl_id, &hobjid, NULL, &buf_size)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */

@@ -66,20 +66,20 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,		/* message id number		*/
     "datatype",			/* message name for debugging	*/
     sizeof(H5T_t),		/* native message size		*/
-    H5O_dtype_decode,		/* decode message		*/
-    H5O_dtype_encode,		/* encode message		*/
+    H5O_dtype_shared_decode,	/* decode message		*/
+    H5O_dtype_shared_encode,	/* encode message		*/
     H5O_dtype_copy,		/* copy the native value	*/
-    H5O_dtype_size,		/* size of raw message		*/
+    H5O_dtype_shared_size,	/* size of raw message		*/
     H5O_dtype_reset,		/* reset method			*/
     H5O_dtype_free,		/* free method			*/
-    NULL,		        /* file delete method		*/
-    NULL,			/* link method			*/
+    H5O_dtype_shared_delete,	/* file delete method		*/
+    H5O_dtype_shared_link,	/* link method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_can_share,	/* can share method		*/
     H5O_dtype_is_shared,	/* is shared method		*/
     H5O_dtype_pre_copy_file,	/* pre copy native value to file */
-    H5O_dtype_copy_file,	/* copy native value to file    */
+    H5O_dtype_shared_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
@@ -179,7 +179,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              */
             z = flags & (H5T_OPAQUE_TAG_MAX - 1);
             HDassert(0 == (z & 0x7)); /*must be aligned*/
-            if(NULL == (dt->shared->u.opaque.tag = H5MM_malloc(z + 1)))
+            if(NULL == (dt->shared->u.opaque.tag = (char *)H5MM_malloc(z + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             HDmemcpy(dt->shared->u.opaque.tag, *pp, z);
             dt->shared->u.opaque.tag[z] = '\0';
@@ -246,7 +246,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 HDassert(dt->shared->u.compnd.nmembs > 0);
                 dt->shared->u.compnd.packed = TRUE; /* Start off packed */
                 dt->shared->u.compnd.nalloc = dt->shared->u.compnd.nmembs;
-                dt->shared->u.compnd.memb = H5MM_calloc(dt->shared->u.compnd.nalloc * sizeof(H5T_cmemb_t));
+                dt->shared->u.compnd.memb = (H5T_cmemb_t *)H5MM_calloc(dt->shared->u.compnd.nalloc * sizeof(H5T_cmemb_t));
                 if(NULL == dt->shared->u.compnd.memb)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
                 for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
@@ -373,8 +373,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if(H5O_dtype_decode_helper(f, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype")
-            if(NULL == (dt->shared->u.enumer.name = H5MM_calloc(dt->shared->u.enumer.nalloc * sizeof(char*))) ||
-                    NULL == (dt->shared->u.enumer.value = H5MM_calloc(dt->shared->u.enumer.nalloc * dt->shared->parent->shared->size)))
+            if(NULL == (dt->shared->u.enumer.name = (char **)H5MM_calloc(dt->shared->u.enumer.nalloc * sizeof(char*))) ||
+                    NULL == (dt->shared->u.enumer.value = (uint8_t *)H5MM_calloc(dt->shared->u.enumer.nalloc * dt->shared->parent->shared->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Names */
@@ -1509,7 +1509,7 @@ H5O_dtype_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t *mesg_type,
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy_file)
 
     /* Perform a normal copy of the object header message */
-    if(NULL == (dst_mesg = H5O_dtype_copy(native_src, NULL)))
+    if(NULL == (dst_mesg = (H5T_t *)H5O_dtype_copy(native_src, NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
 
     /* The datatype will be in the new file; set its location. */

@@ -185,25 +185,9 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
     else
         p += name_len;    /* advance the memory pointer */
 
-    /* decode the attribute datatype */
-    if(flags & H5O_ATTR_FLAG_TYPE_SHARED) {
-	H5O_shared_t *shared;   /* Shared information */
-
-        /* Get the shared information */
-	if(NULL == (shared = (H5O_shared_t *)(H5O_MSG_SHARED->decode)(f, dxpl_id, mesg_flags, p)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
-
-        /* Get the actual datatype information */
-        if((attr->dt = (H5T_t *)H5O_shared_read(f, dxpl_id, shared, H5O_MSG_DTYPE, NULL)) == NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
-
-        /* Free the shared information */
-        H5O_msg_free_real(H5O_MSG_SHARED, shared);
-    } /* end if */
-    else {
-        if((attr->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, mesg_flags, p)) == NULL)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
-    } /* end else */
+    /* Decode the attribute's datatype */
+    if((attr->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), p)) == NULL)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     if(version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN_OLD(attr->dt_size);
     else
@@ -638,8 +622,6 @@ herr_t
 H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
-    htri_t                  tri_ret; 
-    H5O_shared_t            sh_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_delete)
@@ -648,26 +630,9 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     HDassert(f);
     HDassert(attr);
 
-    /* Remove both the datatype and dataspace from the SOHM heap if they're
-     * shared there.
-     */
-    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't tell if datatype is shared")
-    else if(tri_ret > 0) {
-        /* Check whether datatype is shared */
-        if(H5T_committed(attr->dt)) {
-            /* Decrement the reference count on the shared datatype, if requested */
-            if(adj_link)
-                if(H5T_link(attr->dt, -1, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-        } /* end if */
-        else {
-            if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr->dt, &sh_mesg))
-                HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message from datatype")
-            if(H5SM_try_delete(f, dxpl_id, H5O_DTYPE_ID, &sh_mesg) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "can't remove datatype from heap")
-        } /* end else */
-    } /* end if */
+    /* Decrement reference count on datatype in file */
+    if((H5O_MSG_DTYPE->del)(f, dxpl_id, attr->dt, adj_link) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust datatype link count")
 
     /* Decrement reference count on dataspace in file */
     if((H5O_MSG_SDSPACE->del)(f, dxpl_id, attr->ds, adj_link) < 0)
@@ -708,18 +673,11 @@ H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg)
      * Otherwise they may be deleted when the attribute
      * message is deleted.
      */
-    /* Check whether datatype is shared */
-    if(H5T_committed(attr->dt)) {
-        /* Increment the reference count on the shared datatype */
-        if(H5T_link(attr->dt, 1, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-    } /* end if */
-    else {
-        if(H5SM_try_share(f, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute datatype")
-    } /* end else */
-    if(H5SM_try_share(f, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "error trying to re-share attribute dataspace")
+    /* Increment reference count on datatype & dataspace in file */
+    if((H5O_MSG_DTYPE->link)(f, dxpl_id, attr->dt) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust datatype link count")
+    if((H5O_MSG_SDSPACE->link)(f, dxpl_id, attr->ds) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust dataspace link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -887,9 +845,6 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
 
-    H5O_shared_t sh_mesg;				/* Shared message information */
-    htri_t      tri_ret;                /* htri_t return value */
-
     void        *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy_file)
@@ -975,38 +930,9 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     /* Compute the sizes of the datatype and dataspace. This is their raw
      * size unless they're shared.
      */
-    if((tri_ret = H5O_msg_is_shared(H5O_DTYPE_ID, attr_dst->dt)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to determine if datatype is shared")
-    if(tri_ret == TRUE) {
-        /* Reset shared message information */
-        HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
-
-        /* Get shared message information for datatype */
-        if(NULL == H5O_msg_get_share(H5O_DTYPE_ID, attr_dst->dt, &sh_mesg/*out*/))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to get shared message")
-
-        /* Compute shared message size for datatype */
-        attr_dst->dt_size = H5O_msg_raw_size(file_dst, H5O_SHARED_ID, &sh_mesg);
-    } /* end if */
-    else
-        attr_dst->dt_size = H5O_msg_raw_size(file_dst, H5O_DTYPE_ID, attr_src->dt);
+    attr_dst->dt_size = H5O_msg_raw_size(file_dst, H5O_DTYPE_ID, FALSE, attr_src->dt);
     HDassert(attr_dst->dt_size > 0);
-
-    if((tri_ret = H5O_msg_is_shared(H5O_SDSPACE_ID, attr_dst->ds)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "unable to determine if dataspace is shared")
-    if(tri_ret == TRUE) {
-        /* Reset shared message information */
-        HDmemset(&sh_mesg, 0, sizeof(H5O_shared_t));
-
-        /* Get shared message information for dataspace */
-        if(NULL == H5O_msg_get_share(H5O_SDSPACE_ID, attr_dst->ds, &sh_mesg/*out*/))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to get shared message")
-
-        /* Compute shared message size for dataspace */
-        attr_dst->ds_size = H5O_msg_raw_size(file_dst, H5O_SHARED_ID, &sh_mesg);
-    }
-    else
-        attr_dst->ds_size = H5O_msg_raw_size(file_dst, H5O_SDSPACE_ID, attr_src->ds);
+    attr_dst->ds_size = H5O_msg_raw_size(file_dst, H5O_SDSPACE_ID, FALSE, attr_src->ds);
     HDassert(attr_dst->ds_size > 0);
 
     /* Compute the size of the data */

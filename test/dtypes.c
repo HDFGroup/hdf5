@@ -4079,11 +4079,8 @@ test_encode(void)
     } /* end if */
 
     /* Decode from the compound buffer and return an object handle */
-    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode compound type\n");
-        goto error;
-    } /* end if */
+    if((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
+        FAIL_PUTS_ERROR("Can't decode compound type\n")
 
     /* Verify that the datatype was copied exactly */
     if(H5Tequal(decoded_tid1, tid1)<=0) {
@@ -4219,11 +4216,8 @@ test_encode(void)
     } /* end if */
 
     /* Decode from the compound buffer and return an object handle */
-    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode compound type\n");
-        goto error;
-    } /* end if */
+    if((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
+        FAIL_PUTS_ERROR("Can't decode compound type\n")
 
     /* Verify that the datatype was copied exactly */
     if(H5Tequal(decoded_tid1, tid1)<=0) {

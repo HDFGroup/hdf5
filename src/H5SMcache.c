@@ -104,7 +104,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     uint8_t *buf=NULL;                /* Temporary buffer */
     herr_t          ret_value=SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5SM_flush_table, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_flush_table)
 
     /* check arguments */
     HDassert(f);
@@ -170,7 +170,7 @@ H5SM_flush_table(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
 done:
     /* Free buffer if allocated */
     if(buf)
-        H5FL_BLK_FREE(shared_mesg_cache, buf);
+        buf = H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_table */
@@ -202,7 +202,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     uint8_t       x;                   /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
-    FUNC_ENTER_NOAPI(H5SM_load_table, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_load_table)
 
     /* Verify that we're reading version 0 of the table; this is the only
         * version defined so far.
@@ -210,7 +210,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
-    if(NULL == (table = H5MM_calloc(sizeof(H5SM_master_table_t))))
+    if(NULL == (table = (H5SM_master_table_t *)H5MM_calloc(sizeof(H5SM_master_table_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read number of indexes and version from file superblock */
@@ -246,7 +246,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     HDassert((size_t)(p - buf) == H5SM_TABLE_SIZE(f) - H5SM_SIZEOF_CHECKSUM);
 
     /* Allocate space for the index headers in memory*/
-    if(NULL == (table->indexes = H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
+    if(NULL == (table->indexes = (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
 
     /* Read in the index headers */
@@ -282,7 +282,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 done:
     /* Free buffer if allocated */
     if(buf)
-        H5FL_BLK_FREE(shared_mesg_cache, buf);
+        buf = H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_load_table */ 
@@ -341,7 +341,7 @@ done:
 static herr_t
 H5SM_dest_table(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5SM_dest_table)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_dest_table)
 
     HDassert(table);
     HDassert(table->indexes);
@@ -402,7 +402,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
     uint8_t *buf=NULL;               /* Temporary buffer */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5SM_flush_list, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_flush_list)
 
     /* check arguments */
     HDassert(f);
@@ -463,7 +463,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 done:
     /* Free buffer if allocated */
     if(buf)
-        H5FL_BLK_FREE(shared_mesg_cache, buf);
+        buf = H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_flush_list */
@@ -495,7 +495,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     hsize_t x;                      /* Counter variable for messages in list */
     H5SM_list_t *ret_value=NULL;
 
-    FUNC_ENTER_NOAPI(H5SM_load_list, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_load_list)
 
     HDassert(header);
 
@@ -505,7 +505,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
-    if((list->messages = H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_max)) == NULL)
+    if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_max)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
 
     list->header = header;
@@ -528,12 +528,12 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     p += H5SM_LIST_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
-    for(x=0; x<header->num_messages; x++)
+    for(x = 0; x < header->num_messages; x++)
     {
         if(H5SM_message_decode(f, p, &(list->messages[x])) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message");
         p += H5SM_SOHM_ENTRY_SIZE(f);
-    }
+    } /* end for */
 
     /* Read in checksum */
     UINT32DECODE(p, stored_chksum);
@@ -551,25 +551,24 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
 
     /* Initialize the rest of the array */
-    for(x=header->num_messages; x<header->list_max; x++)
-    {
+    for(x = header->num_messages; x < header->list_max; x++)
         list->messages[x].ref_count = 0;
-    }
 
     ret_value = list;
+
 done:
     /* Free buffer if allocated */
     if(buf)
-        H5FL_BLK_FREE(shared_mesg_cache, buf);
+        buf = H5FL_BLK_FREE(shared_mesg_cache, buf);
 
     if(ret_value == NULL) {
         if(list) {
-            if(list->messages) {
+            if(list->messages)
                 H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-            }
             H5FL_FREE(H5SM_list_t, list);
-        }
-    }
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_load_list */
 
@@ -625,7 +624,7 @@ done:
 static herr_t
 H5SM_dest_list(H5F_t UNUSED *f, H5SM_list_t* list)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5SM_dest_list)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_dest_list)
 
     HDassert(list);
     HDassert(list->messages);

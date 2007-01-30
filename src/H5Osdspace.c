@@ -171,7 +171,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
     /* Decode dimension sizes */
     if(sdim->rank > 0) {
-        if(NULL == (sdim->size = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
+        if(NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         for(i = 0; i < sdim->rank; i++) {
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
@@ -183,7 +183,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         } /* end for */
 
         if(flags & H5S_VALID_MAX) {
-            if(NULL == (sdim->max = H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
+            if(NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             for(i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH (f, p, sdim->max[i]);

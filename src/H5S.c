@@ -516,7 +516,7 @@ done:
 hid_t
 H5Scopy(hid_t space_id)
 {
-    H5S_t	*src = NULL;
+    H5S_t	*src;
     H5S_t	*dst = NULL;
     hid_t	ret_value;
 
@@ -524,7 +524,7 @@ H5Scopy(hid_t space_id)
     H5TRACE1("i", "i", space_id);
 
     /* Check args */
-    if (NULL==(src=H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL==(src=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
@@ -562,17 +562,17 @@ done:
 herr_t
 H5Sextent_copy(hid_t dst_id,hid_t src_id)
 {
-    H5S_t	*src = NULL;
-    H5S_t	*dst = NULL;
+    H5S_t	*src;
+    H5S_t	*dst;
     hid_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Sextent_copy, FAIL);
     H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
-    if (NULL==(src=H5I_object_verify(src_id, H5I_DATASPACE)))
+    if (NULL==(src=(H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (NULL==(dst=H5I_object_verify(dst_id, H5I_DATASPACE)))
+    if (NULL==(dst=(H5S_t *)H5I_object_verify(dst_id, H5I_DATASPACE)))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
@@ -620,14 +620,14 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 
         case H5S_SIMPLE:
             if(src->size) {
-                dst->size = H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
+                dst->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
                 for(u = 0; u < src->rank; u++)
                     dst->size[u] = src->size[u];
             } /* end if */
             else
                 dst->size = NULL;
             if(src->max) {
-                dst->max = H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
+                dst->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
                 for(u = 0; u < src->rank; u++)
                     dst->max[u] = src->max[u];
             } /* end if */
@@ -756,14 +756,14 @@ done:
 hssize_t
 H5Sget_simple_extent_npoints(hid_t space_id)
 {
-    H5S_t		   *ds = NULL;
+    H5S_t		   *ds;
     hssize_t		    ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_npoints, FAIL);
     H5TRACE1("Hs", "i", space_id);
 
     /* Check args */
-    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = H5S_GET_EXTENT_NPOINTS(ds);
@@ -860,14 +860,14 @@ done:
 int
 H5Sget_simple_extent_ndims(hid_t space_id)
 {
-    H5S_t		   *ds = NULL;
+    H5S_t		   *ds;
     int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_ndims, FAIL);
     H5TRACE1("Is", "i", space_id);
 
     /* Check args */
-    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = H5S_GET_EXTENT_NDIMS(ds);
@@ -951,14 +951,14 @@ int
 H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 			  hsize_t maxdims[]/*out*/)
 {
-    H5S_t		   *ds = NULL;
+    H5S_t		   *ds;
     int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_dims, FAIL);
     H5TRACE3("Is", "ixx", space_id, dims, maxdims);
 
     /* Check args */
-    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     ret_value = H5S_get_simple_extent_dims(ds, dims, maxdims);
@@ -1215,14 +1215,14 @@ done:
 htri_t
 H5Sis_simple(hid_t space_id)
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
+    H5S_t		   *space;	/* dataspace to modify */
     htri_t		    ret_value;
 
     FUNC_ENTER_API(H5Sis_simple, FAIL);
     H5TRACE1("t", "i", space_id);
 
     /* Check args and all the boring stuff. */
-    if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
+    if ((space = (H5S_t *)H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value = H5S_is_simple(space);
@@ -1268,7 +1268,7 @@ herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 		      const hsize_t max[/*rank*/])
 {
-    H5S_t	*space = NULL;	/* dataspace to modify */
+    H5S_t	*space;	/* dataspace to modify */
     int	u;	/* local counting variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1276,7 +1276,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     H5TRACE4("e", "iIs*[a1]h*[a1]h", space_id, rank, dims, max);
 
     /* Check args */
-    if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
+    if ((space = (H5S_t *)H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
@@ -1351,7 +1351,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 
         /* Set the rank and allocate space for the dims */
         space->extent.rank = rank;
-        space->extent.size = H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
+        space->extent.size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
 
         /* Copy the dimensions & compute the number of elements in the extent */
         for(u = 0, nelem = 1; u < space->extent.rank; u++) {
@@ -1362,7 +1362,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 
         /* Copy the maximum dimensions if specified */
         if(max != NULL) {
-            space->extent.max = H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
+            space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
             HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } /* end if */
         else
@@ -1696,10 +1696,10 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     H5TRACE3("e", "ix*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
-    if (NULL==(dspace=H5I_object_verify(obj_id, H5I_DATASPACE)))
+    if (NULL==(dspace=(H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    if(H5S_encode(dspace, buf, nalloc)<0)
+    if(H5S_encode(dspace, (unsigned char *)buf, nalloc)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
 done:
@@ -1739,7 +1739,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed for extent */
-    if((extent_size = H5O_msg_raw_size(f, H5O_SDSPACE_ID, obj)) == 0)
+    if((extent_size = H5O_msg_raw_size(f, H5O_SDSPACE_ID, TRUE, obj)) == 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
     /* Find out the size of buffer needed for selection */
@@ -1765,7 +1765,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
         UINT32ENCODE(buf, extent_size);
 
         /* Encode the extent part of dataspace */
-        if(H5O_msg_encode(f, H5O_SDSPACE_ID, buf, obj) < 0)
+        if(H5O_msg_encode(f, H5O_SDSPACE_ID, TRUE, buf, obj) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
         buf += extent_size;
 
@@ -1811,7 +1811,7 @@ H5Sdecode(const void *buf)
     if(buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
-    if((ds = H5S_decode(buf)) == NULL)
+    if((ds = H5S_decode((const unsigned char *)buf)) == NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
 
     /* Register the type and return the ID */
@@ -1871,7 +1871,7 @@ H5S_decode(const unsigned char *buf)
 
     /* Decode the extent part of dataspace */
     /* (pass mostly bogus file pointer and bogus DXPL) */
-    if((extent = H5O_msg_decode(f, H5P_DEFAULT, H5O_SDSPACE_ID, buf))==NULL)
+    if((extent = (H5S_extent_t *)H5O_msg_decode(f, H5P_DEFAULT, H5O_SDSPACE_ID, buf))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
     buf += extent_size;
 
@@ -1902,30 +1902,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_decode() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_raw_size
- *
- * Purpose:	Compute the 'raw' size of the extent, as stored on disk.
- *
- * Return:	Success:	non-zero
- *		Failure:	zero
- *
- * Programmer:	Quincey Koziol
- *              koziol@ncsa.uiuc.edu
- *              October 14, 2004
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5S_raw_size(const H5F_t *f, const H5S_t *space)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_raw_size)
-
-    /* Return the size of buffer needed for extent */
-    FUNC_LEAVE_NOAPI(H5O_msg_raw_size(f, H5O_SDSPACE_ID, &(space->extent)))
-} /* end H5S_raw_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1987,14 +1963,14 @@ done:
 H5S_class_t
 H5Sget_simple_extent_type(hid_t sid)
 {
-    H5S_class_t	ret_value;
     H5S_t	*space;
+    H5S_class_t	ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_type, H5S_NO_CLASS);
     H5TRACE1("Sc", "i", sid);
 
     /* Check arguments */
-    if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(sid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
     ret_value=H5S_GET_EXTENT_TYPE(space);
@@ -2021,14 +1997,14 @@ done:
 herr_t
 H5Sset_extent_none(hid_t space_id)
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
+    H5S_t		   *space;	/* dataspace to modify */
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Sset_extent_none, FAIL);
     H5TRACE1("e", "i", space_id);
 
     /* Check args */
-    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     /* Clear the previous extent from the dataspace */
@@ -2061,14 +2037,14 @@ done:
 herr_t
 H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
+    H5S_t		   *space;	/* dataspace to modify */
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Soffset_simple, FAIL);
     H5TRACE2("e", "i*Hs", space_id, offset);
 
     /* Check args */
-    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (space->extent.rank==0 || (H5S_GET_EXTENT_TYPE(space)==H5S_SCALAR
             || H5S_GET_EXTENT_TYPE(space)==H5S_NULL))
@@ -2230,8 +2206,8 @@ H5Sextent_equal(hid_t space1_id, hid_t space2_id)
     H5TRACE2("t", "ii", space1_id, space2_id);
 
     /* check args */
-    if(NULL == (ds1 = H5I_object_verify(space1_id, H5I_DATASPACE)) ||
-            NULL == (ds2 = H5I_object_verify(space2_id, H5I_DATASPACE)))
+    if(NULL == (ds1 = (const H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)) ||
+            NULL == (ds2 = (const H5S_t *)H5I_object_verify(space2_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Check dataspaces for extent's equality */

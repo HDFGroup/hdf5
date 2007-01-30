@@ -1213,10 +1213,11 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
     } /* end if */
 
-    /* Update the type and space header messages */
-    if(H5O_msg_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_SHARED, 0, type, &oh_flags) < 0 ||
-            H5S_append(file, dxpl_id, oh, dset->shared->space, &oh_flags) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update type or space header messages")
+    /* Update the datatype and dataspace header messages */
+    if(H5O_msg_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, type, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
+    if(H5S_append(file, dxpl_id, oh, dset->shared->space, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message")
 
     /* Update the filters message, if this is a chunked dataset */
     if(layout->type == H5D_CHUNKED) {

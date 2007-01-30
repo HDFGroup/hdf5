@@ -206,7 +206,6 @@ H5_DLL herr_t H5S_write(struct H5O_loc_t *loc, const H5S_t *space,
     hbool_t update_time, hid_t dxpl_id);
 H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
                          const H5S_t *ds, unsigned * oh_flags_ptr);
-H5_DLL size_t H5S_raw_size(const H5F_t *f, const H5S_t *space);
 H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);

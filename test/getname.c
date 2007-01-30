@@ -1015,7 +1015,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((type_id=H5Dget_type(dataset_id))<0) TEST_ERROR;
 
     /* Verify */
-    if(check_name(type_id, "/g17/t", "") < 0) TEST_ERROR;
+    if(check_name(type_id, "/g17/t", "/g17/t") < 0) TEST_ERROR;
 
     /* Close */
     H5Dclose( dataset_id );

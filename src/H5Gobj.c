@@ -434,7 +434,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         } /* end if */
 
         /* Get the link's message size */
-        if((link_msg_size = H5O_msg_raw_size(grp_oloc->file, H5O_LINK_ID, obj_lnk)) == 0)
+        if((link_msg_size = H5O_msg_raw_size(grp_oloc->file, H5O_LINK_ID, FALSE, obj_lnk)) == 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size")
 
         /* If there's still a small enough number of links, use the 'link' message */

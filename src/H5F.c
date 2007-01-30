@@ -2080,7 +2080,7 @@ H5F_try_close(H5F_t *f)
             /* Get the list of IDs of open named datatype objects */
             /* (Do this separately from the dataset & attribute IDs, because
              * they could be using one of the named datatypes and then the
-             * open named datatype ID will get closed twice.
+             * open named datatype ID will get closed twice)
              */
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
                 /* Try to close all the open objects in this file */

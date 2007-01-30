@@ -463,13 +463,13 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 #define H5T_INIT_TYPE_COPY_CREATE(BASE) {				      \
     /* Base off of existing datatype */					      \
     if(NULL==(dt = H5T_copy(BASE,H5T_COPY_TRANSIENT)))			      \
-        HGOTO_ERROR (H5E_RESOURCE, H5E_CANTCOPY, FAIL, "duplicating base type failed") \
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "duplicating base type failed") \
 }
 
 #define H5T_INIT_TYPE_ALLOC_CREATE(BASE) {				      \
     /* Allocate new datatype info */					      \
     if (NULL==(dt = H5T_alloc()))				              \
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
 }
 
 
@@ -550,12 +550,12 @@ H5T_init_inf(void)
 
     /* Get the float datatype */
     if (NULL==(dst_p=H5I_object(H5T_NATIVE_FLOAT_g)))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     dst = &dst_p->shared->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
     if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
     d=(uint8_t *)&H5T_NATIVE_FLOAT_POS_INF_g;
@@ -591,12 +591,12 @@ H5T_init_inf(void)
 
     /* Get the double datatype */
     if (NULL==(dst_p=H5I_object(H5T_NATIVE_DOUBLE_g)))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     dst = &dst_p->shared->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
     if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
     d=(uint8_t *)&H5T_NATIVE_DOUBLE_POS_INF_g;
@@ -1644,19 +1644,19 @@ H5Tcopy(hid_t type_id)
         case H5I_DATATYPE:
             /* The argument is a data type handle */
             if (NULL==(dt=H5I_object (type_id)))
-                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
             break;
 
         case H5I_DATASET:
             /* The argument is a dataset handle */
             if (NULL==(dset=H5I_object (type_id)))
-                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
             if (NULL==(dt=H5D_typeof (dset)))
-                HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset data type");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset data type");
             break;
 
         default:
-            HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type or dataset");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type or dataset");
     } /* end switch */
 
     /* Copy */
@@ -1792,10 +1792,10 @@ H5Tlock(hid_t type_id)
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5T_STATE_NAMED==dt->shared->state || H5T_STATE_OPEN==dt->shared->state)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to lock named data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to lock named data type");
 
     if (H5T_lock (dt, TRUE)<0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2413,7 +2413,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     if (H5T_PERS_HARD!=pers && H5T_PERS_SOFT!=pers)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid function persistence");
     if (!name || !*name)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "conversion must have a name for debugging");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "conversion must have a name for debugging");
     if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)))
@@ -2459,7 +2459,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	i;			/*counter			*/
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_unregister, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_unregister);
 
     /* Remove matching entries from the soft list */
     if (H5T_PERS_DONTCARE==pers || H5T_PERS_SOFT==pers) {
@@ -2607,7 +2607,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
             NULL == (dst = H5I_object_verify(dst_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
     if (!pcdata)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "no address to receive cdata pointer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no address to receive cdata pointer");
 
     /* Find it */
     if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
@@ -2716,10 +2716,10 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 
     /* Find the conversion function */
     if (NULL==(tpath=H5T_path_find(src, dst, NULL, NULL, dxpl_id, FALSE)))
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
 
     if (H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, buf, background, dxpl_id)<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2790,18 +2790,20 @@ H5Tdecode(const void *buf)
     H5T_t       *dt;
     hid_t       ret_value;
 
-    FUNC_ENTER_API (H5Tdecode, FAIL);
+    FUNC_ENTER_API(H5Tdecode, FAIL)
     H5TRACE1("i", "x", buf);
 
+    /* Check args */
     if(buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
+    /* Create datatype by decoding buffer */
     if((dt = H5T_decode(buf)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
-    if((ret_value = H5I_register (H5I_DATATYPE, dt)) < 0)
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
+    if((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2836,14 +2838,14 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
     H5F_t       *f = NULL;              /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5T_encode, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_encode)
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc((size_t)0)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
-    if((buf_size = H5O_msg_raw_size(f, H5O_DTYPE_ID, obj)) == 0)
+    if((buf_size = H5O_msg_raw_size(f, H5O_DTYPE_ID, TRUE, obj)) == 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size")
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
@@ -2857,7 +2859,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
         *buf++ = H5T_ENCODE_VERSION;
 
         /* Encode into user's buffer */
-        if(H5O_msg_encode(f, H5O_DTYPE_ID, buf, obj) < 0)
+        if(H5O_msg_encode(f, H5O_DTYPE_ID, TRUE, buf, obj) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object")
     } /* end else */
 
@@ -2892,7 +2894,7 @@ H5T_decode(const unsigned char *buf)
     H5F_t       *f = NULL;      /* Fake file structure*/
     H5T_t       *ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_decode, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_decode)
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc((size_t)0)))
@@ -2957,7 +2959,7 @@ H5T_create(H5T_class_t type, size_t size)
         case H5T_OPAQUE:
         case H5T_COMPOUND:
             if(NULL == (dt = H5T_alloc()))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
 
             if(type==H5T_COMPOUND)
@@ -3068,9 +3070,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Allocate space */
     if (NULL==(new_dt = H5FL_MALLOC(H5T_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (NULL==(new_dt->shared = H5FL_MALLOC(H5T_shared_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
@@ -3113,7 +3115,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
                     /* Open named datatype again */
                     if(H5O_open(&(old_dt->sh_loc.u.oloc)) < 0)
-                        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
 
                     /* Insert opened named datatype into opened object list for the file */
                     if(H5FO_insert(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr, new_dt->shared, FALSE)<0)
@@ -3164,7 +3166,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
                                 sizeof(H5T_cmemb_t));
             if (NULL==new_dt->shared->u.compnd.memb)
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                  new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
@@ -3834,7 +3836,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             /* Build an index for each type so the names are sorted */
             if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))) ||
                     NULL==(idx2 = H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned))))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (u=0; u<dt1->shared->u.compnd.nmembs; u++)
                 idx1[u] = idx2[u] = u;
             if(dt1->shared->u.enumer.nmembs > 1) {
@@ -3912,7 +3914,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             /* Build an index for each type so the names are sorted */
             if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))) ||
                     NULL==(idx2 = H5MM_malloc(dt2->shared->u.enumer.nmembs * sizeof(unsigned))))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (u=0; u<dt1->shared->u.enumer.nmembs; u++)
                 idx1[u] = u;
             if(dt1->shared->u.enumer.nmembs > 1)
@@ -4431,7 +4433,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
             H5T_path_t **x = H5MM_realloc (H5T_g.path,
 					   na*sizeof(H5T_path_t*));
             if (!x)
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             H5T_g.apaths = (int)na;
             H5T_g.path = x;
         }
@@ -4687,7 +4689,7 @@ H5T_nameof(H5T_t *dt)
         case H5T_STATE_TRANSIENT:
         case H5T_STATE_RDONLY:
         case H5T_STATE_IMMUTABLE:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named datatype")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named datatype")
         case H5T_STATE_NAMED:
         case H5T_STATE_OPEN:
             ret_value = &(dt->path);

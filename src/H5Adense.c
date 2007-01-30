@@ -442,7 +442,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
         size_t attr_size;                   /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized message */
-        if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, attr)) == 0)
+        if((attr_size = H5O_msg_raw_size(f, H5O_ATTR_ID, FALSE, attr)) == 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get message size")
 
         /* Allocate space for serialized message, if necessary */
@@ -454,7 +454,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, unsigned mesg_flags,
             attr_ptr = attr_buf;
 
         /* Create serialized form of attribute or shared message */
-        if(H5O_msg_encode(f, H5O_ATTR_ID, (unsigned char *)attr_ptr, attr) < 0)
+        if(H5O_msg_encode(f, H5O_ATTR_ID, FALSE, (unsigned char *)attr_ptr, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
         /* Insert the serialized attribute into the fractal heap */
@@ -549,7 +549,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
         size_t attr_size;               /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized attribute */
-        if((attr_size = H5O_msg_raw_size(op_data->f, H5O_ATTR_ID, op_data->attr)) == 0)
+        if((attr_size = H5O_msg_raw_size(op_data->f, H5O_ATTR_ID, FALSE, op_data->attr)) == 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get attribute size")
 
         /* Allocate space for serialized attribute, if necessary */
@@ -561,7 +561,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
             attr_ptr = attr_buf;
 
         /* Create serialized form of attribute */
-        if(H5O_msg_encode(op_data->f, H5O_ATTR_ID, (unsigned char *)attr_ptr, op_data->attr) < 0)
+        if(H5O_msg_encode(op_data->f, H5O_ATTR_ID, FALSE, (unsigned char *)attr_ptr, op_data->attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute")
 
 /* Sanity check */
