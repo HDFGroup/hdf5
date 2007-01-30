@@ -1082,6 +1082,7 @@
 ./c++/test/tattr.cpp
 ./c++/test/testhdf5.cpp
 ./c++/test/tfile.cpp
+./c++/test/tfilter.cpp
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
 ./c++/test/trefer.cpp
