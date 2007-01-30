@@ -143,14 +143,26 @@ H5SM_message_compare(const void *rec1, const void *rec2)
      */
     /* JAMES HDassert(mesg->ref_count > 0); */
 
+    /* If the key has an fheap ID, we're looking for a message that's
+     * already in the index; if the fheap ID matches, we've found the message
+     * and can stop immediately.
+     * This means that list indexes that don't care about ordering can
+     * pass in bogus hash values and they'll still get a match if the heap
+     * IDs are the same.
+     */
+    if(key->encoding_size == 0)
+    {
+        HDassert(key->encoding == NULL);
+        if(key->message.fheap_id == mesg->fheap_id)
+            HGOTO_DONE(0);
+    }
+
     hash_diff = key->message.hash;
     hash_diff -= mesg->hash;
 
     /* If the hash values match, make sure the messages are really the same */
     if(0 == hash_diff) {
-        /* Compare either the heap_ids directly (if the key has one)
-         * or the encoded buffers
-         */
+        /* Compare the encoded buffers or the fheap IDs */
         if(key->encoding_size == 0)
         {
             HDassert(key->encoding == NULL);
@@ -182,6 +194,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             ret_value = -1;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_message_compare */
 

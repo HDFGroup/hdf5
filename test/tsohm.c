@@ -141,6 +141,9 @@ typedef struct size2_helper_struct {
 #define DELETE_NUM_MESGS 7
 #define HALF_DELETE_NUM_MESGS 3
 #define DELETE_DIMS {1,1,1,1,1,1,1}
+#define DELETE_MIN_MESG_SIZE 10
+#define DELETE_MAX_MESG_SIZE 60
+
 
 /* Number of dimensions in extend_dset test */
 #define EXTEND_NDIMS 2
@@ -2630,7 +2633,6 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
     CHECK_I(ret, "H5Fclose");
     norm_filesize = h5_get_file_size(FILENAME);
 
-
     /* Create a new file with messages 0 to (HALF_DELETE_NUM_MESGS - 1) */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
@@ -2708,7 +2710,7 @@ test_sohm_delete(void)
      */
    for(x=0; x<DELETE_NUM_MESGS; ++x) {
         dspace_id[x] = H5Screate_simple(x + 1, dims, dims);
-        CHECK_I(dspace_id[x], "H5Screate_simple");        
+        CHECK_I(dspace_id[x], "H5Screate_simple");
     }
 
     /* Create a number of different filter pipelines. */
@@ -2752,7 +2754,6 @@ test_sohm_delete(void)
     /* Test that messages can be created and deleted properly */
     delete_helper(fcpl_id, dspace_id, dcpl_id);
 
-
     /* Use B-tree indexes */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -2792,6 +2793,18 @@ test_sohm_delete(void)
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
     delete_helper(fcpl_id, dspace_id, dcpl_id);
+
+
+    /* Test with varying message sizes (ideally, so some messages are too
+     * small to be written but some are big enough that they are still written
+     */
+    ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
+    CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
+    for(x=DELETE_MIN_MESG_SIZE; x<=DELETE_MAX_MESG_SIZE; x += 10) {
+        ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, (size_t) x);
+        CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+        delete_helper(fcpl_id, dspace_id, dcpl_id);
+    }
 
     /* Cleanup */
     ret = H5Pclose(fcpl_id);
@@ -2946,6 +2959,7 @@ test_sohm_delete_revert(void)
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 10);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 10, 5);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
     test_sohm_delete_revert_helper(fcpl_id);
 
@@ -2959,6 +2973,14 @@ test_sohm_delete_revert(void)
      * a B-tree and back.
      */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1, 2);
+    CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
+    test_sohm_delete_revert_helper(fcpl_id);
+
+
+    /* Try with shared messages enabled, but when messages are too big
+     * to be shared.
+     */
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 35);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
     test_sohm_delete_revert_helper(fcpl_id);
 
@@ -3330,7 +3352,6 @@ test_sohm(void)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
-
     test_sohm_fcpl();		/* Test SOHMs and file creation plists */
     test_sohm_size1();          /* Tests the sizes of files with one SOHM */
     test_sohm_attrs();          /* Tests shared messages in attributes */

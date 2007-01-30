@@ -816,8 +816,8 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
     } /* end if */
 
     /* If the message isn't big enough, don't bother sharing it */
-    if(0 == (mesg_size = H5O_msg_mesg_size(f, type_id, mesg, (size_t)0)))
-	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
+    if(0 == (mesg_size = H5O_msg_raw_size(f, type_id, TRUE, mesg)))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
     if(mesg_size < table->indexes[index_num].min_mesg_size)
         HGOTO_DONE(FALSE);
 
@@ -1223,14 +1223,9 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     /* Prepare user data for fractal heap 'op' callback */
     udata.type_id = type_id;
 
-    /* Compute the hash value for the B-tree lookup */
-    if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
-
-
     /* Set up key for message to be deleted. */
     key.message.fheap_id = mesg->u.heap_id;
-    key.message.hash = udata.hash;
+    key.message.hash = 0; /* Only needed for B-tree lookup */
     key.message.ref_count = 0;  /* Refcount isn't relevant here */
 
     key.encoding = NULL;
@@ -1258,6 +1253,12 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     else /* Index is a B-tree */
     {
         HDassert(header->index_type == H5SM_BTREE);
+
+        /* Compute the hash value for the B-tree lookup */
+        if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
+
+        key.message.hash = udata.hash;
 
         /* If this returns failure, it means that the message wasn't found.
          * If it succeeds, a copy of the modified message will be returned. */
@@ -1577,13 +1578,9 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     /* Prepare user data for callback */
     udata.type_id = type_id;
 
-    /* Compute the hash value for the B-tree lookup */
-    if(H5HF_op(fheap, dxpl_id, &(sh_mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
-
     /* Set up key for message to locate */
     key.message.fheap_id = sh_mesg->u.heap_id;
-    key.message.hash = udata.hash;
+    key.message.hash = 0; /* Only needed for B-tree lookup */
     key.message.ref_count = 0; /* Ref count isn't needed to find message */
 
     key.encoding = NULL;
@@ -1608,6 +1605,12 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     else /* Index is a B-tree */
     {
         HDassert(header->index_type == H5SM_BTREE);
+
+        /* Compute the hash value for the B-tree lookup */
+        if(H5HF_op(fheap, dxpl_id, &(sh_mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
+
+        key.message.hash = udata.hash;
 
         /* Look up the message in the v2 B-tree */
         if(H5B2_find(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_get_refcount_bt2_cb, &message) < 0)
