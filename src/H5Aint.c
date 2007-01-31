@@ -135,20 +135,9 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
         udata->atable->nattrs = n;
     } /* end if */
 
-    /* Check for shared message */
-    if(mesg->flags & H5O_MSG_FLAG_SHARED) {
-	/*
-	 * If the message is shared then then the native pointer points to an
-	 * H5O_MSG_SHARED message.  We use that information to look up the real
-	 * message in the global heap or some other object header.
-	 */
-        if(NULL == H5O_shared_read(udata->f, udata->dxpl_id, (const H5O_shared_t *)mesg->native, H5O_MSG_ATTR, &udata->atable->attrs[udata->curr_attr]))
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to read shared attribute")
-    } /* end if */
-    else {
-        if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
-    } /* end else */
+    /* Copy attribute into table */
+    if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Increment current attribute */
     udata->curr_attr++;

@@ -359,12 +359,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy path")
 
     /* Check if any of the pieces should be (or are already) shared in the
-     * SOHM table */
-    /* Data type */
+     * SOHM table
+     */
     if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed")
-
-    /* Data space */
     if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
 
@@ -1302,9 +1300,11 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     if(H5G_loc(loc_id, & loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-    /* Call attribute rename routine */
-    if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_name, new_name))
+        /* Call attribute rename routine */
+        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)

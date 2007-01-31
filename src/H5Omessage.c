@@ -2086,7 +2086,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
 
         /* Check if message is already shared */
         if((shared_mesg = H5O_msg_is_shared((*new_type)->id, (*new_mesg))) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, UFAIL, "error determining if message is shared")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, UFAIL, "error determining if message is shared")
         else if(shared_mesg > 0) {
             /* Increment message's reference count */
             if((*new_type)->link && ((*new_type)->link)(f, dxpl_id, (*new_mesg)) < 0)
@@ -2094,7 +2094,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *mesg_flags, const H5O_msg_class_t *o
             *mesg_flags |= H5O_MSG_FLAG_SHARED;
         } /* end if */
         else {
-            /* Check for unsharable message */
+            /* Avoid unsharable messages */
             if(!(*mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
                 /* Attempt to share message */
                 if((shared_mesg = H5SM_try_share(f, dxpl_id, (*new_type)->id, (*new_mesg))) > 0)
@@ -2222,7 +2222,7 @@ H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg)
     HDassert(type);
 
     /* delete */
-    if((type->del) && (type->del)(f, dxpl_id, mesg, 1) < 0)
+    if((type->del) && (type->del)(f, dxpl_id, mesg, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
 
 done:

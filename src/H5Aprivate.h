@@ -54,9 +54,6 @@ H5_DLL struct H5O_loc_t *H5A_oloc(H5A_t *attr);
 H5_DLL H5G_name_t *H5A_nameof(H5A_t *attr);
 
 /* Attribute "dense" storage routines */
-H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh);
-H5_DLL herr_t H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const struct H5O_t *oh,
-    unsigned mesg_flags, const H5A_t *attr);
 H5_DLL herr_t H5A_dense_delete(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh);
 
 #endif /* _H5Aprivate_H */

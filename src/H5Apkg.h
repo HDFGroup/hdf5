@@ -161,8 +161,11 @@ H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 
 /* Attribute "dense" storage routines */
+H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
+H5_DLL herr_t H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    H5A_t *attr);
 H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     H5A_t *attr);
 H5_DLL herr_t H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
@@ -197,7 +200,7 @@ H5_DLL htri_t H5O_attr_is_shared(const void *_mesg);
 
 /* Attribute operations */
 H5_DLL herr_t H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr, 
-    const H5O_shared_t *sh_mesg);
+    H5O_shared_t *sh_mesg);
 
 /* Testing functions */
 #ifdef H5A_TESTING

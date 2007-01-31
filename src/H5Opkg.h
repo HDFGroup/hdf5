@@ -160,7 +160,7 @@
 /* Temporary macro to define which message classes are using the "new"
  * shared message "interface" for their methods.
  */
-#define H5O_NEW_SHARED(T)       ((T) == H5O_MSG_PLINE || (T) == H5O_MSG_FILL_NEW || (T) == H5O_MSG_FILL || (T) == H5O_MSG_SDSPACE || (T) == H5O_MSG_DTYPE)
+#define H5O_NEW_SHARED(T)       ((T) == H5O_MSG_PLINE || (T) == H5O_MSG_FILL_NEW || (T) == H5O_MSG_FILL || (T) == H5O_MSG_SDSPACE || (T) == H5O_MSG_DTYPE || (T) == H5O_MSG_ATTR)
 
 
 /* The "message class" type */
