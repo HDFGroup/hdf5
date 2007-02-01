@@ -266,6 +266,7 @@ void test_szip_filter(H5File& file1)
                     throw Exception("test_szip_filter", "Failed in testing szip method");
             }
 	dsplist.close();
+	PASSED();
     } // end of try
 
     // catch all other exceptions

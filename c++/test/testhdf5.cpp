@@ -60,7 +60,7 @@
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif  /* !H5_NO_NAMESPACE */
 
 #include "h5cpputil.h"  // C++ utilility header file
@@ -81,6 +81,8 @@ main(int argc, char *argv[])
     AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
     // testing variable-length strings in tvlstr.cpp
     AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
+    AddTest("types", test_types, cleanup_types,  "Generic Data Types", NULL);
+    AddTest("compound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
     AddTest("filter", test_filters, cleanup_filters,  "Various Filters", NULL);
 /* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
@@ -89,8 +91,6 @@ main(int argc, char *argv[])
     AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
-    AddTest("types", test_types, cleanup_types,  "Generic Data Types", NULL);
-    AddTest("compound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
 
 Comment out tests that are not done yet */
 
