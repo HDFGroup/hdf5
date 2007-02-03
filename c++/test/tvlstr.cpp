@@ -194,7 +194,7 @@ test_vlstrings_basic(void)
 	    str_used+=HDstrlen(wdata[i])+1;
 
 	// Compare against the strings actually written.
-	verify_val(vlsize,(hsize_t)str_used,"DataSet::getVlenBufSize", __LINE__, __FILE__);
+	verify_val((int)vlsize,str_used,"DataSet::getVlenBufSize", __LINE__, __FILE__);
 
 	// Read dataset from disk.
 	char *rdata[SPACE1_DIM1];   // Information read in
@@ -354,10 +354,6 @@ test_vlstrings_special(void)
 ****************************************************************/
 static void test_vlstring_type(void)
 {
-    H5T_cset_t          cset;
-    H5T_str_t           pad;
-    herr_t              ret;
-
     // Output message about test being performed.
     MESSAGE(5, ("Testing VL String type\n"));
 
@@ -371,7 +367,7 @@ static void test_vlstring_type(void)
 
 	// Change padding and verify it.
 	vlstr_type.setStrpad(H5T_STR_NULLPAD);
-	pad = vlstr_type.getStrpad();
+	H5T_str_t pad = vlstr_type.getStrpad();
 	verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
 
 	// Convert to variable-length string.
@@ -381,7 +377,7 @@ static void test_vlstring_type(void)
 	H5T_class_t type_class = vlstr_type.getClass();
 	verify_val(type_class, H5T_STRING, "DataType::getClass", __LINE__, __FILE__);
 	bool is_variable_str = vlstr_type.isVariableStr();
-	verify_val(is_variable_str, TRUE, "DataType::isVariableStr", __LINE__, __FILE__);
+	verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__);
 
 	// Check default character set and padding.
 	H5T_cset_t cset = vlstr_type.getCset();
@@ -597,7 +593,6 @@ test_write_vl_string_attribute(void)
 ****************************************************************/
 static void test_read_vl_string_attribute(void)
 {
-    herr_t ret;
     char *string_att_check;
 
     try {

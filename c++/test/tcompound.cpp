@@ -595,7 +595,7 @@ static void test_compound_6(void)
 	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
 	bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
 	orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
-	for (int i=0; i<nelmts; i++) {
+	for (i=0; i<nelmts; i++) {
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    s_ptr->b    = (i*8+1) & 0x7fff;
 	    s_ptr->d    = (i*8+6) & 0x7fff;
