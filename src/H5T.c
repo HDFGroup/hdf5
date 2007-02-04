@@ -3057,28 +3057,28 @@ done:
 H5T_t *
 H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
-    H5T_t	*new_dt=NULL, *tmp=NULL;
+    H5T_t	*new_dt = NULL, *tmp = NULL;
     H5T_shared_t    *reopened_fo;
     unsigned	i;
     char	*s;
     H5T_t	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_copy, NULL);
+    FUNC_ENTER_NOAPI(H5T_copy, NULL)
 
     /* check args */
-    assert(old_dt);
+    HDassert(old_dt);
 
     /* Allocate space */
-    if (NULL==(new_dt = H5FL_MALLOC(H5T_t)))
+    if(NULL == (new_dt = H5FL_MALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (NULL==(new_dt->shared = H5FL_MALLOC(H5T_shared_t)))
+    if(NULL == (new_dt->shared = H5FL_MALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
 
     /* Copy parent information */
-    if (new_dt->shared->parent)
+    if(new_dt->shared->parent)
         new_dt->shared->parent = H5T_copy(new_dt->shared->parent, method);
 
     /* Check what sort of copy we are making */
@@ -3095,11 +3095,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return a transient type (locked or unlocked) or an unopened named
              * type.  Immutable transient types are degraded to read-only.
              */
-            if (H5T_STATE_OPEN==old_dt->shared->state) {
+            if(H5T_STATE_OPEN==old_dt->shared->state)
                 new_dt->shared->state = H5T_STATE_NAMED;
-            } else if (H5T_STATE_IMMUTABLE==old_dt->shared->state) {
+            else if(H5T_STATE_IMMUTABLE==old_dt->shared->state)
                 new_dt->shared->state = H5T_STATE_RDONLY;
-            }
             break;
 
         case H5T_COPY_REOPEN:
@@ -3109,7 +3108,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              */
             if(old_dt->sh_loc.flags & H5O_COMMITTED_FLAG) {
                 /* Check if the object is already open */
-                if((reopened_fo=H5FO_opened(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr))==NULL) {
+                if((reopened_fo = H5FO_opened(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr)) == NULL) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear_stack(NULL);
 
@@ -3125,7 +3124,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     if(H5FO_top_incr(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
 
-                    new_dt->shared->fo_count=1;
+                    new_dt->shared->fo_count = 1;
                 } else {
                     /* The object is already open.  Free the H5T_shared_t struct
                      * we had been using and use the one that already exists.
@@ -3145,9 +3144,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     /* Increment object count for the object in the top file */
                     if(H5FO_top_incr(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
-                }
+                } /* end else */
                 new_dt->shared->state = H5T_STATE_OPEN;
-            } else if (H5T_STATE_IMMUTABLE==old_dt->shared->state) {
+            } else if(H5T_STATE_IMMUTABLE == old_dt->shared->state) {
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
@@ -3156,7 +3155,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     switch(new_dt->shared->type) {
         case H5T_COMPOUND:
             {
-            int accum_change=0;    /* Amount of change in the offset of the fields */
+            int accum_change = 0;    /* Amount of change in the offset of the fields */
 
             /*
              * Copy all member fields to new type, then overwrite the
@@ -3171,7 +3170,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                  new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
-            for (i=0; i<new_dt->shared->u.compnd.nmembs; i++) {
+            for(i = 0; i < new_dt->shared->u.compnd.nmembs; i++) {
                 unsigned	j;
                 int    old_match;
 
@@ -3185,20 +3184,19 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                 new_dt->shared->u.compnd.memb[i].offset += accum_change;
 
                 if(old_dt->shared->u.compnd.sorted != H5T_SORT_VALUE) {
-                    for (old_match=-1, j=0; j<old_dt->shared->u.compnd.nmembs; j++) {
-                        if(!HDstrcmp(new_dt->shared->u.compnd.memb[i].name,old_dt->shared->u.compnd.memb[j].name)) {
-                            old_match=j;
+                    for(old_match = -1, j = 0; j < old_dt->shared->u.compnd.nmembs; j++) {
+                        if(!HDstrcmp(new_dt->shared->u.compnd.memb[i].name, old_dt->shared->u.compnd.memb[j].name)) {
+                            old_match = j;
                             break;
                         } /* end if */
                     } /* end for */
 
                     /* check if we couldn't find a match */
-                    if(old_match<0)
+                    if(old_match < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
                 } /* end if */
-                else {
-                    old_match=i;
-                } /* end else */
+                else
+                    old_match = i;
 
                 /* If the field changed size, add that change to the accumulated size change */
                 if(new_dt->shared->u.compnd.memb[i].type->shared->size != old_dt->shared->u.compnd.memb[old_match].type->shared->size) {
@@ -3225,23 +3223,23 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                                 sizeof(char*));
             new_dt->shared->u.enumer.value = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
                                  new_dt->shared->size);
-            if (NULL==new_dt->shared->u.enumer.value)
+            if(NULL == new_dt->shared->u.enumer.value)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                  new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
-            for (i=0; i<new_dt->shared->u.enumer.nmembs; i++) {
+            for(i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                 s = old_dt->shared->u.enumer.name[i];
                 new_dt->shared->u.enumer.name[i] = H5MM_xstrdup(s);
-            }
+            } /* end for */
             break;
 
         case H5T_VLEN:
         case H5T_REFERENCE:
-            if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
+            if(method == H5T_COPY_TRANSIENT || method == H5T_COPY_REOPEN) {
                 /* H5T_copy converts any type into a memory type */
-                if (H5T_set_loc(new_dt, NULL, H5T_LOC_MEMORY)<0)
+                if(H5T_set_loc(new_dt, NULL, H5T_LOC_MEMORY) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location");
-            }
+            } /* end if */
             break;
 
         case H5T_OPAQUE:
@@ -3269,33 +3267,33 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
         if(H5G_name_copy(&(new_dt->path), &(old_dt->path), H5_COPY_DEEP) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy path")
-    }
+    } /* end if */
 
     /* Copy shared location information if the new type is named or if it is
      * shared in the heap.
      */
     if(old_dt->sh_loc.flags & H5O_SHARED_IN_HEAP_FLAG ||
-        new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN)
+            new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN)
     {
-        if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(old_dt->sh_loc), &(new_dt->sh_loc)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to copy shared location")
-    }
+        if(H5O_shared_copy(&(new_dt->sh_loc), &(old_dt->sh_loc)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy shared information")
+    } /* end if */
     else
         new_dt->sh_loc.flags = H5O_NOT_SHARED;
 
     /* Set return value */
-    ret_value=new_dt;
+    ret_value = new_dt;
 
 done:
-    if(ret_value==NULL) {
+    if(ret_value == NULL) {
         if(new_dt->shared != NULL)
             H5FL_FREE(H5T_shared_t, new_dt->shared);
-        if(new_dt!=NULL)
-            H5FL_FREE (H5T_t,new_dt);
+        if(new_dt != NULL)
+            H5FL_FREE(H5T_t, new_dt);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_copy() */
 
 
 /*-------------------------------------------------------------------------

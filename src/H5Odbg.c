@@ -247,8 +247,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 {
     unsigned	i, chunkno;
     size_t	mesg_total = 0, chunk_total = 0;
-    int		*sequence;
-    const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
+    unsigned	*sequence;
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5O_debug_real, FAIL)
@@ -356,9 +355,11 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     } /* end for */
 
     /* debug each message */
-    if(NULL == (sequence = H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(int))))
+    if(NULL == (sequence = H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
+        const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
+
 	mesg_total += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
 	HDfprintf(stream, "%*sMessage %d...\n", indent, "", i);
 
@@ -410,13 +411,9 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 
 	/* decode the message */
-	if((oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[i].type)) {
-            debug_type = H5O_MSG_SHARED;
-	} else {
-            debug_type = oh->mesg[i].type;
-	} /* end else */
-	if(NULL==oh->mesg[i].native && debug_type->decode)
-            oh->mesg[i].native = (debug_type->decode)(f, dxpl_id, oh->mesg[i].flags, oh->mesg[i].raw);
+	debug_type = oh->mesg[i].type;
+	if(NULL == oh->mesg[i].native && debug_type->decode)
+            H5O_LOAD_NATIVE(f, dxpl_id, &oh->mesg[i], FAIL)
 
 	/* print the message */
 	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -425,17 +422,6 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    (debug_type->debug)(f, dxpl_id, oh->mesg[i].native, stream, indent + 6, MAX(0, fwidth - 6));
 	else
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
-
-	/* If the message is shared then also print the pointed-to message */
-	if((oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(oh->mesg[i].type)) {
-	    H5O_shared_t *shared = (H5O_shared_t*)(oh->mesg[i].native);
-	    void *mesg;
-
-            mesg = H5O_shared_read(f, dxpl_id, shared, oh->mesg[i].type, NULL);
-	    if(oh->mesg[i].type->debug)
-		(oh->mesg[i].type->debug)(f, dxpl_id, mesg, stream, indent + 3, MAX (0, fwidth - 3));
-	    H5O_msg_free_real(oh->mesg[i].type, mesg);
-	} /* end if */
     } /* end for */
     sequence = H5MM_xfree(sequence);
 

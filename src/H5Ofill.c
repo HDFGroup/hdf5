@@ -41,9 +41,6 @@ static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_new_reset(void *_mesg);
 static herr_t H5O_fill_new_free(void *_mesg);
-static void  *H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh);
-static herr_t H5O_fill_new_set_share(void *_mesg, const H5O_shared_t *sh);
-static htri_t H5O_fill_new_is_shared(const void *_mesg);
 static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
@@ -61,6 +58,8 @@ static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FIL
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE		H5O_fill_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
+#define H5O_SHARED_DEBUG		H5O_fill_shared_debug
+#define H5O_SHARED_DEBUG_REAL		H5O_fill_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 /* Set up & include shared message "interface" info */
@@ -88,6 +87,10 @@ static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FIL
 #undef H5O_SHARED_COPY_FILE
 #define H5O_SHARED_COPY_FILE		H5O_fill_new_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
+#undef H5O_SHARED_DEBUG
+#define H5O_SHARED_DEBUG		H5O_fill_new_shared_debug
+#undef H5O_SHARED_DEBUG_REAL
+#define H5O_SHARED_DEBUG_REAL		H5O_fill_new_debug
 #undef H5Oshared_H
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
@@ -96,24 +99,23 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_FILL_ID,                /*message id number                     */
     "fill",                     /*message name for debugging            */
     sizeof(H5O_fill_t),		/*native message size                   */
-    H5O_fill_shared_decode,		/*decode message                        */
-    H5O_fill_shared_encode,		/*encode message                        */
+    TRUE,			/* messages are sharable?       */
+    H5O_fill_shared_decode,	/*decode message                        */
+    H5O_fill_shared_encode,	/*encode message                        */
     H5O_fill_new_copy,          /*copy the native value                 */
-    H5O_fill_shared_size,		/*raw message size			*/
+    H5O_fill_shared_size,	/*raw message size			*/
     H5O_fill_new_reset,         /*free internal memory			*/
     H5O_fill_new_free,		/* free method				*/
     H5O_fill_shared_delete,	/* file delete method			*/
     H5O_fill_shared_link,	/* link method				*/
-    H5O_fill_new_get_share,	/* get share method			*/
-    H5O_fill_new_set_share,	/* set share method			*/
+    H5O_shared_copy,		/* set share method			*/
     NULL,		    	/*can share method		*/
-    H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
     H5O_fill_shared_copy_file,	/* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_fill_debug              /*debug the message			*/
+    H5O_fill_shared_debug       /*debug the message			*/
 }};
 
 /* This message derives from H5O message class, for new fill value after version 1.4  */
@@ -121,6 +123,7 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_FILL_NEW_ID,		/*message id number			*/
     "fill_new", 		/*message name for debugging		*/
     sizeof(H5O_fill_t),		/*native message size			*/
+    TRUE,			/* messages are sharable?       */
     H5O_fill_new_shared_decode,	/*decode message			*/
     H5O_fill_new_shared_encode,	/*encode message			*/
     H5O_fill_new_copy,		/*copy the native value			*/
@@ -129,16 +132,14 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_fill_new_free,		/* free method				*/
     H5O_fill_new_shared_delete,	/* file delete method			*/
     H5O_fill_new_shared_link,	/* link method				*/
-    H5O_fill_new_get_share,	/* get share method			*/
-    H5O_fill_new_set_share,	/* set share method			*/
+    H5O_shared_copy,		/* set share method			*/
     NULL,		    	/*can share method		*/
-    H5O_fill_new_is_shared,	/* is shared method			*/
     NULL,			/* pre copy native value to file	*/
     H5O_fill_new_shared_copy_file, /* copy native value to file		*/
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_fill_new_debug		/*debug the message			*/
+    H5O_fill_new_shared_debug	/*debug the message			*/
 }};
 
 /* Initial version of the "old" fill value information */
@@ -600,96 +601,6 @@ H5O_fill_new_free(void *mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_get_share
- *
- * Purpose:	Gets sharing information from the message
- *
- * Return:	Shared message on success/NULL on failure
- *
- * Programmer:	James Laird
- *              Tuesday, October 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5O_fill_new_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
-{
-    const H5O_fill_t  *mesg = (const H5O_fill_t *)_mesg;
-    void       *ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_get_share)
-
-    HDassert(mesg);
-
-    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_new_get_share() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_set_share
- *
- * Purpose:	Sets sharing information for the message
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, October 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_fill_new_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
-{
-    H5O_fill_t  *mesg = (H5O_fill_t *)_mesg;
-    herr_t       ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_set_share)
-
-    HDassert(mesg);
-    HDassert(sh);
-
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
-        ret_value = FAIL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_new_set_share() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_is_shared
- *
- * Purpose:	Determines if this fill value is shared (committed or a SOHM)
- *              or not.
- *
- * Return:	TRUE if fill value is shared
- *              FALSE if fill value is not shared
- *              Negative on failure
- *
- * Programmer:	James Laird
- *		Monday, October 16, 2006
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5O_fill_new_is_shared(const void *_mesg)
-{
-    const H5O_fill_t  *mesg = (const H5O_fill_t *)_mesg;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_is_shared)
-
-    HDassert(mesg);
-
-    /* Fill values can't currently be committed, but this should let the
-     * library read a "committed fill value" if we ever create one in
-     * the future.
-     */
-    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
-} /* end H5O_fill_new_is_shared() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_debug
  *
  * Purpose:	Prints debugging info for the message.
@@ -707,7 +618,7 @@ static herr_t
 H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
-    const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
+    const H5O_fill_t *mesg = (const H5O_fill_t *)_mesg;
     H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_debug)
@@ -715,8 +626,8 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
     HDassert(f);
     HDassert(mesg);
     HDassert(stream);
-    HDassert(indent>=0);
-    HDassert(fwidth>=0);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Version:", (unsigned)H5O_FILL_VERSION);
@@ -846,8 +757,6 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

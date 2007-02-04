@@ -36,13 +36,13 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_stab_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_stab_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
-static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_stab_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, 
-    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -53,6 +53,7 @@ const H5O_msg_class_t H5O_MSG_STAB[1] = {{
     H5O_STAB_ID,            	/*message id number             */
     "stab",                 	/*message name for debugging    */
     sizeof(H5O_stab_t),     	/*native message size           */
+    FALSE,			/* messages are sharable?       */
     H5O_stab_decode,        	/*decode message                */
     H5O_stab_encode,        	/*encode message                */
     H5O_stab_copy,          	/*copy the native value         */
@@ -61,10 +62,8 @@ const H5O_msg_class_t H5O_MSG_STAB[1] = {{
     H5O_stab_free,	        /* free method			*/
     H5O_stab_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     H5O_stab_copy_file,		/* copy native value to file    */
     H5O_stab_post_copy_file,	/* post copy native value to file    */
@@ -136,12 +135,10 @@ done:
  *              matzke@llnl.gov
  *              Aug  6 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
+H5O_stab_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
@@ -174,8 +171,6 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  *              matzke@llnl.gov
  *              Aug  6 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -185,22 +180,22 @@ H5O_stab_copy(const void *_mesg, void *_dest)
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy)
 
     /* check args */
-    assert(stab);
-    if (!dest && NULL==(dest = H5FL_MALLOC(H5O_stab_t)))
+    HDassert(stab);
+    if(!dest && NULL == (dest = H5FL_MALLOC(H5O_stab_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *stab;
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_stab_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -218,12 +213,10 @@ done:
  *              matzke@llnl.gov
  *              Aug  6 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_stab_size(const H5F_t *f, const void UNUSED *_mesg)
+H5O_stab_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 
@@ -310,9 +303,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type, 
-    void *native_src, H5F_t *file_dst, hid_t dxpl_id,
-    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
+    hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
 {
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
     H5O_stab_t          *stab_dst = NULL;

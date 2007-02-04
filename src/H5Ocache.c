@@ -156,10 +156,6 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
 
             /* Encode the message itself */
             if(curr_msg->native) {
-                herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
-
-                HDassert(curr_msg->type->encode);
-
                 /*
                  * Encode the message.  If the message is shared then we
                  * encode a Shared Object message instead of the object
@@ -169,21 +165,18 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
                 HDassert(curr_msg->raw_size == H5O_ALIGN_OH(oh, curr_msg->raw_size));
                 HDassert(curr_msg->raw + curr_msg->raw_size <=
                        oh->chunk[curr_msg->chunkno].image + (oh->chunk[curr_msg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
-                if((curr_msg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(curr_msg->type))
-                    encode = H5O_MSG_SHARED->encode;
-                else
-                    encode = curr_msg->type->encode;
 #ifndef NDEBUG
 /* Sanity check that the message won't overwrite past it's allocated space */
-if(!(curr_msg->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(curr_msg->type)) {
+{
     size_t msg_size;
 
-    msg_size = curr_msg->type->raw_size(f, curr_msg->native);
+    msg_size = curr_msg->type->raw_size(f, FALSE, curr_msg->native);
     msg_size = H5O_ALIGN_OH(oh, msg_size);
     HDassert(msg_size <= curr_msg->raw_size);
-} /* end if */
+}
 #endif /* NDEBUG */
-                if((encode)(f, curr_msg->raw, curr_msg->native) < 0)
+                HDassert(curr_msg->type->encode);
+                if((curr_msg->type->encode)(f, FALSE, curr_msg->raw, curr_msg->native) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
             } /* end if */
 

@@ -33,12 +33,10 @@ static void *H5O_dtype_copy(const void *_mesg, void *_dest);
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
 static herr_t H5O_dtype_free(void *_mesg);
-static void *H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_dtype_can_share(const void *_mesg);
-static htri_t H5O_dtype_is_shared(const void *_mesg);
-static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
-    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
+static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 
@@ -59,6 +57,8 @@ static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE		H5O_dtype_shared_copy_file
 #define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
+#define H5O_SHARED_DEBUG		H5O_dtype_shared_debug
+#define H5O_SHARED_DEBUG_REAL		H5O_dtype_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 /* This message derives from H5O message class */
@@ -66,6 +66,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,		/* message id number		*/
     "datatype",			/* message name for debugging	*/
     sizeof(H5T_t),		/* native message size		*/
+    TRUE,			/* messages are sharable?       */
     H5O_dtype_shared_decode,	/* decode message		*/
     H5O_dtype_shared_encode,	/* encode message		*/
     H5O_dtype_copy,		/* copy the native value	*/
@@ -74,16 +75,14 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_dtype_free,		/* free method			*/
     H5O_dtype_shared_delete,	/* file delete method		*/
     H5O_dtype_shared_link,	/* link method			*/
-    H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_can_share,	/* can share method		*/
-    H5O_dtype_is_shared,	/* is shared method		*/
     H5O_dtype_pre_copy_file,	/* pre copy native value to file */
     H5O_dtype_shared_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_dtype_debug		/* debug the message		*/
+    H5O_dtype_shared_debug	/* debug the message		*/
 }};
 
 /* This is the version to create all datatypes which don't contain
@@ -1274,49 +1273,6 @@ H5O_dtype_free(void *mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_get_share
- *
- * Purpose:	Returns information about where the shared message is located
- *		by filling in the SH shared message struct.
- *
- * Return:	Shared message on success/NULL on failure
- *
- * Programmer:	Robb Matzke
- *		Monday, June  1, 1998
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5O_dtype_get_share(const void *_mesg, H5O_shared_t *sh/*out*/)
-{
-    const H5T_t	*dt = (const H5T_t *)_mesg;
-    void      *ret_value = NULL;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_get_share)
-
-    HDassert(dt);
-
-    /* Make sure the shared struct is initialized to some reasonable value */
-    HDassert((dt->sh_loc.flags & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG)) || dt->sh_loc.flags == H5O_NOT_SHARED);
-
-#ifndef NDEBUG
-    /* Make sure datatype state is correct: committed datatypes must have
-     * state NAMED or OPEN and neither unshared datatypes nor datatypes
-     * shared in the heap can be NAMED or OPEN. */
-    if(dt->sh_loc.flags & H5O_COMMITTED_FLAG)
-        HDassert(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state);
-    else
-        HDassert(! (H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state));
-#endif /* NDEBUG */
-
-    /* Do actual copy of shared information */
-    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(dt->sh_loc), sh);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_dtype_get_share() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_dtype_set_share
  *
  * Purpose:	Copies sharing information from SH into the message.
@@ -1334,7 +1290,7 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
     H5T_t	*dt = (H5T_t *)_mesg;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_set_share)
 
     HDassert(dt);
     HDassert(sh);
@@ -1349,13 +1305,14 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
         (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
 
     /* Copy the shared information */
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(dt->sh_loc)))
-        ret_value = FAIL;
+    if(H5O_shared_copy(&(dt->sh_loc), sh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy shared message info")
 
     /* If this is now a committed datatype, set its state properly. */
     if(sh->flags & H5O_COMMITTED_FLAG)
         dt->shared->state = H5T_STATE_NAMED;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_set_share() */
 
@@ -1403,35 +1360,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_can_share() */
 
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_dtype_is_shared
- *
- * Purpose:	Determines if this datatype is shared (committed or a SOHM)
- *              or not.
- *
- * Return:	TRUE if datatype is shared
- *              FALSE if datatype is not shared
- *              Negative on failure
- *
- * Programmer:	James Laird
- *		Monday, October 16, 2006
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5O_dtype_is_shared(const void *_mesg)
-{
-    const H5T_t	*mesg = (const H5T_t *)_mesg;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_is_shared)
-
-    HDassert(mesg);
-
-    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
-} /* end H5O_dtype_is_shared() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_dtype_pre_copy_file
@@ -1449,8 +1377,8 @@ H5O_dtype_is_shared(const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *type,
-    const void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
     void *_udata)
 {
     const H5T_t	   *dt_src = (const H5T_t *)mesg_src;  /* Source datatype */

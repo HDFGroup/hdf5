@@ -35,12 +35,12 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_linfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_linfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_linfo_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_linfo_free(void *_mesg);
 static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
-static void *H5O_linfo_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
+static void *H5O_linfo_copy_file(H5F_t *file_src, 
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
 static herr_t H5O_linfo_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
@@ -53,6 +53,7 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
     H5O_LINFO_ID,            	/*message id number             */
     "linfo",                 	/*message name for debugging    */
     sizeof(H5O_linfo_t),     	/*native message size           */
+    FALSE,			/* messages are sharable?       */
     H5O_linfo_decode,        	/*decode message                */
     H5O_linfo_encode,        	/*encode message                */
     H5O_linfo_copy,          	/*copy the native value         */
@@ -61,10 +62,8 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
     H5O_linfo_free,	        /* free method			*/
     H5O_linfo_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     H5O_linfo_copy_file,	/* copy native value to file    */
     H5O_linfo_post_copy_file,	/* post copy native value to file */
@@ -181,7 +180,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_encode(H5F_t *f, uint8_t *p, const void *_mesg)
+H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char       index_flags;          /* Flags for encoding link index info */
@@ -283,7 +282,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_linfo_size(const H5F_t *f, const void *_mesg)
+H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     size_t ret_value;   /* Return value */
@@ -378,9 +377,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_type, 
-    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
-    void UNUSED *udata)
+H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
+    hid_t dxpl_id, H5O_copy_t *cpy_info, void UNUSED *udata)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
     H5O_linfo_t          *linfo_dst = NULL;

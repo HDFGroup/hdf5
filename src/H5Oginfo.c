@@ -33,9 +33,9 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_ginfo_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_ginfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_ginfo_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_ginfo_free(void *_mesg);
 static herr_t H5O_ginfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
@@ -45,6 +45,7 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
     H5O_GINFO_ID,            	/*message id number             */
     "ginfo",                 	/*message name for debugging    */
     sizeof(H5O_ginfo_t),     	/*native message size           */
+    FALSE,			/* messages are sharable?       */
     H5O_ginfo_decode,        	/*decode message                */
     H5O_ginfo_encode,        	/*encode message                */
     H5O_ginfo_copy,          	/*copy the native value         */
@@ -53,10 +54,8 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
     H5O_ginfo_free,	        /* free method			*/
     NULL,	        	/* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -149,12 +148,10 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
     unsigned char       flags;          /* Flags for encoding group info */
@@ -198,8 +195,6 @@ H5O_ginfo_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -248,7 +243,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ginfo_size(const H5F_t UNUSED *f, const void UNUSED *_mesg)
+H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 

@@ -33,9 +33,9 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
-static size_t H5O_name_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
 static herr_t H5O_name_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
@@ -45,18 +45,17 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
     H5O_NAME_ID,            	/*message id number             */
     "name",                 	/*message name for debugging    */
     sizeof(H5O_name_t),     	/*native message size           */
+    FALSE,			/* messages are sharable?       */
     H5O_name_decode,        	/*decode message                */
     H5O_name_encode,        	/*encode message                */
     H5O_name_copy,          	/*copy the native value         */
     H5O_name_size,          	/*raw message size              */
     H5O_name_reset,         	/*free internal memory          */
-    NULL,		            /* free method			*/
+    NULL,			/* free method			*/
     NULL,		        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -130,7 +129,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_name_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
 
@@ -214,7 +213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_name_size(const H5F_t UNUSED *f, const void *_mesg)
+H5O_name_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  ret_value;

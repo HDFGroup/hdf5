@@ -102,7 +102,7 @@ H5A_is_shared_test(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Check if attribute is shared */
-    ret_value = H5O_attr_is_shared(attr);
+    ret_value = H5O_msg_is_shared(H5O_ATTR_ID, attr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -135,7 +135,7 @@ H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Sanity check */
-    HDassert(H5O_attr_is_shared(attr));
+    HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
 
     /* Retrieve ref count for shared attribute */
     if(H5SM_get_refcount(attr->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,

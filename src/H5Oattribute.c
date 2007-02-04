@@ -263,7 +263,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     } /* end else */
 
     /* Was new attribugte shared? */
-    if((shared_mesg = H5O_attr_is_shared(attr)) > 0) {
+    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr)) > 0) {
         hsize_t attr_rc;                /* Attribute's ref count in shared message storage */
 
         /* Retrieve ref count for shared attribute */
@@ -524,8 +524,8 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr,
     HDassert(attr);
 
     /* Extract shared message info from current attribute (for later use) */
-    if(NULL == H5O_attr_get_share(attr, &sh_mesg))
-        HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared info")
+    if(H5O_shared_copy(&sh_mesg, &(attr->sh_loc)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't get shared message")
 
     /* Store new version of message as a SOHM */
     /* (should always work, since we're not changing the size of the attribute) */
@@ -557,8 +557,8 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr,
 
     /* Extract updated shared message info from modified attribute, if requested */
     if(update_sh_mesg)
-        if(NULL == H5O_attr_get_share(attr, update_sh_mesg))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared info")
+        if(H5O_shared_copy(update_sh_mesg, &(attr->sh_loc)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't get shared message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -785,7 +785,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         } /* end if */
         else {
             /* Sanity check */
-            HDassert(H5O_attr_is_shared((H5A_t *)mesg->native) == FALSE);
+            HDassert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == FALSE);
 
             /* Check for attribute message changing size */
             if(HDstrlen(udata->new_name) != HDstrlen(udata->old_name)) {
@@ -831,7 +831,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate renamed attribute in header")
 
                 /* Sanity check */
-                HDassert(H5O_attr_is_shared(attr) == FALSE);
+                HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr) == FALSE);
 
                 /* Release the local copy of the attribute */
                 H5O_msg_free_real(H5O_MSG_ATTR, attr);
@@ -1164,7 +1164,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
                     htri_t shared_mesg;             /* Should this message be stored in the Shared Message table? */
 
                     /* Check if attribute is shared */
-                    if((shared_mesg = H5O_attr_is_shared(&(atable.attrs[u]))) < 0)
+                    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, &(atable.attrs[u]))) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
                     else if(shared_mesg == 0) {
                         /* Increment reference count on attribute components */

@@ -641,7 +641,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     } /* end switch */
 
     /* Copy the shared object info */
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, &(src->sh_loc), &(dst->sh_loc)))
+    if(H5O_shared_copy(&(dst->sh_loc), &(src->sh_loc)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy shared information")
 
 done:
@@ -2326,11 +2326,10 @@ herr_t
 H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_debug)
 
-    switch (H5S_GET_EXTENT_TYPE(mesg)) {
+    switch(H5S_GET_EXTENT_TYPE(mesg)) {
         case H5S_NULL:
             fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth,
                     "Space class:");
@@ -2345,16 +2344,15 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
             fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
                     "Space class:");
             H5O_debug_id(H5O_SDSPACE_ID, f, dxpl_id, &(mesg->extent), stream,
-                                 indent+3, MAX(0, fwidth-3));
+                                 indent + 3, MAX(0, fwidth - 3));
             break;
 
         default:
             fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
                     "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
             break;
-    }
+    } /* end switch */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S_debug() */
 

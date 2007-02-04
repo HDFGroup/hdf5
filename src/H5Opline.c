@@ -35,10 +35,7 @@ static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
 static herr_t H5O_pline_free(void *_mesg);
-static void *H5O_pline_get_share(const void *_mesg, H5O_shared_t *sh);
-static herr_t H5O_pline_set_share(void *_mesg, const H5O_shared_t *sh);
-static htri_t H5O_pline_is_shared(const void *_mesg);
-static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, const H5O_msg_class_t *type,
+static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, 
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -57,6 +54,8 @@ static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE		H5O_pline_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
+#define H5O_SHARED_DEBUG		H5O_pline_shared_debug
+#define H5O_SHARED_DEBUG_REAL		H5O_pline_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 /* This message derives from H5O message class */
@@ -64,6 +63,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_PLINE_ID,		/* message id number		*/
     "filter pipeline",		/* message name for debugging	*/
     sizeof(H5O_pline_t),	/* native message size		*/
+    TRUE,			/* messages are sharable?       */
     H5O_pline_shared_decode,	/* decode message		*/
     H5O_pline_shared_encode,	/* encode message		*/
     H5O_pline_copy,		/* copy the native value	*/
@@ -72,16 +72,14 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_pline_free,		/* free method			*/
     H5O_pline_shared_delete,    /* file delete method		*/
     H5O_pline_shared_link,	/* link method			*/
-    H5O_pline_get_share,	/* get share method		*/
-    H5O_pline_set_share,	/* set share method		*/
+    H5O_shared_copy,		/* set share method			*/
     NULL,		    	/*can share method		*/
-    H5O_pline_is_shared,	/* is shared method		*/
     H5O_pline_pre_copy_file,	/* pre copy native value to file */
     H5O_pline_shared_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_pline_debug		/* debug the message		*/
+    H5O_pline_shared_debug	/* debug the message		*/
 }};
 
 
@@ -588,9 +586,8 @@ H5O_pline_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *type,
-    const void *mesg_src, hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
-    void *_udata)
+H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
+    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
 {
     const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
@@ -612,98 +609,6 @@ H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *ty
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_pline_pre_copy_file() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_pline_get_share
- *
- * Purpose:	Gets sharing information from the message
- *
- * Return:	Shared message on success/NULL on failure
- *
- * Programmer:	James Laird
- *              Tuesday, October 10, 2006
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5O_pline_get_share(const void *_mesg, H5O_shared_t *sh /*out*/)
-{
-    const H5O_pline_t  *mesg = (const H5O_pline_t *)_mesg;
-    void       *ret_value = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_get_share)
-
-    HDassert (mesg);
-
-    ret_value = H5O_msg_copy(H5O_SHARED_ID, &(mesg->sh_loc), sh);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_pline_get_share() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_pline_set_share
- *
- * Purpose:	Sets sharing information for the message
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, October 10, 2006
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_pline_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
-{
-    H5O_pline_t  *mesg = (H5O_pline_t *)_mesg;
-    herr_t       ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_set_share)
-
-    HDassert (mesg);
-    HDassert (sh);
-
-    if(NULL == H5O_msg_copy(H5O_SHARED_ID, sh, &(mesg->sh_loc)))
-        ret_value = FAIL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_pline_set_share() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_pline_is_shared
- *
- * Purpose:	Determines if this fill value is shared (committed or a SOHM)
- *              or not.
- *
- * Return:	TRUE if fill value is shared
- *              FALSE if fill value is not shared
- *              Negative on failure
- *
- * Programmer:	James Laird
- *		Monday, October 16, 2006
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5O_pline_is_shared(const void *_mesg)
-{
-    const H5O_pline_t  *mesg = (const H5O_pline_t *)_mesg;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_is_shared)
-
-    HDassert(mesg);
-
-    /* I/O pipelines can't currently be committed, but this should let the
-     * library read a "committed I/O pipeline" if we ever create one in
-     * the future.
-     */
-    FUNC_LEAVE_NOAPI(H5O_IS_SHARED(mesg->sh_loc.flags))
-} /* end H5O_pline_is_shared() */
 
 
 /*-------------------------------------------------------------------------

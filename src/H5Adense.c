@@ -388,7 +388,6 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
     H5A_bt2_ud_ins_t udata;             /* User data for v2 B-tree insertion */
     H5HF_t *fheap = NULL;               /* Fractal heap handle for attributes */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
-    H5O_shared_t sh_mesg;               /* Shared object header message */
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     void *attr_ptr = NULL;              /* Pointer to serialized message */
     unsigned mesg_flags = 0;            /* Flags for storing message */
@@ -414,7 +413,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
         htri_t shared_mesg;             /* Should this message be stored in the Shared Message table? */
 
         /* Check if message is already shared */
-        if((shared_mesg = H5O_attr_is_shared(attr)) < 0)
+        if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
         else if(shared_mesg > 0)
             /* Mark the message as shared */
@@ -449,12 +448,8 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
         /* Sanity check */
         HDassert(attr_sharable);
 
-        /* Get the shared information for the attribute */
-        if(NULL == H5O_attr_get_share(attr, &sh_mesg))
-            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't get shared message")
-
         /* Use heap ID for shared message heap */
-        udata.id = sh_mesg.u.heap_id;
+        udata.id = attr->sh_loc.u.heap_id;
     } /* end if */
     else {
         size_t attr_size;                   /* Size of serialized attribute in the heap */
@@ -805,7 +800,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
     HDassert(attr_copy);
 
     /* Check if message is already shared */
-    if((shared_mesg = H5O_attr_is_shared(attr_copy)) < 0)
+    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr_copy)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
     else if(shared_mesg > 0) {
         /* Reset shared status of copy */
@@ -823,7 +818,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
 
     /* Was this attribute shared? */
-    if((shared_mesg = H5O_attr_is_shared(attr_copy)) > 0) {
+    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr_copy)) > 0) {
         hsize_t attr_rc;                /* Attribute's ref count in shared message storage */
 
         /* Retrieve ref count for shared attribute */

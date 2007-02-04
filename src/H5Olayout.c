@@ -33,15 +33,15 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
-static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     hbool_t adj_link);
-static void *H5O_layout_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
-    void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -50,6 +50,7 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_LAYOUT_ID,          	/*message id number             */
     "layout",               	/*message name for debugging    */
     sizeof(H5O_layout_t),   	/*native message size           */
+    FALSE,			/* messages are sharable?       */
     H5O_layout_decode,      	/*decode message                */
     H5O_layout_encode,      	/*encode message                */
     H5O_layout_copy,        	/*copy the native value         */
@@ -58,10 +59,8 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_layout_free,        	/*free the struct		*/
     H5O_layout_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     H5O_layout_copy_file,       /* copy native value to file    */
     NULL,		        /* post copy native value to file    */
@@ -261,7 +260,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
+H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned               u;
@@ -319,7 +318,7 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_encode() */
 
 
@@ -336,8 +335,6 @@ done:
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -347,32 +344,32 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
     void                   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy)
 
     /* check args */
-    assert(mesg);
-    if (!dest && NULL==(dest=H5FL_MALLOC(H5O_layout_t)))
+    HDassert(mesg);
+    if(!dest && NULL == (dest = H5FL_MALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     *dest = *mesg;
 
     /* Deep copy the buffer for compact datasets also */
-    if(mesg->type==H5D_COMPACT) {
+    if(mesg->type == H5D_COMPACT) {
         /* Allocate memory for the raw data */
-        if (NULL==(dest->u.compact.buf=H5MM_malloc(dest->u.compact.size)))
+        if(NULL == (dest->u.compact.buf = H5MM_malloc(dest->u.compact.size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
         /* Copy over the raw data */
-        HDmemcpy(dest->u.compact.buf,mesg->u.compact.buf,dest->u.compact.size);
+        HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
     } /* end if */
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -389,8 +386,6 @@ done:
  * Programmer:  Raymond Lu
  *              August 14, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -399,11 +394,11 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
     const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_meta_size);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_meta_size)
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     ret_value = 1 +                     /* Version number                       */
                 1;                      /* layout class type                    */
@@ -436,8 +431,8 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_meta_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -454,28 +449,26 @@ done:
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_layout_size(const H5F_t *f, const void *_mesg)
+H5O_layout_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_size)
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     ret_value = H5O_layout_meta_size(f, mesg);
-    if(mesg->type==H5D_COMPACT)
+    if(mesg->type == H5D_COMPACT)
         ret_value += mesg->u.compact.size;/* data for compact dataset             */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -612,14 +605,11 @@ done:
  * Programmer:  Peter Cao
  *              July 23, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
-    void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
-    void *_udata)
+H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
+    hid_t dxpl_id, H5O_copy_t *cpy_info, void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;

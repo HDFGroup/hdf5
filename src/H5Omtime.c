@@ -33,13 +33,13 @@
 
 
 static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_mtime_new_size(const H5F_t *f, const void *_mesg);
+static herr_t H5O_mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static size_t H5O_mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 
 static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
-static size_t H5O_mtime_size(const H5F_t *f, const void *_mesg);
+static size_t H5O_mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_mtime_reset(void *_mesg);
 static herr_t H5O_mtime_free(void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -50,6 +50,7 @@ const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
     H5O_MTIME_ID,		/*message id number		*/
     "mtime",			/*message name for debugging	*/
     sizeof(time_t),		/*native message size		*/
+    FALSE,			/* messages are sharable?       */
     H5O_mtime_decode,		/*decode message		*/
     H5O_mtime_encode,		/*encode message		*/
     H5O_mtime_copy,		/*copy the native value		*/
@@ -58,10 +59,8 @@ const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
     H5O_mtime_free,		/* free method			*/
     NULL,		        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL, 			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -76,6 +75,7 @@ const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     H5O_MTIME_NEW_ID,		/*message id number		*/
     "mtime_new",		/*message name for debugging	*/
     sizeof(time_t),		/*native message size		*/
+    FALSE,			/* messages are sharable?       */
     H5O_mtime_new_decode,	/*decode message		*/
     H5O_mtime_new_encode,	/*encode message		*/
     H5O_mtime_copy,		/*copy the native value		*/
@@ -84,10 +84,8 @@ const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     H5O_mtime_free,		/* free method			*/
     NULL,		        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL,			/*is shared method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
     NULL,			/* post copy native value to file    */
@@ -302,12 +300,10 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Jan  3 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_mtime_new_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
 
@@ -349,7 +345,7 @@ H5O_mtime_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_mtime_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
@@ -435,7 +431,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_new_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_new_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_size);
 
@@ -468,7 +464,7 @@ H5O_mtime_new_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_size);
 

@@ -357,7 +357,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     } /* end if */
     else {
         oh_dst->nattrs = oh_src->nattrs;
-        /* XXX: Bail out for now, if the source object has densely stored attributes */
+/* XXX: Bail out for now, if the source object has densely stored attributes */
         if(H5F_addr_defined(oh_src->attr_fheap_addr))
             HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "densely stored attributes not supported yet")
         else {
@@ -396,11 +396,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         /* Sanity check */
         HDassert(!mesg_src->dirty);     /* Should be cleared by earlier call to flush messages */
 
-        /* Check for shared message to operate on */
-        if((mesg_src->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_src->type))
-            copy_type = H5O_MSG_SHARED;
-        else
-            copy_type = mesg_src->type;
+        /* Get message class to operate on */
+        copy_type = mesg_src->type;
 
         /* Check for continuation message; these are converted to NULL
          * messages because the destination OH will have only one chunk
@@ -409,30 +406,21 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             deleted[mesgno] = TRUE;
             ++null_msgs;
             copy_type = H5O_MSG_NULL;
-        }
+        } /* end if */
         HDassert(copy_type);
 
         if(copy_type->pre_copy_file) {
-            /*
-             * Decode the message if necessary.  If the message is shared then do
-             * a shared message, ignoring the message type.
-             */
-            if(NULL == mesg_src->native) {
-                /* Decode the message if necessary */
-                HDassert(copy_type->decode);
-                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_src->flags, mesg_src->raw)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
-            } /* end if (NULL == mesg_src->native) */
+            /* Decode the message if necessary. */
+            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, mesg_src, FAIL)
 
             /* Perform "pre copy" operation on message */
-            if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->type, mesg_src->native, &(deleted[mesgno]), cpy_info, udata) < 0)
+            if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native, &(deleted[mesgno]), cpy_info, udata) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to perform 'pre copy' operation on message")
 
             /* Check if the message should be deleted in the destination */
-            if(deleted[mesgno]) {
+            if(deleted[mesgno])
                 /* Mark message as deleted */
                 ++null_msgs;
-            } /* end if(deleted) */
         } /* end if(copy_type->pre_copy_file) */
     } /* end for */
 
@@ -459,8 +447,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             while(deleted[mesgno + null_msgs]) {
                 ++null_msgs;
                 HDassert(mesgno + null_msgs < oh_src->nmesgs);
-            }
-        }
+            } /* end while */
+        } /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
@@ -482,33 +470,22 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             mesg_dst->type = H5O_MSG_NULL;
             mesg_dst->flags = 0;
             mesg_dst->dirty = 1;
-        }
+        } /* end if */
 
-        /* Check for shared message to operate on */
+        /* Check for message class to operate on */
         /* (Use destination message, in case the message has been removed (i.e
-            *      converted to a nil message) in the destination -QAK)
-            */
-        if((mesg_dst->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_dst->type))
-            copy_type = H5O_MSG_SHARED;
-        else
-            copy_type = mesg_dst->type;
+         *      converted to a nil message) in the destination -QAK)
+         */
+        copy_type = mesg_dst->type;
         HDassert(copy_type);
 
         /* copy this message into destination file */
         if(copy_type->copy_file) {
-            /*
-             * Decode the message if necessary.  If the message is shared then do
-             * a shared message, ignoring the message type.
-             */
-            if(NULL == mesg_src->native) {
-                /* Decode the message if necessary */
-                HDassert(copy_type->decode);
-                if(NULL == (mesg_src->native = (copy_type->decode)(oloc_src->file, dxpl_id, mesg_dst->flags, mesg_src->raw)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode a message")
-            } /* end if (NULL == mesg_src->native) */
+            /* Decode the message if necessary. */
+            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, mesg_src, FAIL)
 
             /* Copy the source message */
-            if((mesg_dst->native = H5O_msg_copy_file(copy_type, mesg_dst->type,
+            if((mesg_dst->native = H5O_msg_copy_file(copy_type, 
                     oloc_src->file, mesg_src->native, oloc_dst->file, dxpl_id,
                     &shared, cpy_info, udata)) == NULL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object header message")
@@ -522,21 +499,17 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                 mesg_dst->flags |= H5O_MSG_FLAG_SHARED;
 
                 /* Recompute shared message size (mesg_dst->native is really
-                 * an H5O_shared_t)
+                 * shared)
                  */
-                if(H5O_NEW_SHARED(mesg_dst->type))
-                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                            H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, FALSE, mesg_dst->native));
-                else
-                    mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
-                            H5O_msg_raw_size(oloc_dst->file, H5O_SHARED_ID, FALSE, mesg_dst->native));
+                mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
+                        H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, FALSE, mesg_dst->native));
             } /* end if */
             else if(shared == FALSE && (mesg_dst->flags & H5O_MSG_FLAG_SHARED)) {
                 /* Unset shared flag */
                 mesg_dst->flags &= ~H5O_MSG_FLAG_SHARED;
 
                 /* Recompute native message size (msg_dest->native is no longer
-                 * an H5O_shared_t)
+                 * shared)
                  */
                 mesg_dst->raw_size = H5O_ALIGN_OH(oh_dst,
                         H5O_msg_raw_size(oloc_dst->file, mesg_dst->type->id, FALSE, mesg_dst->native));
@@ -661,14 +634,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
         mesg_dst = &(oh_dst->mesg[mesgno]);
 
-        /* Check for shared message to operate on */
+        /* Check for message class to operate on */
         /* (Use destination message, in case the message has been removed (i.e
          *      converted to a nil message) in the destination -QAK)
          */
-        if((mesg_dst->flags & H5O_MSG_FLAG_SHARED) && !H5O_NEW_SHARED(mesg_dst->type))
-            copy_type = H5O_MSG_SHARED;
-        else
-            copy_type = mesg_dst->type;
+        copy_type = mesg_dst->type;
         HDassert(copy_type);
 
         if(copy_type->post_copy_file && mesg_src->native) {

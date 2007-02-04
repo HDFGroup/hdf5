@@ -88,16 +88,16 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
     H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS,		/*0x0009 "Bogus"			*/
+    H5O_MSG_BOGUS,		/*0x0009 "Bogus" (for testing)		*/
 #else /* H5O_ENABLE_BOGUS */
-    NULL,			/*0x0009 "Bogus"			*/
+    NULL,			/*0x0009 "Bogus" (for testing)		*/
 #endif /* H5O_ENABLE_BOGUS */
     H5O_MSG_GINFO,		/*0x000A Group Information		*/
     H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
     H5O_MSG_ATTR,		/*0x000C Attribute list			*/
     H5O_MSG_NAME,		/*0x000D Object name			*/
     H5O_MSG_MTIME,		/*0x000E Object modification date and time */
-    H5O_MSG_SHARED,		/*0x000F Shared header message (shouldn't be in file) */
+    NULL,			/*0x000F UNUSED (used to be "Shared"    */
     H5O_MSG_CONT,		/*0x0010 Object header continuation	*/
     H5O_MSG_STAB,		/*0x0011 Symbol table			*/
     H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
@@ -1114,7 +1114,7 @@ H5O_touch_oh(H5F_t *f,
             if(!force)
                 HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
-            size = (H5O_MSG_MTIME_NEW->raw_size)(f, &now);
+            size = (H5O_MSG_MTIME_NEW->raw_size)(f, FALSE, &now);
             if((idx = H5O_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, size, oh_flags_ptr)) == UFAIL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
         } /* end if */
