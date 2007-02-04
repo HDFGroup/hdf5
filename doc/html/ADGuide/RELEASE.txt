@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-snap16 released on Sun Jan 28 18:23:02 CST 2007
+HDF5 version 1.6.6-snap17 released on Sun Feb  4 18:24:44 CST 2007
 ================================================================================
 
 INTRODUCTION
