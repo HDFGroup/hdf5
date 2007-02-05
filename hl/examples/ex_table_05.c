@@ -25,9 +25,12 @@
  *-------------------------------------------------------------------------
  */
 
-#define NFIELDS  (hsize_t)       5
-#define NRECORDS (hsize_t)       8
-#define TABLE_NAME "table"
+#define NFIELDS       (hsize_t)   5
+#define NRECORDS      (hsize_t)   8
+#define NRECORDS_ADD  (hsize_t)   3
+#define TABLE_NAME               "table"
+
+
 
 int main( void )
 {
@@ -91,21 +94,15 @@ int main( void )
  int        i;
 
  /* Define new values for the field "Pressure"  */
- float      pressure_in  [NRECORDS] =
- { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f };
-
+ float      pressure_in  [NRECORDS_ADD] =
+ { 0.0f,1.0f,2.0f};
  int        field_index_pre[1]     = { 3 };
  int        field_index_pos[2]     = { 1,2 };
 
  /* Define new values for the fields "Latitude,Longitude"  */
- Position   position_in[NRECORDS] = { {0,0},
+ Position   position_in[NRECORDS_ADD] = { {0,0},
  {10,10},
- {20,20},
- {30,30},
- {40,40},
- {50,50},
- {60,60},
- {70,70} };
+ {20,20} };
 
  size_t field_sizes_pos[2]=
  {
@@ -138,16 +135,18 @@ int main( void )
  /* Write the pressure field starting at record 2 */
  nfields  = 1;
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pre, start, nrecords,
    sizeof( float ), 0, field_sizes_pre, pressure_in  );
+
 
  /* Write the new longitude and latitude information starting at record 2  */
  nfields  = 2;
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  status=H5TBwrite_fields_index( file_id, TABLE_NAME, nfields, field_index_pos, start, nrecords,
    sizeof( Position ), field_offset_pos, field_sizes_pos, position_in  );
+
 
  /* read the table */
  status=H5TBread_table( file_id, TABLE_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
@@ -162,6 +161,7 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
+
 
  /* Close the file. */
  H5Fclose( file_id );

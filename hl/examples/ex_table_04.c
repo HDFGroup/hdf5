@@ -24,9 +24,10 @@
  *-------------------------------------------------------------------------
  */
 
-#define NFIELDS  (hsize_t)  5
-#define NRECORDS (hsize_t)  8
-#define TABLE_NAME          "table"
+#define NFIELDS       (hsize_t)   5
+#define NRECORDS      (hsize_t)   8
+#define NRECORDS_ADD  (hsize_t)   3
+#define TABLE_NAME               "table"
 
 int main( void )
 {
@@ -84,27 +85,17 @@ int main( void )
  herr_t     status;
  int        i;
  Particle  *p_data = NULL;               /* Initially no data */
- float      pressure_in [NRECORDS] =     /* Define new values for the field "Pressure"  */
- { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f };
- Position   position_in[NRECORDS] = {    /* Define new values for "Latitude,Longitude"  */
+ float      pressure_in [NRECORDS_ADD] = /* Define new values for the field "Pressure"  */
+ { 0.0f,1.0f,2.0f};
+ Position   position_in[NRECORDS_ADD] = {/* Define new values for "Latitude,Longitude"  */
  {0,0},
  {10,10},
- {20,20},
- {30,30},
- {40,40},
- {50,50},
- {60,60},
- {70,70} };
- NamePressure   namepre_in[NRECORDS] =  /* Define new values for "Name,Pressure"  */
+ {20,20}};
+ NamePressure   namepre_in[NRECORDS_ADD] =/* Define new values for "Name,Pressure"  */
  { {"zero",0.0f},
  {"one",   1.0f},
  {"two",   2.0f},
- {"three", 3.0f},
- {"four",  4.0f},
- {"five",  5.0f},
- {"six",   6.0f},
- {"seven", 7.0f},
-  };
+ };
  size_t field_sizes_pos[2]=
  {
   sizeof(position_in[0].longi),
@@ -139,13 +130,13 @@ int main( void )
 
  /* Write the pressure field starting at record 2 */
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Pressure", start, nrecords,
    sizeof( float ), 0, field_sizes_pre, pressure_in  );
 
  /* Write the new longitude and latitude information starting at record 2 */
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  status=H5TBwrite_fields_name( file_id, TABLE_NAME, "Latitude,Longitude", start, nrecords,
    sizeof( Position ), field_offset_pos, field_sizes_pos,  position_in  );
 
