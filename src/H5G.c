@@ -539,13 +539,13 @@ H5Gget_create_plist(hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Check for the group having a group info message */
-    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
+    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(ginfo_exists) {
         H5O_ginfo_t ginfo;		/* Group info message            */
 
         /* Read the group info */
-        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, 0, &ginfo, H5AC_ind_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, &ginfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
 
         /* Set the group info for the property list */
@@ -554,13 +554,13 @@ H5Gget_create_plist(hid_t group_id)
     } /* end if */
 
     /* Check for the group having a link info message */
-    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, 0, H5AC_ind_dxpl_id)) < 0)
+    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists) {
         H5O_linfo_t linfo;		/* Link info message            */
 
         /* Read the link info */
-        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, H5AC_ind_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, &linfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Set the link info for the property list */
@@ -1285,8 +1285,8 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
     obj_opened = TRUE;
 
     /* Check if this object has the right message(s) to be treated as a group */
-    if((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID, 0, dxpl_id) <= 0)
-            && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, 0, dxpl_id) <= 0))
+    if((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID, dxpl_id) <= 0)
+            && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, dxpl_id) <= 0))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group")
 
 done:

@@ -105,7 +105,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -123,7 +123,7 @@ main(void)
      */
     TESTING("message modification");
     time_new = 33333333;
-    if (H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -133,7 +133,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL==H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -146,62 +146,6 @@ main(void)
     }
     PASSED();
 
-
-    /*
-     * Test creation of a second message of the same type.
-     */
-    TESTING("duplicate message creation");
-    time_new = 55555555;
-    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (NULL==H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (ro!=time_new) {
-	H5_FAILED();
-	HDfprintf(stdout, "    got: {%ld}\n", (long)ro);
-	HDfprintf(stdout, "    ans: {%ld}\n", (long)time_new);
-	goto error;
-    }
-    PASSED();
-
-    /*
-     * Test modification of the second message with a symbol table.
-     */
-    TESTING("duplicate message modification");
-    time_new = 77777777;
-    if (H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (NULL==H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
-	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
-	goto error;
-    }
-    if (ro!=time_new) {
-	H5_FAILED();
-	HDfprintf(stdout, "    got: {%ld}\n", (long)ro);
-	HDfprintf(stdout, "    ans: {%ld}\n", (long)time_new);
-	goto error;
-    }
-    PASSED();
 
     /*
      * Test creation of a bunch of messages one after another to see
@@ -261,13 +205,13 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_msg_read() should have failed but didn't");
 	H5Eclear_stack(H5E_DEFAULT);
 	goto error;
     }
-    if (H5O_msg_read(&oh_loc, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_msg_read() should have failed but didn't");
 	H5Eclear_stack(H5E_DEFAULT);

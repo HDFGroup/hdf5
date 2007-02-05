@@ -120,7 +120,7 @@
  * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly.
  * Mac OS 10.4 gives some incorrect result. */
 #if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE && \
-    H5_ULLONG_TO_LDOUBLE_PRECISION && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY && \
+    defined(H5_ULLONG_TO_LDOUBLE_PRECISION) && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY && \
     H5_ULLONG_TO_FP_CAST_WORKS)
 #define H5T_CONV_INTERNAL_ULLONG_LDOUBLE         1
 #endif

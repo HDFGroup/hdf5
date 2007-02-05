@@ -99,9 +99,9 @@ H5O_group_isa(struct H5O_t *oh)
     HDassert(oh);
 
     /* Check for any of the messages that indicate a group */
-    if((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID, 0)) < 0)
+    if((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
-    if((linfo_exists = H5O_msg_exists_oh(oh, H5O_LINFO_ID, 0)) < 0)
+    if((linfo_exists = H5O_msg_exists_oh(oh, H5O_LINFO_ID)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
 
     ret_value = (stab_exists > 0 || linfo_exists > 0);

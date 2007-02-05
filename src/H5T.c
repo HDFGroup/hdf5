@@ -2455,36 +2455,38 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
 {
     H5T_path_t	*path = NULL;		/*conversion path		*/
     H5T_soft_t	*soft = NULL;		/*soft conversion information	*/
-    int	nprint=0;		/*number of paths shut down	*/
+    int	nprint = 0;		/*number of paths shut down	*/
     int	i;			/*counter			*/
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_unregister);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_unregister)
 
     /* Remove matching entries from the soft list */
-    if (H5T_PERS_DONTCARE==pers || H5T_PERS_SOFT==pers) {
-        for (i=H5T_g.nsoft-1; i>=0; --i) {
-            soft = H5T_g.soft+i;
-            assert(soft);
-            if (name && *name && HDstrcmp(name, soft->name)) continue;
-            if (src && src->shared->type!=soft->src) continue;
-            if (dst && dst->shared->type!=soft->dst) continue;
-            if (func && func!=soft->func) continue;
+    if(H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {
+        for(i = H5T_g.nsoft - 1; i >= 0; --i) {
+            soft = H5T_g.soft + i;
+            HDassert(soft);
+            if(name && *name && HDstrcmp(name, soft->name))
+                continue;
+            if(src && src->shared->type != soft->src)
+                continue;
+            if(dst && dst->shared->type != soft->dst)
+                continue;
+            if(func && func != soft->func)
+                continue;
 
-            HDmemmove(H5T_g.soft+i, H5T_g.soft+i+1,
-                  (H5T_g.nsoft-(i+1)) * sizeof(H5T_soft_t));
+            HDmemmove(H5T_g.soft + i, H5T_g.soft + i + 1, (H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
-        }
-    }
+        } /* end for */
+    } /* end if */
 
     /* Remove matching conversion paths, except no-op path */
-    for (i=H5T_g.npaths-1; i>0; --i) {
+    for(i = H5T_g.npaths - 1; i > 0; --i) {
         path = H5T_g.path[i];
-        assert(path);
+        HDassert(path);
 
         /* Not a match */
-        if (((H5T_PERS_SOFT==pers && path->is_hard) ||
-                    (H5T_PERS_HARD==pers && !path->is_hard)) ||
+        if(((H5T_PERS_SOFT == pers && path->is_hard) ||
+                    (H5T_PERS_HARD == pers && !path->is_hard)) ||
                 (name && *name && HDstrcmp(name, path->name)) ||
                 (src && H5T_cmp(src, path->src, FALSE)) ||
                 (dst && H5T_cmp(dst, path->dst, FALSE)) ||
@@ -2500,17 +2502,16 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         } /* end if */
         else {
             /* Remove from table */
-            HDmemmove(H5T_g.path+i, H5T_g.path+i+1,
-                  (H5T_g.npaths-(i+1))*sizeof(H5T_path_t*));
+            HDmemmove(H5T_g.path + i, H5T_g.path + i + 1, (H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t*));
             --H5T_g.npaths;
 
             /* Shut down path */
             H5T_print_stats(path, &nprint);
             path->cdata.command = H5T_CONV_FREE;
-            if ((path->func)(FAIL, FAIL, &(path->cdata),
-                    (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id)<0) {
+            if((path->func)(FAIL, FAIL, &(path->cdata),
+                    (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
-                if (H5DEBUG(T)) {
+                if(H5DEBUG(T)) {
                     fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
                             "to free private data for %s (ignored)\n",
                             (unsigned long)(path->func), path->name);
@@ -2524,9 +2525,8 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         } /* end else */
     } /* end for */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5T_unregister() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5T_unregister() */
 
 
 /*-------------------------------------------------------------------------

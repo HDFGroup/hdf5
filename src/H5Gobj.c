@@ -413,14 +413,14 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
 
     /* Check if we have information about the number of objects in this group */
     /* (by attempting to get the link info message for this group) */
-    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         size_t link_msg_size;   /* Size of new link message in the file */
 
         /* Using the new format for groups */
         use_old_format = FALSE;
 
         /* Get the group info */
-        if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+        if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, &ginfo, dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
 
         /* Check for tracking creation order on this group's links */
@@ -541,7 +541,7 @@ H5G_obj_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     /* Increment the number of objects in this group */
     if(!use_old_format) {
         linfo.nlinks++;
-        if(H5O_msg_write(grp_oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
+        if(H5O_msg_write(grp_oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, &linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
     } /* end if */
 
@@ -606,7 +606,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "bad group ID")
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Check for going out of bounds */
         if(skip > 0 && (size_t)skip >= linfo.nlinks)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
@@ -616,7 +616,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
-            if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+            if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
             /* Check if creation order is tracked */
@@ -682,7 +682,7 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     HDassert(grp_info);
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Retrieve the information about the links */
         grp_info->nlinks = linfo.nlinks;
         grp_info->min_corder = linfo.min_corder;
@@ -740,13 +740,13 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5_index_t idx_type,
     HDassert(oloc && oloc->file);
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
-            if(NULL == H5O_msg_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+            if(NULL == H5O_msg_read(oloc, H5O_GINFO_ID, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
             /* Check if creation order is tracked */
@@ -811,7 +811,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     HDassert(oloc);
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Get the object's name from the dense link storage */
             if((ret_value = H5G_dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
@@ -881,7 +881,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
             H5O_ginfo_t ginfo;		/* Group info message            */
 
             /* Get the group info */
-            if(NULL == H5O_msg_read(oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+            if(NULL == H5O_msg_read(oloc, H5O_GINFO_ID, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
 
             /* Check if we should switch from dense storage back to link messages */
@@ -940,7 +940,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
     } /* end if */
 
     /* Update link info in the object header */
-    if(H5O_msg_write(oloc, H5O_LINFO_ID, 0, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
+    if(H5O_msg_write(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
 
 done:
@@ -975,7 +975,7 @@ H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, h
     HDassert(name && *name);
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Using the new format for groups */
         use_old_format = FALSE;
 
@@ -1040,13 +1040,13 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     HDassert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info for this group */
-    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
-            if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+            if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
             /* Check if creation order is tracked */
@@ -1123,7 +1123,7 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     HDassert(name && *name);
 
     /* Attempt to get the link info message for this group */
-    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Check for dense link storage */
         if(H5F_addr_defined(linfo.link_fheap_addr)) {
             /* Get the object's info from the dense link storage */
@@ -1177,13 +1177,13 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
     HDassert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info message for this group */
-    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, 0, &linfo, dxpl_id)) {
+    if(H5O_msg_read(grp_oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             H5O_ginfo_t ginfo;		        /* Group info message */
 
             /* Get group info message, to see if creation order is tracked for links in this group */
-            if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, 0, &ginfo, dxpl_id))
+            if(NULL == H5O_msg_read(grp_oloc, H5O_GINFO_ID, &ginfo, dxpl_id))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info message for group")
 
             /* Check if creation order is tracked */

@@ -1276,8 +1276,8 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         if(H5G_link_name_replace(f, dxpl_id, udata->grp_full_path_r, s, lnk_type, lnk_addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
 
-        /* Decrement the ref. count for hard links, if requested */
-        if(lnk_type == H5L_TYPE_HARD && udata->adj_link) {
+        /* Decrement the ref. count for hard links */
+        if(lnk_type == H5L_TYPE_HARD) {
             H5O_loc_t tmp_oloc;             /* Temporary object location */
 
             /* Build temporary object location */
@@ -1359,14 +1359,12 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         /* Reduce the link count for all entries in this node */
         for(idx = 0; idx < sn->nsyms; idx++) {
             if(!(H5G_CACHED_SLINK == sn->entry[idx].type)) {
-                /* Decrement the reference count, if requested */
-                if(udata->adj_link) {
-                    HDassert(H5F_addr_defined(sn->entry[idx].header));
-                    tmp_oloc.addr = sn->entry[idx].header;
+                /* Decrement the reference count */
+                HDassert(H5F_addr_defined(sn->entry[idx].header));
+                tmp_oloc.addr = sn->entry[idx].header;
 
-                    if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to decrement object link count")
-                } /* end if */
+                if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to decrement object link count")
             } /* end if */
         } /* end for */
 

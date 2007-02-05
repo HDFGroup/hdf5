@@ -1053,7 +1053,7 @@ H5S_write(H5O_loc_t *loc, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if(H5O_msg_write(loc, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent), dxpl_id) < 0)
+            if(H5O_msg_write(loc, H5O_SDSPACE_ID, 0, update_time, &(ds->extent), dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple dataspace message")
             break;
 
@@ -1146,7 +1146,7 @@ H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
     if(NULL == (ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if(H5O_msg_read(loc, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
+    if(H5O_msg_read(loc, H5O_SDSPACE_ID, &(ds->extent), dxpl_id) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header")
 
     /* Default to entire dataspace being selected */

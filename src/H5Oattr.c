@@ -588,7 +588,7 @@ H5O_attr_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
+H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5A_t            *attr = (const H5A_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -600,11 +600,11 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     HDassert(attr);
 
     /* Decrement reference count on datatype in file */
-    if((H5O_MSG_DTYPE->del)(f, dxpl_id, attr->dt, adj_link) < 0)
+    if((H5O_MSG_DTYPE->del)(f, dxpl_id, attr->dt) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust datatype link count")
 
     /* Decrement reference count on dataspace in file */
-    if((H5O_MSG_SDSPACE->del)(f, dxpl_id, attr->ds, adj_link) < 0)
+    if((H5O_MSG_SDSPACE->del)(f, dxpl_id, attr->ds) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust dataspace link count")
 
 done:

@@ -179,7 +179,6 @@ typedef struct H5G_bt_ins_t {
 typedef struct H5G_bt_rm_t {
     /* downward */
     H5G_bt_common_t common;          /* Common info for B-tree user data (must be first) */
-    hbool_t adj_link;                   /* Whether to adjust the link count on objects */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
 } H5G_bt_rm_t;
 
@@ -380,7 +379,7 @@ H5_DLL herr_t H5G_stab_insert(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
     H5O_link_t *obj_lnk, hid_t dxpl_id);
-H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, hbool_t adj_link);
+H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab);
 H5_DLL herr_t H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id,
     H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk, hid_t gid,
     H5G_link_iterate_t *lnk_op, void *op_data);

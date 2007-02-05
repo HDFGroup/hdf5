@@ -839,9 +839,10 @@ done:
  */
 unsigned
 H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
-    size_t size, unsigned * oh_flags_ptr)
+    const void *mesg, unsigned * oh_flags_ptr)
 {
-    size_t      aligned_size = H5O_ALIGN_OH(oh, size);
+    size_t      raw_size;       /* Raw size of message */
+    size_t      aligned_size;   /* Size of message including alignment */
     unsigned    idx;            /* Index of message which fits allocation */
     unsigned    ret_value;      /* Return value */
 
@@ -850,7 +851,13 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     /* check args */
     HDassert(oh);
     HDassert(type);
+    HDassert(mesg);
     HDassert(oh_flags_ptr);
+
+    /* Compute the size needed to store the message in the object header */
+    if((raw_size = (type->raw_size)(f, FALSE, mesg)) >= H5O_MESG_MAX_SIZE)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large")
+    aligned_size = H5O_ALIGN_OH(oh, raw_size);
 
     /* look for a null message which is large enough */
     for(idx = 0; idx < oh->nmesgs; idx++)
@@ -872,7 +879,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
 
             HDassert(H5F_addr_defined(oh->chunk[chunkno].addr));
 
-            tri_result = H5O_alloc_extend_chunk(f, oh, chunkno, size, &idx);
+            tri_result = H5O_alloc_extend_chunk(f, oh, chunkno, raw_size, &idx);
             if(tri_result == TRUE)
 		break;
             else if(tri_result == FALSE)
@@ -885,7 +892,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
          *      create a new one.
          */
         if(idx == UFAIL)
-            if((idx = H5O_alloc_new_chunk(f, dxpl_id, oh, size)) == UFAIL)
+            if((idx = H5O_alloc_new_chunk(f, dxpl_id, oh, raw_size)) == UFAIL)
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, UFAIL, "unable to create a new object header data chunk")
     } /* end if */
 
@@ -920,7 +927,7 @@ done:
  */
 herr_t
 H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
-    hbool_t delete_mesg, hbool_t adj_link)
+    hbool_t adj_link)
 {
     herr_t ret_value = SUCCEED; 	                /* Return value */
 
@@ -932,9 +939,9 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     HDassert(mesg);
 
     /* Check if we should operate on the message */
-    if(delete_mesg) {
+    if(adj_link) {
         /* Free any space referred to in the file from this message */
-        if(H5O_delete_mesg(f, dxpl_id, mesg, adj_link) < 0)
+        if(H5O_delete_mesg(f, dxpl_id, mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end if */
 
@@ -1368,7 +1375,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                 deleted_chunkno = null_msg->chunkno;
 
                 /* Convert continuation message into a null message */
-                if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, TRUE, TRUE) < 0)
+                if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, TRUE) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
 
                 /*

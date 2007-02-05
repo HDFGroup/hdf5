@@ -670,7 +670,7 @@ H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid
 
     /* Get the message */
     comment.s = NULL;
-    if(NULL == H5O_msg_read(obj_loc.oloc, H5O_NAME_ID, 0, &comment, dxpl_id)) {
+    if(NULL == H5O_msg_read(obj_loc.oloc, H5O_NAME_ID, &comment, dxpl_id)) {
 	if(buf && bufsize > 0)
             buf[0] = '\0';
 	ret_value = 0;

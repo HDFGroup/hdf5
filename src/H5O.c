@@ -1108,15 +1108,18 @@ H5O_touch_oh(H5F_t *f,
 
         /* Create a new message, if necessary */
         if(idx == oh->nmesgs) {
-            size_t	size;           /* New modification time message size */
+            unsigned mesg_flags = 0;        /* Flags for message in object header */
 
             /* If we would have to create a new message, but we aren't 'forcing' it, get out now */
             if(!force)
                 HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
-            size = (H5O_MSG_MTIME_NEW->raw_size)(f, FALSE, &now);
-            if((idx = H5O_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, size, oh_flags_ptr)) == UFAIL)
+            /* Allocate space for the modification time message */
+            if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now, oh_flags_ptr)) == UFAIL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
+
+            /* Set the message's flags if appropriate */
+            oh->mesg[idx].flags = mesg_flags;
         } /* end if */
 
         /* Allocate 'native' space, if necessary */
@@ -1225,20 +1228,26 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t * oh_flags_ptr)
 
     /* Create a new message */
     if(idx == oh->nmesgs) {
-        size_t	size = (H5O_MSG_BOGUS->raw_size)(f, NULL);
-
-	if((idx = H5O_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, size, oh_flags_ptr)) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
+        H5O_bogus_t *bogus;             /* Pointer to the bogus information */
+        unsigned mesg_flags = 0;        /* Flags for message in object header */
 
         /* Allocate the native message in memory */
-	if(NULL == (oh->mesg[idx].native = H5MM_malloc(sizeof(H5O_bogus_t))))
+	if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message")
 
-        /* Update the native part */
-        ((H5O_bogus_t *)(oh->mesg[idx].native))->u = H5O_BOGUS_VALUE;
+        /* Update the native value */
+        bogus->u = H5O_BOGUS_VALUE;
+
+        /* Allocate space in the object header for bogus message */
+	if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus, oh_flags_ptr)) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
+
+        /* Point to "bogus" information (take it over) */
+	oh->mesg[idx].native = bogus;
 
         /* Mark the message and object header as dirty */
 	*oh_flags_ptr = TRUE;
+        oh->mesg[idx].flags = mesg_flags;
         oh->mesg[idx].dirty = TRUE;
         oh->dirty = TRUE;
     } /* end if */
@@ -1375,7 +1384,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
      */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         /* Free any space referred to in the file from this message */
-        if(H5O_delete_mesg(f, dxpl_id, curr_msg, TRUE) < 0)
+        if(H5O_delete_mesg(f, dxpl_id, curr_msg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end for */
 
@@ -1812,9 +1821,9 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
         oinfo->btime = 0;
 
         /* Might be information for modification time */
-        if(NULL == H5O_msg_read_real(oloc->file, oh, H5O_MTIME_ID, 0, &oinfo->ctime, dxpl_id)) {
+        if(NULL == H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime)) {
             H5E_clear_stack(NULL);
-            if(NULL == H5O_msg_read_real(oloc->file, oh, H5O_MTIME_NEW_ID, 0, &oinfo->ctime, dxpl_id)) {
+            if(NULL == H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime)) {
                 H5E_clear_stack(NULL);
                 oinfo->ctime = 0;
             } /* end if */

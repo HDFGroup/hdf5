@@ -1761,7 +1761,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open")
 
     /* Get the type and space */
-    if(NULL == (dataset->shared->type = H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, 0, NULL, dxpl_id)))
+    if(NULL == (dataset->shared->type = H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load type info from dataset header")
     if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc), dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load space info from dataset header")
@@ -1776,7 +1776,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 
     /* Get the optional filters message */
     pline = &dataset->shared->dcpl_cache.pline;
-    if(NULL != H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, 0, pline, dxpl_id)) {
+    if(NULL != H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, pline, dxpl_id)) {
         if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline")
     } /* end if */
@@ -1789,7 +1789,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
      * values are copied to the dataset create plist so the user can query
      * them.
      */
-    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, 0, &(dataset->shared->layout), dxpl_id))
+    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout.type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
@@ -1854,11 +1854,11 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
     fill_prop = &dataset->shared->dcpl_cache.fill;
 
     /* Try to get the new fill value message from the object header */
-    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_NEW_ID, 0, fill_prop, dxpl_id)) {
+    if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_NEW_ID, fill_prop, dxpl_id)) {
         H5E_clear_stack(NULL);
 
 	/* For backward compatibility, try to retrieve the old fill value message */
-        if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_ID, 0, fill_prop, dxpl_id)) {
+        if(NULL == H5O_msg_read(&(dataset->oloc), H5O_FILL_ID, fill_prop, dxpl_id)) {
             H5E_clear_stack(NULL);
 
             /* Set the space allocation time appropriately, based on the type of dataset storage */
@@ -1902,7 +1902,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
     if((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
             || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr))) {
-        if(NULL != H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, 0, &dataset->shared->dcpl_cache.efl, dxpl_id)) {
+        if(NULL != H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl, dxpl_id)) {
             if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->dcpl_cache.efl) < 0)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set external file list")
 
@@ -2012,7 +2012,7 @@ H5D_close(H5D_t *dataset)
             case H5D_COMPACT:
                 /* Update header message of layout for compact dataset. */
                 if(dataset->shared->layout.u.compact.dirty) {
-                    if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id) < 0)
+                    if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to update layout message")
                     dataset->shared->layout.u.compact.dirty = FALSE;
                 } /* end if */
@@ -2403,7 +2403,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
          * set the address.  (this is improves forward compatibility).
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            if(H5O_msg_write(&dset->oloc, H5O_LAYOUT_ID, 0, H5O_MSG_FLAG_CONSTANT, update_time, &dset->shared->layout, dxpl_id) < 0)
+            if(H5O_msg_write(&dset->oloc, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_time, &dset->shared->layout, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
     } /* end if */
 
@@ -3306,7 +3306,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
 
                 case H5D_COMPACT:
                     if(dataset->shared->layout.u.compact.dirty) {
-                        if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id) < 0)
+                        if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
                         dataset->shared->layout.u.compact.dirty = FALSE;
                     } /* end if */

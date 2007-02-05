@@ -177,13 +177,13 @@ H5O_dset_isa(H5O_t *oh)
     HDassert(oh);
 
     /* Datatype */
-    if((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID, 0)) < 0)
+    if((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
 	HGOTO_DONE(FALSE)
 
     /* Layout */
-    if((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID, 0)) < 0)
+    if((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
 	HGOTO_DONE(FALSE)

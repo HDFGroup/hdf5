@@ -134,7 +134,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
         HDassert(shared->flags & H5O_COMMITTED_FLAG);
 
         /* Get the shared message from an object header */
-        if(NULL == (ret_value = H5O_msg_read(&(shared->u.oloc), type->id, 0, NULL, dxpl_id)))
+        if(NULL == (ret_value = H5O_msg_read(&(shared->u.oloc), type->id, NULL, dxpl_id)))
             HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read message")
     } /* end else */
 
@@ -440,7 +440,7 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
  */
 herr_t
 H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
-    const H5O_msg_class_t *type, hbool_t adj_link)
+    const H5O_msg_class_t *type)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -459,10 +459,9 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
      * be decremented when they're deleted (in H5O_shared_link_adj).
      */
 
-    /* Decrement the reference count on the shared object, if requested */
-    if(adj_link)
-        if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, type, -1) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
+    /* Decrement the reference count on the shared object */
+    if(H5O_shared_link_adj(f, dxpl_id, sh_mesg, type, -1) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

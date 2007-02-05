@@ -98,7 +98,7 @@ H5O_dtype_isa(struct H5O_t *oh)
 
     HDassert(oh);
 
-    if((ret_value = H5O_msg_exists_oh(oh, H5O_DTYPE_ID, 0)) < 0)
+    if((ret_value = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header")
 
 done:

@@ -176,7 +176,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
     /* Convert message into a null message in the header */
     /* (don't delete attribute's space in the file though) */
-    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE, FALSE) < 0)
+    if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
     /* Indicate that the object header was modified */
@@ -294,7 +294,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
          *      *ick* -QAK, 2007/01/08
          */
         if(attr_rc > 1) {
-            if(H5O_attr_delete(loc->file, dxpl_id, attr, TRUE) < 0)
+            if(H5O_attr_delete(loc->file, dxpl_id, attr) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
         } /* end if */
     } /* end if */
@@ -815,7 +815,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 /* (doesn't decrement the link count on shared components becuase
                  *      the "native" pointer has been reset)
                  */
-                if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE, FALSE) < 0)
+                if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release previous attribute")
 
                 /* Increment attribute count */
@@ -1054,7 +1054,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             oh->nattrs--;
 
         /* Convert message into a null message (i.e. delete it) */
-        if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE, TRUE) < 0)
+        if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
         /* Indicate that the object header was modified */

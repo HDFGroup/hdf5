@@ -39,7 +39,7 @@ static herr_t H5O_linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, con
 static void *H5O_linfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_linfo_free(void *_mesg);
-static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static void *H5O_linfo_copy_file(H5F_t *file_src, 
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
@@ -341,7 +341,7 @@ H5O_linfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
+H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -354,7 +354,7 @@ H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
 
     /* If the group is using "dense" link storage, delete it */
     if(H5F_addr_defined(linfo->link_fheap_addr))
-        if(H5G_dense_delete(f, dxpl_id, (H5O_linfo_t *)linfo, adj_link) < 0)   /* Casting away const OK - QAK */
+        if(H5G_dense_delete(f, dxpl_id, (H5O_linfo_t *)linfo, TRUE) < 0)   /* Casting away const OK - QAK */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
 
 done:

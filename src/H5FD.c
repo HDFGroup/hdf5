@@ -2942,7 +2942,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
     if(type<H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file type")
 
     if(!H5F_addr_defined(addr) || addr>file->maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")

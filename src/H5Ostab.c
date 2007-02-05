@@ -40,7 +40,7 @@ static herr_t H5O_stab_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, cons
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
-static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
     H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
@@ -269,7 +269,7 @@ H5O_stab_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg, hbool_t adj_link)
+H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -280,7 +280,7 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg, hbool_t adj_link)
     HDassert(mesg);
 
     /* Free the file space for the symbol table */
-    if(H5G_stab_delete(f, dxpl_id, mesg, adj_link) < 0)
+    if(H5G_stab_delete(f, dxpl_id, mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:

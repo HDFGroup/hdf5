@@ -700,7 +700,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
                 /* Get the group info for parent group */
                 /* (OK if not found) */
-                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_GINFO_ID, 0, &par_ginfo, dxpl_id)) {
+                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_GINFO_ID, &par_ginfo, dxpl_id)) {
                     /* Clear error stack from not finding the group info message */
                     H5E_clear_stack(NULL);
 
@@ -712,7 +712,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
                 /* Get the link info for parent group */
                 /* (OK if not found) */
-                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_LINFO_ID, 0, &par_linfo, dxpl_id)) {
+                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_LINFO_ID, &par_linfo, dxpl_id)) {
                     /* Clear error stack from not finding the link info message */
                     H5E_clear_stack(NULL);
 

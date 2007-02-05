@@ -406,16 +406,15 @@ H5_DLL herr_t H5O_msg_create(H5O_loc_t *loc, unsigned type_id, unsigned mesg_fla
 H5_DLL herr_t H5O_msg_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg,
     unsigned *oh_flags_ptr);
-H5_DLL herr_t H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned overwrite,
-    unsigned flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
-H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, int sequence,
-    void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned flags,
+    unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
+    hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, int sequence,
-    hid_t dxpl_id);
+H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence,
     hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
@@ -465,7 +464,7 @@ H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
 H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
 
 /* Link operators */
-H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_shared_copy(void *dst, const H5O_shared_t *src);

@@ -43,7 +43,6 @@ static void *H5O_link_copy(const void *_mesg, void *_dest);
 static size_t H5O_link_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
-/* static herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link); */
 static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
@@ -494,7 +493,7 @@ H5O_link_free(void *_mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
+H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -506,47 +505,45 @@ H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     HDassert(lnk);
 
     /* Check for adjusting the link count when the link is removed */
-    if(adj_link) {
-        /* Adjust the reference count of the object when a hard link is removed */
-        if(lnk->type == H5L_TYPE_HARD) {
-            H5O_loc_t oloc;
+    /* Adjust the reference count of the object when a hard link is removed */
+    if(lnk->type == H5L_TYPE_HARD) {
+        H5O_loc_t oloc;
 
-            /* Construct object location for object, in order to decrement it's ref count */
-            H5O_loc_reset(&oloc);
-            oloc.file = f;
-            HDassert(H5F_addr_defined(lnk->u.hard.addr));
-            oloc.addr = lnk->u.hard.addr;
+        /* Construct object location for object, in order to decrement it's ref count */
+        H5O_loc_reset(&oloc);
+        oloc.file = f;
+        HDassert(H5F_addr_defined(lnk->u.hard.addr));
+        oloc.addr = lnk->u.hard.addr;
 
-            /* Decrement the ref count for the object */
-            if(H5O_link(&oloc, -1, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to decrement object link count")
-        } /* end if */
-        /* Perform the "delete" callback when a user-defined link is removed */
-        else if(lnk->type >= H5L_TYPE_UD_MIN) {
-            const H5L_class_t   *link_class;         /* User-defined link class */
+        /* Decrement the ref count for the object */
+        if(H5O_link(&oloc, -1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to decrement object link count")
+    } /* end if */
+    /* Perform the "delete" callback when a user-defined link is removed */
+    else if(lnk->type >= H5L_TYPE_UD_MIN) {
+        const H5L_class_t   *link_class;         /* User-defined link class */
 
-            /* Get the link class for this type of link. */
-            if(NULL == (link_class = H5L_find_class(lnk->type)))
-                HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class not registered")
+        /* Get the link class for this type of link. */
+        if(NULL == (link_class = H5L_find_class(lnk->type)))
+            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class not registered")
 
-            /* Check for delete callback */
-            if(link_class->del_func) {
-                hid_t file_id;           /* ID for the file the link is located in (passed to user callback) */
+        /* Check for delete callback */
+        if(link_class->del_func) {
+            hid_t file_id;           /* ID for the file the link is located in (passed to user callback) */
 
-                /* Get a file ID for the file the link is in */
-                if((file_id = H5F_get_id(f)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get file ID")
+            /* Get a file ID for the file the link is in */
+            if((file_id = H5F_get_id(f)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get file ID")
 
-                /* Call user-defined link's 'delete' callback */
-                if((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0) {
-                    H5I_dec_ref(file_id);
-                    HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure")
-                } /* end if */
-
-                /* Release the file ID */
-                if(H5I_dec_ref(file_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+            /* Call user-defined link's 'delete' callback */
+            if((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0) {
+                H5I_dec_ref(file_id);
+                HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure")
             } /* end if */
+
+            /* Release the file ID */
+            if(H5I_dec_ref(file_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file")
         } /* end if */
     } /* end if */
 

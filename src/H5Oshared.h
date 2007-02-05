@@ -203,7 +203,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline herr_t
-H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
+H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -220,13 +220,13 @@ H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link)
     /* Check for shared message */
     if(H5O_IS_SHARED(sh_mesg->flags)) {
         /* Decrement the reference count on the shared message/object */
-        if(H5O_shared_delete(f, dxpl_id, sh_mesg, H5O_SHARED_TYPE, adj_link) < 0)
+        if(H5O_shared_delete(f, dxpl_id, sh_mesg, H5O_SHARED_TYPE) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for shared message")
     } /* end if */
 #ifdef H5O_SHARED_DELETE_REAL
     else {
         /* Decrement the reference count on the native message directly */
-        if(H5O_SHARED_DELETE_REAL(f, dxpl_id, _mesg, adj_link) < 0)
+        if(H5O_SHARED_DELETE_REAL(f, dxpl_id, _mesg) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for native message")
     } /* end else */
 #endif /* H5O_SHARED_DELETE_REAL */

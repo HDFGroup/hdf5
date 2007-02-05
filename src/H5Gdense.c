@@ -118,7 +118,6 @@ typedef struct {
 typedef struct {
     /* downward */
     H5G_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
-    hbool_t     adj_link;               /* Whether to adjust link count on object */
     hbool_t     rem_from_fheap;         /* Whether to remove the link from the fractal heap */
     hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
@@ -134,7 +133,6 @@ typedef struct {
     /* downward */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
-    hbool_t     adj_link;               /* Whether to adjust link count on object */
     hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
@@ -1367,9 +1365,9 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         if(H5G_link_name_replace(udata->f, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRENAME, FAIL, "unable to rename open objects")
 
-    /* Perform the deletion action on the link */
+    /* Perform the deletion action on the link, if requested */
     /* (call message "delete" callback directly: *ick* - QAK) */
-    if(H5O_link_delete(udata->f, udata->dxpl_id, lnk, udata->adj_link) < 0)
+    if(H5O_link_delete(udata->f, udata->dxpl_id, lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -1407,7 +1405,6 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
     /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f = bt2_udata->common.f;
     fh_udata.dxpl_id = bt2_udata->common.dxpl_id;
-    fh_udata.adj_link = bt2_udata->adj_link;
     fh_udata.rem_from_corder_index = bt2_udata->rem_from_corder_index;
     fh_udata.corder_bt2_addr = bt2_udata->corder_bt2_addr;
     fh_udata.grp_full_path_r = bt2_udata->grp_full_path_r;
@@ -1470,7 +1467,6 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.common.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
-    udata.adj_link = TRUE;
     udata.rem_from_fheap = TRUE;
     udata.rem_from_corder_index = H5F_addr_defined(linfo->corder_bt2_addr);
     udata.corder_bt2_addr = linfo->corder_bt2_addr;
@@ -1478,8 +1474,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.replace_names = TRUE;
 
     /* Remove the record from the name index v2 B-tree */
-    if(H5B2_remove(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
-            &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
+    if(H5B2_remove(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from name index v2 B-tree")
 
 done:
@@ -1616,7 +1611,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 
     /* Perform the deletion action on the link */
     /* (call link message "delete" callback directly: *ick* - QAK) */
-    if(H5O_link_delete(bt2_udata->f, bt2_udata->dxpl_id, fh_udata.lnk, TRUE) < 0)
+    if(H5O_link_delete(bt2_udata->f, bt2_udata->dxpl_id, fh_udata.lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     /* Release the space allocated for the link */
@@ -1781,7 +1776,6 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.common.name_hash = 0;
         udata.common.found_op = NULL;
         udata.common.found_op_data = NULL;
-        udata.adj_link = TRUE;
         udata.rem_from_fheap = FALSE;           /* handled in "bulk" below by deleting entire heap */
         udata.rem_from_corder_index = FALSE;
         udata.grp_full_path_r = NULL;

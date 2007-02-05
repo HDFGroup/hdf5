@@ -40,7 +40,7 @@ static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const
 static herr_t H5O_cont_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
-static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t adj_link);
+static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -222,7 +222,7 @@ H5O_cont_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg, hbool_t UNUSED adj_link)
+H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 {
     const H5O_cont_t     *mesg = (const H5O_cont_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
