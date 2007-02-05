@@ -50,17 +50,14 @@ Preconditions
       4.1 HDF5 uses Zlib version 1.2.2 for compression and Zlib is NOT
           distributed with HDF5 library in 1.6.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/bin/windows 
+          to ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/1.2/bin 
           to download the Zlib library.
-
-          Note: Zlib 1.2.2 DLL library can also be downloaded from
-          http://www.zlib.net/zlib122-dll.zip
       
       4.2 HDF5 uses Szip version 2.0 for compression and Szip
           compression software is provided with HDF5 products starting
           from 1.6.0 release.  To use Szip 2.0 library, you can
           download Szip source codes and binaries from
-          ftp://hdf.ncsa.uiuc.edu/lib-external/szip/bin/windows
+          ftp://hdf.ncsa.uiuc.edu/lib-external/szip/2.0/bin/windows
 
           Please note that Szip is not a totally open-source free
           software.  For licensing issue of Szip, please check 
