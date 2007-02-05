@@ -24,9 +24,6 @@ library.
    hdf5dev      - For discussion of the HDF5 library development
 		  with developers and other interested parties.
 
-   hdf5repo     - For checkin notices of code development on the library,
-		  not a discussion list.
-
 To subscribe to a list, send mail to "<list>-subscribe@hdfgroup.org".
 where <list> is the name of the list.
 E.g., mail hdf5-subscribe@hdfgroup.org
