@@ -117,6 +117,21 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /* set alarms to N seconds if N > 0, else use default alarm_seconds. */
 #define ALARM_SET(N)	HDalarm((N)>0 ? N : alarm_seconds)
 
+/*
+ * The methods to compare the equality of floating-point values:
+ *    1. XXX_ABS_EQUAL - check if the difference is smaller than the 
+ *       Epsilon value.  The Epsilon values, FLT_EPSILON, DBL_EPSILON,
+ *       and LDBL_EPSILON, are defined by compiler in float.h.
+ *    2. To be defined later.
+ */
+#define FLT_ABS_EQUAL(X,Y)	(fabsf(X-Y)<FLT_EPSILON)
+#define DBL_ABS_EQUAL(X,Y)	(fabs(X-Y)<DBL_EPSILON)
+#define LDBL_ABS_EQUAL(X,Y)	(fabsl(X-Y)<LDBL_EPSILON)
+
+/*#define FP_ABS_UNEQUAL(X,Y,T)	((T==1 && fabsf(X-Y)>FLT_EPSILON) || \
+                                 (T==2 && fabs(X-Y)>DBL_EPSILON) || \
+                                 (T==3 && fabsl(X-Y)>LDBL_EPSILON))*/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
