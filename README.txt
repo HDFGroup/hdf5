@@ -27,14 +27,14 @@ http://hdfgroup.org/HDF5/release/alpha/obtain518.html
 Four mailing lists are currently set up for use with the HDF5
 library.
 
-   hdf5         - For general discussion of the HDF5 library with
+   news         - For announcements of HDF5 related developments,
+		  not a discussion list.
+
+   hdf-forum    - For general discussion of the HDF5 library with
 		  other users.
 
    hdf5dev      - For discussion of the HDF5 library development
 		  with developers and other interested parties.
-
-   hdf5announce - For announcements of HDF5 related developments,
-		  not a discussion list.
 
    hdf5repo     - For checkin notices of code development on the library,
 		  not a discussion list.
@@ -44,6 +44,11 @@ where <list> is the name of the list.
 E.g., mail hdf5-subscribe@hdfgroup.org
 
 Messages to be sent to the list should be sent to "<list>@hdfgroup.org".
+
+Periodic code snapshots are provided at the following URL:
+    ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
+Please read the README.txt file in that directory before working with a library
+snapshot.
 
 The HDF5 website is located at http://hdfgroup.org/HDF5/
 
