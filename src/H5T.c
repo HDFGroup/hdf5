@@ -2458,7 +2458,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	nprint = 0;		/*number of paths shut down	*/
     int	i;			/*counter			*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_unregister)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_unregister)
 
     /* Remove matching entries from the soft list */
     if(H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {

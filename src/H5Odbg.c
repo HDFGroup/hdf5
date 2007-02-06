@@ -299,6 +299,12 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
                 "Birth Time:", buf);
 
         /* Attribute tracking fields */
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Attribute creation order tracked:",
+		   (oh->flags & H5P_CRT_ORDER_TRACKED) ? "Yes" : "No");
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Attribute creation order indexed:",
+		   (oh->flags & H5P_CRT_ORDER_INDEXED) ? "Yes" : "No");
         HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
                   "Max. compact attributes:",
                   (unsigned)oh->max_compact);
@@ -377,20 +383,19 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 		  (unsigned) (oh->mesg[i].type->id),
 		  oh->mesg[i].type->name,
 		  sequence[oh->mesg[i].type->id]++);
-	HDfprintf (stream, "%*s%-*s %t\n", indent+3, "", MAX (0, fwidth-3),
+	HDfprintf(stream, "%*s%-*s %t\n", indent+3, "", MAX (0, fwidth-3),
 		   "Dirty:",
 		   oh->mesg[i].dirty);
-	HDfprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
+	HDfprintf(stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
 		   "Shared:",
 		   (oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) ? "Yes" : "No");
 	HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Constant:",
 		  (oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) ? "Yes" : "No");
-	if(oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS) {
-	    HDfprintf (stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3),
+	if(oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS)
+	    HDfprintf(stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3),
 		       "*** ADDITIONAL UNKNOWN FLAGS --->",
 		       oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
-	} /* end if */
 	HDfprintf(stream, "%*s%-*s %Zu bytes\n", indent+3, "", MAX(0,fwidth-3),
 		  "Raw size in obj header:",
 		  oh->mesg[i].raw_size);

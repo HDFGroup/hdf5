@@ -262,7 +262,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new attribute in header")
     } /* end else */
 
-    /* Was new attribugte shared? */
+    /* Was new attribute shared? */
     if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr)) > 0) {
         hsize_t attr_rc;                /* Attribute's ref count in shared message storage */
 

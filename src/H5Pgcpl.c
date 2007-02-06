@@ -466,7 +466,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_creation_order_tracking
+ * Function:    H5Pget_link_creation_order
  *
  * Purpose:     Returns the flag indicating that creation order is tracked
  *              for links in a group.

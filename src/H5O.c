@@ -689,6 +689,10 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
 
+        /* Get object header flags */
+        if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+
         /* Set starting values for attribute info */
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
@@ -1080,11 +1084,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch_oh(H5F_t *f,
-             hid_t dxpl_id,
-	     H5O_t *oh,
-	     hbool_t force,
-             unsigned * oh_flags_ptr)
+H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force,
+    unsigned * oh_flags_ptr)
 {
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */

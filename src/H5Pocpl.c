@@ -49,6 +49,9 @@
 /* Definitions for the min. # of attributes to store densely */
 #define H5O_CRT_ATTR_MIN_DENSE_SIZE     sizeof(unsigned)
 #define H5O_CRT_ATTR_MIN_DENSE_DEF      6
+/* Definitions for the min. # of attributes to store densely */
+#define H5O_CRT_OHDR_FLAGS_SIZE         sizeof(unsigned)
+#define H5O_CRT_OHDR_FLAGS_DEF          0
 
 
 /******************/
@@ -117,6 +120,7 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
 {
     unsigned attr_max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;   /* Default max. compact attribute storage settings */
     unsigned attr_min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;       /* Default min. dense attribute storage settings */
+    unsigned ohdr_flags = H5O_CRT_OHDR_FLAGS_DEF;               /* Default object header flag settings */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_ocrt_reg_prop)
@@ -129,6 +133,11 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
     /* Register min. dense attribute storage property */
     if(H5P_register(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE,
              &attr_min_dense, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register object header flags property */
+    if(H5P_register(pclass, H5O_CRT_OHDR_FLAGS_NAME, H5O_CRT_OHDR_FLAGS_SIZE,
+             &ohdr_flags, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -228,4 +237,98 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_de
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_attr_phase_change() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_attr_creation_order
+ *
+ * Purpose:     Set the flags for creation order of attributes in a group
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              February  6, 2007
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    unsigned ohdr_flags;                /* Object header flags */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pset_attr_creation_order, FAIL)
+    H5TRACE2("e", "iIu", plist_id, crt_order_flags);
+
+    /* Check for bad combination of flags */
+    if(!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get object header flags */
+    if(H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+
+    /* Mask off previous attribute creation order flag settings */
+    ohdr_flags &= ~(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
+
+    /* Update with new attribute creation order flags */
+    ohdr_flags |= (crt_order_flags & H5P_CRT_ORDER_TRACKED);
+    ohdr_flags |= (crt_order_flags & H5P_CRT_ORDER_INDEXED);
+
+    /* Set object header flags */
+    if(H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_attr_creation_order() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_attr_creation_order
+ *
+ * Purpose:     Returns the flag indicating that creation order is tracked
+ *              for attributes in a group.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Ferbruary  6, 2007
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_attr_creation_order, FAIL)
+    H5TRACE2("e", "ix", plist_id, crt_order_flags);
+
+    /* Get values */
+    if(crt_order_flags) {
+        H5P_genplist_t *plist;      /* Property list pointer */
+        unsigned ohdr_flags;        /* Object header flags */
+
+        /* Reset the value to return */
+        *crt_order_flags = 0;
+
+        /* Get the plist structure */
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Get object header flags */
+        if(H5P_get(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+
+        /* Set creation order flags to return */
+        *crt_order_flags = ohdr_flags & (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_attr_creation_order() */
 

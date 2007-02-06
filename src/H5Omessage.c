@@ -1681,7 +1681,7 @@ done:
  */
 unsigned
 H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
-    unsigned *mesg_flags, void *mesg, unsigned *oh_flags_ptr)
+    unsigned *mesg_flags, void *native, unsigned *oh_flags_ptr)
 {
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     unsigned    ret_value = UFAIL;      /* Return value */
@@ -1694,15 +1694,15 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     HDassert(mesg_flags);
     HDassert(!(*mesg_flags & H5O_MSG_FLAG_SHARED));
     HDassert(type);
-    HDassert(mesg);
+    HDassert(native);
     HDassert(oh_flags_ptr);
 
     /* Check if message is already shared */
-    if((shared_mesg = H5O_msg_is_shared(type->id, mesg)) < 0)
+    if((shared_mesg = H5O_msg_is_shared(type->id, native)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, UFAIL, "error determining if message is shared")
     else if(shared_mesg > 0) {
         /* Increment message's reference count */
-        if(type->link && (type->link)(f, dxpl_id, mesg) < 0)
+        if(type->link && (type->link)(f, dxpl_id, native) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, UFAIL, "unable to adjust shared message ref count")
         *mesg_flags |= H5O_MSG_FLAG_SHARED;
     } /* end if */
@@ -1710,7 +1710,7 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
         /* Avoid unsharable messages */
         if(!(*mesg_flags & H5O_MSG_FLAG_DONTSHARE)) {
             /* Attempt to share message */
-            if((shared_mesg = H5SM_try_share(f, dxpl_id, type->id, mesg)) > 0)
+            if((shared_mesg = H5SM_try_share(f, dxpl_id, type->id, native)) > 0)
                 /* Mark the message as shared */
                 *mesg_flags |= H5O_MSG_FLAG_SHARED;
             else if(shared_mesg < 0)
@@ -1719,13 +1719,13 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     } /* end else */
 
     /* Allocate space in the object header for the message */
-    if((ret_value = H5O_alloc(f, dxpl_id, oh, type, mesg, oh_flags_ptr)) == UFAIL)
+    if((ret_value = H5O_alloc(f, dxpl_id, oh, type, native, oh_flags_ptr)) == UFAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "unable to allocate space for message")
 
     /* Get the message's "creation index", if it has one */
     if(type->get_crt_index) {
-        /* Retrieve the creation index for the message */
-        if((type->get_crt_index)(mesg, &oh->mesg[ret_value].crt_idx) < 0)
+        /* Retrieve the creation index from the native message */
+        if((type->get_crt_index)(native, &oh->mesg[ret_value].crt_idx) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, UFAIL, "unable to retrieve creation index")
     } /* end if */
 

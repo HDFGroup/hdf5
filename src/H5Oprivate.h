@@ -80,6 +80,7 @@ typedef struct H5O_t H5O_t;
 /* ========= Object Creation properties ============ */
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MIN_DENSE_NAME	"min dense attr"	/* Min. # of attributes to store densely */
+#define H5O_CRT_OHDR_FLAGS_NAME		"object header flags"	/* Object header flags */
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
