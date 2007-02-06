@@ -30,7 +30,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	32		/*min obj header data size	     */
-#define H5O_MSG_TYPES   19              /* # of types of messages            */
+#define H5O_MSG_TYPES   20              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -400,6 +400,12 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_STAB[1];
  * The message is just a `time_t'.
  */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME_NEW[1];
+
+/* Shared Message information message (0x000a) 
+ * A message for the superblock extension, holding information about
+ * the file-wide shared message "SOHM" table
+ */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_SHMESG[1];
 
 
 /*

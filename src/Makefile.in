@@ -104,11 +104,11 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Ocopy.lo H5Odbg.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo \
 	H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omessage.lo \
 	H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo \
-	H5Oshared.lo H5Ostab.lo H5Otest.lo H5P.lo H5Pacpl.lo \
-	H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo \
-	H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo \
-	H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo \
-	H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \
+	H5Oshared.lo H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5P.lo \
+	H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
+	H5Pfmpl.lo H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo \
+	H5Pocpypl.lo H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo \
+	H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \
 	H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo H5SMbtree2.lo \
 	H5SMcache.lo H5SMtest.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo \
 	H5Tcommit.lo H5Tcompound.lo H5Tconv.lo H5Tcset.lo H5Tenum.lo \
@@ -423,7 +423,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c \
-        H5Otest.c \
+        H5Oshmesg.c H5Otest.c \
         H5P.c H5Pacpl.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
@@ -689,6 +689,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Opline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Osdspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oshared.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oshmesg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ostab.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Otest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5P.Plo@am__quote@

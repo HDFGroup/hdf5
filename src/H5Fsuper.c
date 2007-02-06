@@ -242,13 +242,17 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     HDmemcpy(shared->btree_k, btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);    /* Keep a local copy also */
 
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->base_addr/*out*/);
-    H5F_addr_decode(f, (const uint8_t **)&p, &shared->freespace_addr/*out*/);
+    H5F_addr_decode(f, (const uint8_t **)&p, &(shared->extension_addr)/*out*/);
+
     /* If the superblock version is greater than 1, read in the shared OH message table information */
-    if(super_vers > HDF5_SUPERBLOCK_VERSION_1) {
+#ifdef JAMES
+    if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->sohm_addr/*out*/);
         shared->sohm_vers = *p++;
         shared->sohm_nindexes = *p++;
     }
+#endif /* JAMES */
+
     H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
     H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
     if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/) < 0)
@@ -388,6 +392,39 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, 
     if (H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
 
+    /* Read the file's superblock extension, if there is one. */
+    if(shared->extension_addr != HADDR_UNDEF && super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
+        H5O_loc_t ext_loc;
+/* JAMES        H5O_shmesg_table_t sohm_table; */
+
+        H5O_loc_reset(&ext_loc);
+        ext_loc.file = f;
+        ext_loc.addr = shared->extension_addr;
+
+        /* JAMES: bump the number of open objects to avoid closing the file here */
+        f->nopen_objs++;
+        if(H5O_open(&ext_loc) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+
+        if(NULL == H5O_msg_read(&ext_loc, H5O_SHMESG_ID, &shared->sohm_table, dxpl_id)) {
+            H5E_clear_stack(NULL);
+            shared->sohm_addr = HADDR_UNDEF;
+            shared->sohm_nindexes = 0;
+            shared->sohm_vers = 0;
+        } else {
+            shared->sohm_addr = shared->sohm_table.addr;
+            shared->sohm_vers = shared->sohm_table.version;
+            shared->sohm_nindexes = shared->sohm_table.nindexes;
+        }
+        /* JAMES
+        HDassert(sohm_table.addr == shared->sohm_addr);
+        HDassert(sohm_table.version == shared->sohm_vers);
+        HDassert(sohm_table.nindexes == shared->sohm_nindexes);
+*/
+        if(H5O_close(&ext_loc) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+        f->nopen_objs--;
+    }
 
     /* Decode shared object header message information and store it in the
      * fcpl */
@@ -622,12 +659,16 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
     }
 
     H5F_addr_encode(f, &p, f->shared->base_addr);
-    H5F_addr_encode(f, &p, f->shared->freespace_addr);
+    H5F_addr_encode(f, &p, f->shared->extension_addr);
+
+#ifdef JAMES
     if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
       H5F_addr_encode(f, &p, f->shared->sohm_addr);
       *p++ = f->shared->sohm_vers;
       *p++ = f->shared->sohm_nindexes;
     }
+#endif /* JAMES */
+
     H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER));
     H5F_addr_encode(f, &p, f->shared->driver_addr);
     if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp))<0)

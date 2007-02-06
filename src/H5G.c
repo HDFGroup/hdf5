@@ -1055,8 +1055,13 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "can't copy group object location")
 
     f->shared->root_grp->shared->fo_count = 1;
-    HDassert(1 == f->nopen_objs);
-    f->nopen_objs = 0;
+    /* The only other open object should be the superblock extension, if it
+     * exists.  Don't count either the superblock extension or the root group
+     * in the number of open objects in the file.
+     */
+    HDassert((1 == f->nopen_objs) ||
+            (2 == f->nopen_objs && HADDR_UNDEF != f->shared->extension_addr));
+    f->nopen_objs--;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

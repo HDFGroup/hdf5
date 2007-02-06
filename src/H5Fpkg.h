@@ -38,6 +38,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
+#include "H5Oprivate.h"         /* Object header messages               */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
 
 /*
@@ -91,8 +92,8 @@
         ( 2 /* indexed B-tree internal k */                             \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* free space address */                   \
-        + H5F_SIZEOF_ADDR(f) /* shared message table address */         \
-        + 2 /* shared message version and number of indexes */          \
+/*        + H5F_SIZEOF_ADDR(f) /* shared message table address */         \
+/* JAMES        + 2 /* shared message version and number of indexes */          \
         + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
         + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
         + H5G_SIZEOF_ENTRY(f) /* root group ptr */                      \
@@ -140,7 +141,8 @@ typedef struct H5F_file_t {
     size_t	sizeof_size;	/* Size of offsets in file              */
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
-    haddr_t	freespace_addr;	/* Relative address of free-space info	*/
+    haddr_t	extension_addr;	/* Relative address of superblock extension	*/
+    H5O_shmesg_table_t sohm_table; /* Shared message table information */
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */

@@ -69,6 +69,8 @@ typedef struct H5O_t H5O_t;
 #define H5O_MSG_FLAG_CONSTANT	0x01u
 #define H5O_MSG_FLAG_SHARED	0x02u
 #define H5O_MSG_FLAG_DONTSHARE	0x04u
+#define H5O_MSG_FLAG_FAIL_IF_UNKNOWN 0x08u
+#define H5O_MSG_FLAG_CURRENT 0x10u
 #define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE)
 
 /* Flags for updating messages */
@@ -132,6 +134,7 @@ typedef struct H5O_copy_t {
 #define H5O_CONT_ID	0x0010          /* Object header continuation message.  */
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
+#define H5O_SHMESG_ID   0x0013          /* Shared message "SOHM" table. */
 
 
 /* Shared object message flags.
@@ -368,6 +371,18 @@ typedef struct H5O_stab_t {
     haddr_t	btree_addr;		/*address of B-tree		     */
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
+
+/*
+ * Shared message table message
+ * Information about file-wide shared message table, stored in superblock
+ * extension
+ * (Data structure in memory)
+ */
+typedef struct H5O_shmesg_table_t {
+    haddr_t		addr;	        /*file address of SOHM table */
+    unsigned		version;	/*SOHM table version number */
+    unsigned		nindexes;	/*number of indexes in the table */
+} H5O_shmesg_table_t;
 
 /* Typedef for iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,

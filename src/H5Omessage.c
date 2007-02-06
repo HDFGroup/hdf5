@@ -1763,6 +1763,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     HDassert(type);
     HDassert(mesg);
     HDassert(oh_flags_ptr);
+    HDassert(type->copy);
 
     /* Reset existing native information for the header's message */
     H5O_msg_reset_real(type, idx_msg->native);

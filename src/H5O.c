@@ -101,6 +101,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_CONT,		/*0x0010 Object header continuation	*/
     H5O_MSG_STAB,		/*0x0011 Symbol table			*/
     H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
+    H5O_MSG_SHMESG,		/*0x0013 File-wide shared message table */
 };
 
 /* Header object ID to class mapping */

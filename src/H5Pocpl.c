@@ -306,7 +306,7 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_attr_creation_order, FAIL)
-    H5TRACE2("e", "ix", plist_id, crt_order_flags);
+    H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
 
     /* Get values */
     if(crt_order_flags) {

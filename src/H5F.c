@@ -915,7 +915,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
-	f->shared->freespace_addr = HADDR_UNDEF;
+	f->shared->extension_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
 	f->shared->sohm_nindexes = 0;
@@ -1063,6 +1063,9 @@ done:
  *
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
  *      Added `id to name' support.
+ *
+ *      James Laird, 2007-1-29
+ *      H5F_dest now frees superblock extension oloc.
  *
  *-------------------------------------------------------------------------
  */
@@ -1398,6 +1401,39 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          */
         if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
+
+        /* JAMES: probably out of order or something. Also not the right test. */
+        /* Create the superblock extension OH */
+        if(file->shared->sohm_nindexes > 0) {
+            H5O_loc_t ext_loc;                      /* Superblock extension location */
+            H5O_shmesg_table_t sohm_table;
+
+            /* JAMES: should this go here, or in SMinit?  Or in init_superblock? */
+            /* This isn't actually a group, but the default group creation
+             * list should work fine.
+             */
+            H5O_loc_reset(&ext_loc);
+            /* JAMES: bump the number of open objects to avoid closing the file here */
+            file->nopen_objs++;
+            if(H5O_create(file, dxpl_id, 0 /* JAMES */, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "unable to create superblock extension")
+
+            /* Record this address */
+            file->shared->extension_addr = ext_loc.addr;
+
+            /* Write shared message information to the extension */
+            sohm_table.addr = file->shared->sohm_addr;
+            sohm_table.version = file->shared->sohm_vers;
+            sohm_table.nindexes = file->shared->sohm_nindexes;
+
+            if(H5O_msg_create(&ext_loc, H5O_SHMESG_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &sohm_table, dxpl_id) < 0)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to update type header message")
+
+            if(H5O_close(&ext_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to close superblock extension")
+            file->nopen_objs--;
+        }
+
 
          /* Write the superblock to the file */
         /* (This must be after the root group is created, since the root
