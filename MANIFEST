@@ -606,6 +606,7 @@
 ./src/H5Osdspace.c
 ./src/H5Oshared.c
 ./src/H5Oshared.h
+./src/H5Oshmesg.c
 ./src/H5Ostab.c
 ./src/H5Otest.c
 ./src/H5P.c
