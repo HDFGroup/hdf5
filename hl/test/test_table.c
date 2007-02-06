@@ -52,9 +52,11 @@
  *-------------------------------------------------------------------------
  */
 
-#define TITLE "Title"
-#define NFIELDS  (hsize_t)5
-#define NRECORDS (hsize_t)8
+#define TITLE           "Title"
+#define NFIELDS         (hsize_t)5
+#define NRECORDS        (hsize_t)8
+#define NRECORDS_ADD    (hsize_t)3
+
 #define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
 
 /*-------------------------------------------------------------------------
@@ -189,15 +191,10 @@ int test_table(hid_t fid, int write)
  float           pressure_out [NRECORDS];
  int             buf_new[NRECORDS] = { 0,1,2,3,4,5,6,7 };
  /* buffers for the fields "Latitude,Longitude"  */
- position_t      position_out[NRECORDS];
- position_t      position_in[NRECORDS] = { {0,0},
+ position_t      position_out[NRECORDS_ADD];
+ position_t      position_in[NRECORDS_ADD] = { {0,0},
  {10,10},
- {20,20},
- {30,30},
- {40,40},
- {50,50},
- {60,60},
- {70,70} };
+ {20,20}};
  /* buffers for the fields "Name,Pressure"  */
  namepressure_t   namepre_out[NRECORDS];
  namepressure_t   namepre_in[NRECORDS] =
@@ -912,7 +909,7 @@ int test_table(hid_t fid, int write)
 
  /* write the pressure field starting at record 2 */
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  if (H5TBwrite_fields_name(fid,"table9","Pressure",start,nrecords,sizeof(float),
   0,field_sizes_pre,pressure_in)<0)
   goto out;
@@ -935,9 +932,9 @@ int test_table(hid_t fid, int write)
  {
   if ( i >= 2 && i <= 4 )
   {
-    if ( rbuf[i].lati        != position_in[i].lati ||
-         rbuf[i].longi       != position_in[i].longi ||
-         rbuf[i].pressure    != pressure_in[i] )
+    if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
+         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
+         rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
     {
      fprintf(stderr,"%ld %f %d\n",
       rbuf[i].longi,rbuf[i].pressure,rbuf[i].lati);
@@ -1003,7 +1000,7 @@ int test_table(hid_t fid, int write)
  {
   /* Write the new longitude and latitude information to all the records */
   start    = 0;
-  nrecords = NRECORDS;
+  nrecords = NRECORDS_ADD;
   if ( H5TBwrite_fields_name(fid,"table10", "Latitude,Longitude", start, nrecords,
    sizeof( position_t ), field_offset_pos, field_sizes_pos, position_in  ) < 0 )
    goto out;
@@ -1011,13 +1008,13 @@ int test_table(hid_t fid, int write)
 
  /* Read the "Latitude,Longitude" fields */
  start    = 0;
- nrecords = NRECORDS;
+ nrecords = NRECORDS_ADD;
  if ( H5TBread_fields_name( fid, "table10", "Latitude,Longitude",
   start, nrecords, sizeof(position_t), field_offset_pos, field_sizes_pos, position_out ) < 0 )
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( i = 0; i < NRECORDS_ADD; i++ )
  {
   if ( position_out[i].lati  != position_in[i].lati ||
    position_out[i].longi != position_in[i].longi )
@@ -1104,7 +1101,7 @@ int test_table(hid_t fid, int write)
  /* write the pressure field starting at record 2 */
  nfields  = 1;
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  if ( H5TBwrite_fields_index(fid, "table11", nfields, field_index_pre, start, nrecords,
    sizeof( float ), 0, field_sizes_pre, pressure_in  ) < 0 )
   goto out;
@@ -1113,7 +1110,7 @@ int test_table(hid_t fid, int write)
  /* write the new longitude and latitude information starting at record 2  */
  nfields  = 2;
  start    = 2;
- nrecords = 3;
+ nrecords = NRECORDS_ADD;
  if ( H5TBwrite_fields_index(fid, "table11", nfields, field_index_pos, start, nrecords,
    sizeof( position_t ), field_offset_pos, field_sizes_pos, position_in  ) < 0 )
   goto out;
@@ -1131,9 +1128,9 @@ int test_table(hid_t fid, int write)
  {
   if ( i >= 2 && i <= 4 )
   {
-    if ( rbuf[i].lati        != position_in[i].lati ||
-         rbuf[i].longi       != position_in[i].longi ||
-         rbuf[i].pressure    != pressure_in[i] )
+    if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
+         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
+         rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
    goto out;
   }
  }
@@ -1209,13 +1206,13 @@ int test_table(hid_t fid, int write)
  /* read the "Latitude,Longitude" fields */
  nfields = 2;
  start    = 0;
- nrecords = NRECORDS;
+ nrecords = NRECORDS_ADD;
  if ( H5TBread_fields_index(fid, "table12", nfields, field_index_pos,
    start, nrecords, sizeof(position_t), field_offset_pos, field_sizes_pos, position_out ) < 0 )
   goto out;
 
  /* compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( i = 0; i < NRECORDS_ADD; i++ )
  {
   if ( position_out[i].lati  != position_in[i].lati ||
        position_out[i].longi != position_in[i].longi ) {
