@@ -54,7 +54,7 @@ AC_OUTPUT_COMMANDS([
   if test ! -f src/H5pubconf.h; then
     /bin/mv -f pubconf src/H5pubconf.h
   elif (diff pubconf src/H5pubconf.h >/dev/null); then
-    /bin/rm -f pubconf
+    rm -f pubconf
     echo "src/H5pubconf.h is unchanged"
   else
     /bin/mv -f pubconf src/H5pubconf.h
@@ -895,7 +895,7 @@ VPATH=$srcdir/config $srcdir/src $srcdir/bin
 	cp $< H5.o
 
 foo: H5.o
-	/bin/rm -f H5.o
+	rm -f H5.o
 	@echo works
 EOF
 
@@ -914,7 +914,7 @@ VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
 	cp $< H5.o
 
 foo: H5.o
-	/bin/rm -f H5.o
+	rm -f H5.o
 	@echo works
 EOF
 
@@ -932,7 +932,7 @@ EOF
 	cp $< H5.o
 
 foo: H5.o
-	/bin/rm -f H5.o
+	rm -f H5.o
 	@echo works
 EOF
 
@@ -1876,7 +1876,7 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  /bin/rm a.out
+  rm a.out
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
