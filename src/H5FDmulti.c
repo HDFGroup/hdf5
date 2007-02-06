@@ -1503,7 +1503,6 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 	    if (HADDR_UNDEF==eoa)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
 	} else if (file->fa.relax) {
-int i;
 	    /*
 	     * The member is not open yet (maybe it doesn't exist). Make the
 	     * best guess about the end-of-file.

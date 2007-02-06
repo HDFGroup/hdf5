@@ -38,8 +38,8 @@ static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const void *mesg_src,
 static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
     void *udata);
-static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_crt_idx_t *crt_idx);
-static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_crt_idx_t crt_idx);
+static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
+static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
@@ -943,19 +943,19 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
 done:
     if(buf_sid > 0)
         if(H5I_dec_ref(buf_sid) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
     if(tid_src > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
         if(H5I_remove(tid_src) == NULL)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
         if(H5I_remove(tid_dst) == NULL)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
         /* Decrement the memory datatype ID, it's transient */
         if(H5I_dec_ref(tid_mem) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(buf)
         buf = H5FL_BLK_FREE(attr_buf, buf);
     if(reclaim_buf)
@@ -984,7 +984,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_get_crt_index(const void *_mesg, H5O_crt_idx_t *crt_idx /*out*/)
+H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 {
     const H5A_t  *attr = (const H5A_t *)_mesg;
 
@@ -1014,7 +1014,7 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_crt_idx_t *crt_idx /*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_set_crt_index(void *_mesg, H5O_crt_idx_t crt_idx)
+H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 {
     H5A_t  *attr = (H5A_t *)_mesg;
 

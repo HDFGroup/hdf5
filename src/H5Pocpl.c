@@ -265,7 +265,7 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get object header flags */
@@ -317,7 +317,7 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags)
         *crt_order_flags = 0;
 
         /* Get the plist structure */
-        if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
         /* Get object header flags */

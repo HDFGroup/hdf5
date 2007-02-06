@@ -87,9 +87,6 @@ typedef struct H5O_t H5O_t;
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
 
-/* Typedef for creation indexes */
-typedef uint32_t H5O_crt_idx_t;
-
 /* Fractal heap ID type for shared message & attribute heap IDs. */
 typedef uint64_t H5O_fheap_id_t;
 

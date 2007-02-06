@@ -71,7 +71,7 @@ struct H5A_t {
     size_t      ds_size;    /* Size of dataspace on disk */
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
-    H5O_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
+    H5O_msg_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
 };
 
 /* Typedefs for "dense" attribute storage */

@@ -240,15 +240,17 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     /* Increment attribute count */
     oh->nattrs++;
 
-    /* Check if the object is tracking creation order on attributes */
-    if(oh->flags & H5P_CRT_ORDER_TRACKED) {
+    /* Later versions of the object header track the creation index on all messages */
+    if(oh->version > H5O_VERSION_1) {
         /* Check for attribute creation order index on the object wrapping around */
         if(oh->max_attr_crt_idx == H5O_MAX_CRT_ORDER_IDX)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINC, FAIL, "Attribute creation index can't be incremented")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINC, FAIL, "attribute creation index can't be incremented")
 
         /* Set the creation order index on the attribute & incr. creation order index */
         attr->crt_idx = oh->max_attr_crt_idx++;
     } /* end if */
+    else
+        attr->crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
     /* Check for storing attribute with dense storage */
     if(H5F_addr_defined(oh->attr_fheap_addr)) {

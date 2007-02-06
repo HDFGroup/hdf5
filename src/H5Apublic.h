@@ -19,12 +19,23 @@
 #define _H5Apublic_H
 
 /* Public headers needed by this file */
-#include "H5Ipublic.h"
+#include "H5Ipublic.h"		/* IDs			  		*/
+#include "H5Opublic.h"		/* Object Headers			*/
+#include "H5Tpublic.h"		/* Datatypes				*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Information struct for attribute (for H5Aget_info/H5Aget_info_by_idx) */
+typedef struct {
+    hbool_t             corder_valid;   /* Indicate if creation order is valid */
+    H5O_msg_crt_idx_t   corder;         /* Creation order                 */
+    H5T_cset_t          cset;           /* Character set of attribute name */
+    hsize_t             data_size;      /* Size of raw data		  */
+} H5A_info_t;
+
+/* Typedef for H5Aiterate() callback */
 typedef herr_t (*H5A_operator_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, void *operator_data/*in,out*/);
 
@@ -41,6 +52,7 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
+H5_DLL herr_t  H5Aget_info(hid_t loc_id, const char *name, H5A_info_t *ainfo /*out*/);
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 	  	          void *op_data);

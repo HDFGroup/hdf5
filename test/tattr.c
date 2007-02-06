@@ -1709,7 +1709,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         /* Open attribute */
         sprintf(attrname, "attr %02u", u);
         attr = H5Aopen_name(loc_id, attrname);
-        CHECK(attr, FAIL, "H5Aopen");
+        CHECK(attr, FAIL, "H5Aopen_name");
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
@@ -1806,6 +1806,10 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -1932,6 +1936,10 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2061,6 +2069,10 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2229,6 +2241,10 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
@@ -2383,6 +2399,10 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
@@ -2514,6 +2534,10 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     VERIFY(rmax_compact, max_compact, "H5Pget_attr_phase_change");
     VERIFY(rmin_dense, min_dense, "H5Pget_attr_phase_change");
 
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2606,6 +2630,260 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_limits() */
+
+/****************************************************************
+**
+**  test_attr_corder_create_empty(): Test basic H5A (attribute) code.
+**      Tests basic code to create objects with attribute creation order info
+**
+****************************************************************/
+static void
+test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    unsigned    crt_order_flags;/* Creation order flags */
+    htri_t	is_empty;	/* Are there any attributes? */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Code for Attributes with Creation Order Info\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Get creation order indexing on object */
+    ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
+    CHECK(ret, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(crt_order_flags, 0, "H5Pget_attr_creation_order");
+
+    /* Setting invalid combination of a attribute order creation order indexing on should fail */
+    ret = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_INDEXED);
+    VERIFY(ret, FAIL, "H5Pset_attr_creation_order");
+    ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
+    CHECK(ret, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(crt_order_flags, 0, "H5Pget_attr_creation_order");
+
+    /* Set attribute creation order tracking & indexing for object */
+    ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED));
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+    ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
+    CHECK(ret, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(crt_order_flags, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) , "H5Pget_attr_creation_order");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset created */
+    dataset = H5Dopen(fid, DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Retrieve dataset creation property list for group */
+    dcpl = H5Dget_create_plist(dataset);
+    CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    /* Query the attribute creation properties */
+    ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
+    CHECK(ret, FAIL, "H5Pget_link_creation_order");
+    VERIFY(crt_order_flags, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) , "H5Pget_attr_creation_order");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_corder_create_basic() */
+
+/****************************************************************
+**
+**  test_attr_corder_create_compact(): Test basic H5A (attribute) code.
+**      Tests compact attribute storage on objects with attribute creation order info
+**
+****************************************************************/
+static void
+test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    unsigned    max_compact;    /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;      /* Minimum # of links to store in group "densely" */
+    htri_t	is_empty;	/* Are there any attributes? */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    hsize_t     nattrs;         /* Number of attributes on object */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Compact Storage of Attributes with Creation Order Info\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set attribute creation order tracking & indexing for object */
+    ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED));
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+
+    /* Create dataspace for dataset & attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Query the attribute creation properties */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Create several attributes, but keep storage in compact form */
+    for(u = 0; u < max_compact; u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Verify state of object */
+        ret = H5O_num_attrs_test(dataset, &nattrs);
+        CHECK(ret, FAIL, "H5O_num_attrs_test");
+        VERIFY(nattrs, (u + 1), "H5O_num_attrs_test");
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+    } /* end for */
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset created */
+    dataset = H5Dopen(fid, DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    /* Check on dataset's attribute storage status */
+    ret = H5O_num_attrs_test(dataset, &nattrs);
+    CHECK(ret, FAIL, "H5O_num_attrs_test");
+    VERIFY(nattrs, max_compact, "H5O_num_attrs_test");
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Loop through attributes, checking their creation order values */
+    /* (the name index is used, but the creation order value is in the same order) */
+    for(u = 0; u < max_compact; u++) {
+        H5A_info_t ainfo;           /* Attribute information */
+
+        /* Retrieve information for attribute */
+        sprintf(attrname, "attr %02u", u);
+        ret = H5Aget_info(dataset, attrname, &ainfo);
+        CHECK(ret, FAIL, "H5Aget_info");
+
+        /* Verify creation order of attribute */
+        VERIFY(ainfo.corder_valid, TRUE, "H5Aget_info");
+        VERIFY(ainfo.corder, u, "H5Aget_info");
+    } /* end for */
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_corder_create_compact() */
 
 /****************************************************************
 **
@@ -2751,6 +3029,10 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         /* Retrieve limits for compact/dense attribute storage */
         ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
         CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+        /* Close property list */
+        ret = H5Pclose(dcpl);
+        CHECK(ret, FAIL, "H5Pclose");
 
         /* Check on datasets' attribute storage status */
         is_dense = H5O_is_attr_dense_test(dataset);
@@ -3076,6 +3358,10 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         /* Retrieve limits for compact/dense attribute storage */
         ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
         CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+        /* Close property list */
+        ret = H5Pclose(dcpl);
+        CHECK(ret, FAIL, "H5Pclose");
 
         /* Check on datasets' attribute storage status */
         is_dense = H5O_is_attr_dense_test(dataset);
@@ -3517,6 +3803,10 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
         CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
+        /* Close property list */
+        ret = H5Pclose(dcpl);
+        CHECK(ret, FAIL, "H5Pclose");
+
         /* Check on datasets' attribute storage status */
         is_dense = H5O_is_attr_dense_test(dataset);
         VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
@@ -3880,6 +4170,10 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
         CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
+        /* Close property list */
+        ret = H5Pclose(dcpl);
+        CHECK(ret, FAIL, "H5Pclose");
+
         /* Check on datasets' attribute storage status */
         is_dense = H5O_is_attr_dense_test(dataset);
         VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
@@ -4182,12 +4476,17 @@ test_attr(void)
             my_fcpl = fcpl;
         } /* end else */
 
+        /* General attribute tests */
         test_attr_dense_create(my_fcpl, fapl2);         /* Test dense attribute storage creation */
         test_attr_dense_open(my_fcpl, fapl2);           /* Test opening attributes in dense storage */
         test_attr_dense_delete(my_fcpl, fapl2);         /* Test deleting attributes in dense storage */
         test_attr_dense_rename(my_fcpl, fapl2);         /* Test renaming attributes in dense storage */
         test_attr_dense_unlink(my_fcpl, fapl2);         /* Test unlinking object with attributes in dense storage */
         test_attr_dense_limits(my_fcpl, fapl2);         /* Test dense attribute storage limits */
+
+        /* Attribute creation order tests */
+        test_attr_corder_create_basic(my_fcpl, fapl2);  /* Test creating an object w/attribute creation order info */
+        test_attr_corder_create_compact(my_fcpl, fapl2);  /* Test compact attribute storage on an object w/attribute creation order info */
     } /* end for */
 
     /* More complex tests with both "new format" and "shared" attributes */

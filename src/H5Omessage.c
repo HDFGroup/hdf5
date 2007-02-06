@@ -744,8 +744,6 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;           /* Object header to operate on */
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    int	acc;                    /* Count of the message type found */
-    unsigned u;                 /* Local index variable */
     int	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_msg_count, FAIL)
@@ -762,13 +760,8 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
-    /* Loop over all messages, counting the ones of the type looked for */
-    for(u = acc = 0; u < oh->nmesgs; u++)
-	if(oh->mesg[u].type == type)
-            acc++;
-
-    /* Set return value */
-    ret_value = acc;
+    /* Count the messages of the correct type */
+    ret_value = H5O_msg_count_real(oh, type);
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -776,6 +769,42 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_count_real
+ *
+ * Purpose:	Counts the number of messages in an object header which are a
+ *		certain type.
+ *
+ * Return:	Success:	Number of messages of specified type.
+ *
+ *		Failure:	(can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, February  6, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
+{
+    unsigned u;                 /* Local index variable */
+    unsigned ret_value;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_count_real)
+
+    /* Check args */
+    HDassert(oh);
+    HDassert(type);
+
+    /* Loop over all messages, counting the ones of the type looked for */
+    for(u = ret_value = 0; u < oh->nmesgs; u++)
+	if(oh->mesg[u].type == type)
+            ret_value++;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_count_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -843,7 +872,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5O_msg_exists_oh(H5O_t *oh, unsigned type_id)
+H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     unsigned	u;                      /* Local index variable */

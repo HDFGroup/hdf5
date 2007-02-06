@@ -1934,10 +1934,15 @@ H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_pl
 
     /* Set property values, if they were used for the object */
     if(oh->version > H5O_VERSION_1) {
+        /* Set attribute storage values */
         if(H5P_set(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list")
         if(H5P_set(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
+
+        /* Set object header flags */
+        if(H5P_set(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags")
     } /* end if */
 
 done:

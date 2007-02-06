@@ -110,6 +110,9 @@ typedef struct H5O_info_t {
                                         /* (B-tree & heap for groups, B-tree for chunked dataset, etc.) */
 } H5O_info_t;
 
+/* Typedef for message creation indexes */
+typedef uint32_t H5O_msg_crt_idx_t;
+
 
 /********************/
 /* Public Variables */

@@ -196,8 +196,8 @@ struct H5O_msg_class_t {
     herr_t	(*pre_copy_file)(H5F_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
     void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
     herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
-    herr_t      (*get_crt_index)(const void *, H5O_crt_idx_t *);	/* Get message's creation index */
-    herr_t      (*set_crt_index)(void *, H5O_crt_idx_t);	/* Set message's creation index */
+    herr_t      (*get_crt_index)(const void *, H5O_msg_crt_idx_t *);	/* Get message's creation index */
+    herr_t      (*set_crt_index)(void *, H5O_msg_crt_idx_t);	/* Set message's creation index */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 };
 
@@ -205,7 +205,7 @@ typedef struct H5O_mesg_t {
     const H5O_msg_class_t	*type;	/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
     uint8_t		flags;		/*message flags			     */
-    H5O_crt_idx_t       crt_idx;        /*message creation index	     */
+    H5O_msg_crt_idx_t   crt_idx;        /*message creation index	     */
     unsigned		chunkno;	/*chunk number for this mesg	     */
     void		*native;	/*native format message		     */
     uint8_t		*raw;		/*ptr to raw data		     */
@@ -245,7 +245,7 @@ struct H5O_t {
     hsize_t     nattrs;                 /* Number of attributes in the group */
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
-    H5O_crt_idx_t max_attr_crt_idx;     /* Maximum attribute creation index used */
+    H5O_msg_crt_idx_t max_attr_crt_idx; /* Maximum attribute creation index used */
 
     /* Message management (stored, encoded in chunks) */
     size_t	nmesgs;			/*number of messages		     */
@@ -438,7 +438,8 @@ H5_DLL void *H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL herr_t H5O_msg_free_mesg(H5O_mesg_t *mesg);
-H5_DLL htri_t H5O_msg_exists_oh(struct H5O_t *oh, unsigned type_id);
+H5_DLL unsigned H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type);
+H5_DLL htri_t H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id);
 H5_DLL void *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared,
     H5O_copy_t *cpy_info, void *udata);
@@ -493,7 +494,9 @@ H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 
 /* Testing functions */
 #ifdef H5O_TESTING
+H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);
 H5_DLL htri_t H5O_is_attr_dense_test(hid_t oid);
+H5_DLL herr_t H5O_num_attrs_test(hid_t oid, hsize_t *nattrs);
 #endif /* H5O_TESTING */
 
 /* Object header debugging routines */

@@ -71,7 +71,7 @@ typedef enum {
 #define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT      /* Maximum value link value for "built-in" link types */
 #define H5L_TYPE_UD_MIN      H5L_TYPE_EXTERNAL  /* Link ids at or above this value are "user-defined" link types. */
 
-/* Buffer for user query function */
+/* Information struct for link (for H5Lget_info/H5Lget_info_by_idx) */
 typedef struct {
     H5L_type_t          type;           /* Type of link                   */
     hbool_t             corder_valid;   /* Indicate if creation order is valid */

@@ -22,6 +22,7 @@
 /* Module Setup */
 /****************/
 
+#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5O_TESTING		/*suppress warning about H5O testing funcs*/
 
@@ -30,6 +31,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Apkg.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
@@ -76,7 +78,7 @@
  PURPOSE
     Determine whether attributes for an object are stored "densely"
  USAGE
-    htri_t H5O_is_dense_test(oid)
+    htri_t H5O_is_attr_dense_test(oid)
         hid_t oid;              IN: object to check
  RETURNS
     Non-negative TRUE/FALSE on success, negative on failure
@@ -107,8 +109,12 @@ H5O_is_attr_dense_test(hid_t oid)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check if dense storage is being used */
-    if(H5F_addr_defined(oh->attr_fheap_addr))
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Check for any messages in object header */
+        HDassert(H5O_msg_count_real(oh, H5O_MSG_ATTR) == 0);
+
         ret_value = TRUE;
+    } /* end if */
     else
         ret_value = FALSE;
 
@@ -119,4 +125,136 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_is_attr_dense_test() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_is_attr_empty_test
+ PURPOSE
+    Determine whether there are any attributes for an object
+ USAGE
+    htri_t H5O_is_attr_empty_test(oid)
+        hid_t oid;              IN: object to check
+ RETURNS
+    Non-negative TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks to see if the object is storing any attributes.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5O_is_attr_empty_test(hid_t oid)
+{
+    H5O_t *oh = NULL;           /* Object header */
+    H5O_loc_t *oloc;            /* Pointer to object's location */
+    hsize_t nattrs;             /* Number of attributes */
+    htri_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_is_attr_empty_test, FAIL)
+
+    /* Get object location for object */
+    if(NULL == (oloc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Retrieve the number of attribute messages in header */
+    nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
+
+    /* Check for later version of object header format */
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for using dense storage */
+        if(H5F_addr_defined(oh->attr_fheap_addr)) {
+            /* Check for any messages in object header */
+            HDassert(nattrs == 0);
+
+            /* Retrieve # of records in name index */
+            if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &nattrs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+        } /* end if */
+
+        /* Verify that attribute count in object header is correct */
+        HDassert(nattrs == oh->nattrs);
+    } /* end if */
+
+    /* Set the return value */
+    ret_value = (nattrs == 0) ? TRUE : FALSE;
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_is_attr_empty_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_num_attrs_test
+ PURPOSE
+    Determine whether there are any attributes for an object
+ USAGE
+    herr_t H5O_num_attrs_test(oid, nattrs)
+        hid_t oid;              IN: object to check
+        hsize_t *nattrs;        OUT: Number of attributes on object
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Checks the # of attributes on an object
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
+{
+    H5O_t *oh = NULL;           /* Object header */
+    H5O_loc_t *oloc;            /* Pointer to object's location */
+    hsize_t obj_nattrs;         /* Number of attributes */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_num_attrs_test, FAIL)
+
+    /* Get object location for object */
+    if(NULL == (oloc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Retrieve the number of attribute messages in header */
+    obj_nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
+
+    /* Check for later version of object header format */
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for using dense storage */
+        if(H5F_addr_defined(oh->attr_fheap_addr)) {
+            /* Check for any messages in object header */
+            HDassert(obj_nattrs == 0);
+
+            /* Retrieve # of records in name index */
+            if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &obj_nattrs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+        } /* end if */
+
+        /* Verify that attribute count in object header is correct */
+        HDassert(obj_nattrs == oh->nattrs);
+    } /* end if */
+
+    /* Set the number of attributes */
+    *nattrs = obj_nattrs;
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_num_attrs_test() */
 

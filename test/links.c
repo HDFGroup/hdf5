@@ -5216,11 +5216,11 @@ corder_create_empty(hid_t fapl)
     if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) TEST_ERROR
     if(crt_order_flags != 0) TEST_ERROR
 
-    /* Creating a group with onder creation order indexing on should fail */
+    /* Setting invalid combination of a group order creation order indexing on should fail */
     H5E_BEGIN_TRY {
         ret = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_INDEXED);
     } H5E_END_TRY;
-    if(group_id > 0) {
+    if(ret > 0) {
 	H5_FAILED();
 	puts("    H5Pset_link_create_order() should have failed for a creation order index with no tracking.");
 	TEST_ERROR

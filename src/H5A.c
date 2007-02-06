@@ -74,6 +74,7 @@ static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
+static herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
 
 
 /*********************/
@@ -1106,7 +1107,7 @@ done:
 hid_t
 H5Aget_create_plist(hid_t attr_id)
 {
-    H5A_t		*attr = NULL;
+    H5A_t		*attr;               /* Attribute object for ID */
     H5P_genplist_t      *plist;              /* Default property list */
     hid_t               new_plist_id;        /* ID of ACPL to return */
     H5P_genplist_t      *new_plist;          /* ACPL to return */
@@ -1164,7 +1165,7 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 {
-    H5A_t		*attr = NULL;
+    H5A_t		*attr;               /* Attribute object for ID */
     size_t              copy_len, nbytes;
     ssize_t		ret_value;
 
@@ -1220,7 +1221,7 @@ done:
 hsize_t
 H5Aget_storage_size(hid_t attr_id)
 {
-    H5A_t	*attr = NULL;
+    H5A_t	*attr;               /* Attribute object for ID */
     hsize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aget_storage_size, 0)
@@ -1268,6 +1269,93 @@ H5A_get_storage_size(const H5A_t *attr)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_storage_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aget_info
+ *
+ * Purpose:	Retrieve information about an attribute.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              February  6, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Aget_info(hid_t loc_id, const char *name, H5A_info_t *ainfo)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    H5A_t	*attr = NULL;           /* Attribute object for name */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Aget_info, FAIL)
+
+    /* Check args */
+    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(NULL == ainfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer")
+
+    /* Open the attribute on the object header */
+    if(NULL == (attr = H5A_open_by_name(&loc, name, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+
+    /* Get the attribute information */
+    if(H5A_get_info(attr, ainfo) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
+
+done:
+    /* Cleanup on failure */
+    if(attr && H5A_close(attr) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aget_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_get_info
+ *
+ * Purpose:	Retrieve information about an attribute.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              February  6, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_get_info)
+
+    /* Check args */
+    HDassert(attr);
+    HDassert(ainfo);
+
+    /* Set info for attribute */
+    ainfo->cset = attr->encoding;
+    ainfo->data_size = attr->data_size;
+    if(attr->crt_idx == H5O_MAX_CRT_ORDER_IDX) {
+        ainfo->corder_valid = FALSE;
+        ainfo->corder = 0;
+    } /* end if */
+    else {
+        ainfo->corder_valid = TRUE;
+        ainfo->corder = attr->crt_idx;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5A_get_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1450,7 +1538,7 @@ H5Aclose(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Decrement references to that atom (and close it) */
-    if(H5I_dec_ref (attr_id) < 0)
+    if(H5I_dec_ref(attr_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:

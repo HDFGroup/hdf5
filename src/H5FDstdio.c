@@ -554,6 +554,9 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*unused*/ type)
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
 
+    /* Shut compiler up */
+    type = type;
+
     return(file->eoa);
 }
 
@@ -587,6 +590,9 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*unused*/ type, haddr_t addr)
 
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
+
+    /* Shut compiler up */
+    type = type;
 
     file->eoa = addr;
 

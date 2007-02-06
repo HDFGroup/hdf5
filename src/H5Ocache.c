@@ -418,7 +418,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             size_t	mesg_size;      /* Size of message read in */
             unsigned	id;             /* ID (type) of current message */
             uint8_t	flags;          /* Flags for current message */
-            H5O_crt_idx_t crt_idx = 0;  /* Creation index for current message */
+            H5O_msg_crt_idx_t crt_idx = H5O_MAX_CRT_ORDER_IDX;  /* Creation index for current message */
 
             /* Decode message prefix info */
             if(oh->version == H5O_VERSION_1)
