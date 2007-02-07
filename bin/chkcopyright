@@ -483,13 +483,35 @@ HTML_FILE()
 }
 
 
+# Check Shell script files which use the style of copyright notice of leading #'s.
+#
+SHELL_FILE()
+{
+    f=$1
+    case `MATCH_COPYRIGHT $SH_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $SH_COPYRIGHT $f
+	fi
+	;;
+    esac
+}
+
+
 # Check Shell script files and other files (e.g., Makefile) that use
 # the style of copyright notice of leading #'s.
 # There is a preferred style (single leading #) vs the alternate style (double
 # leading #'s).  The double leading #'s style is used in Makefile.am, for
 # example.
 #
-SHELL_FILE()
+MAKE_FILE()
 {
     f=$1
     if [ `MATCH_COPYRIGHT $SH_COPYRIGHT $f` = FAILED -a \
@@ -517,6 +539,9 @@ BATCH_FILE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${WINBAT_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $WINBAT_COPYRIGHT $f
+	fi
 	;;
     esac
 }
@@ -658,8 +683,11 @@ while read file; do
 	*.htm | *.html )
 	    HTML_FILE ${file}
 	    ;;
-	*.sh | *.sh.in | *Makefile | *Makefile.in | *Makefile.am )
+	*.sh | *.sh.in )
 	    SHELL_FILE ${file}
+	    ;;
+	*Makefile | *Makefile.in | *Makefile.am )
+	    MAKE_FILE ${file}
 	    ;;
 	*.bat | *.BAT )
 	    # Windows Batch files
