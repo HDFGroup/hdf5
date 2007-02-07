@@ -33,16 +33,22 @@ tmpfile=/tmp/h5chkright_tmp.$$
 EXCEPTIONDIRS="-name CVS -o -name .svn"	# at least skip CVS directories.
 EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
+FIXIT=			# default no
 DIRS=.			# default current directory
 NFAILEDFILES=0		# Number of failed files found.
-NPASSEDFILES=0		# Number of failed files found.
+NPASSEDFILES=0		# Number of passed files found.
+NFIXEDFILES=0		# Number of files fixed.
+NFIXFAILEDFILES=0	# Number of files fix failed.
 NUMBEGINLINES=60	# Copyright notice should be located within the
 			# this number of lines at the beginning of the file.
-COPYRIGHTSTR="Copyright by the Board of Trustees of the University of Illinois"
+UICOPYRIGHTSTR="Copyright by the Board of Trustees of the University of Illinois"
+THGCOPYRIGHTSTR="Copyright by The HDF Group."
 
 PASSEDLOG=/tmp/h5chkright_passed.$$
 SKIPPEDLOG=/tmp/h5chkright_skipped.$$
 FAILEDLOG=/tmp/h5chkright_failed.$$
+FIXEDLOG=/tmp/h5chkright_fixed.$$
+FIXFAILEDLOG=/tmp/h5chkright_fixfailed.$$
 
 C_COPYRIGHT=/tmp/h5chkright_C.$$	# C style copyright
 FTN_COPYRIGHT=/tmp/h5chkright_FTN.$$	# Fortran style copyright
@@ -50,6 +56,8 @@ HTM_COPYRIGHT=/tmp/h5chkright_HTM.$$	# HTML style copyright
 SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
+
+tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
 
 # Help page
@@ -68,6 +76,8 @@ Usage: $PROGNAME [-h | -help] [-fname name-patter] [-v | -v9] [dir1 dir2 ...]
 	verbose mode
     -v9
 	highly verbose
+    -fix
+	fix failed files if possible
 EOF
 }
 
@@ -195,7 +205,7 @@ EOF
 INITIALIZATION()
 {
     # clean up log files
-    rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+    rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG $FIXEDLOG $FIXFAILEDLOG
 
     # Generate various styles of copyright notice.
     BUILDCOPYRIGHT
@@ -251,6 +261,9 @@ PARSE_OPTION()
 	    shift
 	    FNAME="$1"
 	    ;;
+	-fix )
+	    FIXIT=yes
+	    ;;
 	-v* )
 	    VERBOSE=yes
 	    if test X$1 = X-v9; then
@@ -284,12 +297,36 @@ RINSE()
     dos2unix < $tmpfile | expand | sed -e 's/ *$//' > $rf
 }
 
+# Locate a line in the file and print the line number.
+# Print 0 if not found; -1 if error.
+# $1 The line.
+# $2 The file.
+#
+FindLineInFile()
+{
+    if [ $# -ne 2 ]; then
+	# expect two arguments
+	echo -1
+	return
+    fi
+    xline=$1
+    xf=$2
+    xpos=`grep -n "${xline}" $xf`
+    if [ "$?" -ne 0 ] ; then
+	# Not found, return 0
+	xpos=0
+    else
+	xpos=`echo $xpos | cut -f1 -d:`
+    fi
+    echo $xpos
+}
+
 
 # Match Copyright notice.
 # $1 file which contains the expected copyright notice.
 # $2 file in which to look for the copyright notice.
 # Copyright notice must be found within the beginning $NUMBEGINLINES of lines.
-# Hunt for the particular string $COPYRIGHTSTR which signifies the beginning
+# Hunt for the particular string $UICOPYRIGHTSTR which signifies the beginning
 # of the copyright notice.
 #
 MATCH_COPYRIGHT()
@@ -301,17 +338,15 @@ MATCH_COPYRIGHT()
     fi
     COPYRIGHTFILE=$1
     f=$2
-    # Must use stdin for wc to prevent filename from popping up.
+    nlines=`wc -l ${COPYRIGHTFILE}  | cut -f1 -d' '`
     # Find a line that contains the copyright string and its line number in
     # the file.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    begin=`grep -n "${COPYRIGHTSTR}" $f`
-    if [ "$?" -ne 0 ] ; then
+    begin=`FindLineInFile "${UICOPYRIGHTSTR}" $f`
+    if [ "$begin" -le 0 ] ; then
 	# Not found, generate an empty dummy file
 	cp /dev/null ${EXTRACTEDFILE}
 	false
     else
-	begin=`echo $begin | cut -f1 -d:`
 	if [ $begin -gt 1 ]; then
 	    begin=`expr $begin - 1`
 	fi
@@ -325,6 +360,64 @@ MATCH_COPYRIGHT()
     else
 	echo FAILED
     fi
+}
+
+# Fix Copyright notice.
+# $1 file which contains the expected copyright notice.
+# $2 file in which to look for the copyright notice.
+# Copyright notice must be found within the beginning $NUMBEGINLINES of lines.
+# Hunt for the particular string $UICOPYRIGHTSTR which signifies the beginning
+# of the copyright notice.
+#
+FIX_COPYRIGHT()
+{
+    if [ $# -ne 2 ]; then
+	# expect two arguments
+	echo FAILED
+	return
+    fi
+    COPYRIGHTFILE=$1
+    f=$2
+    nlines=`wc -l ${COPYRIGHTFILE}  | cut -f1 -d' '`
+    # If the file has UICOPYRIGHTSTR but not THGCOPYRIGHTSTR, then replace the lines
+    # starting at UICOPYRIGHTSTR and down.
+    # If the file has THGCOPYRIGHTSTR, then replace the lines starting at the
+    # THGCOPYRIGHTSTR and down.
+    # If neither found, abort it.
+
+    # Find a line that contains the THG copyright string and its line number in
+    # the file.
+    insertbegin=`FindLineInFile "${THGCOPYRIGHTSTR}" $f`
+    if [ $insertbegin -gt 0 ]; then
+	insertend=`expr $insertbegin + $nlines`		# no need to -1.  See below.
+    else
+	insertbegin=`FindLineInFile "${UICOPYRIGHTSTR}" $f`
+	if [ $insertbegin -gt 0 ]; then
+	    insertend=`expr $insertbegin + $nlines - 1` # no need to -2.  See below.
+	else
+	    FIXFAILED
+	    return
+	fi
+    fi
+
+    # Copy line 1 up to insertbegin from original file
+    xbegin=`expr $insertbegin - 1`
+    if [ $xbegin -gt 0 ]; then
+	sed -n -e "1,${xbegin}p" $f > $tmpfixfile
+    else
+	cp /dev/null $tmpfixfile	# make it empty.
+    fi
+
+    # now the correct copyright file
+    cat $COPYRIGHTFILE >> $tmpfixfile
+
+    # the rest of the original file
+    sed -n -e "${insertend},"'$p' $f >> $tmpfixfile
+	
+    # copy them all back to the original file
+    cp $tmpfixfile $f
+    FIXED
+    rm -f $tmpfixfile
 }
 
 # Check C and C++ source files
@@ -341,6 +434,9 @@ C_SOURCE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${C_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $C_COPYRIGHT $f
+	fi
 	;;
     esac
 }
@@ -432,7 +528,7 @@ BATCH_FILE()
 UNKNOWN_FILE()
 {
     f=$1
-    if head -$NUMBEGINLINES < $f | grep "${COPYRIGHTSTR}" > /dev/null; then
+    if head -$NUMBEGINLINES < $f | grep "${UICOPYRIGHTSTR}" > /dev/null; then
 	# Now guess the file type and try match it.
 	head -5 < $f > $tmpfile
 	if head -1 < $tmpfile | grep '^#!' > /dev/null; then
@@ -507,6 +603,28 @@ FAILED()
 }
 
 
+# Copyright fixed.
+# $1 file that has been fixed.
+#
+FIXED()
+{
+    if test X-$VERBOSE = X-yes; then
+	echo "    FIXED"
+    fi
+    echo $1 >> $FIXEDLOG
+}
+
+
+# Copyright fix failed.
+# $1 file that has failed.
+#
+FIXFAILED()
+{
+    echo "FIX FAILED:  $1"
+    echo $1 >> $FIXFAILEDLOG
+}
+
+
 #
 # Main body
 
@@ -578,14 +696,20 @@ fi
 if [ -f $FAILEDLOG ]; then
     NFAILEDFILES=`wc -l < $FAILEDLOG`
 fi
+if [ -f $FIXEDLOG ]; then
+    NFIXEDFILES=`wc -l < $FIXEDLOG`
+fi
+if [ -f $FIXFAILEDLOG ]; then
+    NFIXFAILEDFILES=`wc -l < $FIXFAILEDLOG`
+fi
 
 # Cleanup
 rm -f $C_COPYRIGHT $FTN_COPYRIGHT $HTM_COPYRIGHT $SH_COPYRIGHT $SH_COPYRIGHT2
 rm -f $EXCEPTIONS $EXTRACTEDFILE
-rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG $FIXEDLOG $FIXFAILEDLOG
 
 # Report Results
-# Results are not total accurate--e.g., Passed are not counted, thus not
+# Results are not total accurate--e.g., Skipped are not counted, thus not
 # reported.
 # 
 echo "*******************"
@@ -593,6 +717,8 @@ echo " REPORT"
 echo "*******************"
 echo Number of passed files = $NPASSEDFILES
 echo Number of failed files = $NFAILEDFILES
+echo Number of fixed files = $NFIXEDFILES
+echo Number of fix failed files = $NFIXFAILEDFILES
 
 if [ $NFAILEDFILES -gt 0 ]; then
     exitcode=1
