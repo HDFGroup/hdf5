@@ -505,23 +505,27 @@ SHELL_FILE()
 }
 
 
-# Check Shell script files and other files (e.g., Makefile) that use
-# the style of copyright notice of leading #'s.
-# There is a preferred style (single leading #) vs the alternate style (double
-# leading #'s).  The double leading #'s style is used in Makefile.am, for
-# example.
+# Check files that use #'s as comments such as Makefile.
+# The Copyright body of text happen to be the same as used by Shell script
+# files.
 #
 MAKE_FILE()
 {
     f=$1
-    if [ `MATCH_COPYRIGHT $SH_COPYRIGHT $f` = FAILED -a \
-	 `MATCH_COPYRIGHT $SH_COPYRIGHT2 $f` = FAILED ]; then
-	# show the differences with the preferred style.
+    case `MATCH_COPYRIGHT $SH_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
-    else
-	PASSED $f
-    fi
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $SH_COPYRIGHT $f
+	fi
+	;;
+    esac
 }
 
 
@@ -711,6 +715,10 @@ while read file; do
 	    ;;
 	*CVS/* )
 	    # Ignore CVS control files.
+	    continue
+	    ;;
+	*.txt | *.TXT )
+	    # Ignore text files.
 	    continue
 	    ;;
 	*)
