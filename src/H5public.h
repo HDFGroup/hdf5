@@ -207,6 +207,26 @@ typedef ssize_t			hssize_t;
 #endif
 #define HADDR_MAX		(HADDR_UNDEF-1)
 
+/* uint32_t type is used for creation order field for messages.  It may be
+ * defined in Posix.1g, otherwise it is defined here.
+ */
+#if H5_SIZEOF_UINT32_T>=4
+#elif H5_SIZEOF_SHORT>=4
+    typedef short uint32_t;
+#   undef H5_SIZEOF_UINT32_T
+#   define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
+#elif H5_SIZEOF_INT>=4
+    typedef unsigned int uint32_t;
+#   undef H5_SIZEOF_UINT32_T
+#   define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG>=4
+    typedef unsigned long uint32_t;
+#   undef H5_SIZEOF_UINT32_T
+#   define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
+#else
+#   error "nothing appropriate for uint32_t"
+#endif
+
 /* int64_t type is used for creation order field for links.  It may be
  * defined in Posix.1g, otherwise it is defined here.
  */
