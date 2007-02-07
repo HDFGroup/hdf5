@@ -456,6 +456,9 @@ FORTRAN_SOURCE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${FTN_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $FTN_COPYRIGHT $f
+	fi
 	;;
     esac
 }
