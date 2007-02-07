@@ -81,9 +81,18 @@ struct H5A_t {
 /* (Keep 'id' field first so generic record handling in callbacks works) */
 typedef struct H5A_dense_bt2_name_rec_t {
     H5O_fheap_id_t id;                  /* Heap ID for attribute */
-    uint8_t flags;                      /* Message flags for attribute */
+    uint8_t flags;                      /* Object header message flags for attribute */
+    H5O_msg_crt_idx_t corder;           /* 'creation order' field value */
     uint32_t hash;                      /* Hash of 'name' field value */
 } H5A_dense_bt2_name_rec_t;
+
+/* Typedef for native 'creation order' field index records in the v2 B-tree */
+/* (Keep 'id' field first so generic record handling in callbacks works) */
+typedef struct H5A_dense_bt2_corder_rec_t {
+    H5O_fheap_id_t id;                  /* Heap ID for attribute */
+    uint8_t flags;                      /* Object header message flags for attribute */
+    H5O_msg_crt_idx_t corder;           /* 'creation order' field value */
+} H5A_dense_bt2_corder_rec_t;
 
 /*
  * Common data exchange structure for dense attribute storage.  This structure
@@ -99,7 +108,7 @@ typedef struct H5A_bt2_ud_common_t {
     const char  *name;                  /* Name of attribute to compare      */
     uint32_t    name_hash;              /* Hash of name of attribute to compare */
     uint8_t     flags;                  /* Flags for attribute storage location */
-    int64_t     corder;                 /* Creation order value of attribute to compare */
+    H5O_msg_crt_idx_t corder;           /* Creation order value of attribute to compare */
     H5B2_found_t found_op;              /* Callback when correct attribute is found */
     void        *found_op_data;         /* Callback data when correct attribute is found */
 } H5A_bt2_ud_common_t;
@@ -148,6 +157,9 @@ H5FL_BLK_EXTERN(attr_buf);
 
 /* The v2 B-tree class for indexing 'name' field on attributes */
 H5_DLLVAR const H5B2_class_t H5A_BT2_NAME[1];
+
+/* The v2 B-tree class for indexing 'creation order' field on attributes */
+H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 
 
 /******************************/

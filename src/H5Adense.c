@@ -216,6 +216,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 
     /* Create the name index v2 B-tree */
     bt2_rrec_size = 4 +                 /* Name's hash value */
+            4 +                         /* Creation order index */
             1 +                         /* Message flags */
             H5O_FHEAP_ID_LEN;           /* Fractal heap ID */
     if(H5B2_create(f, dxpl_id, H5A_BT2_NAME,
@@ -227,23 +228,21 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 HDfprintf(stderr, "%s: oh->name_bt2_addr = %a\n", FUNC, oh->name_bt2_addr);
 #endif /* QAK */
 
-/* XXX: fix me */
-#ifdef NOT_YET
     /* Check if we should create a creation order index v2 B-tree */
-    if(linfo->index_corder) {
+    if(oh->flags & H5P_CRT_ORDER_INDEXED) {
         /* Create the creation order index v2 B-tree */
-        bt2_rrec_size = 8 +             /* Creation order value */
+        bt2_rrec_size = 4 +             /* Creation order index */
+                1 +                     /* Message flags */
                 H5O_FHEAP_ID_LEN;       /* Fractal heap ID */
         if(H5B2_create(f, dxpl_id, H5A_BT2_CORDER,
                 (size_t)H5A_CORDER_BT2_NODE_SIZE, bt2_rrec_size,
                 H5A_CORDER_BT2_SPLIT_PERC, H5A_CORDER_BT2_MERGE_PERC,
-                &(linfo->corder_bt2_addr)) < 0)
+                &(oh->corder_bt2_addr)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 #ifdef QAK
-HDfprintf(stderr, "%s: linfo->corder_bt2_addr = %a\n", FUNC, linfo->corder_bt2_addr);
+HDfprintf(stderr, "%s: oh->corder_bt2_addr = %a\n", FUNC, oh->corder_bt2_addr);
 #endif /* QAK */
     } /* end if */
-#endif /* NOT_YET */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -350,7 +349,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = H5A_dense_fnd_cb;       /* v2 B-tree comparison callback */
     udata.found_op_data = &ret_value;
 
@@ -484,7 +483,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
     udata.common.name = attr->name;
     udata.common.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
     udata.common.flags = mesg_flags;
-    udata.common.corder = -1;   /* XXX: None yet */
+    udata.common.corder = attr->crt_idx;
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     /* udata.id already set */
@@ -492,6 +491,14 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
     /* Insert attribute into 'name' tracking v2 B-tree */
     if(H5B2_insert(f, dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
+
+    /* Check if we should create a creation order index v2 B-tree record */
+    if(oh->flags & H5P_CRT_ORDER_INDEXED) {
+        /* Insert the record into the creation order index v2 B-tree */
+        HDassert(H5F_addr_defined(oh->corder_bt2_addr));
+        if(H5B2_insert(f, dxpl_id, H5A_BT2_CORDER, oh->corder_bt2_addr, &udata) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
+    } /* end if */
 
 done:
     /* Release resources */
@@ -656,7 +663,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, H5A_t *attr)
     udata.name = attr->name;
     udata.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = NULL;
     udata.found_op_data = NULL;
 
@@ -790,7 +797,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *old_name,
     udata.name = old_name;
     udata.name_hash = H5_checksum_lookup3(old_name, HDstrlen(old_name), 0);
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = H5A_dense_fnd_cb;       /* v2 B-tree comparison callback */
     udata.found_op_data = &attr_copy;
 
@@ -1168,7 +1175,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = H5A_dense_fnd_cb;       /* v2 B-tree comparison callback */
     udata.found_op_data = &attr_copy;
 
@@ -1253,7 +1260,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, const char *name)
     udata.name = name;
     udata.name_hash = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = NULL;       /* v2 B-tree comparison callback */
     udata.found_op_data = NULL;
 
@@ -1402,7 +1409,7 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     udata.name = NULL;
     udata.name_hash = 0;
     udata.flags = 0;
-    udata.corder = -1;   /* XXX: None yet */
+    udata.corder = 0;
     udata.found_op = NULL;       /* v2 B-tree comparison callback */
     udata.found_op_data = NULL;
 

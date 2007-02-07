@@ -275,9 +275,9 @@ for(u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
 #endif /* QAK */
     /* Check hash value */
     if(bt2_udata->name_hash < bt2_rec->hash)
-        HGOTO_DONE(-1)
+        ret_value = (-1);
     else if(bt2_udata->name_hash > bt2_rec->hash)
-        HGOTO_DONE(1)
+        ret_value = 1;
     else {
         H5G_fh_ud_cmp_t fh_udata;       /* User data for fractal heap 'op' callback */
         herr_t status;                  /* Status from fractal heap 'op' routine */
@@ -302,10 +302,9 @@ for(u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
         HDassert(status >= 0);
 
         /* Callback will set comparison value */
-        HGOTO_DONE(fh_udata.cmp)
+        ret_value = fh_udata.cmp;
     } /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G_dense_btree2_name_compare() */
 

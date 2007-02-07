@@ -92,8 +92,8 @@
         ( 2 /* indexed B-tree internal k */                             \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* free space address */                   \
-/*        + H5F_SIZEOF_ADDR(f) /* shared message table address */         \
-/* JAMES        + 2 /* shared message version and number of indexes */          \
+/*        + H5F_SIZEOF_ADDR(f) */ /* shared message table address */         \
+/* JAMES        + 2 */ /* shared message version and number of indexes */          \
         + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
         + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
         + H5G_SIZEOF_ENTRY(f) /* root group ptr */                      \

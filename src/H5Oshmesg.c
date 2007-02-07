@@ -251,4 +251,3 @@ H5O_shmesg_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_shmesg_debug() */
 
-

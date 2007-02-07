@@ -697,6 +697,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         /* Set starting values for attribute info */
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
+        oh->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -705,6 +706,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         /* Reset unused attribute fields */
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
+        oh->corder_bt2_addr = HADDR_UNDEF;
     } /* end else */
 
     /* Compute total size of initial object header */

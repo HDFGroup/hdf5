@@ -304,6 +304,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         H5F_DECODE_LENGTH(f, p, oh->nattrs);
         H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
         H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
+        H5F_addr_decode(f, &p, &(oh->corder_bt2_addr));
         UINT16DECODE(p, oh->max_attr_crt_idx);
     } /* end if */
     else {
@@ -316,6 +317,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         oh->nattrs = 0;
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
+        oh->corder_bt2_addr = HADDR_UNDEF;
         oh->max_attr_crt_idx = 0;
     } /* end else */
 
@@ -642,6 +644,7 @@ H5O_assert(oh);
             H5F_ENCODE_LENGTH(f, p, oh->nattrs);
             H5F_addr_encode(f, &p, oh->attr_fheap_addr);
             H5F_addr_encode(f, &p, oh->name_bt2_addr);
+            H5F_addr_encode(f, &p, oh->corder_bt2_addr);
             UINT16ENCODE(p, oh->max_attr_crt_idx);
 
             /* Chunk size */

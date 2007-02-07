@@ -320,6 +320,9 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
         HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                   "Attribute name index address:",
                   oh->name_bt2_addr);
+        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                  "Attribute creation order index address:",
+                  oh->corder_bt2_addr);
     } /* end if */
 
     HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,

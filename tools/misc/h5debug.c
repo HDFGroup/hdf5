@@ -24,22 +24,25 @@
  *
  *-------------------------------------------------------------------------
  */
+#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg  */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Apkg.h"		/* Attributes				*/
 #include "H5Bprivate.h"		/* B-trees				*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FSpkg.h"		/* File free space			*/
-#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Gpkg.h"		/* Groups				*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
@@ -234,8 +237,24 @@ main(int argc, char *argv[])
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR);
                 break;
 
+            case H5B2_GRP_DENSE_NAME_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME);
+                break;
+
+            case H5B2_GRP_DENSE_CORDER_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER);
+                break;
+
             case H5B2_SOHM_INDEX_ID:
                 status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX);
+                break;
+
+            case H5B2_ATTR_DENSE_NAME_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME);
+                break;
+
+            case H5B2_ATTR_DENSE_CORDER_ID:
+                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER);
                 break;
 
             default:
@@ -281,8 +300,24 @@ main(int argc, char *argv[])
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
+            case H5B2_GRP_DENSE_NAME_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME, extra, (unsigned)extra2, (unsigned)extra3);
+                break;
+
+            case H5B2_GRP_DENSE_CORDER_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER, extra, (unsigned)extra2, (unsigned)extra3);
+                break;
+
             case H5B2_SOHM_INDEX_ID:
                 status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2, (unsigned)extra3);
+                break;
+
+            case H5B2_ATTR_DENSE_NAME_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME, extra, (unsigned)extra2, (unsigned)extra3);
+                break;
+
+            case H5B2_ATTR_DENSE_CORDER_ID:
+                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER, extra, (unsigned)extra2, (unsigned)extra3);
                 break;
 
             default:
@@ -327,8 +362,24 @@ main(int argc, char *argv[])
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
                 break;
 
+            case H5B2_GRP_DENSE_NAME_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_GRP_DENSE_CORDER_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER, extra, (unsigned)extra2);
+                break;
+
             case H5B2_SOHM_INDEX_ID:
                 status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_ATTR_DENSE_NAME_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME, extra, (unsigned)extra2);
+                break;
+
+            case H5B2_ATTR_DENSE_CORDER_ID:
+                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER, extra, (unsigned)extra2);
                 break;
 
             default:

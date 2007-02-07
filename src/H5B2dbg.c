@@ -130,8 +130,12 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
                   (shared->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-              "Unknown!")))))));
+                  (shared->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+              "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
@@ -252,8 +256,12 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
                   (shared->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-              "Unknown!")))))));
+                  (shared->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+              "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
@@ -374,8 +382,12 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
                   (shared->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
                   (shared->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-              "Unknown!")))))));
+                  (shared->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (shared->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+              "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);

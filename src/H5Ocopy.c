@@ -354,6 +354,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         oh_dst->nattrs = 0;
         oh_dst->attr_fheap_addr = HADDR_UNDEF;
         oh_dst->name_bt2_addr = HADDR_UNDEF;
+        oh_dst->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         oh_dst->nattrs = oh_src->nattrs;
@@ -364,6 +365,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             HDassert(!H5F_addr_defined(oh_src->name_bt2_addr));
             oh_dst->attr_fheap_addr = HADDR_UNDEF;
             oh_dst->name_bt2_addr = HADDR_UNDEF;
+            oh_dst->corder_bt2_addr = HADDR_UNDEF;
         } /* end else */
     } /* end else */
     

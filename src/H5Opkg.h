@@ -98,14 +98,15 @@
                 4 +		/*modification time	*/		      \
                 4 +		/*change time		*/		      \
                 4 +		/*birth time		*/		      \
-                2 +		/*max compact attributes	*/	      \
+                2 +		/*max compact attributes */		      \
                 2 +		/*min dense attributes	*/		      \
-                (O)->sizeof_size +	/*# of attributes	*/		      \
-                (O)->sizeof_addr +	/*addr of attribute heap	*/	      \
-                (O)->sizeof_addr +	/*addr of attribute name index	*/	      \
-                2 +		/*max attr. creation index	*/	      \
+                (O)->sizeof_size + /*# of attributes	*/		      \
+                (O)->sizeof_addr + /*addr of attribute heap */		      \
+                (O)->sizeof_addr + /*addr of attribute name index */	      \
+                (O)->sizeof_addr + /*addr of attribute creation order index */ \
+                2 +		/*max attr. creation index */		      \
                 4 +		/*chunk data size	*/		      \
-                H5O_SIZEOF_CHKSUM)	/*checksum size	        */	      \
+                H5O_SIZEOF_CHKSUM) /*checksum size	*/		      \
     )
 
 /*
@@ -245,6 +246,7 @@ struct H5O_t {
     hsize_t     nattrs;                 /* Number of attributes in the group */
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order of attributes */
     H5O_msg_crt_idx_t max_attr_crt_idx; /* Maximum attribute creation index used */
 
     /* Message management (stored, encoded in chunks) */
@@ -497,6 +499,7 @@ H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);
 H5_DLL htri_t H5O_is_attr_dense_test(hid_t oid);
 H5_DLL herr_t H5O_num_attrs_test(hid_t oid, hsize_t *nattrs);
+H5_DLL herr_t H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count);
 #endif /* H5O_TESTING */
 
 /* Object header debugging routines */
