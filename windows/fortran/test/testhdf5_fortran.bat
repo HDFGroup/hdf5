@@ -1,3 +1,4 @@
+@REM Copyright by The HDF Group.
 @REM Copyright by the Board of Trustees of the University of Illinois.
 @REM All rights reserved.
 @REM
@@ -7,8 +8,8 @@
 @REM of the source code distribution tree; Copyright.html can be found at the
 @REM root level of an installed copy of the electronic HDF5 document set and
 @REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+@REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+@REM access to either file, you may request a copy from help@hdfgroup.org.
 
 testhdf5_fortran%2\%1\testhdf5_fortran%2
 flush1_fortran%2\%1\flush1_fortran%2
