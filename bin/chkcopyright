@@ -1,5 +1,6 @@
 #! /bin/sh
 #
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -9,8 +10,8 @@
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 #
 
 # Check Copyright notice.
@@ -29,7 +30,7 @@ DIFF="diff"
 INITFILE=.h5chkright.ini
 EXCEPTIONS=/tmp/h5chkright.except.$$
 tmpfile=/tmp/h5chkright_tmp.$$
-EXCEPTIONDIRS="-name CVS"	# at least skip CVS directories.
+EXCEPTIONDIRS="-name CVS -o -name .svn"	# at least skip CVS directories.
 EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
 DIRS=.			# default current directory
@@ -77,6 +78,7 @@ BUILDCOPYRIGHT()
 {
     # C and C++ source Copyright notice
     cat > ${C_COPYRIGHT} << \EOF
+ * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -86,12 +88,13 @@ BUILDCOPYRIGHT()
  * of the source code distribution tree; Copyright.html can be found at the  *
  * root level of an installed copy of the electronic HDF5 document set and   *
  * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # Fortran9X source Copyright notice
     cat > ${FTN_COPYRIGHT} << \EOF
+!   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
@@ -101,12 +104,13 @@ EOF
 !   of the source code distribution tree; Copyright.html can be found at the  *
 !   root level of an installed copy of the electronic HDF5 document set and   *
 !   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+!   access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # HTML file Copyright notice
     cat > ${HTM_COPYRIGHT} << \EOF
+  * Copyright by The HDF Group.                                               *
   * Copyright by the Board of Trustees of the University of Illinois.         *
   * All rights reserved.                                                      *
   *                                                                           *
@@ -116,12 +120,13 @@ EOF
   * of the source code distribution tree; Copyright.html can be found at the  *
   * root level of an installed copy of the electronic HDF5 document set and   *
   * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # Shell style Copyright notice
     cat > ${SH_COPYRIGHT} << \EOF
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -131,12 +136,13 @@ EOF
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
     # Shell style Copyright notice (2nd type)
     cat > ${SH_COPYRIGHT2} << \EOF
+## Copyright by The HDF Group.
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
 ##
@@ -146,12 +152,13 @@ EOF
 ## of the source code distribution tree; Copyright.html can be found at the
 ## root level of an installed copy of the electronic HDF5 document set and
 ## is linked from the top-level documents page.  It can also be found at
-## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
     # Windows Batch file Copyright notice
     cat > ${WINBAT_COPYRIGHT} << \EOF
+@REM Copyright by The HDF Group.
 @REM Copyright by the Board of Trustees of the University of Illinois.
 @REM All rights reserved.
 @REM
@@ -161,8 +168,8 @@ EOF
 @REM of the source code distribution tree; Copyright.html can be found at the
 @REM root level of an installed copy of the electronic HDF5 document set and
 @REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+@REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+@REM access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
 }
@@ -295,11 +302,24 @@ MATCH_COPYRIGHT()
     COPYRIGHTFILE=$1
     f=$2
     # Must use stdin for wc to prevent filename from popping up.
+    # Find a line that contains the copyright string and its line number in
+    # the file.
     nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    head -$NUMBEGINLINES < $f | sed -n -e "/${COPYRIGHTSTR}/"',$p' | \
-	head -${nlines} > ${EXTRACTEDFILE}
-    RINSE ${EXTRACTEDFILE}
-    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    begin=`grep -n "${COPYRIGHTSTR}" $f`
+    if [ "$?" -ne 0 ] ; then
+	# Not found, generate an empty dummy file
+	cp /dev/null ${EXTRACTEDFILE}
+	false
+    else
+	begin=`echo $begin | cut -f1 -d:`
+	if [ $begin -gt 1 ]; then
+	    begin=`expr $begin - 1`
+	fi
+	end=`expr $begin + $nlines - 1`
+	sed -n -e "${begin},${end}p" < $f > ${EXTRACTEDFILE}
+	RINSE ${EXTRACTEDFILE}
+	$DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    fi
     if test $? -eq 0; then
 	echo PASSED
     else
