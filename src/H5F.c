@@ -1403,20 +1403,24 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
-        /* JAMES: probably out of order or something. Also not the right test. */
-        /* Create the superblock extension OH */
+        /* Create the superblock extension and write "extra" superblock data.
+         * Currently, the extension is only needed if Shared Object Header
+         * Messages are enabled.
+         */
         if(file->shared->sohm_nindexes > 0) {
             H5O_loc_t ext_loc;                      /* Superblock extension location */
             H5O_shmesg_table_t sohm_table;
 
-            /* JAMES: should this go here, or in SMinit?  Or in init_superblock? */
-            /* This isn't actually a group, but the default group creation
-             * list should work fine.
+            /* The superblock extension isn't actually a group, but the
+             * default group creation list should work fine.
+             * If we don't supply a size for the object header, HDF5 will
+             * allocate H5O_MIN_SIZE by default.  This is currently
+             * big enough to hold the biggest possible extension, but should
+             * be tuned if more information is added to the superblock
+             * extension.
              */
             H5O_loc_reset(&ext_loc);
-            /* JAMES: bump the number of open objects to avoid closing the file here */
-            file->nopen_objs++;
-            if(H5O_create(file, dxpl_id, 0 /* JAMES */, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
+            if(H5O_create(file, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "unable to create superblock extension")
 
             /* Record this address */
@@ -1430,6 +1434,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
             if(H5O_msg_create(&ext_loc, H5O_SHMESG_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &sohm_table, dxpl_id) < 0)
 	        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to update type header message")
 
+            /* Close the extension.  Bump the version number to avoid closing the
+            * file (since this will be the only open object).
+            */
+            file->nopen_objs++;
             if(H5O_close(&ext_loc) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to close superblock extension")
             file->nopen_objs--;

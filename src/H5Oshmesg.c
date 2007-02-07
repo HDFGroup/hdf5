@@ -26,12 +26,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#ifdef JAMES
-#include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#endif /* JAMES */
-
 
 static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
