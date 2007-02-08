@@ -67,7 +67,7 @@ Step 1. Building and testing HDF5 libraries and tools
    1. Unpack all.zip
 
       Unpack all.zip in c:\MyHDFstuff\hdf5\windows into the 
-      C:\myHDFstuff directory.
+      C:\myHDFstuff\hdf5\ directory.
       
       This can be done with either of the following 2 options:
 
@@ -77,7 +77,7 @@ Step 1. Building and testing HDF5 libraries and tools
 
          cd into the c:\MyHDFstuff\hdf5\windows directory
    
-         type: wzunzip -yO -d -o all.zip c:\MyHDFstuff
+         type: wzunzip -yO -d -o all.zip c:\MyHDFstuff\hdf5
    
 
    2. Build and Test

@@ -22,8 +22,8 @@ STEP 1: Building HDF5 Libraries and Tools
     
 1. Unpack all.zip
     
-   Unpack all.zip in c:\MyHDFstuff\hdf5\windows into the 
-   c:\MyHDFstuff directory. 
+   Unpack windows\all.zip in c:\MyHDFstuff\hdf5\ directory.  If
+   prompted to overwrite files, select "Yes to All".
 
 2. Open all.dsw workspace
     
