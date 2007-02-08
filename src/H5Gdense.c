@@ -120,7 +120,6 @@ typedef struct {
     /* downward */
     H5G_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
     hbool_t     rem_from_fheap;         /* Whether to remove the link from the fractal heap */
-    hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
     hbool_t     replace_names;          /* Whether to replace the names of open objects */
@@ -134,7 +133,6 @@ typedef struct {
     /* downward */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
-    hbool_t     rem_from_corder_index;  /* Whether to remove the link from the creation order index */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
     hbool_t     replace_names;          /* Whether to replace the names of open objects */
@@ -1347,7 +1345,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Check for removing the link from the creation order index */
-    if(udata->rem_from_corder_index) {
+    if(H5F_addr_defined(udata->corder_bt2_addr)) {
         H5G_bt2_ud_common_t bt2_udata;         /* Info for B-tree callbacks */
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1355,7 +1353,6 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         bt2_udata.corder = lnk->corder;
 
         /* Remove the record from the name index v2 B-tree */
-        HDassert(H5F_addr_defined(udata->corder_bt2_addr));
         if(H5B2_remove(udata->f, udata->dxpl_id, H5G_BT2_CORDER, udata->corder_bt2_addr,
                 &bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from creation order index v2 B-tree")
@@ -1406,7 +1403,6 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
     /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f = bt2_udata->common.f;
     fh_udata.dxpl_id = bt2_udata->common.dxpl_id;
-    fh_udata.rem_from_corder_index = bt2_udata->rem_from_corder_index;
     fh_udata.corder_bt2_addr = bt2_udata->corder_bt2_addr;
     fh_udata.grp_full_path_r = bt2_udata->grp_full_path_r;
     fh_udata.replace_names = bt2_udata->replace_names;
@@ -1469,7 +1465,6 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     udata.rem_from_fheap = TRUE;
-    udata.rem_from_corder_index = H5F_addr_defined(linfo->corder_bt2_addr);
     udata.corder_bt2_addr = linfo->corder_bt2_addr;
     udata.grp_full_path_r = grp_full_path_r;
     udata.replace_names = TRUE;
@@ -1569,7 +1564,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPERATE, FAIL, "link removal callback failed")
     HDassert(fh_udata.lnk);
 
-    /* Check for removing the link from the creation order index */
+    /* Check for removing the link from the "other" index (creation order, when name used and vice versa) */
     if(H5F_addr_defined(bt2_udata->other_bt2_addr)) {
         H5G_bt2_ud_common_t other_bt2_udata;    /* Info for B-tree callbacks */
         const H5B2_class_t *other_bt2_class;    /* Class of "other" v2 B-tree */
@@ -1778,7 +1773,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.common.found_op = NULL;
         udata.common.found_op_data = NULL;
         udata.rem_from_fheap = FALSE;           /* handled in "bulk" below by deleting entire heap */
-        udata.rem_from_corder_index = FALSE;
+        udata.corder_bt2_addr = linfo->corder_bt2_addr;
         udata.grp_full_path_r = NULL;
         udata.replace_names = FALSE;
 
@@ -1803,7 +1798,10 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
         if(H5B2_delete(f, dxpl_id, H5G_BT2_CORDER, linfo->corder_bt2_addr, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
+        linfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
+    else
+        HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
 
     /* Delete the fractal heap */
     if(H5HF_delete(f, dxpl_id, linfo->link_fheap_addr) < 0)

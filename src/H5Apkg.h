@@ -124,6 +124,16 @@ typedef struct H5A_bt2_ud_ins_t {
     H5O_fheap_id_t id;                  /* Heap ID of attribute to insert    */
 } H5A_bt2_ud_ins_t;
 
+/*
+ * Data exchange structure for dense attribute storage.  This structure is
+ * passed through the v2 B-tree layer when removing attributes.
+ */
+typedef struct H5A_bt2_ud_rm_t {
+    /* downward */
+    H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
+    haddr_t corder_bt2_addr;            /* v2 B-tree address of creation order index */
+} H5A_bt2_ud_rm_t;
+
 /* Data structure to hold table of attributes for an object */
 typedef struct {
     size_t      nattrs;         /* # of attributes in table */
