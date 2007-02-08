@@ -184,7 +184,7 @@ static herr_t H5L_get_info_by_idx_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
+    H5L_info_t *linfo/*out*/, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_get_name_by_idx_cb(H5G_loc_t *grp_loc/*in*/,
     const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -830,7 +830,7 @@ done:
  *
  * Purpose:	Gets metadata for a link.
  *
- * Return:	Success:	Non-negative with information in LINKBUF
+ * Return:	Success:	Non-negative with information in LINFO
  *
  * 		Failure:	Negative
  *
@@ -840,14 +840,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linkbuf /*out*/,
+H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
     H5G_loc_t	loc;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Lget_info, FAIL)
-    H5TRACE4("e", "isxi", loc_id, name, linkbuf, lapl_id);
+    H5TRACE4("e", "isxi", loc_id, name, linfo, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -861,12 +861,12 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linkbuf /*out*/,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the link information */
-    if(H5L_get_info(&loc, name, linkbuf, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5L_get_info(&loc, name, linfo, lapl_id, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_info() */
+} /* end H5Lget_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -875,7 +875,7 @@ done:
  * Purpose:	Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	Success:	Non-negative with information in LINKBUF
+ * Return:	Success:	Non-negative with information in LINFO
  * 		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -886,13 +886,13 @@ done:
 herr_t
 H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5L_info_t *linkbuf /*out*/, hid_t lapl_id)
+    H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Group location for group to query */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Lget_info_by_idx, FAIL)
-    H5TRACE7("e", "isIiIohxi", loc_id, group_name, idx_type, order, n, linkbuf,
+    H5TRACE7("e", "isIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
              lapl_id);
 
     /* Check arguments */
@@ -911,12 +911,12 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the link information */
-    if(H5L_get_info_by_idx(&loc, group_name, idx_type, order, n, linkbuf, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5L_get_info_by_idx(&loc, group_name, idx_type, order, n, linfo, lapl_id, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_info_by_idx() */
+} /* end H5Lget_info_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -1095,7 +1095,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_name_by_idx() */
+} /* end H5Lget_name_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -2578,14 +2578,14 @@ done:
  */
 herr_t
 H5L_get_info(const H5G_loc_t *loc, const char *name,
-    H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id)
+    H5L_info_t *linfo/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_gi_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5L_get_info, FAIL)
 
-    udata.linfo = linkbuf;
+    udata.linfo = linfo;
     udata.dxpl_id = dxpl_id;
 
     /* Traverse the group hierarchy to locate the object to get info about */
@@ -2665,7 +2665,7 @@ done:
 static herr_t
 H5L_get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id)
+    H5L_info_t *linfo/*out*/, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_gibi_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2681,7 +2681,7 @@ H5L_get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     udata.order = order;
     udata.n = n;
     udata.dxpl_id = dxpl_id;
-    udata.linfo = linkbuf;
+    udata.linfo = linfo;
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if(H5G_traverse(loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, &udata, lapl_id, dxpl_id) < 0)

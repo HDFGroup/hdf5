@@ -475,7 +475,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5O_attr_open_by_idx(const H5O_loc_t *loc, hsize_t n, hid_t dxpl_id)
+H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5A_attr_iter_op_t attr_op;         /* Attribute operator */
     H5A_t *ret_value = NULL;            /* Return value */

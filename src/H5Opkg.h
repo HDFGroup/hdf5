@@ -475,8 +475,8 @@ H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
 H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
 H5_DLL H5A_t *H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
-H5_DLL H5A_t *H5O_attr_open_by_idx(const H5O_loc_t *loc, hsize_t n,
-    hid_t dxpl_id);
+H5_DLL H5A_t *H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
 H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
     H5A_t *attr);
 H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,

@@ -69,7 +69,8 @@ typedef struct H5A_iter_cb1 {
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
     const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 static herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
-static H5A_t *H5A_open_by_idx(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id);
+static H5A_t *H5A_open_by_idx(H5G_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
 static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *name,
     hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
@@ -507,7 +508,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Open the attribute in the object header */
-    if(NULL == (attr = H5A_open_by_idx(&loc, idx, H5AC_ind_dxpl_id)))
+    if(NULL == (attr = H5A_open_by_idx(&loc, H5_INDEX_NAME, H5_ITER_INC, (hsize_t)idx, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
@@ -598,7 +599,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5A_t *
-H5A_open_by_idx(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
+H5A_open_by_idx(H5G_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t n, hid_t dxpl_id)
 {
     H5A_t       *attr = NULL;
     H5A_t       *ret_value;     /* Return value */
@@ -609,8 +611,7 @@ H5A_open_by_idx(H5G_loc_t *loc, unsigned idx, hid_t dxpl_id)
     HDassert(loc);
 
     /* Read in attribute from object header */
-/* XXX: This uses name index order currently, but should use creation order, once it's implemented */
-    if(NULL == (attr = H5O_attr_open_by_idx(loc->oloc, (hsize_t)idx, dxpl_id)))
+    if(NULL == (attr = H5O_attr_open_by_idx(loc->oloc, idx_type, order, n, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to load attribute info from object header")
     attr->initialized = TRUE;
 
@@ -1319,6 +1320,59 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aget_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aget_info_by_idx
+ *
+ * Purpose:	Retrieve information about an attribute, according to the
+ *		order within an index.
+ *
+ * Return:	Success:	Non-negative with information in AINFO
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              February  8, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Aget_info_by_idx(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t n, H5A_info_t *ainfo)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    H5A_t	*attr = NULL;           /* Attribute object for name */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Aget_info_by_idx, FAIL)
+
+    /* Check args */
+    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(NULL == ainfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer")
+
+    /* Open the attribute on the object header */
+    if(NULL == (attr = H5A_open_by_idx(&loc, idx_type, order, n, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+
+    /* Get the attribute information */
+    if(H5A_get_info(attr, ainfo) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
+
+done:
+    /* Cleanup on failure */
+    if(attr && H5A_close(attr) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aget_info_by_idx() */
 
 
 /*-------------------------------------------------------------------------

@@ -42,7 +42,7 @@ typedef herr_t (*H5A_operator_t)(hid_t location_id/*in*/,
 
 /* Public function prototypes */
 H5_DLL hid_t   H5Acreate(hid_t loc_id, const char *name, hid_t type_id,
-	 		 hid_t space_id, hid_t plist_id);
+    hid_t space_id, hid_t plist_id);
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
@@ -54,9 +54,11 @@ H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 H5_DLL herr_t  H5Aget_info(hid_t loc_id, const char *name, H5A_info_t *ainfo /*out*/);
+H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5A_info_t *ainfo /*out*/);
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
-	  	          void *op_data);
+    void *op_data);
 H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
 
 /* Functions and variables defined for compatibility with previous versions

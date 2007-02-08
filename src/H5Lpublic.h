@@ -135,16 +135,15 @@ typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t 
 /* Public Prototypes */
 /*********************/
 H5_DLL herr_t H5Llink(hid_t cur_loc_id, const char *cur_name,
-                        hid_t obj_id, hid_t lcpl_id, hid_t lapl_id);
+    hid_t obj_id, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
-                        const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+    const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
-                        const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+    const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
-		        hid_t dst_loc, const char *dst_name, hid_t lcpl_id,
-                        hid_t lapl_id);
+    hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
-                             const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
+    const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
@@ -154,10 +153,10 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
-                              H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
+    H5L_info_t *linfo /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5L_info_t *linkbuf /*out*/, hid_t lapl_id);
+    H5L_info_t *linfo /*out*/, hid_t lapl_id);
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
@@ -167,17 +166,17 @@ H5_DLL herr_t H5Literate(hid_t loc_id, const char *group_name,
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
-        H5L_type_t link_type, const void * udata, size_t udata_size,
-        hid_t lcpl_id, hid_t lapl_id);
+    H5L_type_t link_type, const void * udata, size_t udata_size, hid_t lcpl_id,
+    hid_t lapl_id);
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
 H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
 H5_DLL herr_t H5Lunpack_elink_val(char * ext_linkval/*in*/, size_t link_size,
-            char ** filename/*out*/, char** obj_path /*out*/);
+    char ** filename/*out*/, char** obj_path /*out*/);
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
-        hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+    hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 
 #ifdef __cplusplus
 }

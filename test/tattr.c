@@ -3777,7 +3777,6 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_delete() */
 
-#ifdef NOT_YET
 /****************************************************************
 **
 **  test_attr_info_by_idx(): Test basic H5A (attribute) code.
@@ -3788,10 +3787,12 @@ static void
 test_attr_info_by_idx(hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
-    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	dset1, dset2, dset3;	/* Dataset IDs			*/
+    hid_t	my_dataset;	/* Current dataset ID		*/
     hid_t	sid;	        /* Dataspace ID			*/
     hid_t	attr;	        /* Attribute ID			*/
     hid_t	dcpl;	        /* Dataset creation property list ID */
+    H5A_info_t  ainfo;          /* Attribute information */
     unsigned    max_compact;    /* Maximum # of links to store in group compactly */
     unsigned    min_dense;      /* Minimum # of links to store in group "densely" */
     htri_t	is_empty;	/* Are there any attributes? */
@@ -3801,6 +3802,7 @@ test_attr_info_by_idx(hid_t fcpl, hid_t fapl)
     hsize_t     corder_count;   /* # of records in creation order index */
     hbool_t     use_index;      /* Use index on creation order values */
     char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    curr_dset;      /* Current dataset to work on */
     unsigned    u;              /* Local index variable */
     herr_t	ret;		/* Generic return value		*/
 
@@ -3812,9 +3814,9 @@ test_attr_info_by_idx(hid_t fcpl, hid_t fapl)
     for(use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Output message about test being performed */
         if(use_index)
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"));
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"))
         else
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"));
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"))
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -3828,24 +3830,53 @@ test_attr_info_by_idx(hid_t fcpl, hid_t fapl)
         ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
         CHECK(ret, FAIL, "H5Pset_attr_creation_order");
 
-        /* Create a dataset */
-        dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset, FAIL, "H5Dcreate");
-
-        /* Check on dataset's attribute storage status */
-        is_empty = H5O_is_attr_empty_test(dataset);
-        VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
-        is_dense = H5O_is_attr_dense_test(dataset);
-        VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
-
         /* Query the attribute creation properties */
         ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
         CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+        /* Create datasets */
+        dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+        CHECK(dset1, FAIL, "H5Dcreate");
+        dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+        CHECK(dset2, FAIL, "H5Dcreate");
+        dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+        CHECK(dset3, FAIL, "H5Dcreate");
 
         /* Close property list */
         ret = H5Pclose(dcpl);
         CHECK(ret, FAIL, "H5Pclose");
 
+        /* Work on all the datasets */
+        for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
+            switch(curr_dset) {
+                case 0:
+                    my_dataset = dset1;
+                    break;
+
+                case 1:
+                    my_dataset = dset2;
+                    break;
+
+                case 2:
+                    my_dataset = dset3;
+                    break;
+
+                default:
+                    HDassert(0 && "Too many datasets!");
+            } /* end switch */
+
+            /* Check on dataset's attribute storage status */
+            is_empty = H5O_is_attr_empty_test(my_dataset);
+            VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+            is_dense = H5O_is_attr_dense_test(my_dataset);
+            VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+            /* Check for query on non-existant attribute */
+            ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo);
+            VERIFY(ret, FALSE, "H5Aget_info_by_idx");
+        } /* end for */
+
+#ifdef NOT_YET
         /* Create attributes, until attribute storage is in dense form */
         for(u = 0; u < max_compact * 2; u++) {
             /* Create attribute */
@@ -3875,43 +3906,22 @@ test_attr_info_by_idx(hid_t fcpl, hid_t fapl)
         ret = H5O_attr_dense_info_test(dataset, &name_count, &corder_count);
         CHECK(ret, FAIL, "H5O_attr_dense_info_test");
         VERIFY(name_count, corder_count, "H5O_attr_dense_info_test");
+#endif /* NOT_YET */
 
-        /* Close Dataset */
-        ret = H5Dclose(dataset);
+        /* Close Datasets */
+        ret = H5Dclose(dset1);
         CHECK(ret, FAIL, "H5Dclose");
-
-        /* Check for deleting dataset without re-opening file */
-        if(!reopen_file) {
-            ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
-            CHECK(ret, FAIL, "H5Ldelete");
-        } /* end if */
+        ret = H5Dclose(dset2);
+        CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Dclose(dset3);
+        CHECK(ret, FAIL, "H5Dclose");
 
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
 
-        /* Check for deleting dataset after re-opening file */
-        if(reopen_file) {
-            /* Re-open file */
-            fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
-            CHECK(fid, FAIL, "H5Fopen");
-
-            /* Delete the dataset */
-            ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
-            CHECK(ret, FAIL, "H5Ldelete");
-
-            /* Close file */
-            ret = H5Fclose(fid);
-            CHECK(ret, FAIL, "H5Fclose");
-        } /* end if */
-
-        /* Get the size of the file now */
-        file_size = h5_get_file_size(FILENAME);
-        CHECK(file_size, FAIL, "h5_get_file_size");
-        VERIFY(file_size, empty_size, "h5_get_file_size");
     } /* end for */
 }   /* test_attr_corder_delete() */
-#endif /* NOT_YET */
 
 /****************************************************************
 **
@@ -5523,8 +5533,8 @@ test_attr(void)
                 test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
                 test_attr_corder_delete(my_fcpl, my_fapl);      /* Test deleting object using dense storage w/attribute creation order info */
 
-                /* New attribute API routine tests */
 #ifdef NOT_YET
+                /* New attribute API routine tests */
                 test_attr_info_by_idx(my_fcpl, my_fapl);        /* Test querying attribute info by index */
 #endif /* NOT_YET */
 
