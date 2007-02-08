@@ -53,7 +53,6 @@ H5_DLL hid_t H5FD_register(const void *cls, size_t size);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
-H5_DLL herr_t H5FD_free_freelist(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);

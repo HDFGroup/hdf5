@@ -63,6 +63,7 @@ static haddr_t H5FD_alloc_metadata(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 static haddr_t H5FD_alloc_raw(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     hsize_t size);
 static haddr_t H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
+static herr_t H5FD_free_freelist(H5FD_t *file);
 static haddr_t H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 
 /* Declare a free list to manage the H5FD_free_t struct */
@@ -215,7 +216,7 @@ H5FD_free_cls(H5FD_class_t *cls)
     H5MM_xfree(cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5FD_free_cls() */
 
 
 /*-------------------------------------------------------------------------
@@ -1154,10 +1155,11 @@ H5FD_close(H5FD_t *file)
     FUNC_ENTER_NOAPI(H5FD_close, FAIL)
 
     /* check args */
-    assert(file && file->cls);
+    HDassert(file && file->cls);
 
-    /* Free the freelist (this call never fails) */
-    (void)H5FD_free_freelist(file);
+    /* Free the freelist */
+    if(H5FD_free_freelist(file) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't release file space free list")
 
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
@@ -1168,14 +1170,13 @@ H5FD_close(H5FD_t *file)
      * Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.
      */
-    assert(driver->close);
-
+    HDassert(driver->close);
     if((driver->close)(file) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1189,7 +1190,7 @@ done:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_free_freelist(H5FD_t *file)
 {
     H5FD_mem_t  i;
@@ -1197,32 +1198,31 @@ H5FD_free_freelist(H5FD_t *file)
     unsigned    nblocks = 0;
     hsize_t     nbytes = 0;
 #endif  /* H5F_DEBUG */
-    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_free_freelist, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_freelist)
 
     /* check args */
-    assert(file && file->cls);
+    HDassert(file && file->cls);
 
     /*
      * Free all free-lists, leaking any memory thus described. Also leaks
      * file space allocated but not used when metadata aggregation is
      * turned on.
      */
-    for (i = H5FD_MEM_DEFAULT; i < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, i)) {
+    for(i = H5FD_MEM_DEFAULT; i < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, i)) {
         H5FD_free_t *cur, *next;
 
-        for (cur = file->fl[i]; cur; cur = next) {
+        for( cur = file->fl[i]; cur; cur = next) {
 #ifdef H5F_DEBUG
             ++nblocks;
             nbytes += cur->size;
 #endif  /* H5F_DEBUG */
             next = cur->next;
             H5FL_FREE(H5FD_free_t, cur);
-        }
+        } /* end for */
 
         file->fl[i] = NULL;
-    }
+    } /* end for */
 
 #ifdef H5F_DEBUG
     if(nblocks && H5DEBUG(F))
@@ -1241,11 +1241,10 @@ H5FD_free_freelist(H5FD_t *file)
         file->accum_buf_size = file->accum_size = 0;
         file->accum_loc = HADDR_UNDEF;
         file->accum_dirty = 0;
-    }
+    } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_free_freelist() */
 
 
 /*-------------------------------------------------------------------------
@@ -1648,6 +1647,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                                 if(size == file->maxsize)
                                     file->maxsize = 0;  /*unknown*/
 
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Exact size match (aligned)\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
                                 HGOTO_DONE(ret_value)
                             }
                         }
@@ -1708,6 +1710,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                             if(size == file->maxsize)
                                 file->maxsize = 0;  /*unknown*/
 
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Exact size match (unaligned)\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
                             HGOTO_DONE(ret_value)
                         }
                     } /* end if */
@@ -1726,6 +1731,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
 
         /* Couldn't find exact match, use best fitting piece found */
         if(best) {
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Splitting %Hu byte sized block\n", FUNC, best->size);
+#endif /* H5FD_ALLOC_DEBUG */
             if(best->size == file->maxsize)
                 file->maxsize = 0;  /*unknown*/
 
@@ -2252,9 +2260,9 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* Check args */
-    assert(file);
-    assert(file->cls);
-    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
 
     if(!H5F_addr_defined(addr) || addr > file->maxaddr ||
             H5F_addr_overflow(addr, size) || (addr + size) > file->maxaddr)
@@ -2337,87 +2345,87 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
         } /* end if */
 
         /* Scan through the existing blocks for the mapped type to see if we can extend one */
-        curr=file->fl[mapped_type];
-        last=prev=NULL;
-        while(curr!=NULL) {
+        curr = file->fl[mapped_type];
+        last = prev = NULL;
+        while(curr != NULL) {
             /* Check if the block to free adjoins the start of the current block */
-            if((addr+size)==curr->addr) {
+            if((addr + size) == curr->addr) {
                 /* If we previously found & merged a node, eliminate it from the list & free it */
-                if(last!=NULL) {
+                if(last != NULL) {
                     /* Check if there was a previous block in the list */
-                    if(last_prev!=NULL)
+                    if(last_prev != NULL)
                         /* Eliminate the merged block from the list */
-                        last_prev->next=last->next;
+                        last_prev->next = last->next;
                     /* No previous block, this must be the head of the list */
                     else
                         /* Eliminate the merged block from the list */
                         file->fl[mapped_type] = last->next;
 
                     /* Check for eliminating the block before the 'current' one */
-                    if(last==prev)
-                        prev=last_prev;
+                    if(last == prev)
+                        prev = last_prev;
 
                     /* Free the memory for the merged block */
-                    H5FL_FREE(H5FD_free_t,last);
+                    H5FL_FREE(H5FD_free_t, last);
                 } /* end if */
 
                 /* Adjust the address and size of the block found */
-                curr->addr=addr;
-                curr->size+=size;
+                curr->addr = addr;
+                curr->size += size;
 
                 /* Adjust the information about to memory block to include the merged block */
-                addr=curr->addr;
-                size=curr->size;
+                addr = curr->addr;
+                size = curr->size;
 
                 /* Update the information about the merged node */
-                last=curr;
-                last_prev=prev;
+                last = curr;
+                last_prev = prev;
             } /* end if */
             else {
                 /* Check if the block to free adjoins the end of the current block */
-                if((curr->addr+curr->size)==addr) {
+                if((curr->addr + curr->size) == addr) {
                     /* If we previously found & merged a node, eliminate it from the list & free it */
-                    if(last!=NULL) {
+                    if(last != NULL) {
                         /* Check if there was a previous block in the list */
-                        if(last_prev!=NULL)
+                        if(last_prev != NULL)
                             /* Eliminate the merged block from the list */
-                            last_prev->next=last->next;
+                            last_prev->next = last->next;
                         /* No previous block, this must be the head of the list */
                         else
                             /* Eliminate the merged block from the list */
                             file->fl[mapped_type] = last->next;
 
                         /* Check for eliminating the block before the 'current' one */
-                        if(last==prev)
-                            prev=last_prev;
+                        if(last == prev)
+                            prev = last_prev;
 
                         /* Free the memory for the merged block */
-                        H5FL_FREE(H5FD_free_t,last);
+                        H5FL_FREE(H5FD_free_t, last);
                     } /* end if */
 
                     /* Adjust the size of the block found */
-                    curr->size+=size;
+                    curr->size += size;
 
                     /* Adjust the information about to memory block to include the merged block */
-                    addr=curr->addr;
-                    size=curr->size;
+                    addr = curr->addr;
+                    size = curr->size;
 
                     /* Update the information about the merged node */
-                    last=curr;
-                    last_prev=prev;
+                    last = curr;
+                    last_prev = prev;
                 } /* end if */
             } /* end else */
 
             /* Advance to next node in list */
-            prev=curr;
-            curr=curr->next;
+            prev = curr;
+            curr = curr->next;
         } /* end while */
 
         /* Check if we adjusted an existing block */
-        if(last!=NULL) {
+        if(last != NULL) {
             /* Move the node found to the front, if it wasn't already there */
-            if(last_prev!=NULL) {
-                last_prev->next=last->next;
+            if(last_prev != NULL) {
+                last_prev->next = last->next;
                 last->next = file->fl[mapped_type];
                 file->fl[mapped_type] = last;
             } /* end if */
@@ -2442,17 +2450,17 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
             haddr_t     eoa;
 
             eoa = file->cls->get_eoa(file, type);
-            if(eoa == (last->addr+last->size)) {
+            if(eoa == (last->addr + last->size)) {
                 if(file->cls->set_eoa(file, type, last->addr) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
                 /* Remove this free block from the list */
                 file->fl[mapped_type] = last->next;
-                if(file->maxsize==last->size)
-                    file->maxsize=0; /*unknown*/
+                if(file->maxsize == last->size)
+                    file->maxsize = 0; /*unknown*/
                 H5FL_FREE(H5FD_free_t, last);
-            }
-        }
+            } /* end if */
+        } /* end if */
     } else if(file->cls->free) {
         if((file->cls->free)(file, type, dxpl_id, addr, size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
@@ -2461,11 +2469,11 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
 #ifdef H5F_DEBUG
 HDfprintf(stderr, "%s: LEAKED MEMORY!!!!!!\n", FUNC);
 #endif /* H5F_DEBUG */
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -2490,24 +2498,24 @@ haddr_t
 H5FDrealloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t old_size,
 	    hsize_t new_size)
 {
-    haddr_t	ret_value=HADDR_UNDEF;
+    haddr_t	ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_API(H5FDrealloc, HADDR_UNDEF)
     H5TRACE6("a", "xMtiahh", file, type, dxpl_id, old_addr, old_size, new_size);
 
     /* Check args */
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
 
-    if(HADDR_UNDEF==(ret_value=H5FD_realloc(file, type, dxpl_id, old_addr, old_size, new_size)))
+    if(HADDR_UNDEF == (ret_value = H5FD_realloc(file, type, dxpl_id, old_addr, old_size, new_size)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file reallocation request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5FDrealloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -2538,21 +2546,19 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
 
     FUNC_ENTER_NOAPI(H5FD_realloc, HADDR_UNDEF)
 
-    if(new_size==old_size) {
+    if(new_size == old_size) {
         /*nothing to do*/
-
-    } else if(0==old_size) {
+    } else if(0 == old_size) {
         /* allocate memory */
-        assert(!H5F_addr_defined(old_addr));
-        if(HADDR_UNDEF==(new_addr=H5FD_alloc(file, type, dxpl_id, new_size)))
+        HDassert(!H5F_addr_defined(old_addr));
+        if(HADDR_UNDEF == (new_addr = H5FD_alloc(file, type, dxpl_id, new_size)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
     } else if(0==new_size) {
         /* free memory */
-        assert(H5F_addr_defined(old_addr));
+        HDassert(H5F_addr_defined(old_addr));
         if(H5FD_free(file, type, dxpl_id, old_addr, old_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "file deallocation request failed")
         new_addr = HADDR_UNDEF;
-
     } else if(new_size<old_size) {
         /* free the end of the block */
         if(H5FD_free(file, type, dxpl_id, old_addr+old_size, old_size-new_size) < 0)
@@ -2565,33 +2571,33 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
          * to move pieces of the realloced data through a fixed size buffer, etc.
          * -QAK, 6/20/01
          */
-        if(HADDR_UNDEF==(new_addr=H5FD_alloc(file, type, dxpl_id, new_size)))
+        if(HADDR_UNDEF == (new_addr = H5FD_alloc(file, type, dxpl_id, new_size)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
         H5_CHECK_OVERFLOW(old_size,hsize_t,size_t);
-        if(old_size>sizeof(_buf) && NULL==(buf=H5MM_malloc((size_t)old_size))) {
+        if(old_size > sizeof(_buf) && NULL == (buf = H5MM_malloc((size_t)old_size))) {
             (void)H5FD_free(file, type, dxpl_id, new_addr, new_size);
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
-        }
+        } /* end if */
         if(H5FD_read(file, type, dxpl_id, old_addr, (size_t)old_size, buf) < 0 ||
                 H5FD_write(file, type, dxpl_id, new_addr, (size_t)old_size, buf) < 0) {
             (void)H5FD_free(file, type, dxpl_id, new_addr, new_size);
-            if(buf!=_buf)
+            if(buf != _buf)
                 H5MM_xfree(buf);
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF, "unable to move file block")
-        }
+        } /* end if */
 
-        if(buf!=_buf)
+        if(buf != _buf)
             H5MM_xfree(buf);
         if(H5FD_free(file, type, dxpl_id, old_addr, old_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "file deallocation request failed")
-    }
+    } /* end else */
 
     /* Set return value */
-    ret_value=new_addr;
+    ret_value = new_addr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_realloc() */
 
 
 /*-------------------------------------------------------------------------
