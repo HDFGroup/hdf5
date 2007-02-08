@@ -4441,7 +4441,7 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     char objname[NAME_BUF_SIZE];                /* Sub-group & dataset name buffer */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
-
+    
     TESTING("H5Ocopy(): deep nested groups");
 
     /* set initial data values */
@@ -7078,10 +7078,15 @@ main(void)
         hid_t	fapl, fapl2;
         hid_t   fcpl_shared;
         int     configuration;  /* Configuration of tests. */
+        int	ExpressMode;
 
 	/* Setup */
 	h5_reset();
 	fapl = h5_fileaccess();
+
+        ExpressMode = GetTestExpress();
+        if (ExpressMode > 1)
+	    printf("***Express test mode on.  Some tests may be skipped\n");
 
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -7163,7 +7168,15 @@ main(void)
             nerrors += test_copy_group_empty(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_root_group(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_group(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group_deep(fcpl_src, fcpl_dst, my_fapl);
+            if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) { 
+                /* This test case with Direct driver has a poor performance on 
+                 * NCSA copper, though it works.  Skip it for now and worry 
+                 * about the performance later. 
+                 */
+                printf("***Express test mode on.  test_copy_group_deep is skipped");
+                SKIPPED();
+            } else
+                nerrors += test_copy_group_deep(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_group_loop(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_group_wide_loop(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_group_links(fcpl_src, fcpl_dst, my_fapl);
