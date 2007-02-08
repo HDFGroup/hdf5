@@ -56,6 +56,7 @@ HTM_COPYRIGHT=/tmp/h5chkright_HTM.$$	# HTML style copyright
 SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
+VMSCMD_COPYRIGHT=/tmp/h5chkright_VMSCMD.$$	# VMS command file Copyright notice
 
 tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
@@ -180,6 +181,22 @@ EOF
 @REM is linked from the top-level documents page.  It can also be found at
 @REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 @REM access to either file, you may request a copy from help@hdfgroup.org.
+EOF
+
+    # VMS command file Copyright notice
+    cat > ${VMSCMD_COPYRIGHT} << \EOF
+$!# Copyright by The HDF Group.
+$!# Copyright by the Board of Trustees of the University of Illinois.
+$!# All rights reserved.
+$!#
+$!# This file is part of HDF5.  The full HDF5 copyright notice, including
+$!# terms governing use, modification, and redistribution, is contained in
+$!# the files COPYING and Copyright.html.  COPYING can be found at the root
+$!# of the source code distribution tree; Copyright.html can be found at the
+$!# root level of an installed copy of the electronic HDF5 document set and
+$!# is linked from the top-level documents page.  It can also be found at
+$!# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+$!# access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
 }
@@ -551,6 +568,28 @@ BATCH_FILE()
 }
 
 
+# Check Windows Batch files
+#
+VMSCMD_FILE()
+{
+    f=$1
+    case `MATCH_COPYRIGHT $VMSCMD_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${VMSCMD_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $VMSCMD_COPYRIGHT $f
+	fi
+	;;
+    esac
+}
+
+
 # Check Unknown type file.
 # First check if there is something that resemble a copyright notice in
 # the first "page".  If so, then inspect the first 5 lines to guess what
@@ -696,6 +735,10 @@ while read file; do
 	*.bat | *.BAT )
 	    # Windows Batch files
 	    BATCH_FILE ${file}
+	    ;;
+	*.com )
+	    # VMS Command files
+	    VMSCMD_FILE ${file}
 	    ;;
 	*.h5 | *.hdf5 )
 	    # Ignore HDF5 data files
