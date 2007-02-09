@@ -2,7 +2,7 @@
 Expected output for 'h5dump --xml tmany.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5File http://hdfgroup.org/DTDs/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
    <hdf5:Group Name="g1" OBJ-XID="xid_1344-0" H5Path="/g1" Parents="xid_696-0" H5ParentPaths="/" >
       <hdf5:Group Name="g1.1" OBJ-XID="xid_2320-0" H5Path="/g1/g1.1" Parents="xid_1344-0" H5ParentPaths="/g1" >
@@ -272,7 +272,7 @@ Expected output for 'h5dump --xml tmany.h5'
       </hdf5:Group>
    </hdf5:Group>
    <hdf5:Group Name="g2" OBJ-XID="xid_6808-0" H5Path="/g2" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:SoftLink LinkName="slink2" OBJ-XID="xid_4294967294-4294967293" H5SourcePath="/g2/slink2" TargetPath="/g1" TargetObj="xid_1344-0" Parents="xid_6808-0" H5ParentPaths="/g2" />
+      <hdf5:SoftLink LinkName="slink2" OBJ-XID="xid_1344-0" H5SourcePath="/g2/slink2" TargetPath="/g1" TargetObj="xid_1344-0" Parents="xid_6808-0" H5ParentPaths="/g2" />
    </hdf5:Group>
    <hdf5:Group Name="g3" OBJ-XID="xid_7784-0" H5Path="/g3" Parents="xid_696-0" H5ParentPaths="/" >
       <hdf5:Dataset Name="link3" OBJ-XID="xid_8480-0" H5Path= "/g3/link3" Parents="xid_7784-0" H5ParentPaths="/g3">
@@ -317,7 +317,7 @@ Expected output for 'h5dump --xml tmany.h5'
       </hdf5:Dataset>
    </hdf5:Group>
    <hdf5:Group Name="g5" OBJ-XID="xid_10248-0" H5Path="/g5" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:SoftLink LinkName="slink4" OBJ-XID="xid_4294967292-4294967291" H5SourcePath="/g5/slink4" TargetPath="/g6/dset3" TargetObj="xid_10944-0" Parents="xid_10248-0" H5ParentPaths="/g5" />
+      <hdf5:SoftLink LinkName="slink4" OBJ-XID="xid_10944-0" H5SourcePath="/g5/slink4" TargetPath="/g6/dset3" TargetObj="xid_10944-0" Parents="xid_10248-0" H5ParentPaths="/g5" />
    </hdf5:Group>
    <hdf5:Group Name="g6" OBJ-XID="xid_10896-0" H5Path="/g6" Parents="xid_696-0" H5ParentPaths="/" >
       <hdf5:Dataset Name="dset3" OBJ-XID="xid_10944-0" H5Path= "/g6/dset3" Parents="xid_10896-0" H5ParentPaths="/g6">

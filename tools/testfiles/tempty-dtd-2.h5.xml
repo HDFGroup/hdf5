@@ -2,7 +2,7 @@
 Expected output for 'h5dump --xml -u tempty.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdfgroup.org/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="xid_928-0" H5Path="/">
    <Dataset Name="Dataset1.0" OBJ-XID="xid_976-0" H5Path= "/Dataset1.0" Parents="xid_928-0" H5ParentPaths="/">

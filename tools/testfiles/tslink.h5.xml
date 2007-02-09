@@ -2,9 +2,9 @@
 Expected output for 'h5dump --xml tslink.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5File http://hdfgroup.org/DTDs/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:SoftLink LinkName="slink1" OBJ-XID="xid_4294967294-4294967293" H5SourcePath="/slink1" TargetPath="somevalue"  Parents="xid_696-0" H5ParentPaths="/" />
-   <hdf5:SoftLink LinkName="slink2" OBJ-XID="xid_4294967292-4294967291" H5SourcePath="/slink2" TargetPath="linkvalue"  Parents="xid_696-0" H5ParentPaths="/" />
+   <hdf5:SoftLink LinkName="slink1" OBJ-XID="xid_4294967294-4294967295" H5SourcePath="/slink1" TargetPath="somevalue"  Parents="xid_696-0" H5ParentPaths="/" />
+   <hdf5:SoftLink LinkName="slink2" OBJ-XID="xid_4294967293-4294967295" H5SourcePath="/slink2" TargetPath="linkvalue"  Parents="xid_696-0" H5ParentPaths="/" />
 </hdf5:RootGroup>
 </hdf5:HDF5-File>
