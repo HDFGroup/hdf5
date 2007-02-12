@@ -522,7 +522,16 @@ test_filespace(hid_t fapl)
     size_t rdcc_nelmts;
     size_t rdcc_nbytes;
     double rdcc_w0;
+    const char *envval = NULL;
+    int    ExpressMode;
 
+    /* Don't run some tests for some drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
+
+    /* See if some tests can be skipped */
+    ExpressMode = GetTestExpress();
 
     puts("Testing file space gets reused:");
 
@@ -957,6 +966,14 @@ test_filespace(hid_t fapl)
 /* Create complex group hiearchy, remove it & verify file size */
     TESTING("    complex group hierarchy");
 
+    if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) {
+        /* This test case with Direct driver has a poor performance on
+         * NCSA copper, though it works.  Skip it for now and worry
+         * about the performance later.
+         */
+        SKIPPED();
+    } else {
+
     /* Create file */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
@@ -1034,6 +1051,7 @@ test_filespace(hid_t fapl)
     if(file_size!=empty_size) TEST_ERROR
 
     PASSED();
+    }
 
 /* Create dataset and duplicate dataset, remove original & verify file size */
     TESTING("    duplicate dataset");
