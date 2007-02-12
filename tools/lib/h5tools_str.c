@@ -338,12 +338,12 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, "%lu"),
-                               (unsigned long)ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT),
+                               ctx->pos[i]);
         }
     } else {
         /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, "%lu"), (unsigned long)0);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
     }
 
     /* Add prefix and suffix to the index */

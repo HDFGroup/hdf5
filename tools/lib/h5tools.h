@@ -29,6 +29,9 @@
 #define START_OF_DATA		0x0001
 #define END_OF_DATA		0x0002
 
+/* format for hsize_t */
+#define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
+
 /*
  * Information about how to format output.
  */

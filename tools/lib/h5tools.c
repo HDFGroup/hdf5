@@ -554,7 +554,12 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
     if (info->line_ncols > 0)
 	ncols = info->line_ncols;
 
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
+    /* pass to the prefix in h5tools_simple_prefix the total position
+    instead of the current stripmine position i; this is necessary
+    to print the array indices */
+    curr_pos = ctx->sm_pos;
+    
+    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
@@ -700,7 +705,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 {
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
-    int			i;                      /*counters		*/
+    int			i, j;                      /*counters		*/
     hsize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
@@ -717,6 +722,10 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     hid_t		sm_space;		/*stripmine data space	*/
 
     hsize_t             count;
+
+    hsize_t           elmtno;                  /* elemnt index  */
+    hsize_t           low[H5S_MAX_RANK];       /* low bound of hyperslab */
+    hsize_t           high[H5S_MAX_RANK];      /* higher bound of hyperslab */
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
@@ -743,8 +752,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-	assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));
-    ctx.size_last_dim = (int)(total_size[ctx.ndims - 1]);
+    ctx.size_last_dim = total_size[ctx.ndims - 1];
 
     count = sset->count[ctx.ndims - 1];
     sset->count[ctx.ndims - 1] = 1;
@@ -820,6 +828,23 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         for (i = 0; i < ctx.ndims; i++) {
             ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
         }
+
+        /* print array indices. get the lower bound of the hyperslab and calulate
+        the element position at the start of hyperslab */
+        H5Sget_select_bounds(f_space,low,high);
+        elmtno=0;
+        for (i = 0; i < ctx.ndims-1; i++) 
+        {
+            hsize_t offset = 1; /* accumulation of the previous dimensions */
+            for (j = i+1; j < ctx.ndims; j++) 
+                offset *= total_size[j];
+            elmtno+= low[i] * offset;
+        }
+        elmtno+= low[ctx.ndims - 1];
+
+        /* initialize the current stripmine position; this is necessary to print the array
+        indices */
+        ctx.sm_pos = elmtno;
 
         h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
                                  p_type, sm_buf);

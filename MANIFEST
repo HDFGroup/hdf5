@@ -1717,6 +1717,10 @@
 ./tools/testfiles/test_fletcher32.h5
 ./tools/testfiles/test_shuffle.h5
 ./tools/testfiles/test_szip.h5
+./tools/testfiles/thyperslab.ddl
+./tools/testfiles/tbigdims.ddl
+./tools/testfiles/tbigdims.h5
+./tools/testfiles/thyperslab.h5
 
 
 

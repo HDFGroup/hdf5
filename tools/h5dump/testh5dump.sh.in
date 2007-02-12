@@ -252,7 +252,6 @@ TOOLTEST tstring2.ddl -r -d str4 tstr3.h5
 TOOLTEST tindicesyes.ddl taindices.h5
 TOOLTEST tindicesno.ddl -y taindices.h5
 
-
 # tests for filters
 # SZIP
 option="-H -p -d szip tfilters.h5"
@@ -294,6 +293,12 @@ TOOLTEST tuserfilter.ddl -H  -p -d myfilter  tfilters.h5
 
 # test for displaying objects with very long names
 TOOLTEST tlonglinks.ddl tlonglinks.h5
+
+# dimensions over 4GB, print boundary 
+TOOLTEST tbigdims.ddl -d dset4gb -s 4294967284 -c 22 tbigdims.h5
+
+# hyperslab read
+TOOLTEST thyperslab.ddl thyperslab.h5
 
 
 if test $nerrors -eq 0 ; then

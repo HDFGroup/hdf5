@@ -1808,12 +1808,13 @@ dump_dims(hsize_t *s, int dims)
     int i;
 
     for (i = 0; i < dims; i++) {
-        printf("%u", (unsigned int)s[i]);
+        printf(HSIZE_T_FORMAT, s[i]);
 
         if (i + 1 != dims)
             printf(", ");
     }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    dump_subsetting_header
@@ -1910,7 +1911,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     outputformat->pindex=pindex;
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
-        outputformat->idx_n_fmt = "%lu";
+        outputformat->idx_n_fmt = HSIZE_T_FORMAT;
         outputformat->idx_sep   = ",";
         outputformat->line_pre  = "%s";
     }
@@ -2699,7 +2700,7 @@ parse_hsize_list(const char *h_list)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if (isdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)atoi(ptr);
+            p_list[i++] = (hsize_t)atof(ptr);
 
             while (isdigit(*ptr))
                 /* scroll to end of integer */
