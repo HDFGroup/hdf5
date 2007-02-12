@@ -84,8 +84,7 @@
 #define FILE54  "tudlink.h5"
 #define FILE55  "tbinary.h5"
 #define FILE56  "tbigdims.h5"
-#define FILE57  "tbigdata.h5"
-#define FILE58  "thyperslab.h5"
+#define FILE57  "thyperslab.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -5730,66 +5729,6 @@ out:
 }
 
 
-/*-------------------------------------------------------------------------
- * Function: gen_bigdata
- *
- * Purpose: generate a dataset with integer numbers greater than 4GB
- *
- *-------------------------------------------------------------------------
- */
-
-static void gen_bigdata(void)
-{
-    hid_t      fid;
-    hid_t      did;
-    hid_t      f_sid;
-    hsize_t    dims[1]={10};                    /* dataset dimensions */
-    long_long  buf[10];
-    hsize_t    i;
-    size_t     nelmts=10;
-    int        ret;
-
-    /* create a file */
-    fid  = H5Fcreate(FILE57, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(fid>=0);
-    
-    if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
-        goto out;
-    if ((did = H5Dcreate(fid,"dsetlonglong",H5T_NATIVE_LLONG,f_sid,H5P_DEFAULT))<0)
-        goto out;
-         
-    buf[0] = GB4LL - 2;
-    
-    for (i=1; i<nelmts; i++) 
-    {
-        buf[i] = buf[i-1] + 1;
-    }
-  
-    if (H5Dwrite (did,H5T_NATIVE_LLONG,H5S_ALL,f_sid,H5P_DEFAULT,buf)<0) 
-        goto out;
-   
-    /* close */
-    if(H5Sclose(f_sid)<0)
-        goto out;
-    if(H5Dclose(did)<0)
-        goto out;
-
-    ret=H5Fclose(fid);
-    assert(ret>=0);
-    
-    return;
-    
-out:
-    printf("Error.....\n");
-    H5E_BEGIN_TRY {
-        H5Sclose(f_sid);
-        H5Dclose(did);
-        H5Fclose(fid);
-    } H5E_END_TRY;
-    return;
-    
-}
-
 
 /*-------------------------------------------------------------------------
  * Function: gent_hyperslab
@@ -5810,7 +5749,7 @@ static void gent_hyperslab(void)
   buf[i] = 1;
 
  /* create a file */
- fid  = H5Fcreate(FILE58, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ fid  = H5Fcreate(FILE57, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  assert(fid>=0);
 
  write_dset(fid,2,dims,"stripmine",H5T_NATIVE_DOUBLE,buf);
@@ -5886,7 +5825,6 @@ int main(void)
     gent_ldouble();
     gent_binary();
     gent_bigdims();
-    gen_bigdata();
     gent_hyperslab();
 
     return 0;
