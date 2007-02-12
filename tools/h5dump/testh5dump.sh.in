@@ -346,6 +346,9 @@ TOOLTEST tregref.ddl tdatareg.h5
 # dimensions over 4GB, print boundary 
 TOOLTEST tbigdims.ddl -d dset4gb -s 4294967284 -c 22 tbigdims.h5
 
+# numbers over 4GB
+TOOLTEST tbigdata.ddl tbigdata.h5
+
 # hyperslab read
 TOOLTEST thyperslab.ddl thyperslab.h5
 

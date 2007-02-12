@@ -1174,6 +1174,9 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
+./tools/testfiles/tbigdata.h5
+./tools/testfiles/tbigdata.ddl
+
 
 
 
