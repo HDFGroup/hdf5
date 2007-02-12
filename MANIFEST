@@ -1170,6 +1170,11 @@
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
 ./tools/testfiles/tregref.ddl
+./tools/testfiles/thyperslab.ddl
+./tools/testfiles/tbigdims.ddl
+./tools/testfiles/tbigdims.h5
+./tools/testfiles/thyperslab.h5
+
 
 
 
