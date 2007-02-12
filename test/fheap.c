@@ -15555,7 +15555,14 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio"))
+
+    /* This test case with Direct driver has a poor performance on 
+     * NCSA copper, though it works.  Skip it if the express mode is set on 
+     * and worry about the performance later. 
+     */
+    if((HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && 
+        HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) && 
+        !(!HDstrcmp(envval, "direct") && (ExpressMode > 1)))
     {
 
     /* Initialize heap creation parameters */
@@ -16010,7 +16017,7 @@ HDfprintf(stderr, "Uncomment cleanup!\n");
 #endif /* QAK */
     } /* end if(HDstrcmp(envval=="...")) */
     else {
-        printf("All fractal heap tests skipped - Incompatible with current Virtual File Driver");
+        printf("All fractal heap tests skipped - Incompatible with current Virtual File Driver\n");
     }
 
     return 0;
