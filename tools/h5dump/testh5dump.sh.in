@@ -343,6 +343,12 @@ TOOLTEST tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
 # test for dataset region references 
 TOOLTEST tregref.ddl tdatareg.h5
 
+# dimensions over 4GB, print boundary 
+TOOLTEST tbigdims.ddl -d dset4gb -s 4294967284 -c 22 tbigdims.h5
+
+# hyperslab read
+TOOLTEST thyperslab.ddl thyperslab.h5
+
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
 fi
