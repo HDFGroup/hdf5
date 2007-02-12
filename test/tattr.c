@@ -135,9 +135,31 @@ test_attr_basic_write(void)
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
-    /* Try to create an attribute on the file (should fail) */
-    ret=H5Acreate(fid1,ATTR1_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
-    VERIFY(ret, FAIL, "H5Acreate");
+
+    /* Try to create an attribute on the file (should create an attribute on root group) */
+    attr = H5Acreate(fid1, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Open the root group */
+    group = H5Gopen(fid1, "/");
+    CHECK(group, FAIL, "H5Gopen");
+
+    /* Open attribute again */
+    attr = H5Aopen_name(group, ATTR1_NAME);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close root group */
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
+
 
     /* Create an attribute for the dataset */
     attr=H5Acreate(dataset,ATTR1_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);

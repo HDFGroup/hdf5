@@ -169,7 +169,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -425,7 +425,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     H5TRACE2("i","is",loc_id,name);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -475,7 +475,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     H5TRACE2("i","iIu",loc_id,idx);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1116,7 +1116,7 @@ H5Aget_num_attrs(hid_t loc_id)
     H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(NULL == (obj = H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom")
@@ -1168,7 +1168,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     /* check arguments */
     if(!old_name || !new_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1298,7 +1298,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     H5TRACE4("e","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1367,7 +1367,7 @@ H5Adelete(hid_t loc_id, const char *name)
     H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (NULL==(ent=H5G_loc(loc_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")

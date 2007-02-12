@@ -73,6 +73,10 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+       - Relaxed restrictions on attribute operations to allow a file ID to
+            be used as the "location ID".  If a file ID is used, the attribute
+            operation will occur on the root group of the file.
+            - QAK - 2007/02/09
         - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
             be returned (0) instead of FAIL on error confitions such as the
             selection or extent not being defined. CMC - 2007/01/05
