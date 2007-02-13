@@ -427,7 +427,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_open_by_idx
+ * Function:	H5O_attr_open_by_idx_cb
  *
  * Purpose:	Callback routine opening an attribute by index
  *
@@ -491,7 +491,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     attr_op.u.lib_op = H5O_attr_open_by_idx_cb;
 
     /* Iterate over attributes to locate correct one */
-    if(H5O_attr_iterate((hid_t)-1, loc, dxpl_id, H5_ITER_INC, (unsigned)n, NULL, &attr_op, &ret_value) < 0)
+    if(H5O_attr_iterate((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
 done:
@@ -950,8 +950,8 @@ done:
  */
 herr_t
 H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
-    H5_iter_order_t order, unsigned skip, unsigned *last_attr,
-    const H5A_attr_iter_op_t *attr_op, void *op_data)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
+    hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
@@ -972,10 +972,16 @@ H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     if(oh->version > H5O_VERSION_1 && H5F_addr_defined(oh->attr_fheap_addr)) {
         haddr_t attr_fheap_addr;            /* Address of fractal heap for dense attribute storage */
         haddr_t name_bt2_addr;              /* Address of v2 B-tree for name index on dense attribute storage */
+        haddr_t corder_bt2_addr;            /* Address of v2 B-tree for creation order index on dense attribute storage */
+
+        /* Check for skipping too many attributes */
+        if(skip > 0 && skip >= oh->nattrs)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
 
         /* Retrieve the information about dense attribute storage */
         attr_fheap_addr = oh->attr_fheap_addr;
         name_bt2_addr = oh->name_bt2_addr;
+        corder_bt2_addr = oh->corder_bt2_addr;
 
         /* Release the object header */
         if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
@@ -984,12 +990,13 @@ H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
         /* Iterate over attributes in dense storage */
         if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, attr_fheap_addr,
-                name_bt2_addr, order, skip, last_attr, attr_op, op_data)) < 0)
+                name_bt2_addr, corder_bt2_addr, idx_type, order, skip,
+                last_attr, attr_op, op_data)) < 0)
             HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
     } /* end if */
     else {
         /* Build table of attributes for compact storage */
-        if(H5A_compact_build_table(loc->file, dxpl_id, oh, H5_INDEX_NAME, H5_ITER_INC, &atable, &oh_flags) < 0)
+        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable, &oh_flags) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Release the object header */
@@ -998,11 +1005,8 @@ H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
         oh = NULL;
 
         /* Check for skipping too many attributes */
-        if(skip > 0) {
-            /* Check for bad starting index */
-            if(skip >= atable.nattrs)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
-        } /* end if */
+        if(skip > 0 && skip >= atable.nattrs)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
 
         /* Iterate over attributes in table */
         if((ret_value = H5A_attr_iterate_table(&atable, skip, last_attr, loc_id, attr_op, op_data)) < 0)
@@ -1148,7 +1152,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             size_t u;                       /* Local index */
 
             /* Build the table of attributes for this object */
-            if(H5A_dense_build_table(loc->file, dxpl_id, oh->nattrs, oh->attr_fheap_addr, oh->name_bt2_addr, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
+            if(H5A_dense_build_table(loc->file, dxpl_id, oh->attr_fheap_addr, oh->name_bt2_addr, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
 
             /* Inspect attributes in table for ones that can't be converted back

@@ -1182,10 +1182,10 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 
     /* get the real attribute length */
     nbytes = HDstrlen(attr->name);
-    assert((ssize_t)nbytes>=0); /*overflow, pretty unlikey --rpm*/
+    HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
 
     /* compute the string length which will fit into the user's buffer */
-    copy_len = MIN(buf_size-1, nbytes);
+    copy_len = MIN(buf_size - 1, nbytes);
 
     /* Copy all/some of the name */
     if(buf && copy_len > 0) {
@@ -1201,6 +1201,66 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aget_name_by_idx
+ *
+ * Purpose:	Retrieve name of an attribute, according to the
+ *		order within an index.
+ *
+ *              Same pattern of behavior as H5Iget_name.
+ *
+ * Return:	Success:	Non-negative length of name, with information
+ *				in NAME buffer
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              February  8, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Aget_name_by_idx(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t n, char *name /*out*/, size_t size)
+{
+    H5G_loc_t   loc;            /* Object location */
+    H5A_t	*attr = NULL;   /* Attribute object for name */
+    ssize_t	ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Aget_name_by_idx, FAIL)
+
+    /* Check args */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+
+    /* Open the attribute on the object header */
+    if(NULL == (attr = H5A_open_by_idx(&loc, idx_type, order, n, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+
+    /* Get the length of the name */
+    ret_value = (ssize_t)HDstrlen(attr->name);
+
+    /* Copy the name into the user's buffer, if given */
+    if(name) {
+        HDstrncpy(name, attr->name, MIN((size_t)(ret_value + 1), size));
+        if((size_t)ret_value >= size)
+            name[size - 1]='\0';
+    } /* end if */
+
+done:
+    /* Release resources */
+    if(attr && H5A_close(attr) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aget_name_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -1367,7 +1427,7 @@ H5Aget_info_by_idx(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
-    /* Cleanup on failure */
+    /* Release resources */
     if(attr && H5A_close(attr) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
@@ -1494,7 +1554,8 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_loc_t		loc;	        /* Object location */
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
-    unsigned		start_idx;      /* Index of attribute to start iterating at */
+    hsize_t		start_idx;      /* Index of attribute to start iterating at */
+    hsize_t		last_attr;      /* Index of last attribute examined */
     herr_t	        ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aiterate, FAIL)
@@ -1511,10 +1572,12 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     attr_op.u.app_op = op;
 
     /* Call attribute iteration routine */
-    start_idx = (attr_num ? (unsigned)*attr_num : 0);
-/* XXX: Uses "native" name index order currently - should use creation order */
-    if((ret_value = H5O_attr_iterate(loc_id, loc.oloc, H5AC_ind_dxpl_id, H5_ITER_NATIVE, start_idx, attr_num, &attr_op, op_data)) < 0)
+    last_attr = start_idx = (hsize_t)(attr_num ? *attr_num : 0);
+    if((ret_value = H5O_attr_iterate(loc_id, loc.oloc, H5AC_ind_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+
+    /* Set the last attribute information */
+    *attr_num = (unsigned)last_attr;
 
 done:
     FUNC_LEAVE_API(ret_value)

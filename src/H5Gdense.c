@@ -86,12 +86,12 @@ typedef struct {
     /* downward (internal) */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
-    H5HF_t      *fheap;                 /* Fractal heap handle */
+    H5HF_t      *fheap;                 /* Fractal heap handle               */
+    hsize_t     count;                  /* # of links examined               */
 
     /* downward (from application) */
     hid_t       gid;                    /* Group ID for application callback */
     hsize_t     skip;                   /* Number of links to skip           */
-    hsize_t     count;                  /* Count of records operated on      */
     const H5G_link_iterate_t *lnk_op;   /* Callback for each link            */
     void        *op_data;               /* Callback data for each link       */
 
@@ -858,7 +858,7 @@ H5G_dense_iterate_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
      *  this routine because this fractal heap 'op' callback routine is called
      *  with the direct block protected and if the callback routine invokes an
      *  HDF5 routine, it could attempt to re-protect that direct block for the
-     *  heap, causing the HDF5 routine called to fail)
+     *  heap, causing the HDF5 routine called to fail - QAK)
      */
     if(NULL == (udata->lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
@@ -968,6 +968,8 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};      /* Table of links */
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_dense_iterate, FAIL)
@@ -979,23 +981,33 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(linfo);
     HDassert(lnk_op && lnk_op->u.lib_op);
 
-    /* Check for skipping too many links */
-    if(skip > 0) {
-        hsize_t nrec;           /* # of records in v2 B-tree */
-
-        /* Retrieve # of records in name index */
-        /* (# of records in all indices the same) */
-        if(H5B2_get_nrec(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &nrec) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
-
-        /* Check for bad starting index */
-        if(skip >= nrec)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    /* Determine the address of the index to use */
+    if(idx_type == H5_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            HDassert(H5F_addr_defined(linfo->name_bt2_addr));
+            bt2_addr = linfo->name_bt2_addr;
+            bt2_class = H5G_BT2_NAME;
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
     } /* end if */
+    else {
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
+         */
+        bt2_addr = linfo->corder_bt2_addr;
+        bt2_class = H5G_BT2_CORDER;
+    } /* end else */
 
     /* Check on iteration order */
-    /* ("native" iteration order is unordered for this link storage mechanism) */
-    if(order == H5_ITER_NATIVE) {
+    if(order == H5_ITER_NATIVE && H5F_addr_defined(bt2_addr)) {
         H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
 
         /* Open the fractal heap */
@@ -1014,11 +1026,10 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
         /* Iterate over the records in the v2 B-tree's "native" order */
         /* (by hash of name) */
-        if((ret_value = H5B2_iterate(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr,
-                H5G_dense_iterate_bt2_cb, &udata)) < 0)
+        if((ret_value = H5B2_iterate(f, dxpl_id, bt2_class, bt2_addr, H5G_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_SYM, H5E_BADITER, "link iteration failed");
 
-        /* Update last link looked at */
+        /* Update the last link examined, if requested */
         if(last_lnk)
             *last_lnk = udata.count;
     } /* end if */

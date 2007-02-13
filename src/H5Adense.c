@@ -87,13 +87,13 @@ typedef struct {
     /* downward (internal) */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
-    H5HF_t      *fheap;                 /* Fractal heap handle */
+    H5HF_t      *fheap;                 /* Fractal heap handle               */
     H5HF_t      *shared_fheap;          /* Fractal heap handle for shared messages */
+    hsize_t     count;                  /* # of attributes examined          */
 
     /* downward (from application) */
     hid_t       loc_id;                 /* Object ID for application callback */
-    unsigned    skip;                   /* Number of attributes to skip      */
-    unsigned    count;                  /* The # of attributes visited       */
+    hsize_t     skip;                   /* Number of attributes to skip      */
     const H5A_attr_iter_op_t *attr_op;  /* Callback for each attribute       */
     void        *op_data;               /* Callback data for each attribute  */
 
@@ -965,14 +965,15 @@ done:
  */
 herr_t
 H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr,
-    haddr_t name_bt2_addr, H5_iter_order_t order, unsigned skip,
-    unsigned *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
+    haddr_t name_bt2_addr, haddr_t corder_bt2_addr, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
+    const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
-    H5A_bt2_ud_it_t udata;              /* User data for iterator callback */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
-    hsize_t nrec;                       /* # of records in v2 B-tree */
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_iterate, FAIL)
@@ -985,21 +986,34 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr
     HDassert(H5F_addr_defined(name_bt2_addr));
     HDassert(attr_op);
 
-    /* Retrieve # of records in name index */
-    /* (# of records in all indices the same) */
-    if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr, &nrec) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
-
-    /* Check for skipping too many attributes */
-    if(skip > 0) {
-        /* Check for bad starting index */
-        if((hsize_t)skip >= nrec)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    /* Determine the address of the index to use */
+    if(idx_type == H5_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            HDassert(H5F_addr_defined(name_bt2_addr));
+            bt2_addr = name_bt2_addr;
+            bt2_class = H5A_BT2_NAME;
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
     } /* end if */
+    else {
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
+         */
+        bt2_addr = corder_bt2_addr;
+        bt2_class = H5A_BT2_CORDER;
+    } /* end else */
 
     /* Check on iteration order */
-    /* ("native" iteration order is unordered for this attribute storage mechanism) */
-    if(order == H5_ITER_NATIVE) {
+    if(order == H5_ITER_NATIVE && H5F_addr_defined(bt2_addr)) {
+        H5A_bt2_ud_it_t udata;              /* User data for iterator callback */
         htri_t attr_sharable;               /* Flag indicating attributes are sharable */
 
         /* Open the fractal heap */
@@ -1039,18 +1053,17 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, haddr_t attr_fheap_addr
 
         /* Iterate over the records in the v2 B-tree's "native" order */
         /* (by hash of name) */
-        if((ret_value = H5B2_iterate(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr,
-                H5A_dense_iterate_bt2_cb, &udata)) < 0)
+        if((ret_value = H5B2_iterate(f, dxpl_id, bt2_class, bt2_addr, H5A_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
-        /* Update last attribute looked at */
+        /* Update the last attribute examined, if requested */
         if(last_attr)
             *last_attr = udata.count;
     } /* end if */
     else {
         /* Build the table of attributes for this object */
-        if(H5A_dense_build_table(f, dxpl_id, nrec, attr_fheap_addr, name_bt2_addr,
-                H5_INDEX_NAME, order, &atable) < 0)
+        /* (build table using the name index, but sort according to idx_type) */
+        if(H5A_dense_build_table(f, dxpl_id, attr_fheap_addr, name_bt2_addr, idx_type, order, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes")
 
         /* Iterate over attributes in table */

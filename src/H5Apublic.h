@@ -56,6 +56,9 @@ H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 H5_DLL herr_t  H5Aget_info(hid_t loc_id, const char *name, H5A_info_t *ainfo /*out*/);
 H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5A_info_t *ainfo /*out*/);
+H5_DLL ssize_t H5Aget_name_by_idx(hid_t loc_id,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    char *name /*out*/, size_t size);
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
     void *op_data);

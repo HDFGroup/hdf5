@@ -304,7 +304,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     VERIFY(ret, -1, "H5Giterate");
 
     if(i != (NDATASETS + 2))
-        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
+        TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
     /* Test all objects in group, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
@@ -329,7 +329,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     VERIFY(ret, -1, "H5Giterate");
 
     if(i != 42 || idx != 52)
-        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
+        TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -454,65 +454,55 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     VERIFY(ret, FAIL, "H5Aiterate");
 
     /* Test all attributes on dataset, when callback always returns 0 */
-    info.command=RET_ZERO;
-    idx=0;
-    if((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0)
+    info.command = RET_ZERO;
+    idx = 0;
+    if((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0)
         TestErrPrintf("Attribute iteration function didn't return zero correctly!\n");
 
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
-    info.command=RET_TWO;
-    idx=i=0;
-    while((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
+    info.command = RET_TWO;
+    idx = i = 0;
+    while((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret,2,"H5Aiterate");
+        VERIFY(ret, 2, "H5Aiterate");
 
         /* Increment the number of times "2" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx,(unsigned)i,"H5Aiterate");
+        VERIFY(idx, (unsigned)i, "H5Aiterate");
 
         /* Verify that the correct name is retrieved */
-#ifdef LATER
-        if(HDstrcmp(info.name,anames[idx-1])!=0)
-            TestErrPrintf("Attribute iteration function didn't return two correctly!\n");
-#endif /* LATER */
-    }
-#ifndef LATER
-HDfprintf(stderr, "Check skipped - fix after creation order for attributes implemented\n");
-#endif /* LATER */
-    VERIFY(ret,-1,"H5Aiterate");
-    if(i!=50 || idx!=50)
-        TestErrPrintf("Attribute iteration function didn't perform multiple iterations correctly!\n");
+        if(HDstrcmp(info.name, anames[idx - 1]) != 0)
+            TestErrPrintf("%u: Attribute iteration function didn't return 'two' correctly!\n", __LINE__);
+    } /* end while */
+    VERIFY(ret, -1, "H5Aiterate");
+    if(i != 50 || idx != 50)
+        TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
 
     /* Test all attributes on dataset, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
-    idx=i=0;
-    while((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
+    idx = i = 0;
+    while((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret,1,"H5Aiterate");
+        VERIFY(ret, 1, "H5Aiterate");
 
         /* Increment the number of times "1" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx,(unsigned)i+10,"H5Aiterate");
+        VERIFY(idx, (unsigned)i + 10, "H5Aiterate");
 
         /* Verify that the correct name is retrieved */
-#ifdef LATER
-        if(HDstrcmp(info.name,anames[idx-1])!=0)
+        if(HDstrcmp(info.name, anames[idx - 1]) != 0)
             TestErrPrintf("Attribute iteration function didn't return changing correctly!\n");
-#endif /* LATER */
-    }
-#ifndef LATER
-HDfprintf(stderr, "Check skipped - fix after creation order for attributes implemented\n");
-#endif /* LATER */
-    VERIFY(ret,-1,"H5Aiterate");
-    if(i!=40 || idx!=50)
-        TestErrPrintf("Attribute iteration function didn't perform multiple iterations correctly!\n");
+    } /* end while */
+    VERIFY(ret, -1, "H5Aiterate");
+    if(i != 40 || idx != 50)
+        TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");

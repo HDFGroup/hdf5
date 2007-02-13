@@ -482,8 +482,8 @@ H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
 H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
     const char *old_name, const char *new_name);
 H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
-    H5_iter_order_t order, unsigned skip, unsigned *last_attr,
-    const H5A_attr_iter_op_t *op, void *op_data);
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
+    hsize_t *last_attr, const H5A_attr_iter_op_t *op, void *op_data);
 H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
 H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);

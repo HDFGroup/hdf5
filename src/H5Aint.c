@@ -57,6 +57,7 @@ typedef struct {
     hid_t       dxpl_id;        /* DXPL for operation                */
     H5A_attr_table_t *atable;   /* Pointer to attribute table to build */
     size_t curr_attr;           /* Current attribute to operate on */
+    hbool_t bogus_crt_idx;      /* Whether bogus creation index values need to be set */
 } H5A_compact_bt_ud_t;
 
 /* Data exchange structure to use when building table of dense attributes for an object */
@@ -114,7 +115,7 @@ static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
  */
 static herr_t
 H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5A_compact_bt_ud_t *udata = (H5A_compact_bt_ud_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -139,6 +140,10 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     /* Copy attribute into table */
     if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+
+    /* Assign [somewhat arbitrary] creation order value, if requested */
+    if(udata->bogus_crt_idx)
+        udata->atable->attrs[udata->curr_attr].crt_idx = sequence;
 
     /* Increment current attribute */
     udata->curr_attr++;
@@ -166,9 +171,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    H5_index_t UNUSED idx_type, H5_iter_order_t order,
-    H5A_attr_table_t *atable, unsigned *oh_flags)
+H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
+    H5_iter_order_t order, H5A_attr_table_t *atable, unsigned *oh_flags)
 {
     H5A_compact_bt_ud_t udata;                  /* User data for iteration callback */
     H5O_mesg_operator_t op;             /* Wrapper for operator */
@@ -190,6 +194,7 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     udata.dxpl_id = dxpl_id;
     udata.atable = atable;
     udata.curr_attr = 0;
+    udata.bogus_crt_idx = (oh->version == H5O_VERSION_1) ? TRUE : FALSE;
 
     /* Iterate over existing attributes, checking for attribute with same name */
     op.lib_op = H5A_compact_build_table_cb;
@@ -200,7 +205,7 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     atable->nattrs = udata.curr_attr;
 
     /* Sort attribute table in correct iteration order */
-    if(H5A_attr_sort_table(atable, H5_INDEX_NAME, order) < 0)
+    if(H5A_attr_sort_table(atable, idx_type, order) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
 
 done:
@@ -255,7 +260,8 @@ done:
  *              an object
  *
  * Note:	Used for building table of attributes in non-native iteration
- *              order for an index
+ *              order for an index.  Uses the "name" index to retrieve records,
+ *		but the 'idx_type' index for sorting them.
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
@@ -266,11 +272,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, hsize_t nattrs, haddr_t attr_fheap_addr,
-    haddr_t name_bt2_addr, H5_index_t UNUSED idx_type, H5_iter_order_t order,
+H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, haddr_t attr_fheap_addr,
+    haddr_t name_bt2_addr, H5_index_t idx_type, H5_iter_order_t order,
     H5A_attr_table_t *atable)
 {
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    hsize_t nrec;                       /* # of records in v2 B-tree */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table)
 
@@ -280,9 +287,14 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, hsize_t nattrs, haddr_t attr_fhea
     HDassert(H5F_addr_defined(name_bt2_addr));
     HDassert(atable);
 
+    /* Retrieve # of records in "name" B-tree */
+    /* (should be same # of records in all indices) */
+    if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr, &nrec) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
+
     /* Set size of table */
-    H5_CHECK_OVERFLOW(nattrs, /* From: */ hsize_t, /* To: */ size_t);
-    atable->nattrs = (size_t)nattrs;
+    H5_CHECK_OVERFLOW(nrec, /* From: */ hsize_t, /* To: */ size_t);
+    atable->nattrs = (size_t)nrec;
 
     /* Allocate space for the table entries */
     if(atable->nattrs > 0) {
@@ -303,11 +315,12 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, hsize_t nattrs, haddr_t attr_fhea
 
         /* Iterate over the links in the group, building a table of the link messages */
         if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, attr_fheap_addr, name_bt2_addr,
-                H5_ITER_NATIVE, (unsigned)0, NULL, &attr_op, &udata) < 0)
+                HADDR_UNDEF, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
+                &attr_op, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Sort attribute table in correct iteration order */
-        if(H5A_attr_sort_table(atable, H5_INDEX_NAME, order) < 0)
+        if(H5A_attr_sort_table(atable, idx_type, order) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
     } /* end if */
     else
@@ -332,7 +345,7 @@ done:
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
- *		Dec 11 2005
+ *		Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -343,6 +356,103 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5A_t *)attr1)->name, ((const H5A_t *)attr2)->name))
 } /* end H5A_attr_cmp_name_inc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_attr_cmp_name_dec
+ *
+ * Purpose:	Callback routine for comparing two attribute names, in
+ *              decreasing alphabetic order
+ *
+ * Return:	An integer less than, equal to, or greater than zero if the
+ *              second argument is considered to be respectively less than,
+ *              equal to, or greater than the first.  If two members compare
+ *              as equal, their order in the sorted array is undefined.
+ *              (i.e. opposite of strcmp())
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb  8 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
+
+    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5A_t *)attr2)->name, ((const H5A_t *)attr1)->name))
+} /* end H5A_attr_cmp_name_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_attr_cmp_corder_inc
+ *
+ * Purpose:	Callback routine for comparing two attributes, in
+ *              increasing creation order
+ *
+ * Return:	An integer less than, equal to, or greater than zero if the
+ *              first argument is considered to be respectively less than,
+ *              equal to, or greater than the second.  If two members compare
+ *              as equal, their order in the sorted array is undefined.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb  8 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2)
+{
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_inc)
+
+    if(((const H5A_t *)attr1)->crt_idx < ((const H5A_t *)attr2)->crt_idx)
+        ret_value = -1;
+    else if(((const H5A_t *)attr1)->crt_idx > ((const H5A_t *)attr2)->crt_idx)
+        ret_value = 1;
+    else
+        ret_value = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_attr_cmp_corder_inc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_attr_cmp_corder_dec
+ *
+ * Purpose:	Callback routine for comparing two attributes, in
+ *              decreasing creation order
+ *
+ * Return:	An integer less than, equal to, or greater than zero if the
+ *              second argument is considered to be respectively less than,
+ *              equal to, or greater than the first.  If two members compare
+ *              as equal, their order in the sorted array is undefined.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb  8 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2)
+{
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_dec)
+
+    if(((const H5A_t *)attr1)->crt_idx < ((const H5A_t *)attr2)->crt_idx)
+        ret_value = 1;
+    else if(((const H5A_t *)attr1)->crt_idx > ((const H5A_t *)attr2)->crt_idx)
+        ret_value = -1;
+    else
+        ret_value = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_attr_cmp_corder_dec() */
 
 
 /*-------------------------------------------------------------------------
@@ -368,31 +478,23 @@ H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
     HDassert(atable);
 
     /* Pick appropriate comparison routine */
-#ifdef NOT_YET
     if(idx_type == H5_INDEX_NAME) {
-#else /* NOT_YET */
-HDassert(idx_type == H5_INDEX_NAME);
-#endif /* NOT_YET */
         if(order == H5_ITER_INC)
             HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_name_inc);
-#ifdef NOT_YET
         else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_name_dec);
-#endif /* NOT_YET */
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_name_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
-#ifdef NOT_YET
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if(order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_inc);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_corder_inc);
         else if(order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G_link_cmp_corder_dec);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_corder_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
-#endif /* NOT_YET */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5A_attr_sort_table() */
@@ -413,8 +515,8 @@ HDassert(idx_type == H5_INDEX_NAME);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_attr_iterate_table(const H5A_attr_table_t *atable, unsigned skip,
-    unsigned *last_attr, hid_t loc_id, const H5A_attr_iter_op_t *attr_op,
+H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
+    hsize_t *last_attr, hid_t loc_id, const H5A_attr_iter_op_t *attr_op,
     void *op_data)
 {
     size_t u;                           /* Local index variable */
@@ -431,7 +533,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, unsigned skip,
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ unsigned, /* To: */ size_t)
+    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
     for(; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch(attr_op->op_type) {

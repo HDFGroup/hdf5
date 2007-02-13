@@ -6087,7 +6087,7 @@ link_info_by_idx(hid_t fapl)
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        valname[NAME_BUF_SIZE]; /* Link value name */
     char        filename[NAME_BUF_SIZE];/* File name */
-    char tmpname[NAME_BUF_SIZE];        /* Temporary link name */
+    char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
     unsigned    u;                      /* Local index variable */
     herr_t      ret;                    /* Generic return value */
 
