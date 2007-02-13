@@ -63,7 +63,8 @@ New Features
 
 Support for New Platforms, Languages and Compilers
 ==================================================
- 
+	- Added support for MAC Intel (Darwin 8.8.2)  (gcc 4.0.1 and g95 0.91)
+				EIP - 2007/02/13
 
     Configuration
     -------------

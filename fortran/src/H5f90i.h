@@ -62,7 +62,9 @@ typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
-#define FNAME(x) x
+#if defined H5_G95
+#define FNAME_POST2_UNDERSCORE
+#endif
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #endif /*H5_ABSOFT*/
@@ -240,7 +242,7 @@ typedef float             real_f;
 #if !defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST_UNDERSCORE)
 #   define FNAME(x)     x##_
 #endif
-#if !defined(FNAME_PRE_UNDERSCORE) && !defined(FNAME_POST_UNDERSCORE)
+#if !defined(FNAME_PRE_UNDERSCORE) && !defined(FNAME_POST_UNDERSCORE) && !defined(FNAME_POST2_UNDERSCORE)
 #   define FNAME(x)     x
 #endif
 #if !defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST2_UNDERSCORE)
