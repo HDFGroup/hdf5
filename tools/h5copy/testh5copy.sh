@@ -27,12 +27,10 @@ H5LS=h5ls                   # The h5ls tool name
 H5LS_ARGS=-vr               # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 
-TESTFILE=$srcdir/../testfiles/h5copytst.h5
-FILEOUT=h5copytst.out.h5
-
 nerrors=0
 verbose=yes
 
+SRCFILE=h5copytst.h5
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -166,25 +164,44 @@ H5LSTEST()
    fi
 }
 
+# Copy single datasets of various forms from one root group to another,
+#       adding new object to the destination file each time
+#
+# Assumed arguments:
+# $1 is test "variation"
+# $2 is group within source file
+# $3 is group within destination file
+SIMPLETEST() 
+{
+    TESTFILE=$srcdir/../testfiles/$SRCFILE
+    FILEOUT="../testfiles/`basename $SRCFILE .h5`.$1.out.h5"
+
+    # Remove any output file left over from previous test run
+    rm -f $FILEOUT
+
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"simple     -d "$3"simple
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"chunk      -d "$3"chunk
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compact    -d "$3"compact
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"compound
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compressed -d "$3"compressed
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"named_vl   -d "$3"named_vl
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"nested_vl  -d "$3"nested_vl
+
+    # Verify that the file created above is correct
+    H5LSTEST $FILEOUT
+
+    # Remove output file created, if the "no cleanup" environment variable is
+    #   not defined
+    if [ x$HDF5_NOCLEANUP = "x" ]; then
+        rm -f $FILEOUT
+    fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-# Copy single datasets of various forms from one root group to another,
-#       adding new object to the destination file each time
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple     -d simple
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk      -d chunk
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compact    -d compact
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compound   -d compound
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compressed -d compressed
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s named_vl   -d named_vl
-TOOLTEST -i $TESTFILE -o $FILEOUT -v -s nested_vl  -d nested_vl
-
-# Verify that the file created above is correct
-H5LSTEST $FILEOUT
-rm -f $FILEOUT
-
-
+SIMPLETEST a "" ""
 
 
 if test $nerrors -eq 0 ; then

@@ -1,7 +1,7 @@
 #############################
-Expected output for 'h5ls h5copytst.out.h5'
+Expected output for 'h5ls ../testfiles/h5copytst.a.out.h5'
 #############################
-Opened "h5copytst.out.h5" with sec2 driver.
+Opened "../testfiles/h5copytst.a.out.h5" with sec2 driver.
 /chunk                   Dataset {6/6}
     Location:  1:6216
     Links:     1
