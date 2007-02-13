@@ -164,14 +164,14 @@ H5LSTEST()
    fi
 }
 
-# Copy single datasets of various forms from one root group to another,
-#       adding new object to the destination file each time
+# Copy single datasets of various forms from one group to another,
+#       adding object copied to the destination file each time
 #
 # Assumed arguments:
-# $1 is test "variation"
+# $1 is test "variation" (a single letter, normally)
 # $2 is group within source file
 # $3 is group within destination file
-SIMPLETEST() 
+COPYOBJECTS() 
 {
     TESTFILE=$srcdir/../testfiles/$SRCFILE
     FILEOUT="../testfiles/`basename $SRCFILE .h5`.$1.out.h5"
@@ -179,6 +179,7 @@ SIMPLETEST()
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
+    # Test copying various forms of datasets
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"simple     -d "$3"simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"chunk      -d "$3"chunk
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compact    -d "$3"compact
@@ -186,6 +187,16 @@ SIMPLETEST()
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compressed -d "$3"compressed
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"named_vl   -d "$3"named_vl
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"nested_vl  -d "$3"nested_vl
+
+    # Test copying & renaming dataset
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"rename
+
+    # Test copying empty & "full" groups
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_empty  -d "$3"grp_empty
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_dsets
+
+    # Test copying & renaming group
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_rename
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
@@ -201,7 +212,13 @@ SIMPLETEST()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-SIMPLETEST a "" ""
+# Copy objects from root group of source file to root of destination file
+# (with implicit root group paths)
+COPYOBJECTS a "" ""
+
+# Copy objects from root group of source file to root of destination file
+# (with explicit root group paths)
+COPYOBJECTS b "/" "/"
 
 
 if test $nerrors -eq 0 ; then

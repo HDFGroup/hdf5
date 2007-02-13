@@ -19,16 +19,16 @@
 #include <stdlib.h>
 #include "hdf5.h"
 
-#define FILENAME           "h5copytst.h5"
-#define DATASET_SIMPLE     "simple"
-#define DATASET_CHUNK      "chunk"
-#define DATASET_COMPACT    "compact"
-#define DATASET_COMPOUND   "compound"
-#define DATASET_COMPRESSED "compressed"
-#define DATASET_NAMED_VL   "named_vl"
-#define DATASET_NESTED_VL  "nested_vl"
-
-
+#define FILENAME                "h5copytst.h5"
+#define DATASET_SIMPLE          "simple"
+#define DATASET_CHUNK           "chunk"
+#define DATASET_COMPACT         "compact"
+#define DATASET_COMPOUND        "compound"
+#define DATASET_COMPRESSED      "compressed"
+#define DATASET_NAMED_VL        "named_vl"
+#define DATASET_NESTED_VL       "nested_vl"
+#define GROUP_EMPTY             "grp_empty"
+#define GROUP_DATASETS          "grp_dsets"
 
 
 /*-------------------------------------------------------------------------
@@ -306,6 +306,64 @@ static void gent_nested_vl(hid_t loc_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function: gent_datasets
+ *
+ * Purpose: Generate all datasets in a particular location
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_datasets(hid_t loc_id)
+{
+    gent_simple(loc_id);
+    gent_chunked(loc_id);
+    gent_compact(loc_id);
+    gent_compound(loc_id);
+    gent_compressed(loc_id);
+    gent_named_vl(loc_id);
+    gent_nested_vl(loc_id);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gent_empty_group
+ *
+ * Purpose: Generate an empty group in a location
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_empty_group(hid_t loc_id)
+{
+    hid_t   gid;
+
+    /* Create group in location */
+    gid = H5Gcreate(loc_id, GROUP_EMPTY, (size_t)0);
+
+    /* Release resources */
+    H5Gclose(gid);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gent_nested_datasets
+ *
+ * Purpose: Generate a group in a location and populate it with the "standard"
+ *		datasets
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_nested_datasets(hid_t loc_id)
+{
+    hid_t   gid;
+
+    /* Create group in location */
+    gid = H5Gcreate(loc_id, GROUP_DATASETS, (size_t)0);
+
+    /* Add datasets to group created */
+    gent_datasets(gid);
+
+    /* Release resources */
+    H5Gclose(gid);
+}
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -317,16 +375,10 @@ int main(void)
 
     /* Create source file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    gent_simple(fid);
-    gent_chunked(fid);
-    gent_compact(fid);
-    gent_compound(fid);
-    gent_compressed(fid);
-    gent_named_vl(fid);
-    gent_nested_vl(fid);
+    gent_datasets(fid);
+    gent_empty_group(fid);
+    gent_nested_datasets(fid);
     H5Fclose(fid);
-
-    /* Create destination file with all datasets in root group */
 
     return 0;
 }
