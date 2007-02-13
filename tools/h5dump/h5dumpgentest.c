@@ -5663,13 +5663,13 @@ static void gent_bigdims(void)
     /* create dataset */ 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
         goto out;
-    if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue)<0)
         goto out;
     if (H5Pset_chunk(dcpl, 1, chunk_dims)<0)
         goto out;
     if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
         goto out;
-    if ((did = H5Dcreate(fid,"dset4gb",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+    if ((did = H5Dcreate(fid,"dset4gb",H5T_NATIVE_SCHAR,f_sid,dcpl))<0)
         goto out;
     if ((tid = H5Dget_type(did))<0) 
         goto out;
@@ -5693,7 +5693,7 @@ static void gent_bigdims(void)
     
     if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size,NULL)<0) 
         goto out;
-    if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+    if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
         goto out;
     
     
