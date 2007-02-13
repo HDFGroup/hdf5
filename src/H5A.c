@@ -1577,7 +1577,8 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Set the last attribute information */
-    *attr_num = (unsigned)last_attr;
+    if(attr_num)
+        *attr_num = (unsigned)last_attr;
 
 done:
     FUNC_LEAVE_API(ret_value)
