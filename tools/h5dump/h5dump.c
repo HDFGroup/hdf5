@@ -3775,7 +3775,7 @@ main(int argc, const char *argv[])
     }
     fname = HDstrdup(argv[opt_ind]);
 
-    fid = h5tools_fopen(fname, driver, NULL, 0);
+    fid = h5tools_fopen(fname, H5F_ACC_RDONLY, driver, NULL, 0);
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);

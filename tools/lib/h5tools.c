@@ -308,8 +308,8 @@ error:
  *-------------------------------------------------------------------------
  */
 hid_t
-h5tools_fopen(const char *fname, const char *driver, char *drivername,
-              size_t drivername_size)
+h5tools_fopen(const char *fname, unsigned flags, const char *driver,
+    char *drivername, size_t drivername_size)
 {
     unsigned    drivernum;
     hid_t       fid = FAIL;
@@ -321,7 +321,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
             goto done;
 
         H5E_BEGIN_TRY {
-            fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl);
+            fid = H5Fopen(fname, flags, fapl);
         } H5E_END_TRY;
 
         if (fid == FAIL)
@@ -335,7 +335,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
                 goto done;
 
             H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl);
+                fid = H5Fopen(fname, flags, fapl);
             } H5E_END_TRY;
 
             if (fid != FAIL)

@@ -21,13 +21,20 @@
 
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
-H5DIFF=../h5diff/h5diff     # The h5diff tool name 
-H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the h5diff  tool binary
+H5DIFF=h5diff               # The h5diff tool name 
+H5DIFF_BIN=`pwd`/../h5diff/$H5DIFF    # The path of the h5diff tool binary
+H5LS=h5ls                   # The h5ls tool name 
+H5LS_ARGS=-vr               # Arguments to the h5ls tool
+H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 
 TESTFILE=$srcdir/../testfiles/h5copytst.h5
 FILEOUT=h5copytst.out.h5
 
 nerrors=0
+verbose=yes
+
+CMP='cmp -s'
+DIFF='diff -c'
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -50,6 +57,15 @@ VERIFY()
 {
     SPACES="                                                               "
     echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+VERIFY_H5LS() 
+{
+    SPACES="                                                               "
+    echo "Verifying h5diff file structure $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*. If h5copy can complete
@@ -84,13 +100,13 @@ TOOLTEST()
     $RUNSERIAL $H5COPY_BIN $@
     ) > output.out
     RET=$?
-    if [ $RET != 0 ] ; then
-    echo "*FAILED*"
-    echo "failed result is:"
-    cat output.out
-    nerrors="`expr $nerrors + 1`"
+    if [ $RET != 0 ]; then
+        echo "*FAILED*"
+        echo "failed result is:"
+        cat output.out
+        nerrors="`expr $nerrors + 1`"
     else
-    echo " PASSED"
+        echo " PASSED"
     fi
     
     if [ $runh5diff != no ]; then
@@ -104,9 +120,9 @@ H5DIFFTEST()
 {
     VERIFY  $@
     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-     $RUNSERIAL $H5DIFF_BIN $@ -q
+        $RUNSERIAL $H5DIFF_BIN $@ -q
     else
-     $RUNSERIAL $H5DIFF_BIN "$@" -q
+        $RUNSERIAL $H5DIFF_BIN "$@" -q
     fi
     RET=$?
     if [ $RET != 0 ] ; then
@@ -117,10 +133,45 @@ H5DIFFTEST()
     fi
 }
 
+# Call the h5ls tool to verify the correct output data in the destination file
+#
+H5LSTEST() 
+{
+    expect="$srcdir/../testfiles/`basename $1 .h5`.ls"
+    actual="../testfiles/`basename $1 .h5`.out"
+    actual_err="../testfiles/`basename $1 .h5`.err"
+
+    VERIFY_H5LS  $@
+
+   (
+      echo "#############################"
+      echo "Expected output for '$H5LS $@'" 
+      echo "#############################"
+      $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
+   ) >$actual 2>$actual_err
+   cat $actual_err >> $actual
+
+
+   if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+    echo " CREATED"
+    cp $actual $expect
+   elif $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ls) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
+# Copy single datasets of various forms from one root group to another,
+#       adding new object to the destination file each time
 TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple     -d simple
 TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk      -d chunk
 TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compact    -d compact
@@ -129,6 +180,9 @@ TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compressed -d compressed
 TOOLTEST -i $TESTFILE -o $FILEOUT -v -s named_vl   -d named_vl
 TOOLTEST -i $TESTFILE -o $FILEOUT -v -s nested_vl  -d nested_vl
 
+# Verify that the file created above is correct
+H5LSTEST $FILEOUT
+rm -f $FILEOUT
 
 
 
@@ -138,6 +192,4 @@ if test $nerrors -eq 0 ; then
 fi
 
 exit $nerrors
-
-
 
