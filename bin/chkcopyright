@@ -83,6 +83,18 @@ EOF
 }
 
 
+# Print Debug output
+# 
+PRINTDEBUG()
+{
+    if [ -n "$VERBOSE" ]; then
+	echo $*
+    else
+	:	# noop
+    fi
+}
+
+
 # Generate various styles of Copyright notices
 #
 BUILDCOPYRIGHT()
@@ -590,6 +602,43 @@ VMSCMD_FILE()
 }
 
 
+# Guess the type of file.
+# Inspect the first 5 lines to guess what type of file it is.
+#
+GUESS_File_Type()
+{
+    if [ $# -ne 1 ]; then
+	echo "wrong number of arguments($#)"
+	return
+    fi
+    f=$1
+    # Now guess the file type.
+    head -5 < $f > $tmpfile
+    if head -1 < $tmpfile | grep '^#!' > /dev/null; then
+	# First line is "#!".  It is likely a shell script or similar type.
+	echo SHELL_FILE
+    elif grep '\/\*' < $tmpfile > /dev/null; then
+	# Found some lines containing '/*'.  It may be a C/C++ style file.
+	echo C_SOURCE
+    elif grep '^!' < $tmpfile > /dev/null; then
+	# Some lines start with a "!".  It may be a Fortran 9X style file.
+	echo FORTRAN_SOURCE
+    elif grep '^#' < $tmpfile > /dev/null; then
+	# Some lines start with a "#".  It may be a shell like type.
+	# Put this after C_SOURCE which may have #define and such lines.
+	echo SHELL_FILE
+    elif grep -i '^<html>' < $tmpfile > /dev/null || \
+	 grep '^<!--' < $tmpfile > /dev/null ; then
+	# Some lines start with a "<html>" or having an html comment tag.
+	# It may be an HTML file.
+	echo HTML_FILE
+    else
+	# Unknown type.
+	echo UNKNOWN_TYPE
+    fi
+}
+
+
 # Check Unknown type file.
 # First check if there is something that resemble a copyright notice in
 # the first "page".  If so, then inspect the first 5 lines to guess what
@@ -599,31 +648,17 @@ VMSCMD_FILE()
 UNKNOWN_FILE()
 {
     f=$1
-    if head -$NUMBEGINLINES < $f | grep "${UICOPYRIGHTSTR}" > /dev/null; then
-	# Now guess the file type and try match it.
-	head -5 < $f > $tmpfile
-	if head -1 < $tmpfile | grep '^#!' > /dev/null; then
-	    # First line is "#!".  It is likely a shell script or similar type.
-	    SHELL_FILE $f
-	elif grep '\/\*' < $tmpfile > /dev/null; then
-	    # Found some lines containing '/*'.  It may be a C/C++ style file.
-	    C_SOURCE $f
-	elif grep '^!' < $tmpfile > /dev/null; then
-	    # Some lines start with a "!".  It may be a Fortran 9X style file.
-	    FORTRAN_SOURCE $f
-	elif grep '^#' < $tmpfile > /dev/null; then
-	    # Some lines start with a "#".  It may be a shell like type.
-	    # Put this after C_SOURCE which may have #define and such lines.
-	    SHELL_FILE $f
-	elif grep -i '^<html>' < $tmpfile > /dev/null || \
-	     grep '^<!--' < $tmpfile > /dev/null ; then
-	    # Some lines start with a "<html>" or having an html comment tag.
-	    # It may be an HTML file.
-	    HTML_FILE $f
-	else
-	    # Unknown type.
-	    UNKNOWN_TYPE $f
-	fi
+    if head -$NUMBEGINLINES < $f | grep "${COPYRIGHTSTR}" > /dev/null; then
+	xftype=`GUESS_File_Type $f`
+	PRINTDEBUG f=$f xftype=$xftype > /dev/tty
+	case $xftype in
+	    SHELL_FILE) 	    SHELL_FILE $f;;
+	    C_SOURCE) 	    C_SOURCE $f;;
+	    FORTRAN_SOURCE) 	    FORTRAN_SOURCE $f;;
+	    SHELL_FILE) 	    SHELL_FILE $f;;
+	    HTML_FILE) 	    HTML_FILE $f;;
+	    UNKNOWN_TYPE) 	    UNKNOWN_TYPE $f;;
+	esac
     else
 	# Unknown type.
 	UNKNOWN_TYPE $f
