@@ -304,99 +304,99 @@ static hbool_t
 display_native_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_NATIVE_SCHAR)==TRUE) {
- printf("native signed char");
+        printf("native signed char");
     } else if (H5Tequal(type, H5T_NATIVE_UCHAR)==TRUE) {
- printf("native unsigned char");
+        printf("native unsigned char");
     } else if (H5Tequal(type, H5T_NATIVE_INT)==TRUE) {
- printf("native int");
+        printf("native int");
     } else if (H5Tequal(type, H5T_NATIVE_UINT)==TRUE) {
- printf("native unsigned int");
+        printf("native unsigned int");
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)==TRUE) {
- printf("native short");
+        printf("native short");
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)==TRUE) {
- printf("native unsigned short");
+        printf("native unsigned short");
     } else if (H5Tequal(type, H5T_NATIVE_LONG)==TRUE) {
- printf("native long");
+        printf("native long");
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)==TRUE) {
- printf("native unsigned long");
+        printf("native unsigned long");
     } else if (H5Tequal(type, H5T_NATIVE_LLONG)==TRUE) {
- printf("native long long");
+        printf("native long long");
     } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==TRUE) {
- printf("native unsigned long long");
+        printf("native unsigned long long");
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)==TRUE) {
- printf("native float");
+        printf("native float");
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)==TRUE) {
- printf("native double");
+        printf("native double");
 #if H5_SIZEOF_LONG_DOUBLE !=0
     } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)==TRUE) {
- printf("native long double");
+        printf("native long double");
 #endif
     } else if (H5Tequal(type, H5T_NATIVE_INT8)==TRUE) {
- printf("native int8_t");
+        printf("native int8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT8)==TRUE) {
- printf("native uint8_t");
+        printf("native uint8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT16)==TRUE) {
- printf("native int16_t");
+        printf("native int16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT16)==TRUE) {
- printf("native uint16_t");
+        printf("native uint16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT32)==TRUE) {
- printf("native int32_t");
+        printf("native int32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT32)==TRUE) {
- printf("native uint32_t");
+        printf("native uint32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT64)==TRUE) {
- printf("native int64_t");
+        printf("native int64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT64)==TRUE) {
- printf("native uint64_t");
+        printf("native uint64_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)==TRUE) {
- printf("native int_least8_t");
+        printf("native int_least8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)==TRUE) {
- printf("native uint_least8_t");
+        printf("native uint_least8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)==TRUE) {
- printf("native int_least16_t");
+        printf("native int_least16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)==TRUE) {
- printf("native uint_least16_t");
+        printf("native uint_least16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)==TRUE) {
- printf("native int_least32_t");
+        printf("native int_least32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)==TRUE) {
- printf("native uint_least32_t");
+        printf("native uint_least32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)==TRUE) {
- printf("native int_least64_t");
+        printf("native int_least64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)==TRUE) {
- printf("native uint_least64_t");
+        printf("native uint_least64_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)==TRUE) {
- printf("native int_fast8_t");
+        printf("native int_fast8_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)==TRUE) {
- printf("native uint_fast8_t");
+        printf("native uint_fast8_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)==TRUE) {
- printf("native int_fast16_t");
+        printf("native int_fast16_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)==TRUE) {
- printf("native uint_fast16_t");
+        printf("native uint_fast16_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)==TRUE) {
- printf("native int_fast32_t");
+        printf("native int_fast32_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)==TRUE) {
- printf("native uint_fast32_t");
+        printf("native uint_fast32_t");
     } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)==TRUE) {
- printf("native int_fast64_t");
+        printf("native int_fast64_t");
     } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)==TRUE) {
- printf("native uint_fast64_t");
+        printf("native uint_fast64_t");
     } else if (H5Tequal(type, H5T_NATIVE_B8)==TRUE) {
- printf("native 8-bit field");
+        printf("native 8-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B16)==TRUE) {
- printf("native 16-bit field");
+        printf("native 16-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B32)==TRUE) {
- printf("native 32-bit field");
+        printf("native 32-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B64)==TRUE) {
- printf("native 64-bit field");
+        printf("native 64-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)==TRUE) {
- printf("native hsize_t");
+        printf("native hsize_t");
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)==TRUE) {
- printf("native hssize_t");
+        printf("native hssize_t");
     } else if (H5Tequal(type, H5T_NATIVE_HERR)==TRUE) {
- printf("native herr_t");
+        printf("native herr_t");
     } else if (H5Tequal(type, H5T_NATIVE_HBOOL)==TRUE) {
- printf("native hbool_t");
+        printf("native hbool_t");
     } else {
- return FALSE;
+        return FALSE;
     }
     return TRUE;
 }
@@ -422,15 +422,15 @@ static hbool_t
 display_ieee_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_IEEE_F32BE)==TRUE) {
- printf("IEEE 32-bit big-endian float");
+        printf("IEEE 32-bit big-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F32LE)==TRUE) {
- printf("IEEE 32-bit little-endian float");
+        printf("IEEE 32-bit little-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F64BE)==TRUE) {
- printf("IEEE 64-bit big-endian float");
+        printf("IEEE 64-bit big-endian float");
     } else if (H5Tequal(type, H5T_IEEE_F64LE)==TRUE) {
- printf("IEEE 64-bit little-endian float");
+        printf("IEEE 64-bit little-endian float");
     } else {
- return FALSE;
+        return FALSE;
     }
     return TRUE;
 }
@@ -465,61 +465,61 @@ display_precision(hid_t type, int ind)
      * and offset on the following line.  Also display the padding
      * information. */
     if (8*H5Tget_size(type)!=(prec=H5Tget_precision(type))) {
- printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
-        ind, "", (unsigned long)prec, 1==prec?"":"s",
-        (unsigned long)H5Tget_offset(type));
+        printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
+            ind, "", (unsigned long)prec, 1==prec?"":"s",
+            (unsigned long)H5Tget_offset(type));
 
- H5Tget_pad(type, &plsb, &pmsb);
- if (H5Tget_offset(type)>0) {
-     switch (plsb) {
-     case H5T_PAD_ZERO:
-  plsb_s = "zero";
-  break;
-     case H5T_PAD_ONE:
-  plsb_s = "one";
-  break;
-     case H5T_PAD_BACKGROUND:
-  plsb_s = "bkg";
-  break;
-     case H5T_PAD_ERROR:
-     case H5T_NPAD:
-  plsb_s = "unknown";
-  break;
-     }
- }
- if (H5Tget_offset(type)+prec<8*H5Tget_size(type)) {
-     switch (pmsb) {
-     case H5T_PAD_ZERO:
-  pmsb_s = "zero";
-  break;
-     case H5T_PAD_ONE:
-  pmsb_s = "one";
-  break;
-     case H5T_PAD_BACKGROUND:
-  pmsb_s = "bkg";
-  break;
-     case H5T_PAD_ERROR:
-     case H5T_NPAD:
-  pmsb_s = "unknown";
-  break;
-     }
- }
- if (plsb_s || pmsb_s) {
-     printf("\n%*s(", ind, "");
-     if (plsb_s) {
-  nbits = H5Tget_offset(type);
-  printf("%lu %s bit%s at bit 0",
-         (unsigned long)nbits, plsb_s, 1==nbits?"":"s");
-     }
-     if (plsb_s && pmsb_s) printf(", ");
-     if (pmsb_s) {
-  nbits = 8*H5Tget_size(type)-(H5Tget_offset(type)+prec);
-  printf("%lu %s bit%s at bit %lu",
-         (unsigned long)nbits, pmsb_s, 1==nbits?"":"s",
-         (unsigned long)(8*H5Tget_size(type)-nbits));
-     }
-     printf(")");
- }
+        H5Tget_pad(type, &plsb, &pmsb);
+        if (H5Tget_offset(type)>0) {
+            switch (plsb) {
+                case H5T_PAD_ZERO:
+                    plsb_s = "zero";
+                    break;
+                case H5T_PAD_ONE:
+                    plsb_s = "one";
+                    break;
+                case H5T_PAD_BACKGROUND:
+                    plsb_s = "bkg";
+                    break;
+                case H5T_PAD_ERROR:
+                case H5T_NPAD:
+                    plsb_s = "unknown";
+                    break;
+            }
+        }
+        if (H5Tget_offset(type)+prec<8*H5Tget_size(type)) {
+            switch (pmsb) {
+                case H5T_PAD_ZERO:
+                    pmsb_s = "zero";
+                    break;
+                case H5T_PAD_ONE:
+                    pmsb_s = "one";
+                    break;
+                case H5T_PAD_BACKGROUND:
+                    pmsb_s = "bkg";
+                    break;
+                case H5T_PAD_ERROR:
+                case H5T_NPAD:
+                    pmsb_s = "unknown";
+                    break;
+            }
+        }
+        if (plsb_s || pmsb_s) {
+            printf("\n%*s(", ind, "");
+            if (plsb_s) {
+                nbits = H5Tget_offset(type);
+                printf("%lu %s bit%s at bit 0",
+                        (unsigned long)nbits, plsb_s, 1==nbits?"":"s");
+            }
+            if (plsb_s && pmsb_s) printf(", ");
+            if (pmsb_s) {
+                nbits = 8*H5Tget_size(type)-(H5Tget_offset(type)+prec);
+                printf("%lu %s bit%s at bit %lu",
+                        (unsigned long)nbits, pmsb_s, 1==nbits?"":"s",
+                        (unsigned long)(8*H5Tget_size(type)-nbits));
+            }
+            printf(")");
+        }
     }
 }
 
@@ -555,37 +555,37 @@ display_int_type(hid_t type, int ind)
 
     /* Byte order */
     if (H5Tget_size(type)>1) {
- order = H5Tget_order(type);
- if (H5T_ORDER_LE==order) {
-     order_s = " little-endian";
- } else if (H5T_ORDER_BE==order) {
-     order_s = " big-endian";
- } else if (H5T_ORDER_VAX==order) {
-     order_s = " mixed-endian";
- } else {
-     order_s = " unknown-byte-order";
- }
+        order = H5Tget_order(type);
+        if (H5T_ORDER_LE==order) {
+            order_s = " little-endian";
+        } else if (H5T_ORDER_BE==order) {
+            order_s = " big-endian";
+        } else if (H5T_ORDER_VAX==order) {
+            order_s = " mixed-endian";
+        } else {
+            order_s = " unknown-byte-order";
+        }
     } else {
- order_s = "";
+        order_s = "";
     }
 
     /* Sign */
     if ((sign=H5Tget_sign(type))>=0) {
- if (H5T_SGN_NONE==sign) {
-     sign_s = " unsigned";
- } else if (H5T_SGN_2==sign) {
-     sign_s = "";
- } else {
-     sign_s = " unknown-sign";
- }
+        if (H5T_SGN_NONE==sign) {
+            sign_s = " unsigned";
+        } else if (H5T_SGN_2==sign) {
+            sign_s = "";
+        } else {
+            sign_s = " unknown-sign";
+        }
     } else {
- sign_s = " unknown-sign";
+        sign_s = " unknown-sign";
     }
 
     /* Print size, order, and sign on first line, precision and padding
      * information on the subsequent lines */
     printf("%lu-bit%s%s integer",
-    (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
+            (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
     display_precision(type, ind);
     return TRUE;
 }
@@ -625,24 +625,24 @@ display_float_type(hid_t type, int ind)
 
     /* Byte order */
     if (H5Tget_size(type)>1) {
- order = H5Tget_order(type);
- if (H5T_ORDER_LE==order) {
-     order_s = " little-endian";
- } else if (H5T_ORDER_BE==order) {
-     order_s = " big-endian";
- } else if (H5T_ORDER_VAX==order) {
-     order_s = " mixed-endian";
- } else {
-     order_s = " unknown-byte-order";
- }
+        order = H5Tget_order(type);
+        if (H5T_ORDER_LE==order) {
+            order_s = " little-endian";
+        } else if (H5T_ORDER_BE==order) {
+            order_s = " big-endian";
+        } else if (H5T_ORDER_VAX==order) {
+            order_s = " mixed-endian";
+        } else {
+            order_s = " unknown-byte-order";
+        }
     } else {
- order_s = "";
+        order_s = "";
     }
 
     /* Print size and byte order on first line, precision and padding on
      * subsequent lines. */
     printf("%lu-bit%s floating-point",
-    (unsigned long)(8*H5Tget_size(type)), order_s);
+        (unsigned long)(8*H5Tget_size(type)), order_s);
     display_precision(type, ind);
 
     /* Print sizes, locations, and other information about each field */
@@ -650,46 +650,46 @@ display_float_type(hid_t type, int ind)
     ebias = H5Tget_ebias(type);
     norm = H5Tget_norm(type);
     switch (norm) {
-    case H5T_NORM_IMPLIED:
- norm_s = ", msb implied";
- break;
-    case H5T_NORM_MSBSET:
- norm_s = ", msb always set";
- break;
-    case H5T_NORM_NONE:
- norm_s = ", no normalization";
- break;
-    case H5T_NORM_ERROR:
- norm_s = ", unknown normalization";
- break;
+        case H5T_NORM_IMPLIED:
+            norm_s = ", msb implied";
+            break;
+        case H5T_NORM_MSBSET:
+            norm_s = ", msb always set";
+            break;
+        case H5T_NORM_NONE:
+            norm_s = ", no normalization";
+            break;
+        case H5T_NORM_ERROR:
+            norm_s = ", unknown normalization";
+            break;
     }
     printf("\n%*s(significant for %lu bit%s at bit %lu%s)", ind, "",
-    (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
-    norm_s);
+            (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
+            norm_s);
     printf("\n%*s(exponent for %lu bit%s at bit %lu, bias is 0x%lx)",
-    ind, "", (unsigned long)esize, 1==esize?"":"s",
-    (unsigned long)epos, (unsigned long)ebias);
+            ind, "", (unsigned long)esize, 1==esize?"":"s",
+            (unsigned long)epos, (unsigned long)ebias);
     printf("\n%*s(sign bit at %lu)", ind, "", (unsigned long)spos);
 
     /* Display internal padding */
     if (1+esize+msize<H5Tget_precision(type)) {
- pad = H5Tget_inpad(type);
- switch (pad) {
- case H5T_PAD_ZERO:
-     pad_s = "zero";
-     break;
- case H5T_PAD_ONE:
-     pad_s = "one";
-     break;
- case H5T_PAD_BACKGROUND:
-     pad_s = "bkg";
-     break;
- case H5T_PAD_ERROR:
- case H5T_NPAD:
-     pad_s = "unknown";
-     break;
- }
- printf("\n%*s(internal padding bits are %s)", ind, "", pad_s);
+        pad = H5Tget_inpad(type);
+        switch (pad) {
+            case H5T_PAD_ZERO:
+                pad_s = "zero";
+                break;
+            case H5T_PAD_ONE:
+                pad_s = "one";
+                break;
+            case H5T_PAD_BACKGROUND:
+                pad_s = "bkg";
+                break;
+            case H5T_PAD_ERROR:
+            case H5T_NPAD:
+                pad_s = "unknown";
+                break;
+        }
+        printf("\n%*s(internal padding bits are %s)", ind, "", pad_s);
     }
     return TRUE;
 }
@@ -880,59 +880,59 @@ display_string_type(hid_t type, int UNUSED ind)
     /* Padding */
     pad = H5Tget_strpad(type);
     switch (pad) {
-    case H5T_STR_NULLTERM:
- pad_s = "null-terminated";
- break;
-    case H5T_STR_NULLPAD:
- pad_s = "null-padded";
- break;
-    case H5T_STR_SPACEPAD:
- pad_s = "space-padded";
- break;
-    case H5T_STR_RESERVED_3:
-    case H5T_STR_RESERVED_4:
-    case H5T_STR_RESERVED_5:
-    case H5T_STR_RESERVED_6:
-    case H5T_STR_RESERVED_7:
-    case H5T_STR_RESERVED_8:
-    case H5T_STR_RESERVED_9:
-    case H5T_STR_RESERVED_10:
-    case H5T_STR_RESERVED_11:
-    case H5T_STR_RESERVED_12:
-    case H5T_STR_RESERVED_13:
-    case H5T_STR_RESERVED_14:
-    case H5T_STR_RESERVED_15:
-    case H5T_STR_ERROR:
- pad_s = "unknown-format";
- break;
+        case H5T_STR_NULLTERM:
+            pad_s = "null-terminated";
+            break;
+        case H5T_STR_NULLPAD:
+            pad_s = "null-padded";
+            break;
+        case H5T_STR_SPACEPAD:
+            pad_s = "space-padded";
+            break;
+        case H5T_STR_RESERVED_3:
+        case H5T_STR_RESERVED_4:
+        case H5T_STR_RESERVED_5:
+        case H5T_STR_RESERVED_6:
+        case H5T_STR_RESERVED_7:
+        case H5T_STR_RESERVED_8:
+        case H5T_STR_RESERVED_9:
+        case H5T_STR_RESERVED_10:
+        case H5T_STR_RESERVED_11:
+        case H5T_STR_RESERVED_12:
+        case H5T_STR_RESERVED_13:
+        case H5T_STR_RESERVED_14:
+        case H5T_STR_RESERVED_15:
+        case H5T_STR_ERROR:
+            pad_s = "unknown-format";
+            break;
     }
 
     /* Character set */
     cset = H5Tget_cset(type);
     switch (cset) {
-    case H5T_CSET_ASCII:
- cset_s = "ASCII";
- break;
-    case H5T_CSET_UTF8:
- cset_s = "UTF-8";
- break;
-    case H5T_CSET_RESERVED_2:
-    case H5T_CSET_RESERVED_3:
-    case H5T_CSET_RESERVED_4:
-    case H5T_CSET_RESERVED_5:
-    case H5T_CSET_RESERVED_6:
-    case H5T_CSET_RESERVED_7:
-    case H5T_CSET_RESERVED_8:
-    case H5T_CSET_RESERVED_9:
-    case H5T_CSET_RESERVED_10:
-    case H5T_CSET_RESERVED_11:
-    case H5T_CSET_RESERVED_12:
-    case H5T_CSET_RESERVED_13:
-    case H5T_CSET_RESERVED_14:
-    case H5T_CSET_RESERVED_15:
-    case H5T_CSET_ERROR:
- cset_s = "unknown-character-set";
- break;
+        case H5T_CSET_ASCII:
+            cset_s = "ASCII";
+            break;
+        case H5T_CSET_UTF8:
+            cset_s = "UTF-8";
+            break;
+        case H5T_CSET_RESERVED_2:
+        case H5T_CSET_RESERVED_3:
+        case H5T_CSET_RESERVED_4:
+        case H5T_CSET_RESERVED_5:
+        case H5T_CSET_RESERVED_6:
+        case H5T_CSET_RESERVED_7:
+        case H5T_CSET_RESERVED_8:
+        case H5T_CSET_RESERVED_9:
+        case H5T_CSET_RESERVED_10:
+        case H5T_CSET_RESERVED_11:
+        case H5T_CSET_RESERVED_12:
+        case H5T_CSET_RESERVED_13:
+        case H5T_CSET_RESERVED_14:
+        case H5T_CSET_RESERVED_15:
+        case H5T_CSET_ERROR:
+            cset_s = "unknown-character-set";
+            break;
     }
 
     if (H5Tis_variable_str(type)) {
@@ -969,12 +969,12 @@ display_reference_type(hid_t type, int UNUSED ind)
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
     if (H5Tequal(type, H5T_STD_REF_OBJ)) {
- printf("object reference");
+        printf("object reference");
     } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
- printf("dataset region reference");
+        printf("dataset region reference");
     } else {
- printf("%lu-byte unknown reference",
-        (unsigned long)H5Tget_size(type));
+        printf("%lu-byte unknown reference",
+                (unsigned long)H5Tget_size(type));
     }
 
     return TRUE;
@@ -1008,14 +1008,15 @@ display_opaque_type(hid_t type, int ind)
     size = H5Tget_size(type);
     printf("%lu-byte opaque type", (unsigned long)size);
     if ((tag=H5Tget_tag(type))) {
- printf("\n%*s(tag = \"", ind, "");
- display_string(stdout, tag, FALSE);
- printf("\")");
- free(tag);
+        printf("\n%*s(tag = \"", ind, "");
+        display_string(stdout, tag, FALSE);
+        printf("\")");
+        free(tag);
     }
     return TRUE;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    display_vlen_type
  *
@@ -1045,6 +1046,7 @@ display_vlen_type(hid_t type, int ind)
     return TRUE;
 }
 
+
 /*---------------------------------------------------------------------------
  * Purpose:     Print information about an array type
  *
@@ -1090,6 +1092,7 @@ display_array_type(hid_t type, int ind)
     return TRUE;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function: display_bitfield_type
  *
@@ -1136,6 +1139,7 @@ display_bitfield_type(hid_t type, int ind)
     return TRUE;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function: display_type
  *
@@ -1231,34 +1235,34 @@ dump_dataset_values(hid_t dset)
     memset(&info, 0, sizeof info);
 
     if (simple_output_g) {
- info.idx_fmt = "";
- info.line_ncols = 65535; /*something big*/
- info.line_per_line = 1;
- info.line_multi_new = 0;
- info.line_pre  = "        ";
- info.line_cont = "         ";
+        info.idx_fmt = "";
+        info.line_ncols = 65535; /*something big*/
+        info.line_per_line = 1;
+        info.line_multi_new = 0;
+        info.line_pre  = "        ";
+        info.line_cont = "         ";
 
- info.arr_pre = "";
- info.arr_suf = "";
- info.arr_sep = " ";
+        info.arr_pre = "";
+        info.arr_suf = "";
+        info.arr_sep = " ";
 
- info.cmpd_pre = "";
- info.cmpd_suf = "";
- info.cmpd_sep = " ";
+        info.cmpd_pre = "";
+        info.cmpd_suf = "";
+        info.cmpd_sep = " ";
 
- if (label_g) info.cmpd_name = "%s=";
+        if (label_g) info.cmpd_name = "%s=";
 
- info.elmt_suf1 = " ";
- info.str_locale = ESCAPE_HTML;
+        info.elmt_suf1 = " ";
+        info.str_locale = ESCAPE_HTML;
 
     } else {
- info.idx_fmt = "(%s)";
- info.line_ncols = width_g;
- info.line_multi_new = 1;
- if (label_g) info.cmpd_name = "%s=";
- info.line_pre  = "        %s ";
- info.line_cont = "        %s  ";
- info.str_repeat = 8;
+        info.idx_fmt = "(%s)";
+        info.line_ncols = width_g;
+        info.line_multi_new = 1;
+        if (label_g) info.cmpd_name = "%s=";
+        info.line_pre  = "        %s ";
+        info.line_cont = "        %s  ";
+        info.str_repeat = 8;
     }
 
     /* Floating point types should display full precision */
@@ -1281,24 +1285,23 @@ dump_dataset_values(hid_t dset)
     if (hexdump_g) {
         /* Print all data in hexadecimal format if the `-x' or `--hexdump'
          * command line switch was given. */
- info.raw = TRUE;
+        info.raw = TRUE;
     } else if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
         /* Print 1-byte integer data as an ASCI character string instead of
          * integers if the `-s' or `--string' command-line option was given. */
- info.ascii = TRUE;
- info.elmt_suf1 = "";
- info.elmt_suf2 = "";
- strcpy(string_prefix, info.line_pre);
- strcat(string_prefix, "\"");
- info.line_pre = string_prefix;
- info.line_suf = "\"";
+        info.ascii = TRUE;
+        info.elmt_suf1 = "";
+        info.elmt_suf2 = "";
+        strcpy(string_prefix, info.line_pre);
+        strcat(string_prefix, "\"");
+        info.line_pre = string_prefix;
+        info.line_suf = "\"";
     }
 
     /* Print all the values. */
     printf("    Data:\n");
-    if (h5tools_dump_dset(stdout, &info, dset, -1, NULL, -1) < 0) {
- printf("        Unable to print data.\n");
-    }
+    if (h5tools_dump_dset(stdout, &info, dset, -1, NULL, -1) < 0)
+        printf("        Unable to print data.\n");
 
     H5Tclose(f_type);
 }
@@ -1469,12 +1472,12 @@ dataset_list1(hid_t dset)
     ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     printf (" {");
     for (i=0; i<ndims; i++) {
- HDfprintf (stdout, "%s%Hu", i?", ":"", cur_size[i]);
- if (max_size[i]==H5S_UNLIMITED) {
-     HDfprintf (stdout, "/%s", "Inf");
- } else if (max_size[i]!=cur_size[i] || verbose_g>0) {
-     HDfprintf(stdout, "/%Hu", max_size[i]);
- }
+        HDfprintf (stdout, "%s%Hu", i?", ":"", cur_size[i]);
+        if (max_size[i]==H5S_UNLIMITED) {
+            HDfprintf (stdout, "/%s", "Inf");
+        } else if (max_size[i]!=cur_size[i] || verbose_g>0) {
+            HDfprintf(stdout, "/%Hu", max_size[i]);
+        }
     }
     if (space_type==H5S_SCALAR) printf("SCALAR");
     else if (space_type==H5S_NULL) printf("NULL");
@@ -1526,115 +1529,113 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     int   i;
 
     if (verbose_g>0) {
- dcpl = H5Dget_create_plist(dset);
- space = H5Dget_space(dset);
- type = H5Dget_type(dset);
+        dcpl = H5Dget_create_plist(dset);
+        space = H5Dget_space(dset);
+        type = H5Dget_type(dset);
 
- /* Print information about chunked storage */
- if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
-     ndims = H5Pget_chunk(dcpl, NELMTS(chsize), chsize/*out*/);
-     printf("    %-10s {", "Chunks:");
-     total = H5Tget_size(type);
-     for (i=0; i<ndims; i++) {
-  printf("%s%lu", i?", ":"", (unsigned long)(chsize[i]));
-  total *= chsize[i];
-     }
-     printf("} %lu bytes\n", (unsigned long)total);
- }
+        /* Print information about chunked storage */
+        if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
+            ndims = H5Pget_chunk(dcpl, NELMTS(chsize), chsize/*out*/);
+            printf("    %-10s {", "Chunks:");
+            total = H5Tget_size(type);
+            for (i=0; i<ndims; i++) {
+                printf("%s%lu", i?", ":"", (unsigned long)(chsize[i]));
+                total *= chsize[i];
+            }
+            printf("} %lu bytes\n", (unsigned long)total);
+        }
 
- /* Print total raw storage size */
- total = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
- used = H5Dget_storage_size(dset);
- printf("    %-10s ", "Storage:");
- printf("%lu logical byte%s, %lu allocated byte%s",
-        (unsigned long)total, 1==total?"":"s",
-        (unsigned long)used, 1==used?"":"s");
- if (used>0) {
+        /* Print total raw storage size */
+        total = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
+        used = H5Dget_storage_size(dset);
+        printf("    %-10s ", "Storage:");
+        printf("%lu logical byte%s, %lu allocated byte%s",
+               (unsigned long)total, 1==total?"":"s",
+               (unsigned long)used, 1==used?"":"s");
+        if (used>0) {
 #ifdef WIN32
-    utilization = (hssize_t)total * 100.0 / (hssize_t)used;
+            utilization = (hssize_t)total * 100.0 / (hssize_t)used;
 #else
-    utilization = (total*100.0)/used;
+            utilization = (total*100.0)/used;
 #endif
-     printf(", %1.2f%% utilization", utilization);
- }
- putchar('\n');
+            printf(", %1.2f%% utilization", utilization);
+        }
+        putchar('\n');
 
- /* Print information about external strorage */
- if ((nf = H5Pget_external_count(dcpl))>0) {
-     for (i=0, max_len=0; i<nf; i++) {
-  H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL);
-  n = display_string(NULL, f_name, TRUE);
-  max_len = MAX(max_len, n);
-     }
-     printf("    %-10s %d external file%s\n",
-     "Extern:", nf, 1==nf?"":"s");
-     printf("        %4s %10s %10s %10s %s\n",
-     "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
-     printf("        %4s %10s %10s %10s ",
-     "----", "----------", "----------", "----------");
-     for (i=0; i<max_len; i++) putchar('-');
-     putchar('\n');
-     for (i=0, total=0; i<nf; i++) {
-  if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset,
-        &f_size)<0) {
-      HDfprintf(stdout,
-         "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
-         i, total, "", "",
-         i+1<nf?"Following addresses are incorrect":"");
-  } else if (H5S_UNLIMITED==f_size) {
-      HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s ",
-         i, total, (hsize_t)f_offset, "INF");
-      display_string(stdout, f_name, TRUE);
-  } else {
-      HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu ",
-         i, total, (hsize_t)f_offset, f_size);
-      display_string(stdout, f_name, TRUE);
-  }
-  putchar('\n');
-  total += f_size;
-     }
-     printf("        %4s %10s %10s %10s ",
-     "----", "----------", "----------", "----------");
-     for (i=0; i<max_len; i++) putchar('-');
-     putchar('\n');
- }
+        /* Print information about external strorage */
+        if ((nf = H5Pget_external_count(dcpl))>0) {
+            for (i=0, max_len=0; i<nf; i++) {
+                H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL);
+                n = display_string(NULL, f_name, TRUE);
+                max_len = MAX(max_len, n);
+            }
+            printf("    %-10s %d external file%s\n",
+                    "Extern:", nf, 1==nf?"":"s");
+            printf("        %4s %10s %10s %10s %s\n",
+                    "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
+            printf("        %4s %10s %10s %10s ",
+                    "----", "----------", "----------", "----------");
+            for (i=0; i<max_len; i++) putchar('-');
+            putchar('\n');
+            for (i=0, total=0; i<nf; i++) {
+                if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size)<0) {
+                    HDfprintf(stdout,
+                            "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
+                            i, total, "", "",
+                            i+1<nf?"Following addresses are incorrect":"");
+                } else if (H5S_UNLIMITED==f_size) {
+                    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s ",
+                            i, total, (hsize_t)f_offset, "INF");
+                    display_string(stdout, f_name, TRUE);
+                } else {
+                    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu ",
+                            i, total, (hsize_t)f_offset, f_size);
+                    display_string(stdout, f_name, TRUE);
+                }
+                putchar('\n');
+                total += f_size;
+            }
+            printf("        %4s %10s %10s %10s ",
+                    "----", "----------", "----------", "----------");
+            for (i=0; i<max_len; i++) putchar('-');
+            putchar('\n');
+        }
 
- /* Print information about raw data filters */
- if ((nf = H5Pget_nfilters(dcpl))>0) {
-     for (i=0; i<nf; i++) {
-  cd_nelmts = NELMTS(cd_values);
+        /* Print information about raw data filters */
+        if ((nf = H5Pget_nfilters(dcpl))>0) {
+            for (i=0; i<nf; i++) {
+                cd_nelmts = NELMTS(cd_values);
 #ifdef H5_WANT_H5_V1_6_COMPAT
-  filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
-     cd_values, sizeof(f_name), f_name);
+                filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
+                        cd_values, sizeof(f_name), f_name);
 #else
-  filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
-     cd_values, sizeof(f_name), f_name, NULL);
+                filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
+                        cd_values, sizeof(f_name), f_name, NULL);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
-  f_name[sizeof(f_name)-1] = '\0';
-  sprintf(s, "Filter-%d:", i);
-  printf("    %-10s %s-%u %s {", s,
-         f_name[0]?f_name:"method",
-         (unsigned)filt_id,
-         filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-  for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
-      printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
-  }
-  printf("}\n");
-     }
- }
+                f_name[sizeof(f_name)-1] = '\0';
+                sprintf(s, "Filter-%d:", i);
+                printf("    %-10s %s-%u %s {", s,
+                        f_name[0]?f_name:"method",
+                        (unsigned)filt_id,
+                        filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
+                for (cd_num=0; cd_num<cd_nelmts; cd_num++)
+                    printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
+                printf("}\n");
+            }
+        }
 
- /* Print data type */
- printf("    %-10s ", "Type:");
- display_type(type, 15);
- printf("\n");
+        /* Print data type */
+        printf("    %-10s ", "Type:");
+        display_type(type, 15);
+        printf("\n");
 
- /* Print address information */
- if (address_g) H5Ddebug(dset);
+        /* Print address information */
+        if (address_g) H5Ddebug(dset);
 
- /* Close stuff */
- H5Tclose(type);
- H5Sclose(space);
- H5Pclose(dcpl);
+        /* Close stuff */
+        H5Tclose(type);
+        H5Sclose(space);
+        H5Pclose(dcpl);
     }
 
     if (data_g) dump_dataset_values(dset);
@@ -1693,9 +1694,9 @@ static herr_t
 datatype_list2(hid_t type, const char UNUSED *name)
 {
     if (verbose_g>0) {
- printf("    %-10s ", "Type:");
- display_type(type, 15);
- printf("\n");
+        printf("    %-10s ", "Type:");
+        display_type(type, 15);
+        printf("\n");
     }
     return 0;
 }
@@ -1733,6 +1734,8 @@ slink_open(hid_t location, const char *name)
 
     return 0;
 }
+
+
 /*-------------------------------------------------------------------------
  * Function: udlink_open
  *
@@ -1989,56 +1992,53 @@ get_width(void)
 
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
-    if ((s=getenv("COLUMNS")) && *s && isdigit((int)*s)) {
- width = (int)strtol(s, NULL, 0);
-    }
+    if ((s=getenv("COLUMNS")) && *s && isdigit((int)*s))
+        width = (int)strtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
- /* Microsoft C */
- struct videoconfig w;
- _getvideoconfig(&w);
- width = w.numtextcols;
+        /* Microsoft C */
+        struct videoconfig w;
+        _getvideoconfig(&w);
+        width = w.numtextcols;
     }
 #elif defined(H5_HAVE_STRUCT_TEXT_INFO) && defined(H5_HAVE_GETTEXTINFO)
     {
- /* Borland C or DJGPPC */
- struct text_info w;
- gettextinfo(&w);
- width = w.screenwidth;
+        /* Borland C or DJGPPC */
+        struct text_info w;
+        gettextinfo(&w);
+        width = w.screenwidth;
     }
 #elif defined(H5_HAVE_GETCONSOLESCREENBUFFERINFO)
     {
- /* Win32 C */
- CONSOLE_SCREEN_BUFFER_INFO scr;
- GetConsoleScreenBufferInfo(con_out, &scr);
- width = scr.srWindow.Right - scr.srWindow.Left + 1;
+        /* Win32 C */
+        CONSOLE_SCREEN_BUFFER_INFO scr;
+        GetConsoleScreenBufferInfo(con_out, &scr);
+        width = scr.srWindow.Right - scr.srWindow.Left + 1;
     }
 #elif defined(H5_HAVE__SCRSIZE)
     {
- /* OS/2 */
- int w[2];
- _scrsize(w);
- width = w[0];
+        /* OS/2 */
+        int w[2];
+        _scrsize(w);
+        width = w[0];
     }
 #elif defined(H5_HAVE_TIOCGWINSZ) && defined(H5_HAVE_IOCTL)
 #ifndef __PUMAGON__
 /* the ioctl() call coredump on TFLOPS.  Turn it off for now. */
     {
- /* Unix with ioctl(TIOCGWINSZ) */
- struct winsize w;
- if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0) {
-     width = w.ws_col;
- }
+        /* Unix with ioctl(TIOCGWINSZ) */
+        struct winsize w;
+        if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0)
+            width = w.ws_col;
     }
 #endif
 #elif defined(H5_HAVE_TIOCGETD) && defined(H5_HAVE_IOCTL)
     {
- /* Unix with ioctl(TIOCGETD) */
- struct uwdata w;
- if (ioctl(2, WIOCGETD, &w)>=0 && w.uw_width>0) {
-     width = w.uw_width / w.uw_hs;
- }
+        /* Unix with ioctl(TIOCGETD) */
+        struct uwdata w;
+        if (ioctl(2, WIOCGETD, &w)>=0 && w.uw_width>0)
+            width = w.uw_width / w.uw_hs;
     }
 #endif
 
@@ -2105,16 +2105,11 @@ main (int argc, const char *argv[])
     h5tools_init();
 
     /* Build display table */
-    DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
-      dataset_list1, dataset_list2);
-    DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose,
-      NULL, group_list2);
-    DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose,
-      NULL, datatype_list2);
-    DISPATCH(H5G_LINK, "-> ", slink_open, NULL,
-      NULL, NULL);
-    DISPATCH(H5G_UDLINK, "-> ", udlink_open, NULL,
-      NULL, NULL);
+    DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose, dataset_list1, dataset_list2);
+    DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose, NULL, group_list2);
+    DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose, NULL, datatype_list2);
+    DISPATCH(H5G_LINK, "-> ", slink_open, NULL, NULL, NULL);
+    DISPATCH(H5G_UDLINK, "-> ", udlink_open, NULL, NULL, NULL);
 
 #if 0
     /* Name of this program without the path */
