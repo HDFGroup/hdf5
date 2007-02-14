@@ -142,13 +142,16 @@ H5LSTEST()
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
+    #
+    # Note:  The modification time and storage utilization are masked off
+    #   so that the output is more portable
     VERIFY_H5LS  $@
     (
       echo "#############################"
       echo "Expected output for '$H5LS $@'" 
       echo "#############################"
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
-    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
+    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' |sed 's/Storage:.*/Storage:   <details removed for portability>/' >$actual
 
 
    if [ ! -f $expect ]; then
