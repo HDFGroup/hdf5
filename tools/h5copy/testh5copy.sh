@@ -24,7 +24,7 @@ H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
 H5DIFF=h5diff               # The h5diff tool name 
 H5DIFF_BIN=`pwd`/../h5diff/$H5DIFF    # The path of the h5diff tool binary
 H5LS=h5ls                   # The h5ls tool name 
-H5LS_ARGS=-vr               # Arguments to the h5ls tool
+H5LS_ARGS=-Svr              # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 
 nerrors=0
