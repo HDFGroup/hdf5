@@ -169,6 +169,8 @@ typedef struct H5O_shared_t {
  * (Data structure in memory)
  * (if the fields in this struct are changed, remember to change the default
  *      link info structure in src/H5Gprivate.h - QAK)
+ * (if the fields in this struct are changed, also look at the code that
+ *      creates intermediate groups in src/H5Gtraverse.c - QAK)
  */
 typedef struct H5O_linfo_t {
     /* (creation order info) */

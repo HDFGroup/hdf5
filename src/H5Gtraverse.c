@@ -696,6 +696,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                 const H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;    /* Default link info settings */
                 H5O_ginfo_t	par_ginfo;	/* Group info settings for parent group */
                 H5O_linfo_t	par_linfo;	/* Link info settings for parent group */
+                H5O_linfo_t	tmp_linfo;	/* Temporary link info settings */
                 const H5O_ginfo_t *ginfo;	/* Group info settings for new group */
                 const H5O_linfo_t *linfo;	/* Link info settings for new group */
 
@@ -720,8 +721,14 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     /* Use default link info settings */
                     linfo = &def_linfo;
                 } /* end if */
-                else
-                    linfo = &par_linfo;
+                else {
+                    /* Only keep the index_corder information from the parent 
+                     *  group's link info
+                     */
+                    HDmemcpy(&tmp_linfo, &def_linfo, sizeof(H5O_linfo_t));
+                    tmp_linfo.index_corder = par_linfo.index_corder;
+                    linfo = &tmp_linfo;
+                } /* end else */
 
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
