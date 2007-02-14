@@ -183,6 +183,12 @@ main (int argc, const char *argv[])
  /* initialize h5tools lib */
  h5tools_init();
 
+ /* Check for no command line parameters */
+ if(argc == 1) {
+   usage();
+   leave(EXIT_SUCCESS);
+ } /* end if */
+
  /* parse command line options */
  while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
  {

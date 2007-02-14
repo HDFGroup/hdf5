@@ -28,6 +28,8 @@ H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 nerrors=0
 verbose=yes
 
+INDIR=$srcdir/../testfiles
+OUTDIR=../testfiles
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -35,7 +37,7 @@ DIFF='diff -c'
 if test -z "$srcdir"; then
     srcdir=.
 fi
-test -d ../testfiles || mkdir ../testfiles
+test -d $OUTDIR || mkdir $OUTDIR
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -84,8 +86,8 @@ TOOLTEST()
 #
 H5LSTEST() 
 {
-    expect="$srcdir/../testfiles/`basename $1 .h5`.ls"
-    actual="../testfiles/`basename $1 .h5`.out"
+    expect="$INDIR/`basename $1 .h5`.ls"
+    actual="$OUTDIR/`basename $1 .h5`.out"
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
@@ -120,7 +122,7 @@ H5LSTEST()
 # $* are groups to create
 RUNTEST() 
 {
-    FILEOUT=../testfiles/$1
+    FILEOUT=$OUTDIR/$1
     shift
     H5MKGRP_ARGS=$1
     shift
@@ -136,7 +138,7 @@ RUNTEST()
 
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined
-    if [ x$HDF5_NOCLEANUP = "x" ]; then
+    if test -z "$HDF5_NOCLEANUP"; then
         rm -f $FILEOUT
     fi
 }
