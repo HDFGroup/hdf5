@@ -3832,19 +3832,19 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the information for first attribute, in increasing creation order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
     /* Verify the information for new attribute, in increasing creation order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, n, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
     /* Verify the name for new link, in increasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE);
+    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -3857,19 +3857,19 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
     if(use_index) {
         /* Verify the information for first attribute, in native creation order */
         HDmemset(&ainfo, 0, sizeof(ainfo));
-        ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &ainfo);
+        ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &ainfo, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Aget_info_by_idx");
         VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
         /* Verify the information for new attribute, in native creation order */
         HDmemset(&ainfo, 0, sizeof(ainfo));
-        ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &ainfo);
+        ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &ainfo, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Aget_info_by_idx");
         VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
         /* Verify the name for new link, in increasing native order */
         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-        ret = H5Aget_name_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE);
+        ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Aget_name_by_idx");
         if(HDstrcmp(attrname, tmpname))
             TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -3878,19 +3878,19 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the information for first attribute, in decreasing creation order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_DEC, n, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, n, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
     /* Verify the information for new attribute, in increasing creation order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
     /* Verify the name for new link, in increasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE);
+    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -3898,19 +3898,19 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the information for first attribute, in increasing name order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
     /* Verify the information for new attribute, in increasing name order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_INC, n, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
     /* Verify the name for new link, in increasing name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE);
+    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -3923,19 +3923,19 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the information for first attribute, in decreasing name order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_DEC, n, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
     /* Verify the information for new attribute, in increasing name order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &ainfo);
+    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_idx");
     VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
     /* Verify the name for new link, in increasing name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE);
+    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -4043,9 +4043,9 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
             /* Check for query on non-existant attribute */
-            ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo);
+            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_name_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE);
+            ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
         } /* end for */
 
@@ -4079,11 +4079,11 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
         VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
         /* Check for out of bound offset queries */
-        ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo);
+        ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-        ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo);
+        ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-        ret = H5Aget_name_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE);
+        ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
         /* Create more attributes, to push into dense form */
@@ -4129,11 +4129,11 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Check for out of bound offset queries */
-        ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo);
+        ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-        ret = H5Aget_info_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo);
+        ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-        ret = H5Aget_name_by_idx(my_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE);
+        ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
         /* Close Datasets */

@@ -379,7 +379,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_find(H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc/*out*/,
+H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc/*out*/,
     hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_fnd_t udata;                /* User data for traversal callback */
