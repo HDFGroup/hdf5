@@ -507,6 +507,9 @@ HTML_FILE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${HTM_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $HTM_COPYRIGHT $f
+	fi
 	;;
     esac
 }
