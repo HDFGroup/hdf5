@@ -272,7 +272,7 @@ main (int argc, const char *argv[])
  * open input file
  *-------------------------------------------------------------------------*/
  
-  fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, NULL, NULL, 0);
+  fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0);
 
 /*-------------------------------------------------------------------------
  * test for error in opening input file
@@ -290,10 +290,10 @@ main (int argc, const char *argv[])
  *-------------------------------------------------------------------------*/
 
     /* Attempt to open an existing HDF5 file first */
-    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, NULL, NULL, 0);
+    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0);
 
     /* If we couldn't open an existing file, try creating file */
-    /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file */
+    /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */
     if(fid_dst < 0)
         fid_dst = H5Fcreate(fname_dst, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
 

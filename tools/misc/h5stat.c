@@ -183,7 +183,7 @@ leave(int ret)
 }
 
 
-static void                                                                                                                    usage(const char *prog)
+static void usage(const char *prog)
 {
      fflush(stdout);
      fprintf(stdout, "\n");

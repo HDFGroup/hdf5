@@ -961,11 +961,13 @@
 ./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
+./tools/misc/h5mkgrp.c
 ./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/h5stat.c
 ./tools/misc/repart_test.c
+./tools/misc/testh5mkgrp.sh
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/testh5stat.sh.in
 ./tools/misc/testfiles/h5stat_filters-d.ddl
@@ -1384,6 +1386,22 @@
 
 # test files for h5copy
 ./tools/testfiles/h5copytst.h5
+./tools/testfiles/h5copytst.a.out.ls
+./tools/testfiles/h5copytst.b.out.ls
+
+# test files for h5mkgrp
+./tools/testfiles/h5mkgrp_help.ls
+./tools/testfiles/h5mkgrp_nested.ls
+./tools/testfiles/h5mkgrp_nested_latest.ls
+./tools/testfiles/h5mkgrp_nested_mult.ls
+./tools/testfiles/h5mkgrp_nested_mult_latest.ls
+./tools/testfiles/h5mkgrp_several.ls
+./tools/testfiles/h5mkgrp_several_latest.ls
+./tools/testfiles/h5mkgrp_single.ls
+./tools/testfiles/h5mkgrp_single_latest.ls
+./tools/testfiles/h5mkgrp_version.ls
+
+
 
 # high level libraries
 ./hl/COPYING

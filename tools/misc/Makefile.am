@@ -25,14 +25,14 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
 TEST_PROG=h5repart_gentest
-TEST_SCRIPT=testh5repart.sh testh5stat.sh
+TEST_SCRIPT=testh5repart.sh testh5stat.sh $(srcdir)/testh5mkgrp.sh
 
 check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)
-SCRIPT_DEPEND=h5repart$(EXEEXT) h5stat$(EXEEXT)
+SCRIPT_DEPEND=h5repart$(EXEEXT) h5stat$(EXEEXT) h5mkgrp$(EXEEXT)
 
 # These are our main targets, the tools
-bin_PROGRAMS=h5debug h5repart h5stat
+bin_PROGRAMS=h5debug h5repart h5stat h5mkgrp
 bin_SCRIPTS=h5redeploy
 
 # Tell automake to clean h5redeploy script

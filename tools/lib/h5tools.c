@@ -161,67 +161,67 @@ h5tools_close(void)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5tools_get_fapl(const char *driver, unsigned *drivernum)
+h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 {
-    hid_t               fapl = H5P_DEFAULT;
+    hid_t new_fapl;     /* Copy of file access property list passed in, or new property list */
+
+    /* Make a copy of the FAPL, for the file open call to use, eventually */
+    if(fapl == H5P_DEFAULT) {
+        if((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            goto error;
+    } /* end if */
+    else {
+        if((new_fapl = H5Pcopy(fapl)) < 0)
+            goto error;
+    } /* end else */
 
     /* Determine which driver the user wants to open the file with. Try
      * that driver. If it can't open it, then fail. */
-    if (!strcmp(driver, drivernames[SEC2_IDX])) {
+    if(!strcmp(driver, drivernames[SEC2_IDX])) {
         if(drivernum)
             *drivernum = SEC2_IDX;
-    } else if (!strcmp(driver, drivernames[FAMILY_IDX])) {
+    } else if(!strcmp(driver, drivernames[FAMILY_IDX])) {
         /* FAMILY Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            /* Set member size to be 0 to indicate the current first member size
-             * is the member size.
-             */
-            if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT)<0)
-		goto error;
 
-            if(drivernum)
-                *drivernum = FAMILY_IDX;
-        } /* end if */
-    } else if (!strcmp(driver, drivernames[SPLIT_IDX])) {
+        /* Set member size to be 0 to indicate the current first member size
+         * is the member size.
+         */
+        if(H5Pset_fapl_family(new_fapl, (hsize_t)0, H5P_DEFAULT) < 0)
+            goto error;
+
+        if(drivernum)
+            *drivernum = FAMILY_IDX;
+    } else if(!strcmp(driver, drivernames[SPLIT_IDX])) {
         /* SPLIT Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            
-            if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT)<0)
-		goto error;
+        if(H5Pset_fapl_split(new_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
+            goto error;
 
-            if(drivernum)
-                *drivernum = SPLIT_IDX;
-        } /* end if */
-    } else if (!strcmp(driver, drivernames[MULTI_IDX])) {
+        if(drivernum)
+            *drivernum = SPLIT_IDX;
+    } else if(!strcmp(driver, drivernames[MULTI_IDX])) {
         /* MULTI Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            
-            if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE)<0)
-		goto error;
+        if(H5Pset_fapl_multi(new_fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
+            goto error;
 
-            if(drivernum)
-                *drivernum = MULTI_IDX;
-        } /* end if */
+        if(drivernum)
+            *drivernum = MULTI_IDX;
 #ifdef H5_HAVE_STREAM
-    } else if (!strcmp(driver, drivernames[STREAM_IDX])) {
+    } else if(!strcmp(driver, drivernames[STREAM_IDX])) {
         /* STREAM Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            
-            if (H5Pset_fapl_stream(fapl, NULL)<0)
-		goto error;
+        if(H5Pset_fapl_stream(new_fapl, NULL) < 0)
+            goto error;
 
-            if(drivernum)
-                *drivernum = STREAM_IDX;
-        } /* end if */
+        if(drivernum)
+            *drivernum = STREAM_IDX;
 #endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
-    } else if (!strcmp(driver, drivernames[MPIO_IDX])) {
+    } else if(!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
 	/* check if MPI has been initialized. */
-	if (!h5tools_mpi_init_g)
+	if(!h5tools_mpi_init_g)
 	    MPI_Initialized(&h5tools_mpi_init_g);
-        if (h5tools_mpi_init_g && ((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0)) {
-            if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL)<0)
+        if(h5tools_mpi_init_g) {
+            if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
 		goto error;
 
             if(drivernum)
@@ -230,10 +230,10 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum)
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
 	/* check if MPI has been initialized. */
-	if (!h5tools_mpi_init_g)
+	if(!h5tools_mpi_init_g)
 	    MPI_Initialized(&h5tools_mpi_init_g);
-        if (h5tools_mpi_init_g && ((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0)) {
-            if (H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE)<0)
+        if(h5tools_mpi_init_g) {
+            if(H5Pset_fapl_mpiposix(new_fapl, MPI_COMM_WORLD, TRUE) < 0)
 		goto error;
 
             if(drivernum)
@@ -241,14 +241,14 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum)
         } /* end if */
 #endif /* H5_HAVE_PARALLEL */
     } else {
-        fapl=(-1);
+        goto error;
     }
 
-    return(fapl);
+    return(new_fapl);
 
 error:
-    if(fapl!=H5P_DEFAULT)
-     H5Pclose(fapl);
+    if(new_fapl != H5P_DEFAULT)
+        H5Pclose(new_fapl);
     return -1;
 }
 
@@ -308,49 +308,49 @@ error:
  *-------------------------------------------------------------------------
  */
 hid_t
-h5tools_fopen(const char *fname, unsigned flags, const char *driver,
+h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
     char *drivername, size_t drivername_size)
 {
     unsigned    drivernum;
     hid_t       fid = FAIL;
-    hid_t       fapl = H5P_DEFAULT;
+    hid_t       my_fapl = H5P_DEFAULT;
 
-    if (driver && *driver) {
+    if(driver && *driver) {
         /* Get the correct FAPL for the given driver */
-        if((fapl=h5tools_get_fapl(driver,&drivernum))<0)
+        if((my_fapl = h5tools_get_fapl(fapl, driver, &drivernum)) < 0)
             goto done;
 
         H5E_BEGIN_TRY {
-            fid = H5Fopen(fname, flags, fapl);
+            fid = H5Fopen(fname, flags, my_fapl);
         } H5E_END_TRY;
 
-        if (fid == FAIL)
+        if(fid == FAIL)
             goto done;
 
     } else {
         /* Try to open the file using each of the drivers */
-        for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+        for(drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
             /* Get the correct FAPL for the given driver */
-            if((fapl=h5tools_get_fapl(drivernames[drivernum],NULL))<0)
+            if((my_fapl = h5tools_get_fapl(fapl, drivernames[drivernum], NULL)) < 0)
                 goto done;
 
             H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, flags, fapl);
+                fid = H5Fopen(fname, flags, my_fapl);
             } H5E_END_TRY;
 
-            if (fid != FAIL)
+            if(fid != FAIL)
                 break;
             else {
                 /* Close the FAPL */
-                H5Pclose(fapl);
-                fapl=H5P_DEFAULT;
+                H5Pclose(my_fapl);
+                my_fapl = H5P_DEFAULT;
             } /* end else */
         }
     }
 
     /* Save the driver name */
-    if (drivername && drivername_size) {
-        if (fid != FAIL) {
+    if(drivername && drivername_size) {
+        if(fid != FAIL) {
             strncpy(drivername, drivernames[drivernum], drivername_size);
             drivername[drivername_size - 1] = '\0';
         } else {
@@ -360,8 +360,8 @@ h5tools_fopen(const char *fname, unsigned flags, const char *driver,
     }
 
 done:
-    if(fapl!=H5P_DEFAULT)
-        H5Pclose(fapl);
+    if(my_fapl != H5P_DEFAULT)
+        H5Pclose(my_fapl);
     return fid;
 }
 

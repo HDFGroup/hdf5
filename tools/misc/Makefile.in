@@ -59,7 +59,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5stat.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT)
+bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT) h5mkgrp$(EXEEXT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -91,6 +91,10 @@ h5stat_SOURCES = h5stat.c
 h5stat_OBJECTS = h5stat.$(OBJEXT)
 h5stat_LDADD = $(LDADD)
 h5stat_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+h5mkgrp_SOURCES = h5mkgrp.c
+h5mkgrp_OBJECTS = h5mkgrp.$(OBJEXT)
+h5mkgrp_LDADD = $(LDADD)
+h5mkgrp_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
@@ -108,9 +112,9 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c \
+SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c h5mkgrp.c \
 	repart_test.c
-DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c \
+DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c h5mkgrp.c \
 	repart_test.c
 ETAGS = etags
 CTAGS = ctags
@@ -362,9 +366,9 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
 TEST_PROG = h5repart_gentest
-TEST_SCRIPT = testh5repart.sh testh5stat.sh
+TEST_SCRIPT = testh5repart.sh testh5stat.sh $(srcdir)/testh5mkgrp.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = h5repart$(EXEEXT) h5stat$(EXEEXT)
+SCRIPT_DEPEND = h5repart$(EXEEXT) h5stat$(EXEEXT) h5mkgrp$(EXEEXT)
 bin_SCRIPTS = h5redeploy
 
 # Tell automake to clean h5redeploy script
@@ -483,6 +487,9 @@ h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPEND
 h5stat$(EXEEXT): $(h5stat_OBJECTS) $(h5stat_DEPENDENCIES) 
 	@rm -f h5stat$(EXEEXT)
 	$(LINK) $(h5stat_LDFLAGS) $(h5stat_OBJECTS) $(h5stat_LDADD) $(LIBS)
+h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) 
+	@rm -f h5mkgrp$(EXEEXT)
+	$(LINK) $(h5mkgrp_LDFLAGS) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
 repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) 
 	@rm -f repart_test$(EXEEXT)
 	$(LINK) $(repart_test_LDFLAGS) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
@@ -516,6 +523,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5stat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5mkgrp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
 
 .c.o:

@@ -13,16 +13,14 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for the h5copy tool
+# Tests for the h5mkgrp tool
 #
-# Pedro Vicente Nunes (pvn@hdfgroup.org), Albert Cheng (acheng@hdfgroup.org)
-# Thursday, July 20, 2006
+# Quincey Koziol (koziol@hdfgroup.org)
+# Tuesday, February 13, 2007
 #
 
-H5COPY=h5copy               # The tool name
-H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
-H5DIFF=h5diff               # The h5diff tool name 
-H5DIFF_BIN=`pwd`/../h5diff/$H5DIFF    # The path of the h5diff tool binary
+H5MKGRP=h5mkgrp             # The tool name
+H5MKGRP_BIN=`pwd`/$H5MKGRP  # The path of the tool binary
 H5LS=h5ls                   # The h5ls tool name 
 H5LS_ARGS=-vr               # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
@@ -30,7 +28,6 @@ H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 nerrors=0
 verbose=yes
 
-SRCFILE=h5copytst.h5
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -51,51 +48,26 @@ TESTING()
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
-VERIFY() 
-{
-    SPACES="                                                               "
-    echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
-}
-
-# Print a line-line message left justified in a field of 70 characters
-# beginning with the word "Verifying".
-#
 VERIFY_H5LS() 
 {
     SPACES="                                                               "
     echo "Verifying h5ls file structure $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
-# Run a test and print PASS or *FAIL*. If h5copy can complete
+# Run a test and print PASS or *FAIL*. If h5mkgrp can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
 # Assumed arguments:
-# $1 is -i
-# $2 is input file
-# $3 is -o
-# $4 is output file
-# $* everything else arguments for h5copy.
+# $* arguments for h5mkgrp.
 
 TOOLTEST() 
 {
-     runh5diff=yes
-     if [ "$1" = -i ]; then
-      inputfile=$2
-     else
-      runh5diff=no
-     fi
-     if [ "$3" = -o ]; then
-      outputfile=$4
-     else 
-      runh5diff=no
-     fi
-  
-    TESTING $H5COPY $@
+    TESTING $H5MKGRP $@
     (
     echo "#############################"
-    echo " output for '$H5COPY $@'"
+    echo " output for '$H5MKGRP $@'"
     echo "#############################"
-    $RUNSERIAL $H5COPY_BIN $@
+    $RUNSERIAL $H5MKGRP_BIN $@
     ) > output.out
     RET=$?
     if [ $RET != 0 ]; then
@@ -105,29 +77,6 @@ TOOLTEST()
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
-    fi
-    
-    if [ $runh5diff != no ]; then
-     H5DIFFTEST $inputfile $outputfile 
-    fi
-}
-
-# Call the h5diff tool
-#
-H5DIFFTEST() 
-{
-    VERIFY  $@
-    if [ "`uname -s`" = "TFLOPS O/S" ]; then
-        $RUNSERIAL $H5DIFF_BIN $@ -q
-    else
-        $RUNSERIAL $H5DIFF_BIN "$@" -q
-    fi
-    RET=$?
-    if [ $RET != 0 ] ; then
-         echo "*FAILED*"
-         nerrors="`expr $nerrors + 1`"
-    else
-         echo " PASSED"
     fi
 }
 
@@ -146,7 +95,7 @@ H5LSTEST()
       echo "Expected output for '$H5LS $@'" 
       echo "#############################"
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
-    ) 2>&1 >$actual
+    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
 
 
    if [ ! -f $expect ]; then
@@ -163,39 +112,24 @@ H5LSTEST()
    fi
 }
 
-# Copy single datasets of various forms from one group to another,
-#       adding object copied to the destination file each time
+# Single run of tool
 #
 # Assumed arguments:
-# $1 is test "variation" (a single letter, normally)
-# $2 is group within source file
-# $3 is group within destination file
-COPYOBJECTS() 
+# $1 is test file name
+# $2 is h5mkgrp options
+# $* are groups to create
+RUNTEST() 
 {
-    TESTFILE=$srcdir/../testfiles/$SRCFILE
-    FILEOUT="../testfiles/`basename $SRCFILE .h5`.$1.out.h5"
+    FILEOUT=../testfiles/$1
+    shift
+    H5MKGRP_ARGS=$1
+    shift
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
-    # Test copying various forms of datasets
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"simple     -d "$3"simple
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"chunk      -d "$3"chunk
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compact    -d "$3"compact
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"compound
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compressed -d "$3"compressed
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"named_vl   -d "$3"named_vl
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"nested_vl  -d "$3"nested_vl
-
-    # Test copying & renaming dataset
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"rename
-
-    # Test copying empty & "full" groups
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_empty  -d "$3"grp_empty
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_dsets
-
-    # Test copying & renaming group
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_rename
+    # Run test
+    TOOLTEST $H5MKGRP_ARGS $FILEOUT $@
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
@@ -211,17 +145,31 @@ COPYOBJECTS()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-# Copy objects from root group of source file to root of destination file
-# (with implicit root group paths)
-COPYOBJECTS a "" ""
+# Check that help & version is displayed properly
+RUNTEST h5mkgrp_help.h5 "-h"
+RUNTEST h5mkgrp_version.h5 "-V"
 
-# Copy objects from root group of source file to root of destination file
-# (with explicit root group paths)
-COPYOBJECTS b "/" "/"
+# Create single group at root level
+RUNTEST h5mkgrp_single.h5 " " single
+RUNTEST h5mkgrp_single.h5 "-v" single
+RUNTEST h5mkgrp_single.h5 "-p" single
+RUNTEST h5mkgrp_single_latest.h5 "-l" latest
+
+# Create several groups at root level
+RUNTEST h5mkgrp_several.h5 " " one two
+RUNTEST h5mkgrp_several.h5 "-v" one two
+RUNTEST h5mkgrp_several.h5 "-p" one two
+RUNTEST h5mkgrp_several_latest.h5 "-l" one two
+
+# Create various nested groups 
+RUNTEST h5mkgrp_nested.h5 "-p" /one/two
+RUNTEST h5mkgrp_nested_latest.h5 "-lp" /one/two
+RUNTEST h5mkgrp_nested_mult.h5 "-p" /one/two /three/four
+RUNTEST h5mkgrp_nested_mult_latest.h5 "-lp" /one/two /three/four
 
 
 if test $nerrors -eq 0 ; then
-    echo "All h5copy tests passed."
+    echo "All h5mkgrp tests passed."
 fi
 
 exit $nerrors

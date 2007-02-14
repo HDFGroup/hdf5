@@ -181,7 +181,7 @@ int copy_objects(const char* fnamein,
  * open the files
  *-------------------------------------------------------------------------
  */
- if ((fidin=h5tools_fopen(fnamein, H5F_ACC_RDONLY, NULL, NULL, 0))<0 ){
+ if ((fidin=h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0))<0 ){
   error_msg(progname, "<%s>: %s\n", fnamein, H5FOPENERROR );
   goto out;
  }
