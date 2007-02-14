@@ -148,7 +148,7 @@ H5LSTEST()
       echo "Expected output for '$H5LS $@'" 
       echo "#############################"
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
-    ) 2>&1 >$actual
+    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
 
 
    if [ ! -f $expect ]; then
