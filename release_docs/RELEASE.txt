@@ -500,6 +500,8 @@ New Features
 
     Tools:
     ------
+        - Added new tool, h5mkgrp. QAK - 2007/02/14
+        - Added new tool, h5copy. PVN - 2006/??/??
 	- Removed obsolete pdb2hdf5 tool from tools/misc  -JML 2005/10/24
 	- Added build_h5perf_alone.sh that builds h5perf by standalone mode.
 	  AKC - 2005/09/18.

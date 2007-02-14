@@ -20,6 +20,8 @@
 #
 #  --nocheck	Ignore errors in MANIFEST file.
 #          
+#  --private	Make a private release with today's date in version information.
+#          
 # The other command-line options are the names of the programs to use
 # for compressing the resulting tar archive (if none are given then
 # `tar md5' is assumed):
