@@ -5649,7 +5649,7 @@ static void gent_bigdims(void)
     hsize_t hs_start[1];
     hsize_t hs_size[1];                        /* hyperslab dimensions */
     size_t  size;
-    char    fillvalue=-1;
+    char    fillvalue=0;
     char    *buf=NULL;
     hsize_t i;
     char    c;
