@@ -5,6 +5,7 @@ use Text::Tabs;
 # NOTE: THE FORMAT OF HRETURN_ERROR AND HGOTO_ERROR MACROS HAS
 # CHANGED. THIS SCRIPT NO LONGER WORKS! --rpm
 
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -14,8 +15,8 @@ use Text::Tabs;
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 #
 # Robb Matzke, matzke@llnl.gov
 # 30 Aug 1997
