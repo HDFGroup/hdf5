@@ -764,7 +764,11 @@ while read file; do
 	*.sh | *.sh.in )
 	    SHELL_FILE ${file}
 	    ;;
-	*Makefile | *Makefile.in | *Makefile.am )
+	*.pl )
+	    # Perl script files are similar to Shell files
+	    SHELL_FILE ${file}
+	    ;;
+	*Makefile | *Makefile.in | *Makefile.am | Makefile.dist )
 	    MAKE_FILE ${file}
 	    ;;
 	*.bat | *.BAT )
