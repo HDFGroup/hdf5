@@ -1386,8 +1386,7 @@
 
 # test files for h5copy
 ./tools/testfiles/h5copytst.h5
-./tools/testfiles/h5copytst.a.out.ls
-./tools/testfiles/h5copytst.b.out.ls
+./tools/testfiles/h5copytst.out.ls
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls

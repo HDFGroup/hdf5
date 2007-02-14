@@ -14,7 +14,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include "hdf5.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include <string.h>
@@ -23,21 +22,43 @@
 const char *progname="h5copy";
 int   d_status;
 
-static void leave(int ret);
-
 /* command-line options: short and long-named parameters */
-static const char *s_opts = "hvf:Vi:o:s:d:";
+static const char *s_opts = "d:f:hi:o:ps:vV";
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "verbose", no_arg, 'v' },
+    { "destination", require_arg, 'd' },
     { "flag", require_arg, 'f' },
-    { "version", no_arg, 'V' },
+    { "help", no_arg, 'h' },
     { "input", require_arg, 'i' },
     { "output", require_arg, 'o' },
+    { "parents", no_arg, 'p' },
     { "source", require_arg, 's' },
-    { "destination", require_arg, 'd' },
+    { "verbose", no_arg, 'v' },
+    { "version", no_arg, 'V' },
     { NULL, 0, '\0' }
 };
+
+/*-------------------------------------------------------------------------
+ * Function:    leave
+ *
+ * Purpose:     Shutdown MPI & HDF5 and call exit()
+ *
+ * Return:      Does not return
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, 31. January 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+leave(int ret)
+{
+ h5tools_close();
+ 
+ exit(ret);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -64,6 +85,7 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
       -d, --destination  destination object name\n\
    OPTIONS\n\
       -h, --help         Print a usage message and exit\n\
+      -p, --parents      No error if existing, make parent groups as needed\n\
       -v, --verbose      Print information about OBJECTS and OPTIONS\n\
       -V, --version      Print version number and exit\n\
       -f, --flag         Flag type\n\n\
@@ -144,7 +166,7 @@ static int parse_flag(const char* str_flag, unsigned *flag)
  }
  else
  {
-  printf("Error in input flag\n");
+  error_msg(progname, "Error in input flag\n");
   return -1;
  }
 
@@ -175,8 +197,10 @@ main (int argc, const char *argv[])
  char         *oname_src=NULL;
  char         *oname_dst=NULL;
  unsigned     flag=0;
- int          verbose=0;
- hid_t        pid; 
+ unsigned     verbose=0;
+ unsigned     parents=0;
+ hid_t        ocpl_id;          /* Object copy property list */
+ hid_t        lcpl_id;          /* Link creation property list */
  char         str_flag[20];
  int          opt;
 
@@ -194,9 +218,39 @@ main (int argc, const char *argv[])
  {
   switch ((char)opt) 
   {
+  case 'd':
+   oname_dst = strdup(opt_arg);
+   break;
+   
+  case 'f':
+   /* validate flag */
+   if (parse_flag(opt_arg,&flag)<0)
+   {
+    usage();
+    leave(EXIT_FAILURE);
+   }
+   strcpy(str_flag,opt_arg);
+   break;
+
   case 'h':
    usage();
    leave(EXIT_SUCCESS);
+   break;
+
+  case 'i':
+   fname_src = strdup(opt_arg);
+   break;
+
+  case 'o':
+   fname_dst = strdup(opt_arg);
+   break;
+
+  case 'p':
+   parents = 1;
+   break;
+
+  case 's':
+   oname_src = strdup(opt_arg);
    break;
 
   case 'V':
@@ -208,33 +262,6 @@ main (int argc, const char *argv[])
    verbose = 1;
    break;
 
-  case 'f':
-   /* validate flag */
-   if (parse_flag(opt_arg,&flag)<0)
-   {
-    usage();
-    leave(EXIT_FAILURE);
-   }
-   strcpy(str_flag,opt_arg);
-   break;
-
-  case 'i':
-   fname_src = strdup(opt_arg);
-   break;
-
-  case 'o':
-   fname_dst = strdup(opt_arg);
-   break;
-
-  case 's':
-   oname_src = strdup(opt_arg);
-   break;
-
-  case 'd':
-   oname_dst = strdup(opt_arg);
-   break;
-   
-  case '?':
   default:
    usage();
    leave(EXIT_FAILURE);
@@ -247,28 +274,28 @@ main (int argc, const char *argv[])
 
  if (fname_src==NULL) 
  {
-  printf("Input file name missing\n");
+  error_msg(progname, "Input file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (fname_dst==NULL) 
  {
-  printf("Output file name missing\n");
+  error_msg(progname, "Output file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (oname_src==NULL) 
  {
-  printf("Input object name missing\n");
+  error_msg(progname, "Source object name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (oname_dst==NULL) 
  {
-  printf("Destination object name missing\n");
+  error_msg(progname, "Destination object name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
@@ -285,7 +312,7 @@ main (int argc, const char *argv[])
  *-------------------------------------------------------------------------*/
  if (fid_src==-1)
  {
-  printf("Could not open input file <%s>...Exiting\n",fname_src);
+  error_msg(progname, "Could not open input file <%s>...Exiting\n", fname_src);
   if (fname_src)
    free(fname_src);
   leave(EXIT_FAILURE);
@@ -308,7 +335,7 @@ main (int argc, const char *argv[])
  *-------------------------------------------------------------------------*/
  if (fid_dst==-1)
  {
-  printf("Could not open output file <%s>...Exiting\n",fname_dst);
+  error_msg(progname, "Could not open output file <%s>...Exiting\n", fname_dst);
   if (fname_src)
    free(fname_src);
   if (fname_dst)
@@ -333,34 +360,55 @@ main (int argc, const char *argv[])
 
  
 /*-------------------------------------------------------------------------
- * create a property list for copy
+ * create property lists for copy
  *-------------------------------------------------------------------------*/
  
  /* create property to pass copy options */
- if ( (pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
+ if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
   goto error;
 
  /* set options for object copy */
  if (flag)
  {
-  if ( H5Pset_copy_object(pid, flag) < 0) 
+  if ( H5Pset_copy_object(ocpl_id, flag) < 0) 
    goto error;
  }
+
+    /* Create link creation property list */
+    if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
+        error_msg(progname, "Could not create link creation property list\n");
+        goto error;
+    } /* end if */
+
+    /* Check for creating intermediate groups */
+    if(parents) {
+        /* Set the intermediate group creation property */
+        if(H5Pset_create_intermediate_group(lcpl_id, 1) < 0) {
+            error_msg(progname, "Could not set property for creating parent groups\n");
+            goto error;
+        } /* end if */
+
+        /* Display some output if requested */
+        if(verbose)
+            printf("%s: Creating parent groups\n", progname);
+    } /* end if */
 
 /*-------------------------------------------------------------------------
  * do the copy
  *-------------------------------------------------------------------------*/
 
-  if (H5Ocopy(fid_src,        /* Source file or group identifier */
-              oname_src,      /* Name of the source object to be copied */
-              fid_dst,        /* Destination file or group identifier  */
-              oname_dst,      /* Name of the destination object  */
-              pid,            /* Properties which apply to the copy   */
-              H5P_DEFAULT)<0) /* Properties which apply to the new hard link */              
+  if (H5Ocopy(fid_src,          /* Source file or group identifier */
+              oname_src,        /* Name of the source object to be copied */
+              fid_dst,          /* Destination file or group identifier  */
+              oname_dst,        /* Name of the destination object  */
+              ocpl_id,          /* Object copy property list */
+              lcpl_id)<0)       /* Link creation property list */
               goto error;
  
- /* close property */
- if (H5Pclose(pid)<0)
+ /* close propertis */
+ if(H5Pclose(ocpl_id)<0)
+  goto error;
+ if(H5Pclose(lcpl_id)<0)
   goto error;
 
  /* close files */
@@ -385,7 +433,8 @@ main (int argc, const char *argv[])
 error:
  printf("Error in copy...Exiting\n");
  H5E_BEGIN_TRY {
-  H5Pclose(pid);
+  H5Pclose(ocpl_id);
+  H5Pclose(lcpl_id);
   H5Fclose(fid_src);
   H5Fclose(fid_dst);
   } H5E_END_TRY;
@@ -401,28 +450,5 @@ error:
  h5tools_close();
  
  return 1;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    leave
- *
- * Purpose:     Shutdown MPI & HDF5 and call exit()
- *
- * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-leave(int ret)
-{
- h5tools_close();
- 
- exit(ret);
 }
 

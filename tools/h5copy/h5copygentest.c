@@ -29,6 +29,7 @@
 #define DATASET_NESTED_VL       "nested_vl"
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
+#define GROUP_NESTED            "grp_nested"
 
 
 /*-------------------------------------------------------------------------
@@ -364,6 +365,28 @@ static void gent_nested_datasets(hid_t loc_id)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: gent_nested_group
+ *
+ * Purpose: Generate a group in a location and populate it with another group
+ *		containing the "standard" datasets
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_nested_group(hid_t loc_id)
+{
+    hid_t   gid;
+
+    /* Create group in location */
+    gid = H5Gcreate(loc_id, GROUP_NESTED, (size_t)0);
+
+    /* Add datasets to group created */
+    gent_nested_datasets(gid);
+
+    /* Release resources */
+    H5Gclose(gid);
+}
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -378,6 +401,7 @@ int main(void)
     gent_datasets(fid);
     gent_empty_group(fid);
     gent_nested_datasets(fid);
+    gent_nested_group(fid);
     H5Fclose(fid);
 
     return 0;

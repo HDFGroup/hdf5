@@ -169,35 +169,50 @@ H5LSTEST()
 #       adding object copied to the destination file each time
 #
 # Assumed arguments:
-# $1 is test "variation" (a single letter, normally)
-# $2 is group within source file
-# $3 is group within destination file
+# <none>
 COPYOBJECTS() 
 {
     TESTFILE="$INDIR/$SRCFILE"
-    FILEOUT="$OUTDIR/`basename $SRCFILE .h5`.$1.out.h5"
+    FILEOUT="$OUTDIR/`basename $SRCFILE .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
-    # Test copying various forms of datasets
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"simple     -d "$3"simple
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"chunk      -d "$3"chunk
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compact    -d "$3"compact
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"compound
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compressed -d "$3"compressed
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"named_vl   -d "$3"named_vl
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"nested_vl  -d "$3"nested_vl
+    echo "Test copying various forms of datasets"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple     -d simple
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk      -d chunk
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compact    -d compact
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compound   -d compound
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compressed -d compressed
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s named_vl   -d named_vl
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s nested_vl  -d nested_vl
 
-    # Test copying & renaming dataset
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"compound   -d "$3"rename
+    echo "Test copying dataset within group in source file to root of destination"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets/simple  -d simple_top
 
-    # Test copying empty & "full" groups
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_empty  -d "$3"grp_empty
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_dsets
+    echo "Test copying & renaming dataset"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s compound   -d rename
 
-    # Test copying & renaming group
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s "$2"grp_dsets  -d "$3"grp_rename
+    echo "Test copying empty, 'full' & 'nested' groups"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_empty  -d grp_empty
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_nested -d grp_nested
+
+    echo "Test copying dataset within group in source file to group in destination"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
+
+    echo "Test copying & renaming group"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
+
+    echo "Test copying 'full' group hierarchy into group in destination file"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
+
+    echo "Test copying objects into group hier. that doesn't exist yet in destination file"
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B1/simple
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B2/simple2
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets/simple    -d /C/D/simple
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
@@ -213,13 +228,7 @@ COPYOBJECTS()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-echo "Copy objects from root group of source file to root of destination file"
-echo "(with implicit root group paths)"
-COPYOBJECTS a "" ""
-
-echo "Copy objects from root group of source file to root of destination file"
-echo "(with explicit root group paths)"
-COPYOBJECTS b "/" "/"
+COPYOBJECTS 
 
 
 if test $nerrors -eq 0 ; then
