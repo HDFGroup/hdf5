@@ -1,5 +1,6 @@
 #! /bin/sh
 #
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -9,8 +10,8 @@
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 #
 
 # Check Copyright notice.
@@ -29,19 +30,25 @@ DIFF="diff"
 INITFILE=.h5chkright.ini
 EXCEPTIONS=/tmp/h5chkright.except.$$
 tmpfile=/tmp/h5chkright_tmp.$$
-EXCEPTIONDIRS="-name CVS"	# at least skip CVS directories.
+EXCEPTIONDIRS="-name CVS -o -name .svn"	# at least skip CVS directories.
 EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
+FIXIT=			# default no
 DIRS=.			# default current directory
 NFAILEDFILES=0		# Number of failed files found.
-NPASSEDFILES=0		# Number of failed files found.
+NPASSEDFILES=0		# Number of passed files found.
+NFIXEDFILES=0		# Number of files fixed.
+NFIXFAILEDFILES=0	# Number of files fix failed.
 NUMBEGINLINES=60	# Copyright notice should be located within the
 			# this number of lines at the beginning of the file.
-COPYRIGHTSTR="Copyright by the Board of Trustees of the University of Illinois"
+UICOPYRIGHTSTR="Copyright by the Board of Trustees of the University of Illinois"
+THGCOPYRIGHTSTR="Copyright by The HDF Group."
 
 PASSEDLOG=/tmp/h5chkright_passed.$$
 SKIPPEDLOG=/tmp/h5chkright_skipped.$$
 FAILEDLOG=/tmp/h5chkright_failed.$$
+FIXEDLOG=/tmp/h5chkright_fixed.$$
+FIXFAILEDLOG=/tmp/h5chkright_fixfailed.$$
 
 C_COPYRIGHT=/tmp/h5chkright_C.$$	# C style copyright
 FTN_COPYRIGHT=/tmp/h5chkright_FTN.$$	# Fortran style copyright
@@ -49,6 +56,9 @@ HTM_COPYRIGHT=/tmp/h5chkright_HTM.$$	# HTML style copyright
 SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
+VMSCMD_COPYRIGHT=/tmp/h5chkright_VMSCMD.$$	# VMS command file Copyright notice
+
+tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
 
 # Help page
@@ -67,7 +77,21 @@ Usage: $PROGNAME [-h | -help] [-fname name-patter] [-v | -v9] [dir1 dir2 ...]
 	verbose mode
     -v9
 	highly verbose
+    -fix
+	fix failed files if possible
 EOF
+}
+
+
+# Print Debug output
+# 
+PRINTDEBUG()
+{
+    if [ -n "$VERBOSE" ]; then
+	echo $*
+    else
+	:	# noop
+    fi
 }
 
 
@@ -77,6 +101,7 @@ BUILDCOPYRIGHT()
 {
     # C and C++ source Copyright notice
     cat > ${C_COPYRIGHT} << \EOF
+ * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -86,12 +111,13 @@ BUILDCOPYRIGHT()
  * of the source code distribution tree; Copyright.html can be found at the  *
  * root level of an installed copy of the electronic HDF5 document set and   *
  * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # Fortran9X source Copyright notice
     cat > ${FTN_COPYRIGHT} << \EOF
+!   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
@@ -101,12 +127,13 @@ EOF
 !   of the source code distribution tree; Copyright.html can be found at the  *
 !   root level of an installed copy of the electronic HDF5 document set and   *
 !   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+!   access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # HTML file Copyright notice
     cat > ${HTM_COPYRIGHT} << \EOF
+  * Copyright by The HDF Group.                                               *
   * Copyright by the Board of Trustees of the University of Illinois.         *
   * All rights reserved.                                                      *
   *                                                                           *
@@ -116,12 +143,13 @@ EOF
   * of the source code distribution tree; Copyright.html can be found at the  *
   * root level of an installed copy of the electronic HDF5 document set and   *
   * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
 EOF
 
     # Shell style Copyright notice
     cat > ${SH_COPYRIGHT} << \EOF
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -131,12 +159,13 @@ EOF
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
     # Shell style Copyright notice (2nd type)
     cat > ${SH_COPYRIGHT2} << \EOF
+## Copyright by The HDF Group.
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
 ##
@@ -146,12 +175,13 @@ EOF
 ## of the source code distribution tree; Copyright.html can be found at the
 ## root level of an installed copy of the electronic HDF5 document set and
 ## is linked from the top-level documents page.  It can also be found at
-## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
     # Windows Batch file Copyright notice
     cat > ${WINBAT_COPYRIGHT} << \EOF
+@REM Copyright by The HDF Group.
 @REM Copyright by the Board of Trustees of the University of Illinois.
 @REM All rights reserved.
 @REM
@@ -161,8 +191,24 @@ EOF
 @REM of the source code distribution tree; Copyright.html can be found at the
 @REM root level of an installed copy of the electronic HDF5 document set and
 @REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+@REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+@REM access to either file, you may request a copy from help@hdfgroup.org.
+EOF
+
+    # VMS command file Copyright notice
+    cat > ${VMSCMD_COPYRIGHT} << \EOF
+$!# Copyright by The HDF Group.
+$!# Copyright by the Board of Trustees of the University of Illinois.
+$!# All rights reserved.
+$!#
+$!# This file is part of HDF5.  The full HDF5 copyright notice, including
+$!# terms governing use, modification, and redistribution, is contained in
+$!# the files COPYING and Copyright.html.  COPYING can be found at the root
+$!# of the source code distribution tree; Copyright.html can be found at the
+$!# root level of an installed copy of the electronic HDF5 document set and
+$!# is linked from the top-level documents page.  It can also be found at
+$!# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+$!# access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
 }
@@ -188,7 +234,7 @@ EOF
 INITIALIZATION()
 {
     # clean up log files
-    rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+    rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG $FIXEDLOG $FIXFAILEDLOG
 
     # Generate various styles of copyright notice.
     BUILDCOPYRIGHT
@@ -244,6 +290,9 @@ PARSE_OPTION()
 	    shift
 	    FNAME="$1"
 	    ;;
+	-fix )
+	    FIXIT=yes
+	    ;;
 	-v* )
 	    VERBOSE=yes
 	    if test X$1 = X-v9; then
@@ -277,12 +326,36 @@ RINSE()
     dos2unix < $tmpfile | expand | sed -e 's/ *$//' > $rf
 }
 
+# Locate a line in the file and print the line number.
+# Print 0 if not found; -1 if error.
+# $1 The line.
+# $2 The file.
+#
+FindLineInFile()
+{
+    if [ $# -ne 2 ]; then
+	# expect two arguments
+	echo -1
+	return
+    fi
+    xline=$1
+    xf=$2
+    xpos=`grep -n "${xline}" $xf`
+    if [ "$?" -ne 0 ] ; then
+	# Not found, return 0
+	xpos=0
+    else
+	xpos=`echo $xpos | cut -f1 -d:`
+    fi
+    echo $xpos
+}
+
 
 # Match Copyright notice.
 # $1 file which contains the expected copyright notice.
 # $2 file in which to look for the copyright notice.
 # Copyright notice must be found within the beginning $NUMBEGINLINES of lines.
-# Hunt for the particular string $COPYRIGHTSTR which signifies the beginning
+# Hunt for the particular string $UICOPYRIGHTSTR which signifies the beginning
 # of the copyright notice.
 #
 MATCH_COPYRIGHT()
@@ -294,17 +367,86 @@ MATCH_COPYRIGHT()
     fi
     COPYRIGHTFILE=$1
     f=$2
-    # Must use stdin for wc to prevent filename from popping up.
-    nlines=`wc -l < ${COPYRIGHTFILE}| tr -d ' '`
-    head -$NUMBEGINLINES < $f | sed -n -e "/${COPYRIGHTSTR}/"',$p' | \
-	head -${nlines} > ${EXTRACTEDFILE}
-    RINSE ${EXTRACTEDFILE}
-    $DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    nlines=`wc -l ${COPYRIGHTFILE}  | cut -f1 -d' '`
+    # Find a line that contains the copyright string and its line number in
+    # the file.
+    begin=`FindLineInFile "${UICOPYRIGHTSTR}" $f`
+    if [ "$begin" -le 0 ] ; then
+	# Not found, generate an empty dummy file
+	cp /dev/null ${EXTRACTEDFILE}
+	false
+    else
+	if [ $begin -gt 1 ]; then
+	    begin=`expr $begin - 1`
+	fi
+	end=`expr $begin + $nlines - 1`
+	sed -n -e "${begin},${end}p" < $f > ${EXTRACTEDFILE}
+	RINSE ${EXTRACTEDFILE}
+	$DIFF ${EXTRACTEDFILE} ${COPYRIGHTFILE} >/dev/null 2>&1
+    fi
     if test $? -eq 0; then
 	echo PASSED
     else
 	echo FAILED
     fi
+}
+
+# Fix Copyright notice.
+# $1 file which contains the expected copyright notice.
+# $2 file in which to look for the copyright notice.
+# Copyright notice must be found within the beginning $NUMBEGINLINES of lines.
+# Hunt for the particular string $UICOPYRIGHTSTR which signifies the beginning
+# of the copyright notice.
+#
+FIX_COPYRIGHT()
+{
+    if [ $# -ne 2 ]; then
+	# expect two arguments
+	echo FAILED
+	return
+    fi
+    COPYRIGHTFILE=$1
+    f=$2
+    nlines=`wc -l ${COPYRIGHTFILE}  | cut -f1 -d' '`
+    # If the file has UICOPYRIGHTSTR but not THGCOPYRIGHTSTR, then replace the lines
+    # starting at UICOPYRIGHTSTR and down.
+    # If the file has THGCOPYRIGHTSTR, then replace the lines starting at the
+    # THGCOPYRIGHTSTR and down.
+    # If neither found, abort it.
+
+    # Find a line that contains the THG copyright string and its line number in
+    # the file.
+    insertbegin=`FindLineInFile "${THGCOPYRIGHTSTR}" $f`
+    if [ $insertbegin -gt 0 ]; then
+	insertend=`expr $insertbegin + $nlines`		# no need to -1.  See below.
+    else
+	insertbegin=`FindLineInFile "${UICOPYRIGHTSTR}" $f`
+	if [ $insertbegin -gt 0 ]; then
+	    insertend=`expr $insertbegin + $nlines - 1` # no need to -2.  See below.
+	else
+	    FIXFAILED
+	    return
+	fi
+    fi
+
+    # Copy line 1 up to insertbegin from original file
+    xbegin=`expr $insertbegin - 1`
+    if [ $xbegin -gt 0 ]; then
+	sed -n -e "1,${xbegin}p" $f > $tmpfixfile
+    else
+	cp /dev/null $tmpfixfile	# make it empty.
+    fi
+
+    # now the correct copyright file
+    cat $COPYRIGHTFILE >> $tmpfixfile
+
+    # the rest of the original file
+    sed -n -e "${insertend},"'$p' $f >> $tmpfixfile
+	
+    # copy them all back to the original file
+    cp $tmpfixfile $f
+    FIXED
+    rm -f $tmpfixfile
 }
 
 # Check C and C++ source files
@@ -321,6 +463,9 @@ C_SOURCE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${C_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $C_COPYRIGHT $f
+	fi
 	;;
     esac
 }
@@ -340,6 +485,9 @@ FORTRAN_SOURCE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${FTN_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $FTN_COPYRIGHT $f
+	fi
 	;;
     esac
 }
@@ -359,28 +507,57 @@ HTML_FILE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${HTM_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $HTM_COPYRIGHT $f
+	fi
 	;;
     esac
 }
 
 
-# Check Shell script files and other files (e.g., Makefile) that use
-# the style of copyright notice of leading #'s.
-# There is a preferred style (single leading #) vs the alternate style (double
-# leading #'s).  The double leading #'s style is used in Makefile.am, for
-# example.
+# Check Shell script files which use the style of copyright notice of leading #'s.
 #
 SHELL_FILE()
 {
     f=$1
-    if [ `MATCH_COPYRIGHT $SH_COPYRIGHT $f` = FAILED -a \
-	 `MATCH_COPYRIGHT $SH_COPYRIGHT2 $f` = FAILED ]; then
-	# show the differences with the preferred style.
+    case `MATCH_COPYRIGHT $SH_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
-    else
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $SH_COPYRIGHT $f
+	fi
+	;;
+    esac
+}
+
+
+# Check files that use #'s as comments such as Makefile.
+# The Copyright body of text happen to be the same as used by Shell script
+# files.
+#
+MAKE_FILE()
+{
+    f=$1
+    case `MATCH_COPYRIGHT $SH_COPYRIGHT $f` in
+    PASSED)
 	PASSED $f
-    fi
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${SH_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $SH_COPYRIGHT $f
+	fi
+	;;
+    esac
 }
 
 
@@ -398,8 +575,70 @@ BATCH_FILE()
 	# show the difference
 	FAILED $f
 	$DIFF ${EXTRACTEDFILE} ${WINBAT_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $WINBAT_COPYRIGHT $f
+	fi
 	;;
     esac
+}
+
+
+# Check Windows Batch files
+#
+VMSCMD_FILE()
+{
+    f=$1
+    case `MATCH_COPYRIGHT $VMSCMD_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${VMSCMD_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $VMSCMD_COPYRIGHT $f
+	fi
+	;;
+    esac
+}
+
+
+# Guess the type of file.
+# Inspect the first 5 lines to guess what type of file it is.
+#
+GUESS_File_Type()
+{
+    if [ $# -ne 1 ]; then
+	echo "wrong number of arguments($#)"
+	return
+    fi
+    f=$1
+    # Now guess the file type.
+    head -5 < $f > $tmpfile
+    if head -1 < $tmpfile | grep '^#!' > /dev/null; then
+	# First line is "#!".  It is likely a shell script or similar type.
+	echo SHELL_FILE
+    elif grep '\/\*' < $tmpfile > /dev/null; then
+	# Found some lines containing '/*'.  It may be a C/C++ style file.
+	echo C_SOURCE
+    elif grep '^!' < $tmpfile > /dev/null; then
+	# Some lines start with a "!".  It may be a Fortran 9X style file.
+	echo FORTRAN_SOURCE
+    elif grep '^#' < $tmpfile > /dev/null; then
+	# Some lines start with a "#".  It may be a shell like type.
+	# Put this after C_SOURCE which may have #define and such lines.
+	echo SHELL_FILE
+    elif grep -i '^<html>' < $tmpfile > /dev/null || \
+	 grep '^<!--' < $tmpfile > /dev/null ; then
+	# Some lines start with a "<html>" or having an html comment tag.
+	# It may be an HTML file.
+	echo HTML_FILE
+    else
+	# Unknown type.
+	echo UNKNOWN_TYPE
+    fi
 }
 
 
@@ -413,30 +652,16 @@ UNKNOWN_FILE()
 {
     f=$1
     if head -$NUMBEGINLINES < $f | grep "${COPYRIGHTSTR}" > /dev/null; then
-	# Now guess the file type and try match it.
-	head -5 < $f > $tmpfile
-	if head -1 < $tmpfile | grep '^#!' > /dev/null; then
-	    # First line is "#!".  It is likely a shell script or similar type.
-	    SHELL_FILE $f
-	elif grep '\/\*' < $tmpfile > /dev/null; then
-	    # Found some lines containing '/*'.  It may be a C/C++ style file.
-	    C_SOURCE $f
-	elif grep '^!' < $tmpfile > /dev/null; then
-	    # Some lines start with a "!".  It may be a Fortran 9X style file.
-	    FORTRAN_SOURCE $f
-	elif grep '^#' < $tmpfile > /dev/null; then
-	    # Some lines start with a "#".  It may be a shell like type.
-	    # Put this after C_SOURCE which may have #define and such lines.
-	    SHELL_FILE $f
-	elif grep -i '^<html>' < $tmpfile > /dev/null || \
-	     grep '^<!--' < $tmpfile > /dev/null ; then
-	    # Some lines start with a "<html>" or having an html comment tag.
-	    # It may be an HTML file.
-	    HTML_FILE $f
-	else
-	    # Unknown type.
-	    UNKNOWN_TYPE $f
-	fi
+	xftype=`GUESS_File_Type $f`
+	PRINTDEBUG f=$f xftype=$xftype > /dev/tty
+	case $xftype in
+	    SHELL_FILE) 	    SHELL_FILE $f;;
+	    C_SOURCE) 	    C_SOURCE $f;;
+	    FORTRAN_SOURCE) 	    FORTRAN_SOURCE $f;;
+	    SHELL_FILE) 	    SHELL_FILE $f;;
+	    HTML_FILE) 	    HTML_FILE $f;;
+	    UNKNOWN_TYPE) 	    UNKNOWN_TYPE $f;;
+	esac
     else
 	# Unknown type.
 	UNKNOWN_TYPE $f
@@ -487,6 +712,28 @@ FAILED()
 }
 
 
+# Copyright fixed.
+# $1 file that has been fixed.
+#
+FIXED()
+{
+    if test X-$VERBOSE = X-yes; then
+	echo "    FIXED"
+    fi
+    echo $1 >> $FIXEDLOG
+}
+
+
+# Copyright fix failed.
+# $1 file that has failed.
+#
+FIXFAILED()
+{
+    echo "FIX FAILED:  $1"
+    echo $1 >> $FIXFAILEDLOG
+}
+
+
 #
 # Main body
 
@@ -517,12 +764,23 @@ while read file; do
 	*.htm | *.html )
 	    HTML_FILE ${file}
 	    ;;
-	*.sh | *.sh.in | *Makefile | *Makefile.in | *Makefile.am )
+	*.sh | *.sh.in )
 	    SHELL_FILE ${file}
+	    ;;
+	*.pl )
+	    # Perl script files are similar to Shell files
+	    SHELL_FILE ${file}
+	    ;;
+	*Makefile | *Makefile.in | *Makefile.am | Makefile.dist )
+	    MAKE_FILE ${file}
 	    ;;
 	*.bat | *.BAT )
 	    # Windows Batch files
 	    BATCH_FILE ${file}
+	    ;;
+	*.com )
+	    # VMS Command files
+	    VMSCMD_FILE ${file}
 	    ;;
 	*.h5 | *.hdf5 )
 	    # Ignore HDF5 data files
@@ -544,6 +802,10 @@ while read file; do
 	    # Ignore CVS control files.
 	    continue
 	    ;;
+	*.txt | *.TXT )
+	    # Ignore text files.
+	    continue
+	    ;;
 	*)
 	    UNKNOWN_FILE $file
 	    ;;
@@ -558,14 +820,20 @@ fi
 if [ -f $FAILEDLOG ]; then
     NFAILEDFILES=`wc -l < $FAILEDLOG`
 fi
+if [ -f $FIXEDLOG ]; then
+    NFIXEDFILES=`wc -l < $FIXEDLOG`
+fi
+if [ -f $FIXFAILEDLOG ]; then
+    NFIXFAILEDFILES=`wc -l < $FIXFAILEDLOG`
+fi
 
 # Cleanup
 rm -f $C_COPYRIGHT $FTN_COPYRIGHT $HTM_COPYRIGHT $SH_COPYRIGHT $SH_COPYRIGHT2
 rm -f $EXCEPTIONS $EXTRACTEDFILE
-rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG
+rm -f $PASSEDLOG $SKIPPEDLOG $FAILEDLOG $FIXEDLOG $FIXFAILEDLOG
 
 # Report Results
-# Results are not total accurate--e.g., Passed are not counted, thus not
+# Results are not total accurate--e.g., Skipped are not counted, thus not
 # reported.
 # 
 echo "*******************"
@@ -573,6 +841,8 @@ echo " REPORT"
 echo "*******************"
 echo Number of passed files = $NPASSEDFILES
 echo Number of failed files = $NFAILEDFILES
+echo Number of fixed files = $NFIXEDFILES
+echo Number of fix failed files = $NFIXFAILEDFILES
 
 if [ $NFAILEDFILES -gt 0 ]; then
     exitcode=1
