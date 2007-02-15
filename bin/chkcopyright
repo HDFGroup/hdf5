@@ -61,6 +61,16 @@ VMSCMD_COPYRIGHT=/tmp/h5chkright_VMSCMD.$$	# VMS command file Copyright notice
 tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
 
+# Caution message of the fix feature.
+FIXCAUTIONMSG()
+{
+    cat <<EOF
+**CAUTION**
+The fix is a best attempt. Check the changes before committing them.
+EOF
+}
+
+
 # Help page
 #
 USAGE()
@@ -78,8 +88,9 @@ Usage: $PROGNAME [-h | -help] [-fname name-patter] [-v | -v9] [dir1 dir2 ...]
     -v9
 	highly verbose
     -fix
-	fix failed files if possible
+	fix failed files if possible.
 EOF
+    FIXCAUTIONMSG
 }
 
 
@@ -843,6 +854,9 @@ echo Number of passed files = $NPASSEDFILES
 echo Number of failed files = $NFAILEDFILES
 echo Number of fixed files = $NFIXEDFILES
 echo Number of fix failed files = $NFIXFAILEDFILES
+if [ $NFIXEDFILES -gt 0 ]; then
+    FIXCAUTIONMSG
+fi
 
 if [ $NFAILEDFILES -gt 0 ]; then
     exitcode=1
