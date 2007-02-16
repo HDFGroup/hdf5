@@ -431,6 +431,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name error_compatdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name h5mkgrp
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1777,6 +1780,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name toolslibD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "h5mkgrp"="..\..\TOOLS\h5mkgrp\h5mkgrp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
     End Project Dependency
 }}}
 
