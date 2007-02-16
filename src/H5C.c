@@ -5296,11 +5296,21 @@ done:
  *		Modified routine to allow it to operate on protected
  *		entries.
  *
+ *		JRM -- 2/16/07
+ *		Added conditional compile to avoid unused parameter 
+ *		warning in production compile.
+ *
  *-------------------------------------------------------------------------
  */
+#ifndef NDEBUG
 herr_t
-H5C_pin_protected_entry(H5C_t *		  cache_ptr,
+H5C_pin_protected_entry(H5C_t *	          cache_ptr,
                         void *		  thing)
+#else
+herr_t
+H5C_pin_protected_entry(H5C_t UNUSED *	cache_ptr,
+                        void *		  thing)
+#endif
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C_cache_entry_t *	entry_ptr;
@@ -6537,14 +6547,26 @@ done:
  *		JRM - 8/9/06 
  *		Further updates for pin related statistics.
  *
- *		JRM 8/23/08
+ *		JRM 8/23/06
  *		Added initialization code for new flush related statistics.
+ *
+ *		JRM 2/16/07
+ *		Added conditional compile code to avoid unused parameter
+ *		warning in the production build.
  *
  *-------------------------------------------------------------------------
  */
 
 void
+#ifndef NDEBUG
 H5C_stats__reset(H5C_t * cache_ptr)
+#else /* NDEBUG */
+#if H5C_COLLECT_CACHE_STATS
+H5C_stats__reset(H5C_t * cache_ptr)
+#else /* H5C_COLLECT_CACHE_STATS */
+H5C_stats__reset(H5C_t UNUSED * cache_ptr)
+#endif /* H5C_COLLECT_CACHE_STATS */
+#endif /* NDEBUG */
 {
 #if H5C_COLLECT_CACHE_STATS
     int i;
