@@ -35,10 +35,14 @@ fi
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
-# The default Fortran 90 compiler
+# Use default Fortran 90 compiler according to what C compiler is used.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
-        gcc*|pgcc*)
+        gcc*)
+            FC=g95
+            FC_BASENAME=g95
+            ;;
+	pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
             ;;
