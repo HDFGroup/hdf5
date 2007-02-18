@@ -127,6 +127,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Configuration
     -------------
+	- Changed default fortran compiler to g95 when gcc is used. - AKC
+          2007/2/17.
 	- Configure can now use any tr command.  No more need for
 	  defining variable TR nor is it supported. -AKC 2006/05/20
 
