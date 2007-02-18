@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-snap19 currently under development
+HDF5 version 1.6.6-snap19 released on Sun Feb 18 18:23:21 CST 2007
 ================================================================================
 
 INTRODUCTION
@@ -63,7 +63,8 @@ New Features
 
 Support for New Platforms, Languages and Compilers
 ==================================================
- 
+	- Added support for MAC Intel (Darwin 8.8.2)  (gcc 4.0.1 and g95 0.91)
+				EIP - 2007/02/13
 
     Configuration
     -------------
@@ -126,6 +127,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Configuration
     -------------
+	- Changed default fortran compiler to g95 when gcc is used. - AKC
+          2007/2/17.
 	- Configure can now use any tr command.  No more need for
 	  defining variable TR nor is it supported. -AKC 2006/05/20
 
