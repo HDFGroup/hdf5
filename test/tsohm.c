@@ -572,6 +572,12 @@ size1_helper(hid_t file, const char* filename, int test_file_closing)
     hsize_t     dim1[1];
     int         x;
 
+    /* Closing and re-opening the file takes a long time on systems without
+     * local disks.  Don't close and reopen if express testing is enabled.
+     */
+    if(GetTestExpress() > 1)
+      test_file_closing = 0;
+
     /* Intialize rdata */
     strcpy(rdata.str, "\0");
 
@@ -1365,6 +1371,12 @@ size2_helper(hid_t fcpl_id, int test_file_closing)
     const hsize_t dims[20] = SIZE2_DIMS;
     dtype1_struct fill1;
     char fill2[DTYPE2_SIZE];
+
+    /* Closing and re-opening the file takes a long time on systems without
+     * local disks.  Don't close and reopen if express testing is enabled.
+     */
+    if(GetTestExpress() > 1)
+      test_file_closing = 0;
 
     /* Create a file and get its size */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
