@@ -502,6 +502,8 @@ New Features
 
     Tools:
     ------
+        - h5diff prints dataset dimensions along with dataset name. PVN -
+          2007/02/19
         - Added new tool, h5mkgrp. QAK - 2007/02/14
         - Added new tool, h5copy. PVN - 2006/7/15
 	- Removed obsolete pdb2hdf5 tool from tools/misc  -JML 2005/10/24
