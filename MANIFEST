@@ -1829,6 +1829,7 @@
 ./windows/tools/h5repartdll/h5repartdll.dsp
 ./windows/tools/h5import/h5import.dsp
 ./windows/tools/h5importdll/h5importdll.dsp
+./windows/tools/h5mkgrp/h5mkgrp.dsp
 ./windows/tools/taligndll/taligndll.dsp
 ./windows/tools/h5jam/h5jam.dsp
 ./windows/tools/h5copy/h5copy.dsp
