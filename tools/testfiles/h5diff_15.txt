@@ -1,7 +1,8 @@
 #############################
 Expected output for 'h5diff file1.h5 file2.h5 -r -d 5 g1/dset3 g1/dset4'
 #############################
-Dataset:     </g1/dset3> and </g1/dset4>
+dataset:
+</g1/dset3> and </g1/dset4> [3x2]
 position        dset3           dset4           difference          
 ------------------------------------------------------------
 [ 0 0 ]          100.000000      110.000000      10.000000      

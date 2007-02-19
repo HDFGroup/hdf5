@@ -205,7 +205,7 @@ diff_attr(hid_t      loc1_id,
  /* always print name */
  if (options->m_verbose)
  {
-  printf( "Attribute:   <%s> and <%s>\n",np1,np2);
+  do_print_objname ("attribute", np1, np2);
   found = diff_array(buf1,
                      buf2,
                      nelmts1,
@@ -243,7 +243,7 @@ diff_attr(hid_t      loc1_id,
    options->m_quiet=0;
    if (found)
    {
-    printf( "Attribute:   <%s> and <%s>\n",np1,np2);
+    do_print_objname ("attribute", np1, np2);
     found = diff_array(buf1,
                      buf2,
                      nelmts1,

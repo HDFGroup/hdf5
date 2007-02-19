@@ -18,7 +18,6 @@
 #include "H5private.h"
 
 
-
 /*-------------------------------------------------------------------------
  * Function: print_objname
  *
@@ -29,7 +28,20 @@
  */
 int print_objname(diff_opt_t *options, hsize_t nfound)
 {
- return ( (options->m_verbose || nfound) && !options->m_quiet) ?1:0;
+    return ( (options->m_verbose || nfound) && !options->m_quiet) ?1:0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: do_print_objname
+ *
+ * Purpose: print object name 
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+do_print_objname (const char *OBJ, const char *path1, const char *path2)
+{
+    printf("%s:\n<%s> and <%s> ", OBJ, path1, path2);
 }
 
 /*-------------------------------------------------------------------------
@@ -435,8 +447,8 @@ diff (hid_t file1_id,
   if (options->m_verbose)
   {
    if (print_objname(options,(hsize_t)1))
-    printf( "Dataset:     <%s> and <%s>\n",path1,path2);
-   nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+    do_print_objname ("dataset", path1, path2);
+   nfound=diff_dataset(file1_id,file2_id,path1,path2,options,1);
 
   }
   /* check first if we have differences */
@@ -446,20 +458,20 @@ diff (hid_t file1_id,
    {
     /* shut up temporarily */
     options->m_quiet=1;
-    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+    nfound=diff_dataset(file1_id,file2_id,path1,path2,options,0);
     /* print again */
     options->m_quiet=0;
     if (nfound)
     {
      if (print_objname(options,nfound))
-      printf( "Dataset:     <%s> and <%s>\n",path1,path2);
-     nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+      do_print_objname ("dataset", path1, path2);
+     nfound=diff_dataset(file1_id,file2_id,path1,path2,options,1);
     } /*if*/
    } /*if*/
    /* in quiet mode, just count differences */
    else
    {
-    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+    nfound=diff_dataset(file1_id,file2_id,path1,path2,options,0);
    }
   }/*else*/
 
@@ -482,7 +494,7 @@ diff (hid_t file1_id,
   nfound = (ret>0) ? 0 : 1;
 
   if (print_objname(options,nfound))
-   printf( "Datatype:    <%s> and <%s>\n",path1,path2);
+   do_print_objname ("datatype", path1, path2);
 
 /*-------------------------------------------------------------------------
  * compare attributes
@@ -515,7 +527,7 @@ diff (hid_t file1_id,
   nfound = (ret!=0) ? 1 : 0;
 
   if (print_objname(options,nfound))
-   printf( "Group:       <%s> and <%s>\n",path1,path2);
+   do_print_objname ("group", path1, path2);
 
  /*-------------------------------------------------------------------------
   * compare attributes
@@ -561,7 +573,7 @@ diff (hid_t file1_id,
      nfound = (ret != 0) ? 1 : 0;
 
      if (print_objname (options, nfound))
-         printf( "Link:        <%s> and <%s>\n",path1,path2);
+         do_print_objname ("link", path1, path2);
 
       HDfree (buf1);
       HDfree (buf2);
@@ -581,19 +593,19 @@ diff (hid_t file1_id,
 
 out:
 
-    /* close */
-    /* disable error reporting */
-    H5E_BEGIN_TRY
-    {
- H5Tclose (type1_id);
- H5Tclose (type2_id);
- H5Gclose (grp1_id);
- H5Tclose (grp2_id);
- /* enable error reporting */
-    }
-    H5E_END_TRY;
-
-    return nfound;
+ /* close */
+ /* disable error reporting */
+ H5E_BEGIN_TRY
+ {
+     H5Tclose (type1_id);
+     H5Tclose (type2_id);
+     H5Gclose (grp1_id);
+     H5Tclose (grp2_id);
+     /* enable error reporting */
+ }
+ H5E_END_TRY;
+ 
+ return nfound;
 }
 
 

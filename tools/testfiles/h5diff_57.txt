@@ -1,7 +1,8 @@
 #############################
 Expected output for 'h5diff file4.h5 file4.h5 -v dset7a dset7b'
 #############################
-Dataset:     </dset7a> and </dset7b>
+dataset:
+</dset7a> and </dset7b> [3x2]
 Warning: Different storage datatype
 </dset7a> has file datatype H5T_STD_I8LE
 </dset7b> has file datatype H5T_STD_U8LE

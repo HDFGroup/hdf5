@@ -43,10 +43,10 @@ static int check_f_input( const char* );
  *   Verbose mode: print the above plus a list of objects and warnings
  *   Quiet mode: do not print output
  *
-	* Modifications: October 2005
-	*  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
-	*  if some objects are not comparable and prints the message
-	*  "Some objects are not comparable"
+    * Modifications: October 2005
+    *  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
+    *  if some objects are not comparable and prints the message
+    *  "Some objects are not comparable"
  *-------------------------------------------------------------------------
  */
 
@@ -222,13 +222,13 @@ int main(int argc, const char *argv[])
     print_found(nfound);
   }
 
-		if (options.not_cmp==1)
+  if (options.not_cmp==1)
   {
-			printf("--------------------------------\n");
-   printf("Some objects are not comparable\n");
-			printf("--------------------------------\n");
-   if (!options.m_verbose)
-    printf("Use -v for a list of objects.\n");
+      printf("--------------------------------\n");
+      printf("Some objects are not comparable\n");
+      printf("--------------------------------\n");
+      if (!options.m_verbose)
+          printf("Use -v for a list of objects.\n");
   }
 
 

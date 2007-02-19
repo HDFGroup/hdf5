@@ -1,5 +1,5 @@
 #############################
 Expected output for 'h5diff file3.h5 file3.h5 -v link link'
 #############################
-Link:        </link> and </link>
-0 differences found
+link:
+</link> and </link> 0 differences found

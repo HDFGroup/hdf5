@@ -1,7 +1,8 @@
 #############################
 Expected output for 'h5diff file4.h5 file4.h5 -v dset4a dset4b'
 #############################
-Dataset:     </dset4a> and </dset4b>
+dataset:
+</dset4a> and </dset4b> [3x2]
 position        dset4a          dset4b          difference          
 ------------------------------------------------------------
 [ 1 0 ]          1               3               2              

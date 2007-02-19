@@ -621,7 +621,8 @@ hsize_t diff_datum(void       *_mem1,
 				    obj2_id,
 				    NULL,
 				    NULL,
-				    options);
+				    options,
+                    0);
 			    break;
 			default:
                          printf("Warning: Comparison not possible of object types referenced: <%s> and <%s>",

@@ -19,12 +19,6 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
-
-#if 0
-#define H5DIFF_DEBUG
-#endif
-
-
 /*-------------------------------------------------------------------------
  * printf formatting
  *-------------------------------------------------------------------------
@@ -101,13 +95,15 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options );
+                      diff_opt_t *options,
+                      int print_dims);
 
 hsize_t diff_datasetid( hid_t dset1_id,
                         hid_t dset2_id,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options );
+                        diff_opt_t *options,
+                        int print_dims);
 
 hsize_t diff( hid_t      file1_id,
               const char *path1,
@@ -192,7 +188,9 @@ void        print_pos( int        *ph,
                        const char *obj1,
                        const char *obj2 );
 
-int print_objname(diff_opt_t *options, hsize_t nfound);
+int         print_objname(diff_opt_t *options, hsize_t nfound);
+void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
+
 
 
 #if defined (H5DIFF_DEBUG)

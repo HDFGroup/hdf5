@@ -18,6 +18,29 @@
 #include "h5tools.h"
 
 /*-------------------------------------------------------------------------
+ * Function: print_size
+ *
+ * Purpose: print dimensions 
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+print_size (int rank, hsize_t *dims)
+{
+    int i;
+
+    printf("[" );
+    for ( i = 0; i < rank-1; i++)
+    {
+        printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        printf("x");
+    }
+    printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    printf("]\n" );
+    
+}
+
+/*-------------------------------------------------------------------------
  * Function: diff_dataset
  *
  * Purpose: check for comparable datasets and read into a compatible
@@ -35,7 +58,8 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options )
+                      diff_opt_t *options,
+                      int print_dims)
 {
  hid_t   dset1_id=-1;
  hid_t   dset2_id=-1;
@@ -83,7 +107,8 @@ hsize_t diff_dataset( hid_t file1_id,
                        dset2_id,
                        obj1_name,
                        obj2_name,
-                       options);
+                       options,
+                       print_dims);
  }
 /*-------------------------------------------------------------------------
  * close
@@ -136,7 +161,8 @@ hsize_t diff_datasetid( hid_t dset1_id,
                         hid_t dset2_id,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options )
+                        diff_opt_t *options,
+                        int print_dims)
 {
  hid_t        space1_id =-1;
  hid_t        space2_id =-1;
@@ -195,6 +221,14 @@ hsize_t diff_datasetid( hid_t dset1_id,
  /* Get the data type */
  if ( (f_type2 = H5Dget_type(dset2_id)) < 0 )
   goto error;
+
+ /*-------------------------------------------------------------------------
+  * print dimensions
+  *-------------------------------------------------------------------------
+  */
+ if (print_dims)
+     print_size (rank1, dims1);
+
 
 
 /*-------------------------------------------------------------------------

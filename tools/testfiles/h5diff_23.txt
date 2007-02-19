@@ -1,5 +1,5 @@
 #############################
 Expected output for 'h5diff file3.h5 file3.h5 -v group group'
 #############################
-Group:       </group> and </group>
-0 differences found
+group:
+</group> and </group> 0 differences found
