@@ -170,17 +170,6 @@ void print_pos( int        *ph,       /* print header */
  {
   *ph=0;
 
-  /* print size of array */
-  parallel_print("size [" );
-  for ( i = 0; i < rank-1; i++)
-  {
-      parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
-      parallel_print("x");
-  }
-  parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
-  parallel_print("]\n" );
-  
-
   if (pp)
   {
    parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
@@ -800,7 +789,8 @@ hsize_t diff_datum(void       *_mem1,
       obj2_id,
       NULL,
       NULL,
-      options);
+      options,
+      0);
      break;
     default:
      parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>",

@@ -1,8 +1,8 @@
 #############################
 Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10 -p 0.01 -v'
 #############################
-Dataset:     </g1/dset9> and </g1/dset10>
-size [3x2]
+dataset:
+</g1/dset9> and </g1/dset10> [3x2]
 position        dset9           dset10          difference      relative       
 ------------------------------------------------------------------------
 [ 0 0 ]          100             120             20              0.2           

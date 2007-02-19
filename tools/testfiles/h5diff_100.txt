@@ -6,8 +6,8 @@ file1     file2
 ---------------------------------------
     x      x    /big           
 
-Dataset:     </big> and </big>
-size [1073741824]
+dataset:
+</big> and </big> [1073741824]
 position        big             big             difference          
 ------------------------------------------------------------
 [ 268435456 ]          31              0               31             
@@ -1035,5 +1035,5 @@ position        big             big             difference
 [ 268436478 ]          31              0               31             
 [ 268436479 ]          31              0               31             
 1024 differences found
-Group:       </> and </>
-0 differences found
+group:
+</> and </> 0 differences found

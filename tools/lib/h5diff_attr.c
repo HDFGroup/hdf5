@@ -200,7 +200,7 @@ int diff_attr(hid_t loc1_id,
    /* always print name */
    if (options->m_verbose)
    {
-    parallel_print( "Attribute:   <%s> and <%s>\n",np1,np2);
+    do_print_objname ("attribute", np1, np2);
     nfound = diff_array(buf1,
      buf2,
      nelmts1,
@@ -239,7 +239,7 @@ int diff_attr(hid_t loc1_id,
      options->m_quiet=0;
      if (nfound)
      {
-      parallel_print( "Attribute:   <%s> and <%s>\n",np1,np2);
+      do_print_objname ("attribute", np1, np2);
       nfound = diff_array(buf1,
        buf2,
        nelmts1,

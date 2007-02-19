@@ -18,60 +18,28 @@
 #include "H5private.h"
 #include "h5tools.h"
 
-
 /*-------------------------------------------------------------------------
- * Function: print_sizes
+ * Function: print_size
  *
- * Purpose: Print datatype sizes
+ * Purpose: print dimensions 
  *
  *-------------------------------------------------------------------------
  */
-#if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1,
-                  const char *obj2,
-                  hid_t f_tid1,
-                  hid_t f_tid2,
-                  hid_t m_tid1,
-                  hid_t m_tid2 )
+void
+print_size (int rank, hsize_t *dims)
 {
- size_t  f_size1, f_size2;       /* size of type in file */
- size_t  m_size1, m_size2;       /* size of type in memory */
+    int i;
 
- f_size1 = H5Tget_size( f_tid1 );
- f_size2 = H5Tget_size( f_tid2 );
- m_size1 = H5Tget_size( m_tid1 );
- m_size2 = H5Tget_size( m_tid2 );
-
- printf("\n");
- printf("------------------\n");
- printf("sizeof(char)   %u\n", sizeof(char) );
- printf("sizeof(short)  %u\n", sizeof(short) );
- printf("sizeof(int)    %u\n", sizeof(int) );
- printf("sizeof(long)   %u\n", sizeof(long) );
- printf("<%s> ------------------\n", obj1);
- printf("type on file   ");
- print_type(f_tid1);
- printf("\n");
- printf("size on file   %u\n", f_size1 );
-
- printf("type on memory ");
- print_type(m_tid1);
- printf("\n");
- printf("size on memory %u\n", m_size1 );
-
- printf("<%s> ------------------\n", obj2);
- printf("type on file   ");
- print_type(f_tid2);
- printf("\n");
- printf("size on file   %u\n", f_size2 );
-
- printf("type on memory ");
- print_type(m_tid2);
- printf("\n");
- printf("size on memory %u\n", m_size2 );
- printf("\n");
+    parallel_print("[" );
+    for ( i = 0; i < rank-1; i++)
+    {
+        parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        parallel_print("x");
+    }
+    parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    parallel_print("]\n" );
+    
 }
-#endif /* H5DIFF_DEBUG */
 
 
 
@@ -93,7 +61,8 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options )
+                      diff_opt_t *options,
+                      int print_dims)
 {
  hid_t   did1=-1;
  hid_t   did2=-1;
@@ -141,7 +110,8 @@ hsize_t diff_dataset( hid_t file1_id,
                         did2,
                         obj1_name,
                         obj2_name,
-                        options);
+                        options,
+                        print_dims);
  }
 /*-------------------------------------------------------------------------
  * close
@@ -190,7 +160,8 @@ hsize_t diff_datasetid( hid_t did1,
                         hid_t did2,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options )
+                        diff_opt_t *options,
+                        int print_dims)
 {
  hid_t      sid1=-1;
  hid_t      sid2=-1;
@@ -260,6 +231,13 @@ hsize_t diff_datasetid( hid_t did1,
  if ( (f_tid2 = H5Dget_type(did2)) < 0 )
   goto error;
 
+ 
+ /*-------------------------------------------------------------------------
+  * print dimensions
+  *-------------------------------------------------------------------------
+  */
+ if (print_dims)
+     print_size (rank1, dims1);
 
 /*-------------------------------------------------------------------------
  * check for empty datasets
@@ -730,7 +708,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
 
  if ( (H5Tequal(f_tid1, f_tid2)==0) && options->m_verbose && obj1_name)
  {
-  printf("warning: different storage datatype\n");
+  printf("Warning: different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
   print_type(f_tid1);
   printf("\n");
@@ -807,7 +785,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
  if (maxdim1 && maxdim2 && maxdim_diff==1 && obj1_name )
  {
   if (options->m_verbose) {
-   printf( "warning: different maximum dimensions\n");
+   printf( "Warning: different maximum dimensions\n");
    printf("<%s> has max dimensions ", obj1_name);
    print_dims(rank1,maxdim1);
    printf("\n");
@@ -819,3 +797,60 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
 
  return 1;
 }
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_sizes
+ *
+ * Purpose: Print datatype sizes
+ *
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5DIFF_DEBUG)
+void print_sizes( const char *obj1,
+                  const char *obj2,
+                  hid_t f_tid1,
+                  hid_t f_tid2,
+                  hid_t m_tid1,
+                  hid_t m_tid2 )
+{
+ size_t  f_size1, f_size2;       /* size of type in file */
+ size_t  m_size1, m_size2;       /* size of type in memory */
+
+ f_size1 = H5Tget_size( f_tid1 );
+ f_size2 = H5Tget_size( f_tid2 );
+ m_size1 = H5Tget_size( m_tid1 );
+ m_size2 = H5Tget_size( m_tid2 );
+
+ printf("\n");
+ printf("------------------\n");
+ printf("sizeof(char)   %u\n", sizeof(char) );
+ printf("sizeof(short)  %u\n", sizeof(short) );
+ printf("sizeof(int)    %u\n", sizeof(int) );
+ printf("sizeof(long)   %u\n", sizeof(long) );
+ printf("<%s> ------------------\n", obj1);
+ printf("type on file   ");
+ print_type(f_tid1);
+ printf("\n");
+ printf("size on file   %u\n", f_size1 );
+
+ printf("type on memory ");
+ print_type(m_tid1);
+ printf("\n");
+ printf("size on memory %u\n", m_size1 );
+
+ printf("<%s> ------------------\n", obj2);
+ printf("type on file   ");
+ print_type(f_tid2);
+ printf("\n");
+ printf("size on file   %u\n", f_size2 );
+
+ printf("type on memory ");
+ print_type(m_tid2);
+ printf("\n");
+ printf("size on memory %u\n", m_size2 );
+ printf("\n");
+}
+#endif /* H5DIFF_DEBUG */

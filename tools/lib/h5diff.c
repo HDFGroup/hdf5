@@ -39,7 +39,7 @@
 /*-------------------------------------------------------------------------
  * Function: print_objname
  *
- * Purpose: print object name only when:
+ * Purpose: check if object name is to be printed, only when:
  *  1) verbose mode
  *  2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
@@ -49,6 +49,22 @@ print_objname (diff_opt_t * options, hsize_t nfound)
 {
  return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
+
+/*-------------------------------------------------------------------------
+ * Function: do_print_objname
+ *
+ * Purpose: print object name 
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+do_print_objname (const char *OBJ, const char *path1, const char *path2)
+{
+ parallel_print("%s:\n<%s> and <%s> ", OBJ, path1, path2);
+}
+
+
+
 
 #ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
@@ -893,10 +909,10 @@ hsize_t diff (hid_t file1_id,
  hid_t       type2_id=(-1);
  hid_t       grp1_id=(-1);
  hid_t       grp2_id=(-1);
- int ret;
- H5G_stat_t sb1;
- H5G_stat_t sb2;
- hsize_t nfound = 0;
+ int         ret;
+ H5G_stat_t  sb1;
+ H5G_stat_t  sb2;
+ hsize_t     nfound=0;
 
  switch (type)
  {
@@ -913,8 +929,8 @@ hsize_t diff (hid_t file1_id,
   if (options->m_verbose)
   {
    if (print_objname (options, (hsize_t)1))
-    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
-   nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+    do_print_objname ("dataset", path1, path2);
+   nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 1);
    /* always print the number of differences found */
    print_found(nfound);
   }
@@ -928,14 +944,14 @@ hsize_t diff (hid_t file1_id,
    {
     /* shut up temporarily */
     options->m_quiet = 1;
-    nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+    nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 0);
     /* print again */
     options->m_quiet = 0;
     if (nfound)
     {
      if (print_objname (options, nfound))
-      parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
-     nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+      do_print_objname ("dataset", path1, path2);
+     nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 1);
      /* print the number of differences found only when found
      this is valid for the default mode and report mode */
      print_found(nfound);
@@ -948,7 +964,7 @@ hsize_t diff (hid_t file1_id,
   */
    else
    {
-    nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+    nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 0);
    }
   }   /*else verbose */
 
@@ -971,7 +987,7 @@ hsize_t diff (hid_t file1_id,
   nfound = (ret > 0) ? 0 : 1;
 
   if (print_objname (options, nfound))
-   parallel_print("Datatype:    <%s> and <%s>\n", path1, path2);
+   do_print_objname ("datatype", path1, path2);
 
   /* always print the number of differences found in verbose mode */
   if (options->m_verbose)
@@ -1008,7 +1024,7 @@ hsize_t diff (hid_t file1_id,
   nfound = (ret != 0) ? 1 : 0;
 
   if (print_objname (options, nfound))
-   parallel_print("Group:       <%s> and <%s>\n", path1, path2);
+   do_print_objname ("group", path1, path2);
 
   /* always print the number of differences found in verbose mode */
   if (options->m_verbose)
@@ -1058,7 +1074,7 @@ hsize_t diff (hid_t file1_id,
    nfound = (ret != 0) ? 1 : 0;
 
    if (print_objname (options, nfound))
-    parallel_print("Soft Link:        <%s> and <%s>\n", path1, path2);
+    do_print_objname ("soft link", path1, path2);
 
    /* always print the number of differences found in verbose mode */
    if (options->m_verbose)
@@ -1124,7 +1140,7 @@ hsize_t diff (hid_t file1_id,
       nfound = (ret != 0) ? 1 : 0;
 
       if (print_objname (options, nfound))
-        parallel_print("External Link:        <%s> and <%s>\n", path1, path2);
+        do_print_objname ("external link", path1, path2);
    }
    else
    {
@@ -1141,7 +1157,7 @@ hsize_t diff (hid_t file1_id,
         nfound = 0;
 
       if (print_objname (options, nfound))
-        parallel_print("User-defined Link:        <%s> and <%s>\n", path1, path2);
+        do_print_objname ("user defined link", path1, path2);
    }
 
    /* always print the number of differences found in verbose mode */
