@@ -308,6 +308,9 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
+    /* Indicate that the object header was modified */
+    oh_flags |= H5AC__DIRTIED_FLAG;
+
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")

@@ -180,8 +180,6 @@ H5_DLLVAR const H5B2_class_t H5SM_INDEX[1];
 
 /* General routines */
 H5_DLL ssize_t H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id);
-H5_DLL size_t H5SM_find_in_list(H5SM_list_t *list,
-                                const H5SM_mesg_key_t *key, size_t *empty_pos);
 
 /* Encode and decode routines, used for B-tree and cache encoding/decoding */
 H5_DLL herr_t H5SM_message_encode(const H5F_t *f, uint8_t *raw,

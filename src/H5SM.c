@@ -50,6 +50,7 @@ static herr_t H5SM_create_index(H5F_t *f, H5SM_index_header_t *header,
 static herr_t H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header,
                                 hid_t dxpl_id, hbool_t delete_heap);
 static haddr_t H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id);
+static size_t H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos);
 static herr_t H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
                            H5SM_list_t **_list, H5HF_t *fheap, hid_t dxpl_id);
 static herr_t H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_id);
@@ -1116,13 +1117,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5SM_find_in_list(H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos)
+static size_t
+H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos)
 {
     size_t               x;
     size_t               ret_value;
 
-    FUNC_ENTER_NOAPI(H5SM_find_in_list, UFAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_find_in_list)
 
     HDassert(list);
     /* Both key and empty_pos can be NULL, but not both! */
