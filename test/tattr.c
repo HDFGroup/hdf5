@@ -4438,6 +4438,105 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
 
+
+                    /* Delete attributes in middle */
+
+
+                    /* Create attributes, to push into dense form */
+                    for(u = 0; u < (max_compact * 2); u++) {
+                        /* Create attribute */
+                        sprintf(attrname, "attr %02u", u);
+                        attr = H5Acreate(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+                        CHECK(attr, FAIL, "H5Acreate");
+
+                        /* Write data into the attribute */
+                        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+                        CHECK(ret, FAIL, "H5Awrite");
+
+                        /* Close attribute */
+                        ret = H5Aclose(attr);
+                        CHECK(ret, FAIL, "H5Aclose");
+
+                        /* Verify state of object */
+                        if(u >= max_compact) {
+                            is_dense = H5O_is_attr_dense_test(my_dataset);
+                            VERIFY(is_dense, (new_format ? TRUE : FALSE), "H5O_is_attr_dense_test");
+                        } /* end if */
+
+                        /* Verify information for new attribute */
+                        ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
+                        CHECK(ret, FAIL, "attr_info_by_idx_check");
+                    } /* end for */
+
+                    /* Delete every other attribute from dense storage, in appropriate order */
+                    for(u = 0; u < max_compact; u++) {
+                        /* Delete attribute */
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                        CHECK(ret, FAIL, "H5Adelete_by_idx");
+
+                        /* Verify the attribute information for first attribute in appropriate order */
+                        HDmemset(&ainfo, 0, sizeof(ainfo));
+                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, &ainfo, H5P_DEFAULT);
+                        if(new_format) {
+                            if(order == H5_ITER_INC) {
+                                VERIFY(ainfo.corder, ((u * 2) + 1), "H5Aget_info_by_idx");
+                            } /* end if */
+                            else {
+                                VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 2)), "H5Aget_info_by_idx");
+                            } /* end else */
+                        } /* end if */
+
+                        /* Verify the name for first attribute in appropriate order */
+                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        if(order == H5_ITER_INC)
+                            sprintf(attrname, "attr %02u", ((u * 2) + 1));
+                        else
+                            sprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 2)));
+                        ret = HDstrcmp(attrname, tmpname);
+                        VERIFY(ret, 0, "H5Aget_name_by_idx");
+                    } /* end for */
+
+                    /* Delete remaining attributes from dense storage, in appropriate order */
+                    for(u = 0; u < (max_compact - 1); u++) {
+                        /* Delete attribute */
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                        CHECK(ret, FAIL, "H5Adelete_by_idx");
+
+                        /* Verify the attribute information for first attribute in appropriate order */
+                        HDmemset(&ainfo, 0, sizeof(ainfo));
+                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, &ainfo, H5P_DEFAULT);
+                        if(new_format) {
+                            if(order == H5_ITER_INC) {
+                                VERIFY(ainfo.corder, ((u * 2) + 3), "H5Aget_info_by_idx");
+                            } /* end if */
+                            else {
+                                VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 4)), "H5Aget_info_by_idx");
+                            } /* end else */
+                        } /* end if */
+
+                        /* Verify the name for first attribute in appropriate order */
+                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        if(order == H5_ITER_INC)
+                            sprintf(attrname, "attr %02u", ((u * 2) + 3));
+                        else
+                            sprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 4)));
+                        ret = HDstrcmp(attrname, tmpname);
+                        VERIFY(ret, 0, "H5Aget_name_by_idx");
+                    } /* end for */
+
+                    /* Delete last attribute */
+                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    CHECK(ret, FAIL, "H5Adelete_by_idx");
+
+                    /* Verify state of attribute storage (empty) */
+                    is_empty = H5O_is_attr_empty_test(my_dataset);
+                    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+
+                    /* Check for deletion on empty attribute storage again */
+                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    VERIFY(ret, FAIL, "H5Adelete_by_idx");
                 } /* end for */
 
                 /* Close Datasets */
