@@ -41,7 +41,7 @@
 #define SPACE3_DIM1     128
 #define L1_INCM         16
 #define L2_INCM         8
-#define L3_INCM         2
+#define L3_INCM         3 
 
 void *test_vltypes_alloc_custom(size_t size, void *info);
 void test_vltypes_free_custom(void *mem, void *info);
@@ -1158,6 +1158,8 @@ test_vltypes_compound_vlen_vlen(void)
 **
 **  test_vltypes_compound_vlstr(): Test VL datatype code.
 **      Tests VL datatypes of compound datatypes with VL string.
+**      Dataset is extensible chunked, and data is rewritten with
+**      shorter VL data. 
 **
 ****************************************************************/
 static void
@@ -1182,8 +1184,8 @@ test_vltypes_compound_vlstr(void)
     char	str[64] = "a\0";
     hid_t	fid1;		        /* HDF5 File IDs		*/
     hid_t	dataset, dset2;	        /* Dataset ID			*/
-    hid_t	sid1, sid2, filespace;                   /* Dataspace ID			*/
-    hid_t	tid1, tid2, tid3, tid4, tid5;       /* Datatype IDs         */
+    hid_t	sid1, sid2, filespace, filespace2;  /* Dataspace ID	*/
+    hid_t	tid1, tid2, tid3, tid4, tid5;       /* Datatype IDs     */
     hid_t	cparms;
     hsize_t	dims1[] = {SPACE1_DIM1};
     hsize_t	chunk_dims[] = {SPACE1_DIM1/2};
@@ -1206,7 +1208,8 @@ test_vltypes_compound_vlstr(void)
 	    strcat(str, "m");
 	    t1->string = (char*)HDmalloc(strlen(str)*sizeof(char)+1);
             strcpy(t1->string, str);
-	    t1->color = red;
+	    /*t1->color = red;*/
+	    t1->color = blue;
         }
     } /* end for */
 
@@ -1225,7 +1228,7 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Create an enum type */
-    tid3 = H5Tenum_create(H5T_STD_I32BE);
+    tid3 = H5Tenum_create(H5T_STD_I32LE);
     val = 0;
     ret = H5Tenum_insert(tid3, "RED", &val);
     CHECK(ret, FAIL, "H5Tenum_insert");
@@ -1285,9 +1288,54 @@ test_vltypes_compound_vlstr(void)
     ret=H5Fflush(fid1,H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
 
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
 
+    /* Close disk dataspace */
+    ret = H5Sclose(filespace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid4);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid5);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid3);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close Property list */
+    ret = H5Pclose(cparms);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
     dset2=H5Dopen(fid1,"Dataset1");
     CHECK(dset2, FAIL, "H5Dopen");
+
+    /* Get the data type */
+    tid2 = H5Dget_type(dset2);
+    CHECK(tid2, FAIL, "H5Dget_type");
 
     /* Read dataset from disk */
     ret=H5Dread(dset2,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
@@ -1320,35 +1368,22 @@ test_vltypes_compound_vlstr(void)
     ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
-#ifdef TMP
-    for(i=0; i<SPACE1_DIM1; i++) {
-        wdata[i].v.p=(s2*)HDmalloc((i+L3_INCM)*sizeof(s2));
-        wdata[i].v.len=i+L3_INCM;
-        for(t1=(wdata[i].v).p, j=0; j<(i+L3_INCM); j++, t1++) {
-	    strcat(str, "n");
-	    t1->string = (char*)HDmalloc(strlen(str)*sizeof(char)+1);
-            strcpy(t1->string, str);
-	    t1->color = blue;
-        }
-    } /* end for */
-#else
     /* Use this part for new data */
-    strcpy(str, "b\0");
+    strcpy(str, "bbbbbbbb\0");
     for(i=0; i<SPACE1_DIM1; i++) {
-        wdata2[i].v.p=(s2*)HDmalloc(sizeof(s2));
-        wdata2[i].v.len=1;
-        for(t1=(s2*)(wdata2[i].v).p, j=0; j<1; j++, t1++) {
-	    strcat(str, "p");
+        wdata2[i].v.p=(s2*)HDmalloc((i+1)*sizeof(s2));
+        wdata2[i].v.len=i+1;
+        for(t1=(s2*)(wdata2[i].v).p, j=0; j<i+1; j++, t1++) {
+	    strcat(str, "pp");
 	    t1->string = (char*)HDmalloc(strlen(str)*sizeof(char)+1);
             strcpy(t1->string, str);
 	    t1->color = green;
         }
     } /* end for */
-#endif /*TMP*/
 
     /* Select a hyperslab  */
-    filespace = H5Dget_space (dset2);
-    ret = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, offset, NULL,
+    filespace2 = H5Dget_space (dset2);
+    ret = H5Sselect_hyperslab (filespace2, H5S_SELECT_SET, offset, NULL,
                                   dims1, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -1357,7 +1392,7 @@ test_vltypes_compound_vlstr(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dset2,tid2,sid2,filespace,H5P_DEFAULT, &wdata2);
+    ret=H5Dwrite(dset2,tid2,sid2,filespace2,H5P_DEFAULT, &wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Read dataset from disk */
@@ -1391,10 +1426,6 @@ test_vltypes_compound_vlstr(void)
     ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata2);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-    CHECK(ret, FAIL, "H5Dclose");
-
     ret = H5Dclose(dset2);
     CHECK(ret, FAIL, "H5Dclose");
 
@@ -1407,32 +1438,12 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close disk dataspace */
-    ret = H5Sclose(filespace);
+    ret = H5Sclose(filespace2);
     CHECK(ret, FAIL, "H5Sclose");
-
-    /* Close datatype */
-    ret = H5Tclose(tid4);
-    CHECK(ret, FAIL, "H5Tclose");
-
-    /* Close datatype */
-    ret = H5Tclose(tid5);
-    CHECK(ret, FAIL, "H5Tclose");
-
-    /* Close datatype */
-    ret = H5Tclose(tid3);
-    CHECK(ret, FAIL, "H5Tclose");
 
     /* Close datatype */
     ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
-
-    /* Close datatype */
-    ret = H5Tclose(tid1);
-    CHECK(ret, FAIL, "H5Tclose");
-
-    /* Close Property list */
-    ret = H5Pclose(cparms);
-    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close file */
     ret = H5Fclose(fid1);
@@ -2399,8 +2410,8 @@ test_vltypes(void)
     test_vltypes_vlen_vlen_atomic();  	   /* Test VL datatype with VL atomic components */
     rewrite_longer_vltypes_vlen_vlen_atomic();  /*overwrite with VL data of longer sequence*/
     rewrite_shorter_vltypes_vlen_vlen_atomic();  /*overwrite with VL data of shorted sequence*/
-    test_vltypes_compound_vlen_vlen(); /* Test compound datatypes with VL atomic components */
-    test_vltypes_compound_vlstr(); /* Test VL of compound datatype with VL string components */
+    test_vltypes_compound_vlen_vlen();/* Test compound datatypes with VL atomic components */
+    test_vltypes_compound_vlstr();    /* Test data rewritten of nested VL data */
 }   /* test_vltypes() */
 
 
