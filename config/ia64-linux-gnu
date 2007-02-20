@@ -51,3 +51,12 @@ esac
 
 # Check MPICH settings
 . $srcdir/config/mpich
+
+#Uncomment the next line if your system doesn't support MPI complex derived datatype.
+#hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+#Comment out the following line if your system supports collective IO when some processes
+#don't have any contributions to IOs.
+hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}
+
+
