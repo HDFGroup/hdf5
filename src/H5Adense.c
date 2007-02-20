@@ -116,6 +116,30 @@ typedef struct {
     H5A_t  *attr;                       /* Copy of attribute                 */
 } H5A_fh_ud_cp_t;
 
+/*
+ * Data exchange structure for dense attribute storage.  This structure is
+ * passed through the v2 B-tree layer when removing attributes.
+ */
+typedef struct H5A_bt2_ud_rm_t {
+    /* downward */
+    H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
+    haddr_t corder_bt2_addr;            /* v2 B-tree address of creation order index */
+} H5A_bt2_ud_rm_t;
+
+/*
+ * Data exchange structure for dense attribute storage.  This structure is
+ * passed through the v2 B-tree layer when removing attributes by index.
+ */
+typedef struct H5A_bt2_ud_rmbi_t {
+    /* downward */
+    H5F_t       *f;                     /* Pointer to file that fractal heap is in */
+    hid_t       dxpl_id;                /* DXPL for operation                */
+    H5HF_t      *fheap;                 /* Fractal heap handle               */
+    H5HF_t      *shared_fheap;          /* Fractal heap handle for shared messages */
+    H5_index_t  idx_type;               /* Index type for operation */
+    haddr_t     other_bt2_addr;         /* v2 B-tree address of "other" index */
+} H5A_bt2_ud_rmbi_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -1130,8 +1154,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_udata)
         udata->common.corder = attr->crt_idx;
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove(udata->common.f, udata->common.dxpl_id, H5A_BT2_CORDER, udata->corder_bt2_addr,
-                udata, NULL, NULL) < 0)
+        if(H5B2_remove(udata->common.f, udata->common.dxpl_id, H5A_BT2_CORDER, udata->corder_bt2_addr, udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove attribute from creation order index v2 B-tree")
     } /* end if */
 
@@ -1222,6 +1245,214 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_dense_remove_by_idx_bt2_cb
+ *
+ * Purpose:	v2 B-tree callback for dense attribute storage record removal by index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 14 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
+{
+    const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record; /* v2 B-tree record */
+    H5A_bt2_ud_rmbi_t *bt2_udata = (H5A_bt2_ud_rmbi_t *)_bt2_udata;         /* User data for callback */
+    H5A_fh_ud_cp_t fh_udata;            /* User data for fractal heap 'op' callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_remove_by_idx_bt2_cb)
+
+    /* Set up the user data for fractal heap 'op' callback */
+    fh_udata.f = bt2_udata->f;
+    fh_udata.dxpl_id = bt2_udata->dxpl_id;
+    fh_udata.record = record;
+    fh_udata.attr = NULL;
+
+    /* Call fractal heap 'op' routine, to make copy of attribute to remove */
+    if(H5HF_op(bt2_udata->fheap, bt2_udata->dxpl_id, &record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, FAIL, "attribute removal callback failed")
+    HDassert(fh_udata.attr);
+
+    /* Check for removing shared attribute */
+    if(record->flags & H5O_MSG_FLAG_SHARED) {
+        /* Decrement the reference count on the shared attribute message */
+        if(H5SM_try_delete(bt2_udata->f, bt2_udata->dxpl_id, H5O_ATTR_ID, &(fh_udata.attr->sh_loc)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to delete shared attribute")
+    } /* end if */
+    else {
+        /* Perform the deletion action on the attribute */
+        /* (takes care of shared & committed datatype/dataspace components) */
+        if(H5O_attr_delete(bt2_udata->f, bt2_udata->dxpl_id, &fh_udata.attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+        /* Remove record from fractal heap */
+        if(H5HF_remove(bt2_udata->fheap, bt2_udata->dxpl_id, &record->id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from fractal heap")
+    } /* end else */
+
+    /* Check for removing the link from the "other" index (creation order, when name used and vice versa) */
+    if(H5F_addr_defined(bt2_udata->other_bt2_addr)) {
+        H5A_bt2_ud_common_t other_bt2_udata;    /* Info for B-tree callbacks */
+        const H5B2_class_t *other_bt2_class;    /* Class of "other" v2 B-tree */
+
+        /* Determine the index being used */
+        if(bt2_udata->idx_type == H5_INDEX_NAME) {
+            /* Set the class of the "other" index */
+            other_bt2_class = H5A_BT2_CORDER;
+
+            /* Set up the user data for the v2 B-tree 'record remove' callback */
+            other_bt2_udata.corder = fh_udata.attr->crt_idx;
+        } /* end if */
+        else {
+            HDassert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
+
+            /* Set the class of the "other" index */
+            other_bt2_class = H5A_BT2_NAME;
+
+            /* Set up the user data for the v2 B-tree 'record remove' callback */
+            other_bt2_udata.f = bt2_udata->f;
+            other_bt2_udata.dxpl_id = bt2_udata->dxpl_id;
+            other_bt2_udata.fheap = bt2_udata->fheap;
+            other_bt2_udata.name = fh_udata.attr->name;
+            other_bt2_udata.name_hash = H5_checksum_lookup3(fh_udata.attr->name, HDstrlen(fh_udata.attr->name), 0);
+            other_bt2_udata.found_op = NULL;
+            other_bt2_udata.found_op_data = NULL;
+        } /* end else */
+
+        /* Set the common information for the v2 B-tree remove operation */
+
+        /* Remove the record from the "other" index v2 B-tree */
+        if(H5B2_remove(bt2_udata->f, bt2_udata->dxpl_id, other_bt2_class, bt2_udata->other_bt2_addr, &other_bt2_udata, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove record from 'other' index v2 B-tree")
+    } /* end if */
+
+done:
+    /* Release resources */
+    if(fh_udata.attr)
+        H5O_msg_free(H5O_ATTR_ID, fh_udata.attr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_dense_remove_by_idx_bt2_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_dense_remove_by_idx
+ *
+ * Purpose:	Remove an attribute from the dense storage of an object,
+ *		according to the order within an index
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 14 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_t *oh, 
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
+{
+    H5HF_t *fheap = NULL;               /* Fractal heap handle */
+    H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
+    const H5B2_class_t *bt2_class = NULL;     /* Class of v2 B-tree */
+    haddr_t bt2_addr;                   /* Address of v2 B-tree to use for operation */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_dense_remove_by_idx, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Determine the address of the index to use */
+    if(idx_type == H5_INDEX_NAME) {
+        /* Check if "native" order is OK - since names are hashed, getting them
+         *      in strictly increasing or decreasing order requires building a
+         *      table and sorting it.
+         */
+        if(order == H5_ITER_NATIVE) {
+            bt2_addr = oh->name_bt2_addr;
+            bt2_class = H5A_BT2_NAME;
+            HDassert(H5F_addr_defined(bt2_addr));
+        } /* end if */
+        else
+            bt2_addr = HADDR_UNDEF;
+    } /* end if */
+    else {
+        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+
+        /* This address may not be defined if creation order is tracked, but
+         *      there's no index on it.  If there's no v2 B-tree that indexes
+         *      the links, a table will be built.
+         */
+        bt2_addr = oh->corder_bt2_addr;
+        bt2_class = H5A_BT2_CORDER;
+    } /* end else */
+
+    /* If there is an index defined for the field, use it */
+    if(H5F_addr_defined(bt2_addr)) {
+        H5A_bt2_ud_rmbi_t udata;        /* User data for v2 B-tree record removal */
+        htri_t attr_sharable;           /* Flag indicating attributes are sharable */
+
+        /* Open the fractal heap */
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, oh->attr_fheap_addr)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+        /* Check if attributes are shared in this file */
+        if((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
+
+        /* Get handle for shared message heap, if attributes are sharable */
+        if(attr_sharable) {
+            haddr_t shared_fheap_addr;      /* Address of fractal heap to use */
+
+            /* Retrieve the address of the shared message's fractal heap */
+            if(H5SM_get_fheap_addr(f, dxpl_id, H5O_ATTR_ID, &shared_fheap_addr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get shared message heap address")
+
+            /* Check if there are any shared messages currently */
+            if(H5F_addr_defined(shared_fheap_addr)) {
+                /* Open the fractal heap for shared header messages */
+                if(NULL == (shared_fheap = H5HF_open(f, dxpl_id, shared_fheap_addr)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+            } /* end if */
+        } /* end if */
+
+        /* Set up the user data for the v2 B-tree 'record remove' callback */
+        udata.f = f;
+        udata.dxpl_id = dxpl_id;
+        udata.fheap = fheap;
+        udata.shared_fheap = shared_fheap;
+        udata.idx_type = idx_type;
+        udata.other_bt2_addr = idx_type == H5_INDEX_NAME ? oh->corder_bt2_addr : oh->name_bt2_addr;
+
+        /* Remove the record from the name index v2 B-tree */
+        if(H5B2_remove_by_idx(f, dxpl_id, bt2_class, bt2_addr, order, n, H5A_dense_remove_by_idx_bt2_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from v2 B-tree index")
+    } /* end if */
+    else {
+    } /* end else */
+
+done:
+    /* Release resources */
+    if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_dense_remove_by_idx() */
 
 
 /*-------------------------------------------------------------------------

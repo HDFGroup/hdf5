@@ -997,7 +997,7 @@ H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     else {
         /* Build table of attributes for compact storage */
         if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable, &oh_flags) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Release the object header */
         if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
@@ -1022,6 +1022,108 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_iterate */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_remove_update
+ *
+ * Purpose:	Check for reverting from dense to compact attribute storage
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, February 14, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, unsigned *oh_flags,
+    hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove_update)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(oh);
+    HDassert(oh_flags);
+
+    /* Reset the creation order min/max if there's no more attributes on the object */
+    if(oh->nattrs == 0)
+        oh->max_attr_crt_idx = 0;
+
+    /* Check for shifting from dense storage back to compact storage */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Check if there's no more attributes */
+        if(oh->nattrs == 0) {
+            /* Delete the dense storage */
+            if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
+        } /* end if */
+        else if(oh->nattrs < oh->min_dense) {
+            H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
+            hbool_t can_convert = TRUE;     /* Whether converting to attribute messages is possible */
+            size_t u;                       /* Local index */
+
+            /* Build the table of attributes for this object */
+            if(H5A_dense_build_table(loc->file, dxpl_id, oh->attr_fheap_addr, oh->name_bt2_addr, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
+
+            /* Inspect attributes in table for ones that can't be converted back
+             * into attribute message form (currently only attributes which
+             * can't fit into an object header message)
+             */
+            for(u = 0; u < oh->nattrs; u++)
+                if(H5O_msg_mesg_size(loc->file, H5O_ATTR_ID, &(atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                    can_convert = FALSE;
+                    break;
+                } /* end if */
+
+            /* If ok, insert attributes as object header messages */
+            if(can_convert) {
+                /* Iterate over attributes, to put them into header */
+                for(u = 0; u < oh->nattrs; u++) {
+                    htri_t shared_mesg;             /* Should this message be stored in the Shared Message table? */
+
+                    /* Check if attribute is shared */
+                    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, &(atable.attrs[u]))) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
+                    else if(shared_mesg == 0) {
+                        /* Increment reference count on attribute components */
+                        /* (so that they aren't deleted when the dense attribute storage is deleted) */
+                        if(H5O_attr_link(loc->file, dxpl_id, &(atable.attrs[u])) < 0)
+                            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
+                    } /* end if */
+                    else {
+                        /* Reset 'shared' status, so attributes will be shared again */
+                        atable.attrs[u].sh_loc.flags = 0;
+                    } /* end else */
+
+                    /* Insert attribute message into object header */
+                    /* (Will increment reference count on shared attributes) */
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, &(atable.attrs[u]), oh_flags) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
+                } /* end for */
+
+                /* Remove the dense storage */
+                if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
+
+                /* Update the modification time, if any */
+                if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, oh_flags) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+            } /* end if */
+
+            /* Free attribute table information */
+            if(H5A_attr_release_table(&atable) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
+        } /* end else */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_remove_update() */
 
 
 /*-------------------------------------------------------------------------
@@ -1083,7 +1185,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_attr_remove
  *
- * Purpose:	Delete an attributes on an object.
+ * Purpose:	Delete an attribute on an object.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1138,80 +1240,98 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute")
     } /* end else */
 
-    /* Check for shifting from dense storage back to compact storage */
-    if(H5F_addr_defined(oh->attr_fheap_addr) && (oh->nattrs == 0 || oh->nattrs < oh->min_dense)) {
-        /* Check if there's no more attributes */
-        if(oh->nattrs == 0) {
-            /* Delete the dense storage */
-            if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
-        } /* end if */
-        else {
-            H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
-            hbool_t can_convert = TRUE;     /* Whether converting to attribute messages is possible */
-            size_t u;                       /* Local index */
-
-            /* Build the table of attributes for this object */
-            if(H5A_dense_build_table(loc->file, dxpl_id, oh->attr_fheap_addr, oh->name_bt2_addr, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "error building attribute table")
-
-            /* Inspect attributes in table for ones that can't be converted back
-             * into attribute message form (currently only attributes which
-             * can't fit into an object header message)
-             */
-            for(u = 0; u < oh->nattrs; u++)
-                if(H5O_msg_mesg_size(loc->file, H5O_ATTR_ID, &(atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
-                    can_convert = FALSE;
-                    break;
-                } /* end if */
-
-            /* If ok, insert attributes as object header messages */
-            if(can_convert) {
-                /* Iterate over attributes, to put them into header */
-                for(u = 0; u < oh->nattrs; u++) {
-                    htri_t shared_mesg;             /* Should this message be stored in the Shared Message table? */
-
-                    /* Check if attribute is shared */
-                    if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, &(atable.attrs[u]))) < 0)
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
-                    else if(shared_mesg == 0) {
-                        /* Increment reference count on attribute components */
-                        /* (so that they aren't deleted when the dense attribute storage is deleted) */
-                        if(H5O_attr_link(loc->file, dxpl_id, &(atable.attrs[u])) < 0)
-                            HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
-                    } /* end if */
-                    else {
-                        /* Reset 'shared' status, so attributes will be shared again */
-                        atable.attrs[u].sh_loc.flags = 0;
-                    } /* end else */
-
-                    /* Insert attribute message into object header */
-                    /* (Will increment reference count on shared attributes) */
-                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, &(atable.attrs[u]), &oh_flags) < 0)
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
-                } /* end for */
-
-                /* Remove the dense storage */
-                if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
-
-                /* Update the modification time, if any */
-                if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
-            } /* end if */
-
-            /* Free attribute table information */
-            if(H5A_attr_release_table(&atable) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
-        } /* end else */
-    } /* end if */
+    /* Update the object header information after removing an attribute */
+    if(H5O_attr_remove_update(loc, oh, &oh_flags, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_remove */
+} /* end H5O_attr_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_remove_by_idx
+ *
+ * Purpose:	Delete an attribute on an object, according to an order within
+ *		an index.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, February 14, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove_by_idx)
+
+    /* Check arguments */
+    HDassert(loc);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Check for attributes stored densely */
+    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        /* Delete attribute from dense storage */
+        if(H5A_dense_remove_by_idx(loc->file, dxpl_id, oh, idx_type, order, n) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
+
+        /* Decrement # of attributes on object */
+        oh->nattrs--;
+    } /* end if */
+    else {
+        H5O_iter_rm_t udata;            /* User data for callback */
+        H5O_mesg_operator_t op;         /* Wrapper for operator */
+
+        /* Build table of attributes for compact storage */
+        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
+
+        /* Check for skipping too many attributes */
+        if(n >= atable.nattrs)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+
+        /* Set up user data for callback, to remove the attribute by name */
+        udata.f = loc->file;
+        udata.dxpl_id = dxpl_id;
+        udata.name = atable.attrs[n].name;
+        udata.found = FALSE;
+
+        /* Iterate over attributes, to locate correct one to delete */
+        op.lib_op = H5O_attr_remove_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "error deleting attribute")
+
+        /* Check that we found the attribute */
+        if(!udata.found)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute")
+    } /* end else */
+
+    /* Update the object header information after removing an attribute */
+    if(H5O_attr_remove_update(loc, oh, &oh_flags, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(atable.attrs && H5A_attr_release_table(&atable) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_remove_by_idx() */
 
 
 /*-------------------------------------------------------------------------

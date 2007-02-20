@@ -53,7 +53,8 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 H5_DLL hid_t   H5Aget_create_plist(hid_t attr_id);
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
-H5_DLL herr_t  H5Aget_info(hid_t loc_id, const char *name, H5A_info_t *ainfo /*out*/);
+H5_DLL herr_t  H5Aget_info(hid_t loc_id, const char *obj_name,
+    const char *attr_name, H5A_info_t *ainfo /*out*/, hid_t lapl_id);
 H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5A_info_t *ainfo /*out*/, hid_t lapl_id);
@@ -64,6 +65,8 @@ H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_nam
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
     void *op_data);
 H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
+H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 
 /* Functions and variables defined for compatibility with previous versions
  * of the HDF5 API.

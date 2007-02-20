@@ -147,7 +147,7 @@ typedef struct {
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;                /* DXPL for operation                */
     H5HF_t      *fheap;                 /* Fractal heap handle               */
-    H5_index_t idx_type;               /* Primary index for removing link */
+    H5_index_t idx_type;                /* Primary index for removing link */
     haddr_t     other_bt2_addr;         /* Address of "other" v2 B-tree indexing link */
     H5RS_str_t *grp_full_path_r;        /* Full path of group where link is removed */
 } H5G_bt2_ud_rmbi_t;

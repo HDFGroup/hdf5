@@ -124,16 +124,6 @@ typedef struct H5A_bt2_ud_ins_t {
     H5O_fheap_id_t id;                  /* Heap ID of attribute to insert    */
 } H5A_bt2_ud_ins_t;
 
-/*
- * Data exchange structure for dense attribute storage.  This structure is
- * passed through the v2 B-tree layer when removing attributes.
- */
-typedef struct H5A_bt2_ud_rm_t {
-    /* downward */
-    H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
-    haddr_t corder_bt2_addr;            /* v2 B-tree address of creation order index */
-} H5A_bt2_ud_rm_t;
-
 /* Data structure to hold table of attributes for an object */
 typedef struct {
     size_t      nattrs;         /* # of attributes in table */
@@ -199,6 +189,8 @@ H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data);
 H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
+H5_DLL herr_t H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
 H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
     const char *name);
 
@@ -214,14 +206,27 @@ H5_DLL herr_t H5A_attr_iterate_table(const H5A_attr_table_t *atable,
     const H5A_attr_iter_op_t *attr_op, void *op_data);
 H5_DLL herr_t H5A_attr_release_table(H5A_attr_table_t *atable);
 
-/* Attribute object header routines */
-H5_DLL herr_t H5O_attr_reset(void *_mesg);
-H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
-H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
-
 /* Attribute operations */
+H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
+H5_DLL H5A_t *H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name,
+    hid_t dxpl_id);
+H5_DLL H5A_t *H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
 H5_DLL herr_t H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5A_t *attr, 
     H5O_shared_t *sh_mesg);
+H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
+    H5A_t *attr);
+H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
+    const char *old_name, const char *new_name);
+H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
+    hsize_t *last_attr, const H5A_attr_iter_op_t *op, void *op_data);
+H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
+    hid_t dxpl_id);
+H5_DLL herr_t H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
+H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL htri_t H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id);
 
 /* Testing functions */
 #ifdef H5A_TESTING

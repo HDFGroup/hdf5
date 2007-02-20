@@ -471,23 +471,10 @@ H5_DLL herr_t H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst, hid_t dxpl_
 H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
     int indent, int fwidth);
 
-/* Attribute operations */
-H5_DLL herr_t H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr);
-H5_DLL H5A_t *H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name,
-    hid_t dxpl_id);
-H5_DLL H5A_t *H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
-H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
-    H5A_t *attr);
-H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
-    const char *old_name, const char *new_name);
-H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
-    hsize_t *last_attr, const H5A_attr_iter_op_t *op, void *op_data);
-H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
-    hid_t dxpl_id);
-H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL htri_t H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id);
+/* Attribute operators */
+H5_DLL herr_t H5O_attr_reset(void *_mesg);
+H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
