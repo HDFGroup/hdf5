@@ -31,6 +31,32 @@
 # HDF5 Library Makefile(.in)
 #
 
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -59,7 +85,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5stat.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT) h5mkgrp$(EXEEXT)
+bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5stat$(EXEEXT) \
+	h5mkgrp$(EXEEXT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -78,6 +105,10 @@ h5debug_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
 am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
 h5debug_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+h5mkgrp_SOURCES = h5mkgrp.c
+h5mkgrp_OBJECTS = h5mkgrp.$(OBJEXT)
+h5mkgrp_LDADD = $(LDADD)
+h5mkgrp_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 h5repart_SOURCES = h5repart.c
 h5repart_OBJECTS = h5repart.$(OBJEXT)
 h5repart_LDADD = $(LDADD)
@@ -91,10 +122,6 @@ h5stat_SOURCES = h5stat.c
 h5stat_OBJECTS = h5stat.$(OBJEXT)
 h5stat_LDADD = $(LDADD)
 h5stat_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
-h5mkgrp_SOURCES = h5mkgrp.c
-h5mkgrp_OBJECTS = h5mkgrp.$(OBJEXT)
-h5mkgrp_LDADD = $(LDADD)
-h5mkgrp_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
@@ -112,10 +139,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c h5mkgrp.c \
+SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c h5stat.c \
 	repart_test.c
-DIST_SOURCES = h5debug.c h5repart.c h5repart_gentest.c h5stat.c h5mkgrp.c \
-	repart_test.c
+DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
+	h5stat.c repart_test.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -341,11 +368,11 @@ LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-H5CC = $(bindir)/h5cc $(H5CCFLAGS)
-H5CC_PP = $(bindir)/h5pcc $(H5CCFLAGS)
-H5FC = $(bindir)/h5fc $(H5CCFLAGS)
-H5FC_PP = $(bindir)/h5pfc $(H5CCFLAGS)
-H5CPP = $(bindir)/h5c++ $(H5CCFLAGS)
+H5CC = $(bindir)/h5cc
+H5CC_PP = $(bindir)/h5pcc
+H5FC = $(bindir)/h5fc
+H5FC_PP = $(bindir)/h5pfc
+H5CPP = $(bindir)/h5c++
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.
@@ -478,6 +505,9 @@ clean-checkPROGRAMS:
 h5debug$(EXEEXT): $(h5debug_OBJECTS) $(h5debug_DEPENDENCIES) 
 	@rm -f h5debug$(EXEEXT)
 	$(LINK) $(h5debug_LDFLAGS) $(h5debug_OBJECTS) $(h5debug_LDADD) $(LIBS)
+h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) 
+	@rm -f h5mkgrp$(EXEEXT)
+	$(LINK) $(h5mkgrp_LDFLAGS) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
 h5repart$(EXEEXT): $(h5repart_OBJECTS) $(h5repart_DEPENDENCIES) 
 	@rm -f h5repart$(EXEEXT)
 	$(LINK) $(h5repart_LDFLAGS) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
@@ -487,9 +517,6 @@ h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPEND
 h5stat$(EXEEXT): $(h5stat_OBJECTS) $(h5stat_DEPENDENCIES) 
 	@rm -f h5stat$(EXEEXT)
 	$(LINK) $(h5stat_LDFLAGS) $(h5stat_OBJECTS) $(h5stat_LDADD) $(LIBS)
-h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) 
-	@rm -f h5mkgrp$(EXEEXT)
-	$(LINK) $(h5mkgrp_LDFLAGS) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
 repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) 
 	@rm -f repart_test$(EXEEXT)
 	$(LINK) $(repart_test_LDFLAGS) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
@@ -520,10 +547,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5mkgrp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5stat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5mkgrp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
 
 .c.o:

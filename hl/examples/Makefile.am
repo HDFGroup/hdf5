@@ -46,10 +46,10 @@ INSTALL_FILES = ptExampleFL.c ptExampleVL.c
 # Additional dependencies for each program are listed below.
 if BUILD_PARALLEL_CONDITIONAL
 $(EXTRA_PROG): $(H5CC_PP)
-	$(H5CC_PP) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC_PP) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 else
 $(EXTRA_PROG): $(H5CC)
-	$(H5CC) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
 # ex_lite2 uses a file created by ex_lite1

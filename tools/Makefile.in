@@ -30,6 +30,32 @@
 #
 # Tools HDF5 Makefile(.in)
 #
+
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -297,11 +323,11 @@ LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-H5CC = $(bindir)/h5cc $(H5CCFLAGS)
-H5CC_PP = $(bindir)/h5pcc $(H5CCFLAGS)
-H5FC = $(bindir)/h5fc $(H5CCFLAGS)
-H5FC_PP = $(bindir)/h5pfc $(H5CCFLAGS)
-H5CPP = $(bindir)/h5c++ $(H5CCFLAGS)
+H5CC = $(bindir)/h5cc
+H5CC_PP = $(bindir)/h5pcc
+H5FC = $(bindir)/h5fc
+H5FC_PP = $(bindir)/h5pfc
+H5CPP = $(bindir)/h5c++
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.

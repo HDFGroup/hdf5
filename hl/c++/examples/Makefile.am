@@ -36,7 +36,7 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)
-	$(H5CPP) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
+	$(H5CPP) $(H5CCFLAGS) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it

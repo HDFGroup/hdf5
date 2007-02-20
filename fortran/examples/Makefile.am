@@ -56,10 +56,10 @@ attrexample.chkexe_: rwdsetexample.chkexe_
 # Additional dependencies for the examples are listed below
 if BUILD_PARALLEL_CONDITIONAL
 $(EXTRA_PROG): $(H5FC_PP)
-	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC_PP) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 else
 $(EXTRA_PROG): $(H5FC)
-	$(H5FC) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 endif
 
 # Tell automake how to install examples
