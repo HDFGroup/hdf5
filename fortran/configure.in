@@ -658,6 +658,10 @@ AC_SUBST(PARALLEL)
 AC_SUBST(RUNSERIAL)
 AC_SUBST(RUNPARALLEL)
 AC_SUBST(TESTPARALLEL)
+AC_SUBST(BUILD_PARALLEL_CONDITIONAL_TRUE)
+AC_SUBST(BUILD_PARALLEL_CONDITIONAL_FALSE)
+
+dnl variables related to conditions of parallel build.
 
 dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
@@ -1245,10 +1249,15 @@ dnl First the stamp1 file for H5config.h.in
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
-PARALLEL_MAKE=
-
+dnl Set parallel build conditions depending on if TESTPARALLEL is defined.
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE=$TESTPARALLEL/Makefile
+  BUILD_PARALLEL_CONDITIONAL_TRUE=
+  BUILD_PARALLEL_CONDITIONAL_FALSE='#'
+else
+  PARALLEL_MAKE=
+  BUILD_PARALLEL_CONDITIONAL_TRUE='#'
+  BUILD_PARALLEL_CONDITIONAL_FALSE=
 fi
 
 dnl Then the config.status file (but not makefiles)

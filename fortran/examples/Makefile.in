@@ -26,6 +26,8 @@ FC_PP=$(bindir)/h5pfc
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
+## Parallel programs are dependent on if parallel build is true.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROGS_PARA=ph5example
 TEST_PROGS=dsetexample fileexample rwdsetexample attrexample groupexample	\
 	   grpsexample grpdsetexample hyperslab selectele grpit refobjexample	\
 	   refregexample mountexample compound
@@ -37,13 +39,15 @@ CLEAN=*.h5
 ## List all source files here. The list of object files will be
 ## created by replacing the `.f90' with a `.o'. This list is necessary
 ## for building automatic dependencies.
+## Parallel programs are dependent on if parallel build is true.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SRC_PARA=ph5example.f90
 TEST_SRC=dsetexample.f90 fileexample.f90 rwdsetexample.f90 attrexample.f90	\
 	 groupexample.f90 grpsexample.f90 grpdsetexample.f90 hyperslab.f90	\
 	 selectele.f90 grpit.f90 refobjexample.f90 refregexample.f90		\
 	 mountexample.f90 compound.f90
 TEST_OBJ=$(TEST_SRC:.f90=.lo)
 
-EXAMPLE_PROGS=$(TEST_SRC)
+EXAMPLE_PROGS=$(TEST_SRC) $(TEST_SRC_PARA)
 
 ## How to build the programs... they all depend on the installed h5fc.
 $(TEST_PROGS):
@@ -165,6 +169,15 @@ mountexample: $(srcdir)/mountexample.f90
 	fi
 
 compound: $(srcdir)/compound.f90
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	fi
+
+ph5example: $(srcdir)/ph5example.f90
 	@if test "X$(PARALLEL)" = "Xno"; then				\
 	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
 	  $(FC) -o $@ $(srcdir)/$@.f90;					\

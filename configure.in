@@ -1770,6 +1770,8 @@ AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
+AC_SUBST([BUILD_PARALLEL_CONDITIONAL_TRUE])
+AC_SUBST([BUILD_PARALLEL_CONDITIONAL_FALSE])
 
 dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
@@ -2403,10 +2405,15 @@ touch ./config/stamp1
 saved_no_create=$no_create
 no_create=yes
 
-PARALLEL_MAKE=""
-
+dnl Set parallel build conditions depending on if TESTPARALLEL is defined.
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+  BUILD_PARALLEL_CONDITIONAL_TRUE=
+  BUILD_PARALLEL_CONDITIONAL_FALSE='#'
+else
+  PARALLEL_MAKE=""
+  BUILD_PARALLEL_CONDITIONAL_TRUE='#'
+  BUILD_PARALLEL_CONDITIONAL_FALSE=
 fi
 
 
