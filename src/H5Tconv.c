@@ -2904,7 +2904,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 uint8_t *tmp_p;
                                 /* TMP_P is reset each time in the loop because DST_BASE_SIZE may include some data in addition to VL info. - SLU */
                                 for(u=seq_len; u<bg_seq_len; u++) {
-                                    tmp_p = tmp_buf + u*dst_base_size;  
+                                    tmp_p = (uint8_t*)tmp_buf + u*dst_base_size;  
                                     UINT32DECODE(tmp_p, parent_seq_len);
                                     if(parent_seq_len>0) {
                                         H5F_addr_decode(dst->shared->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
