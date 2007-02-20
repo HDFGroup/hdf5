@@ -57,6 +57,7 @@ SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
 VMSCMD_COPYRIGHT=/tmp/h5chkright_VMSCMD.$$	# VMS command file Copyright notice
+CONFIGURE_IN_COPYRIGHT=/tmp/h5chkright_CONFIGURE_IN.$$	# configure.in file Copyright notice
 
 tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
@@ -204,6 +205,22 @@ EOF
 @REM is linked from the top-level documents page.  It can also be found at
 @REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 @REM access to either file, you may request a copy from help@hdfgroup.org.
+EOF
+
+    # configure.in file Copyright notice
+    cat > ${CONFIGURE_IN_COPYRIGHT} << \EOF
+dnl Copyright by The HDF Group.
+dnl Copyright by the Board of Trustees of the University of Illinois.
+dnl All rights reserved.
+dnl
+dnl This file is part of HDF5.  The full HDF5 copyright notice, including
+dnl terms governing use, modification, and redistribution, is contained in
+dnl the files COPYING and Copyright.html.  COPYING can be found at the root
+dnl of the source code distribution tree; Copyright.html can be found at the
+dnl root level of an installed copy of the electronic HDF5 document set and
+dnl is linked from the top-level documents page.  It can also be found at
+dnl http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+dnl access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
     # VMS command file Copyright notice
@@ -616,6 +633,28 @@ VMSCMD_FILE()
 }
 
 
+# Check Configure.in type files
+#
+CONFIGURE_IN_FILE()
+{
+    f=$1
+    case `MATCH_COPYRIGHT $CONFIGURE_IN_COPYRIGHT $f` in
+    PASSED)
+	PASSED $f
+	return
+	;;
+    FAILED)
+	# show the difference
+	FAILED $f
+	$DIFF ${EXTRACTEDFILE} ${CONFIGURE_IN_COPYRIGHT}
+	if [ -n "$FIXIT" ]; then
+	    FIX_COPYRIGHT $CONFIGURE_IN_COPYRIGHT $f
+	fi
+	;;
+    esac
+}
+
+
 # Guess the type of file.
 # Inspect the first 5 lines to guess what type of file it is.
 #
@@ -641,6 +680,9 @@ GUESS_File_Type()
 	# Some lines start with a "#".  It may be a shell like type.
 	# Put this after C_SOURCE which may have #define and such lines.
 	echo SHELL_FILE
+    elif grep '^dnl' < $tmpfile > /dev/null; then
+	# Some lines start with a "dnl".  It may be a configure.in type file.
+	echo CONFIGURE_IN_FILE
     elif grep -i '^<html>' < $tmpfile > /dev/null || \
 	 grep '^<!--' < $tmpfile > /dev/null ; then
 	# Some lines start with a "<html>" or having an html comment tag.
@@ -784,6 +826,9 @@ while read file; do
 	    ;;
 	*Makefile | *Makefile.in | *Makefile.am | Makefile.dist )
 	    MAKE_FILE ${file}
+	    ;;
+	configure.in )
+	    CONFIGURE_IN_FILE ${file}
 	    ;;
 	*.bat | *.BAT )
 	    # Windows Batch files
