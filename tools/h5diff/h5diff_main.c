@@ -328,10 +328,9 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-static
 void usage(void)
 {
- printf("Usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
+ printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
  printf("\n");
  printf("file1             File name of the first HDF5 file\n");
  printf("file2             File name of the second HDF5 file\n");
@@ -347,11 +346,11 @@ void usage(void)
  printf("[-p relative]     Print difference when it is greater than a relative limit\n");
  printf("\n");
  printf("Items in [] are optional\n");
- printf("[obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)\n");
+ printf("[obj1] and [obj2] are HDF5 objects (datasets, groups, datatypes or links)\n");
  printf("The 'count' value must be a positive integer\n");
  printf("The 'delta' and 'relative' values must be positive numbers\n");
  printf("The -d compare criteria is |a - b| > delta\n");
- printf("The -p compare criteria is |1 - b/a| > relative\n");
+ printf("The -p compare criteria is |(b-a)/a| > relative\n");
  printf("\n");
  printf("h5diff has four modes of output:\n");
  printf(" Normal mode: print the number of differences found and where they occured\n");
@@ -378,8 +377,11 @@ void usage(void)
  printf("   h5diff file1 file1 /g1/dset1 /g1/dset2\n");
  printf("\n");
  printf("   to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
+ printf("\n");
+ printf("If no objects are specified, h5diff only compares objects with the same ");
+ printf("absolute path in both files. The compare criteria is: ");
+ printf("1) datasets: numerical array differences 2) groups: name string difference ");
+ printf("3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value\n");
+
  exit(0);
 }
-
-
-

@@ -1,8 +1,8 @@
 #############################
-Expected output for 'h5diff file1.h5 file2.h5 -d g1/dset3 g1/dset4'
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic2.h5 -d g1/dset3 g1/dset4'
 #############################
 <-d g1/dset3> is not a valid option
-Usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] 
+usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] 
 
 file1             File name of the first HDF5 file
 file2             File name of the second HDF5 file
@@ -18,11 +18,11 @@ file2             File name of the second HDF5 file
 [-p relative]     Print difference when it is greater than a relative limit
 
 Items in [] are optional
-[obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)
+[obj1] and [obj2] are HDF5 objects (datasets, groups, datatypes or links)
 The 'count' value must be a positive integer
 The 'delta' and 'relative' values must be positive numbers
 The -d compare criteria is |a - b| > delta
-The -p compare criteria is |1 - b/a| > relative
+The -p compare criteria is |(b-a)/a| > relative
 
 h5diff has four modes of output:
  Normal mode: print the number of differences found and where they occured
@@ -49,3 +49,5 @@ Note)  file1 and file2 can be the same file. Use
    h5diff file1 file1 /g1/dset1 /g1/dset2
 
    to compare '/g1/dset1' and '/g1/dset2' in the same file
+
+If no objects are specified, h5diff only compares objects with the same absolute path in both files. The compare criteria is: 1) datasets: numerical array differences 2) groups: name string difference 3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value

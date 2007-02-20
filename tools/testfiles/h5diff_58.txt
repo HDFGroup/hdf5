@@ -1,0 +1,14 @@
+#############################
+Expected output for 'h5diff h5diff_dset1.h5 h5diff_dset2.h5 -v refreg'
+#############################
+dataset:
+</refreg> and </refreg> [2]
+Referenced dataset      6056            6056
+------------------------------------------------------------
+Region blocks
+block #0           (2,2)-(7,7)           (0,0)-(2,2)
+Region points
+point #1              (2,2)              (3,3)
+point #3              (1,6)              (2,5)
+point #4              (2,8)              (1,7)
+4 differences found

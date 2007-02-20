@@ -30,6 +30,24 @@
 #define START_OF_DATA		0x0001
 #define END_OF_DATA		0x0002
 
+/*
+ * The output functions need a temporary buffer to hold a piece of the
+ * dataset while it's being printed. This constant sets the limit on the
+ * size of that temporary buffer in bytes. For efficiency's sake, choose the
+ * largest value suitable for your machine (for testing use a small value).
+ */
+#if 1
+#define H5TOOLS_BUFSIZE         (1024 * 1024)
+#else
+#define H5TOOLS_BUFSIZE         (1024)
+#endif 
+
+/*
+ * Maximum size used in a call to malloc
+ */
+#define H5TOOLS_MALLOCSIZE      ((size_t)1024 * 1024 * 1024)
+
+
 /* format for hsize_t */
 #define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
 

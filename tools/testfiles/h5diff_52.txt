@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff file4.h5 file4.h5 -v dset2a dset2b'
+Expected output for 'h5diff h5diff_dtypes.h5 h5diff_dtypes.h5 -v dset2a dset2b'
 #############################
 dataset:
 </dset2a> and </dset2b> [3x2]

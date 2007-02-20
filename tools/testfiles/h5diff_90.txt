@@ -1,0 +1,4 @@
+#############################
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5'
+#############################
+0 differences found

@@ -1,0 +1,12 @@
+#############################
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 -v -p 0.02 g1/dset7 g1/dset8'
+#############################
+dataset:
+</g1/dset7> and </g1/dset8> [3x2]
+HDF5-DIAG: Error detected in HDF5 library version: 1.6.6-snap20 thread 0.  Back trace follows.
+  #000: ../../../hdf5_1_6/src/H5T.c line 2435 in H5Tconvert(): unable to convert between src and dst data types
+    major(13): Datatype interface
+    minor(29): Unable to initialize object
+  #001: ../../../hdf5_1_6/src/H5T.c line 3984 in H5T_path_find(): no appropriate function for conversion path
+    major(13): Datatype interface
+    minor(29): Unable to initialize object

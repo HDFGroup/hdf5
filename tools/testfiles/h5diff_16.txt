@@ -1,14 +1,16 @@
 #############################
-Expected output for 'h5diff file1.h5 file2.h5 -r -p 0.05 g1/dset3 g1/dset4'
+Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10 -p 0.01 -v'
 #############################
 dataset:
-</g1/dset3> and </g1/dset4> [3x2]
-position        dset3           dset4           difference      relative       
+</g1/dset9> and </g1/dset10> [3x2]
+position        dset9           dset10          difference      relative       
 ------------------------------------------------------------------------
-[ 0 0 ]          100             110             10              0.1           
-[ 0 1 ]          110             100             10              0.09090909091 
-[ 1 0 ]          100             90              10              0.1           
-[ 1 1 ]          100             80              20              0.2           
-[ 2 0 ]          100             140             40              0.4           
-[ 2 1 ]          100             200             100             1             
-6 differences found
+[ 0 0 ]          100             120             20              0.2           
+[ 0 1 ]          100             80              20              0.2           
+[ 1 0 ]          100             0               100             1             
+[ 1 1 ]          0               100             100             not comparable
+[ 2 1 ]          100             50              50              0.5           
+5 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------

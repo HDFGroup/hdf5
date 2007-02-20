@@ -27,7 +27,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 
 ## Test programs and scripts.
 ##
-TEST_PROGS=h5difftst
+TEST_PROGS=h5diffgentest
 TEST_SCRIPTS=$(srcdir)/testh5diff.sh
 
 ## These are our main targets: library and tools.
@@ -50,10 +50,10 @@ MOSTLYCLEAN=*.h5
 
 ## Source and object files for programs...
 ##
-PROG_SRC= h5diff_main.c  testh5diff_attr.c testh5diff_basic.c testh5diff_dset.c testh5diff_util.c testh5diff_main.c
+PROG_SRC= h5diff_main.c  h5diffgentest.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 OBJS= h5diff_main.lo
-TEST_OBJS=testh5diff_attr.lo testh5diff_basic.lo testh5diff_dset.lo testh5diff_util.lo testh5diff_main.lo
+TEST_OBJS=h5diffgentest.o
 
 PRIVATE_HDR=testh5diff.h
 
@@ -74,7 +74,7 @@ $(PROGS): $(LIBTOOLS) $(LIBHDF5)
 h5diff: $(OBJS)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(OBJS) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5difftst: $(TEST_OBJS)
+h5diffgentest: $(TEST_OBJS)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 
