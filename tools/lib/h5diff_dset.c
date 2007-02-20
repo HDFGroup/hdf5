@@ -315,10 +315,6 @@ hsize_t diff_datasetid( hid_t dset1_id,
  m_size1 = H5Tget_size( m_type1 );
  m_size2 = H5Tget_size( m_type2 );
 
-#if defined (H5DIFF_DEBUG)
- if (obj1_name)
-  print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
-#endif
 
 /*-------------------------------------------------------------------------
  * check for different signed/unsigned types
@@ -362,11 +358,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
 
    m_size2 = H5Tget_size( m_type2 );
   }
-#if defined (H5DIFF_DEBUG)
-  printf("WARNING: Size was upgraded\n");
-  if (obj1_name)
-  print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
-#endif
+
  }
  assert(m_size1==m_size2);
 

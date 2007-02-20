@@ -192,14 +192,6 @@ int         print_objname(diff_opt_t *options, hsize_t nfound);
 void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
 
 
-
-#if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1, const char *obj2,
- hid_t f_type1, hid_t f_type2,
- hid_t m_type1, hid_t m_type2 );
-#endif
-
-
 hsize_t diff_native_uchar(unsigned char *mem1,
                           unsigned char *mem2,
                           hsize_t       i,
