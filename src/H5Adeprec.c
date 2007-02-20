@@ -168,6 +168,74 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Aiterate
+ PURPOSE
+    Calls a user's function for each attribute on an object
+ USAGE
+    herr_t H5Aiterate (loc_id, attr_num, op, data)
+        hid_t loc_id;       IN: Object (dataset or group) to be iterated over
+        unsigned *attr_num; IN/OUT: Starting (IN) & Ending (OUT) attribute number
+        H5A_operator_t op;  IN: User's function to pass each attribute to
+        void *op_data;      IN/OUT: User's data to pass through to iterator operator function
+ RETURNS
+        Returns a negative value if something is wrong, the return value of the
+    last operator if it was non-zero, or zero if all attributes were processed.
+
+ DESCRIPTION
+        This function interates over the attributes of dataset or group
+    specified with 'loc_id'.  For each attribute of the object, the
+    'op_data' and some additional information (specified below) are passed
+    to the 'op' function.  The iteration begins with the '*attr_number'
+    object in the group and the next attribute to be processed by the operator
+    is returned in '*attr_number'.
+        The operation receives the ID for the group or dataset being iterated
+    over ('loc_id'), the name of the current attribute about the object
+    ('attr_name') and the pointer to the operator data passed in to H5Aiterate
+    ('op_data').  The return values from an operator are:
+        A. Zero causes the iterator to continue, returning zero when all
+            attributes have been processed.
+        B. Positive causes the iterator to immediately return that positive
+            value, indicating short-circuit success.  The iterator can be
+            restarted at the next attribute.
+        C. Negative causes the iterator to immediately return that value,
+            indicating failure.  The iterator can be restarted at the next
+            attribute.
+--------------------------------------------------------------------------*/
+herr_t
+H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
+{
+    H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
+    hsize_t		start_idx;      /* Index of attribute to start iterating at */
+    hsize_t		last_attr;      /* Index of last attribute examined */
+    herr_t	        ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Aiterate, FAIL)
+    H5TRACE4("e", "i*Iuxx", loc_id, attr_num, op, op_data);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+
+    /* Build attribute operator info */
+    attr_op.op_type = H5A_ATTR_OP_APP;
+    attr_op.u.app_op = op;
+
+    /* Call attribute iteration routine */
+    last_attr = start_idx = (hsize_t)(attr_num ? *attr_num : 0);
+    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+
+    /* Set the last attribute information */
+    if(attr_num)
+        *attr_num = (unsigned)last_attr;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aiterate() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Adelete
  PURPOSE
     Deletes an attribute from a location

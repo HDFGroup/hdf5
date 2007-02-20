@@ -37,7 +37,7 @@
 /* Static local functions */
 static herr_t H5T_commit(H5F_t *file, H5T_t *type,
     hid_t dxpl_id, hid_t tcpl_id, hid_t tapl_id);
-static H5T_t *H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id);
+static H5T_t *H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id);
 
 
 /*--------------------------------------------------------------------------
@@ -667,7 +667,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_open(H5G_loc_t *loc, hid_t dxpl_id)
+H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_shared_t   *shared_fo = NULL;
     H5T_t          *dt = NULL;
@@ -776,7 +776,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5T_t *
-H5T_open_oid(H5G_loc_t *loc, hid_t dxpl_id)
+H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_t	*dt = NULL;
     H5T_t	*ret_value;

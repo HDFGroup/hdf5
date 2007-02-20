@@ -125,6 +125,9 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
+    hid_t dxpl_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
+    hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data);
 
 
 /*********************/
@@ -494,7 +497,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     attr_op.u.lib_op = H5O_attr_open_by_idx_cb;
 
     /* Iterate over attributes to locate correct one */
-    if(H5O_attr_iterate((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
+    if(H5O_attr_iterate_real((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
 done:
@@ -940,9 +943,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_iterate
+ * Function:	H5O_attr_iterate_real
  *
- * Purpose:	Iterate over attributes for an object.
+ * Purpose:	Internal routine to iterate over attributes for an object.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -951,20 +954,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
+static herr_t
+H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
     hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_iterate)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_iterate_real)
 
     /* Check arguments */
     HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
@@ -1024,7 +1029,45 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_iterate */
+} /* end H5O_attr_iterate_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_iterate
+ *
+ * Purpose:	Iterate over attributes for an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, December  5, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
+    hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
+{
+    H5G_loc_t loc;	        /* Object location */
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_iterate)
+
+    /* Check arguments */
+    HDassert(attr_op);
+
+    /* Look up location for location ID */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Iterate over attributes to locate correct one */
+    if((ret_value = H5O_attr_iterate_real(loc_id, loc.oloc, dxpl_id, idx_type, order, skip, last_attr, attr_op, op_data)) < 0)
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_iterate() */
 
 
 /*-------------------------------------------------------------------------

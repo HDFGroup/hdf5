@@ -150,7 +150,7 @@ H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL herr_t H5G_free(H5G_t *grp);
-H5_DLL H5G_t *H5G_open(H5G_loc_t *loc, hid_t dxpl_id);
+H5_DLL H5G_t *H5G_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
     H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id);

@@ -137,10 +137,12 @@ typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, void *op_data);
 struct H5A_attr_iter_op_t {
     enum {
         H5A_ATTR_OP_APP,                /* Application callback */
+        H5A_ATTR_OP_APP2,               /* Revised application callback */
         H5A_ATTR_OP_LIB                 /* Library internal callback */
     } op_type;
     union {
-        H5A_operator_t app_op;           /* Application callback for each attribute */
+        H5A_operator_t app_op;          /* Application callback for each attribute */
+        H5A_operator2_t app_op2;        /* Revised application callback for each attribute */
         H5A_lib_iterate_t lib_op;       /* Library internal callback for each attribute */
     } u;
 };
@@ -170,6 +172,7 @@ H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 /* Function prototypes for H5A package scope */
 H5_DLL herr_t H5A_init(void);
 H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
+H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 
@@ -218,9 +221,9 @@ H5_DLL herr_t H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id,
     H5A_t *attr);
 H5_DLL herr_t H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id,
     const char *old_name, const char *new_name);
-H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
-    hsize_t *last_attr, const H5A_attr_iter_op_t *op, void *op_data);
+H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
+    const H5A_attr_iter_op_t *op, void *op_data);
 H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,

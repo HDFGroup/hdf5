@@ -986,8 +986,8 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
     if(bt2_udata->skip > 0)
         --bt2_udata->skip;
     else {
-        H5A_fh_ud_cp_t fh_udata;       /* User data for fractal heap 'op' callback */
-        H5HF_t *fheap;                 /* Fractal heap handle for attribute storage */
+        H5A_fh_ud_cp_t fh_udata;        /* User data for fractal heap 'op' callback */
+        H5HF_t *fheap;                  /* Fractal heap handle for attribute storage */
 
         /* Check for iterating over shared attribute */
         if(record->flags & H5O_MSG_FLAG_SHARED)
@@ -1008,6 +1008,19 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
         /* Check which type of callback to make */
         switch(bt2_udata->attr_op->op_type) {
+            case H5A_ATTR_OP_APP2:
+            {
+                H5A_info_t ainfo;               /* Info for attribute */
+
+                /* Get the attribute information */
+                if(H5A_get_info(fh_udata.attr, &ainfo) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
+
+                /* Make the application callback */
+                ret_value = (bt2_udata->attr_op->u.app_op2)(bt2_udata->loc_id, fh_udata.attr->name, &ainfo, bt2_udata->op_data);
+                break;
+            }
+
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
                 ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->name, bt2_udata->op_data);

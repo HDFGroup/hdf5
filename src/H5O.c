@@ -67,9 +67,8 @@
 /* Local Prototypes */
 /********************/
 
-static hid_t H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-static const H5O_obj_class_t *H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id);
+static const H5O_obj_class_t *H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 
 
@@ -823,13 +822,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5O_open_by_loc(H5G_loc_t *obj_loc, hid_t dxpl_id)
+hid_t
+H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     const H5O_obj_class_t *obj_class;   /* Class of object for location */
     hid_t      ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_open_by_loc)
+    FUNC_ENTER_NOAPI(H5O_open_by_loc, FAIL)
 
     HDassert(obj_loc);
 
@@ -1496,7 +1495,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static const H5O_obj_class_t *
-H5O_obj_class(H5O_loc_t *loc, hid_t dxpl_id)
+H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;                     /* Object header for location */
     const H5O_obj_class_t *ret_value;           /* Return value */

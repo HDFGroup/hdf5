@@ -43,7 +43,7 @@
 /********************/
 
 static htri_t H5O_dtype_isa(H5O_t *loc);
-static hid_t H5O_dtype_open(H5G_loc_t *obj_loc, hid_t dxpl_id);
+static hid_t H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
 static H5O_loc_t *H5O_dtype_get_oloc(hid_t obj_id);
 
 
@@ -121,7 +121,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_dtype_open(H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     H5T_t       *type = NULL;           /* Datatype opened */
     hid_t	ret_value;              /* Return value */

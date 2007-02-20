@@ -537,6 +537,19 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
     for(; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch(attr_op->op_type) {
+            case H5A_ATTR_OP_APP2:
+            {
+                H5A_info_t ainfo;               /* Info for attribute */
+
+                /* Get the attribute information */
+                if(H5A_get_info(&atable->attrs[u], &ainfo) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
+
+                /* Make the application callback */
+                ret_value = (attr_op->u.app_op2)(loc_id, atable->attrs[u].name, &ainfo, op_data);
+                break;
+            }
+
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
                 ret_value = (attr_op->u.app_op)(loc_id, atable->attrs[u].name, op_data);
@@ -556,6 +569,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
     if(ret_value < 0)
         HERROR(H5E_ATTR, H5E_CANTNEXT, "iteration operator failed");
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_attr_iterate_table() */
 

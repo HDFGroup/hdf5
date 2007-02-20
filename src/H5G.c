@@ -1177,7 +1177,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_t *
-H5G_open(H5G_loc_t *loc, hid_t dxpl_id)
+H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5G_t           *grp = NULL;
     H5G_shared_t    *shared_fo = NULL;

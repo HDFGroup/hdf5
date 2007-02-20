@@ -76,7 +76,6 @@ static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name,
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
-static herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
 
 
 /*********************/
@@ -1503,10 +1502,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_get_info)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_get_info, FAIL)
 
     /* Check args */
     HDassert(attr);
@@ -1524,7 +1525,8 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
         ainfo->corder = attr->crt_idx;
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_info() */
 
 
@@ -1571,30 +1573,38 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Aiterate
+    H5Aiterate2
  PURPOSE
     Calls a user's function for each attribute on an object
  USAGE
-    herr_t H5Aiterate (loc_id, attr_num, op, data)
-        hid_t loc_id;       IN: Object (dataset or group) to be iterated over
-        unsigned *attr_num; IN/OUT: Starting (IN) & Ending (OUT) attribute number
-        H5A_operator_t op;  IN: User's function to pass each attribute to
-        void *op_data;      IN/OUT: User's data to pass through to iterator operator function
+    herr_t H5Aiterate2(loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id)
+        hid_t loc_id;           IN: Base location for object
+        const char *obj_name;   IN: Name of object relative to location
+        H5_index_t idx_type;    IN: Type of index to use
+        H5_iter_order_t order;  IN: Order to iterate over index
+        hsize_t *idx;           IN/OUT: Starting (IN) & Ending (OUT) attribute
+                                    in index & order
+        H5A_operator2_t op;     IN: User's function to pass each attribute to
+        void *op_data;          IN/OUT: User's data to pass through to iterator
+                                    operator function
+        hid_t lapl_id;          IN: Link access property list
  RETURNS
-        Returns a negative value if something is wrong, the return value of the
-    last operator if it was non-zero, or zero if all attributes were processed.
+        Returns a negative value if an error occurs, the return value of the
+    last operator if it was non-zero (which can be a negative value), or zero
+    if all attributes were processed.
 
  DESCRIPTION
         This function interates over the attributes of dataset or group
-    specified with 'loc_id'.  For each attribute of the object, the
-    'op_data' and some additional information (specified below) are passed
-    to the 'op' function.  The iteration begins with the '*attr_number'
+    specified with 'loc_id' & 'obj_name'.  For each attribute of the object,
+    the 'op_data' and some additional information (specified below) are passed
+    to the 'op' function.  The iteration begins with the '*idx'
     object in the group and the next attribute to be processed by the operator
-    is returned in '*attr_number'.
+    is returned in '*idx'.
         The operation receives the ID for the group or dataset being iterated
     over ('loc_id'), the name of the current attribute about the object
-    ('attr_name') and the pointer to the operator data passed in to H5Aiterate
-    ('op_data').  The return values from an operator are:
+    ('attr_name'), the attribute's "info" struct ('ainfo') and the pointer to
+    the operator data passed in to H5Aiterate2 ('op_data').  The return values
+    from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.
         B. Positive causes the iterator to immediately return that positive
@@ -1605,39 +1615,78 @@ done:
             attribute.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
+H5Aiterate2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
+    hid_t lapl_id)
 {
-    H5G_loc_t		loc;	        /* Object location */
-    H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
-    hsize_t		start_idx;      /* Index of attribute to start iterating at */
-    hsize_t		last_attr;      /* Index of last attribute examined */
-    herr_t	        ret_value;      /* Return value */
+    H5G_loc_t	loc;	        /* Object location */
+    H5G_loc_t   obj_loc;        /* Location used to open group */
+    H5G_name_t  obj_path;       /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;       /* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    hsize_t	start_idx;      /* Index of attribute to start iterating at */
+    hsize_t	last_attr;      /* Index of last attribute examined */
+    herr_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Aiterate, FAIL)
-    H5TRACE4("e", "i*Iuxx", loc_id, attr_num, op, op_data);
+    FUNC_ENTER_API(H5Aiterate2, FAIL)
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location */
+    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+    loc_found = TRUE;
+
+    /* Open the object */
+    if((obj_loc_id = H5O_open_by_loc(&obj_loc, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     /* Build attribute operator info */
-    attr_op.op_type = H5A_ATTR_OP_APP;
-    attr_op.u.app_op = op;
+    attr_op.op_type = H5A_ATTR_OP_APP2;
+    attr_op.u.app_op2 = op;
 
     /* Call attribute iteration routine */
-    last_attr = start_idx = (hsize_t)(attr_num ? *attr_num : 0);
-    if((ret_value = H5O_attr_iterate(loc_id, loc.oloc, H5AC_ind_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
+    last_attr = start_idx = (idx ? *idx : 0);
+    if((ret_value = H5O_attr_iterate(obj_loc_id, H5AC_ind_dxpl_id, idx_type, order, start_idx, &last_attr, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Set the last attribute information */
-    if(attr_num)
-        *attr_num = (unsigned)last_attr;
+    if(idx)
+        *idx = last_attr;
 
 done:
+    /* Release resources */
+    if(obj_loc_id > 0) {
+        if(H5I_dec_ref(obj_loc_id) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close temporary object")
+    } /* end if */
+    else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+
     FUNC_LEAVE_API(ret_value)
-} /* H5Aiterate() */
+} /* H5Aiterate2() */
 
 
 /*--------------------------------------------------------------------------
@@ -1646,7 +1695,7 @@ done:
  PURPOSE
     Deletes an attribute from a location
  USAGE
-    herr_t H5Adelete (loc_id, name)
+    herr_t H5Adelete2(loc_id, obj_name, attr_name, lapl_id)
         hid_t loc_id;           IN: Base location for object
         const char *obj_name;   IN: Name of object relative to location
         const char *attr_name;  IN: Name of attribute to delete
@@ -1704,7 +1753,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Adelete() */
+} /* H5Adelete2() */
 
 
 /*--------------------------------------------------------------------------
