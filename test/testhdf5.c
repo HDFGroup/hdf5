@@ -54,6 +54,7 @@ main(int argc, char *argv[])
     AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL);
     AddTest("objects", test_h5o, cleanup_file, "Generic Object Functions", NULL);
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
+    AddTest("sohm", test_sohm, cleanup_sohm,  "Shared Object Header Messages", NULL);
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
@@ -64,7 +65,6 @@ main(int argc, char *argv[])
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
     AddTest("unicode", test_unicode, cleanup_unicode,  "UTF-8 Encoding", NULL);
-    AddTest("sohm", test_sohm, cleanup_sohm,  "Shared Object Header Messages", NULL);
     AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
     AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL);
 

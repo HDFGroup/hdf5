@@ -113,7 +113,7 @@ typedef struct {
     H5SM_sohm_t message;                /* The message to find/insert.
                                          * If the message doesn't yet have a
                                          * heap ID, the heap ID will be 0. */
-    const void *encoding; 		/* The message encoded, or NULL */
+    void *encoding; 		        /* The message encoded, or NULL */
     size_t encoding_size; 		/* Size of the encoding, or 0 */
     H5HF_t *fheap;    			/* The heap for this message type, open. */
 } H5SM_mesg_key_t;

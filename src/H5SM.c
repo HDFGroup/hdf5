@@ -1205,8 +1205,9 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     H5SM_mesg_key_t key;
     H5SM_sohm_t     message;            /* Deleted message returned from index */
     H5SM_sohm_t    *message_ptr;        /* Pointer to deleted message returned from index */
+    size_t          buf_size;         /* Size of the encoded message */
+    void *          encoding_buf = NULL; /* Buffer for encoded message */
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
-    H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_delete_from_index)
@@ -1216,21 +1217,30 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     HDassert(cache_flags);
     HDassert(mesg->flags & H5O_SHARED_IN_HEAP_FLAG);
     HDassert(*encoded_mesg == NULL);
-
+   
     /* Open the heap that this message is in */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
-    /* Prepare user data for fractal heap 'op' callback */
-    udata.type_id = type_id;
+    /* Get the size of the message in the heap */
+    if(H5HF_get_obj_len(fheap, dxpl_id, &(mesg->u.heap_id), &buf_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
+
+    /* Allocate a buffer to hold the message */
+    if(NULL == (encoding_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Read the message from the heap and get its hash */
+    if(H5HF_read(fheap, dxpl_id, &(mesg->u.heap_id), encoding_buf) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
+
+    key.message.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
 
     /* Set up key for message to be deleted. */
+    key.encoding = encoding_buf;
+    key.encoding_size = buf_size;
     key.message.fheap_id = mesg->u.heap_id;
-    key.message.hash = 0; /* Only needed for B-tree lookup */
     key.message.ref_count = 0;  /* Refcount isn't relevant here */
-
-    key.encoding = NULL;
-    key.encoding_size = 0;
     key.fheap = fheap;
 
     /* Try to find the message in the index */
@@ -1255,12 +1265,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
     {
         HDassert(header->index_type == H5SM_BTREE);
 
-        /* Compute the hash value for the B-tree lookup */
-        if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
-
-        key.message.hash = udata.hash;
-
         /* If this returns failure, it means that the message wasn't found.
          * If it succeeds, a copy of the modified message will be returned. */
         if(H5B2_modify(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_decr_ref, &message) <0)
@@ -1283,10 +1287,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         if(H5HF_get_obj_len(fheap, dxpl_id, &(message_ptr->fheap_id), &buf_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
 
-        /* Allocate a buffer to hold the message */
-        if(NULL == (*encoded_mesg = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
-
         /* Remove the message from the index */
         if(header->index_type == H5SM_LIST)
             message_ptr->ref_count = 0;
@@ -1300,17 +1300,14 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5SM_index_header_t *header,
         --header->num_messages;
         *cache_flags |= H5AC__DIRTIED_FLAG;
 
-
-        /* Retrieve the message from the heap so we can return it (to free any
-         * other messages it may reference)
-         */
-        if(H5HF_read(fheap, dxpl_id, &(message_ptr->fheap_id), *encoded_mesg) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
-
         /* Remove the message from the heap */
         if(H5HF_remove(fheap, dxpl_id, &(message_ptr->fheap_id)) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "unable to remove message from heap")
 
+        /* Return the message's encoding so any messages it references can be
+         * freed
+         */
+        *encoded_mesg = encoding_buf;
 
         /* If there are no messages left in the index, delete it */
         if(header->num_messages == 0) {
@@ -1348,9 +1345,11 @@ done:
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
-    /* Free the serialized message buffer on error */
-    if(ret_value < 0 && *encoded_mesg)
-        *encoded_mesg = H5MM_xfree(*encoded_mesg);
+    /* Free the message encoding, if we're not returning it in encoded_mesg
+     * or if there's been an error.
+     */
+    if(key.encoding && (NULL == *encoded_mesg || ret_value < 0))
+        key.encoding = H5MM_xfree(key.encoding);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
@@ -1553,6 +1552,8 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_mesg_key_t key;                /* Key for looking up message */
     H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
     H5SM_sohm_t message;                /* Shared message returned from callback */
+    size_t buf_size;                    /* Size of the encoded message */
+    void *encoding_buf = NULL;          /* Buffer for encoded message */
     ssize_t index_num;                  /* Table index for message type */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1576,16 +1577,25 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
-    /* Prepare user data for callback */
-    udata.type_id = type_id;
+    /* Get the size of the message in the heap */
+    if(H5HF_get_obj_len(fheap, dxpl_id, &(sh_mesg->u.heap_id), &buf_size) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
+
+    /* Allocate a buffer to hold the message */
+    if(NULL == (encoding_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Read the message from the heap and get its hash */
+    if(H5HF_read(fheap, dxpl_id, &(sh_mesg->u.heap_id), encoding_buf) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
+
+    key.message.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
 
     /* Set up key for message to locate */
+    key.encoding = encoding_buf;
+    key.encoding_size = buf_size;
     key.message.fheap_id = sh_mesg->u.heap_id;
-    key.message.hash = 0; /* Only needed for B-tree lookup */
     key.message.ref_count = 0; /* Ref count isn't needed to find message */
-
-    key.encoding = NULL;
-    key.encoding_size = 0;
     key.fheap = fheap;
 
     /* Try to find the message in the index */
@@ -1607,12 +1617,6 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     {
         HDassert(header->index_type == H5SM_BTREE);
 
-        /* Compute the hash value for the B-tree lookup */
-        if(H5HF_op(fheap, dxpl_id, &(sh_mesg->u.heap_id), H5SM_get_hash_fh_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't access message in fractal heap")
-
-        key.message.hash = udata.hash;
-
         /* Look up the message in the v2 B-tree */
         if(H5B2_find(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_get_refcount_bt2_cb, &message) < 0)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
@@ -1629,6 +1633,9 @@ done:
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+    if(encoding_buf)
+        encoding_buf = H5MM_xfree(encoding_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_get_refcount() */

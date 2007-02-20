@@ -147,45 +147,30 @@ H5SM_message_compare(const void *rec1, const void *rec2)
     /* If the key has an fheap ID, we're looking for a message that's
      * already in the index; if the fheap ID matches, we've found the message
      * and can stop immediately.
-     * This means that list indexes that don't care about ordering can
-     * pass in bogus hash values and they'll still get a match if the heap
-     * IDs are the same.
      */
-    if(key->encoding_size == 0)
-    {
-        HDassert(key->encoding == NULL);
-        if(key->message.fheap_id == mesg->fheap_id)
-            HGOTO_DONE(0);
-    }
+    if(key->message.fheap_id == mesg->fheap_id)
+        HGOTO_DONE(0);
 
     hash_diff = key->message.hash;
     hash_diff -= mesg->hash;
 
     /* If the hash values match, make sure the messages are really the same */
     if(0 == hash_diff) {
-        /* Compare the encoded buffers or the fheap IDs */
-        if(key->encoding_size == 0)
-        {
-            HDassert(key->encoding == NULL);
-            ret_value = (herr_t) (key->message.fheap_id - mesg->fheap_id);
-        } /* end if */
-        else
-        {
-            /* Hash values match, but we don't have a heap ID for the key.
-             * Compare the encoded message with the one in the heap.
-             */
-            H5SM_compare_udata_t udata;
-            herr_t ret;
+       /* Hash values match; compare the encoded message with the one in
+        * the heap.
+        */
+       H5SM_compare_udata_t udata;
+       herr_t ret;
 
-            /* Casting away const OK.  -JML */
-            udata.key = key;
+        HDassert(key->encoding_size > 0 && key->encoding);
+        /* Casting away const OK.  -JML */
+        udata.key = key;
 
-            /* Call heap op routine with comparison callback */
-            ret = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), H5SM_btree_compare_cb, &udata);
-            HDassert(ret >= 0);
+        /* Call heap op routine with comparison callback */
+        ret = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), H5SM_btree_compare_cb, &udata);
+        HDassert(ret >= 0);
 
-            ret_value = udata.ret;
-        } /* end else */
+        ret_value = udata.ret;
     } /* end if */
     else {
         /* Compress 64-bit hash_diff to fit in an herr_t */
